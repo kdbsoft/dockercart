@@ -15,7 +15,7 @@ class ModelCatalogProduct extends Model {
 			$cache_stamp = (int)strtotime($version_query->row['date_modified']);
 		}
 
-		$cache_key = 'product.get.v4.' . (int)$product_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.' . $cache_stamp;
+		$cache_key = 'product.get.v5.' . (int)$product_id . '.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_customer_group_id') . '.' . $cache_stamp;
 
 		if ($cache_enabled) {
 			$cached = $this->cache->get($cache_key);
@@ -115,6 +115,7 @@ class ModelCatalogProduct extends Model {
 				'preorder'         => (int)$query->row['preorder'],
 				'image'            => $query->row['image'],
 				'model_3d'         => $query->row['model_3d'],
+				'image_360'        => isset($query->row['image_360']) ? $query->row['image_360'] : '',
 				'manufacturer_id'  => $query->row['manufacturer_id'],
 				'manufacturer'     => $query->row['manufacturer'],
 				'price'            => $price,

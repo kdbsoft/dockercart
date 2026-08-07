@@ -332,7 +332,8 @@ class ControllerProductProduct extends Controller {
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
 			// Localized label for the image zoom hint
 			$data['text_zoom'] = $this->language->get('text_zoom');
-
+			// Localized hint for the 360° viewer
+			$data['text_360_hint'] = $this->language->get('text_360_hint');
 			$this->load->model('catalog/review');
 
 			$data['tab_review'] = $this->language->get('tab_review');
@@ -530,6 +531,16 @@ class ControllerProductProduct extends Controller {
 			if ($data['model_3d'] && is_file(DIR_IMAGE . $data['model_3d'])) {
 				$data['model_3d_url'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . ltrim($data['model_3d'], '/');
 			}
+
+			// 360° Image
+			$data['image_360'] = !empty($product_info['image_360']) ? $product_info['image_360'] : '';
+			$data['image_360_url'] = '';
+
+			if ($data['image_360'] && is_file(DIR_IMAGE . $data['image_360'])) {
+				$data['image_360_url'] = ($this->request->server['HTTPS'] ? $this->config->get('config_ssl') : $this->config->get('config_url')) . 'image/' . ltrim($data['image_360'], '/');
+			}
+
+			$data['image_360_enabled'] = (bool)$this->config->get('config_product_image_360_enable');
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);

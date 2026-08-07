@@ -43,6 +43,21 @@
   #model-3d-modal .modal-title { margin: 0; font-size: 16px; font-weight: 600; }
   #model-3d-modal .modal-body { padding: 0; }
 
+  /* ── 360° Viewer (vanilla, no Bootstrap) ─────────────── */
+  #image-360-modal { position: fixed; z-index: 1060; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90vw; display: none; }
+  #image-360-modal.dc-open { display: block; }
+  #image-360-modal .modal-dialog { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 90vw; margin: 0 auto; }
+  #image-360-modal .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e5e7eb; }
+  #image-360-modal .modal-header .close { background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 0; line-height: 1; }
+  #image-360-modal .modal-header .close:hover { color: #111827; }
+  #image-360-modal .modal-title { margin: 0; font-size: 16px; font-weight: 600; }
+  #image-360-modal .modal-body { padding: 0; }
+  .dc-360-stage { position: relative; width: min(90vw, 70vh); height: min(90vw, 70vh); max-width: 100%; max-height: 70vh; margin: 0 auto; overflow: hidden; background: #fff; user-select: none; touch-action: pan-y; cursor: grab; }
+  .dc-360-stage.dc-360-dragging { cursor: grabbing; }
+  .dc-360-stage img { display: block; max-width: none; }
+  .dc-360-hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 7px; background: rgba(17,24,39,0.86); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 13px; border-radius: 9999px; backdrop-filter: blur(4px); pointer-events: none; white-space: nowrap; }
+  .dc-360-hint__badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 20px; padding: 0 5px; border: 1px solid rgba(255,255,255,0.55); border-radius: 9999px; font-size: 10px; font-weight: 800; letter-spacing: .02em; }
+
 </style>
 
 {% include 'dockercart/template/product/review_css.twig' %}
@@ -88,7 +103,7 @@
           {% endif %}
         </div>
         {% endif %}
-        {% if images or model_3d or (video_type and video_url) %}
+        {% if images or model_3d or (video_type and video_url) or (image_360_enabled and image_360_url) %}
         <div class="grid grid-cols-4 gap-3 mt-3">
           <button class="dc-thumb active relative rounded-2xl border-2 overflow-hidden" data-img="{{ display is not empty ? display : 'image/no_image.png' }}" data-display="{{ display is not empty ? display : 'image/no_image.png' }}" data-popup="{{ popup is not empty ? popup : 'image/no_image.png' }}" data-orientation="{{ image_orientation }}">
             <img src="{{ thumb is not empty ? thumb : 'image/no_image.png' }}" alt="{{ heading_title }}" class="w-full h-20 object-cover" />
@@ -107,6 +122,12 @@
           <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="open3DViewer(this)">
             <i data-lucide="box" class="w-8 h-8 text-white mb-1"></i>
             <span class="text-white text-[10px]">3D</span>
+          </button>
+          {% endif %}
+          {% if image_360_enabled and image_360_url %}
+          <button type="button" class="dc-thumb dc-thumb-media rounded-2xl border-2 border-gray-200 overflow-hidden flex flex-col items-center justify-center bg-gray-900 h-20" onclick="open360Viewer(this)">
+            <i data-lucide="rotate-3d" class="w-8 h-8 text-white mb-1"></i>
+            <span class="text-white text-[10px]">360°</span>
           </button>
           {% endif %}
         </div>
@@ -136,6 +157,24 @@
       <script type="module">
         import '@google/model-viewer';
       </script>
+      {% endif %}
+
+      <!-- 360° Image Modal -->
+      {% if image_360_enabled and image_360_url %}
+      <div id="image-360-modal">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h4 class="modal-title">{{ heading_title }} — 360°</h4>
+            <button type="button" class="close" onclick="close360Viewer()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div id="dc-360-stage" class="dc-360-stage" data-url="{{ image_360_url }}">
+              <img id="dc-360-img" src="{{ image_360_url }}" alt="{{ heading_title }}" draggable="false" />
+              <div class="dc-360-hint"><i data-lucide="move-horizontal" class="w-4 h-4"></i><span class="dc-360-hint__badge">360°</span><span id="dc-360-hint-text">{{ text_360_hint }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
       {% endif %}
 
       <!-- Info -->
@@ -1098,6 +1137,173 @@ function closeModal3d() {
   document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
   if (restoreThumb) restoreThumb.classList.add('active');
 }
+
+/* ── 360° Viewer ───────────────────────────────────────── */
+var dc360 = {
+  modal: null,
+  stage: null,
+  img: null,
+  frames: 36,
+  frame: 0,
+  frameW: 1,
+  scale: 1,
+  dragging: false,
+  lastX: 0,
+  dragDistance: 0,
+  dragPixelsPerFrame: 1,
+  interval: null
+};
+
+function open360Viewer(btn) {
+  dc360.modal = document.getElementById('image-360-modal');
+  if (!dc360.modal) return;
+
+  document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+
+  var backdrop = document.getElementById('dc-modal-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'dc-modal-backdrop';
+    backdrop.className = 'dc-modal-overlay dc-hidden';
+    backdrop.addEventListener('click', function(e) {
+      if (e.target === backdrop) close360Viewer();
+    });
+    document.body.appendChild(backdrop);
+  }
+  backdrop.classList.remove('dc-hidden');
+
+  dc360.modal.classList.add('dc-open');
+  document.body.style.overflow = 'hidden';
+
+  dc360.stage = document.getElementById('dc-360-stage');
+  dc360.img = document.getElementById('dc-360-img');
+  dc360.frame = 0;
+
+  if (dc360.img.complete && dc360.img.naturalWidth > 0) {
+    dc360Init();
+  } else {
+    dc360.img.addEventListener('load', function() { dc360Init(); }, { once: true });
+  }
+}
+
+function dc360Init() {
+  var w = dc360.img.naturalWidth;
+  var h = dc360.img.naturalHeight;
+  if (w > 0 && h > 0) {
+    dc360.frames = Math.max(2, Math.round(w / h));
+    dc360.frameW = w / dc360.frames;
+  } else {
+    dc360.frames = 36;
+    dc360.frameW = 1;
+    h = 1;
+  }
+  // Scale the sprite so exactly one frame fits the square stage.
+  var stageW = dc360.stage.clientWidth || Math.floor(window.innerWidth * 0.8);
+  var stageH = dc360.stage.clientHeight || stageW;
+  dc360.scale = Math.min(stageW / dc360.frameW, stageH / h);
+  dc360.dragPixelsPerFrame = Math.max(8, stageW / dc360.frames);
+  dc360.frame = 0;
+  dc360Render();
+}
+
+function dc360Render() {
+  if (!dc360.img) return;
+  var n = dc360.frames;
+  dc360.frame = ((dc360.frame % n) + n) % n;
+  var fw = dc360.frameW;
+  dc360.img.style.width = (dc360.scale * n * fw) + 'px';
+  dc360.img.style.height = 'auto';
+  dc360.img.style.transform = 'translateX(' + (-dc360.frame * fw * dc360.scale) + 'px)';
+  dc360.img.style.opacity = '1';
+}
+
+function dc360Show(f) {
+  dc360.frame = f;
+  dc360Render();
+}
+function dc360StartAuto() {
+  dc360StopAuto();
+  dc360.interval = setInterval(function() {
+    dc360.frame++;
+    dc360Render();
+  }, 90);
+}
+
+function dc360StopAuto() {
+  if (dc360.interval) {
+    clearInterval(dc360.interval);
+    dc360.interval = null;
+  }
+}
+
+function close360Viewer() {
+  dc360StopAuto();
+  var modal = document.getElementById('image-360-modal');
+  var backdrop = document.getElementById('dc-modal-backdrop');
+  if (modal) modal.classList.remove('dc-open');
+  if (backdrop) backdrop.classList.add('dc-hidden');
+  document.body.style.overflow = '';
+  dc360.dragging = false;
+  dc360.stage = null;
+  dc360.img = null;
+  dc360.modal = null;
+  var restoreThumb = dcActiveImageThumb || document.querySelector('.dc-thumb:not(.dc-thumb-media)');
+  document.querySelectorAll('.dc-thumb').forEach(function(t) { t.classList.remove('active'); });
+  if (restoreThumb) restoreThumb.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var stage = document.getElementById('dc-360-stage');
+  if (!stage) return;
+
+  stage.addEventListener('pointerdown', function(e) {
+    dc360StopAuto();
+    dc360.dragging = true;
+    dc360.lastX = e.clientX;
+    dc360.dragDistance = 0;
+    stage.classList.add('dc-360-dragging');
+    stage.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener('pointermove', function(e) {
+    if (!dc360.dragging) return;
+    dc360.dragDistance += e.clientX - dc360.lastX;
+    dc360.lastX = e.clientX;
+
+    var frameDelta = Math.trunc(dc360.dragDistance / dc360.dragPixelsPerFrame);
+    if (frameDelta !== 0) {
+      dc360.frame -= frameDelta;
+      dc360.dragDistance -= frameDelta * dc360.dragPixelsPerFrame;
+      dc360Render();
+    }
+  });
+
+  stage.addEventListener('pointerup', function() {
+    dc360.dragging = false;
+    stage.classList.remove('dc-360-dragging');
+  });
+
+  stage.addEventListener('pointercancel', function() {
+    dc360.dragging = false;
+    stage.classList.remove('dc-360-dragging');
+  });
+
+  stage.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    dc360StopAuto();
+    dc360.frame += (e.deltaY > 0 ? 1 : -1);
+    dc360Render();
+  }, { passive: false });
+
+  stage.addEventListener('dblclick', function() {
+    if (dc360.interval) {
+      dc360StopAuto();
+    } else {
+      dc360StartAuto();
+    }
+  });
+});
 </script>
 
 <script type="text/javascript">

@@ -189,6 +189,8 @@ $_['help_video_combined']            = 'Enter a YouTube URL/ID or click "Browse 
 $_['text_youtube_video']             = 'YouTube video';
 $_['entry_model_3d']          = '3D Model';
 $_['help_model_3d']           = 'Upload a GLB 3D model file';
+$_['entry_image_360']         = '360° Image';
+$_['help_image_360']          = 'Upload a horizontal sprite strip of 360° rotation frames (square frames).';
 
 // Panel titles
 $_['text_panel_description_title']    = 'Description';
@@ -206,7 +208,7 @@ $_['text_panel_pricing_subtitle']     = 'Base price, customer group prices and t
 $_['text_panel_inventory_title']      = 'Inventory';
 $_['text_panel_inventory_subtitle']   = 'Stock quantity, minimum order and availability options';
 $_['text_panel_media_title']          = 'Media';
-$_['text_panel_media_subtitle']       = 'Main image, additional photos, video and 3D model';
+$_['text_panel_media_subtitle']       = 'Main image, additional photos, video, 3D model and 360° view';
 $_['text_panel_attributes_title']     = 'Attributes';
 $_['text_panel_attributes_subtitle']  = 'Technical specifications and feature descriptions';
 $_['text_help_attributes']           = 'Attributes — descriptive product features (composition, country of origin, season). They are informational and don\'t affect price or stock.';
