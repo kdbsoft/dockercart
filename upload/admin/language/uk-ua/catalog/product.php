@@ -198,6 +198,8 @@ $_['help_video_combined']            = 'Введіть YouTube URL/ID або н�
 $_['text_youtube_video']             = 'YouTube відео';
 $_['entry_model_3d']          = '3D Модель';
 $_['help_model_3d']           = 'Завантажте 3D модель у форматі GLB';
+$_['entry_image_360']         = 'Зображення 360°';
+$_['help_image_360']          = 'Горизонтальна смуга кадрів обертання 360° (кадри квадратні).';
 
 // Panel titles
 $_['text_panel_description_title']    = 'Опис';
@@ -215,7 +217,7 @@ $_['text_panel_pricing_subtitle']     = 'Базова ціна, ціни для 
 $_['text_panel_inventory_title']      = 'Запаси';
 $_['text_panel_inventory_subtitle']   = 'Кількість на складі, мінімальне замовлення та опції наявності';
 $_['text_panel_media_title']          = 'Медіа';
-$_['text_panel_media_subtitle']       = 'Головне зображення, додаткові фото, відео та 3D-модель';
+$_['text_panel_media_subtitle']       = 'Головне зображення, додаткові фото, відео, 3D-модель та 360°-огляд';
 $_['text_panel_attributes_title']     = 'Атрибути';
 $_['text_panel_attributes_subtitle']  = 'Технічні характеристики та описи властивостей';
 $_['text_help_attributes']           = 'Атрибути — описові характеристики товару (склад, країна виробництва, сезон). Мають інформаційний характер і не впливають на ціну та залишок.';

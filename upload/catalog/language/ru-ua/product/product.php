@@ -82,6 +82,7 @@ $_['text_similar_products'] = 'Похожие товары';
 $_['text_accessory']         = 'Аксессуары';
 $_['text_fbt']               = 'Покупают вместе';
 $_['text_zoom'] = 'Зум';
+$_['text_360_hint'] = 'Тяните, чтобы вращать';
 $_['button_cart'] = 'В корзину';
 
 // Messenger

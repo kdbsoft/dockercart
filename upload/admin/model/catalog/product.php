@@ -95,6 +95,18 @@ class ModelCatalogProduct extends Model
             );
         }
 
+        if (isset($data["image_360"])) {
+            $this->db->query(
+                "UPDATE " .
+                    DB_PREFIX .
+                    "product SET image_360 = '" .
+                    $this->db->escape($data["image_360"]) .
+                    "' WHERE product_id = '" .
+                    (int) $product_id .
+                    "'",
+            );
+        }
+
         foreach ($data["product_description"] as $language_id => $value) {
             $this->db->query(
                 "INSERT INTO " .
@@ -1258,6 +1270,18 @@ class ModelCatalogProduct extends Model
                     DB_PREFIX .
                     "product SET model_3d = '" .
                     $this->db->escape($data["model_3d"]) .
+                    "' WHERE product_id = '" .
+                    (int) $product_id .
+                    "'",
+            );
+        }
+
+        if (isset($data["image_360"])) {
+            $this->db->query(
+                "UPDATE " .
+                    DB_PREFIX .
+                    "product SET image_360 = '" .
+                    $this->db->escape($data["image_360"]) .
                     "' WHERE product_id = '" .
                     (int) $product_id .
                     "'",

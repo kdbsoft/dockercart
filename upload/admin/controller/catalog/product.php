@@ -1843,6 +1843,18 @@ class ControllerCatalogProduct extends Controller {
 		}
 		$data['model_3d_placeholder'] = $this->model_tool_image->resize('model_3d_placeholder.svg', 100, 100);
 
+		// 360° Image
+		if (isset($this->request->post['image_360'])) {
+			$data['image_360'] = $this->request->post['image_360'];
+		} elseif (!empty($product_info)) {
+			$data['image_360'] = $product_info['image_360'];
+		} else {
+			$data['image_360'] = '';
+		}
+
+		$data['image_360_thumb'] = $this->model_tool_image->resize('image_360_placeholder.svg', 100, 100);
+		$data['image_360_placeholder'] = $this->model_tool_image->resize('image_360_placeholder.svg', 100, 100);
+
 		// Downloads
 		$this->load->model('catalog/download');
 
