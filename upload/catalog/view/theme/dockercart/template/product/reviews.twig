@@ -15,22 +15,22 @@
         </a>
       </div>
       {% if review_guest %}
-      <a href="{{ reviews_url }}#form-review" class="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
-        <i data-lucide="square-pen" width="16" height="16" class="inline-block mr-1.5 -mt-0.5"></i>{{ text_write }}
-      </a>
+      <button type="button" data-review-modal-open class="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
+        <i data-lucide="square-pen" width="16" height="16"></i>{{ text_write }}
+      </button>
       {% endif %}
     </div>
 
+    {% if review_count %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
       <aside class="lg:col-span-1 lg:sticky lg:top-24 self-start">
-        <div class="dc-review-overview p-6 sm:p-7">
-          {% if review_count %}
+        <div class="dc-review-hero p-6 sm:p-7">
           <div class="flex items-center gap-4">
             {% if rating > 0 %}
-            <span class="dc-rating-number text-6xl font-extrabold leading-none">{{ rating_value }}</span>
+            <span class="dc-rating-number text-5xl font-extrabold leading-none">{{ rating_value }}</span>
             {% endif %}
             <div>
-              <div class="dc-stars" aria-hidden="true">
+              <div class="dc-stars dc-stars-hero" aria-hidden="true">
                 {% for i in 1..5 %}
                   {% set diff = rating - (i - 1) %}
                   {% if diff >= 1 %}
@@ -60,16 +60,11 @@
           </div>
           {% endif %}
 
-          <div class="mt-6 pt-5 border-t border-gray-100">
-            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ text_reviews_section }}</p>
-            <p class="text-sm text-gray-600 mt-1">{{ text_be_first_hint }}</p>
-          </div>
-          {% else %}
-          <div class="flex items-center gap-3">
-            <span class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm ring-1 ring-gray-100">
-              <i data-lucide="star" width="21" height="21" aria-hidden="true"></i>
-            </span>
-            <p class="text-sm font-extrabold text-gray-900">{{ text_no_reviews }}</p>
+          {% if review_guest %}
+          <div class="mt-6">
+            <button type="button" data-review-modal-open class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
+              <i data-lucide="square-pen" width="14" height="14"></i>{{ text_write }}
+            </button>
           </div>
           {% endif %}
         </div>
@@ -95,31 +90,47 @@
             vote_url: vote_url
           } %}
         </div>
-
-        {% if review_status %}
-        <div class="mt-12 pt-8 border-t border-gray-100">
-          <h2 class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-gray-900 mb-5">
-            <i data-lucide="square-pen" width="18" height="18" class="text-blue-600"></i>{{ text_write }}
-          </h2>
-          <div class="w-full">
-            {% include 'dockercart/template/product/review_form.twig' with {
-              review_guest: review_guest,
-              customer_name: customer_name,
-              customer_logged: customer_logged,
-              criteria: criteria,
-              has_rating_criteria: has_rating_criteria,
-              review_images_enabled: review_images_enabled,
-              review_max_images: review_max_images,
-              review_video_enabled: review_video_enabled,
-              captcha: captcha
-            } %}
-          </div>
-        </div>
-        {% endif %}
       </section>
     </div>
+    {% else %}
+    <div id="review">
+      {% include 'dockercart/template/product/review.twig' with {
+        reviews: reviews_list,
+        total: review_total,
+        total_label: review_total_label,
+        sort_urls: sort_urls,
+        has_more: has_more,
+        next_page: next_page,
+        sort: sort,
+        show_more_label: show_more_label,
+        review_ajax_url: review_ajax_url,
+        text_no_reviews: text_no_reviews,
+        text_be_first: text_be_first,
+        text_be_first_hint: text_be_first_hint,
+        text_leave_review: text_leave_review,
+        reviews_url: reviews_url,
+        vote_url: vote_url
+      } %}
+    </div>
+    {% endif %}
   </div>
 </main>
+
+{% if review_status %}
+{% include 'dockercart/template/product/review_modal.twig' with {
+  review_guest: review_guest,
+  customer_name: customer_name,
+  customer_logged: customer_logged,
+  criteria: criteria,
+  has_rating_criteria: has_rating_criteria,
+  review_images_enabled: review_images_enabled,
+  review_max_images: review_max_images,
+  review_video_enabled: review_video_enabled,
+  captcha: captcha,
+  product_id: product_id,
+  review_write_url: review_write_url
+} %}
+{% endif %}
 
 {% include 'dockercart/template/common/partials/schema_reviews.twig' %}
 {% include 'dockercart/template/product/review_js.twig' %}

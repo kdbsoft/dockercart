@@ -1,6 +1,6 @@
 {% if review_guest %}
 <form id="form-review" data-product-id="{{ product_id }}" data-write-url="{{ review_write_url|default('') }}" enctype="multipart/form-data">
-  <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
+  <div class="{% if is_modal|default(false) %}space-y-0{% else %}bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8{% endif %}">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div class="sm:col-span-2">
@@ -103,7 +103,7 @@
   </div>
 </form>
 {% else %}
-<div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
+<div class="{% if is_modal|default(false) %}py-2{% else %}bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8{% endif %}">
   <p class="text-sm text-gray-600">{{ text_login }}</p>
 </div>
 {% endif %}

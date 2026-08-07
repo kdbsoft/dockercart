@@ -1,0 +1,27 @@
+<div id="dc-review-modal" class="dc-review-modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="dc-review-modal-title">
+  <div class="dc-review-modal-backdrop" data-review-modal-close></div>
+  <div class="dc-review-modal-card">
+    <div class="dc-review-modal-head">
+      <h2 id="dc-review-modal-title" class="text-lg font-extrabold tracking-tight text-gray-900">{{ text_write|default(text_leave_review|default('Write a review')) }}</h2>
+      <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition" data-review-modal-close aria-label="Close">
+        <i data-lucide="x" width="18" height="18"></i>
+      </button>
+    </div>
+    <div class="dc-review-modal-body">
+      {% include 'dockercart/template/product/review_form.twig' with {
+        review_guest: review_guest,
+        customer_name: customer_name,
+        customer_logged: customer_logged,
+        criteria: criteria,
+        has_rating_criteria: has_rating_criteria,
+        review_images_enabled: review_images_enabled,
+        review_max_images: review_max_images,
+        review_video_enabled: review_video_enabled,
+        captcha: captcha,
+        product_id: product_id,
+        review_write_url: review_write_url|default(''),
+        is_modal: true
+      } %}
+    </div>
+  </div>
+</div>
