@@ -81,11 +81,12 @@ class ControllerCommonFileManager extends Controller {
 				}
 
 				$data['images'][] = array(
-					'thumb' => '',
-					'name'  => implode(' ', $name),
-					'type'  => 'directory',
-					'path'  => utf8_substr($image, utf8_strlen(DIR_IMAGE)),
-					'href'  => $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . '&directory=' . urlencode(utf8_substr($image, utf8_strlen(DIR_IMAGE . 'catalog/'))) . $url, true)
+					'thumb'     => '',
+					'name'      => implode(' ', $name),
+					'type'      => 'directory',
+					'path'      => utf8_substr($image, utf8_strlen(DIR_IMAGE)),
+					'protected' => $this->isProtected($image),
+					'href'      => $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'] . '&directory=' . urlencode(utf8_substr($image, utf8_strlen(DIR_IMAGE . 'catalog/'))) . $url, true)
 				);
 			} elseif (is_file($image)) {
 				$ext = utf8_strtolower(pathinfo($image, PATHINFO_EXTENSION));
@@ -242,7 +243,7 @@ class ControllerCommonFileManager extends Controller {
 
 		// Check if directory is protected
 		if (!$json && $this->isProtected($directory)) {
-			$json['error'] = $this->language->get('error_directory');
+			$json['error'] = $this->language->get('error_protected');
 		}
 
 		if (!$json) {
@@ -366,7 +367,7 @@ class ControllerCommonFileManager extends Controller {
 
 		// Check if directory is protected
 		if (!isset($json['error']) && $this->isProtected($directory)) {
-			$json['error'] = $this->language->get('error_directory');
+			$json['error'] = $this->language->get('error_protected');
 		}
 
 		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
@@ -497,9 +498,10 @@ class ControllerCommonFileManager extends Controller {
 
 			foreach ($directories as $dir) {
 				$result[] = array(
-					'name'     => basename($dir),
-					'path'     => utf8_substr($dir, utf8_strlen(DIR_IMAGE . 'catalog/')),
-					'children' => $this->getDirectoryTree($dir)
+					'name'      => basename($dir),
+					'path'      => utf8_substr($dir, utf8_strlen(DIR_IMAGE . 'catalog/')),
+					'protected' => $this->isProtected($dir),
+					'children'  => $this->getDirectoryTree($dir)
 				);
 			}
 		}

@@ -1,13 +1,13 @@
 {% macro tree(children, active) %}
 {% for node in children %}
 <li{% if node.path == active %} class="active"{% endif %} data-path="{{ node.path }}">
-	<div class="tree-item{% if node.path == active %} active{% endif %}" data-directory="{{ node.path }}">
+	<div class="tree-item{% if node.path == active %} active{% endif %}" data-directory="{{ node.path }}" data-folder-icon="{% if node.protected %}folder-lock{% else %}folder{% endif %}">
 		{% if node.children %}
 		<i data-lucide="chevron-right" class="tree-toggle" width="14" height="14"></i>
 		{% else %}
 		<span class="tree-toggle-placeholder"></span>
 		{% endif %}
-		<i data-lucide="folder" class="tree-folder-icon" width="16" height="16"></i>
+		<i data-lucide="{% if node.protected %}folder-lock{% else %}folder{% endif %}" class="tree-folder-icon" width="16" height="16"></i>
 		<span class="tree-link">{{ node.name }}</span>
 	</div>
 	{% if node.children %}
@@ -68,7 +68,7 @@
             {% for image in images %}
             <div class="filemanager-item text-center">
               {% if image.type == 'directory' %}
-              <div class="filemanager-thumb"><a href="{{ image.href }}" class="directory"><i data-lucide="folder" style="width:64px;height:64px"></i></a></div>
+              <div class="filemanager-thumb"><a href="{{ image.href }}" class="directory"><i data-lucide="{% if image.protected %}folder-lock{% else %}folder{% endif %}" style="width:64px;height:64px"></i></a></div>
               <label>
                 <input type="checkbox" name="path[]" value="{{ image.path }}" />
                 {{ image.name }}</label>
@@ -134,11 +134,11 @@ function fmUpdateActiveTree(directory) {
 			$li.children('.tree-item').addClass('active');
 			$li.addClass('expanded');
 			fmSetIcon($li, '> .tree-item .tree-toggle', 'chevron-down');
-			fmSetIcon($li, '> .tree-item .tree-folder-icon', 'folder-open');
+			fmSetIcon($li, '> .tree-item .tree-folder-icon', $li.find('.tree-item').data('folder-icon') || 'folder-open');
 			$li.parents('li').addClass('expanded');
 			$li.parents('li').children('.tree-item').each(function() {
 				fmSetIcon($(this).parent(), '> .tree-item .tree-toggle', 'chevron-down');
-				fmSetIcon($(this).parent(), '> .tree-item .tree-folder-icon', 'folder-open');
+				fmSetIcon($(this).parent(), '> .tree-item .tree-folder-icon', $(this).data('folder-icon') || 'folder-open');
 			});
 		}
 	}
