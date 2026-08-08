@@ -387,6 +387,12 @@ class ControllerProductManufacturer extends Controller {
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
+			$category_names_map = array();
+
+			if ($results) {
+				$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
@@ -463,8 +469,24 @@ class ControllerProductManufacturer extends Controller {
 					'is_configurable' => !empty($result['is_configurable']),
 					'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 					'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
+					'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
 				);
+			}
+
+			// When a category filter is active, label each product with its direct
+			// subcategory (next level deeper); hide the label when there is none.
+			if ($category_id > 0 && !empty($data['products'])) {
+				$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($data['products'], 'product_id'), $category_id);
+
+				foreach ($data['products'] as &$prod) {
+					if (isset($subcategory_map[(int)$prod['product_id']])) {
+						$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+					} else {
+						$prod['category'] = '';
+					}
+				}
+				unset($prod);
 			}
 
 			$url = '';
@@ -681,12 +703,17 @@ class ControllerProductManufacturer extends Controller {
 	public function loadmore() {
 		$this->load->language('product/manufacturer');
 		$this->load->model('catalog/manufacturer');
+		$this->load->model('catalog/category');
 		$this->load->model('catalog/product');
 		$this->load->model('tool/image');
 
 		$this->response->addHeader('Content-Type: application/json');
 
 		$manufacturer_id = isset($this->request->get['manufacturer_id']) ? (int)$this->request->get['manufacturer_id'] : 0;
+		$category_id = 0;
+		if (isset($this->request->get['category_id'])) {
+			$category_id = (int)$this->request->get['category_id'];
+		}
 		$sort  = isset($this->request->get['sort'])  ? $this->request->get['sort']  : 'p.sort_order';
 		$order = isset($this->request->get['order']) ? $this->request->get['order'] : 'ASC';
 		$page  = isset($this->request->get['page'])  ? (int)$this->request->get['page'] : 1;
@@ -736,6 +763,13 @@ class ControllerProductManufacturer extends Controller {
 		}
 
 		$products = array();
+
+		$category_names_map = array();
+
+		if ($results) {
+			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+		}
+
 		foreach ($results as $result) {
 			$image = $result['image']
 				? $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'))
@@ -781,7 +815,7 @@ class ControllerProductManufacturer extends Controller {
 				'name'        => $result['name'],
 				'model'       => isset($result['model']) ? $result['model'] : '',
 				'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
-				'category'    => '',
+				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'price'       => $price,
 				'price_raw'   => (float)$result['price'],
 				'special'     => $special,
@@ -799,6 +833,21 @@ class ControllerProductManufacturer extends Controller {
 					'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
 			);
+		}
+
+		// When a category filter is active, label each product with its direct
+		// subcategory (next level deeper); hide the label when there is none.
+		if ($category_id > 0 && !empty($products)) {
+			$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($products, 'product_id'), $category_id);
+
+			foreach ($products as &$prod) {
+				if (isset($subcategory_map[(int)$prod['product_id']])) {
+					$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+				} else {
+					$prod['category'] = '';
+				}
+			}
+			unset($prod);
 		}
 
 		$html = '';

@@ -76,8 +76,10 @@ class ControllerAccountWishList extends Controller {
 			}
 		}
 
+		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($results, 'product_id')));
+
 		foreach ($results as $result) {
-			$product_info = $this->model_catalog_product->getProduct($result['product_id']);
+			$product_info = isset($products_info[(int)$result['product_id']]) ? $products_info[(int)$result['product_id']] : false;
 
 			if ($product_info) {
 				if ($product_info['image']) {

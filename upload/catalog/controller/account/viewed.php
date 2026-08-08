@@ -32,8 +32,10 @@ class ControllerAccountViewed extends Controller {
 
 		$viewed_products = $this->model_account_viewed->getViewedProducts();
 
+		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($viewed_products, 'product_id')));
+
 		foreach ($viewed_products as $viewed_product) {
-			$product_info = $this->model_catalog_product->getProduct($viewed_product['product_id']);
+			$product_info = isset($products_info[(int)$viewed_product['product_id']]) ? $products_info[(int)$viewed_product['product_id']] : false;
 
 			if (!$product_info) {
 				continue;
