@@ -32,6 +32,9 @@ $(document).ready(function() {
 	$('.text-danger').each(function() {
 		var element = $(this).parent().parent();
 
+		// Skip the "required field" asterisk — it's a marker, not an error
+		if ($.trim($(this).text()) === '*') return;
+
 		if (element.hasClass('form-group') || element.hasClass('dcx-field')) {
 			element.addClass('has-error');
 		}
