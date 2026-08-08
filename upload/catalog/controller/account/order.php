@@ -377,6 +377,10 @@ class ControllerAccountOrder extends Controller {
 					$reorder = '';
 				}
 
+				// Gift lines are zero-price product lines; exclude products with
+				// "call for price" (also zero price) from the gift badge.
+				$is_gift = (float)$product['price'] == 0 && (float)$product['total'] == 0 && (int)$product['reward'] == 0 && !empty($product_info) && empty($product_info['call_for_price']);
+
 				$data['products'][] = array(
 					'name'     => $this->orderLocalizer()->productName($product),
 					'model'    => $product['model'],
@@ -384,6 +388,7 @@ class ControllerAccountOrder extends Controller {
 					'quantity' => $product['quantity'],
 					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
+					'is_gift'  => $is_gift,
 					'reorder'  => $reorder,
 					'return'   => $this->url->link('account/return/add', 'order_id=' . $order_info['order_id'] . '&product_id=' . $product['product_id'], true)
 				);
