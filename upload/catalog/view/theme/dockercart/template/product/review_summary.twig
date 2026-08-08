@@ -2,7 +2,7 @@
 <div class="flex flex-wrap items-center gap-3 mt-4">
   <div class="inline-flex self-center items-center gap-2 rounded-2xl bg-amber-50/60 leading-none">
     {% if rating > 0 %}
-    <span class="text-sm font-bold tracking-tight text-gray-900 leading-none">{{ rating_value }}</span><span class="text-sm font-semibold text-gray-400 leading-none">/5</span>
+    <span class="dc-rating-number text-base font-extrabold leading-none">{{ rating_value }}<span class="text-xs font-normal text-gray-400"> / 5</span></span>
     {% endif %}
     <div class="flex self-center justify-center gap-2">
       <div class="dc-stars dc-stars-summary leading-none" aria-hidden="true">
