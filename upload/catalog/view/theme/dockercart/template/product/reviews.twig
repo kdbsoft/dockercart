@@ -15,19 +15,19 @@
         </a>
       </div>
       {% if review_guest %}
-      <button type="button" data-review-modal-open class="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
-        <i data-lucide="square-pen" width="16" height="16"></i>{{ text_write }}
+      <button type="button" data-review-modal-open class="inline-flex items-center gap-2 px-5 py-3 border border-blue-600 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-50 transition">
+        <i data-lucide="message-square-plus" width="16" height="16"></i>{{ text_leave_review|default('Leave a review') }}
       </button>
       {% endif %}
     </div>
 
     {% if review_count %}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-      <aside class="lg:col-span-1 lg:sticky lg:top-24 self-start">
-        <div class="dc-review-hero p-6 sm:p-7">
+      <aside class="lg:col-span-1 lg:sticky lg:top-24">
+        <div class="dc-review-overview-compact p-5 sm:p-6">
           <div class="flex items-center gap-4">
             {% if rating > 0 %}
-            <span class="dc-rating-number text-5xl font-extrabold leading-none">{{ rating_value }}<span class="text-base font-normal text-gray-400"> / 5</span></span>
+            <span class="dc-rating-number text-4xl font-extrabold leading-none">{{ rating_value }}<span class="text-base font-normal text-gray-400"> / 5</span></span>
             {% endif %}
             <div>
               <div class="dc-stars dc-stars-hero" aria-hidden="true">
@@ -42,7 +42,9 @@
                   {% endif %}
                 {% endfor %}
               </div>
+              {% if review_count %}
               <div class="text-sm font-medium text-gray-500 mt-1">{{ reviews }}</div>
+              {% endif %}
             </div>
           </div>
 
@@ -61,10 +63,14 @@
           {% endif %}
 
           {% if review_guest %}
-          <div class="mt-6">
+          <div class="mt-5 pt-4 border-t border-gray-100">
             <button type="button" data-review-modal-open class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-blue-200">
               <i data-lucide="square-pen" width="14" height="14"></i>{{ text_write }}
             </button>
+          </div>
+          {% else %}
+          <div class="mt-5 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-400">{{ text_login }}</p>
           </div>
           {% endif %}
         </div>
