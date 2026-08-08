@@ -210,7 +210,14 @@ class ControllerCheckoutConfirm extends Controller {
 
 			$order_data['products'] = array();
 
-			foreach ($this->cart->getProducts() as $product) {
+			$cart_products = $this->cart->getProducts();
+
+			// BXGY per-item discounts (pre-tax, applied to product prices)
+			$this->load->library('bxgy');
+			$bxgy_lib = new Bxgy($this->registry);
+			$bxgy_discounts = $bxgy_lib->getPerProductDiscountsFor($cart_products);
+
+			foreach ($cart_products as $product) {
 				$option_data = array();
 
 				foreach ($product['option'] as $option) {
@@ -225,6 +232,19 @@ class ControllerCheckoutConfirm extends Controller {
 					);
 				}
 
+				$price = (float) $product['price'];
+				$tax = $this->tax->getTax($product['price'], $product['tax_class_id']);
+
+				if (isset($bxgy_discounts[(int) $product['product_id']])) {
+					$per_unit_discount = $bxgy_discounts[(int) $product['product_id']]['discount_amount'];
+
+					if ($price > 0 && $per_unit_discount > 0) {
+						$new_price = max(0, $price - $per_unit_discount);
+						$tax = $tax * ($new_price / $price);
+						$price = $new_price;
+					}
+				}
+
 				$order_data['products'][] = array(
 					'product_id' => $product['product_id'],
 					'name'       => $product['name'],
@@ -233,9 +253,9 @@ class ControllerCheckoutConfirm extends Controller {
 					'download'   => $product['download'],
 					'quantity'   => $product['quantity'],
 					'subtract'   => $product['subtract'],
-					'price'      => $product['price'],
-					'total'      => $product['total'],
-					'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
+					'price'      => $price,
+					'total'      => $price * $product['quantity'],
+					'tax'        => $tax,
 					'reward'     => $product['reward']
 				);
 			}

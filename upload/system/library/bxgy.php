@@ -18,19 +18,23 @@ class Bxgy {
 	}
 
 	/**
-	 * Get all active BXGY rules for products in the cart.
+	 * Get all active BXGY rules for the given cart/order products.
 	 * Returns array keyed by reward_product_id => array of rules.
+	 *
+	 * @param array $products list of products with at least 'product_id'
 	 */
-	public function getActiveRulesByReward($store_id = 0) {
-		$cart_products = $this->cart->getProducts();
+	public function getActiveRulesByReward(array $products = [], $store_id = 0) {
+		if (empty($products)) {
+			$products = $this->cart->getProducts();
+		}
 
-		if (empty($cart_products)) {
+		if (empty($products)) {
 			return [];
 		}
 
 		$product_ids = [];
 
-		foreach ($cart_products as $product) {
+		foreach ($products as $product) {
 			$product_ids[] = (int) $product['product_id'];
 		}
 
@@ -70,7 +74,7 @@ class Bxgy {
 	 * @return array [product_id => ['discount_amount' => float, 'original_price' => float, 'text' => string]]
 	 */
 	public function getPerProductDiscounts(array $cart_products) {
-		$rules_by_reward = $this->getActiveRulesByReward();
+		$rules_by_reward = $this->getActiveRulesByReward($cart_products);
 
 		if (empty($rules_by_reward)) {
 			return [];
@@ -104,7 +108,6 @@ class Bxgy {
 
 			$price = (float) $product['price'];
 			$tax_class_id = (int) ($product['tax_class_id'] ?? 0);
-			$taxed_price = $this->tax->calculate($price, $tax_class_id, $this->config->get('config_tax'));
 			$reward_qty = $trigger_qty[$reward_id] ?? 0;
 			$best_discount = 0;
 			$best_text = '';
@@ -124,7 +127,7 @@ class Bxgy {
 				$eligible_sets = (int) min($trigger_sets, $reward_qty);
 
 				$candidate_discount = $this->calculateDiscount(
-					$taxed_price,
+					$price,
 					$rule['discount_type'],
 					(float) $rule['discount_value'],
 					$eligible_sets
@@ -142,7 +145,7 @@ class Bxgy {
 					'original_price' => $price,
 					'text' => $best_text,
 					'original_price_formatted' => $this->currency->format(
-						$this->tax->calculate($price, $product['tax_class_id'], $this->config->get('config_tax')),
+						$this->tax->calculate($price, $tax_class_id, $this->config->get('config_tax')),
 						$this->session->data['currency']
 					),
 				];
@@ -150,6 +153,17 @@ class Bxgy {
 		}
 
 		return $discounts;
+	}
+
+	/**
+	 * Calculate per-product BXGY discounts for an explicit product list
+	 * (works outside the storefront cart, e.g. admin order editing).
+	 *
+	 * @param array $cart_products list of products with product_id/quantity/price/tax_class_id
+	 * @return array [product_id => ['discount_amount' => float, 'original_price' => float, 'text' => string]]
+	 */
+	public function getPerProductDiscountsFor(array $cart_products) {
+		return $this->getPerProductDiscounts($cart_products);
 	}
 
 	/**
