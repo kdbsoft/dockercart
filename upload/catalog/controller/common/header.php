@@ -1,6 +1,11 @@
 <?php
 class ControllerCommonHeader extends Controller {
 	public function index() {
+		// Phone input mask (used by cfp-request modal and account forms).
+		// addScript de-duplicates by href, so register/login/etc. including
+		// the same script won't load it twice.
+		$this->document->addScript('catalog/view/javascript/common/phone-mask.js', 'header');
+
 		// Analytics
 		$this->load->model('setting/extension');
 
@@ -187,8 +192,34 @@ class ControllerCommonHeader extends Controller {
 
 		// Call for price (for quick view JS)
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 		$data['call_for_price_phone'] = $this->config->get('config_telephone');
 		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+		$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
+
+		// Call for price request modal (for cfp-request.js)
+		$data['text_cfp_request_title'] = $this->language->get('text_cfp_request_title');
+		$data['text_cfp_request_name'] = $this->language->get('text_cfp_request_name');
+		$data['text_cfp_request_phone'] = $this->language->get('text_cfp_request_phone');
+		$data['text_cfp_request_email'] = $this->language->get('text_cfp_request_email');
+		$data['text_cfp_request_comment'] = $this->language->get('text_cfp_request_comment');
+		$data['text_cfp_request_quantity'] = $this->language->get('text_cfp_request_quantity');
+		$data['text_cfp_request_submit'] = $this->language->get('text_cfp_request_submit');
+		$data['text_cfp_request_loading'] = $this->language->get('text_cfp_request_loading');
+		$data['text_cfp_request_close'] = $this->language->get('text_cfp_request_close');
+		$data['text_cfp_request_error_name'] = $this->language->get('text_cfp_request_error_name');
+		$data['text_cfp_request_error_phone'] = $this->language->get('text_cfp_request_error_phone');
+		$data['text_cfp_request_error_email'] = $this->language->get('text_cfp_request_error_email');
+		$data['text_cfp_request_error_general'] = $this->language->get('text_cfp_request_error_general');
+
+		// Phone input mask format (same source as account register/login forms)
+		$data['telephone_mask'] = '';
+		$this->load->model('localisation/country');
+		$default_country_id = $this->config->get('config_country_id');
+		if ($default_country_id) {
+			$country_info = $this->model_localisation_country->getCountry($default_country_id);
+			$data['telephone_mask'] = $country_info['phone_format'] ?? '';
+		}
 
 		// Wishlist
 		if ($this->customer->isLogged()) {

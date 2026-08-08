@@ -111,8 +111,10 @@ class ControllerAccountViewed extends Controller {
 		$data['continue'] = $this->customer->isLogged() ? $this->url->link('account/account', '', true) : $this->url->link('common/home');
 
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 		$data['call_for_price_phone'] = $this->config->get('config_telephone');
+		$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
 
 		$data['account_menu'] = $this->load->controller('common/account_menu');
 

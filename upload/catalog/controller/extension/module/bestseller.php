@@ -156,10 +156,12 @@ class ControllerExtensionModuleBestSeller extends Controller {
 			$this->load->language('product/product');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+			$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+			$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
 
 			return $this->load->view('extension/module/bestseller', $data);
 		}

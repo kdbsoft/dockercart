@@ -247,6 +247,7 @@ class ControllerProductManufacturer extends Controller {
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+			$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
 
 			$data['compare'] = $this->url->link('product/compare');
 
@@ -620,6 +621,7 @@ class ControllerProductManufacturer extends Controller {
 			$data['page']            = $page;
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+			$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 			$data['view_mode']       = $view_mode;
 
 				$this->response->setOutput($this->load->view('product/manufacturer_info', $data));
@@ -809,12 +811,14 @@ class ControllerProductManufacturer extends Controller {
 				'text_sale'        => 'SALE',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
+				'text_call_for_price_request' => $this->language->get('text_call_for_price_request'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
 				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
 				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
 				'call_for_price_phone' => $this->config->get('config_telephone'),
+				'call_for_price_mode' => ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request',
 			));
 		}
 

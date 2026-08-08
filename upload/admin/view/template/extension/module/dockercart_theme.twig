@@ -363,6 +363,14 @@
                   <div class="help-block">{{ help_call_for_price_status }}</div>
                 </div>
                 <div class="dcx-field">
+                  <label class="dcx-label" for="input-call-for-price-mode">{{ entry_call_for_price_mode }}</label>
+                  <select name="dockercart_theme_call_for_price_mode" id="input-call-for-price-mode" class="form-control dc-theme-select-sm">
+                    <option value="request" {% if dockercart_theme_call_for_price_mode == 'request' %}selected="selected"{% endif %}>{{ text_call_for_price_mode_request }}</option>
+                    <option value="call" {% if dockercart_theme_call_for_price_mode == 'call' %}selected="selected"{% endif %}>{{ text_call_for_price_mode_call }}</option>
+                  </select>
+                  <div class="help-block">{{ help_call_for_price_mode }}</div>
+                </div>
+                <div class="dcx-field">
                   <label class="dcx-label" for="input-sale-timer-status">{{ entry_sale_timer_status }}</label>
                   <select name="dockercart_theme_sale_timer_status" id="input-sale-timer-status" class="form-control dc-theme-select-sm">
                     <option value="1" {% if dockercart_theme_sale_timer_status == 1 %}selected="selected"{% endif %}>{{ text_enabled }}</option>
