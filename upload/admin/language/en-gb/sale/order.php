@@ -273,6 +273,7 @@ $_['text_ship_to']               = 'Ship To';
 $_['text_bank_name']             = 'Bank';
 $_['text_bank_account']          = 'Account';
 $_['text_bank_swift']            = 'SWIFT';
+$_['text_invoice_signature']     = 'Signature & Stamp';
 
 // Payment order sample
 $_['text_payment_order']         = 'Payment Order Sample';

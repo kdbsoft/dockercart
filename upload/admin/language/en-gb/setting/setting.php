@@ -212,6 +212,10 @@ $_['help_password']                  = 'Allow forgotten password to be used for 
 $_['help_encryption']                = 'Please provide a secret key that will be used to encrypt private information when processing orders.';
 $_['help_compression']               = 'GZIP for more efficient transfer to requesting clients. Compression level must be between 0 - 9.';
 $_['help_invoice_logo']              = 'Upload an image to show it on invoices. Leave empty to hide the logo on invoices.';
+$_['help_seller_officer']            = 'Full name of the official shown on the invoice under the signature.';
+$_['help_seller_officer_role']       = 'Position of the official, e.g. Director or Head of Sales.';
+$_['help_seller_signature_image']    = 'Upload a signature image. Stored securely outside the web root — there is no public link to it.';
+$_['help_seller_stamp_image']        = 'Upload a stamp image. Stored securely outside the web root — there is no public link to it.';
 $_['help_invoice_valid_days']        = 'Number of days the invoice remains valid for payment. The expiry date is shown on the invoice. Leave empty or 0 to omit the validity period.';
 $_['help_invoice_language']          = 'Language used for invoices and order printouts. Leave empty to use the admin interface language.';
 
@@ -238,6 +242,7 @@ $_['error_encryption']               = 'Encryption Key must be between 32 and 10
 $_['error_stock_reserve_minutes']    = 'Reserve duration must be 0 or a positive number of minutes!';
 $_['error_invoice_language']         = 'Please select a valid invoice language!';
 $_['error_invoice_valid_days']       = 'Invoice validity days must be a non-negative number!';
+$_['error_filetype']                 = 'Invalid file type!';
 
 // Tab
 $_['tab_invoice']                   = 'Invoice & Organization';
@@ -248,6 +253,7 @@ $_['text_invoice_seller']           = 'Seller';
 $_['text_invoice_tax']              = 'Tax Numbers';
 $_['text_invoice_bank']             = 'Bank Details';
 $_['text_invoice_logo']             = 'Invoice Logo';
+$_['text_invoice_signature']        = 'Signature & Stamp';
 
 // Entry
 $_['entry_invoice_prefix']          = 'Invoice Prefix';
@@ -264,6 +270,10 @@ $_['entry_seller_bank_name']        = 'Bank Name';
 $_['entry_seller_bank_account']     = 'Bank Account (IBAN)';
 $_['entry_seller_bank_swift']       = 'SWIFT / BIC';
 $_['entry_seller_invoice_logo']     = 'Invoice Logo';
+$_['entry_seller_officer']          = 'Officer (full name)';
+$_['entry_seller_officer_role']     = 'Position';
+$_['entry_seller_signature_image']  = 'Signature';
+$_['entry_seller_stamp_image']      = 'Stamp';
 
 // Seller tax number type labels (code => label)
 $_['text_seller_tax_type_VAT']        = 'VAT';

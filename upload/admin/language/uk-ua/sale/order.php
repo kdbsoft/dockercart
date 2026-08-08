@@ -290,6 +290,7 @@ $_['text_ship_to']               = 'Адреса доставки';
 $_['text_bank_name']             = 'Банк';
 $_['text_bank_account']          = 'Розрахунковий рахунок';
 $_['text_bank_swift']            = 'SWIFT';
+$_['text_invoice_signature']     = 'Підпис та печатка';
 
 // Payment order sample
 $_['text_payment_order']         = 'Зразок платіжного доручення';
