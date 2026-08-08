@@ -11,6 +11,7 @@
     .page { width: auto; min-height: auto; padding: 20mm; }
     .accent { height: 2.5px; background: #0f172a; margin: 0 0 16px 0; }
     .doc-head td { vertical-align: top; padding: 0; }
+    .brand-logo { max-height: 30px; max-width: 200px; margin-bottom: 8px; display: block; }
     .doc-title { font-size: 16pt; font-weight: 700; color: #0f172a; line-height: 1.15; letter-spacing: 0.3px; }
     .doc-sub { font-size: 8.5pt; color: #64748b; margin-top: 3px; }
     .doc-sub strong { color: #334155; font-weight: 700; }
@@ -47,6 +48,7 @@
     <table class="doc-head">
       <tr>
         <td>
+          {% if order.seller_logo %}<img src="{{ order.seller_logo }}" class="brand-logo" alt="">{% endif %}
           <div class="doc-title">{{ order.heading_title }}</div>
           {% if order.order_status %}<div class="status-badge">{{ order.order_status }}</div>{% endif %}
           {% if order.invoice_no %}<div class="doc-sub"><strong>{{ text_invoice_no }}</strong> {{ order.invoice_no }}</div>{% endif %}

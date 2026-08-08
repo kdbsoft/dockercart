@@ -289,6 +289,7 @@ $_['text_ship_to']               = 'Адрес доставки';
 $_['text_bank_name']             = 'Банк';
 $_['text_bank_account']          = 'Расчётный счёт';
 $_['text_bank_swift']            = 'SWIFT';
+$_['text_invoice_signature']     = 'Подпись и печать';
 
 // Payment order sample
 $_['text_payment_order']         = 'Образец платёжного поручения';

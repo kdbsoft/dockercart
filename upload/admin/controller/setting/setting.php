@@ -1163,6 +1163,30 @@ class ControllerSettingSetting extends Controller {
 			$data['config_seller_invoice_logo'] = $this->config->get('config_seller_invoice_logo');
 		}
 
+		if (isset($this->request->post['config_seller_officer'])) {
+			$data['config_seller_officer'] = $this->request->post['config_seller_officer'];
+		} else {
+			$data['config_seller_officer'] = $this->config->get('config_seller_officer');
+		}
+
+		if (isset($this->request->post['config_seller_officer_role'])) {
+			$data['config_seller_officer_role'] = $this->request->post['config_seller_officer_role'];
+		} else {
+			$data['config_seller_officer_role'] = $this->config->get('config_seller_officer_role');
+		}
+
+		if (isset($this->request->post['config_seller_signature_image'])) {
+			$data['config_seller_signature_image'] = $this->request->post['config_seller_signature_image'];
+		} else {
+			$data['config_seller_signature_image'] = $this->config->get('config_seller_signature_image');
+		}
+
+		if (isset($this->request->post['config_seller_stamp_image'])) {
+			$data['config_seller_stamp_image'] = $this->request->post['config_seller_stamp_image'];
+		} else {
+			$data['config_seller_stamp_image'] = $this->config->get('config_seller_stamp_image');
+		}
+
 		$data['seller_invoice_logo_thumb'] = '';
 		if (!empty($data['config_seller_invoice_logo']) && is_file(DIR_IMAGE . $data['config_seller_invoice_logo'])) {
 			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize($data['config_seller_invoice_logo'], 100, 100);
@@ -1171,6 +1195,9 @@ class ControllerSettingSetting extends Controller {
 		if (empty($data['seller_invoice_logo_thumb'])) {
 			$data['seller_invoice_logo_thumb'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 		}
+
+		$data['seller_signature_image_url'] = $this->invoiceImageUrl('signature');
+		$data['seller_stamp_image_url'] = $this->invoiceImageUrl('stamp');
 
 		$data['placeholder'] = $this->model_tool_image->resize('no_image.png', 100, 100);
 
@@ -1395,6 +1422,24 @@ class ControllerSettingSetting extends Controller {
 	 */
 	private function getSellerTaxTypes() {
 		return array('VAT', 'EIN', 'TIN', 'ABN', 'GST', 'EDRPOU', 'IPN', 'CVR', 'Momsreg.nr', 'Orgnr', 'SIRET', 'CIF', 'P.IVA', 'Other');
+	}
+
+	/**
+	 * Preview URL for a protected invoice image (signature/stamp), served by
+	 * setting/invoice_image only for logged-in admins. Empty when unset.
+	 */
+	private function invoiceImageUrl(string $name): string {
+		$filename = basename((string)$this->config->get('config_seller_' . $name . '_image'));
+
+		if ($filename === '' || $filename === '.' || $filename === '..') {
+			return '';
+		}
+
+		if (!is_file(DIR_STORAGE . 'documents/signature/' . $filename)) {
+			return '';
+		}
+
+		return $this->url->link('setting/invoice_image/image', 'user_token=' . $this->session->data['user_token'] . '&name=' . $name, true);
 	}
 
 	/**
