@@ -69,7 +69,6 @@ $_['text_selected']            = 'selected';
  $_['help_review_criteria_group']  = 'Which "what is rated" group applies to product reviews in this category. Leave on "Inherit" to use the default group.';
  $_['text_review_criteria_inherit'] = 'Inherit default';
  $_['text_default']            = 'default';
- $_['text_banner_card']        = 'Listing Banner';
 $_['text_link_custom']        = 'Custom URL';
 $_['text_link_product']       = 'Product';
 $_['text_link_category']      = 'Category';
