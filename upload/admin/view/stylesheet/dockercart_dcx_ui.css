@@ -1869,7 +1869,7 @@ div.dcx-field.required > .dcx-label:before {
     gap: 4px 6px;
     padding: 4px;
     background: var(--dc-gray-100);
-    border-radius: var(--dc-radius-full);
+    border-radius: var(--dc-radius-xl);
     list-style: none;
     margin: 0 0 20px 0;
     flex-wrap: wrap;
@@ -1926,6 +1926,21 @@ div.dcx-field.required > .dcx-label:before {
 .dcx-pills--reports > li > a {
     padding: 7px 13px;
     white-space: nowrap;
+}
+
+/* Order timeline tabs: compact so both fit on one line */
+.dcx-pills--timeline {
+    flex-wrap: nowrap;
+}
+.dcx-pills--timeline > li > a {
+    font-size: 12px;
+    padding: 5px 10px;
+    gap: 5px;
+}
+.dcx-pills--timeline > li > a > i,
+.dcx-pills--timeline > li > a > svg {
+    width: 12px;
+    height: 12px;
 }
 
 
