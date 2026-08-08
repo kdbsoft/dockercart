@@ -11,6 +11,7 @@ $_['text_out_of_stock']  = 'Out Of Stock';
 $_['text_empty']    = 'You have not viewed any products yet.';
 $_['text_viewed_on'] = 'Viewed on';
 $_['text_call_for_price'] = 'Contact for price';
+$_['text_call_for_price_request'] = 'Request price';
 
 // Locale
 $_['date_format_short'] = 'm/d/Y';

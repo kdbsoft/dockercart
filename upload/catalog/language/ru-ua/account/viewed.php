@@ -9,6 +9,7 @@ $_['text_out_of_stock'] = 'Нет в наличии';
 $_['text_empty'] = 'Вы еще не просмотрели ни одного товара.';
 $_['text_viewed_on'] = 'Просмотрено';
 $_['text_call_for_price'] = 'Уточнить цену';
+$_['text_call_for_price_request'] = 'Запрос цены';
 
 // Locale
 $_['date_format_short'] = 'd/m/Y';

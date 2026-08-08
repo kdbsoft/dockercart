@@ -163,6 +163,14 @@ class ControllerBlogPost extends Controller {
 			$data['text_recommended_categories'] = $this->language->get('text_recommended_categories');
 			$data['text_recommended_manufacturers'] = $this->language->get('text_recommended_manufacturers');
 
+			// Call for price (recommended products)
+			$this->load->language('product/product');
+			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+			$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
+			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
+			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+			$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
+
 			// Recommended items
 			$data['recommended_products'] = array();
 			$recommended_products = $this->model_extension_module_dockercart_blog_post->getPostProducts($post_id);
@@ -192,7 +200,9 @@ class ControllerBlogPost extends Controller {
 					'name'       => $product['name'],
 					'description'=> utf8_substr(strip_tags(html_entity_decode($product['description'], ENT_QUOTES, 'UTF-8')), 0, 100) . '..',
 					'price'      => $price,
+					'price_raw'  => (float)$product['price'],
 					'special'    => $special,
+					'call_for_price' => !empty($product['call_for_price']),
 					'rating'     => $product['rating'],
 					'href'       => $this->url->link('product/product', 'product_id=' . $product['product_id'])
 				);
