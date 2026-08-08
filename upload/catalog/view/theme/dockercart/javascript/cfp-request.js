@@ -187,6 +187,21 @@
     }
   }
 
+  /**
+   * A phone is valid when it matches the country mask (if one is active)
+   * or, without a mask, contains at least 5 digits — mirroring the
+   * controller-side validatePhone().
+   */
+  function isPhoneValid(value) {
+    var input = modal.querySelector('#dc-cfp-telephone');
+    var fmt = t('telephone_mask', '');
+    if (input && input._phonemask_format) fmt = input._phonemask_format;
+    if (fmt && typeof window.DockercartPhoneMask !== 'undefined') {
+      return window.DockercartPhoneMask.validate(value, fmt);
+    }
+    return (value.replace(/\D/g, '').length >= 5);
+  }
+
   /* ── Open from trigger ────────────────────────────────────── */
 
   function openFromTrigger(btn) {
@@ -271,7 +286,7 @@
       setError(t('cfp_request_error_name', 'Please enter your name'));
       return;
     }
-    if (!/\d{5,}/.test(phone)) {
+    if (!isPhoneValid(phone)) {
       setError(t('cfp_request_error_phone', 'Please enter a valid phone number'));
       return;
     }
