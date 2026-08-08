@@ -159,7 +159,14 @@ $_['error_invoice_valid_days'] = 'Термін дії рахунку має бу
 $_['error_filetype'] = 'Недійсний тип файлу!';
 
 // Tab
-$_['tab_invoice']                   = 'Рахунок та організація';
+$_['tab_store']                      = 'Магазин';
+$_['tab_seo']                        = 'SEO';
+$_['tab_local']                      = 'Локальні';
+$_['tab_option']                     = 'Опції';
+$_['tab_image']                      = 'Зображення';
+$_['tab_mail']                       = 'Пошта';
+$_['tab_server']                     = 'Сервер';
+$_['tab_invoice']                    = 'Рахунок та організація';
 
 // Invoice sections
 $_['text_invoice']                  = 'Рахунок';
