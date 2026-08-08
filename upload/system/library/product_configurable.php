@@ -379,6 +379,30 @@ class ProductConfigurable {
 		return false;
 	}
 
+	/**
+	 * Aggregate stock for many products in one query.
+	 * Returns [product_id => ['variants_in_stock', 'total_variants']].
+	 */
+	public function getAggregatedStocksByProductIds(array $product_ids) {
+		$result = array();
+
+		if (empty($product_ids)) {
+			return $result;
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$query = $this->db->query("SELECT product_id, SUM(CASE WHEN quantity > 0 THEN 1 ELSE 0 END) AS variants_in_stock, COUNT(*) AS total_variants FROM " . DB_PREFIX . "product_variant WHERE product_id IN (" . implode(',', $ids) . ") AND status = '1' GROUP BY product_id");
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['product_id']] = array(
+				'variants_in_stock' => (int)$row['variants_in_stock'],
+				'total_variants'    => (int)$row['total_variants'],
+			);
+		}
+
+		return $result;
+	}
+
 	public function getAggregatedPriceRange($product_id, $customer_group_id = null) {
 		if ($customer_group_id !== null) {
 			$query = $this->db->query("SELECT MIN(COALESCE(cgp.price, pv.price)) AS min_price, MAX(COALESCE(cgp.price, pv.price)) AS max_price FROM " . DB_PREFIX . "product_variant pv LEFT JOIN " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pv.product_id = '" . (int)$product_id . "' AND pv.status = '1'");
@@ -567,6 +591,211 @@ class ProductConfigurable {
 
 	public function deleteAllVariantSpecials($variant_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id = '" . (int)$variant_id . "'");
+	}
+
+	/**
+	 * Bulk variant hydration for multiple products (N+1 killer for listings).
+	 * Returns:
+	 *   'configurable' => [product_id => configurable row (only is_configurable=1)]
+	 *   'options'      => [product_id => [axis rows with 'values' => [option_value rows]]]
+	 *   'variants'     => [product_id => [variant rows with 'values' => [value rows]]]
+	 */
+	public function getConfigurableDataByProductIds(array $product_ids) {
+		$result = array(
+			'configurable' => array(),
+			'options'      => array(),
+			'variants'     => array(),
+		);
+
+		if (empty($product_ids)) {
+			return $result;
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$in = implode(',', $ids);
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$config_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_configurable WHERE product_id IN (" . $in . ") AND is_configurable = '1'");
+
+		foreach ($config_query->rows as $row) {
+			$result['configurable'][(int)$row['product_id']] = $row;
+		}
+
+		if (empty($result['configurable'])) {
+			return $result;
+		}
+
+		$configurable_ids = array_keys($result['configurable']);
+
+		$options_query = $this->db->query("SELECT pco.product_id, pco.option_id, pco.position, o.type, od.name FROM " . DB_PREFIX . "product_configurable_option pco LEFT JOIN `" . DB_PREFIX . "option` o ON (pco.option_id = o.option_id) LEFT JOIN " . DB_PREFIX . "option_description od ON (o.option_id = od.option_id) WHERE pco.product_id IN (" . implode(',', $configurable_ids) . ") AND od.language_id = '" . $language_id . "' ORDER BY pco.product_id ASC, pco.position ASC");
+
+		$axis_option_ids = array();
+
+		foreach ($options_query->rows as $row) {
+			$pid = (int)$row['product_id'];
+			$result['options'][$pid][] = $row;
+			$axis_option_ids[$pid][] = (int)$row['option_id'];
+		}
+
+		// Axis option values: one query for all (product_id, option_id) pairs
+		$value_sql_parts = array();
+
+		foreach ($axis_option_ids as $pid => $option_ids) {
+			foreach ($option_ids as $oid) {
+				$value_sql_parts[] = "(pov.product_id = '" . $pid . "' AND pov.option_id = '" . $oid . "')";
+			}
+		}
+
+		if (!empty($value_sql_parts)) {
+			$values_query = $this->db->query("SELECT pov.product_id, pov.option_id, ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE (" . implode(' OR ', $value_sql_parts) . ") AND ovd.language_id = '" . $language_id . "' ORDER BY ov.sort_order ASC, ov.option_value_id ASC");
+
+			$values_by_key = array();
+
+			foreach ($values_query->rows as $row) {
+				$values_by_key[(int)$row['product_id'] . ':' . (int)$row['option_id']][] = array(
+					'option_value_id' => (int)$row['option_value_id'],
+					'name'            => $row['name'],
+					'color_code'      => $row['color_code'],
+				);
+			}
+
+			foreach ($result['options'] as $pid => &$axes) {
+				foreach ($axes as &$axis) {
+					$key = $pid . ':' . (int)$axis['option_id'];
+					$axis['values'] = isset($values_by_key[$key]) ? $values_by_key[$key] : array();
+				}
+				unset($axis);
+			}
+			unset($axes);
+		}
+
+		// Variants + values
+		$variants_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE product_id IN (" . implode(',', $configurable_ids) . ") ORDER BY product_id ASC, sort_order ASC, variant_id ASC");
+
+		$variant_ids = array();
+
+		foreach ($variants_query->rows as $row) {
+			$result['variants'][(int)$row['product_id']][] = $row;
+			$variant_ids[] = (int)$row['variant_id'];
+		}
+
+		if (!empty($variant_ids)) {
+			$values_query = $this->db->query("SELECT pvv.*, ovd.name FROM " . DB_PREFIX . "product_variant_value pvv LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (pvv.option_value_id = ovd.option_value_id) WHERE pvv.variant_id IN (" . implode(',', $variant_ids) . ") AND ovd.language_id = '" . $language_id . "' ORDER BY pvv.variant_id ASC, pvv.option_id ASC");
+
+			$values_by_variant = array();
+
+			foreach ($values_query->rows as $row) {
+				$values_by_variant[(int)$row['variant_id']][] = $row;
+			}
+
+			foreach ($result['variants'] as &$variants) {
+				foreach ($variants as &$variant) {
+					$variant['values'] = isset($values_by_variant[(int)$variant['variant_id']]) ? $values_by_variant[(int)$variant['variant_id']] : array();
+				}
+				unset($variant);
+			}
+			unset($variants);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Variant defaults for many products in one query.
+	 * Returns [product_id => variant row (with 'values')].
+	 */
+	public function getDefaultVariantsByProductIds(array $product_ids) {
+		$result = array();
+
+		if (empty($product_ids)) {
+			return $result;
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$config_query = $this->db->query("SELECT product_id, default_variant_id FROM " . DB_PREFIX . "product_configurable WHERE product_id IN (" . implode(',', $ids) . ") AND default_variant_id IS NOT NULL AND default_variant_id > 0");
+
+		$variant_ids = array();
+		$variant_by_product = array();
+
+		foreach ($config_query->rows as $row) {
+			$vid = (int)$row['default_variant_id'];
+			$variant_by_product[(int)$row['product_id']] = $vid;
+			$variant_ids[] = $vid;
+		}
+
+		if (empty($variant_ids)) {
+			return $result;
+		}
+
+		$variants_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
+
+		$variant_rows = array();
+
+		foreach ($variants_query->rows as $row) {
+			$variant_rows[(int)$row['variant_id']] = $row;
+		}
+
+		$values_query = $this->db->query("SELECT pvv.*, ovd.name FROM " . DB_PREFIX . "product_variant_value pvv LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (pvv.option_value_id = ovd.option_value_id) WHERE pvv.variant_id IN (" . implode(',', $variant_ids) . ") AND ovd.language_id = '" . $language_id . "' ORDER BY pvv.variant_id ASC, pvv.option_id ASC");
+
+		$values_by_variant = array();
+
+		foreach ($values_query->rows as $row) {
+			$values_by_variant[(int)$row['variant_id']][] = $row;
+		}
+
+		foreach ($variant_by_product as $pid => $vid) {
+			if (isset($variant_rows[$vid])) {
+				$variant = $variant_rows[$vid];
+				$variant['values'] = isset($values_by_variant[$vid]) ? $values_by_variant[$vid] : array();
+				$result[$pid] = $variant;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Bulk variant pricing data for many products (3 queries total).
+	 * Returns:
+	 *   'cg_prices'  => [product_id => [variant_id => price]]  (only current customer group)
+	 *   'specials'   => [variant_id => [active special rows]]
+	 *   'discounts'  => [variant_id => [discount rows]]
+	 */
+	public function getVariantPricingByProductIds(array $product_ids, $customer_group_id = 0) {
+		$result = array(
+			'cg_prices' => array(),
+			'specials'  => array(),
+			'discounts' => array(),
+		);
+
+		if (empty($product_ids)) {
+			return $result;
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$in = implode(',', $ids);
+
+		$cg_query = $this->db->query("SELECT pv.product_id, cgp.variant_id, cgp.price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp INNER JOIN " . DB_PREFIX . "product_variant pv ON (cgp.variant_id = pv.variant_id) WHERE pv.product_id IN (" . $in . ") AND cgp.customer_group_id = '" . (int)$customer_group_id . "'");
+
+		foreach ($cg_query->rows as $row) {
+			$result['cg_prices'][(int)$row['product_id']][(int)$row['variant_id']] = (float)$row['price'];
+		}
+
+		$specials_query = $this->db->query("SELECT vs.*, pv.product_id FROM " . DB_PREFIX . "dockercart_product_variant_special vs INNER JOIN " . DB_PREFIX . "product_variant pv ON (vs.variant_id = pv.variant_id) WHERE pv.product_id IN (" . $in . ")");
+
+		foreach ($specials_query->rows as $row) {
+			$result['specials'][(int)$row['variant_id']][] = $row;
+		}
+
+		$discounts_query = $this->db->query("SELECT vd.*, pv.product_id FROM " . DB_PREFIX . "dockercart_product_variant_discount vd INNER JOIN " . DB_PREFIX . "product_variant pv ON (vd.variant_id = pv.variant_id) WHERE pv.product_id IN (" . $in . ") ORDER BY vd.quantity ASC, vd.priority ASC");
+
+		foreach ($discounts_query->rows as $row) {
+			$result['discounts'][(int)$row['variant_id']][] = $row;
+		}
+
+		return $result;
 	}
 
 	public function getVariantsDiscounts($product_id) {

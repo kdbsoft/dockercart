@@ -89,11 +89,21 @@ final class Tax {
 	}
 
 	public function getRateName($tax_rate_id) {
+		static $rate_names = array();
+
+		if (array_key_exists($tax_rate_id, $rate_names)) {
+			return $rate_names[$tax_rate_id];
+		}
+
 		$tax_query = $this->db->query("SELECT name FROM " . DB_PREFIX . "tax_rate WHERE tax_rate_id = '" . (int)$tax_rate_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 		if ($tax_query->num_rows) {
+			$rate_names[$tax_rate_id] = $tax_query->row['name'];
+
 			return $tax_query->row['name'];
 		} else {
+			$rate_names[$tax_rate_id] = false;
+
 			return false;
 		}
 	}

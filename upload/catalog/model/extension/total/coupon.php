@@ -51,21 +51,32 @@ class ModelExtensionTotalCoupon extends Model {
 			$product_data = array();
 
 			if ($coupon_product_data || $coupon_category_data) {
-				foreach ($this->cart->getProducts() as $product) {
+				$cart_products = $this->cart->getProducts();
+
+				// Bulk: which cart products belong to the coupon categories (one query instead of N×M)
+				$matched_product_ids = array();
+
+				if ($coupon_category_data) {
+					$cart_product_ids = array_map('intval', array_column($cart_products, 'product_id'));
+
+					if ($cart_product_ids) {
+						$coupon_category_query = $this->db->query("SELECT DISTINCT p2c.product_id FROM `" . DB_PREFIX . "product_to_category` p2c WHERE p2c.product_id IN (" . implode(',', $cart_product_ids) . ") AND p2c.category_id IN (" . implode(',', array_map('intval', $coupon_category_data)) . ")");
+
+						foreach ($coupon_category_query->rows as $row) {
+							$matched_product_ids[(int)$row['product_id']] = true;
+						}
+					}
+				}
+
+				foreach ($cart_products as $product) {
 					if (in_array($product['product_id'], $coupon_product_data)) {
 						$product_data[] = $product['product_id'];
 
 						continue;
 					}
 
-					foreach ($coupon_category_data as $category_id) {
-						$coupon_category_query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "product_to_category` WHERE `product_id` = '" . (int)$product['product_id'] . "' AND category_id = '" . (int)$category_id . "'");
-
-						if ($coupon_category_query->row['total']) {
-							$product_data[] = $product['product_id'];
-
-							continue;
-						}
+					if (isset($matched_product_ids[(int)$product['product_id']])) {
+						$product_data[] = $product['product_id'];
 					}
 				}
 

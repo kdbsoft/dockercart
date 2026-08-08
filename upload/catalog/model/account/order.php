@@ -176,6 +176,28 @@ class ModelAccountOrder extends Model {
 		return $query->rows;
 	}
 
+	/**
+	 * Bulk order options for many order product lines (N+1 killer).
+	 * Returns [order_product_id => [option rows]].
+	 */
+	public function getOrderOptionsByOrderProductIds($order_id, array $order_product_ids) {
+		if (empty($order_product_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_product_ids)));
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id IN (" . implode(',', $ids) . ")");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_product_id']][] = $row;
+		}
+
+		return $result;
+	}
+
 	public function getOrderVouchers($order_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_voucher` WHERE order_id = '" . (int)$order_id . "'");
 
@@ -206,9 +228,53 @@ class ModelAccountOrder extends Model {
 		return $query->row['total'];
 	}
 
+	/**
+	 * Bulk product counts for many orders (N+1 killer).
+	 * Returns [order_id => count].
+	 */
+	public function getTotalOrderProductsByOrderIds(array $order_ids) {
+		if (empty($order_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_ids)));
+
+		$query = $this->db->query("SELECT order_id, COUNT(*) AS total FROM " . DB_PREFIX . "order_product WHERE order_id IN (" . implode(',', $ids) . ") GROUP BY order_id");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_id']] = (int)$row['total'];
+		}
+
+		return $result;
+	}
+
 	public function getTotalOrderVouchersByOrderId($order_id) {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order_voucher` WHERE order_id = '" . (int)$order_id . "'");
 
 		return $query->row['total'];
+	}
+
+	/**
+	 * Bulk voucher counts for many orders (N+1 killer).
+	 * Returns [order_id => count].
+	 */
+	public function getTotalOrderVouchersByOrderIds(array $order_ids) {
+		if (empty($order_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_ids)));
+
+		$query = $this->db->query("SELECT order_id, COUNT(*) AS total FROM `" . DB_PREFIX . "order_voucher` WHERE order_id IN (" . implode(',', $ids) . ") GROUP BY order_id");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_id']] = (int)$row['total'];
+		}
+
+		return $result;
 	}
 }
