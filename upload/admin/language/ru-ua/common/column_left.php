@@ -78,5 +78,5 @@ $_['text_user_group'] = 'Группы пользователей';
 $_['text_users'] = 'Пользователи';
 $_['text_voucher'] = 'Подарочные сертификаты';
 $_['text_voucher_theme'] = 'Темы оформления ваучеров';
-$_['text_weight_class'] = 'Весовые категории';
+$_['text_weight_class'] = 'Классы веса';
 $_['text_zone'] = 'Зоны';
