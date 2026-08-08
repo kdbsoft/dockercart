@@ -1756,6 +1756,10 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 	cursor: pointer;
 }
 
+.tree-folder-icon[data-lucide="folder-lock"] {
+	color: var(--dc-text-muted);
+}
+
 .tree-item.active .tree-folder-icon,
 .sidebar-tree li.active > .tree-item .tree-folder-icon {
 	color: var(--dc-warning-hover);
