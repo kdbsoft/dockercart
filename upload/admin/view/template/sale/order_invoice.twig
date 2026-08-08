@@ -60,6 +60,15 @@
     .note { margin-top: 14px; border-left: 2px solid #e2e8f0; padding-left: 10px; }
     .note h3 { border: 0; padding: 0; margin-bottom: 4px; }
     .note p { font-size: 8.5pt; color: #475569; line-height: 1.6; }
+    .signature-block { margin-top: 28px; }
+    .signature-title { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #0f172a; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+    .signature-table td { vertical-align: bottom; padding: 0; }
+    .signature-left { width: 40%; }
+    .signature-right { width: 60%; }
+    .signature-img { max-height: 60px; max-width: 160px; display: inline-block; }
+    .stamp-img { max-height: 70px; max-width: 120px; margin-left: 14px; display: inline-block; }
+    .sig-line { font-size: 9pt; color: #334155; }
+    .sig-line strong { color: #0f172a; }
     .page-foot { margin-top: 22px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; color: #94a3b8; font-size: 7pt; line-height: 1.6; }
     .page-foot strong { color: #64748b; font-weight: 700; }
   </style>
@@ -198,6 +207,25 @@
     <div class="note">
       <h3>{{ text_comment }}</h3>
       <p>{{ order.comment|nl2br }}</p>
+    </div>
+    {% endif %}
+
+    {% if order.seller_officer or order.seller_officer_role or order.seller_signature_image or order.seller_stamp_image %}
+    <div class="signature-block">
+      <div class="signature-title">{{ text_invoice_signature }}</div>
+      <table class="signature-table">
+        <tr>
+          <td class="signature-left">
+            {% if order.seller_signature_image %}<img src="{{ order.seller_signature_image }}" class="signature-img" alt="">{% endif %}
+            {% if order.seller_stamp_image %}<img src="{{ order.seller_stamp_image }}" class="stamp-img" alt="">{% endif %}
+          </td>
+          <td class="signature-right">
+            {% if order.seller_officer or order.seller_officer_role %}
+            <div class="sig-line">{% if order.seller_officer_role %}<span class="muted">{{ order.seller_officer_role }}:</span> {% endif %}<strong>{{ order.seller_officer }}</strong></div>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
     </div>
     {% endif %}
 

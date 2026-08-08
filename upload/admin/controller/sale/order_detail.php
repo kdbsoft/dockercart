@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
-	private const INVOICE_RENDER_VERSION = 'qr-v3';
+	private const INVOICE_RENDER_VERSION = 'qr-v4';
 
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;
@@ -502,6 +502,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['store_url'] = $order_info['store_id'] == 0
 			? ($this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG)
 			: $order_info['store_url'];
+		$data['seller_logo'] = $this->sellerLogoPath();
 		$data['date_added'] = date($this->language->get('datetime_format'), strtotime($order_info['date_added']));
 		$data['firstname'] = $order_info['firstname'];
 		$data['lastname'] = $order_info['lastname'];
@@ -656,8 +657,11 @@ class ControllerSaleOrderDetail extends Controller {
 			'payer_company'    => $payer_company,
 		];
 
-		$logo = $this->config->get('config_seller_invoice_logo');
-		$data['seller_logo'] = $logo ? DIR_IMAGE . $logo : '';
+		$data['seller_logo'] = $this->sellerLogoPath();
+		$data['seller_officer'] = (string)$this->config->get('config_seller_officer');
+		$data['seller_officer_role'] = (string)$this->config->get('config_seller_officer_role');
+		$data['seller_signature_image'] = $this->invoiceImagePath('signature');
+		$data['seller_stamp_image'] = $this->invoiceImagePath('stamp');
 
 		$data['firstname'] = $order_info['firstname'];
 		$data['lastname'] = $order_info['lastname'];
@@ -722,6 +726,41 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->sendStoredPdfFromBytes($this->renderPdf($html), $filename);
 	}
 
+	/**
+	 * Absolute local path of the invoice logo (config_seller_invoice_logo),
+	 * read by dompdf from disk. Empty when not set.
+	 */
+	private function sellerLogoPath(): string {
+		$logo = $this->config->get('config_seller_invoice_logo');
+
+		if (!$logo || !is_file(DIR_IMAGE . $logo)) {
+			return '';
+		}
+
+		return DIR_IMAGE . $logo;
+	}
+
+	/**
+	 * Absolute local path of a protected invoice image (signature/stamp)
+	 * stored outside the webroot in DIR_STORAGE . 'documents/signature/'.
+	 * Empty when not set.
+	 */
+	private function invoiceImagePath(string $name): string {
+		$filename = basename((string)$this->config->get('config_seller_' . $name . '_image'));
+
+		if ($filename === '' || $filename === '.' || $filename === '..') {
+			return '';
+		}
+
+		$path = DIR_STORAGE . 'documents/signature/' . $filename;
+
+		if (!is_file($path)) {
+			return '';
+		}
+
+		return $path;
+	}
+
 	private function renderPdf(string $html): string {
 		$options = new \Dompdf\Options();
 		$options->set('isRemoteEnabled', false);
@@ -735,7 +774,11 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$options->set('fontDir', $font_cache);
 		$options->set('fontCache', $font_cache);
-		$options->set('chroot', [realpath(DIR_IMAGE) ?: DIR_IMAGE, realpath(DIR_SYSTEM . 'fonts/arial') ?: DIR_SYSTEM . 'fonts/arial']);
+		$options->set('chroot', [
+			realpath(DIR_IMAGE) ?: DIR_IMAGE,
+			realpath(DIR_SYSTEM . 'fonts/arial') ?: DIR_SYSTEM . 'fonts/arial',
+			realpath(DIR_STORAGE . 'documents/signature') ?: DIR_STORAGE . 'documents/signature',
+		]);
 
 		$dompdf = new \Dompdf\Dompdf($options);
 		$this->registerArialFonts($dompdf);
