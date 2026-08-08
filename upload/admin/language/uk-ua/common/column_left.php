@@ -136,5 +136,5 @@ $_['text_user_group'] = 'Групи користувачів';
 $_['text_users'] = 'Користувачі';
 $_['text_voucher'] = 'Подарункові сертифікати';
 $_['text_voucher_theme'] = 'Теми ваучерів';
-$_['text_weight_class'] = 'Вагові категорії';
+$_['text_weight_class'] = 'Класи ваги';
 $_['text_zone'] = 'Зони';
