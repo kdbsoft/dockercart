@@ -325,8 +325,10 @@
                           <span data-toggle="tooltip" title="{{ help_symbol_left_space }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                         </label>
                         <label class="dcx-checkbox-label">
-                          <input type="hidden" name="config_symbol_right_space" value="0" />
-                          <input type="checkbox" name="config_symbol_right_space" value="1"{% if config_symbol_right_space %} checked="checked"{% endif %}> {{ entry_symbol_right_space }}
+                          {% if not config_symbol_right_space %}
+                            <input type="hidden" name="config_symbol_right_space" value="1" />
+                          {% endif %}
+                          <input type="checkbox" name="config_symbol_right_space" value="0"{% if not config_symbol_right_space %} checked="checked"{% endif %}> {{ entry_symbol_right_space }}
                           <span data-toggle="tooltip" title="{{ help_symbol_right_space }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                         </label>
                       </div>
