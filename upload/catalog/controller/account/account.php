@@ -19,9 +19,11 @@ class ControllerAccountAccount extends Controller {
 		$recent_orders = $this->model_account_order->getOrders(0, 3);
 
 		if ($recent_orders) {
+			$products_count = $this->model_account_order->getTotalOrderProductsByOrderIds(array_map('intval', array_column($recent_orders, 'order_id')));
+
 			foreach ($recent_orders as &$order) {
 				$order['view'] = $this->url->link('account/order/info', 'order_id=' . $order['order_id'], true);
-				$order['products'] = $this->model_account_order->getTotalOrderProductsByOrderId($order['order_id']);
+				$order['products'] = isset($products_count[(int)$order['order_id']]) ? $products_count[(int)$order['order_id']] : 0;
 				$order['total'] = $this->currency->format($order['total'], $order['currency_code'], $order['currency_value']);
 				$order['date_added'] = date($this->language->get('datetime_format'), strtotime($order['date_added']));
 			}

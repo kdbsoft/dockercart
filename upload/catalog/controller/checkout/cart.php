@@ -184,8 +184,10 @@ class ControllerCheckoutCart extends Controller {
 			$data['gifts'] = array();
 			$cart_products = $this->cart->getProducts();
 
+			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, 'product_id'));
+
 			foreach ($cart_products as $product) {
-				$gifts = $this->model_catalog_product->getProductGifts($product['product_id']);
+				$gifts = isset($gifts_map[(int)$product['product_id']]) ? $gifts_map[(int)$product['product_id']] : array();
 
 				foreach ($gifts as $gift) {
 					if ($product['quantity'] >= (int)$gift['minimum_quantity']) {
@@ -518,8 +520,10 @@ class ControllerCheckoutCart extends Controller {
 			if (count($bundle_products) >= 2) {
 				$this->load->model('catalog/product');
 
+				$bundle_products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($bundle_products, 'product_id')));
+
 				foreach ($bundle_products as $bp) {
-					$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+					$product_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
 
 					if ($product_info) {
 						if (!empty($product_info['call_for_price'])) {

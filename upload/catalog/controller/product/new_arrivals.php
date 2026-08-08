@@ -108,6 +108,12 @@ class ControllerProductNewArrivals extends Controller {
 
 		$results = $this->model_catalog_product->getNewArrivalProducts($filter_data, 90);
 
+		$category_names_map = array();
+
+		if ($results) {
+			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+		}
+
 		foreach ($results as $result) {
 			if ($result['image']) {
 				$image = $this->model_tool_image->resize(
@@ -178,14 +184,9 @@ class ControllerProductNewArrivals extends Controller {
 			}
 
 				$category_name = '';
-				$product_categories = $this->model_catalog_product->getCategories($result['product_id']);
 
-				if (!empty($product_categories[0]['category_id'])) {
-					$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-
-					if ($category_info && !empty($category_info['name'])) {
-						$category_name = $category_info['name'];
-					}
+				if (isset($category_names_map[(int)$result['product_id']])) {
+					$category_name = $category_names_map[(int)$result['product_id']]['name'];
 				}
 
 			$days_since_added = 90;
@@ -435,6 +436,12 @@ class ControllerProductNewArrivals extends Controller {
 		$product_total = $this->model_catalog_product->getTotalNewArrivalProducts(90);
 		$results       = $this->model_catalog_product->getNewArrivalProducts($filter_data, 90);
 
+		$category_names_map = array();
+
+		if ($results) {
+			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+		}
+
 		$wishlist_ids = array();
 		if ($this->customer->isLogged()) {
 			$this->load->model('account/wishlist');
@@ -490,12 +497,9 @@ class ControllerProductNewArrivals extends Controller {
 			}
 
 			$category_name = '';
-			$product_categories = $this->model_catalog_product->getCategories($result['product_id']);
-			if (!empty($product_categories[0]['category_id'])) {
-				$cat_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-				if ($cat_info && !empty($cat_info['name'])) {
-					$category_name = $cat_info['name'];
-				}
+
+			if (isset($category_names_map[(int)$result['product_id']])) {
+				$category_name = $category_names_map[(int)$result['product_id']]['name'];
 			}
 
 			$days_since_added = 90;

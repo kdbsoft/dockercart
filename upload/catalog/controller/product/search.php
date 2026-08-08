@@ -527,6 +527,12 @@ class ControllerProductSearch extends Controller {
 			$data['text_all_categories'] = $this->language->get('text_all_categories');
 			$data['text_back_to'] = $this->language->get('text_back_to');
 
+			$category_names_map = array();
+
+			if ($results) {
+				$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
@@ -605,9 +611,25 @@ class ControllerProductSearch extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
+				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 			);
 		}
+
+			// When a category filter is active, label each product with its direct
+			// subcategory (next level deeper); hide the label when there is none.
+			if ((int)$category_id > 0 && !empty($data['products'])) {
+				$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($data['products'], 'product_id'), (int)$category_id);
+
+				foreach ($data['products'] as &$prod) {
+					if (isset($subcategory_map[(int)$prod['product_id']])) {
+						$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+					} else {
+						$prod['category'] = '';
+					}
+				}
+				unset($prod);
+			}
 
 			$url = '';
 
@@ -909,6 +931,7 @@ class ControllerProductSearch extends Controller {
 	 */
 	public function loadmore() {
 		$this->load->language('product/search');
+		$this->load->model('catalog/category');
 		$this->load->model('catalog/product');
 		$this->load->model('tool/image');
 
@@ -983,6 +1006,13 @@ class ControllerProductSearch extends Controller {
 		}
 
 		$products = array();
+
+		$category_names_map = array();
+
+		if ($results) {
+			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+		}
+
 		foreach ($results as $result) {
 			$image = $result['image']
 				? $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'))
@@ -1043,9 +1073,24 @@ class ControllerProductSearch extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
-				'category'    => '',
+				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
 			);
+		}
+
+		// When a category filter is active, label each product with its direct
+		// subcategory (next level deeper); hide the label when there is none.
+		if ((int)$category_id > 0 && !empty($products)) {
+			$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($products, 'product_id'), (int)$category_id);
+
+			foreach ($products as &$prod) {
+				if (isset($subcategory_map[(int)$prod['product_id']])) {
+					$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+				} else {
+					$prod['category'] = '';
+				}
+			}
+			unset($prod);
 		}
 
 		$html = '';

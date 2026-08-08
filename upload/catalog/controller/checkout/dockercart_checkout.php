@@ -65,14 +65,15 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         // Check minimum quantity requirements
         $products = $this->cart->getProducts();
+
+        $product_totals = [];
+
         foreach ($products as $product) {
-            $product_total = 0;
-            foreach ($products as $product_2) {
-                if ($product_2["product_id"] == $product["product_id"]) {
-                    $product_total += $product_2["quantity"];
-                }
-            }
-            if ($product["minimum"] > $product_total) {
+            $product_totals[(int)$product["product_id"]] = isset($product_totals[(int)$product["product_id"]]) ? $product_totals[(int)$product["product_id"]] + $product["quantity"] : $product["quantity"];
+        }
+
+        foreach ($products as $product) {
+            if ($product["minimum"] > $product_totals[(int)$product["product_id"]]) {
                 $this->response->redirect($this->url->link("checkout/cart"));
                 return;
             }
@@ -681,9 +682,12 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $cart_id = (int) $data["cart_id"];
             $quantity = $this->dcNormalizeQuantity($data["quantity"], 0);
 
+            // Snapshot the cart before the mutation for validation
+            $cart_products_before = $this->cart->getProducts();
+
             $cart_products = [];
 
-            foreach ($this->cart->getProducts() as $cart_product) {
+            foreach ($cart_products_before as $cart_product) {
                 $cart_products[$cart_product["cart_id"]] = $cart_product;
             }
 
@@ -2198,8 +2202,10 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $this->load->language("product/product");
         $text_gift = $this->language->get("text_gift");
 
+        $gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, "product_id"));
+
         foreach ($cart_products as $cart_product) {
-            $gifts = $this->model_catalog_product->getProductGifts($cart_product["product_id"]);
+            $gifts = isset($gifts_map[(int)$cart_product["product_id"]]) ? $gifts_map[(int)$cart_product["product_id"]] : [];
 
             foreach ($gifts as $gift) {
                 if ($cart_product["quantity"] >= (int)$gift["minimum_quantity"]) {
@@ -2472,9 +2478,11 @@ class ControllerCheckoutDockercartCheckout extends Controller
     {
         $this->load->model("tool/image");
 
+        $cart_products = $this->cart->getProducts();
+
         $products = [];
 
-        foreach ($this->cart->getProducts() as $product) {
+        foreach ($cart_products as $product) {
             $option_data = [];
 
             foreach ($product["option"] as $option) {
@@ -2542,7 +2550,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // BXGY per-item discounts
         $this->load->library("bxgy");
         $bxgy_lib = new Bxgy($this->registry);
-        $bxgy_discounts = $bxgy_lib->getPerProductDiscounts($this->cart->getProducts());
+        $bxgy_discounts = $bxgy_lib->getPerProductDiscounts($cart_products);
 
         foreach ($products as &$product) {
             $pid = (int) $product["product_id"];
@@ -2589,8 +2597,11 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         $gifts = [];
 
-        foreach ($this->cart->getProducts() as $product) {
-            $product_gifts = $this->model_catalog_product->getProductGifts($product["product_id"]);
+        $cart_products = $this->cart->getProducts();
+        $gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, "product_id"));
+
+        foreach ($cart_products as $product) {
+            $product_gifts = isset($gifts_map[(int)$product["product_id"]]) ? $gifts_map[(int)$product["product_id"]] : [];
 
             foreach ($product_gifts as $gift) {
                 if ($product["quantity"] >= (int)$gift["minimum_quantity"]) {

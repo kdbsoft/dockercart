@@ -32,8 +32,15 @@ class ControllerExtensionModuleBestSeller extends Controller {
 		}
 
 		if ($results) {
+			$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($results, 'product_id')));
+
+			$product_categories_map = array();
+			if ($products_info) {
+				$product_categories_map = $this->model_catalog_category->getProductCategoryNames(array_keys($products_info));
+			}
+
 			foreach ($results as $result) {
-				$product_info = $this->model_catalog_product->getProduct($result['product_id']);
+				$product_info = isset($products_info[(int)$result['product_id']]) ? $products_info[(int)$result['product_id']] : false;
 				if (!$product_info) {
 					continue;
 				}
@@ -91,15 +98,10 @@ class ControllerExtensionModuleBestSeller extends Controller {
 
 				$category_name = '';
 				$category_id = 0;
-				$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
-				if (!empty($product_categories[0]['category_id'])) {
-					$category_id = (int)$product_categories[0]['category_id'];
-					$category_info = $this->model_catalog_category->getCategory($category_id);
-
-					if ($category_info && !empty($category_info['name'])) {
-						$category_name = $category_info['name'];
-					}
+				if (isset($product_categories_map[(int)$product_info['product_id']])) {
+					$category_id = (int)$product_categories_map[(int)$product_info['product_id']]['category_id'];
+					$category_name = $product_categories_map[(int)$product_info['product_id']]['name'];
 				}
 
 				$data['products'][] = array(

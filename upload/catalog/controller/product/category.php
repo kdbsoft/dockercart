@@ -301,6 +301,12 @@ class ControllerProductCategory extends Controller {
 
 			$data['products'] = array();
 
+			$category_names_map = array();
+
+			if ($results) {
+				$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
@@ -379,30 +385,21 @@ class ControllerProductCategory extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
-					'category'    => '',
+					'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 					'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
 				);
 			}
 
-			// If category has subcategories, attach the direct subcategory name to each product (one batch query)
-			if (!empty($subcategory_ids) && !empty($data['products'])) {
-				$product_ids_list = implode(',', array_map('intval', array_column($data['products'], 'product_id')));
-				$subcat_ids_list  = implode(',', array_map('intval', array_keys($subcategory_ids)));
-				$subcat_query = $this->db->query(
-					"SELECT p2c.product_id, cd.name
-					 FROM `" . DB_PREFIX . "product_to_category` p2c
-					 LEFT JOIN `" . DB_PREFIX . "category_description` cd
-					        ON (p2c.category_id = cd.category_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "')
-					 WHERE p2c.category_id IN (" . $subcat_ids_list . ")
-					   AND p2c.product_id  IN (" . $product_ids_list . ")"
-				);
-				$product_subcategory = array();
-				foreach ($subcat_query->rows as $row) {
-					$product_subcategory[(int)$row['product_id']] = $row['name'];
-				}
+			// If category has subcategories, label each product with its direct
+			// subcategory (next level deeper); hide the label when there is none.
+			if (!empty($data['products'])) {
+				$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($data['products'], 'product_id'), $category_id);
+
 				foreach ($data['products'] as &$prod) {
-					if (isset($product_subcategory[$prod['product_id']])) {
-						$prod['category'] = $product_subcategory[$prod['product_id']];
+					if (isset($subcategory_map[(int)$prod['product_id']])) {
+						$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+					} else {
+						$prod['category'] = '';
 					}
 				}
 				unset($prod);
@@ -952,6 +949,13 @@ class ControllerProductCategory extends Controller {
 		}
 
 		$results  = $this->model_catalog_product->getProducts($filter_data);
+
+		$category_names_map = array();
+
+		if ($results) {
+			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
+		}
+
 		$products = array();
 
 		foreach ($results as $result) {
@@ -1017,9 +1021,24 @@ class ControllerProductCategory extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
-				'category'    => '',
+				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'href'        => $this->url->link('product/product', 'path=' . (isset($this->request->get['path']) ? $this->request->get['path'] : '') . '&product_id=' . $result['product_id'])
 			);
+		}
+
+		// Label each product with its direct subcategory (next level deeper);
+		// hide the label when there is none (mirror of index()).
+		if (!empty($products)) {
+			$subcategory_map = $this->model_catalog_category->getProductSubcategoryNames(array_column($products, 'product_id'), $category_id);
+
+			foreach ($products as &$prod) {
+				if (isset($subcategory_map[(int)$prod['product_id']])) {
+					$prod['category'] = $subcategory_map[(int)$prod['product_id']]['name'];
+				} else {
+					$prod['category'] = '';
+				}
+			}
+			unset($prod);
 		}
 
 		$banner_position = $page === 1 ? 5 : 3;

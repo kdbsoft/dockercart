@@ -37,16 +37,14 @@ class ControllerCheckoutConfirm extends Controller {
 		// Validate minimum quantity requirements.
 		$products = $this->cart->getProducts();
 
+		$product_totals = array();
+
 		foreach ($products as $product) {
-			$product_total = 0;
+			$product_totals[(int)$product['product_id']] = isset($product_totals[(int)$product['product_id']]) ? $product_totals[(int)$product['product_id']] + $product['quantity'] : $product['quantity'];
+		}
 
-			foreach ($products as $product_2) {
-				if ($product_2['product_id'] == $product['product_id']) {
-					$product_total += $product_2['quantity'];
-				}
-			}
-
-			if ($product['minimum'] > $product_total) {
+		foreach ($products as $product) {
+			if ($product['minimum'] > $product_totals[(int)$product['product_id']]) {
 				$redirect = $this->url->link('checkout/cart');
 
 				break;
@@ -263,8 +261,11 @@ class ControllerCheckoutConfirm extends Controller {
 			// Product Gifts
 			$this->load->model('catalog/product');
 
-			foreach ($this->cart->getProducts() as $cart_product) {
-				$gifts = $this->model_catalog_product->getProductGifts($cart_product['product_id']);
+			$cart_products_for_gifts = $this->cart->getProducts();
+			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products_for_gifts, 'product_id'));
+
+			foreach ($cart_products_for_gifts as $cart_product) {
+				$gifts = isset($gifts_map[(int)$cart_product['product_id']]) ? $gifts_map[(int)$cart_product['product_id']] : array();
 
 				foreach ($gifts as $gift) {
 					if ($cart_product['quantity'] >= (int)$gift['minimum_quantity']) {
@@ -431,8 +432,11 @@ class ControllerCheckoutConfirm extends Controller {
 
 			$data['gifts'] = array();
 
-			foreach ($this->cart->getProducts() as $cart_product) {
-				$gifts = $this->model_catalog_product->getProductGifts($cart_product['product_id']);
+			$cart_products_for_gifts_render = $this->cart->getProducts();
+			$gifts_map_render = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products_for_gifts_render, 'product_id'));
+
+			foreach ($cart_products_for_gifts_render as $cart_product) {
+				$gifts = isset($gifts_map_render[(int)$cart_product['product_id']]) ? $gifts_map_render[(int)$cart_product['product_id']] : array();
 
 				foreach ($gifts as $gift) {
 					if ($cart_product['quantity'] >= (int)$gift['minimum_quantity']) {

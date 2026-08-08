@@ -57,7 +57,26 @@ class ControllerCommonCart extends Controller {
 
 		$data['products'] = array();
 
-		foreach ($this->cart->getProducts() as $product) {
+		$cart_products = $this->cart->getProducts();
+
+		// Bulk lookup for file-option upload names (one query instead of per option)
+		$upload_codes = array();
+
+		foreach ($cart_products as $product) {
+			foreach ($product['option'] as $option) {
+				if ($option['type'] == 'file') {
+					$upload_codes[$option['value']] = true;
+				}
+			}
+		}
+
+		$upload_names = array();
+
+		if ($upload_codes) {
+			$upload_names = $this->model_tool_upload->getUploadNamesByCodes(array_keys($upload_codes));
+		}
+
+		foreach ($cart_products as $product) {
 			if ($product['image']) {
 				$image = $this->model_tool_image->resize($product['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));
 			} else {
@@ -70,13 +89,7 @@ class ControllerCommonCart extends Controller {
 				if ($option['type'] != 'file') {
 					$value = $option['value'];
 				} else {
-					$upload_info = $this->model_tool_upload->getUploadByCode($option['value']);
-
-					if ($upload_info) {
-						$value = $upload_info['name'];
-					} else {
-						$value = '';
-					}
+					$value = isset($upload_names[$option['value']]) ? $upload_names[$option['value']] : '';
 				}
 
 				$option_data[] = array(
@@ -131,8 +144,11 @@ class ControllerCommonCart extends Controller {
 
 		$data['gifts'] = array();
 
-		foreach ($this->cart->getProducts() as $product) {
-			$gifts = $this->model_catalog_product->getProductGifts($product['product_id']);
+		$cart_products = $this->cart->getProducts();
+		$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, 'product_id'));
+
+		foreach ($cart_products as $product) {
+			$gifts = isset($gifts_map[(int)$product['product_id']]) ? $gifts_map[(int)$product['product_id']] : array();
 
 			foreach ($gifts as $gift) {
 				if ($product['quantity'] >= (int)$gift['minimum_quantity']) {

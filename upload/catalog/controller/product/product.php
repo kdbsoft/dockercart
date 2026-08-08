@@ -589,7 +589,8 @@ class ControllerProductProduct extends Controller {
 				);
 			}
 
-			$gifts = $this->model_catalog_product->getProductGifts($product_id);
+			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array((int)$product_id));
+			$gifts = isset($gifts_map[(int)$product_id]) ? $gifts_map[(int)$product_id] : array();
 
 			$data['gifts'] = array();
 
@@ -617,8 +618,16 @@ class ControllerProductProduct extends Controller {
 			$bxgy_rules = $this->model_catalog_product->getProductBxgy($product_id);
 			$data['bxgy_rules'] = array();
 
+			$reward_ids = array();
+
 			foreach ($bxgy_rules as $rule) {
-				$reward_info = $this->model_catalog_product->getProduct($rule['reward_product_id']);
+				$reward_ids[] = (int)$rule['reward_product_id'];
+			}
+
+			$rewards_info = $reward_ids ? $this->model_catalog_product->getProductsByIds($reward_ids) : array();
+
+			foreach ($bxgy_rules as $rule) {
+				$reward_info = isset($rewards_info[(int)$rule['reward_product_id']]) ? $rewards_info[(int)$rule['reward_product_id']] : false;
 
 				if (!$reward_info) {
 					continue;
@@ -752,6 +761,43 @@ class ControllerProductProduct extends Controller {
 			$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
 			$customer_group_id = (int)$this->config->get('config_customer_group_id');
 			$variant_discounts = $pc->getVariantsDiscounts($product_id);
+			$variant_cg_prices = $pc->getVariantCustomerGroupPrices($product_id);
+			$variant_specials = $pc->getVariantsSpecials($product_id);
+
+			// Build per-variant lookup maps (bulk, no per-variant queries)
+			$cg_price_map = array();
+
+			foreach ($variant_cg_prices as $vid => $rows) {
+				foreach ($rows as $row) {
+					if ((int)$row['customer_group_id'] === $customer_group_id) {
+						$cg_price_map[$vid] = (float)$row['price'];
+					}
+				}
+			}
+
+			$variant_special_map = array();
+
+			foreach ($variant_specials as $vid => $rows) {
+				$best = null;
+
+				foreach ($rows as $vs) {
+					if ((int)$vs['customer_group_id'] !== $customer_group_id) {
+						continue;
+					}
+
+					if (!(($vs['date_start'] === '0000-00-00' || $vs['date_start'] < date('Y-m-d H:i:s')) && ($vs['date_end'] === '0000-00-00' || $vs['date_end'] > date('Y-m-d H:i:s')))) {
+						continue;
+					}
+
+					if ($best === null || (float)$vs['price'] < (float)$best['price']) {
+						$best = $vs;
+					}
+				}
+
+				if ($best !== null) {
+					$variant_special_map[$vid] = (float)$best['price'];
+				}
+			}
 
 			foreach ($variants as &$variant) {
 				$variant['discounts'] = array();
@@ -772,7 +818,8 @@ class ControllerProductProduct extends Controller {
 						);
 					}
 				}
-				$variant_cg_price = $pc->getVariantCustomerGroupPrice((int)$variant['variant_id'], $customer_group_id);
+
+				$variant_cg_price = isset($cg_price_map[(int)$variant['variant_id']]) ? $cg_price_map[(int)$variant['variant_id']] : null;
 
 				$effective_price = (float)$variant['price'];
 
@@ -781,7 +828,7 @@ class ControllerProductProduct extends Controller {
 					$variant['price'] = $variant_cg_price;
 				}
 
-				$variant_special_price = $pc->getVariantSpecialPrice((int)$variant['variant_id'], $customer_group_id);
+				$variant_special_price = isset($variant_special_map[(int)$variant['variant_id']]) ? $variant_special_map[(int)$variant['variant_id']] : null;
 
 				if ($variant_special_price !== null && $variant_special_price < $effective_price) {
 					$variant['special'] = $variant_special_price;
@@ -819,7 +866,7 @@ class ControllerProductProduct extends Controller {
 			unset($variant);
 
 			if (!empty($default_variant)) {
-				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], $customer_group_id);
+				$default_cg_price = isset($cg_price_map[(int)$default_variant['variant_id']]) ? $cg_price_map[(int)$default_variant['variant_id']] : null;
 
 				$default_effective_price = (float)$default_variant['price'];
 
@@ -828,7 +875,7 @@ class ControllerProductProduct extends Controller {
 					$default_variant['price'] = $default_cg_price;
 				}
 
-				$default_special_price = $pc->getVariantSpecialPrice((int)$default_variant['variant_id'], $customer_group_id);
+				$default_special_price = isset($variant_special_map[(int)$default_variant['variant_id']]) ? $variant_special_map[(int)$default_variant['variant_id']] : null;
 
 				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
 					$default_variant['special'] = $default_special_price;
@@ -1181,6 +1228,12 @@ class ControllerProductProduct extends Controller {
 
 			$results = $this->model_catalog_product->getProductRelated($product_id);
 
+			$related_category_map = array();
+
+			if ($results) {
+				$related_category_map = $this->model_catalog_category->getProductCategoryNames(array_keys($results));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
@@ -1243,12 +1296,8 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 				if (empty($category_name)) {
-					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
-					if (!empty($product_categories[0]['category_id'])) {
-						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-						if ($category_info && !empty($category_info['name'])) {
-							$category_name = $category_info['name'];
-						}
+					if (isset($related_category_map[(int)$result['product_id']])) {
+						$category_name = $related_category_map[(int)$result['product_id']]['name'];
 					}
 				}
 
@@ -1282,6 +1331,12 @@ class ControllerProductProduct extends Controller {
 
 			$results = $this->model_catalog_product->getProductUpsell($product_id);
 
+			$upsell_category_map = array();
+
+			if ($results) {
+				$upsell_category_map = $this->model_catalog_category->getProductCategoryNames(array_keys($results));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
@@ -1344,12 +1399,8 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 				if (empty($category_name)) {
-					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
-					if (!empty($product_categories[0]['category_id'])) {
-						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-						if ($category_info && !empty($category_info['name'])) {
-							$category_name = $category_info['name'];
-						}
+					if (isset($upsell_category_map[(int)$result['product_id']])) {
+						$category_name = $upsell_category_map[(int)$result['product_id']]['name'];
 					}
 				}
 
@@ -1383,6 +1434,12 @@ class ControllerProductProduct extends Controller {
 
 			$results = $this->model_catalog_product->getProductAccessory($product_id);
 
+			$accessory_category_map = array();
+
+			if ($results) {
+				$accessory_category_map = $this->model_catalog_category->getProductCategoryNames(array_keys($results));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
@@ -1445,12 +1502,8 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 				if (empty($category_name)) {
-					$product_categories = $this->model_catalog_product->getCategories((int)$result['product_id']);
-					if (!empty($product_categories[0]['category_id'])) {
-						$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-						if ($category_info && !empty($category_info['name'])) {
-							$category_name = $category_info['name'];
-						}
+					if (isset($accessory_category_map[(int)$result['product_id']])) {
+						$category_name = $accessory_category_map[(int)$result['product_id']]['name'];
 					}
 				}
 
@@ -1646,11 +1699,19 @@ class ControllerProductProduct extends Controller {
 		foreach ($bundle_results as $bundle) {
 			$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
 
+			$bundle_product_ids = array();
+
+			foreach ($bundle_products as $bp) {
+				$bundle_product_ids[] = (int)$bp['product_id'];
+			}
+
+			$bundle_products_info = $bundle_product_ids ? $this->model_catalog_product->getProductsByIds($bundle_product_ids) : array();
+
 			$products_data = array();
 			$original_total = 0;
 
 			foreach ($bundle_products as $bp) {
-				$bp_info = $this->model_catalog_product->getProduct($bp['product_id']);
+				$bp_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
 
 				if ($bp_info) {
 					$bp_price = (float)$bp_info['price'];
@@ -1690,7 +1751,7 @@ class ControllerProductProduct extends Controller {
 
 				$all_in_stock = true;
 				foreach ($bundle_products as $bp) {
-					$bp_stock_info = $this->model_catalog_product->getProduct($bp['product_id']);
+					$bp_stock_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
 					if ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
 						$all_in_stock = false;
 						break;
