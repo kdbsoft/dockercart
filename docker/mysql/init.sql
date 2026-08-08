@@ -1301,8 +1301,6 @@ CREATE TABLE `oc_category` (
   `image` varchar(255) DEFAULT NULL,
   `icon` varchar(255) DEFAULT NULL,
   `background_image` varchar(255) DEFAULT NULL,
-  `banner_image` varchar(255) DEFAULT NULL,
-  `banner_link` varchar(255) NOT NULL DEFAULT '',
   `parent_id` int(11) NOT NULL DEFAULT 0,
   `top` tinyint(1) NOT NULL,
   `column` int(11) NOT NULL,
@@ -1329,7 +1327,7 @@ INSERT INTO `oc_category` VALUES
 (105,'catalog/demo/demo-seed/categories/beauty-health.jpg',NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',NULL,'',0,1,1,5,1,'2026-03-03 08:51:06','2026-05-30 16:39:49'),
 (106,'catalog/demo/demo-seed/categories/toys-games.jpg',NULL,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg',NULL,'',0,1,1,6,1,'2026-03-03 08:51:07','2026-05-28 08:39:54'),
 (107,'catalog/demo/demo-seed/categories/books-media.jpg',NULL,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg',NULL,'',0,1,1,7,1,'2026-03-03 08:51:07','2026-05-28 08:40:14'),
-(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg','catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&amp;path=103',0,1,0,8,1,'2026-03-03 08:51:08','2026-07-23 15:20:37'),
+(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',0,1,0,8,1,'2026-03-03 08:51:08','2026-07-23 15:20:37'),
 (109,'catalog/demo/demo-seed/categories/pet-supplies.jpg',NULL,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg',NULL,'',0,1,1,9,1,'2026-03-03 08:51:09','2026-05-28 08:40:50'),
 (1101,'catalog/demo/demo-seed/categories/electronics-smartphones.jpg',NULL,NULL,NULL,'',101,0,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
 (1102,'catalog/demo/demo-seed/categories/electronics-laptops.jpg',NULL,NULL,NULL,'',101,0,1,2,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
@@ -1383,6 +1381,31 @@ CREATE TABLE `oc_category_description` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `oc_category_banner`
+--
+
+DROP TABLE IF EXISTS `oc_category_banner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_category_banner` (
+  `category_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `banner_image` varchar(255) DEFAULT NULL,
+  `banner_link` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`category_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_category_banner`
+--
+
+INSERT INTO `oc_category_banner` VALUES
+(108,1,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103'),
+(108,2,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103'),
+(108,3,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103');
 
 --
 -- Dumping data for table `oc_category_description`

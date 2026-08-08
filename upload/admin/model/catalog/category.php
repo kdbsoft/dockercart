@@ -17,17 +17,11 @@ class ModelCatalogCategory extends Model {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
 
-		if (isset($data['banner_image'])) {
-			$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_image = '" . $this->db->escape($data['banner_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
-		}
-
-		if (isset($data['banner_link'])) {
-			$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
-		}
-
 		if (isset($data['review_criteria_group_id'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET review_criteria_group_id = '" . (int)$data['review_criteria_group_id'] . "' WHERE category_id = '" . (int)$category_id . "'");
 		}
+
+		$this->saveCategoryBanners($category_id, $data);
 
 		foreach ($data['category_description'] as $language_id => $value) {
 			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
@@ -103,17 +97,11 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("UPDATE " . DB_PREFIX . "category SET background_image = '" . $this->db->escape($data['background_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
 	}
 
-	if (isset($data['banner_image'])) {
-		$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_image = '" . $this->db->escape($data['banner_image']) . "' WHERE category_id = '" . (int)$category_id . "'");
-	}
-
-	if (isset($data['banner_link'])) {
-		$this->db->query("UPDATE " . DB_PREFIX . "category SET banner_link = '" . $this->db->escape($data['banner_link']) . "' WHERE category_id = '" . (int)$category_id . "'");
-	}
-
 	if (isset($data['review_criteria_group_id'])) {
 		$this->db->query("UPDATE " . DB_PREFIX . "category SET review_criteria_group_id = '" . (int)$data['review_criteria_group_id'] . "' WHERE category_id = '" . (int)$category_id . "'");
 	}
+
+	$this->saveCategoryBanners($category_id, $data);
 
 	$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
 
@@ -241,6 +229,7 @@ class ModelCatalogCategory extends Model {
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_banner WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_store WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_layout WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE category_id = '" . (int)$category_id . "'");
@@ -291,8 +280,9 @@ class ModelCatalogCategory extends Model {
 		$data["status"] = $category["status"];
 		$data["image"] = $category["image"];
 		$data["background_image"] = $category["background_image"];
-		$data["banner_image"] = $category["banner_image"];
-		$data["banner_link"] = $category["banner_link"];
+		$data["category_banner"] = $this->getCategoryBanners(
+			$category_id,
+		);
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
@@ -363,8 +353,9 @@ class ModelCatalogCategory extends Model {
 		$data["status"] = $category["status"];
 		$data["image"] = $category["image"];
 		$data["background_image"] = $category["background_image"];
-		$data["banner_image"] = $category["banner_image"];
-		$data["banner_link"] = $category["banner_link"];
+		$data["category_banner"] = $this->getCategoryBanners(
+			$category_id,
+		);
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
@@ -591,6 +582,38 @@ class ModelCatalogCategory extends Model {
 		}
 
 		return $category_description_data;
+	}
+
+	public function getCategoryBanners($category_id) {
+		$category_banner_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_banner WHERE category_id = '" . (int)$category_id . "'");
+
+		foreach ($query->rows as $result) {
+			$category_banner_data[$result['language_id']] = array(
+				'enabled'      => !empty($result['banner_image']),
+				'banner_image' => $result['banner_image'],
+				'banner_link'  => $result['banner_link']
+			);
+		}
+
+		return $category_banner_data;
+	}
+
+	private function saveCategoryBanners($category_id, $data) {
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_banner WHERE category_id = '" . (int)$category_id . "'");
+
+		if (!isset($data['category_banner'])) {
+			return;
+		}
+
+		foreach ($data['category_banner'] as $language_id => $value) {
+			if (empty($value['enabled']) || (empty($value['banner_image']) && empty($value['banner_link']))) {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "category_banner SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', banner_image = '" . $this->db->escape(isset($value['banner_image']) ? $value['banner_image'] : '') . "', banner_link = '" . $this->db->escape(isset($value['banner_link']) ? $value['banner_link'] : '') . "'");
+		}
 	}
 	
 	public function getCategoryPath($category_id) {
