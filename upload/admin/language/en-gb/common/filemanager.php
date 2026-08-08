@@ -25,6 +25,7 @@ $_['error_filename']   = 'Warning: Filename must be between 3 and 255!';
 $_['error_folder']     = 'Warning: Folder name must be between 3 and 255!';
 $_['error_exists']     = 'Warning: A file or directory with the same name already exists!';
 $_['error_directory']  = 'Warning: Directory does not exist!';
+$_['error_protected']  = 'Warning: This directory is protected and cannot be written to. Create your own directory and upload files to it.';
 $_['error_filesize']   = 'Warning: Incorrect file size!';
 $_['error_filetype']   = 'Warning: Incorrect file type!';
 $_['error_upload']     = 'Warning: File could not be uploaded for an unknown reason!';
