@@ -601,35 +601,37 @@ class ControllerCatalogCategory extends Controller {
 			$data['background_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
 
-		if (isset($this->request->post['banner_image'])) {
-			$data['banner_image'] = $this->request->post['banner_image'];
-		} elseif (!empty($category_info)) {
-			$data['banner_image'] = $category_info['banner_image'];
-		} else {
-			$data['banner_image'] = '';
+		$data['category_banner'] = array();
+
+		if (isset($this->request->post['category_banner'])) {
+			$data['category_banner'] = $this->request->post['category_banner'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$data['category_banner'] = $this->model_catalog_category->getCategoryBanners($this->request->get['category_id']);
 		}
 
-		if (isset($this->request->post['banner_image']) && is_file(DIR_IMAGE . $this->request->post['banner_image'])) {
-			$data['banner_thumb'] = $this->model_tool_image->resize($this->request->post['banner_image'], 140, 140);
-		} elseif (!empty($category_info) && is_file(DIR_IMAGE . $category_info['banner_image'])) {
-			$data['banner_thumb'] = $this->model_tool_image->resize($category_info['banner_image'], 140, 140);
-		} else {
-			$data['banner_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
+		$this->load->model('tool/image');
+
+		$data['banner_links'] = array();
+
+		foreach ($data['languages'] as $language) {
+			$language_id = (int)$language['language_id'];
+			$banner_image = isset($data['category_banner'][$language_id]['banner_image']) ? $data['category_banner'][$language_id]['banner_image'] : '';
+			$banner_link = isset($data['category_banner'][$language_id]['banner_link']) ? $data['category_banner'][$language_id]['banner_link'] : '';
+
+			$parsed_link = $this->parseBannerLink($banner_link);
+
+			$data['banner_links'][$language_id] = array(
+				'banner_enabled'        => !empty($banner_image),
+				'banner_image'          => $banner_image,
+				'banner_thumb'          => ($banner_image && is_file(DIR_IMAGE . $banner_image))
+					? $this->model_tool_image->resize($banner_image, 140, 140)
+					: $this->model_tool_image->resize('no_image.png', 140, 140),
+				'banner_link_type'      => $parsed_link['type'],
+				'banner_link_value'     => $parsed_link['value'],
+				'banner_link_entity_name' => $parsed_link['entity_name'],
+				'banner_link_raw'       => $banner_link
+			);
 		}
-
-		$banner_link = '';
-
-		if (isset($this->request->post['banner_link'])) {
-			$banner_link = $this->request->post['banner_link'];
-		} elseif (!empty($category_info)) {
-			$banner_link = $category_info['banner_link'];
-		}
-
-		$parsed_link = $this->parseBannerLink($banner_link);
-		$data['banner_link'] = $banner_link;
-		$data['banner_link_type'] = $parsed_link['type'];
-		$data['banner_link_value'] = $parsed_link['value'];
-		$data['banner_link_entity_name'] = $parsed_link['entity_name'];
 
 		// Review criteria group (per-category "what is rated" override)
 		if (isset($this->request->post['review_criteria_group_id'])) {

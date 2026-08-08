@@ -85,6 +85,43 @@
                 <textarea name="category_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ category_description[language.language_id] ? category_description[language.language_id].meta_keyword }}</textarea>
               </div>
               </div>
+              <div class="dcx-banner-section" id="banner-section-{{ language.language_id }}">
+                <div class="dcx-banner-section__head">
+                  <label class="dcx-checkbox-label dcx-banner-toggle">
+                    <input type="checkbox" name="category_banner[{{ language.language_id }}][enabled]" value="1" {% if banner_links[language.language_id] and banner_links[language.language_id].banner_enabled %}checked="checked"{% endif %} id="banner-toggle-{{ language.language_id }}" />
+                    <span>{{ entry_banner_image }}</span>
+                    <span data-toggle="tooltip" title="{{ help_banner_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                  </label>
+                </div>
+                <div class="dcx-banner-layout" id="banner-layout-{{ language.language_id }}">
+                  <div class="dcx-banner-layout__preview" id="banner-preview-wrap-{{ language.language_id }}">
+                    <a href="" id="thumb-banner-{{ language.language_id }}" data-toggle="image" class="dcx-banner-layout__thumb">
+                      <img src="{{ banner_links[language.language_id] ? banner_links[language.language_id].banner_thumb : placeholder }}" alt="" data-placeholder="{{ placeholder }}" id="banner-preview-img-{{ language.language_id }}" />
+                    </a>
+                    <input type="hidden" name="category_banner[{{ language.language_id }}][banner_image]" value="{{ banner_links[language.language_id] ? banner_links[language.language_id].banner_image : '' }}" id="input-banner-{{ language.language_id }}" />
+                  </div>
+                  <div class="dcx-banner-layout__link">
+                    <label class="dcx-label">{{ entry_banner_link }}</label>
+                    <div class="dc-link-row">
+                      <select class="form-control dc-link-type dc-link-type-select">
+                        <option value="custom" {{ banner_links[language.language_id].banner_link_type == 'custom' or not banner_links[language.language_id].banner_link_type ? 'selected' : '' }}>{{ text_link_custom }}</option>
+                        <option value="product" {{ banner_links[language.language_id].banner_link_type == 'product' ? 'selected' : '' }}>{{ text_link_product }}</option>
+                        <option value="category" {{ banner_links[language.language_id].banner_link_type == 'category' ? 'selected' : '' }}>{{ text_link_category }}</option>
+                        <option value="manufacturer" {{ banner_links[language.language_id].banner_link_type == 'manufacturer' ? 'selected' : '' }}>{{ text_link_manufacturer }}</option>
+                        <option value="information" {{ banner_links[language.language_id].banner_link_type == 'information' ? 'selected' : '' }}>{{ text_link_information }}</option>
+                        <option value="blog" {{ banner_links[language.language_id].banner_link_type == 'blog' ? 'selected' : '' }}>{{ text_link_blog }}</option>
+                      </select>
+                      <div class="dc-link-custom{% if banner_links[language.language_id].banner_link_type is not empty and banner_links[language.language_id].banner_link_type != 'custom' %} dc-link-hidden-field{% endif %}">
+                        <input type="text" class="form-control dc-link-custom-input" value="{{ banner_links[language.language_id] ? banner_links[language.language_id].banner_link_raw : '' }}" placeholder="{{ entry_link }}" />
+                      </div>
+                      <div class="dc-link-entity{% if not banner_links[language.language_id].banner_link_type or banner_links[language.language_id].banner_link_type == 'custom' %} dc-link-hidden-field{% endif %}">
+                        <input type="text" class="form-control dc-link-autocomplete" value="{{ banner_links[language.language_id] ? banner_links[language.language_id].banner_link_entity_name : '' }}" placeholder="{{ entry_link_search }}" data-type="{{ banner_links[language.language_id].banner_link_type }}" data-value="{{ banner_links[language.language_id].banner_link_value }}" />
+                      </div>
+                    </div>
+                    <input type="hidden" name="category_banner[{{ language.language_id }}][banner_link]" value="{{ banner_links[language.language_id] ? banner_links[language.language_id].banner_link_raw : '' }}" class="dc-link-hidden" />
+                  </div>
+                </div>
+              </div>
             </div>
             {% endfor %}
           </div>
@@ -117,42 +154,6 @@
             <a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
             <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
           </div>
-          </div>
-          <div class="dcx-banner-section">
-            <div class="dcx-banner-section__head">
-              <span>{{ text_banner_card }}</span>
-            </div>
-            <div class="dcx-banner-layout">
-              <div class="dcx-banner-layout__preview" id="banner-preview-wrap">
-                <a href="" id="thumb-banner" data-toggle="image" class="dcx-banner-layout__thumb">
-                  <img src="{{ banner_thumb }}" alt="" data-placeholder="{{ placeholder }}" id="banner-preview-img" />
-                </a>
-                <input type="hidden" name="banner_image" value="{{ banner_image }}" id="input-banner" />
-              </div>
-              <div class="dcx-banner-layout__link">
-                <div style="display:flex;align-items:center;gap:4px;">
-                  <label class="dcx-label">{{ entry_banner_link }}</label>
-                  <span data-toggle="tooltip" title="{{ help_banner_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                </div>
-                <div class="dc-link-row">
-                  <select class="form-control dc-link-type dc-link-type-select">
-                    <option value="custom" {{ banner_link_type == 'custom' or not banner_link_type ? 'selected' : '' }}>{{ text_link_custom }}</option>
-                    <option value="product" {{ banner_link_type == 'product' ? 'selected' : '' }}>{{ text_link_product }}</option>
-                    <option value="category" {{ banner_link_type == 'category' ? 'selected' : '' }}>{{ text_link_category }}</option>
-                    <option value="manufacturer" {{ banner_link_type == 'manufacturer' ? 'selected' : '' }}>{{ text_link_manufacturer }}</option>
-                    <option value="information" {{ banner_link_type == 'information' ? 'selected' : '' }}>{{ text_link_information }}</option>
-                    <option value="blog" {{ banner_link_type == 'blog' ? 'selected' : '' }}>{{ text_link_blog }}</option>
-                  </select>
-                  <div class="dc-link-custom{% if banner_link_type is not empty and banner_link_type != 'custom' %} dc-link-hidden-field{% endif %}">
-                    <input type="text" class="form-control dc-link-custom-input" value="{{ banner_link }}" placeholder="{{ entry_link }}" />
-                  </div>
-                  <div class="dc-link-entity{% if not banner_link_type or banner_link_type == 'custom' %} dc-link-hidden-field{% endif %}">
-                    <input type="text" class="form-control dc-link-autocomplete" value="{{ banner_link_entity_name }}" placeholder="{{ entry_link_search }}" data-type="{{ banner_link_type }}" data-value="{{ banner_link_value }}" />
-                  </div>
-                </div>
-                <input type="hidden" name="banner_link" value="{{ banner_link }}" class="dc-link-hidden" />
-              </div>
-            </div>
           </div>
         </div>
         </div>
@@ -418,10 +419,20 @@ $(document).on('click', '#category-related .dcx-tree-select__well-remove', funct
 });
 
 $(document).ready(function() {
-  var $bannerPanel = $('#thumb-banner').closest('.dcx-panel-body');
-  if ($bannerPanel.length) {
-    DcLinkField.init($bannerPanel);
-  }
+  $('.tab-content .tab-pane').each(function() {
+    var $bannerPanel = $(this);
+    if ($bannerPanel.find('.dc-link-row').length) {
+      DcLinkField.init($bannerPanel);
+    }
+  });
+  $('.dcx-banner-toggle input[type="checkbox"]').each(function() {
+    var $layout = $(this).closest('.dcx-banner-section').find('.dcx-banner-layout');
+    var sync = function() {
+      $layout.toggle($(this).is(':checked'));
+    }.bind(this);
+    $(this).on('change', sync);
+    sync();
+  });
   $('#category-related').toggle($('#category-related .dcx-tree-select__well-item').length > 0);
 });
 //--></script>
