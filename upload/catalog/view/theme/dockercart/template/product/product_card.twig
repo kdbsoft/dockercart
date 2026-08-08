@@ -37,10 +37,17 @@
   <div class="flex items-baseline gap-1 whitespace-nowrap">
     {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
     {% if cfp %}
+      {% if call_for_price_mode is defined and call_for_price_mode == 'call' %}
       <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 transition">
         <i data-lucide="phone" class="w-3 h-3"></i>
         {{ text_call_for_price|default('Contact for price') }}
       </a>
+      {% else %}
+      <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 transition" data-dc-cfp-request data-product-id="{{ product.product_id }}">
+        <i data-lucide="message-circle-question" class="w-3 h-3"></i>
+        {{ text_call_for_price_request|default('Request price') }}
+      </button>
+      {% endif %}
     {% elseif product.special %}
       <span class="text-sm font-extrabold text-gray-900">{{ product.special }}</span>
       <span class="text-[11px] text-red-400 line-through">{{ product.price }}</span>
@@ -153,10 +160,17 @@
         <div class="flex items-baseline gap-1 flex-wrap">
           {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
           {% if cfp %}
+            {% if call_for_price_mode is defined and call_for_price_mode == 'call' %}
             <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition shadow-sm">
               <i data-lucide="phone" class="w-4 h-4"></i>
               {{ text_call_for_price|default('Contact for price') }}
             </a>
+            {% else %}
+            <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition shadow-sm" data-dc-cfp-request data-product-id="{{ product.product_id }}">
+              <i data-lucide="message-circle-question" class="w-4 h-4"></i>
+              {{ text_call_for_price_request|default('Request price') }}
+            </button>
+            {% endif %}
           {% elseif product.special %}
             <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.special }}</span>
             <span class="text-xs text-red-400 line-through">{{ product.price }}</span>
@@ -239,10 +253,17 @@
       <div class="flex items-baseline gap-1 flex-wrap">
         {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
         {% if cfp %}
+          {% if call_for_price_mode is defined and call_for_price_mode == 'call' %}
           <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm">
             <i data-lucide="phone" class="w-3.5 h-3.5"></i>
             {{ text_call_for_price|default('Contact for price') }}
           </a>
+          {% else %}
+          <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm" data-dc-cfp-request data-product-id="{{ product.product_id }}">
+            <i data-lucide="message-circle-question" class="w-3.5 h-3.5"></i>
+            {{ text_call_for_price_request|default('Request price') }}
+          </button>
+          {% endif %}
         {% elseif product.special %}
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
           <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>

@@ -47,6 +47,7 @@ $_['text_reviews'] = '%s отзывов';
 $_['text_reward'] = 'Бонусные баллы:';
 $_['text_sale'] = 'Распродажа';
 $_['text_call_for_price'] = 'Уточнить цену';
+$_['text_call_for_price_request'] = 'Запрос цены';
 $_['text_you_save'] = 'Вы сэкономите';
 $_['text_sale_ends_in'] = 'Акция заканчивается через';
 $_['text_timer_days'] = 'дн';

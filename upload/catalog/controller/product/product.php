@@ -1137,6 +1137,7 @@ class ControllerProductProduct extends Controller {
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+			$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
 			$data['call_for_price'] = !empty($product_info['call_for_price']);
 
 			// Sale timers
@@ -1163,6 +1164,7 @@ class ControllerProductProduct extends Controller {
 			$data['text_total'] = $this->language->get('text_total');
 			$data['text_sale'] = $this->language->get('text_sale');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+			$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 
 			// Captcha
 			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
