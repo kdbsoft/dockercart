@@ -21,6 +21,9 @@ $_['button_generate']   = 'Generate Sitemap';
 
 $_['text_sitemap_url']  = 'Sitemap URL';
 $_['text_generated']    = 'Sitemap generated successfully!';
+$_['text_last_generated'] = 'Last generated: %s — %d files';
+$_['text_last_generated_never'] = 'Last generated: Never';
+$_['text_generate_error'] = 'Unexpected error while generating sitemap.';
 $_['text_section_module_settings'] = 'Module Settings';
 $_['text_section_content_types'] = 'Content Types';
 $_['text_section_limits'] = 'Sitemap Limits';
