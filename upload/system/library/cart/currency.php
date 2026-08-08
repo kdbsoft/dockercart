@@ -7,6 +7,10 @@ class Currency {
 	private $symbol_left_space = false;
 	private $symbol_right_space = false;
 
+	public function getCurrencies() {
+		return $this->currencies;
+	}
+
 	public function __construct($registry) {
 		$this->db = $registry->get('db');
 		$this->language = $registry->get('language');

@@ -13,4 +13,30 @@ class ModelToolUpload extends Model {
 
 		return $query->row;
 	}
+
+	/**
+	 * Bulk upload names by code (N+1 killer for cart/checkout file options).
+	 * Returns [code => name].
+	 */
+	public function getUploadNamesByCodes(array $codes) {
+		if (empty($codes)) {
+			return array();
+		}
+
+		$implode = array();
+
+		foreach ($codes as $code) {
+			$implode[] = "'" . $this->db->escape($code) . "'";
+		}
+
+		$query = $this->db->query("SELECT code, name FROM `" . DB_PREFIX . "upload` WHERE code IN (" . implode(',', $implode) . ")");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[$row['code']] = $row['name'];
+		}
+
+		return $result;
+	}
 }
