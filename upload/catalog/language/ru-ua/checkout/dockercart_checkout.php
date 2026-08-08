@@ -1,7 +1,7 @@
 <?php
 
 $_["button_accept"] = "Принять";
-$_["button_apply_coupon"] = "Применить промо-код";
+$_["button_apply_coupon"] = "Применить";
 $_["button_apply_reward"] = "Применить баллы";
 $_["button_apply_voucher"] = "Применить сертификат";
 $_["button_back"] = "Назад";
