@@ -1866,6 +1866,7 @@ class ControllerProductProduct extends Controller {
 		$data['text_be_first'] = $fragment['text_be_first'];
 		$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
 		$data['text_leave_review'] = $fragment['text_leave_review'];
+		$data['text_write'] = $fragment['text_write'];
 		$data['text_reviews_section'] = $this->language->get('text_reviews_section');
 		$data['total'] = $fragment['total'];
 		$data['total_label'] = $fragment['total_label'];
