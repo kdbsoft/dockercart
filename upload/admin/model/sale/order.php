@@ -1083,6 +1083,10 @@ class ModelSaleOrder extends Model {
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET quantity = '" . (float)$quantity . "', total = '" . (float)$new_total . "', tax = '" . (float)$new_tax . "' WHERE order_product_id = '" . (int)$order_product_id . "'");
 
+		// Manual quantity change: the admin now owns this line's price, so it is
+		// excluded from catalog re-pricing until restoreOrderProductPrice().
+		$this->setOrderProductOverride($order_product_id, $order_id);
+
 		return true;
 	}
 
@@ -1105,7 +1109,84 @@ class ModelSaleOrder extends Model {
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$price . "', total = '" . (float)$new_total . "' WHERE order_product_id = '" . (int)$order_product_id . "'");
 
+		// Manual price change: the admin now owns this line's price, so it is
+		// excluded from catalog re-pricing until restoreOrderProductPrice().
+		$this->setOrderProductOverride($order_product_id, $order_id);
+
 		return true;
+	}
+
+	public function setOrderProductOverride($order_product_id, $order_id) {
+		$this->ensureOrderProductOverrideTable();
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product_override` SET order_product_id = '" . (int)$order_product_id . "', order_id = '" . (int)$order_id . "', date_modified = NOW() ON DUPLICATE KEY UPDATE date_modified = NOW()");
+	}
+
+	public function clearOrderProductOverride($order_product_id) {
+		$this->ensureOrderProductOverrideTable();
+
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_product_override` WHERE order_product_id = '" . (int)$order_product_id . "'");
+	}
+
+	public function getOrderProductOverrides($order_id) {
+		$this->ensureOrderProductOverrideTable();
+
+		$overrides = array();
+		$query = $this->db->query("SELECT order_product_id FROM `" . DB_PREFIX . "order_product_override` WHERE order_id = '" . (int)$order_id . "'");
+
+		foreach ($query->rows as $row) {
+			$overrides[(int)$row['order_product_id']] = true;
+		}
+
+		return $overrides;
+	}
+
+	private function ensureOrderProductOverrideTable() {
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "order_product_override` (
+			`order_product_id` int(11) NOT NULL,
+			`order_id` int(11) NOT NULL,
+			`date_modified` datetime NOT NULL,
+			PRIMARY KEY (`order_product_id`),
+			KEY `order_id` (`order_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+	}
+
+	public function restoreOrderProductPrice($order_product_id, $order_id) {
+		$product_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+
+		if (!$product_query->num_rows) {
+			return false;
+		}
+
+		$product = $product_query->row;
+		$options = $this->getOrderOptions($order_id, $order_product_id);
+
+		$pricing = $this->calculateProductPricing($order_id, (int)$product['product_id'], (float)$product['quantity'], $options);
+
+		if (!$pricing) {
+			return false;
+		}
+
+		$quantity = max(1, (float)$pricing['quantity']);
+
+		if ($pricing['variant_id'] > 0 && (int)$product['variant_id'] > 0) {
+			$pricing['variant_id'] = (int)$product['variant_id'];
+		}
+
+		$new_total = round((float)$pricing['price'] * $quantity, 4);
+		$new_tax = round((float)$pricing['tax'] * $quantity, 4);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$pricing['price'] . "', total = '" . (float)$new_total . "', tax = '" . (float)$new_tax . "' WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'");
+
+		$this->clearOrderProductOverride($order_product_id);
+
+		return array(
+			'price'      => round((float)$pricing['price'], 4),
+			'tax'        => round((float)$pricing['tax'], 4),
+			'total'      => round($new_total, 4),
+			'tax_total'  => round($new_tax, 4),
+			'quantity'   => $quantity
+		);
 	}
 
 	public function calculateProductPricing($order_id, $product_id, $quantity = 1, $options = array()) {
@@ -1129,6 +1210,14 @@ class ModelSaleOrder extends Model {
 		$option_price = 0.0;
 		$stock = (float)$product_info['quantity'];
 		$subtract = (bool)$product_info['subtract'];
+
+		// DockerCart: catalog pricing (customer group price / quantity discount /
+		// special / group percent) applies to plain products as on the storefront.
+		$catalog_pricing = $this->applyCatalogPricingToPrice($product_id, 0, $quantity, $customer_group_id, $price);
+
+		if ($catalog_pricing['applied']) {
+			$price = $catalog_pricing['price'];
+		}
 
 		$pc = new \ProductConfigurable($this->registry);
 
@@ -1187,6 +1276,14 @@ class ModelSaleOrder extends Model {
 					$model = $variant_sku;
 				}
 
+				// DockerCart: catalog pricing applies to the variant price too,
+				// mirroring the storefront cart (group price, discount, special).
+				$variant_catalog_pricing = $this->applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $price);
+
+				if ($variant_catalog_pricing['applied']) {
+					$price = $variant_catalog_pricing['price'];
+				}
+
 				if ($customer_group_id) {
 					$cg_price = $pc->getVariantCustomerGroupPrice($variant_id, $customer_group_id);
 
@@ -1210,6 +1307,45 @@ class ModelSaleOrder extends Model {
 		}
 
 		$price += $option_price;
+
+		// DockerCart: BXGY per-item discount (pre-tax) — applies to the reward
+		// product price, mirroring the storefront order creation.
+		$bxgy_applied = false;
+
+		if ($price > 0) {
+			$bxgy_lines = $this->db->query("SELECT product_id, quantity, price FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' AND product_id != '" . (int)$product_id . "'");
+
+			$lines = array(
+				array(
+					'product_id' => (int)$product_id,
+					'quantity'   => $quantity,
+					'price'      => $price
+				)
+			);
+
+			foreach ($bxgy_lines->rows as $line) {
+				$lines[] = array(
+					'product_id' => (int)$line['product_id'],
+					'quantity'   => (float)$line['quantity'],
+					'price'      => (float)$line['price']
+				);
+			}
+
+			$bxgy_lib = new \Bxgy($this->registry);
+			$bxgy_discounts = $bxgy_lib->getPerProductDiscountsFor($lines);
+
+			if (isset($bxgy_discounts[(int)$product_id]) && (float)$bxgy_discounts[(int)$product_id]['discount_amount'] > 0) {
+				$discount_amount = (float)$bxgy_discounts[(int)$product_id]['discount_amount'];
+
+				if ($discount_amount >= $price) {
+					$price = 0;
+				} else {
+					$price -= $discount_amount;
+				}
+
+				$bxgy_applied = true;
+			}
+		}
 
 		$tax = 0.0;
 
@@ -1235,6 +1371,7 @@ class ModelSaleOrder extends Model {
 			'stock'             => $stock,
 			'subtract'          => $subtract,
 			'customer_group_id' => $customer_group_id,
+			'bxgy_applied'      => $bxgy_applied,
 		);
 	}
 
@@ -1264,6 +1401,9 @@ class ModelSaleOrder extends Model {
 
 		$order_product_id = $this->db->getLastId();
 
+		// Product gifts: zero-price lines when the minimum quantity is met.
+		$this->addProductGiftsToOrder($order_id, $product_id, (float)$pricing['quantity']);
+
 		if ($options) {
 			foreach ($options as $option) {
 				$this->db->query("INSERT INTO `" . DB_PREFIX . "order_option` SET
@@ -1279,6 +1419,130 @@ class ModelSaleOrder extends Model {
 		}
 
 		return $order_product_id;
+	}
+
+	/**
+	 * Add product gift lines (zero price) for an order product when the
+	 * minimum quantity is met. Mirrors the storefront order creation.
+	 */
+	private function addProductGiftsToOrder($order_id, $product_id, $quantity) {
+		if ($quantity < 1) {
+			return;
+		}
+
+		$this->load->model('catalog/product');
+
+		$gifts = $this->model_catalog_product->getProductGifts($product_id);
+
+		if (empty($gifts)) {
+			return;
+		}
+
+		$text_gift = $this->language->get('text_gift');
+
+		foreach ($gifts as $gift) {
+			if ($quantity < (int)$gift['minimum_quantity']) {
+				continue;
+			}
+
+			// Admin model returns the gift product name under gift_product_name.
+			$gift_name = !empty($gift['gift_product_name']) ? $gift['gift_product_name'] : ($gift['name'] ?? '');
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "order_product` SET
+				order_id = '" . (int)$order_id . "',
+				product_id = '" . (int)$gift['gift_product_id'] . "',
+				name = '" . $this->db->escape(($text_gift ? $text_gift . ': ' : '') . $gift_name) . "',
+				model = '',
+				quantity = '1',
+				price = '0',
+				total = '0',
+				tax = '0',
+				reward = '0',
+				variant_id = '0',
+				variant_sku = ''
+			");
+		}
+	}
+
+	/**
+	 * Applies the storefront catalog pricing rules to a base unit price:
+	 * per-product customer group price, quantity discount, special, then the
+	 * group-wide discount/markup percent (skipped when a per-product group
+	 * price exists). Mirrors Cart::getProducts() / cart.php:655-728.
+	 *
+	 * @return array{price: float, applied: bool}
+	 */
+	private function applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $base_price) {
+		$price = (float)$base_price;
+		$applied = false;
+
+		if (!$customer_group_id) {
+			return array('price' => $price, 'applied' => $applied);
+		}
+
+		if ($variant_id > 0) {
+			$group_price_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "'");
+		} else {
+			$group_price_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_customer_group_price WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "'");
+		}
+
+		$has_customer_group_price = $group_price_query->num_rows && (float)$group_price_query->row['price'] > 0;
+
+		if ($has_customer_group_price) {
+			$price = (float)$group_price_query->row['price'];
+			$applied = true;
+		}
+
+		$discount_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND quantity <= '" . (float)$quantity . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
+
+		if ($discount_query->num_rows && (float)$discount_query->row['price'] < $price) {
+			$price = (float)$discount_query->row['price'];
+			$applied = true;
+		}
+
+		$special_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
+
+		if ($special_query->num_rows && (float)$special_query->row['price'] < $price) {
+			$price = (float)$special_query->row['price'];
+			$applied = true;
+		}
+
+		$customer_group_discount = 0.0;
+		$customer_group_markup = 0.0;
+		$group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+		if ($group_query->num_rows) {
+			$customer_group_discount = (float)$group_query->row['discount_percent'];
+
+			if ($customer_group_discount < 0) {
+				$customer_group_discount = 0;
+			} elseif ($customer_group_discount > 100) {
+				$customer_group_discount = 100;
+			}
+
+			$customer_group_markup = (float)$group_query->row['markup_percent'];
+
+			if ($customer_group_markup < 0) {
+				$customer_group_markup = 0;
+			} elseif ($customer_group_markup > 100) {
+				$customer_group_markup = 100;
+			}
+		}
+
+		if ($customer_group_discount > 0 && $customer_group_markup > 0) {
+			$customer_group_markup = 0;
+		}
+
+		if (!$has_customer_group_price) {
+			if ($customer_group_discount > 0) {
+				$price *= (100 - $customer_group_discount) / 100;
+				$applied = true;
+			} elseif ($customer_group_markup > 0) {
+				$price *= (100 + $customer_group_markup) / 100;
+				$applied = true;
+			}
+		}
+
+		return array('price' => $price, 'applied' => $applied);
 	}
 
 	public function removeProductFromOrder($order_product_id, $order_id) {

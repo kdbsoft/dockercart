@@ -125,10 +125,21 @@
                   {% if product.discount_percent > 0 %}
                   <div class="order-product-card__discount">{{ product.discount_percent|round(1) }}% {{ text_discount }}</div>
                   {% endif %}
+                  {% if product.price_override %}
+                  <div class="order-product-card__discount"><i data-lucide="pencil" width="11" height="11"></i> {{ text_price_override }}</div>
+                  {% endif %}
+                  {% if product.is_gift %}
+                  <div class="order-product-card__discount"><i data-lucide="gift" width="11" height="11"></i> {{ text_gift }}</div>
+                  {% endif %}
                 </div>
                 <div class="order-product-card__price">
                   <span class="view-only">{{ product.price }}</span>
                   <input type="text" class="form-control edit-only" value="{{ product.price_raw|round(currency_decimal_place) }}" data-field="price" style="display:none">
+                  {% if product.price_override %}
+                  <button type="button" class="btn btn-default btn-xs edit-only" data-restore-catalog-price style="display:none" data-toggle="tooltip" title="{{ button_restore_catalog_price }}">
+                    <i data-lucide="rotate-ccw" width="12" height="12"></i>
+                  </button>
+                  {% endif %}
                 </div>
                 <div class="order-product-card__mult">&times;</div>
                 <div class="order-product-card__qty">
@@ -1053,6 +1064,12 @@ function previewRecalc(card) {
 	const priceInput = card.querySelector('input[data-field="price"]');
 	const qtyInput = card.querySelector('input[data-field="quantity"]');
 	const discInput = card.querySelector('input[data-field="discount"]');
+	const restoreBtn = card.querySelector('[data-restore-catalog-price]');
+	if (restoreBtn) {
+		const priceChanged = priceInput && priceInput.value !== priceInput.defaultValue;
+		const qtyChanged = qtyInput && qtyInput.value !== qtyInput.defaultValue;
+		restoreBtn.style.display = (priceChanged || qtyChanged) ? 'inline-block' : 'none';
+	}
 	const origPrice = parseFloat(card.dataset.priceRaw) || 0;
 	const origTax = parseFloat(card.dataset.taxRaw) || 0;
 	const origQty = qtyInput ? (parseFloat(qtyInput.defaultValue) || 1) : 1;
@@ -1299,6 +1316,32 @@ function removeProduct(btn) {
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
 			}
+		});
+}
+
+function restoreCatalogPrice(btn) {
+	const card = btn.closest('.order-product-card');
+	if (!card) return;
+	api('index.php?route=sale/order_detail/restoreCatalogPrice&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { order_product_id: card.dataset.orderProductId }).then(j => {
+			if (j.error) {
+				showAlert(j.error, 'danger');
+				return;
+			}
+			const priceInput = card.querySelector('input[data-field="price"]');
+			const qtyInput = card.querySelector('input[data-field="quantity"]');
+			if (priceInput) priceInput.value = (parseFloat(j.price_raw) || 0).toFixed(getCurrencyDecimals());
+			if (qtyInput) qtyInput.defaultValue = qtyInput.value;
+			const restoreBtn = card.querySelector('[data-restore-catalog-price]');
+			if (restoreBtn) restoreBtn.style.display = 'none';
+			const badge = card.querySelector('.order-product-card__discount [data-lucide="pencil"]');
+			if (badge) badge.closest('.order-product-card__discount').style.display = 'none';
+			card.dataset.priceRaw = (parseFloat(j.price_raw) || 0).toFixed(4);
+			card.dataset.taxRaw = (parseFloat(j.tax_raw) || 0).toFixed(4);
+			const totalEl = card.querySelector('.order-product-card__total');
+			if (totalEl) totalEl.textContent = '= ' + formatCurrency(parseFloat(j.total_raw) || 0);
+			if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
+			showAlert(j.success || '{{ text_order_saved }}');
 		});
 }
 
@@ -2166,6 +2209,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 		info.appendChild(meta);
 
+		if (p.price_override) {
+			const overrideBadge = document.createElement('div');
+			overrideBadge.className = 'order-product-card__discount';
+			overrideBadge.innerHTML = '<i data-lucide="pencil" width="11" height="11"></i> {{ text_price_override }}';
+			info.appendChild(overrideBadge);
+		}
+
+		if (p.is_gift) {
+			const giftBadge = document.createElement('div');
+			giftBadge.className = 'order-product-card__discount';
+			giftBadge.innerHTML = '<i data-lucide="gift" width="11" height="11"></i> {{ text_gift }}';
+			info.appendChild(giftBadge);
+		}
+
 		const priceDiv = document.createElement('div');
 		priceDiv.className = 'order-product-card__price';
 		const priceView = document.createElement('span');
@@ -2180,6 +2237,17 @@ document.addEventListener('DOMContentLoaded', function() {
 		priceInput.style.display = editing ? '' : 'none';
 		priceDiv.appendChild(priceView);
 		priceDiv.appendChild(priceInput);
+		if (p.price_override) {
+			const restoreBtn = document.createElement('button');
+			restoreBtn.type = 'button';
+			restoreBtn.className = 'btn btn-default btn-xs edit-only';
+			restoreBtn.style.display = editing ? '' : 'none';
+			restoreBtn.dataset.restoreCatalogPrice = '';
+			restoreBtn.title = '{{ button_restore_catalog_price }}';
+			restoreBtn.innerHTML = '<i data-lucide="rotate-ccw" width="12" height="12"></i>';
+			restoreBtn.addEventListener('click', function() { restoreCatalogPrice(this); });
+			priceDiv.appendChild(restoreBtn);
+		}
 
 		const multDiv = document.createElement('div');
 		multDiv.className = 'order-product-card__mult';
