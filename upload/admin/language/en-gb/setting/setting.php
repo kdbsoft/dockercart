@@ -245,7 +245,14 @@ $_['error_invoice_valid_days']       = 'Invoice validity days must be a non-nega
 $_['error_filetype']                 = 'Invalid file type!';
 
 // Tab
-$_['tab_invoice']                   = 'Invoice & Organization';
+$_['tab_store']                      = 'Store';
+$_['tab_seo']                        = 'SEO';
+$_['tab_local']                      = 'Local';
+$_['tab_option']                     = 'Option';
+$_['tab_image']                      = 'Image';
+$_['tab_mail']                       = 'Mail';
+$_['tab_server']                     = 'Server';
+$_['tab_invoice']                    = 'Invoice & Organization';
 
 // Invoice sections
 $_['text_invoice']                  = 'Invoice';
