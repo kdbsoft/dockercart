@@ -112,7 +112,14 @@ $_['error_invoice_valid_days'] = 'Срок действия счёта долж�
 $_['error_filetype'] = 'Недопустимый тип файла!';
 
 // Tab
-$_['tab_invoice']                   = 'Счёт и организация';
+$_['tab_store']                      = 'Магазин';
+$_['tab_seo']                        = 'SEO';
+$_['tab_local']                      = 'Локальные';
+$_['tab_option']                     = 'Опции';
+$_['tab_image']                      = 'Изображения';
+$_['tab_mail']                       = 'Почта';
+$_['tab_server']                     = 'Сервер';
+$_['tab_invoice']                    = 'Счёт и организация';
 
 // Invoice sections
 $_['text_invoice']                  = 'Счёт';

@@ -15,6 +15,14 @@ $_['text_checkout']                = 'Checkout';
 $_['text_stock']                   = 'Stock';
 $_['text_shipping']                = 'Shipping Address';
 $_['text_payment']                 = 'Payment Address';
+
+// Tab
+$_['tab_general']                  = 'General';
+$_['tab_store']                    = 'Store';
+$_['tab_local']                    = 'Local';
+$_['tab_option']                   = 'Option';
+$_['tab_image']                    = 'Image';
+$_['tab_server']                   = 'Server';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage multiple store instances';
@@ -70,6 +78,7 @@ $_['entry_stock_display']          = 'Display Stock';
 $_['entry_stock_checkout']         = 'Stock Checkout';
 $_['entry_logo']                   = 'Store Logo';
 $_['entry_icon']                   = 'Icon';
+$_['entry_image_max_dimension']    = 'Max Image Dimension';
 $_['entry_secure']                 = 'Use SSL';
 
 // Help
@@ -94,6 +103,8 @@ $_['help_order_status']            = 'Set the default order status when an order
 $_['help_stock_display']           = 'Display stock quantity on the product page.';
 $_['help_stock_checkout']          = 'Allow customers to still checkout if the products they are ordering are not in stock.';
 $_['help_icon']                    = 'The icon should be a PNG that is 16px x 16px.';
+$_['help_image_max_dimension']     = 'Uploaded images with a longer side exceeding this value (px) will be proportionally resized and recompressed during upload. Set 0 to disable. Default fallback: 2560.';
+$_['help_cart_weight']             = 'Show the cart weight on the cart page.';
 $_['help_secure']                  = 'To use SSL check with your host if a SSL certificate is installed.';
 
 // Error
