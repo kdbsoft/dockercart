@@ -93,6 +93,7 @@ class ControllerProductReviews extends Controller {
 			$data['text_be_first'] = $fragment['text_be_first'];
 			$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
 			$data['text_leave_review'] = $fragment['text_leave_review'];
+			$data['text_write'] = $fragment['text_write'];
 			$data['review_total'] = $fragment['total'];
 			$data['review_total_label'] = $fragment['total_label'];
 			$data['vote_url'] = $fragment['vote_url'];
@@ -100,6 +101,7 @@ class ControllerProductReviews extends Controller {
 			// Write form data
 			$data['review_status'] = $this->config->get('config_review_status');
 			$data['review_guest'] = $this->config->get('config_review_guest') || $this->customer->isLogged();
+			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
 			$data['customer_name'] = $this->customer->isLogged() ? $this->customer->getFirstName() . '&nbsp;' . $this->customer->getLastName() : '';
 			$data['customer_logged'] = $this->customer->isLogged();
 			$data['review_write_url'] = $this->url->link('product/product/write', 'product_id=' . $product_id);

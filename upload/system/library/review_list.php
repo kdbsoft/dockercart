@@ -166,6 +166,7 @@ class ReviewList {
 			'text_be_first'       => $this->language->get('text_be_first'),
 			'text_be_first_hint'  => $this->language->get('text_be_first_hint'),
 			'text_leave_review'   => $this->language->get('text_leave_review'),
+			'text_write'          => $this->language->get('text_write'),
 			'vote_url'            => $this->url->link('product/product/vote'),
 		);
 	}

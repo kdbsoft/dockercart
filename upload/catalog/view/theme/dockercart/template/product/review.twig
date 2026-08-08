@@ -34,7 +34,7 @@
     <p class="mt-2 text-sm text-gray-500">{{ text_be_first_hint }}</p>
     {% endif %}
     <button type="button" data-review-modal-open class="mt-7 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition shadow-sm shadow-blue-200">
-      <i data-lucide="square-pen" width="16" height="16"></i>{{ text_leave_review|default('Write a review') }}
+      <i data-lucide="square-pen" width="16" height="16"></i>{{ text_write|default(text_leave_review) }}
     </button>
   </div>
 {% endif %}
