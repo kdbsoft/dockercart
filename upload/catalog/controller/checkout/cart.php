@@ -124,7 +124,8 @@ class ControllerCheckoutCart extends Controller {
 						$per_unit_discount = $bxgy_discounts[$bxgy_key]['discount_amount'];
 						$bxgy_original_price_fmt = $bxgy_discounts[$bxgy_key]['original_price_formatted'];
 						$bxgy_discount_text = $bxgy_discounts[$bxgy_key]['text'];
-						$price = max(0, $unit_price - $per_unit_discount);
+						$discounted = max(0, (float)$product['price'] - $per_unit_discount);
+						$price = $this->tax->calculate($discounted, $product['tax_class_id'], $this->config->get('config_tax'));
 						$total = $price * $product['quantity'];
 					}
 

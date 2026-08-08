@@ -2155,8 +2155,29 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 : [],
         ];
 
-        // Add products from cart
-        foreach ($this->cart->getProducts() as $product) {
+        // Add products from cart (apply BXGY per-item discounts to prices)
+        $this->load->library("bxgy");
+        $bxgy_lib = new Bxgy($this->registry);
+        $cart_products = $this->cart->getProducts();
+        $bxgy_discounts = $bxgy_lib->getPerProductDiscountsFor($cart_products);
+
+        foreach ($cart_products as $product) {
+            $price = (float) $product["price"];
+            $tax = isset($product["tax"]) ? (float) $product["tax"] : 0;
+
+            if (isset($bxgy_discounts[(int) $product["product_id"]])) {
+                $per_unit_discount = $bxgy_discounts[(int) $product["product_id"]]["discount_amount"];
+
+                if ($price > 0 && $per_unit_discount > 0) {
+                    $new_price = max(0, $price - $per_unit_discount);
+                    // Scale tax proportionally to the price change (pre-tax discount).
+                    if ($price > 0) {
+                        $tax = $tax * ($new_price / $price);
+                    }
+                    $price = $new_price;
+                }
+            }
+
             $order_data["products"][] = [
                 "product_id"  => $product["product_id"],
                 "variant_id"  => isset($product["variant_id"]) ? (int)$product["variant_id"] : 0,
@@ -2164,12 +2185,39 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 "name"        => $product["name"],
                 "model"       => $product["model"],
                 "quantity"    => $product["quantity"],
-                "price"       => $product["price"],
-                "total"       => $product["total"],
-                "tax"         => isset($product["tax"]) ? $product["tax"] : 0,
+                "price"       => $price,
+                "total"       => $price * $product["quantity"],
+                "tax"         => $tax,
                 "reward"      => isset($product["reward"]) ? $product["reward"] : 0,
                 "option"      => isset($product["option"]) ? $product["option"] : [],
             ];
+        }
+
+        // Product Gifts: add zero-price gift lines when minimum quantity is met
+        $this->load->model("catalog/product");
+        $this->load->language("product/product");
+        $text_gift = $this->language->get("text_gift");
+
+        foreach ($cart_products as $cart_product) {
+            $gifts = $this->model_catalog_product->getProductGifts($cart_product["product_id"]);
+
+            foreach ($gifts as $gift) {
+                if ($cart_product["quantity"] >= (int)$gift["minimum_quantity"]) {
+                    $order_data["products"][] = [
+                        "product_id"  => (int) $gift["gift_product_id"],
+                        "variant_id"  => 0,
+                        "variant_sku" => '',
+                        "name"        => ($text_gift ? $text_gift . ': ' : '') . $gift["name"],
+                        "model"       => '',
+                        "quantity"    => 1,
+                        "price"       => 0,
+                        "total"       => 0,
+                        "tax"         => 0,
+                        "reward"      => 0,
+                        "option"      => [],
+                    ];
+                }
+            }
         }
 
         // Compute raw totals using the total extension pipeline so order_total rows will be inserted correctly
@@ -2500,23 +2548,28 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $pid = (int) $product["product_id"];
 
             if (isset($bxgy_discounts[$pid])) {
-                $unit_price = $this->tax->calculate(
-                    $product["price_raw"] ?? 0,
-                    $product["tax_class_id"] ?? 0,
-                    $this->config->get("config_tax"),
-                );
-
-                if (!$unit_price) {
-                    continue;
-                }
-
                 $per_unit_discount = $bxgy_discounts[$pid]["discount_amount"];
-                $discounted_price = max(0, $unit_price - $per_unit_discount);
 
+                $discounted_raw = max(0, (float)($product["price_raw"] ?? 0) - $per_unit_discount);
+                $product["price_raw"] = $discounted_raw;
                 $product["bxgy_original_price"] = $bxgy_discounts[$pid]["original_price_formatted"];
                 $product["bxgy_discount_text"] = $bxgy_discounts[$pid]["text"];
-                $product["price"] = $this->currency->format($discounted_price, $this->session->data["currency"]);
-                $product["total"] = $this->currency->format($discounted_price * $product["quantity"], $this->session->data["currency"]);
+                $product["price"] = $this->currency->format(
+                    $this->tax->calculate(
+                        $discounted_raw,
+                        $product["tax_class_id"] ?? 0,
+                        $this->config->get("config_tax"),
+                    ),
+                    $this->session->data["currency"],
+                );
+                $product["total"] = $this->currency->format(
+                    $this->tax->calculate(
+                        $discounted_raw,
+                        $product["tax_class_id"] ?? 0,
+                        $this->config->get("config_tax"),
+                    ) * $product["quantity"],
+                    $this->session->data["currency"],
+                );
             }
         }
 
