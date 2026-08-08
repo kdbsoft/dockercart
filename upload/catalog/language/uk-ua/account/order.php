@@ -13,6 +13,7 @@ $_['column_quantity'] = 'Кількість';
 $_['column_status'] = 'Статус';
 $_['column_tracking_number'] = 'Номер відстеження';
 $_['column_total'] = 'Сума';
+$_['text_gift'] = 'Подарунок';
 $_['error_reorder'] = '%s наразі недоступний для повторного замовлення.';
 $_['heading_title'] = 'Історія замовлень';
 $_['text_account'] = 'Обліковий запис';
