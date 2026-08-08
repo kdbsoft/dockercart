@@ -41,7 +41,7 @@ class ControllerExtensionModuleDockercartCfpRequest extends Controller {
 			$json['error'] = $this->language->get('error_name');
 		}
 
-		if (!isset($json['error']) && preg_match('/\d{5,}/', $telephone) !== 1) {
+		if (!isset($json['error']) && !$this->validatePhone($telephone)) {
 			$json['error'] = $this->language->get('error_telephone');
 		}
 
@@ -61,6 +61,32 @@ class ControllerExtensionModuleDockercartCfpRequest extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Validate the telephone against the store's default-country phone
+	 * mask (same source as the client-side mask). Without a mask, fall
+	 * back to a plain 5+ digit count.
+	 */
+	private function validatePhone(string $telephone): bool {
+		$this->load->model('localisation/country');
+		$country_info = $this->model_localisation_country->getCountry($this->config->get('config_country_id'));
+		$phone_format = $country_info ? (string)($country_info['phone_format'] ?? '') : '';
+
+		if ($phone_format !== '') {
+			$pattern = '/^';
+			for ($i = 0; $i < strlen($phone_format); $i++) {
+				$ch = $phone_format[$i];
+				$pattern .= $ch === 'X' ? '\d' : preg_quote($ch, '/');
+			}
+			$pattern .= '$/';
+
+			return (bool)preg_match($pattern, $telephone);
+		}
+
+		$digits = preg_replace('/\D/', '', $telephone);
+
+		return strlen($digits) >= 5;
 	}
 
 	/**
