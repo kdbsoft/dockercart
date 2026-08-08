@@ -48,6 +48,7 @@ class Currency {
 
 		if ($symbol_left) {
 			$string .= $symbol_left;
+
 			if ($this->symbol_left_space) {
 				$string .= ' ';
 			}
@@ -58,9 +59,10 @@ class Currency {
 		$string .= number_format($amount, (int)$decimal_place, $this->language->get('decimal_point'), $thousand_point);
 
 		if ($symbol_right) {
-			if ($this->symbol_right_space) {
+			if (!$this->symbol_right_space) {
 				$string .= ' ';
 			}
+
 			$string .= $symbol_right;
 		}
 
