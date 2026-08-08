@@ -595,6 +595,7 @@ class Cart
                 }
 
                 $price = $product_query->row["price"];
+                $has_variant_group_price = false;
 
                 if ($variant_id > 0) {
                     $variant_special_query = $this->db->query(
@@ -649,6 +650,21 @@ class Cart
                             (float) $price
                     ) {
                         $price = (float) $variant_discount_query->row["price"];
+                    }
+
+                    // DockerCart: variant-level customer group price override
+                    $variant_group_price_query = $this->db->query(
+                        "SELECT price FROM " .
+                            DB_PREFIX .
+                            "dockercart_product_variant_customer_group_price WHERE variant_id = '" .
+                            (int) $variant_id .
+                            "' AND customer_group_id = '" .
+                            (int) $this->config->get("config_customer_group_id") .
+                            "'",
+                    );
+
+                    if ($variant_group_price_query->num_rows && (float)$variant_group_price_query->row["price"] > 0) {
+                        $has_variant_group_price = true;
                     }
                 }
 
@@ -721,6 +737,8 @@ class Cart
 
                     if ($has_customer_group_price) {
                         // Per-product group price set — skip global % discount/markup
+                    } elseif ($has_variant_group_price) {
+                        // Variant-level group price set — skip global % discount/markup
                     } elseif ($customer_group_discount > 0) {
                         $price *= (100 - $customer_group_discount) / 100;
                     } elseif ($customer_group_markup > 0) {
