@@ -251,6 +251,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('catalog/product');
 
 		$order_product_discounts = $this->model_sale_order->getOrderProductDiscounts($order_id);
+		$order_product_overrides = $this->model_sale_order->getOrderProductOverrides($order_id);
 		$products = $this->model_sale_order->getOrderProducts($order_id);
 		$data['products'] = [];
 		$data['product_count'] = count($products);
@@ -281,6 +282,10 @@ class ControllerSaleOrderDetail extends Controller {
 			$quantity = max(1, (int)$product['quantity']);
 			$unit_tax = $product['tax'] / $quantity;
 
+			// Gift lines are zero-price product lines; exclude products with
+			// "call for price" (also zero price) from the gift badge.
+			$is_gift = (float)$product['price'] == 0 && (float)$product['total'] == 0 && (int)$product['reward'] == 0 && !empty($product_info) && empty($product_info['call_for_price']);
+
 			$data['products'][] = [
 				'order_product_id' => $product['order_product_id'],
 				'product_id'       => $product['product_id'],
@@ -295,6 +300,8 @@ class ControllerSaleOrderDetail extends Controller {
 				'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 				'total_raw'        => $product['total'],
 				'discount_percent' => $order_product_discounts[(int)$product['order_product_id']] ?? 0,
+				'price_override'   => isset($order_product_overrides[(int)$product['order_product_id']]),
+				'is_gift'          => $is_gift,
 				'thumb'            => $thumb,
 				'href'             => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true),
 			];
@@ -1237,6 +1244,62 @@ class ControllerSaleOrderDetail extends Controller {
 					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
 					$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
 				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function restoreCatalogPrice(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$order_product_id = (int)($this->request->post['order_product_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$restored = $this->model_sale_order->restoreOrderProductPrice($order_product_id, $order_id);
+
+			if ($restored) {
+				$recalc = $this->model_sale_order->recalculateOrderTotals($order_id);
+
+				$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
+
+				$order_info = $this->model_sale_order->getOrder($order_id);
+
+				$product = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE order_product_id = '" . (int)$order_product_id . "' AND order_id = '" . (int)$order_id . "'")->row;
+
+				if (!$product) {
+					$json['error'] = $this->language->get('error_action');
+				}
+
+				if ($product && !isset($json['error'])) {
+					$json['success'] = $this->language->get('text_order_saved');
+					$json['product_total'] = $this->currency->format(
+						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
+						$order_info['currency_code'],
+						$order_info['currency_value']
+					);
+					$json['product_price'] = $this->currency->format(
+						$product['price'],
+						$order_info['currency_code'],
+						$order_info['currency_value']
+					);
+					$json['price_raw'] = $product['price'];
+					$json['tax_raw'] = $product['tax'];
+					$json['total_raw'] = $product['total'];
+					$json['product_quantity'] = (int)$product['quantity'];
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+					$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
+				}
+			} else {
+				$json['error'] = $this->language->get('error_action');
 			}
 		}
 
