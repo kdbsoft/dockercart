@@ -17,8 +17,10 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 
 		$product_ids = $this->model_account_viewed->getViewedProductIds(10);
 
+		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', $product_ids));
+
 		foreach ($product_ids as $product_id) {
-			$product_info = $this->model_catalog_product->getProduct((int)$product_id);
+			$product_info = isset($products_info[(int)$product_id]) ? $products_info[(int)$product_id] : false;
 
 			if (!$product_info) {
 				continue;

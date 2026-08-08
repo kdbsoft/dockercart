@@ -126,9 +126,14 @@ class ControllerAccountOrder extends Controller {
 
 		$flow = $this->buildOrderFlowData();
 
+		// Bulk item counts for all orders on the page (one query each instead of per-order)
+		$order_ids = array_map('intval', array_column($results, 'order_id'));
+		$products_count = $order_ids ? $this->model_account_order->getTotalOrderProductsByOrderIds($order_ids) : array();
+		$vouchers_count = $order_ids ? $this->model_account_order->getTotalOrderVouchersByOrderIds($order_ids) : array();
+
 		foreach ($results as $result) {
-			$product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
-			$voucher_total = $this->model_account_order->getTotalOrderVouchersByOrderId($result['order_id']);
+			$product_total = isset($products_count[(int)$result['order_id']]) ? $products_count[(int)$result['order_id']] : 0;
+			$voucher_total = isset($vouchers_count[(int)$result['order_id']]) ? $vouchers_count[(int)$result['order_id']] : 0;
 			$payment_status = $this->model_account_order->getPaymentStatus($result['total'], $result['paid_amount']);
 
 			$data['orders'][] = array(
@@ -345,10 +350,18 @@ class ControllerAccountOrder extends Controller {
 
 			$products = $this->model_account_order->getOrderProducts($this->request->get['order_id']);
 
+			$options_map = $this->model_account_order->getOrderOptionsByOrderProductIds($this->request->get['order_id'], array_column($products, 'order_product_id'));
+
+			$product_info_map = array();
+
+			if ($products) {
+				$product_info_map = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($products, 'product_id')));
+			}
+
 			foreach ($products as $product) {
 				$option_data = array();
 
-				$options = $this->model_account_order->getOrderOptions($this->request->get['order_id'], $product['order_product_id']);
+				$options = isset($options_map[(int)$product['order_product_id']]) ? $options_map[(int)$product['order_product_id']] : array();
 
 				foreach ($options as $option) {
 					if ($option['type'] == 'file') {
@@ -369,7 +382,7 @@ class ControllerAccountOrder extends Controller {
 					);
 				}
 
-				$product_info = $this->model_catalog_product->getProduct($product['product_id']);
+				$product_info = isset($product_info_map[(int)$product['product_id']]) ? $product_info_map[(int)$product['product_id']] : false;
 
 				if ($product_info) {
 					$reorder = $this->url->link('account/order/reorder', 'order_id=' . $order_id . '&order_product_id=' . $product['order_product_id'], true);

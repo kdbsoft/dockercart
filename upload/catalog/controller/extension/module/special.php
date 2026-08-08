@@ -31,8 +31,10 @@ class ControllerExtensionModuleSpecial extends Controller {
 		$results = $this->model_catalog_product->getProductSpecials($filter_data);
 
 		if ($results) {
+			$product_categories_map = $this->model_catalog_category->getProductCategoryNames(array_keys($results));
+
 			foreach ($results as $result) {
-				$product_info = $this->model_catalog_product->getProduct($result['product_id']);
+				$product_info = $result;
 				if (!$product_info) {
 					continue;
 				}
@@ -89,14 +91,9 @@ class ControllerExtensionModuleSpecial extends Controller {
 				}
 
 				$category_name = '';
-				$product_categories = $this->model_catalog_product->getCategories($product_info['product_id']);
 
-				if (!empty($product_categories[0]['category_id'])) {
-					$category_info = $this->model_catalog_category->getCategory((int)$product_categories[0]['category_id']);
-
-					if ($category_info && !empty($category_info['name'])) {
-						$category_name = $category_info['name'];
-					}
+				if (isset($product_categories_map[(int)$product_info['product_id']])) {
+					$category_name = $product_categories_map[(int)$product_info['product_id']]['name'];
 				}
 
 				$data['products'][] = array(
