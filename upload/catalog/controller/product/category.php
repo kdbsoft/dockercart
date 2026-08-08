@@ -582,6 +582,7 @@ class ControllerProductCategory extends Controller {
 			$data['text_quick_view'] = $this->language->get('text_quick_view');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
+		$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 			$data['text_category_description'] = $this->language->get('text_category_description');
 			$data['text_shop_by'] = $this->language->get('text_shop_by');
 			$data['text_model'] = $this->language->get('text_model');
@@ -593,6 +594,7 @@ class ControllerProductCategory extends Controller {
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 			$data['call_for_price_phone'] = $this->config->get('config_telephone');
+			$data['call_for_price_mode'] = ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request';
 
 			// Load-more AJAX
 			$lm_params = 'path=' . $this->request->get['path'] . '&sort=' . $sort . '&order=' . $order . '&limit=' . $limit;
@@ -1040,12 +1042,14 @@ class ControllerProductCategory extends Controller {
 				'text_sale'        => '',
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
+				'text_call_for_price_request' => $this->language->get('text_call_for_price_request'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-blue-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
 				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
 				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
 				'call_for_price_phone' => $this->config->get('config_telephone'),
+				'call_for_price_mode' => ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request',
 			));
 		}
 

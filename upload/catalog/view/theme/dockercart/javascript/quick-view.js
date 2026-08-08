@@ -219,6 +219,7 @@
 
       // Call for price handling
       var isCfp = card.dataset.callForPrice === '1';
+      var cfpMode = (window.dcLang && window.dcLang.call_for_price_mode) || 'request';
 
       var priceWrap = document.getElementById('qv-price-wrap');
       var addBtn = document.getElementById('qv-add-btn');
@@ -232,11 +233,26 @@
         if (savingsEl) savingsEl.style.display = 'none';
         if (addBtn) addBtn.classList.add('hidden');
         if (callBtn) {
-          var phone = (window.dcLang && window.dcLang.call_for_price_phone) || '';
-          callBtn.href = 'tel:' + phone;
           callBtn.classList.remove('hidden');
           if (callText) {
-            callText.textContent = (window.dcLang && window.dcLang.text_call_for_price) ? window.dcLang.text_call_for_price : 'Contact for price';
+            if (cfpMode === 'request') {
+              callText.textContent = (window.dcLang && window.dcLang.text_call_for_price_request) ? window.dcLang.text_call_for_price_request : 'Request price';
+            } else {
+              callText.textContent = (window.dcLang && window.dcLang.text_call_for_price) ? window.dcLang.text_call_for_price : 'Contact for price';
+            }
+          }
+          if (cfpMode === 'call') {
+            // Phone link mode
+            var phone = (window.dcLang && window.dcLang.call_for_price_phone) || '';
+            callBtn.setAttribute('href', 'tel:' + phone);
+            var callIcon = callBtn.querySelector('i[data-lucide]');
+            if (callIcon) callIcon.setAttribute('data-lucide', 'phone');
+          } else {
+            // Request mode: the button becomes a trigger for cfp-request.js
+            callBtn.setAttribute('data-dc-cfp-request', '');
+            callBtn.setAttribute('data-product-id', productId);
+            var callIcon2 = callBtn.querySelector('i[data-lucide]');
+            if (callIcon2) callIcon2.setAttribute('data-lucide', 'message-circle-question');
           }
         }
       } else {
@@ -372,7 +388,7 @@
       <div class="flex gap-3 mt-4">
         <button id="qv-add-btn" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200">Add to Cart</button>
         <a id="qv-call-btn" href="tel:" class="hidden flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md shadow-blue-200 inline-flex items-center justify-center gap-2 whitespace-nowrap">
-          <i data-lucide="phone" class="w-4 h-4"></i>
+          <i data-lucide="message-circle-question" class="w-4 h-4"></i>
           <span id="qv-call-text">Contact for price</span>
         </a>
         <button id="qv-wishlist-btn" class="w-11 h-11 rounded-xl border border-gray-200 hover:border-rose-300 hover:bg-rose-50 flex items-center justify-center transition flex-shrink-0">

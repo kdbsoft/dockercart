@@ -101,9 +101,25 @@
   window.dcLang.button_cart = {{ button_cart ? '"' ~ button_cart|e('js') ~ '"' : '"Add to Cart"' }};
   window.dcLang.text_you_save = {{ text_you_save ? '"' ~ text_you_save|e('js') ~ '"' : '"You Save"' }};
   window.dcLang.text_call_for_price = {{ text_call_for_price ? '"' ~ text_call_for_price|e('js') ~ '"' : '"Contact for price"' }};
+  window.dcLang.text_call_for_price_request = {{ text_call_for_price_request ? '"' ~ text_call_for_price_request|e('js') ~ '"' : '"Request price"' }};
   window.dcLang.text_view_full_product = {{ text_view_full_product ? '"' ~ text_view_full_product|e('js') ~ '"' : '"View Full Product"' }};
   window.dcLang.call_for_price_phone = {{ call_for_price_phone ? '"' ~ call_for_price_phone|e('js') ~ '"' : '""' }};
   window.dcLang.call_for_price_status = {{ call_for_price_status is defined ? call_for_price_status|json_encode|raw : 0 }};
+  window.dcLang.call_for_price_mode = {{ call_for_price_mode is defined ? (call_for_price_mode == 'call' ? '"call"' : '"request"') : '"request"' }};
+  window.dcLang.cfp_request_title = {{ text_cfp_request_title ? '"' ~ text_cfp_request_title|e('js') ~ '"' : '"Price request"' }};
+  window.dcLang.cfp_request_name = {{ text_cfp_request_name ? '"' ~ text_cfp_request_name|e('js') ~ '"' : '"Name"' }};
+  window.dcLang.cfp_request_phone = {{ text_cfp_request_phone ? '"' ~ text_cfp_request_phone|e('js') ~ '"' : '"Phone"' }};
+  window.dcLang.cfp_request_email = {{ text_cfp_request_email ? '"' ~ text_cfp_request_email|e('js') ~ '"' : '"E-mail"' }};
+  window.dcLang.cfp_request_comment = {{ text_cfp_request_comment ? '"' ~ text_cfp_request_comment|e('js') ~ '"' : '"Comment"' }};
+  window.dcLang.cfp_request_quantity = {{ text_cfp_request_quantity ? '"' ~ text_cfp_request_quantity|e('js') ~ '"' : '"Quantity"' }};
+  window.dcLang.cfp_request_submit = {{ text_cfp_request_submit ? '"' ~ text_cfp_request_submit|e('js') ~ '"' : '"Send request"' }};
+  window.dcLang.cfp_request_loading = {{ text_cfp_request_loading ? '"' ~ text_cfp_request_loading|e('js') ~ '"' : '"Sending..."' }};
+  window.dcLang.cfp_request_close = {{ text_cfp_request_close ? '"' ~ text_cfp_request_close|e('js') ~ '"' : '"Close"' }};
+  window.dcLang.cfp_request_error_name = {{ text_cfp_request_error_name ? '"' ~ text_cfp_request_error_name|e('js') ~ '"' : '"Please enter your name"' }};
+  window.dcLang.cfp_request_error_phone = {{ text_cfp_request_error_phone ? '"' ~ text_cfp_request_error_phone|e('js') ~ '"' : '"Please enter a valid phone number"' }};
+  window.dcLang.cfp_request_error_email = {{ text_cfp_request_error_email ? '"' ~ text_cfp_request_error_email|e('js') ~ '"' : '"Please enter a valid e-mail"' }};
+  window.dcLang.cfp_request_error_general = {{ text_cfp_request_error_general ? '"' ~ text_cfp_request_error_general|e('js') ~ '"' : '"Something went wrong. Please try again."' }};
+  window.dcLang.telephone_mask = {{ telephone_mask ? '"' ~ telephone_mask|e('js') ~ '"' : '""' }};
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
   window.dcCompareIds = {{ compare_product_ids is defined ? compare_product_ids|json_encode|raw : '[]' }};
 </script>

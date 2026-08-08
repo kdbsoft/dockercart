@@ -67,6 +67,7 @@ $_['text_tax'] = 'Без ПДВ:';
 $_['text_total'] = 'Сума:';
 $_['text_sale'] = 'Розпродаж';
 $_['text_call_for_price'] = 'Уточнити ціну';
+$_['text_call_for_price_request'] = 'Запит ціни';
 $_['text_you_save'] = 'Ви заощадите';
 $_['text_sale_ends_in'] = 'Акція закінчується через';
 $_['text_timer_days'] = 'дн';

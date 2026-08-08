@@ -17,6 +17,7 @@ $_['text_discount']            = ' or more ';
 $_['text_option']              = 'Available Options';
 $_['text_sale']                = 'Sale';
 $_['text_call_for_price']      = 'Contact for price';
+$_['text_call_for_price_request'] = 'Request price';
 $_['text_you_save']            = 'You Save';
 $_['text_sale_ends_in']        = 'Sale ends in';
 $_['text_timer_days']          = 'days';

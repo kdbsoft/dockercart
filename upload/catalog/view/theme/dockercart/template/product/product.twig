@@ -201,10 +201,17 @@
         {% if price %}
         <div class="mt-5">
           {% if show_call_for_price %}
+            {% if call_for_price_mode is defined and call_for_price_mode == 'call' %}
             <a href="tel:{{ call_for_price_phone }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-base font-bold rounded-xl hover:bg-blue-700 active:bg-blue-800 transition shadow-sm shadow-blue-200">
               <i data-lucide="phone" class="w-5 h-5"></i>
               {{ text_call_for_price|default('Contact for price') }}
             </a>
+            {% else %}
+            <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-base font-bold rounded-xl hover:bg-blue-700 active:bg-blue-800 transition shadow-sm shadow-blue-200" data-dc-cfp-request data-product-id="{{ product_id }}">
+              <i data-lucide="message-circle-question" class="w-5 h-5"></i>
+              {{ text_call_for_price_request|default('Request price') }}
+            </button>
+            {% endif %}
           {% elseif not special %}
             <div class="flex items-baseline gap-3 flex-wrap" id="dc-price-regular">
               <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
