@@ -69,7 +69,7 @@
                     {{ text_call_for_price|default('Contact for price') }}
                   </a>
                   {% else %}
-                  <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm" data-dc-cfp-request data-product-id="{{ product.product_id }}" onclick="event.stopPropagation();">
+                  <button type="button" class="dc-cfp-request-btn inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm" data-dc-cfp-request data-product-id="{{ product.product_id }}">
                     <i data-lucide="message-circle-question" class="w-3.5 h-3.5"></i>
                     {{ text_call_for_price_request|default('Request price') }}
                   </button>

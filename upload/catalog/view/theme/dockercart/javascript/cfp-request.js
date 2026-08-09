@@ -340,6 +340,8 @@
     buildModal();
     refreshIcons();
 
+    // Capture phase: fire before inline onclick handlers (e.g. a card's
+    // "go to product" navigation) so the modal opens instead of a redirect.
     document.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-dc-cfp-request]');
       if (btn) {
@@ -352,7 +354,7 @@
       if (close) {
         closeModal();
       }
-    });
+    }, true);
 
     var form = modal.querySelector('#dc-cfp-form');
     if (form) form.addEventListener('submit', handleSubmit);
