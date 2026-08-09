@@ -195,10 +195,23 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             'module_dockercart_search_autocomplete_limit' => 10,
             'module_dockercart_search_min_chars' => 2,
             'module_dockercart_search_results_limit' => 20,
+            'module_dockercart_search_admin_fallback' => 1,
             'module_dockercart_search_query_mappings' => ''
         ]);
 
         $this->logger->info('Module installed successfully');
+
+        // Register scheduled Manticore reindex task (daily).
+        // Manticore stores RT indexes in a tmpfs volume — they are wiped on
+        // container restart, so a periodic reindex keeps them warm even when
+        // the boot-time background reindex does not run.
+        $this->dockercart_scheduler->registerTask(
+            'manticore_search_reindex',
+            'Manticore Search Reindex',
+            'php /var/www/html/bin/dockercart_search_reindex.php',
+            'daily',
+            true
+        );
     }
 
     /**

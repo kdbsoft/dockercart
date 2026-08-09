@@ -1523,7 +1523,41 @@ class ControllerCustomerCustomer extends Controller {
 				'limit'            => 5
 			);
 
-			$results = $this->model_customer_customer->getCustomers($filter_data);
+			// Affiliate filter has no Manticore equivalent → always use SQL
+			if (!empty($filter_affiliate)) {
+				$results = $this->model_customer_customer->getCustomers($filter_data);
+			} else {
+				$this->load->model('common/admin_search');
+
+				// Manticore path: single search over name/email/phone.
+				$search_query = trim($filter_name . ' ' . $filter_email);
+				$manticore = $search_query !== '' ? $this->model_common_admin_search->searchEntity('customer', $search_query, array('limit' => 5)) : false;
+
+				if ($manticore === false) {
+					// Fallback: Manticore unavailable → SQL LIKE path
+					$results = $this->model_customer_customer->getCustomers($filter_data);
+				} else {
+					$results = array();
+
+					foreach ($manticore['results'] as $result) {
+						$row = $result['row'];
+
+						$results[] = array(
+							'customer_id'       => $result['id'],
+							'customer_group_id' => (int)($row['customer_group_id'] ?? 0),
+							'name'              => trim(($row['firstname'] ?? '') . ' ' . ($row['lastname'] ?? '')),
+							'customer_group'    => $row['customer_group_name'] ?? '',
+							'firstname'         => $row['firstname'] ?? '',
+							'lastname'          => $row['lastname'] ?? '',
+							'email'             => $row['email'] ?? '',
+							'telephone'         => $row['telephone'] ?? '',
+							'tax_number'        => '',
+							'custom_field'      => '[]',
+							'address'           => $this->model_customer_customer->getAddresses($result['id'])
+						);
+					}
+				}
+			}
 
 			foreach ($results as $result) {
 				$json[] = array(

@@ -956,29 +956,48 @@ class ControllerSaleOrder extends Controller {
 		}
 
 		if ($filter_search !== '') {
-			$this->load->model('sale/order');
+			$this->load->model('common/admin_search');
 
-			$is_numeric = ctype_digit($filter_search);
+			$manticore = $this->model_common_admin_search->searchEntity('order', $filter_search, array('limit' => 8));
 
-			$filter_data = array(
-				'filter_order_id'  => $is_numeric ? $filter_search : '',
-				'filter_customer'  => $is_numeric ? '' : $filter_search,
-				'sort'             => 'o.order_id',
-				'order'            => 'DESC',
-				'start'            => 0,
-				'limit'            => 8
-			);
+			if ($manticore === false) {
+				// Fallback: Manticore unavailable → SQL LIKE path
+				$this->load->model('sale/order');
 
-			$results = $this->model_sale_order->getOrders($filter_data);
+				$is_numeric = ctype_digit($filter_search);
 
-			foreach ($results as $result) {
-				$json[] = array(
-					'id'       => '#' . $result['order_id'],
-					'name'     => $result['customer'],
-					'subtitle' => date($this->language->get('datetime_format'), strtotime($result['date_added'])) . ' · ' . ($result['order_status'] ? $result['order_status'] : $this->language->get('text_missing')),
-					'meta'     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
-					'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true)
+				$filter_data = array(
+					'filter_order_id'  => $is_numeric ? $filter_search : '',
+					'filter_customer'  => $is_numeric ? '' : $filter_search,
+					'sort'             => 'o.order_id',
+					'order'            => 'DESC',
+					'start'            => 0,
+					'limit'            => 8
 				);
+
+				$results = $this->model_sale_order->getOrders($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => '#' . $result['order_id'],
+						'name'     => $result['customer'],
+						'subtitle' => date($this->language->get('datetime_format'), strtotime($result['date_added'])) . ' · ' . ($result['order_status'] ? $result['order_status'] : $this->language->get('text_missing')),
+						'meta'     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+						'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true)
+					);
+				}
+			} else {
+				foreach ($manticore['results'] as $result) {
+					$row = $result['row'];
+
+					$json[] = array(
+						'id'       => '#' . $result['id'],
+						'name'     => trim(($row['firstname'] ?? '') . ' ' . ($row['lastname'] ?? '')),
+						'subtitle' => date($this->language->get('datetime_format'), (int)($row['date_added'] ?? 0)) . ' · ' . ($row['order_status_name'] ? $row['order_status_name'] : $this->language->get('text_missing')),
+						'meta'     => $this->currency->format((float)($row['total'] ?? 0), $row['currency_code'] ?? $this->config->get('config_currency'), $this->currency->getValue($row['currency_code'] ?? $this->config->get('config_currency'))),
+						'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['id'], true)
+					);
+				}
 			}
 		}
 

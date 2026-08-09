@@ -2533,6 +2533,15 @@ class ModelCatalogProduct extends Model
                 "%')";
         }
 
+        if (!empty($data["filter_product_ids"])) {
+            $product_ids = array_map("intval", (array) $data["filter_product_ids"]);
+
+            if ($product_ids) {
+                $where .=
+                    " AND p.product_id IN (" . implode(",", $product_ids) . ")";
+            }
+        }
+
         if (!empty($data["filter_manufacturer"])) {
             $joins .=
                 " LEFT JOIN " .
