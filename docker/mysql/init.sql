@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.8.8-MariaDB, for debian-linux-gnu (x86_64)
+-- MariaDB dump 10.19-12.3.2-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: dockercart
 -- ------------------------------------------------------
--- Server version	11.8.8-MariaDB-ubu2404
+-- Server version	12.3.2-MariaDB-ubu2404
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -54,219 +54,33 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
--- Table structure for table `oc_api`
+-- Table structure for table `oc_admin_filter`
 --
 
-DROP TABLE IF EXISTS `oc_api`;
+DROP TABLE IF EXISTS `oc_admin_filter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_api` (
-  `api_id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(64) NOT NULL,
-  `key` mediumtext NOT NULL,
-  `status` tinyint(1) NOT NULL,
+CREATE TABLE `oc_admin_filter` (
+  `filter_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `entity` varchar(64) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `conditions` text NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL,
-  `date_modified` datetime NOT NULL,
-  PRIMARY KEY (`api_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  PRIMARY KEY (`filter_id`),
+  KEY `idx_admin_filter_user_entity` (`user_id`,`entity`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `oc_api`
+-- Dumping data for table `oc_admin_filter`
 --
 
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_api` WRITE;
-/*!40000 ALTER TABLE `oc_api` DISABLE KEYS */;
-INSERT INTO `oc_api` VALUES
-(3,'Default','558a270743dc11f19007c2d192a9df58',1,'2026-04-29 15:01:43','2026-04-29 15:01:43');
-/*!40000 ALTER TABLE `oc_api` ENABLE KEYS */;
-UNLOCK TABLES;
-COMMIT;
-SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
-
---
--- Table structure for table `oc_api_ip`
---
-
-DROP TABLE IF EXISTS `oc_api_ip`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_api_ip` (
-  `api_ip_id` int(11) NOT NULL AUTO_INCREMENT,
-  `api_id` int(11) NOT NULL,
-  `ip` varchar(40) NOT NULL,
-  PRIMARY KEY (`api_ip_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `oc_api_ip`
---
-
-SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_api_ip` WRITE;
-/*!40000 ALTER TABLE `oc_api_ip` DISABLE KEYS */;
-INSERT INTO `oc_api_ip` VALUES
-(1,1,'172.19.0.2'),
-(2,1,'172.19.0.3'),
-(3,1,'172.19.0.6'),
-(4,1,'172.19.0.4'),
-(5,1,'172.22.0.7'),
-(6,2,'172.20.0.6'),
-(7,3,'10.89.1.6'),
-(8,3,'10.89.1.7'),
-(9,3,'10.89.2.7'),
-(10,3,'10.89.2.8'),
-(11,3,'10.89.3.8');
-/*!40000 ALTER TABLE `oc_api_ip` ENABLE KEYS */;
-UNLOCK TABLES;
-COMMIT;
-SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
-
---
--- Table structure for table `oc_api_session`
---
-
-DROP TABLE IF EXISTS `oc_api_session`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_api_session` (
-  `api_session_id` int(11) NOT NULL AUTO_INCREMENT,
-  `api_id` int(11) NOT NULL,
-  `session_id` varchar(32) NOT NULL,
-  `ip` varchar(40) NOT NULL,
-  `date_added` datetime NOT NULL,
-  `date_modified` datetime NOT NULL,
-  PRIMARY KEY (`api_session_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1139 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `oc_api_session`
---
-
-SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_api_session` WRITE;
-/*!40000 ALTER TABLE `oc_api_session` DISABLE KEYS */;
-INSERT INTO `oc_api_session` VALUES
-(1023,3,'964b4f349c240396aff9ce8215','10.89.1.7','2026-07-09 15:40:01','2026-07-09 15:40:03'),
-(1024,3,'fea4515196f009bdf19e1866f5','10.89.1.7','2026-07-09 15:40:03','2026-07-09 15:40:03'),
-(1025,3,'af8556befef4a77bd804954cbd','10.89.1.7','2026-07-15 09:15:59','2026-07-15 09:15:59'),
-(1026,3,'ccefe09565672a9817da36d201','10.89.1.7','2026-07-15 09:22:17','2026-07-15 09:22:17'),
-(1027,3,'3ed8e2b5e380e35616f4e857bd','10.89.1.7','2026-07-15 15:38:18','2026-07-15 15:38:18'),
-(1028,3,'85329cdc5d9c558f3b57170efc','10.89.1.7','2026-07-15 15:57:46','2026-07-15 15:57:46'),
-(1029,3,'f1c3c8e72c4eecd7cb97d5a1ce','10.89.1.7','2026-07-17 15:37:08','2026-07-17 15:37:08'),
-(1030,3,'051f62f87cbe59d93d846a1d82','10.89.1.7','2026-07-17 16:42:46','2026-07-17 16:42:46'),
-(1031,3,'d41967f699fdb86f45c5bd6ced','10.89.1.7','2026-07-17 16:42:55','2026-07-17 16:42:55'),
-(1032,3,'ea61227d1d17038ba4740ed6d7','10.89.1.7','2026-07-18 17:04:14','2026-07-18 17:04:14'),
-(1033,3,'c7c103068b87a217928af53c96','10.89.1.7','2026-07-18 17:27:07','2026-07-18 17:27:07'),
-(1034,3,'e1bca56cb25f24c74da503953f','10.89.1.7','2026-07-18 18:03:43','2026-07-18 18:03:43'),
-(1035,3,'b595b82ac09bc91d54b6bcbb27','10.89.1.7','2026-07-18 18:07:02','2026-07-18 18:07:02'),
-(1036,3,'b0fff6bdbda82bb1c744a7bba5','10.89.1.7','2026-07-18 18:07:23','2026-07-18 18:07:23'),
-(1037,3,'877896218a7ad6147820da7017','10.89.1.7','2026-07-19 09:53:55','2026-07-19 09:53:55'),
-(1038,3,'a8f949fbcb0c67ea617c0d18ab','10.89.1.7','2026-07-21 14:22:32','2026-07-21 14:22:32'),
-(1039,3,'b8864c8d8171827f769d1084b6','10.89.1.7','2026-07-21 15:43:41','2026-07-21 15:43:41'),
-(1040,3,'80df76a1eb8d3ec02460147d82','10.89.1.7','2026-07-21 15:43:50','2026-07-21 15:43:50'),
-(1041,3,'6165e88e3e226290d2f20d463d','10.89.1.7','2026-07-21 15:44:52','2026-07-21 15:44:52'),
-(1042,3,'77c9aec971a05200c134f31f17','10.89.1.7','2026-07-21 15:45:19','2026-07-21 15:45:19'),
-(1043,3,'1d329600905eaa010370bca397','10.89.1.7','2026-07-21 15:46:38','2026-07-21 15:46:38'),
-(1044,3,'824a70f5d43174b50d90b2be85','10.89.1.7','2026-07-21 15:46:48','2026-07-21 15:46:48'),
-(1045,3,'d176c53316fc572a9c0bc653db','10.89.1.7','2026-07-21 15:46:54','2026-07-21 15:46:54'),
-(1046,3,'d64ba943f91950ab8a9c1bf4f6','10.89.1.7','2026-07-21 15:46:55','2026-07-21 15:46:55'),
-(1047,3,'f34508944adfbf8be44f411e1f','10.89.1.7','2026-07-21 15:46:56','2026-07-21 15:46:56'),
-(1048,3,'4c5feab586cb2fc6b85eedc533','10.89.1.7','2026-07-21 15:47:11','2026-07-21 15:47:11'),
-(1049,3,'13dc9c5bfe40f1b9325668f053','10.89.1.7','2026-07-21 15:47:11','2026-07-21 15:47:11'),
-(1050,3,'3e2c843ef094f225c6f6aff554','10.89.1.7','2026-07-21 15:47:16','2026-07-21 15:47:16'),
-(1051,3,'ae65e2803906a6539f1ea4b4ec','10.89.1.7','2026-07-21 15:47:17','2026-07-21 15:47:17'),
-(1052,3,'2e290e6fc7b8a7696f8b49a4bc','10.89.1.7','2026-07-21 15:47:31','2026-07-21 15:47:31'),
-(1053,3,'afd26ada0dc340c16939120cb5','10.89.1.7','2026-07-21 15:47:32','2026-07-21 15:47:32'),
-(1054,3,'47ba1b8cdfae1cc4d50cd6ac43','10.89.1.7','2026-07-21 15:47:44','2026-07-21 15:47:44'),
-(1055,3,'09c130d4f55b6d0ad38e9d3c64','10.89.1.7','2026-07-21 15:47:45','2026-07-21 15:47:45'),
-(1056,3,'a03963ce2b3cdef04d33cdc68b','10.89.1.7','2026-07-21 15:47:46','2026-07-21 15:47:46'),
-(1057,3,'5fd84917181502741fddee4da4','10.89.1.7','2026-07-21 15:48:00','2026-07-21 15:48:00'),
-(1058,3,'5448ef5dd1a473e08f0b9a2e38','10.89.1.7','2026-07-21 15:48:46','2026-07-21 15:48:46'),
-(1059,3,'04bc00b28bc4e760a818c4bf74','10.89.1.7','2026-07-21 15:48:51','2026-07-21 15:48:51'),
-(1060,3,'1d4aa8bd0ad0c9975b784e80b2','10.89.1.7','2026-07-21 15:48:56','2026-07-21 15:48:56'),
-(1061,3,'ea4f6caeb0952b531f07ec8375','10.89.1.7','2026-07-21 15:48:58','2026-07-21 15:48:58'),
-(1062,3,'9c949ff58e6d9b24f73c4b8432','10.89.1.7','2026-07-21 15:50:08','2026-07-21 15:50:08'),
-(1063,3,'9be09acd66fc9e76f3203cff46','10.89.1.7','2026-07-21 15:51:34','2026-07-21 15:51:34'),
-(1064,3,'289c035acabd93fa1954cf7b9e','10.89.1.7','2026-07-21 15:51:59','2026-07-21 15:51:59'),
-(1065,3,'6ce3f5a79098a2df5ba3adbdcb','10.89.1.7','2026-07-21 15:55:52','2026-07-21 15:55:52'),
-(1066,3,'7b334eedf53480f8554f0cf244','10.89.1.7','2026-07-22 10:20:34','2026-07-22 10:20:34'),
-(1067,3,'a868a06406c9b96aaf43cc6298','10.89.1.7','2026-07-22 10:20:38','2026-07-22 10:20:38'),
-(1068,3,'ae68abf4bb27a41105d032fc59','10.89.1.7','2026-07-22 10:33:44','2026-07-22 10:33:44'),
-(1069,3,'877fa599224d969e8a04c9fc7f','10.89.1.7','2026-07-22 10:35:48','2026-07-22 10:35:48'),
-(1070,3,'807191adf643df7f0ce3cc2a94','10.89.1.7','2026-07-22 10:36:03','2026-07-22 10:36:03'),
-(1071,3,'c34475ee11e2604c7fea85cea5','10.89.1.7','2026-07-22 10:36:05','2026-07-22 10:36:05'),
-(1072,3,'54d7824867e41d45528ebac902','10.89.1.7','2026-07-22 10:36:05','2026-07-22 10:36:05'),
-(1073,3,'5f69943e3bf3107187573f202b','10.89.1.7','2026-07-22 10:36:45','2026-07-22 10:36:45'),
-(1074,3,'855c505d0371f1dfbe56e95fe2','10.89.1.7','2026-07-22 10:36:46','2026-07-22 10:36:46'),
-(1075,3,'29e8bfab0207a25fec85e84fa8','10.89.1.7','2026-07-22 10:36:46','2026-07-22 10:36:46'),
-(1076,3,'f3d5edab64f9a5b578464b9e10','10.89.1.7','2026-07-22 12:30:26','2026-07-22 12:30:26'),
-(1077,3,'e9c41feb55f4922ae6c9c68e2c','10.89.1.7','2026-07-22 18:46:10','2026-07-22 18:46:10'),
-(1078,3,'06c16193739a91383572f5bf24','10.89.1.7','2026-07-23 08:07:38','2026-07-23 08:07:38'),
-(1079,3,'95dfa614da220eaa302db5c98e','10.89.1.7','2026-07-23 08:07:47','2026-07-23 08:07:47'),
-(1080,3,'a343407b8a8308b67e4041b75b','10.89.1.7','2026-07-24 10:01:55','2026-07-24 10:01:55'),
-(1081,3,'ea716c112c73d4b88aca86f78a','10.89.1.7','2026-07-24 10:39:24','2026-07-24 10:39:24'),
-(1082,3,'cc6286afe68848ab1758eb1680','10.89.1.7','2026-07-24 11:16:59','2026-07-24 11:16:59'),
-(1083,3,'830e88d2a813959d4e52d02fe1','10.89.1.7','2026-07-24 11:19:03','2026-07-24 11:19:03'),
-(1084,3,'d92fc6448d2a847763a696d2d4','10.89.1.7','2026-07-24 16:48:04','2026-07-24 16:48:04'),
-(1085,3,'a43289cc25a9574312682b3d17','10.89.1.7','2026-07-26 21:08:22','2026-07-26 21:08:22'),
-(1086,3,'2fd3a179930c1476b8fd4636fa','10.89.1.7','2026-07-26 21:17:07','2026-07-26 21:17:07'),
-(1087,3,'8062afbb53de413f6adfe275e3','10.89.1.7','2026-07-26 21:17:13','2026-07-26 21:17:13'),
-(1088,3,'618a79bb58b1e15348ea1033db','10.89.1.7','2026-07-26 21:17:47','2026-07-26 21:17:47'),
-(1089,3,'a4141c9c8ec4f737fb7f906fc2','10.89.1.7','2026-07-26 21:18:40','2026-07-26 21:18:40'),
-(1090,3,'b1baa71a26d87f3e15da6f7fd1','10.89.1.7','2026-07-26 21:19:43','2026-07-26 21:19:43'),
-(1091,3,'e872a29adde1c229bf028db7ee','10.89.1.7','2026-07-26 21:20:02','2026-07-26 21:20:02'),
-(1092,3,'0a721af10fb96c1db57f5213dc','10.89.1.7','2026-07-26 21:20:04','2026-07-26 21:20:04'),
-(1093,3,'3a78a67507be9eb0895432a31c','10.89.1.7','2026-07-26 21:20:05','2026-07-26 21:20:05'),
-(1094,3,'840cc56e586b65b253fb3b0550','10.89.1.7','2026-07-26 21:20:22','2026-07-26 21:20:22'),
-(1095,3,'45e8e76cdc15919d8f32fbc847','10.89.1.7','2026-07-26 21:20:22','2026-07-26 21:20:22'),
-(1096,3,'0667de0945fc78ef64e2f98cd8','10.89.1.7','2026-07-26 21:20:33','2026-07-26 21:20:33'),
-(1097,3,'b0d6edf52a73b19643574aab3b','10.89.1.7','2026-07-26 21:20:33','2026-07-26 21:20:33'),
-(1098,3,'3f84977dedd0179ec10b4ba593','10.89.1.7','2026-07-26 21:20:43','2026-07-26 21:20:43'),
-(1099,3,'6de81bb78f0029a26d7ea19217','10.89.1.7','2026-07-26 21:20:56','2026-07-26 21:20:56'),
-(1100,3,'5692dfbce91bc76bc2e4ce6647','10.89.1.7','2026-07-26 21:21:29','2026-07-26 21:21:29'),
-(1101,3,'c6a31e3f30dc36d10140bb9eb6','10.89.1.7','2026-07-26 21:21:29','2026-07-26 21:21:29'),
-(1102,3,'3ad4ecc590f93da422f162f782','10.89.1.7','2026-07-26 21:21:37','2026-07-26 21:21:37'),
-(1103,3,'93298198ac14f1b8b433f7ba82','10.89.1.7','2026-07-26 21:21:38','2026-07-26 21:21:38'),
-(1104,3,'5ad4fd7d24652d37ac9ce87886','10.89.1.7','2026-07-26 21:24:54','2026-07-26 21:24:54'),
-(1105,3,'6f917bf81fc32ad6f4936bae5d','10.89.1.7','2026-07-26 21:24:55','2026-07-26 21:24:55'),
-(1106,3,'9a8c21954ba7416efe222267fa','10.89.1.7','2026-07-26 21:27:06','2026-07-26 21:27:06'),
-(1107,3,'91daaa19b0012bdb8aee7e0628','10.89.1.7','2026-07-26 21:28:36','2026-07-26 21:28:36'),
-(1108,3,'3abe69d7982b2c671653f7b3d1','10.89.1.7','2026-07-26 21:29:03','2026-07-26 21:29:03'),
-(1109,3,'b1f522646f8fb9a40c41cfbc1b','10.89.1.7','2026-07-26 21:29:09','2026-07-26 21:29:09'),
-(1110,3,'7b856a919fd5efd20295a77cef','10.89.1.7','2026-07-26 21:31:43','2026-07-26 21:31:43'),
-(1111,3,'ec5c24530307e5f25e7e82065d','10.89.1.7','2026-07-26 21:32:57','2026-07-26 21:32:57'),
-(1112,3,'eb1a299d2531c882b8aebbea64','10.89.1.7','2026-07-27 08:37:52','2026-07-27 08:37:52'),
-(1113,3,'52efc3ec2b1b6de11774730d66','10.89.1.7','2026-07-27 08:54:57','2026-07-27 08:54:57'),
-(1114,3,'19328505d57eba3704a0db684c','10.89.1.7','2026-07-27 09:17:15','2026-07-27 09:17:15'),
-(1115,3,'c34cb0ccdc17e1b5d9147da52e','10.89.1.7','2026-07-27 09:25:49','2026-07-27 09:25:49'),
-(1116,3,'a609308f9a18e1b141a7c65314','10.89.1.7','2026-07-27 09:26:02','2026-07-27 09:26:02'),
-(1117,3,'a93a62194a8e8c139b4aae36da','10.89.1.7','2026-07-27 10:45:40','2026-07-27 10:45:40'),
-(1118,3,'a13efd8919df6000b621e8b078','10.89.1.7','2026-07-27 11:40:56','2026-07-27 11:40:56'),
-(1119,3,'a23981a1eaa4549cf635c5d143','10.89.1.7','2026-07-27 12:33:56','2026-07-27 12:33:56'),
-(1120,3,'39e74a5da87614c0a5184a256d','10.89.1.7','2026-07-27 12:34:10','2026-07-27 12:34:10'),
-(1121,3,'9d3131ef77b3361b36e693a78d','10.89.1.7','2026-07-27 13:10:30','2026-07-27 13:10:30'),
-(1122,3,'c28b899552635c5b30f6b966ed','10.89.1.7','2026-07-27 13:17:16','2026-07-27 13:17:16'),
-(1123,3,'30ec7367f0b409ad5bb26600f8','10.89.1.7','2026-07-27 14:51:32','2026-07-27 14:51:32'),
-(1124,3,'75b62107879e80f889209887ae','10.89.1.7','2026-07-27 14:58:29','2026-07-27 14:58:29'),
-(1125,3,'ed9d7918c4fb82584019a58b4a','10.89.1.7','2026-07-27 15:09:55','2026-07-27 15:09:55'),
-(1126,3,'0843ee0a5374a585aed3ba91ce','10.89.1.7','2026-07-27 17:23:48','2026-07-27 17:23:48'),
-(1127,3,'1a9f3cb3c5bc0b5e2693bcaadf','10.89.1.7','2026-07-27 17:25:17','2026-07-27 17:25:17'),
-(1128,3,'e19d058a4e7178c0069ec7a3b3','10.89.1.7','2026-07-27 17:50:28','2026-07-27 17:50:28'),
-(1129,3,'385c65f2f9a606c9772f19c227','10.89.1.7','2026-07-28 09:30:56','2026-07-28 09:30:56'),
-(1130,3,'972ba05ad3a478ac4ff510c11e','10.89.1.7','2026-07-28 09:40:29','2026-07-28 09:40:29'),
-(1131,3,'b363877c6d99a8935bc9e6319c','10.89.1.7','2026-07-28 09:47:07','2026-07-28 09:47:07'),
-(1132,3,'74463458302df8fea5612b35b4','10.89.1.7','2026-07-28 09:56:57','2026-07-28 09:56:57'),
-(1133,3,'5b26f546662b5f925dd2c0fa98','10.89.1.7','2026-07-28 10:12:42','2026-07-28 10:12:42'),
-(1134,3,'b021594be4f2f3158deadfc145','10.89.1.7','2026-07-28 11:31:05','2026-07-28 11:31:05'),
-(1135,3,'dac78bbca95aa4b662ae4bf2ac','10.89.1.7','2026-07-28 16:39:36','2026-07-28 16:39:36'),
-(1136,3,'047dcee306e13031da14357aec','10.89.1.7','2026-07-28 17:09:04','2026-07-28 17:09:04'),
-(1137,3,'22be3a463cc2db2d859bce62f9','10.89.1.7','2026-07-29 10:37:45','2026-07-29 10:37:45'),
-(1138,3,'0a355471f6f07361e01e60503a','10.89.1.7','2026-07-29 12:17:15','2026-07-29 12:17:15');
-/*!40000 ALTER TABLE `oc_api_session` ENABLE KEYS */;
+LOCK TABLES `oc_admin_filter` WRITE;
+/*!40000 ALTER TABLE `oc_admin_filter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_admin_filter` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -284,7 +98,7 @@ CREATE TABLE `oc_attribute` (
   `sort_order` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`attribute_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5007 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -295,11 +109,62 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_attribute` WRITE;
 /*!40000 ALTER TABLE `oc_attribute` DISABLE KEYS */;
 INSERT INTO `oc_attribute` VALUES
+(1,1,1,1),
 (2,1,2,1),
-(3,2,3,1),
-(5001,1,1,1),
-(5002,501,1,1),
-(5003,501,1,1);
+(3,1,3,1),
+(4,1,4,1),
+(5,1,5,1),
+(6,1,6,1),
+(7,1,7,1),
+(8,1,8,1),
+(9,1,9,1),
+(10,1,10,1),
+(11,2,1,1),
+(12,2,2,1),
+(13,2,3,1),
+(14,2,4,1),
+(15,2,5,1),
+(16,2,6,1),
+(17,2,7,1),
+(18,3,1,1),
+(19,3,2,1),
+(20,3,3,1),
+(21,3,4,1),
+(22,3,5,1),
+(23,3,6,1),
+(24,3,7,1),
+(25,3,8,1),
+(26,3,9,1),
+(27,3,10,1),
+(28,3,11,1),
+(29,3,12,1),
+(30,3,13,1),
+(31,4,1,1),
+(32,4,2,1),
+(33,4,3,1),
+(34,4,4,1),
+(35,4,5,1),
+(36,4,6,1),
+(37,4,7,1),
+(38,4,8,1),
+(39,5,1,1),
+(40,5,2,1),
+(41,5,3,1),
+(42,5,4,1),
+(43,5,5,1),
+(44,5,6,1),
+(45,6,1,1),
+(46,6,2,1),
+(47,6,3,1),
+(48,6,4,1),
+(49,7,1,1),
+(50,7,2,1),
+(51,7,3,1),
+(52,8,1,1),
+(53,8,2,1),
+(54,8,3,1),
+(55,8,4,1),
+(56,8,5,1);
 /*!40000 ALTER TABLE `oc_attribute` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -328,21 +193,174 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_attribute_description` WRITE;
 /*!40000 ALTER TABLE `oc_attribute_description` DISABLE KEYS */;
 INSERT INTO `oc_attribute_description` VALUES
-(2,1,'Type'),
-(2,2,'Тип'),
-(2,3,'Тип'),
-(3,1,'Is New'),
-(3,2,'Новий'),
-(3,3,'Новый'),
-(5001,1,'Brand'),
-(5001,2,'Бренд'),
-(5001,3,'Бренд'),
-(5002,1,'Material'),
-(5002,2,'Матеріал'),
-(5002,3,'Материал'),
-(5003,1,'Warranty'),
-(5003,2,'Гарантія'),
-(5003,3,'Гарантия');
+(1,1,'Brand'),
+(1,2,'Бренд'),
+(1,3,'Бренд'),
+(2,1,'Model'),
+(2,2,'Модель'),
+(2,3,'Модель'),
+(3,1,'Color'),
+(3,2,'Колір'),
+(3,3,'Цвет'),
+(4,1,'Warranty'),
+(4,2,'Гарантія'),
+(4,3,'Гарантия'),
+(5,1,'Country of origin'),
+(5,2,'Країна виробник'),
+(5,3,'Страна производитель'),
+(6,1,'Year of release'),
+(6,2,'Рік випуску'),
+(6,3,'Год выпуска'),
+(7,1,'Material'),
+(7,2,'Матеріал'),
+(7,3,'Материал'),
+(8,1,'Is New'),
+(8,2,'Новий'),
+(8,3,'Новинка'),
+(9,1,'Certification'),
+(9,2,'Сертифікація'),
+(9,3,'Сертификация'),
+(10,1,'Type'),
+(10,2,'Тип'),
+(10,3,'Тип'),
+(11,1,'Width'),
+(11,2,'Ширина'),
+(11,3,'Ширина'),
+(12,1,'Height'),
+(12,2,'Висота'),
+(12,3,'Высота'),
+(13,1,'Depth'),
+(13,2,'Глибина'),
+(13,3,'Глубина'),
+(14,1,'Weight'),
+(14,2,'Вага'),
+(14,3,'Вес'),
+(15,1,'Screen diagonal'),
+(15,2,'Діагональ екрана'),
+(15,3,'Диагональ экрана'),
+(16,1,'Screen resolution'),
+(16,2,'Роздільна здатність екрана'),
+(16,3,'Разрешение экрана'),
+(17,1,'Battery capacity'),
+(17,2,'Ємність акумулятора'),
+(17,3,'Ёмкость аккумулятора'),
+(18,1,'Processor'),
+(18,2,'Процесор'),
+(18,3,'Процессор'),
+(19,1,'RAM'),
+(19,2,'Оперативна память'),
+(19,3,'Оперативная память'),
+(20,1,'Storage capacity'),
+(20,2,'Обсяг памʼять'),
+(20,3,'Объём памяти'),
+(21,1,'Operating system'),
+(21,2,'Операційна система'),
+(21,3,'Операционная система'),
+(22,1,'Connectivity'),
+(22,2,'Підключення'),
+(22,3,'Подключение'),
+(23,1,'Power'),
+(23,2,'Потужність'),
+(23,3,'Мощность'),
+(24,1,'Voltage'),
+(24,2,'Напруга'),
+(24,3,'Напряжение'),
+(25,1,'Capacity'),
+(25,2,'Місткість'),
+(25,3,'Ёмкость'),
+(26,1,'Battery life'),
+(26,2,'Час роботи від акумулятора'),
+(26,3,'Время работы от аккумулятора'),
+(27,1,'Water resistance'),
+(27,2,'Вологозахист'),
+(27,3,'Влагозащита'),
+(28,1,'Noise level'),
+(28,2,'Рівень шуму'),
+(28,3,'Уровень шума'),
+(29,1,'Temperature range'),
+(29,2,'Діапазон температур'),
+(29,3,'Диапазон температур'),
+(30,1,'Charging time'),
+(30,2,'Час заряджання'),
+(30,3,'Время зарядки'),
+(31,1,'Key features'),
+(31,2,'Ключові особливості'),
+(31,3,'Ключевые особенности'),
+(32,1,'Additional functions'),
+(32,2,'Додаткові функції'),
+(32,3,'Дополнительные функции'),
+(33,1,'Controls'),
+(33,2,'Керування'),
+(33,3,'Управление'),
+(34,1,'Display'),
+(34,2,'Дисплей'),
+(34,3,'Дисплей'),
+(35,1,'Lighting'),
+(35,2,'Підсвітка'),
+(35,3,'Подсветка'),
+(36,1,'Sports'),
+(36,2,'Види спорту'),
+(36,3,'Виды спорта'),
+(37,1,'Age'),
+(37,2,'Вік'),
+(37,3,'Возраст'),
+(38,1,'Number of modes'),
+(38,2,'Кількість режимів'),
+(38,3,'Количество режимов'),
+(39,1,'Care instructions'),
+(39,2,'Рекомендації щодо догляду'),
+(39,3,'Рекомендации по уходу'),
+(40,1,'Washing temperature'),
+(40,2,'Температура прання'),
+(40,3,'Температура стирки'),
+(41,1,'Dishwasher safe'),
+(41,2,'Можна мити в посудомийній машині'),
+(41,3,'Можно мыть в посудомоечной машине'),
+(42,1,'Waterproof'),
+(42,2,'Водонепроникний'),
+(42,3,'Водонепроницаемый'),
+(43,1,'Material composition'),
+(43,2,'Склад матеріалу'),
+(43,3,'Состав материала'),
+(44,1,'Rechargeable'),
+(44,2,'Акумуляторний'),
+(44,3,'Аккумуляторный'),
+(45,1,'Compatible models'),
+(45,2,'Сумісні моделі'),
+(45,3,'Совместимые модели'),
+(46,1,'Platform'),
+(46,2,'Платформа'),
+(46,3,'Платформа'),
+(47,1,'Supported formats'),
+(47,2,'Підтримувані формати'),
+(47,3,'Поддерживаемые форматы'),
+(48,1,'Operating environment'),
+(48,2,'Середовище використання'),
+(48,3,'Среда использования'),
+(49,1,'Package contents'),
+(49,2,'Комплектація'),
+(49,3,'Комплектация'),
+(50,1,'Number of pieces'),
+(50,2,'Кількість предметів'),
+(50,3,'Количество предметов'),
+(51,1,'Box dimensions'),
+(51,2,'Розміри упаковки'),
+(51,3,'Размеры упаковки'),
+(52,1,'Release date'),
+(52,2,'Дата виходу'),
+(52,3,'Дата выхода'),
+(53,1,'Recommended age'),
+(53,2,'Рекомендований вік'),
+(53,3,'Рекомендуемый возраст'),
+(54,1,'Gender'),
+(54,2,'Стать'),
+(54,3,'Пол'),
+(55,1,'Season'),
+(55,2,'Сезон'),
+(55,3,'Сезон'),
+(56,1,'Safety class'),
+(56,2,'Клас безпеки'),
+(56,3,'Класс безопасности');
 /*!40000 ALTER TABLE `oc_attribute_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -360,7 +378,7 @@ CREATE TABLE `oc_attribute_group` (
   `sort_order` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`attribute_group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=505 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -373,9 +391,12 @@ LOCK TABLES `oc_attribute_group` WRITE;
 INSERT INTO `oc_attribute_group` VALUES
 (1,1,1),
 (2,2,1),
-(7,0,1),
-(8,0,1),
-(501,1,1);
+(3,3,1),
+(4,4,1),
+(5,5,1),
+(6,6,1),
+(7,7,1),
+(8,8,1);
 /*!40000 ALTER TABLE `oc_attribute_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -407,13 +428,182 @@ INSERT INTO `oc_attribute_group_description` VALUES
 (1,1,'General'),
 (1,2,'Загальне'),
 (1,3,'Общее'),
-(2,1,'Flags'),
-(2,2,'Характеристики'),
-(2,3,'Флаги'),
-(501,1,'Specifications'),
-(501,2,'Технічні характеристики'),
-(501,3,'Технические характеристики');
+(2,1,'Dimensions'),
+(2,2,'Розміри'),
+(2,3,'Размеры'),
+(3,1,'Technical'),
+(3,2,'Технічні дані'),
+(3,3,'Технические данные'),
+(4,1,'Features'),
+(4,2,'Особливості'),
+(4,3,'Особенности'),
+(5,1,'Care'),
+(5,2,'Догляд'),
+(5,3,'Уход'),
+(6,1,'Compatibility'),
+(6,2,'Сумісність'),
+(6,3,'Совместимость'),
+(7,1,'Set includes'),
+(7,2,'У комплекті'),
+(7,3,'В комплекте'),
+(8,1,'Other'),
+(8,2,'Інше'),
+(8,3,'Другое');
 /*!40000 ALTER TABLE `oc_attribute_group_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_attribute_set`
+--
+
+DROP TABLE IF EXISTS `oc_attribute_set`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_attribute_set` (
+  `attribute_set_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sort_order` int(3) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`attribute_set_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_attribute_set`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_attribute_set` WRITE;
+/*!40000 ALTER TABLE `oc_attribute_set` DISABLE KEYS */;
+INSERT INTO `oc_attribute_set` VALUES
+(1,1,1),
+(2,2,1),
+(3,3,1),
+(4,4,1);
+/*!40000 ALTER TABLE `oc_attribute_set` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_attribute_set_attribute`
+--
+
+DROP TABLE IF EXISTS `oc_attribute_set_attribute`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_attribute_set_attribute` (
+  `attribute_set_id` int(11) NOT NULL,
+  `attribute_id` int(11) NOT NULL,
+  `sort_order` int(3) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`attribute_set_id`,`attribute_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_attribute_set_attribute`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_attribute_set_attribute` WRITE;
+/*!40000 ALTER TABLE `oc_attribute_set_attribute` DISABLE KEYS */;
+INSERT INTO `oc_attribute_set_attribute` VALUES
+(1,1,0),
+(1,2,1),
+(1,3,2),
+(1,4,3),
+(1,5,4),
+(1,6,5),
+(1,9,6),
+(1,15,7),
+(1,16,8),
+(1,17,9),
+(1,18,10),
+(1,19,11),
+(1,20,12),
+(1,21,13),
+(1,22,14),
+(1,26,15),
+(1,27,16),
+(1,30,17),
+(2,1,0),
+(2,2,1),
+(2,4,2),
+(2,7,3),
+(2,10,4),
+(2,11,5),
+(2,12,6),
+(2,13,7),
+(2,14,8),
+(2,23,9),
+(2,24,10),
+(2,25,11),
+(2,28,12),
+(2,29,13),
+(2,38,14),
+(2,41,15),
+(3,1,0),
+(3,3,1),
+(3,7,2),
+(3,11,10),
+(3,14,3),
+(3,39,4),
+(3,40,5),
+(3,42,6),
+(3,43,7),
+(3,54,8),
+(3,55,9),
+(4,1,0),
+(4,4,1),
+(4,7,2),
+(4,37,3),
+(4,49,4),
+(4,50,5),
+(4,51,6),
+(4,53,7),
+(4,56,8);
+/*!40000 ALTER TABLE `oc_attribute_set_attribute` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_attribute_set_description`
+--
+
+DROP TABLE IF EXISTS `oc_attribute_set_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_attribute_set_description` (
+  `attribute_set_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  PRIMARY KEY (`attribute_set_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_attribute_set_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_attribute_set_description` WRITE;
+/*!40000 ALTER TABLE `oc_attribute_set_description` DISABLE KEYS */;
+INSERT INTO `oc_attribute_set_description` VALUES
+(1,1,'Smartphones'),
+(1,2,'Смартфони'),
+(1,3,'Смартфоны'),
+(2,1,'Home appliances'),
+(2,2,'Побутова техніка'),
+(2,3,'Бытовая техника'),
+(3,1,'Clothing & shoes'),
+(3,2,'Одяг та взуття'),
+(3,3,'Одежда и обувь'),
+(4,1,'Kids toys'),
+(4,2,'Дитячі іграшки'),
+(4,3,'Детские игрушки');
+/*!40000 ALTER TABLE `oc_attribute_set_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -825,9 +1015,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_blog_post` WRITE;
 /*!40000 ALTER TABLE `oc_blog_post` DISABLE KEYS */;
 INSERT INTO `oc_blog_post` VALUES
-(1,5,'blog/post-1-smartphones.jpg','catalog/demo/demo-seed/banners/37464827_SL-113022-54210-35.jpg',1,1,1,1,190,'2026-05-05 21:30:56','2026-03-01 12:58:01','2026-07-27 10:55:38'),
-(2,1,'blog/post-2-laptops.jpg',NULL,1,1,1,2,69,'2026-02-26 12:58:01','2026-02-26 12:58:01','2026-02-26 12:58:01'),
-(3,1,'blog/post-3-headphones.jpg',NULL,1,0,1,3,19,'2026-02-22 12:58:01','2026-02-22 12:58:01','2026-02-22 12:58:01'),
+(1,5,'blog/post-1-smartphones.jpg','catalog/demo/demo-seed/banners/37464827_SL-113022-54210-35.jpg',1,1,1,1,193,'2026-05-05 21:30:56','2026-03-01 12:58:01','2026-07-27 10:55:38'),
+(2,1,'blog/post-2-laptops.jpg',NULL,1,1,1,2,70,'2026-02-26 12:58:01','2026-02-26 12:58:01','2026-02-26 12:58:01'),
+(3,1,'blog/post-3-headphones.jpg',NULL,1,0,1,3,20,'2026-02-22 12:58:01','2026-02-22 12:58:01','2026-02-22 12:58:01'),
 (4,1,'blog/post-4-cameras.jpg',NULL,1,1,1,4,0,'2026-02-19 12:58:01','2026-02-19 12:58:01','2026-02-19 12:58:01'),
 (5,1,'blog/post-5-monitors.jpg',NULL,1,0,1,5,9,'2026-02-14 12:58:01','2026-02-14 12:58:01','2026-02-14 12:58:01'),
 (6,1,'blog/post-6-tablets.jpg',NULL,1,1,1,6,0,'2026-02-09 12:58:01','2026-02-09 12:58:01','2026-02-09 12:58:01'),
@@ -1254,7 +1444,6 @@ DROP TABLE IF EXISTS `oc_cart`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `oc_cart` (
   `cart_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `api_id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
   `session_id` varchar(32) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -1263,8 +1452,8 @@ CREATE TABLE `oc_cart` (
   `quantity` decimal(15,2) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
-  KEY `cart_id` (`api_id`,`customer_id`,`session_id`,`product_id`,`recurring_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=956 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `cart_id` (`customer_id`,`session_id`,`product_id`,`recurring_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1320 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1275,15 +1464,32 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_cart` WRITE;
 /*!40000 ALTER TABLE `oc_cart` DISABLE KEYS */;
 INSERT INTO `oc_cart` VALUES
-(23,0,1,'aec13783b7deaef064fd472163',40,0,'[]',1.00,'2025-12-06 08:34:36'),
-(38,0,2,'498fde754a83274b04b90035ae',43,0,'[]',1.00,'2025-12-12 14:52:52'),
-(174,0,3,'9fa7582aee1fa976d784906d77',5001,0,'{\"9001\":\"9501\",\"9002\":\"9503\"}',1.00,'2026-03-03 13:44:26'),
-(175,0,3,'9fa7582aee1fa976d784906d77',5031,0,'{\"9061\":\"9622\",\"9062\":\"9624\"}',1.00,'2026-03-03 20:49:34'),
-(777,0,6,'142b62fca194c3f9d91ca06f15',5011,0,'{\"9021\":\"9541\",\"9022\":\"9543\"}',1.00,'2026-04-10 16:06:29'),
-(779,0,7,'142b62fca194c3f9d91ca06f15',5023,0,'{\"9045\":\"9589\",\"9046\":\"9591\"}',1.00,'2026-04-14 11:18:24'),
-(835,0,8,'0a889eddeefcb9e98de2c00e65',5023,0,'{\"9045\":\"9589\",\"9046\":\"9591\"}',1.00,'2026-04-30 18:38:42'),
-(907,0,9,'e7e468f477bd0fac15ca8ea890',5023,0,'{\"9223\":\"9940\",\"9046\":\"9864\"}',9.00,'2026-06-30 09:03:13'),
-(919,0,9,'e7e468f477bd0fac15ca8ea890',5074,0,'{\"9147\":\"9793\",\"9148\":\"9795\"}',1.00,'2026-06-30 15:36:32');
+(23,1,'aec13783b7deaef064fd472163',40,0,'[]',1.00,'2025-12-06 08:34:36'),
+(38,2,'498fde754a83274b04b90035ae',43,0,'[]',1.00,'2025-12-12 14:52:52'),
+(174,3,'9fa7582aee1fa976d784906d77',5001,0,'{\"9001\":\"9501\",\"9002\":\"9503\"}',1.00,'2026-03-03 13:44:26'),
+(175,3,'9fa7582aee1fa976d784906d77',5031,0,'{\"9061\":\"9622\",\"9062\":\"9624\"}',1.00,'2026-03-03 20:49:34'),
+(777,6,'142b62fca194c3f9d91ca06f15',5011,0,'{\"9021\":\"9541\",\"9022\":\"9543\"}',1.00,'2026-04-10 16:06:29'),
+(779,7,'142b62fca194c3f9d91ca06f15',5023,0,'{\"9045\":\"9589\",\"9046\":\"9591\"}',1.00,'2026-04-14 11:18:24'),
+(835,8,'0a889eddeefcb9e98de2c00e65',5023,0,'{\"9045\":\"9589\",\"9046\":\"9591\"}',1.00,'2026-04-30 18:38:42'),
+(907,9,'e7e468f477bd0fac15ca8ea890',5023,0,'{\"9223\":\"9940\",\"9046\":\"9864\"}',9.00,'2026-06-30 09:03:13'),
+(919,9,'e7e468f477bd0fac15ca8ea890',5074,0,'{\"9147\":\"9793\",\"9148\":\"9795\"}',1.00,'2026-06-30 15:36:32'),
+(1253,0,'a50adfc7cf31add9b871d0df12',42,0,'[]',2.00,'2026-08-06 15:39:24'),
+(1254,0,'399d7e850f17fa12920b365b7c',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 15:42:40'),
+(1257,0,'cf60389ae728e02269625e01c8',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 15:53:26'),
+(1258,0,'2b4c6ec6741f9c04a70bd9ee58',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 15:59:32'),
+(1259,0,'7aebb49e02257924ee3f202cdc',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:04:07'),
+(1260,0,'11d6b4859ae489c2c23f5a83df',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:08:41'),
+(1261,0,'8394dd8796f9810210e7f0417c',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:12:12'),
+(1262,0,'1ab7fabea841683f3bbc5ed4a1',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:12:29'),
+(1263,0,'0ad170d66969668bc01f1bb6f9',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:13:16'),
+(1264,0,'9b32635268faa8e9d9d040c4a2',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:17:23'),
+(1266,0,'9c85ded13943777a42e7f7db1d',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:18:19'),
+(1267,0,'a244a82a9dd69f43cb06b15f73',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:19:34'),
+(1268,0,'b510dd99aba009735f04662ed7',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:20:16'),
+(1269,0,'05cf51d107372fdde055ae876f',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:20:28'),
+(1270,0,'1dea61a78778baa6e2cf86de69',5020,0,'{\"9039\":\"9577\",\"9040\":\"9579\"}',1.00,'2026-08-06 16:20:44'),
+(1272,0,'674402c065afe8f2cad654d226',5021,0,'{\"9041\":\"9581\",\"9042\":\"9584\"}',1.00,'2026-08-06 16:59:12'),
+(1273,0,'674402c065afe8f2cad654d226',5023,0,'{\"9230\":\"9956\",\"9231\":\"9960\",\"variant_id\":212}',1.00,'2026-08-06 16:59:12');
 /*!40000 ALTER TABLE `oc_cart` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -1308,6 +1514,7 @@ CREATE TABLE `oc_category` (
   `status` tinyint(1) NOT NULL,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
+  `review_criteria_group_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`category_id`),
   KEY `parent_id` (`parent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1987 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1321,43 +1528,75 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_category` WRITE;
 /*!40000 ALTER TABLE `oc_category` DISABLE KEYS */;
 INSERT INTO `oc_category` VALUES
-(101,'catalog/demo/demo-seed/categories/electronics.jpg','','catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',NULL,'',0,1,0,1,1,'2026-03-03 08:51:04','2026-07-23 13:53:46'),
-(103,'catalog/demo/demo-seed/categories/fashion.jpg',NULL,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg',NULL,'',0,1,1,3,1,'2026-03-03 08:51:05','2026-05-28 08:38:53'),
-(104,'catalog/demo/demo-seed/categories/sports-outdoors.jpg',NULL,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg',NULL,'',0,1,1,4,1,'2026-03-03 08:51:05','2026-05-28 08:39:26'),
-(105,'catalog/demo/demo-seed/categories/beauty-health.jpg',NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',NULL,'',0,1,1,5,1,'2026-03-03 08:51:06','2026-05-30 16:39:49'),
-(106,'catalog/demo/demo-seed/categories/toys-games.jpg',NULL,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg',NULL,'',0,1,1,6,1,'2026-03-03 08:51:07','2026-05-28 08:39:54'),
-(107,'catalog/demo/demo-seed/categories/books-media.jpg',NULL,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg',NULL,'',0,1,1,7,1,'2026-03-03 08:51:07','2026-05-28 08:40:14'),
-(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',0,1,0,8,1,'2026-03-03 08:51:08','2026-07-23 15:20:37'),
-(109,'catalog/demo/demo-seed/categories/pet-supplies.jpg',NULL,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg',NULL,'',0,1,1,9,1,'2026-03-03 08:51:09','2026-05-28 08:40:50'),
-(1101,'catalog/demo/demo-seed/categories/electronics-smartphones.jpg',NULL,NULL,NULL,'',101,0,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(1102,'catalog/demo/demo-seed/categories/electronics-laptops.jpg',NULL,NULL,NULL,'',101,0,1,2,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(1103,'catalog/demo/demo-seed/categories/electronics-audio.jpg',NULL,NULL,NULL,'',101,0,1,3,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(1301,'catalog/demo/demo-seed/categories/fashion-womens-clothing.jpg',NULL,NULL,NULL,'',103,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(1302,'catalog/demo/demo-seed/categories/fashion-mens-clothing.jpg',NULL,NULL,NULL,'',103,0,1,2,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(1303,'catalog/demo/demo-seed/categories/fashion-shoes-accessories.jpg',NULL,NULL,NULL,'',103,0,1,3,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(1401,'catalog/demo/demo-seed/categories/sports-outdoors-fitness.jpg',NULL,NULL,NULL,'',104,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(1402,'catalog/demo/demo-seed/categories/sports-outdoors-camping.jpg',NULL,NULL,NULL,'',104,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(1403,'catalog/demo/demo-seed/categories/sports-outdoors-cycling.jpg',NULL,NULL,NULL,'',104,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(1501,'catalog/demo/demo-seed/categories/beauty-health-skincare.jpg',NULL,NULL,NULL,'',105,0,1,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(1502,'catalog/demo/demo-seed/categories/beauty-health-haircare.jpg',NULL,NULL,NULL,'',105,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(1503,'catalog/demo/demo-seed/categories/beauty-health-wellness.jpg',NULL,NULL,NULL,'',105,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(1601,'catalog/demo/demo-seed/categories/toys-games-board-games.jpg',NULL,NULL,NULL,'',106,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1602,'catalog/demo/demo-seed/categories/toys-games-construction-toys.jpg',NULL,NULL,NULL,'',106,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1603,'catalog/demo/demo-seed/categories/toys-games-gaming-consoles.jpg',NULL,NULL,NULL,'',106,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1701,'catalog/demo/demo-seed/categories/books-media-fiction.jpg',NULL,NULL,NULL,'',107,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1702,'catalog/demo/demo-seed/categories/books-media-business.jpg',NULL,NULL,NULL,'',107,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1703,'catalog/demo/demo-seed/categories/books-media-kids-books.jpg',NULL,NULL,NULL,'',107,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(1801,'catalog/demo/demo-seed/categories/automotive-car-electronics.jpg','catalog/cart.png','',NULL,'',108,0,1,1,1,'2026-03-03 08:51:08','2026-06-07 09:02:42'),
-(1802,'catalog/demo/demo-seed/categories/automotive-car-care.jpg',NULL,NULL,NULL,'',108,0,1,2,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(1803,'catalog/demo/demo-seed/categories/automotive-interior-accessories.jpg',NULL,NULL,NULL,'',108,0,1,3,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(1901,'catalog/demo/demo-seed/categories/pet-supplies-dog-care.jpg',NULL,NULL,NULL,'',109,0,1,1,1,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(1902,'catalog/demo/demo-seed/categories/pet-supplies-cat-care.jpg',NULL,NULL,NULL,'',109,0,1,2,1,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(1903,'catalog/demo/demo-seed/categories/pet-supplies-pet-tech.jpg',NULL,NULL,NULL,'',109,0,1,3,1,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(1971,'catalog/demo/demo-seed/categories/home-kitchen.jpg',NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg',NULL,'',0,1,1,2,1,'2026-06-03 13:44:48','2026-06-03 18:02:14'),
-(1972,'catalog/demo/demo-seed/categories/home-kitchen-cookware.jpg',NULL,NULL,NULL,'',1971,0,1,1,1,'2026-06-03 13:44:48','2026-06-03 13:44:48'),
-(1973,'catalog/demo/demo-seed/categories/home-kitchen-small-appliances.jpg',NULL,NULL,NULL,'',1971,0,1,2,1,'2026-06-03 13:44:48','2026-06-03 13:44:48'),
-(1974,'catalog/demo/demo-seed/categories/home-kitchen-home-decor.jpg',NULL,NULL,NULL,'',1971,0,1,3,1,'2026-06-03 13:44:48','2026-06-03 13:44:48');
+(101,'catalog/demo/demo-seed/categories/electronics.jpg','','catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',0,1,0,1,1,'2026-03-03 08:51:04','2026-07-23 13:53:46',NULL),
+(103,'catalog/demo/demo-seed/categories/fashion.jpg',NULL,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg',0,1,1,3,1,'2026-03-03 08:51:05','2026-05-28 08:38:53',NULL),
+(104,'catalog/demo/demo-seed/categories/sports-outdoors.jpg',NULL,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg',0,1,1,4,1,'2026-03-03 08:51:05','2026-05-28 08:39:26',NULL),
+(105,'catalog/demo/demo-seed/categories/beauty-health.jpg',NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',0,1,1,5,1,'2026-03-03 08:51:06','2026-05-30 16:39:49',NULL),
+(106,'catalog/demo/demo-seed/categories/toys-games.jpg',NULL,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg',0,1,1,6,1,'2026-03-03 08:51:07','2026-05-28 08:39:54',NULL),
+(107,'catalog/demo/demo-seed/categories/books-media.jpg',NULL,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg',0,1,1,7,1,'2026-03-03 08:51:07','2026-05-28 08:40:14',NULL),
+(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',0,1,0,8,1,'2026-03-03 08:51:08','2026-08-08 10:05:15',0),
+(109,'catalog/demo/demo-seed/categories/pet-supplies.jpg',NULL,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg',0,1,1,9,1,'2026-03-03 08:51:09','2026-05-28 08:40:50',NULL),
+(1101,'catalog/demo/demo-seed/categories/electronics-smartphones.jpg',NULL,NULL,101,0,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1102,'catalog/demo/demo-seed/categories/electronics-laptops.jpg',NULL,NULL,101,0,1,2,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1103,'catalog/demo/demo-seed/categories/electronics-audio.jpg',NULL,NULL,101,0,1,3,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1301,'catalog/demo/demo-seed/categories/fashion-womens-clothing.jpg',NULL,NULL,103,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1302,'catalog/demo/demo-seed/categories/fashion-mens-clothing.jpg',NULL,NULL,103,0,1,2,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1303,'catalog/demo/demo-seed/categories/fashion-shoes-accessories.jpg',NULL,NULL,103,0,1,3,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1401,'catalog/demo/demo-seed/categories/sports-outdoors-fitness.jpg',NULL,NULL,104,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1402,'catalog/demo/demo-seed/categories/sports-outdoors-camping.jpg',NULL,NULL,104,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1403,'catalog/demo/demo-seed/categories/sports-outdoors-cycling.jpg',NULL,NULL,104,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1501,'catalog/demo/demo-seed/categories/beauty-health-skincare.jpg',NULL,NULL,105,0,1,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1502,'catalog/demo/demo-seed/categories/beauty-health-haircare.jpg',NULL,NULL,105,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1503,'catalog/demo/demo-seed/categories/beauty-health-wellness.jpg',NULL,NULL,105,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1601,'catalog/demo/demo-seed/categories/toys-games-board-games.jpg',NULL,NULL,106,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1602,'catalog/demo/demo-seed/categories/toys-games-construction-toys.jpg',NULL,NULL,106,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1603,'catalog/demo/demo-seed/categories/toys-games-gaming-consoles.jpg',NULL,NULL,106,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1701,'catalog/demo/demo-seed/categories/books-media-fiction.jpg',NULL,NULL,107,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1702,'catalog/demo/demo-seed/categories/books-media-business.jpg',NULL,NULL,107,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1703,'catalog/demo/demo-seed/categories/books-media-kids-books.jpg',NULL,NULL,107,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1801,'catalog/demo/demo-seed/categories/automotive-car-electronics.jpg','catalog/cart.png','',108,0,1,1,1,'2026-03-03 08:51:08','2026-06-07 09:02:42',NULL),
+(1802,'catalog/demo/demo-seed/categories/automotive-car-care.jpg',NULL,NULL,108,0,1,2,1,'2026-03-03 08:51:08','2026-03-03 08:51:08',NULL),
+(1803,'catalog/demo/demo-seed/categories/automotive-interior-accessories.jpg',NULL,NULL,108,0,1,3,1,'2026-03-03 08:51:08','2026-03-03 08:51:08',NULL),
+(1901,'catalog/demo/demo-seed/categories/pet-supplies-dog-care.jpg',NULL,NULL,109,0,1,1,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1902,'catalog/demo/demo-seed/categories/pet-supplies-cat-care.jpg',NULL,NULL,109,0,1,2,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1903,'catalog/demo/demo-seed/categories/pet-supplies-pet-tech.jpg',NULL,NULL,109,0,1,3,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1971,'catalog/demo/demo-seed/categories/home-kitchen.jpg',NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg',0,1,1,2,1,'2026-06-03 13:44:48','2026-06-03 18:02:14',NULL),
+(1972,'catalog/demo/demo-seed/categories/home-kitchen-cookware.jpg',NULL,NULL,1971,0,1,1,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
+(1973,'catalog/demo/demo-seed/categories/home-kitchen-small-appliances.jpg',NULL,NULL,1971,0,1,2,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
+(1974,'catalog/demo/demo-seed/categories/home-kitchen-home-decor.jpg',NULL,NULL,1971,0,1,3,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL);
 /*!40000 ALTER TABLE `oc_category` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_category_banner`
+--
+
+DROP TABLE IF EXISTS `oc_category_banner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_category_banner` (
+  `category_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `banner_image` varchar(255) DEFAULT NULL,
+  `banner_link` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`category_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_category_banner`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_category_banner` WRITE;
+/*!40000 ALTER TABLE `oc_category_banner` DISABLE KEYS */;
+INSERT INTO `oc_category_banner` VALUES
+(108,1,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&amp;path=103'),
+(108,2,'','route=product/category&amp;path=103'),
+(108,3,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&amp;path=103');
+/*!40000 ALTER TABLE `oc_category_banner` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -1381,31 +1620,6 @@ CREATE TABLE `oc_category_description` (
   KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `oc_category_banner`
---
-
-DROP TABLE IF EXISTS `oc_category_banner`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_category_banner` (
-  `category_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `banner_image` varchar(255) DEFAULT NULL,
-  `banner_link` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`category_id`,`language_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `oc_category_banner`
---
-
-INSERT INTO `oc_category_banner` VALUES
-(108,1,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103'),
-(108,2,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103'),
-(108,3,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&path=103');
 
 --
 -- Dumping data for table `oc_category_description`
@@ -1766,7 +1980,7 @@ CREATE TABLE `oc_country` (
   `postcode_required` tinyint(1) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`country_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=258 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=99102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1995,7 +2209,7 @@ INSERT INTO `oc_country` VALUES
 (217,'Turks and Caicos Islands','TC','TCA','','',0,1),
 (218,'Tuvalu','TV','TUV','','',0,1),
 (219,'Uganda','UG','UGA','','',0,1),
-(220,'Украина','UA','UKR','{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','+380 (XX) XXX-XX-XX',0,1),
+(220,'Украина','UA','UKR','{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','+38 (0XX) XXX-XX-XX',0,1),
 (221,'United Arab Emirates','AE','ARE','','',0,1),
 (222,'United Kingdom','GB','GBR','','',1,1),
 (223,'United States','US','USA','{firstname} {lastname}\r\n{company}\r\n{address_1}\r\n{address_2}\r\n{city}, {zone} {postcode}\r\n{country}','+1 (XXX) XXX-XXXX',0,1),
@@ -2348,7 +2562,7 @@ CREATE TABLE `oc_coupon` (
   `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`coupon_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2359,9 +2573,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_coupon` WRITE;
 /*!40000 ALTER TABLE `oc_coupon` DISABLE KEYS */;
 INSERT INTO `oc_coupon` VALUES
-(4,'-10% Discount','2222','P',10.0000,0,0,0.0000,'2014-01-01','2026-01-01',10,'10',1,0,'2009-01-27 13:55:03'),
-(5,'Free Shipping','3333','P',0.0000,0,1,100.0000,'2014-01-01','2014-02-01',10,'10',0,0,'2009-03-14 21:13:53'),
-(6,'-10.00 Discount','1111','F',10.0000,0,0,10.0000,'2014-01-01','2020-01-01',100000,'10000',0,0,'2009-03-14 21:15:18');
+(4,'-10% Скидка','2222','P',10.0000,0,0,0.0000,'2014-01-01','2026-01-01',10,'10',1,0,'2009-01-27 13:55:03'),
+(5,'Бесплатная доставка','3333','P',0.0000,0,1,100.0000,'2014-01-01','2014-02-01',10,'10',0,0,'2009-03-14 21:13:53'),
+(6,'-10.00 Скидка','1111','F',10.0000,0,0,10.0000,'2014-01-01','2020-01-01',100000,'10000',0,0,'2009-03-14 21:15:18');
 /*!40000 ALTER TABLE `oc_coupon` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2389,6 +2603,43 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_coupon_category` WRITE;
 /*!40000 ALTER TABLE `oc_coupon_category` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oc_coupon_category` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_coupon_description`
+--
+
+DROP TABLE IF EXISTS `oc_coupon_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_coupon_description` (
+  `coupon_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  PRIMARY KEY (`coupon_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_coupon_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_coupon_description` WRITE;
+/*!40000 ALTER TABLE `oc_coupon_description` DISABLE KEYS */;
+INSERT INTO `oc_coupon_description` VALUES
+(4,1,'-10% Discount'),
+(4,2,'-10% Знижка'),
+(4,3,'-10% Скидка'),
+(5,1,'Free Shipping'),
+(5,2,'Безкоштовна доставка'),
+(5,3,'Бесплатная доставка'),
+(6,1,'-10.00 Discount'),
+(6,2,'-10.00 Знижка'),
+(6,3,'-10.00 Скидка');
+/*!40000 ALTER TABLE `oc_coupon_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -2479,10 +2730,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_currency` WRITE;
 /*!40000 ALTER TABLE `oc_currency` DISABLE KEYS */;
 INSERT INTO `oc_currency` VALUES
-(1,'Pound Sterling','GBP','£','','2',0.01675175,1,'2026-07-29 10:47:16'),
-(2,'US Dollar','USD','$','','2',0.02225799,1,'2026-07-29 10:47:16'),
-(3,'Euro','EUR','','€','2',0.01958124,1,'2026-07-29 10:47:16'),
-(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-07-29 10:47:16');
+(1,'Pound Sterling','GBP','£','','2',0.01661636,1,'2026-08-09 07:46:20'),
+(2,'US Dollar','USD','$','','2',0.02234824,1,'2026-08-09 07:46:20'),
+(3,'Euro','EUR','','€','2',0.01937429,1,'2026-08-09 07:46:20'),
+(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-08-09 07:46:20');
 /*!40000 ALTER TABLE `oc_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2663,7 +2914,7 @@ CREATE TABLE `oc_customer` (
   `remember_token` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`customer_id`),
   KEY `idx_customer_date` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2693,7 +2944,7 @@ CREATE TABLE `oc_customer_activity` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_activity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2703,6 +2954,123 @@ CREATE TABLE `oc_customer_activity` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_activity` WRITE;
 /*!40000 ALTER TABLE `oc_customer_activity` DISABLE KEYS */;
+INSERT INTO `oc_customer_activity` VALUES
+(1,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":99}','10.89.1.7','2026-07-30 08:33:34'),
+(2,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"99\"}','10.89.1.7','2026-07-30 11:50:45'),
+(3,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"99\"}','10.89.1.7','2026-07-30 12:06:25'),
+(4,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"99\"}','10.89.1.7','2026-07-30 12:06:31'),
+(5,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":100}','10.89.1.7','2026-07-30 12:09:58'),
+(6,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"100\"}','10.89.1.7','2026-07-30 12:10:17'),
+(7,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":101}','10.89.1.7','2026-07-30 13:47:20'),
+(8,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:07:20'),
+(9,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:07:24'),
+(10,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:07:32'),
+(11,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:07:36'),
+(12,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:07:41'),
+(13,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"101\"}','10.89.1.7','2026-07-30 14:08:00'),
+(14,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":102}','10.89.1.7','2026-07-30 14:13:39'),
+(15,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:13:51'),
+(16,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:44:04'),
+(17,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:44:09'),
+(18,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:44:51'),
+(19,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:45:09'),
+(20,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:45:14'),
+(21,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:45:58'),
+(22,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:48:32'),
+(23,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:48:39'),
+(24,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:48:43'),
+(25,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:48:57'),
+(26,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:49:07'),
+(27,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:49:12'),
+(28,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:50:12'),
+(29,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:51:54'),
+(30,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:52:43'),
+(31,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:52:49'),
+(32,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:53:08'),
+(33,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:53:10'),
+(34,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:53:17'),
+(35,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:53:40'),
+(36,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:54:06'),
+(37,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:55:30'),
+(38,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:55:34'),
+(39,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:55:40'),
+(40,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:55:56'),
+(41,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 14:56:56'),
+(42,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:02:54'),
+(43,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:08'),
+(44,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:11'),
+(45,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:17'),
+(46,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:20'),
+(47,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:22'),
+(48,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:25'),
+(49,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:27'),
+(50,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:04:31'),
+(51,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:17'),
+(52,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:21'),
+(53,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:27'),
+(54,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:32'),
+(55,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:41'),
+(56,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:12:47'),
+(57,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:21:12'),
+(58,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:21:14'),
+(59,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:21:31'),
+(60,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:21:33'),
+(61,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:32:16'),
+(62,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:32:18'),
+(63,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:32:23'),
+(64,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:32:26'),
+(65,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:32:29'),
+(66,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:34:11'),
+(67,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:34:42'),
+(68,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:38:37'),
+(69,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:39:35'),
+(70,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.7','2026-07-30 15:39:38'),
+(71,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:29'),
+(72,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:31'),
+(73,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:34'),
+(74,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:37'),
+(75,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:42'),
+(76,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:46'),
+(77,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:40:50'),
+(78,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:46:03'),
+(79,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:46:07'),
+(80,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:46:10'),
+(81,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:46:13'),
+(82,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:21'),
+(83,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:25'),
+(84,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:33'),
+(85,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:37'),
+(86,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:41'),
+(87,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 15:47:48'),
+(88,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:12:18'),
+(89,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:12:20'),
+(90,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:12:24'),
+(91,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:13:51'),
+(92,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:14:50'),
+(93,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:15:12'),
+(94,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:19:16'),
+(95,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:19:25'),
+(96,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:00'),
+(97,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:06'),
+(98,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:15'),
+(99,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:37'),
+(100,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:51'),
+(101,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:53'),
+(102,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:22:59'),
+(103,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":\"102\"}','10.89.1.8','2026-07-30 16:23:01'),
+(104,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":103}','10.89.1.8','2026-07-30 18:03:12'),
+(106,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":104}','10.89.1.7','2026-08-01 10:53:55'),
+(107,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":130}','10.89.1.7','2026-08-01 16:29:28'),
+(108,0,'order_guest','{\"name\":\"John Doe\",\"order_id\":153}','10.89.1.7','2026-08-01 17:29:12'),
+(109,35,'login','{\"customer_id\":\"35\",\"name\":\"Test Customer\"}','10.89.1.7','2026-08-02 15:19:59'),
+(110,35,'login','{\"customer_id\":\"35\",\"name\":\"Test Customer\"}','10.89.1.7','2026-08-02 15:27:53'),
+(111,0,'order_guest','{\"name\":\"Test \",\"order_id\":167}','10.89.1.7','2026-08-08 11:09:17'),
+(112,0,'order_guest','{\"name\":\"Test2 \",\"order_id\":168}','10.89.1.7','2026-08-08 11:09:26'),
+(113,0,'order_guest','{\"name\":\"Test \",\"order_id\":169}','10.89.1.7','2026-08-08 11:09:34'),
+(114,0,'order_guest','{\"name\":\"Test \",\"order_id\":170}','10.89.1.7','2026-08-08 11:17:13'),
+(115,0,'order_guest','{\"name\":\"Test \",\"order_id\":171}','10.89.1.7','2026-08-08 11:17:26'),
+(116,0,'order_guest','{\"name\":\"ntcn \",\"order_id\":99602}','10.89.1.7','2026-08-08 17:31:00'),
+(117,0,'order_guest','{\"name\":\"Administrator \",\"order_id\":99603}','10.89.1.7','2026-08-08 17:31:22');
 /*!40000 ALTER TABLE `oc_customer_activity` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2791,7 +3159,7 @@ CREATE TABLE `oc_customer_group` (
   `markup_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
   `sort_order` int(11) NOT NULL,
   PRIMARY KEY (`customer_group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=99802 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2832,9 +3200,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_group_description` WRITE;
 /*!40000 ALTER TABLE `oc_customer_group_description` DISABLE KEYS */;
 INSERT INTO `oc_customer_group_description` VALUES
-(1,1,'Default',''),
-(1,2,'За замовчуванням',''),
-(1,3,'По умолчанию','');
+(1,1,'General',''),
+(1,2,'Загальна',''),
+(1,3,'Общая','');
 /*!40000 ALTER TABLE `oc_customer_group_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2882,7 +3250,7 @@ CREATE TABLE `oc_customer_ip` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_ip_id`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2892,6 +3260,8 @@ CREATE TABLE `oc_customer_ip` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_ip` WRITE;
 /*!40000 ALTER TABLE `oc_customer_ip` DISABLE KEYS */;
+INSERT INTO `oc_customer_ip` VALUES
+(17,10,'10.89.1.8','2026-07-31 11:02:07');
 /*!40000 ALTER TABLE `oc_customer_ip` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2912,9 +3282,10 @@ CREATE TABLE `oc_customer_login` (
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`customer_login_id`),
+  UNIQUE KEY `ux_email` (`email`),
   KEY `email` (`email`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2981,7 +3352,7 @@ CREATE TABLE `oc_customer_search` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_search_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=326 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3001,7 +3372,322 @@ INSERT INTO `oc_customer_search` VALUES
 (7,0,1,0,'fas',1302,0,0,0,'10.89.1.7','2026-07-12 09:58:48'),
 (8,0,3,0,'Dyson V15 Detect',0,0,0,1,'10.89.1.7','2026-07-18 11:48:26'),
 (9,0,3,0,'DEMO-5005',0,0,0,1,'10.89.1.7','2026-07-18 12:27:11'),
-(10,0,3,0,'Apple MacBook Air M3',0,0,0,1,'10.89.1.7','2026-07-24 18:23:13');
+(10,0,3,0,'Apple MacBook Air M3',0,0,0,1,'10.89.1.7','2026-07-24 18:23:13'),
+(11,0,3,0,'adidas',101,1,0,1,'10.89.1.7','2026-07-29 18:34:50'),
+(12,0,3,0,'adidas',101,1,0,1,'10.89.1.7','2026-07-29 18:35:00'),
+(13,0,3,0,'adad',0,0,0,0,'10.89.1.7','2026-08-01 08:20:41'),
+(14,0,3,0,'adad',0,0,0,0,'10.89.1.7','2026-08-01 08:24:29'),
+(15,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:24:34'),
+(16,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:27:44'),
+(17,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:27:50'),
+(18,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:32:37'),
+(19,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:33:22'),
+(20,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:33:40'),
+(21,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:33:52'),
+(22,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:39:04'),
+(23,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:39:07'),
+(24,0,3,0,'adid',0,0,0,1,'10.89.1.7','2026-08-01 08:39:13'),
+(25,0,3,0,'adias',0,0,0,0,'10.89.1.7','2026-08-01 08:39:19'),
+(26,0,3,0,'adias',0,0,0,0,'10.89.1.7','2026-08-01 08:39:32'),
+(27,0,3,0,'adias',0,0,0,0,'10.89.1.7','2026-08-01 08:39:33'),
+(28,0,3,0,'adadis',0,0,0,0,'10.89.1.7','2026-08-01 08:39:37'),
+(29,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:39:42'),
+(30,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:40:17'),
+(31,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:40:18'),
+(32,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:40:23'),
+(33,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:40:23'),
+(34,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:40:27'),
+(35,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:40:27'),
+(36,0,3,0,'преем',0,0,0,0,'10.89.1.7','2026-08-01 08:40:32'),
+(37,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:40:38'),
+(38,0,1,0,'kanken',0,0,0,1,'10.89.1.7','2026-08-01 08:40:44'),
+(39,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:40:51'),
+(40,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:41:17'),
+(41,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:42:07'),
+(42,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:42:07'),
+(43,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:42:19'),
+(44,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:43:11'),
+(45,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:29'),
+(46,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:29'),
+(47,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:43:31'),
+(48,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:32'),
+(49,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:33'),
+(50,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:33'),
+(51,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:43:33'),
+(52,0,1,0,'kanken',0,0,0,1,'10.89.1.7','2026-08-01 08:43:34'),
+(53,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:39'),
+(54,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:43:41'),
+(55,0,3,0,'adas',0,0,0,0,'10.89.1.7','2026-08-01 08:43:46'),
+(56,0,3,0,'adasa',0,0,0,0,'10.89.1.7','2026-08-01 08:43:48'),
+(57,0,3,0,'dash',0,0,0,1,'10.89.1.7','2026-08-01 08:43:51'),
+(58,0,3,0,'преем',0,0,0,0,'10.89.1.7','2026-08-01 08:43:58'),
+(59,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:44:01'),
+(60,0,3,0,'приемник',0,0,0,1,'10.89.1.7','2026-08-01 08:44:02'),
+(61,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:44:03'),
+(62,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:44:06'),
+(63,0,1,0,'lean startap',0,0,0,0,'10.89.1.7','2026-08-01 08:45:49'),
+(64,0,1,0,'lean startup',0,0,0,1,'10.89.1.7','2026-08-01 08:45:49'),
+(65,0,1,0,'lean startap',0,0,0,0,'10.89.1.7','2026-08-01 08:47:19'),
+(66,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:47:20'),
+(67,0,1,0,'lean',0,0,0,1,'10.89.1.7','2026-08-01 08:47:20'),
+(68,0,1,0,'zzzzqqqq',0,0,0,0,'10.89.1.7','2026-08-01 08:47:20'),
+(69,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:48:22'),
+(70,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:49:43'),
+(71,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:49:44'),
+(72,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:49:44'),
+(73,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:50:26'),
+(74,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:50:27'),
+(75,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:50:27'),
+(76,0,3,0,'преемник',0,0,0,0,'10.89.1.7','2026-08-01 08:50:32'),
+(77,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:51:43'),
+(78,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:51:44'),
+(79,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:51:50'),
+(80,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:51:53'),
+(81,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:51:57'),
+(82,0,3,0,'adadas',0,0,0,0,'10.89.1.7','2026-08-01 08:51:59'),
+(83,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:01'),
+(84,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:01'),
+(85,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:11'),
+(86,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:12'),
+(87,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:19'),
+(88,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:52:20'),
+(89,0,1,0,'kanken',0,0,0,1,'10.89.1.7','2026-08-01 08:52:31'),
+(90,0,1,0,'kankeb',0,0,0,0,'10.89.1.7','2026-08-01 08:52:46'),
+(91,0,1,0,'kanken',0,0,0,1,'10.89.1.7','2026-08-01 08:52:47'),
+(92,0,1,0,'zzzzqqqq',0,0,0,0,'10.89.1.7','2026-08-01 08:52:47'),
+(93,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:52:56'),
+(94,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:53:01'),
+(95,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:53:07'),
+(96,0,1,0,'фантанчик',0,0,0,0,'10.89.1.7','2026-08-01 08:53:26'),
+(97,0,3,0,'фонтанчик',0,0,0,1,'10.89.1.7','2026-08-01 08:53:46'),
+(98,0,3,0,'фонтанчик',0,0,0,1,'10.89.1.7','2026-08-01 08:53:51'),
+(99,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:53:57'),
+(100,0,1,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:53:59'),
+(101,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:54:01'),
+(102,0,3,0,'крем',0,0,0,2,'10.89.1.7','2026-08-01 08:54:06'),
+(103,0,3,0,'приемник',0,0,0,1,'10.89.1.7','2026-08-01 08:54:14'),
+(104,0,1,0,'kanken',0,0,0,1,'10.89.1.7','2026-08-01 08:54:25'),
+(105,0,3,0,'adad',0,0,0,0,'10.89.1.7','2026-08-01 08:56:18'),
+(106,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:56:21'),
+(107,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 08:56:25'),
+(108,0,3,0,'bluetooth',0,0,0,1,'10.89.1.7','2026-08-01 08:56:34'),
+(109,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-01 08:59:25'),
+(110,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-01 08:59:28'),
+(111,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 09:06:49'),
+(112,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-01 09:06:58'),
+(113,0,3,0,'all',0,0,0,2,'10.89.1.7','2026-08-01 09:07:01'),
+(114,0,3,0,'iphone',0,0,0,1,'10.89.1.7','2026-08-01 09:07:20'),
+(115,0,1,0,'iphone',0,0,0,1,'10.89.1.7','2026-08-01 09:10:11'),
+(116,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 09:22:12'),
+(117,0,3,0,'adaag',0,0,0,0,'10.89.1.7','2026-08-01 11:21:39'),
+(118,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 11:21:42'),
+(119,0,3,0,'adad',0,0,0,0,'10.89.1.7','2026-08-01 11:21:45'),
+(120,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-01 11:21:47'),
+(121,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:09'),
+(122,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:11'),
+(123,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:27'),
+(124,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:38'),
+(125,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:39'),
+(126,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:03:44'),
+(127,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:25'),
+(128,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:29'),
+(129,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:36'),
+(130,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:38'),
+(131,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:39'),
+(132,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:40'),
+(133,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:04:50'),
+(134,0,3,0,'ABC-1',0,0,0,1,'10.89.1.7','2026-08-01 14:06:10'),
+(135,0,3,0,'A5',101,1,0,0,'10.89.1.7','2026-08-01 14:08:19'),
+(136,0,3,0,'A5',101,1,0,0,'10.89.1.7','2026-08-01 14:08:21'),
+(137,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:08:24'),
+(138,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:08:29'),
+(139,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:08:53'),
+(140,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:09:21'),
+(141,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:09:44'),
+(142,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:09:51'),
+(143,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:09:51'),
+(144,0,3,0,'4987187600215',0,0,0,1,'10.89.1.7','2026-08-01 14:11:16'),
+(145,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:15:32'),
+(146,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:16:35'),
+(147,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:16:36'),
+(148,0,3,0,'A5',0,0,0,0,'10.89.1.7','2026-08-01 14:16:36'),
+(149,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:18:26'),
+(150,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:20:56'),
+(151,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:20:57'),
+(152,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:21:01'),
+(153,0,3,0,'A4',0,0,0,1,'10.89.1.7','2026-08-01 14:21:05'),
+(154,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:21:08'),
+(155,0,3,0,'A5',0,0,0,1,'10.89.1.7','2026-08-01 14:23:44'),
+(156,0,3,0,'фвш',0,0,0,0,'10.89.1.7','2026-08-01 14:23:47'),
+(157,0,3,0,'adid',0,0,0,1,'10.89.1.7','2026-08-01 14:23:52'),
+(158,0,3,0,'фвшв',0,0,0,0,'10.89.1.7','2026-08-01 14:23:55'),
+(159,0,3,0,'тыс',0,0,0,1,'10.89.1.7','2026-08-02 11:00:00'),
+(160,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:17:56'),
+(161,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:17:58'),
+(162,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:17:59'),
+(163,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:05'),
+(164,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:06'),
+(165,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:15'),
+(166,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:39'),
+(167,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:47'),
+(168,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:18:55'),
+(169,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:19:20'),
+(170,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:19:27'),
+(171,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:19:34'),
+(172,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-02 11:19:38'),
+(173,0,3,0,'adidas',0,0,0,1,'10.89.1.7','2026-08-02 11:31:51'),
+(174,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:31:53'),
+(175,0,3,0,'дупщ',0,0,0,0,'10.89.1.7','2026-08-02 11:32:00'),
+(176,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:32:01'),
+(177,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:32:03'),
+(178,0,3,0,'сокол',0,0,0,1,'10.89.1.7','2026-08-02 11:32:08'),
+(179,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 11:33:01'),
+(180,0,3,0,'lego',105,1,0,1,'10.89.1.7','2026-08-02 11:33:06'),
+(181,0,3,0,'lego',0,1,0,18,'10.89.1.7','2026-08-02 11:33:08'),
+(182,0,3,0,'тест',0,0,0,18,'10.89.1.7','2026-08-02 11:48:02'),
+(183,0,3,0,'наст',0,0,0,6,'10.89.1.7','2026-08-02 11:48:09'),
+(184,0,3,0,'наст',0,0,0,6,'10.89.1.7','2026-08-02 11:48:14'),
+(185,0,3,0,'тест',0,0,0,0,'10.89.1.7','2026-08-02 11:48:18'),
+(186,0,3,0,'сокол',105,1,0,0,'10.89.1.7','2026-08-02 11:56:52'),
+(187,0,3,0,'сокол',0,0,0,1,'10.89.1.7','2026-08-02 11:57:02'),
+(188,0,3,0,'сокол',104,1,0,0,'10.89.1.7','2026-08-02 11:57:06'),
+(189,0,3,0,'ывпывп',0,0,0,0,'10.89.1.7','2026-08-02 11:59:30'),
+(190,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 11:59:32'),
+(191,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:02:51'),
+(192,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:02:52'),
+(193,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:02:54'),
+(194,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:02:55'),
+(195,0,3,0,'харар',0,0,0,1,'10.89.1.7','2026-08-02 12:03:04'),
+(196,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:05'),
+(197,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:12'),
+(198,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:12'),
+(199,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:15'),
+(200,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:16'),
+(201,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:20'),
+(202,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:20'),
+(203,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:26'),
+(204,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:26'),
+(205,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:34'),
+(206,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:34'),
+(207,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:41'),
+(208,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:45'),
+(209,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:03:47'),
+(210,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:05'),
+(211,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:20'),
+(212,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:24'),
+(213,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:25'),
+(214,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:38'),
+(215,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:41'),
+(216,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:42'),
+(217,0,3,0,'харар',0,0,0,1,'10.89.1.7','2026-08-02 12:04:50'),
+(218,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:04:52'),
+(219,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:07'),
+(220,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:08'),
+(221,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:10'),
+(222,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:10'),
+(223,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:13'),
+(224,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:18'),
+(225,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:18'),
+(226,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:22'),
+(227,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:23'),
+(228,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:38'),
+(229,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:54'),
+(230,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:05:54'),
+(231,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:02'),
+(232,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:02'),
+(233,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:10'),
+(234,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:11'),
+(235,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:14'),
+(236,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:15'),
+(237,0,1,0,'iphone',0,0,0,1,'10.89.1.7','2026-08-02 12:06:24'),
+(238,0,3,0,'харар',0,0,0,1,'10.89.1.7','2026-08-02 12:06:57'),
+(239,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:06:58'),
+(240,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:07:00'),
+(241,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:07:03'),
+(242,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:07:45'),
+(243,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:10:11'),
+(244,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:10:23'),
+(245,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:10:23'),
+(246,0,3,0,'харар',0,0,0,1,'10.89.1.7','2026-08-02 12:10:24'),
+(247,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:10:26'),
+(248,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:10:34'),
+(249,0,1,0,'iphone',101,1,0,1,'10.89.1.7','2026-08-02 12:10:46'),
+(250,0,1,0,'zzzzzznothing',101,1,0,0,'10.89.1.7','2026-08-02 12:11:02'),
+(251,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:04'),
+(252,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:05'),
+(253,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:12'),
+(254,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:17'),
+(255,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:18'),
+(256,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:35'),
+(257,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:11:37'),
+(258,0,3,0,'варавр',104,1,0,0,'10.89.1.7','2026-08-02 12:12:09'),
+(259,0,3,0,'вар',105,1,0,10,'10.89.1.7','2026-08-02 12:13:46'),
+(260,0,3,0,'апвопао',0,0,0,0,'10.89.1.7','2026-08-02 12:13:56'),
+(261,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 12:13:59'),
+(262,0,3,0,'lego',104,1,0,2,'10.89.1.7','2026-08-02 12:14:02'),
+(263,0,3,0,'lego',104,1,0,2,'10.89.1.7','2026-08-02 12:14:24'),
+(264,0,3,0,'lego',104,1,0,2,'10.89.1.7','2026-08-02 12:14:25'),
+(265,0,1,0,'iphone',101,1,0,1,'10.89.1.7','2026-08-02 12:14:26'),
+(266,0,1,0,'zzzzzznothing',101,1,0,0,'10.89.1.7','2026-08-02 12:14:26'),
+(267,0,3,0,'lego',104,1,0,2,'10.89.1.7','2026-08-02 12:14:27'),
+(268,0,1,0,'iphone',0,0,0,1,'10.89.1.7','2026-08-02 12:14:40'),
+(269,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:14:48'),
+(270,0,3,0,'iphone',101,1,0,1,'10.89.1.7','2026-08-02 12:14:52'),
+(271,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:15:37'),
+(272,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:15:37'),
+(273,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:15:43'),
+(274,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:15:44'),
+(275,0,3,0,'jfyj',104,1,0,0,'10.89.1.7','2026-08-02 12:16:00'),
+(276,0,3,0,'lego',0,0,0,18,'10.89.1.7','2026-08-02 12:58:14'),
+(277,0,3,0,'фззду',105,1,0,0,'10.89.1.7','2026-08-02 14:28:07'),
+(278,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-02 14:28:12'),
+(279,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-05 12:16:47'),
+(280,0,3,0,'dell',0,0,0,1,'10.89.1.7','2026-08-05 23:49:09'),
+(281,0,3,0,'dell',101,1,0,1,'10.89.1.7','2026-08-05 23:49:14'),
+(282,0,3,0,'sony',0,0,0,2,'10.89.1.7','2026-08-06 00:10:56'),
+(283,0,3,0,'Braun Series 9 Pro',0,0,0,1,'10.89.1.7','2026-08-06 17:34:43'),
+(284,0,1,0,'iPhone 15 Pro',0,0,0,1,'10.89.1.7','2026-08-07 10:03:47'),
+(285,0,3,0,'Lenovo ThinkPad X1 Carbon',0,0,0,1,'10.89.1.7','2026-08-08 15:18:30'),
+(286,0,3,0,'фззу',0,0,0,0,'10.89.1.7','2026-08-08 20:07:09'),
+(287,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:07:11'),
+(288,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:07:45'),
+(289,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:07:50'),
+(290,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:08:03'),
+(291,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:11:14'),
+(292,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:12:19'),
+(293,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:12:55'),
+(294,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:13:31'),
+(295,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:14:22'),
+(296,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:14:23'),
+(297,0,3,0,'фззду',1973,1,0,0,'10.89.1.7','2026-08-08 20:16:28'),
+(298,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:16:30'),
+(299,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:16:54'),
+(300,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:22:48'),
+(301,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:23:46'),
+(302,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:24:22'),
+(303,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:24:29'),
+(304,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:25:14'),
+(305,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:29:21'),
+(306,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:29:42'),
+(307,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:31:09'),
+(308,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:31:23'),
+(309,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:31:24'),
+(310,0,3,0,'датчик',0,0,0,1,'10.89.1.7','2026-08-08 20:31:30'),
+(311,0,3,0,'датчик',104,1,0,1,'10.89.1.7','2026-08-08 20:31:34'),
+(312,0,3,0,'датчик',104,1,0,1,'10.89.1.7','2026-08-08 20:31:36'),
+(313,0,3,0,'датчик',1402,1,0,1,'10.89.1.7','2026-08-08 20:31:37'),
+(314,0,3,0,'датчик',1402,1,0,1,'10.89.1.7','2026-08-08 20:31:39'),
+(315,0,3,0,'датчик',1402,1,0,1,'10.89.1.7','2026-08-08 20:31:39'),
+(316,0,3,0,'фззду',103,1,0,0,'10.89.1.7','2026-08-08 20:44:15'),
+(317,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:44:17'),
+(318,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:44:20'),
+(319,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:44:49'),
+(320,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:45:55'),
+(321,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:45:56'),
+(322,0,3,0,'фззду',1501,1,0,0,'10.89.1.7','2026-08-08 20:46:36'),
+(323,0,3,0,'apple',0,0,0,2,'10.89.1.7','2026-08-08 20:46:37'),
+(324,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:46:39'),
+(325,0,3,0,'apple',101,1,0,2,'10.89.1.7','2026-08-08 20:46:41');
 /*!40000 ALTER TABLE `oc_customer_search` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3060,6 +3746,163 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_customer_wishlist` WRITE;
 /*!40000 ALTER TABLE `oc_customer_wishlist` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oc_customer_wishlist` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_dockercart_checkout_abandoned`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_checkout_abandoned`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_checkout_abandoned` (
+  `abandoned_id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  `customer_id` int(11) DEFAULT 0,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `cart_data` text DEFAULT NULL,
+  `address_data` text DEFAULT NULL,
+  `last_step` varchar(50) NOT NULL,
+  `restore_token` varchar(64) DEFAULT NULL,
+  `restore_expires` datetime DEFAULT NULL,
+  `reminder_sent` tinyint(1) NOT NULL DEFAULT 0,
+  `reminder_sent_at` datetime DEFAULT NULL,
+  `reminder_wave` int(11) NOT NULL DEFAULT 0,
+  `reminder_coupon_id` int(11) DEFAULT NULL,
+  `recovered` tinyint(1) DEFAULT 0,
+  `date_added` datetime NOT NULL,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`abandoned_id`),
+  UNIQUE KEY `ux_restore_token` (`restore_token`),
+  UNIQUE KEY `ux_session_recovered` (`session_id`,`recovered`),
+  KEY `session_id` (`session_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `email` (`email`),
+  KEY `recovered` (`recovered`)
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_checkout_abandoned`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_checkout_abandoned` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_checkout_abandoned` DISABLE KEYS */;
+INSERT INTO `oc_dockercart_checkout_abandoned` VALUES
+(51,'003c164f2a40251b4b706e18a1',0,'','','[{\"cart_id\":\"1277\",\"product_id\":\"5023\",\"variant_id\":213,\"variant_sku\":\"\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"A5\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9230\",\"product_option_value_id\":\"9957\",\"option_id\":\"7001\",\"option_value_id\":\"7103\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0421\\u0435\\u0440\\u0435\\u0431\\u0440\\u043e\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9231\",\"product_option_value_id\":\"9959\",\"option_id\":\"7002\",\"option_value_id\":\"7201\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u044b\\u0439 12 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0435\\u0432\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":3,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":400,\"total\":1200,\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":0,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"1276\",\"product_id\":\"5066\",\"variant_id\":0,\"variant_sku\":\"\",\"name\":\"\\u00ab\\u0414\\u044e\\u043d\\u0430\\u00bb \\u0424\\u0440\\u044d\\u043d\\u043a\\u0430 \\u0413\\u0435\\u0440\\u0431\\u0435\\u0440\\u0442\\u0430\",\"model\":\"DEMO-5066\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/dune-by-frank-herbert.jpg\",\"option\":[{\"product_option_id\":\"9131\",\"product_option_value_id\":\"9762\",\"option_id\":\"7001\",\"option_value_id\":\"7103\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0421\\u0435\\u0440\\u0435\\u0431\\u0440\\u043e\",\"type\":\"color\",\"price\":\"460.5022\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9132\",\"product_option_value_id\":\"9763\",\"option_id\":\"7002\",\"option_value_id\":\"7201\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u044b\\u0439 12 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0435\\u0432\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":2,\"minimum\":1,\"quantity_step\":1,\"subtract\":\"1\",\"stock\":true,\"preorder\":false,\"price\":1074.5052,\"total\":2149.0104,\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":2,\"weight_class_id\":\"1\",\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-06 16:58:53','2026-08-08 20:02:31');
+/*!40000 ALTER TABLE `oc_dockercart_checkout_abandoned` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_dockercart_checkout_analytics`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_checkout_analytics`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_checkout_analytics` (
+  `analytics_id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(255) NOT NULL,
+  `customer_id` int(11) DEFAULT 0,
+  `step` varchar(50) NOT NULL,
+  `data` text DEFAULT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`analytics_id`),
+  KEY `session_id` (`session_id`),
+  KEY `step` (`step`),
+  KEY `date_added` (`date_added`)
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_checkout_analytics`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_checkout_analytics` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_checkout_analytics` DISABLE KEYS */;
+INSERT INTO `oc_dockercart_checkout_analytics` VALUES
+(12,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-06 16:58:53'),
+(13,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-06 16:58:53'),
+(14,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-06 16:58:53'),
+(15,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-06 16:58:53'),
+(16,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-06 16:58:53'),
+(17,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-06 18:08:21'),
+(18,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-06 18:08:22'),
+(19,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-06 18:08:22'),
+(20,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-06 18:08:22'),
+(21,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-06 18:08:22'),
+(22,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 08:44:45'),
+(23,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 08:44:45'),
+(24,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 08:44:46'),
+(25,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 08:44:46'),
+(26,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 08:44:46'),
+(27,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:08:55'),
+(28,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:08:55'),
+(29,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:08:55'),
+(30,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:08:55'),
+(31,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:08:55'),
+(32,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:43:49'),
+(33,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:43:50'),
+(34,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:43:50'),
+(35,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:43:50'),
+(36,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:43:50'),
+(37,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:44:06'),
+(38,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:44:07'),
+(39,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:44:07'),
+(40,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:44:07'),
+(41,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:44:07'),
+(42,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:44:12'),
+(43,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:44:12'),
+(44,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:44:12'),
+(45,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:44:13'),
+(46,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:44:13'),
+(47,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:44:22'),
+(48,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:44:22'),
+(49,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:44:23'),
+(50,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:44:23'),
+(51,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:44:23'),
+(52,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 09:46:14'),
+(53,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 09:46:15'),
+(54,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 09:46:15'),
+(55,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 09:46:15'),
+(56,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 09:46:15'),
+(57,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 13:24:33'),
+(58,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 13:24:33'),
+(59,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 13:24:33'),
+(60,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 13:24:33'),
+(61,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 13:24:33'),
+(62,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 13:24:36'),
+(63,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 13:24:36'),
+(64,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 13:24:36'),
+(65,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 13:24:40'),
+(66,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 13:24:40'),
+(67,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 13:24:40'),
+(68,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 13:24:40'),
+(69,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 13:24:40'),
+(70,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 13:24:40'),
+(71,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 17:39:28'),
+(72,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 17:39:28'),
+(73,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 17:39:28'),
+(74,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 17:39:28'),
+(75,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 17:39:28'),
+(76,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 17:44:26'),
+(77,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 17:44:27'),
+(78,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 17:44:27'),
+(79,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 17:44:27'),
+(80,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 17:44:27'),
+(81,'003c164f2a40251b4b706e18a1',0,'cart','[]','2026-08-08 20:02:31'),
+(82,'003c164f2a40251b4b706e18a1',0,'shipping_address','[]','2026-08-08 20:02:31'),
+(83,'003c164f2a40251b4b706e18a1',0,'shipping_method','[]','2026-08-08 20:02:31'),
+(84,'003c164f2a40251b4b706e18a1',0,'payment_address','[]','2026-08-08 20:02:31'),
+(85,'003c164f2a40251b4b706e18a1',0,'payment_method','[]','2026-08-08 20:02:31');
+/*!40000 ALTER TABLE `oc_dockercart_checkout_analytics` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -3414,7 +4257,7 @@ CREATE TABLE `oc_dockercart_product_variant_customer_group_price` (
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
   PRIMARY KEY (`variant_customer_group_price_id`),
   UNIQUE KEY `variant_group` (`variant_id`,`customer_group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3425,6 +4268,40 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_product_variant_customer_group_price` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_customer_group_price` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_customer_group_price` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_dockercart_product_variant_discount`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_product_variant_discount`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_product_variant_discount` (
+  `variant_discount_id` int(11) NOT NULL AUTO_INCREMENT,
+  `variant_id` int(11) NOT NULL,
+  `customer_group_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  `priority` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `date_start` date NOT NULL DEFAULT '0000-00-00',
+  `date_end` date NOT NULL DEFAULT '0000-00-00',
+  `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`variant_discount_id`),
+  KEY `variant_id` (`variant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_product_variant_discount`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_product_variant_discount` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_product_variant_discount` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_dockercart_product_variant_discount` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -3486,7 +4363,7 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
   `is_system` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_type` (`task_type`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3497,10 +4374,13 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-07-29 08:17:07',NULL,'2026-07-02 11:00:50','2026-07-29 08:17:07',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
-(41,'license_check','License Verification',1,'every_3d','2026-07-27 09:19:47',NULL,'2026-07-03 18:33:04','2026-07-27 10:40:03',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-07-29 08:17:07',NULL,'2026-07-24 18:51:04','2026-07-29 08:17:07',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-07-29 10:47:15',NULL,'2026-07-29 10:46:20','2026-07-29 10:47:15',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0);
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-09 07:46:18',NULL,'2026-07-02 11:00:50','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(41,'license_check','License Verification',1,'every_3d','2026-08-08 09:30:51',NULL,'2026-07-03 18:33:04','2026-08-08 11:07:29',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-09 07:46:18',NULL,'2026-07-24 18:51:04','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-09 07:46:18',NULL,'2026-07-29 10:46:20','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-09 11:44:26',NULL,'2026-08-01 18:17:04','2026-08-09 11:44:26',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-09 07:46:18',NULL,'2026-08-06 08:09:03','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-09 07:46:18',NULL,'2026-08-06 15:36:09','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4218,7 +5098,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=714 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4233,7 +5113,683 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (2,'66511bcd02e10ab44e07eaeb8f','dockercart','referral','','2026-07-25 09:31:35'),
 (9,'9783b87f78a7ef5c40cb979c87','','none','','2026-07-29 08:17:05'),
 (10,'9783b87f78a7ef5c40cb979c87','dockercart','referral','','2026-07-29 10:34:21'),
-(12,'fd7fd7a5eb09071d292ecd11da','','none','','2026-07-29 15:26:21');
+(12,'fd7fd7a5eb09071d292ecd11da','','none','','2026-07-29 15:26:21'),
+(13,'74458c20977e1b974fb9bbd0c7','','none','','2026-07-29 15:53:03'),
+(14,'359f1444f6e6e26dd06741481b','','none','','2026-07-29 15:53:10'),
+(15,'2f5dc299d464c5eded7b30f9ec','','none','','2026-07-29 15:53:17'),
+(16,'1bfa5b73cad0767e546057a258','','none','','2026-07-29 15:53:25'),
+(17,'52ff7f9603b906ea0471a345f0','','none','','2026-07-29 15:53:33'),
+(18,'b90d7190103ae74aeea23922ca','','none','','2026-07-29 15:53:38'),
+(19,'38e3c3ffcac9df4a7a71a1fa00','','none','','2026-07-29 15:54:05'),
+(20,'490d040a2ca797643c925ecf1d','','none','','2026-07-29 15:54:11'),
+(21,'d87bba52a02a28296d5c7163e4','','none','','2026-07-29 15:54:34'),
+(22,'2f9cef908b2666970ab2361ded','','none','','2026-07-29 16:53:48'),
+(23,'14df9c22662d1dda1d9875b7ec','','none','','2026-07-29 16:54:06'),
+(25,'8da97487730f87aa0a8874cd74','','none','','2026-07-30 09:27:29'),
+(26,'4d9ecbe0c243442c57dfa352d3','','none','','2026-07-30 09:27:38'),
+(27,'93fcda4192b28e2e035a673b49','','none','','2026-07-30 09:40:48'),
+(28,'1408dc344653f0ac8018776776','','none','','2026-07-30 09:48:20'),
+(29,'34c45d0ed41a8559d39c6b8a64','','none','','2026-07-30 10:01:34'),
+(30,'9709baa45c40686ed5e2e6e9ca','','none','','2026-07-30 10:06:47'),
+(31,'4eccb3ebcacf5cc2fa5d2a7922','','none','','2026-07-30 10:29:01'),
+(32,'25c9fc9255e00b0097c18afba9','','none','','2026-07-30 10:30:34'),
+(33,'a795b511325b527fd964f9feb4','','none','','2026-07-30 10:41:05'),
+(34,'61eee23331aaea564d6f648150','','none','','2026-07-30 10:42:35'),
+(35,'959f531b022c5789dfa2397f25','','none','','2026-07-30 10:42:38'),
+(36,'657a8d86d01a8327cef330e3ac','','none','','2026-07-30 10:42:44'),
+(37,'510442242f20467d828ba4fbf7','','none','','2026-07-30 10:43:14'),
+(38,'f2857413d9c6173e9a34bdfbbd','','none','','2026-07-30 10:47:22'),
+(39,'19de75b441af1820e82ff14d39','','none','','2026-07-30 10:57:58'),
+(40,'c4c5a25955d3d929559cc4c972','','none','','2026-07-30 10:58:27'),
+(41,'715d30129afdc81b9dab668e79','','none','','2026-07-30 10:58:34'),
+(42,'18f0eebdbc6aac22f2f08b8b9f','','none','','2026-07-30 10:59:14'),
+(43,'5af83b9686948d3d0f0aa07c95','','none','','2026-07-30 10:59:21'),
+(44,'7b1d1e45059019278c9f30f62c','','none','','2026-07-30 11:09:46'),
+(45,'a1717be36af165a0ee54973448','','none','','2026-07-30 11:09:56'),
+(46,'74ed6472bbbaecdb4621829797','','none','','2026-07-30 11:10:07'),
+(47,'fa87626c8fde88e4ce80e812e2','','none','','2026-07-30 11:10:22'),
+(48,'8a5b7e8ccfdf6c22e92c7044fe','','none','','2026-07-30 11:10:39'),
+(49,'da6f80f14bcde343c3526e9609','','none','','2026-07-30 11:11:21'),
+(50,'c73b525b261faf0e0a28c87cee','','none','','2026-07-30 11:11:35'),
+(51,'0ef654449dc64ae4ad0029fab6','','none','','2026-07-30 11:31:21'),
+(52,'7f033d4b5b0cfc33ce8a2b6603','','none','','2026-07-30 11:32:12'),
+(53,'3b7aad342e9c79ddaad0992523','','none','','2026-07-30 11:36:25'),
+(54,'e886a178c9f12ce35a7431940c','','none','','2026-07-30 11:49:46'),
+(55,'d4b7fc44e74d8a18ef43dc7a43','','none','','2026-07-30 11:49:52'),
+(56,'2d00c5af703b68d7775308100c','','none','','2026-07-30 11:50:05'),
+(57,'70d25b0d3f1de0bae44467c6b7','','none','','2026-07-30 11:51:01'),
+(58,'ba6affcef69d5f9b345a11bb01','','none','','2026-07-30 11:52:09'),
+(59,'6953342cb3754e2b5be6b0996d','','none','','2026-07-30 11:52:13'),
+(60,'17345d90e579f04d31092fa082','','none','','2026-07-30 12:06:23'),
+(61,'2ccd56d03d484c242fdabfcd32','','none','','2026-07-30 12:06:30'),
+(62,'418d5e37ed82a7acd83fbb035b','','none','','2026-07-30 12:10:09'),
+(63,'97b4434d645f37b249c9e555cf','','none','','2026-07-30 12:10:15'),
+(64,'6f2464844766c1e8bd8459f611','','none','','2026-07-30 13:47:27'),
+(65,'adf2fa4b7b172ef0e61946674f','','none','','2026-07-30 13:47:32'),
+(66,'938f0b920a52aedad8c4eb7b82','','none','','2026-07-30 13:50:57'),
+(67,'a51e6e9e99f330ec56c57c9b43','','none','','2026-07-30 13:51:24'),
+(68,'89178cf7819c38f10070502375','','none','','2026-07-30 13:52:56'),
+(69,'daaaa8fbc6276f8c0813f3b35b','','none','','2026-07-30 13:53:41'),
+(70,'e8a2db06284e6d679298c61b30','','none','','2026-07-30 13:55:02'),
+(71,'f66d6248d88922c99ac1798887','','none','','2026-07-30 13:55:06'),
+(72,'1bf8217557aaf63792ddd4a7a5','','none','','2026-07-30 13:55:17'),
+(73,'c19f323b53614a3ea76dfbc535','','none','','2026-07-30 13:55:25'),
+(74,'da79da2b99cc0c8fec23a394b5','','none','','2026-07-30 13:55:54'),
+(75,'63d57720926b8606d5ef63348f','','none','','2026-07-30 13:56:14'),
+(76,'0610dd2301789c52c75dd5da93','','none','','2026-07-30 14:00:04'),
+(77,'7e72788541b33e48dacd097d77','','none','','2026-07-30 14:02:18'),
+(78,'f4b7a44e32ecf4e0e6e3c02ef3','','none','','2026-07-30 14:06:16'),
+(79,'f735acc4b14222bb17ea683a52','','none','','2026-07-30 14:07:19'),
+(80,'93a0d5f876a1e2b6845b463ee7','','none','','2026-07-30 14:07:24'),
+(81,'1656105001c9b91944f3b8899a','','none','','2026-07-30 14:07:32'),
+(82,'a110e239302bdb07e00efd3f41','','none','','2026-07-30 14:07:36'),
+(83,'b86aa6baee0592eda4324bb6a0','','none','','2026-07-30 14:07:41'),
+(84,'8ec74c34c59ba61607393ce31a','','none','','2026-07-30 14:07:58'),
+(85,'c51a096c9d98045e73ccbe7fc6','','none','','2026-07-30 14:10:20'),
+(86,'f880fc20cdf146e86efbbe3e17','','none','','2026-07-30 14:13:48'),
+(87,'792a4fdcf31af2d4ad19b219b1','','none','','2026-07-30 14:19:25'),
+(88,'c718c00bc856dc847ca33da3f8','','none','','2026-07-30 14:44:00'),
+(89,'5a02c43b6030abfc9f22732252','','none','','2026-07-30 14:44:09'),
+(90,'8a37e7104206c4906059c4a489','','none','','2026-07-30 14:44:50'),
+(91,'51bb123254f9290cff1669b59c','','none','','2026-07-30 14:45:09'),
+(92,'f00001e539e525765068ab973b','','none','','2026-07-30 14:45:13'),
+(93,'d9b39b718f0f323b906f1ec47c','','none','','2026-07-30 14:45:57'),
+(94,'307fabef9f47febb77db20d618','','none','','2026-07-30 14:47:03'),
+(95,'83a46c20c9bbc3a4820c840ce2','','none','','2026-07-30 14:47:06'),
+(96,'8bce4e526342c6d6e77bc6197d','','none','','2026-07-30 14:48:31'),
+(97,'8be3039db72b5a330b4a26bf6f','','none','','2026-07-30 14:48:39'),
+(98,'53e294f4b367c6c5585bcbee9b','','none','','2026-07-30 14:48:43'),
+(99,'cd5cb6ca423273b351f6661ad2','','none','','2026-07-30 14:48:56'),
+(100,'55f5a4d0bc2216a70c630349f2','','none','','2026-07-30 14:49:06'),
+(101,'0f7c13c8059c0f0c8f41fedefd','','none','','2026-07-30 14:49:11'),
+(102,'1f355a279952f99b46b99ce973','','none','','2026-07-30 14:50:04'),
+(103,'f1ec5b3bb1fa70eeaa76d1da4c','','none','','2026-07-30 14:50:12'),
+(104,'e775e1bc5c4242986e0ef30c38','','none','','2026-07-30 14:51:52'),
+(105,'7a2e87d08a8816820e09751de3','','none','','2026-07-30 14:52:42'),
+(106,'3c106436c0115a4879ff8bd9d8','','none','','2026-07-30 14:52:49'),
+(107,'9d7092674b9eae5ef32a59658c','','none','','2026-07-30 14:53:09'),
+(108,'470a036403eea03ece74159078','','none','','2026-07-30 14:53:16'),
+(109,'dcb9efa96574e67342bdc543fe','','none','','2026-07-30 14:53:22'),
+(110,'f21664f49d3d7201ad7ee8baa7','','none','','2026-07-30 14:53:36'),
+(111,'954e549f9575b005dc335a37c6','','none','','2026-07-30 14:53:44'),
+(112,'0052978d8eeddd2367fc9d3313','','none','','2026-07-30 14:54:04'),
+(113,'d9a076c021077a336bcbac09f5','','none','','2026-07-30 14:55:30'),
+(114,'6c8b70a2e4c38bc8c4a82af675','','none','','2026-07-30 14:55:33'),
+(115,'7b8d8052ba2f500c4bd8b1b492','','none','','2026-07-30 14:55:40'),
+(116,'14ccf7c45ab489cdb47e0c74c5','','none','','2026-07-30 14:55:47'),
+(117,'15e4a4c5f08831aaa420b10901','','none','','2026-07-30 14:55:55'),
+(118,'2c69c547afb1131518e331f9e2','','none','','2026-07-30 14:56:53'),
+(119,'016cb909ee25eb88d09e67f87f','','none','','2026-07-30 15:02:52'),
+(120,'ca6cf0d9deb2833324b833d30c','','none','','2026-07-30 15:04:08'),
+(121,'98c7bc5259211250ad0d9e2921','','none','','2026-07-30 15:12:17'),
+(122,'19d0b3ba7f21895b312f71d919','','none','','2026-07-30 15:12:26'),
+(123,'50d455c81eba4e724601184d22','','none','','2026-07-30 15:12:39'),
+(124,'6744c790a33cd61ac6d69e799c','','none','','2026-07-30 15:12:47'),
+(125,'13a7a4b91123f4c359050083c4','','none','','2026-07-30 15:21:11'),
+(126,'f8a6abf094697a57a94aa6aefa','','none','','2026-07-30 15:21:30'),
+(127,'a616950a21281b8c8c2c1319d9','','none','','2026-07-30 15:32:15'),
+(128,'e1087cb36f69cf37d061f3a099','','none','','2026-07-30 15:34:10'),
+(129,'03b66a57d5023fee0ba076dcea','','none','','2026-07-30 15:34:41'),
+(130,'82ea980e7afe4d4eb85490dc60','','none','','2026-07-30 15:38:36'),
+(131,'d8ff51017bf88ed40b70af5ab4','','none','','2026-07-30 15:39:34'),
+(132,'d9b8a6f181d5c95fe3679e58a1','','none','','2026-07-30 15:40:29'),
+(133,'1282f3bb39546c2280fbf4cea7','','none','','2026-07-30 15:44:13'),
+(134,'f8bf9cc93b74e947c2833ac09b','','none','','2026-07-30 15:44:23'),
+(135,'20787bfe7da0672ebd0892c6d9','','none','','2026-07-30 15:44:27'),
+(136,'c34cf9d584115b33926ed3f9b8','','none','','2026-07-30 15:45:24'),
+(137,'1bbc048ba73cc2fd00bd253dfe','','none','','2026-07-30 15:45:33'),
+(138,'4d24c59c5f30c886f41cb2ee54','','none','','2026-07-30 15:45:39'),
+(139,'82111762abab606647d9fd1f71','','none','','2026-07-30 15:45:51'),
+(140,'24248065a65bfecd94858238df','','none','','2026-07-30 15:45:58'),
+(141,'a3d3586b327ce91671c2afe210','','none','','2026-07-30 15:46:02'),
+(142,'8f2322456bf30505a5c88713d0','','none','','2026-07-30 15:46:06'),
+(143,'649534c2bb5e0df29220499e59','','none','','2026-07-30 15:46:18'),
+(144,'01aba7f9e4d60aedeafa43fe3a','','none','','2026-07-30 15:47:19'),
+(145,'2edc3b41a12109bb201b05b333','','none','','2026-07-30 15:47:33'),
+(146,'1767ae4711658a8dd9a5b2bbea','','none','','2026-07-30 15:47:46'),
+(147,'c6bae52b9f4b8669de0c4de264','','none','','2026-07-30 16:12:16'),
+(148,'7e9a7ceb08018e2a24129138e0','','none','','2026-07-30 16:13:49'),
+(149,'7f17090ad4f9f186e07bec5c56','','none','','2026-07-30 16:14:48'),
+(150,'93e3fbc9d22985a0e376e90c70','','none','','2026-07-30 16:15:10'),
+(151,'be5c3a4432be08840dfb9c7daa','','none','','2026-07-30 16:19:10'),
+(152,'791933570ad0ef086b7756237a','','none','','2026-07-30 16:19:14'),
+(153,'151b92fe55babd93fbe7dbee64','','none','','2026-07-30 16:19:24'),
+(154,'50041fc33513ee8c8ec861f578','','none','','2026-07-30 16:21:27'),
+(155,'cb74702c65f708cfb8257beffe','','none','','2026-07-30 16:21:41'),
+(156,'27b34f5cf63647413534a6fe0e','','none','','2026-07-30 16:21:58'),
+(157,'aca26ceb4ea50b47214b9d41d1','','none','','2026-07-30 16:22:05'),
+(158,'542f5efd62f787e4644ef8e152','','none','','2026-07-30 16:22:13'),
+(159,'20f075acc2cf6aa98c714f3d84','','none','','2026-07-30 16:22:34'),
+(160,'55f746ff404baf6a0ceb333b7c','','none','','2026-07-30 16:22:49'),
+(161,'00fbb5e70d5e2473091a041d6c','','none','','2026-07-30 16:23:33'),
+(162,'5173f51bb4ff40296cf7356259','','none','','2026-07-30 16:23:46'),
+(163,'4ad5073c8895aaa3db63f7dd2d','','none','','2026-07-30 16:24:17'),
+(164,'b86253c7b63d6ce823b7b60a42','','none','','2026-07-30 16:25:04'),
+(165,'a08124c311a358226686710d29','','none','','2026-07-30 16:25:43'),
+(166,'5bae3f8c30ab464dc5bd5fdacb','','none','','2026-07-30 16:26:20'),
+(167,'324e58f883f77a5ca194e0ec18','','none','','2026-07-30 16:26:43'),
+(168,'6663b7785c77c4d808a78d4b0b','','none','','2026-07-30 16:31:07'),
+(172,'4e0da0416ced6b4eebd6e22d3d','','none','','2026-07-31 11:02:03'),
+(173,'c3046b2a9ac4354e66cc23e71a','','none','','2026-08-01 08:20:35'),
+(174,'a6631fa29cfc2e107643731619','','none','','2026-08-01 08:40:23'),
+(175,'543f0cb322c01721998d617e69','','none','','2026-08-01 08:40:23'),
+(176,'4efb55c79fcd6d51dfada6a382','','none','','2026-08-01 08:40:23'),
+(177,'6309f7bb3aab1165fcafdd7ed2','','none','','2026-08-01 08:40:23'),
+(178,'9421e51cc3125a759fce06ef17','','none','','2026-08-01 08:40:27'),
+(179,'ff0c83f9af5188573f0e43dda5','','none','','2026-08-01 08:40:27'),
+(180,'398ea17bbe0ca05750dc9f5d90','','none','','2026-08-01 08:40:27'),
+(181,'aa9c1478005111d4c66d75a8fb','','none','','2026-08-01 08:40:27'),
+(182,'1065e8688c0c8e3b179b136e56','','none','','2026-08-01 08:40:35'),
+(183,'a2a26bec2d5e0d8230f600b27e','','none','','2026-08-01 08:40:44'),
+(184,'6068901bf9b34db18da26b5c3a','','none','','2026-08-01 08:40:44'),
+(185,'33236ec05d53598a3906c52969','','none','','2026-08-01 08:43:11'),
+(186,'65a29ccf90b19a88db7033492e','','none','','2026-08-01 08:43:11'),
+(187,'76fd963b9bed7b8f97ec50b56b','','none','','2026-08-01 08:43:33'),
+(188,'a0d5cecf7602bbabef3c72d2b9','','none','','2026-08-01 08:43:33'),
+(189,'4776afcd2bdee289a7d90b47d2','','none','','2026-08-01 08:43:34'),
+(190,'df95890c3dbf4fac04a056501c','','none','','2026-08-01 08:43:34'),
+(191,'84235a78c06c59600dc39ef81a','','none','','2026-08-01 08:44:00'),
+(192,'c1d3b3a4e1ff94229ab280c248','','none','','2026-08-01 08:44:00'),
+(193,'62e7fb08696755afcc00925dde','','none','','2026-08-01 08:44:03'),
+(194,'7ca571b0943e48e94695344312','','none','','2026-08-01 08:44:03'),
+(195,'ef4c96dff1197cd7dc5ae6f1af','','none','','2026-08-01 08:45:49'),
+(196,'25ade6816c06f5078c86f175e6','','none','','2026-08-01 08:45:49'),
+(197,'a8d040ba8347833711347731d4','','none','','2026-08-01 08:45:49'),
+(198,'5179303fbd3353403b55881858','','none','','2026-08-01 08:45:49'),
+(199,'76acdd0a297f0151043aeed2fb','','none','','2026-08-01 08:45:49'),
+(200,'af1471229a3569a4e201c98dde','','none','','2026-08-01 08:45:49'),
+(201,'a6cdbcfa16f16e4507c79775a9','','none','','2026-08-01 08:47:19'),
+(202,'7bdf33d703a2ef1c4ccb459f7f','','none','','2026-08-01 08:47:19'),
+(203,'b00a453e87ee0fb442a15ef4b5','','none','','2026-08-01 08:47:20'),
+(204,'8ca9eba2f71dd2b826a51b85fb','','none','','2026-08-01 08:47:20'),
+(205,'cc334cbadcb772362969dd3500','','none','','2026-08-01 08:47:20'),
+(206,'4efc41c55876c4593c679344cb','','none','','2026-08-01 08:47:20'),
+(207,'37da2c058e4199295ee271fc08','','none','','2026-08-01 08:47:20'),
+(208,'ab512581d9b8b6ff44f9bf3bb0','','none','','2026-08-01 08:47:20'),
+(209,'9a772eb38a8aa1ba90947fff5e','','none','','2026-08-01 08:52:15'),
+(210,'e905f65c5e7f3d05b9bff0089f','','none','','2026-08-01 08:52:15'),
+(211,'9adfd0a3aaed1e290320751aa6','','none','','2026-08-01 08:52:24'),
+(212,'16cc3a15907a7d5827c4f07859','','none','','2026-08-01 08:52:31'),
+(213,'c2ec072600ba05413f75bbbdc3','','none','','2026-08-01 08:52:46'),
+(214,'b7fbe52a2dc814212a4c833f82','','none','','2026-08-01 08:52:47'),
+(215,'93f7ec77111b38a0278e6eafcf','','none','','2026-08-01 08:52:47'),
+(216,'ee27025230ca85a9ca735a5480','','none','','2026-08-01 08:52:47'),
+(217,'c93c77e52cf0e43811b34cee3d','','none','','2026-08-01 08:52:47'),
+(218,'3adfcbe5bca068d871a0f930cd','','none','','2026-08-01 08:52:56'),
+(219,'a712844039aa53a78165ef19a7','','none','','2026-08-01 08:53:01'),
+(220,'1f484854ceacee51e559886e06','','none','','2026-08-01 08:53:13'),
+(221,'46f768c7774535ab5cf6aec865','','none','','2026-08-01 08:53:21'),
+(222,'b8e37b3d13b7d4d54eb70073ac','','none','','2026-08-01 08:53:26'),
+(223,'b5d67e334fb6912e068cf361a7','','none','','2026-08-01 08:53:46'),
+(224,'ad21332bd2a8316703f41aae47','','none','','2026-08-01 08:54:25'),
+(225,'bf956b05864ce56af78e2c677e','','none','','2026-08-01 09:06:15'),
+(226,'76de64e558913b83ebda84c624','','none','','2026-08-01 09:06:21'),
+(227,'20d0c2fb47bb845b175b98c095','','none','','2026-08-01 09:09:10'),
+(228,'e149c27905b990438c88fe0081','','none','','2026-08-01 09:09:10'),
+(229,'64f8df625dc0adf6f80401c95b','','none','','2026-08-01 09:09:18'),
+(230,'cdc48ee7eb44ec892cd76a6683','','none','','2026-08-01 09:09:18'),
+(231,'c4e6c74cb75b9e032aeb0ed7ad','','none','','2026-08-01 09:09:35'),
+(232,'aa93e9655865c506edaba2bd72','','none','','2026-08-01 09:09:35'),
+(233,'bc0feac4a88f0959029cf8ac0d','','none','','2026-08-01 09:09:40'),
+(234,'7b6235412d775439c7c49af3a9','','none','','2026-08-01 09:09:44'),
+(235,'a50779b980b97a049c8908005c','','none','','2026-08-01 09:09:59'),
+(236,'d8942137e40f666997a80dfcd0','','none','','2026-08-01 09:10:04'),
+(237,'d82598a66aee0a1312ed8da520','','none','','2026-08-01 09:10:10'),
+(238,'ca744b3e98ab09f01b2e1a2704','','none','','2026-08-01 09:17:42'),
+(239,'a99ac3efa38138a2f5e25b9c0f','','none','','2026-08-01 12:13:58'),
+(240,'abc0baf21a66961a7852097a01','','none','','2026-08-01 12:14:31'),
+(241,'8f6787314ad63e76340d24d181','','none','','2026-08-01 12:16:04'),
+(242,'5299995a252ad3737837b572ca','','none','','2026-08-01 12:17:22'),
+(243,'f7dd62dabc10ffe674cb52b7d4','','none','','2026-08-01 12:17:35'),
+(244,'4ccda5a3e3037a210cfee78145','','none','','2026-08-01 12:18:07'),
+(245,'52995a977d226dc39f7f4208ef','','none','','2026-08-01 12:18:51'),
+(246,'5f01d6415b12a7842caf3a8e51','','none','','2026-08-01 12:19:43'),
+(247,'44c106264c35bced01903429bc','','none','','2026-08-01 12:24:31'),
+(248,'98e9cd2d4f5d2a1fb4ffe8fe0e','','none','','2026-08-01 12:25:13'),
+(249,'6f1aaa336f08e624f78696efb9','','none','','2026-08-01 12:25:27'),
+(250,'b0d6b1332f43df368c1dfef80a','','none','','2026-08-01 12:25:55'),
+(251,'48ad3ec719eea11575c21fd58a','','none','','2026-08-01 12:27:33'),
+(252,'4d6e8b34b171018f375421bf30','','none','','2026-08-01 12:27:33'),
+(253,'0a77c070baf875e7939e49f421','','none','','2026-08-01 12:28:07'),
+(254,'e978df70495e940980915cb8e7','','none','','2026-08-01 12:30:08'),
+(255,'8201ca4390d73cb98320237c7f','','none','','2026-08-01 12:30:25'),
+(256,'9c42048d4bc2e2928216e6a952','','none','','2026-08-01 14:04:25'),
+(257,'3dbef393a6523cf38933a3d064','','none','','2026-08-01 14:04:36'),
+(258,'6a6d7ec511acc9d3017f9bc2b9','','none','','2026-08-01 14:04:38'),
+(259,'9eb2214ae74adc4c0e9424cb6c','','none','','2026-08-01 14:06:10'),
+(260,'c4b7bf9e58398efd0b241cf5ed','','none','','2026-08-01 14:11:16'),
+(261,'aa6e1df2904d03b0a1eb474fdf','','none','','2026-08-01 14:18:26'),
+(262,'c3046b2a9ac4354e66cc23e71a','dockercart','referral','','2026-08-01 16:29:14'),
+(263,'74c2604022e6c457f237edd567','','none','','2026-08-01 16:46:18'),
+(265,'a7d7e588dbb6e326ef88e9e9d4','','none','','2026-08-02 09:00:03'),
+(266,'2025a21c72502471aa838630b0','','none','','2026-08-02 10:48:54'),
+(267,'8afc33e6c002b166ec5b03d922','','none','','2026-08-02 10:48:54'),
+(268,'d792ed01749e8289c4cc2e8dbe','','none','','2026-08-02 10:49:01'),
+(269,'a1d74f358f8afb6b848c3e573d','','none','','2026-08-02 10:49:01'),
+(270,'25c8915af3ab81b96e34ff69b0','','none','','2026-08-02 10:49:15'),
+(271,'e6a35900d20e9409e138b38e2f','','none','','2026-08-02 10:49:56'),
+(272,'8f9be0e1dfd98948a3c7bc5169','','none','','2026-08-02 10:51:24'),
+(273,'061e3540ec2ef9931e9af9aeef','','none','','2026-08-02 10:51:41'),
+(274,'9a4d75889516356e0b62653c04','','none','','2026-08-02 10:52:24'),
+(275,'32437e4d074ccfee47826acd8e','','none','','2026-08-02 10:53:19'),
+(276,'3657551b489ec37e90450d32b1','','none','','2026-08-02 11:03:26'),
+(277,'2990f2e47bc9ae8316c68de7fd','','none','','2026-08-02 11:03:26'),
+(278,'3a86aae04b2b4d52acd41108a5','','none','','2026-08-02 12:05:14'),
+(279,'4ac946bd9794047433557b85f2','','none','','2026-08-02 12:05:26'),
+(280,'23db9d0217b58fafe8fb556ee4','','none','','2026-08-02 12:05:34'),
+(281,'c0bb494035cc1e40e6a677cc7f','','none','','2026-08-02 12:05:45'),
+(282,'04c873eb4e53781dc4ea4d3241','','none','','2026-08-02 12:05:45'),
+(283,'6e18ce0af369a5b124397b4e15','','none','','2026-08-02 12:06:24'),
+(284,'b676aeab60cc6b497124998f6c','','none','','2026-08-02 12:06:24'),
+(285,'cbcc11998675c55b0b17601e6c','','none','','2026-08-02 12:08:31'),
+(286,'d18b959b053ace84562c878956','','none','','2026-08-02 12:10:32'),
+(287,'9a16df201bbd6992705ea76458','','none','','2026-08-02 12:10:46'),
+(288,'7b74912ed33e11b68f2328b089','','none','','2026-08-02 12:10:46'),
+(289,'f543b1ae2e67fc70f3c0bc37cd','','none','','2026-08-02 12:11:02'),
+(290,'78f8cfc3c179908ed8db8edfbd','','none','','2026-08-02 12:11:02'),
+(291,'459cb04d0b91b130cad2ea8d7b','','none','','2026-08-02 12:14:26'),
+(292,'4a7875e5ba067b0027957448aa','','none','','2026-08-02 12:14:26'),
+(293,'134f417511471878adfca86f79','','none','','2026-08-02 12:14:26'),
+(294,'d53b6fd322c19865b1508cf6db','','none','','2026-08-02 12:14:26'),
+(295,'9af977c24f3a9244a4ab0a5efe','','none','','2026-08-02 12:14:40'),
+(296,'384f92800834df3e8f4ef662b0','','none','','2026-08-02 12:14:40'),
+(297,'262e1fb6ffb1a93b563f88ada3','','none','','2026-08-02 12:14:40'),
+(298,'3d328e5ca6e00275222f7e42a2','','none','','2026-08-02 12:14:52'),
+(299,'c76c27c40983311ffe2d171f49','','none','','2026-08-02 12:35:44'),
+(300,'728ef87508c978d79cdcb30b62','','none','','2026-08-02 12:35:49'),
+(301,'82930efeb83f39730670b2d60f','','none','','2026-08-02 12:35:55'),
+(302,'6d1aea9fb60971a402f8f2b14e','','none','','2026-08-02 12:36:01'),
+(303,'faf24bee77dd1d20bc42b43a31','','none','','2026-08-02 12:36:06'),
+(304,'938ef94c1e6a52eb20fe8c7f2a','','none','','2026-08-02 12:36:13'),
+(305,'483576d882a8b7c5dad82153d6','','none','','2026-08-02 12:39:53'),
+(306,'aee6f125b08bbd3c8713a5bb60','','none','','2026-08-02 12:53:48'),
+(307,'46d9ef81f02f8dc113ca2cf13f','','none','','2026-08-02 12:54:34'),
+(308,'989e0c57243ddf847e3ce8eb2b','','none','','2026-08-02 12:54:42'),
+(309,'82f63a092e734d7cfbde10f7ab','','none','','2026-08-02 12:58:31'),
+(310,'10a7a10b73bf4a2bb7d3bad8f6','','none','','2026-08-02 13:02:35'),
+(311,'e3beab7686d30cfd668856be3e','','none','','2026-08-02 13:03:50'),
+(312,'46c7995ac129669159d79ccd65','','none','','2026-08-02 13:07:40'),
+(313,'e20087e9facec6797a31d205b5','','none','','2026-08-02 13:07:52'),
+(314,'df888c0717636e4cdff0c3410f','','none','','2026-08-02 13:07:52'),
+(315,'d116e5355f75e7d4df019fe37a','','none','','2026-08-02 13:07:52'),
+(316,'c37588d3fbe43e1836eba32082','','none','','2026-08-02 13:08:05'),
+(317,'8e551436328749aa4e2e0b32ef','','none','','2026-08-02 13:08:05'),
+(318,'15ba1c7b703fb6f3293585511d','','none','','2026-08-02 13:08:06'),
+(320,'6f1d4f1040d9bcd89b2673d208','','none','','2026-08-02 15:00:27'),
+(321,'47e418471b690f1225c527605a','','none','','2026-08-02 15:00:36'),
+(322,'55bf0632131a7e9c90f0e118d5','','none','','2026-08-02 15:00:45'),
+(323,'a1a35b5c52a86b5325c023a6a7','','none','','2026-08-02 15:00:45'),
+(324,'55d3330cd30140980e1f849026','','none','','2026-08-02 15:01:22'),
+(325,'e1f9a763306d422aa1a3dd0130','','none','','2026-08-02 15:01:32'),
+(326,'76f1cefad5f663c4c108dd0805','','none','','2026-08-02 15:01:32'),
+(327,'96ffb815fb78b0f98e39826a0e','','none','','2026-08-02 15:02:51'),
+(328,'5536fb798bf826b41972db7c54','','none','','2026-08-02 15:03:12'),
+(329,'0cdfb0aeb883a856129f3b2d3e','','none','','2026-08-02 15:03:12'),
+(330,'a2f3c1a0f651935eeb7e58ebe7','','none','','2026-08-02 15:03:23'),
+(331,'3921eb6476496adc1fcdad816a','','none','','2026-08-02 15:03:23'),
+(332,'8e70cc2793603a63527a2350d8','','none','','2026-08-02 15:03:36'),
+(333,'1bd613a174112807152f710f2a','','none','','2026-08-02 15:03:49'),
+(334,'ccd821b98f66a7f2931de9ff65','','none','','2026-08-02 15:04:29'),
+(335,'23274a1e27441f9c7337a79458','','none','','2026-08-02 15:04:44'),
+(336,'fdcbfbe40d9b057fefd1cbb654','','none','','2026-08-02 15:05:16'),
+(337,'47e64346601acbe10a6f0940f6','','none','','2026-08-02 15:11:22'),
+(338,'65db8b95a88fe82dd9d0324aa6','','none','','2026-08-02 15:11:31'),
+(339,'cf98396cd2214fcc9d18e36fab','','none','','2026-08-02 15:11:31'),
+(340,'0f9b71267bc706e0dd11d2aa7d','','none','','2026-08-02 15:12:01'),
+(341,'9d62b6acdd72765586a078f647','','none','','2026-08-02 15:12:01'),
+(342,'2427daca4c36fdd638c1bcbd6f','','none','','2026-08-02 15:12:11'),
+(343,'f11bc494f94cb07e060ae6b062','','none','','2026-08-02 15:12:11'),
+(344,'a474820fa33d832dd8487e7fab','','none','','2026-08-02 15:12:27'),
+(345,'c7b6cfc1e4b2c2eab29c542d0f','','none','','2026-08-02 15:14:08'),
+(346,'e5c4101477e537e3aee598901e','','none','','2026-08-02 15:14:47'),
+(347,'79622439fb3f059b4188a6768d','','none','','2026-08-02 15:15:28'),
+(348,'2f1e19a65ebee4f797f82f8d0a','','none','','2026-08-02 15:15:44'),
+(349,'c11fd20c7d2e50c72f93e41153','','none','','2026-08-02 15:15:44'),
+(350,'a1ae84c1d3eb233de2214a701c','','none','','2026-08-02 15:19:59'),
+(351,'7416e3e6be21ce229dcfff755f','','none','','2026-08-02 15:27:53'),
+(352,'ac1584ce52625c7dffc1d16e14','','none','','2026-08-02 15:30:13'),
+(353,'9d43638f58e12f4fda25715ab4','','none','','2026-08-02 15:30:26'),
+(354,'39ae9052e148d9fd7bcd37da92','','none','','2026-08-02 15:31:45'),
+(355,'a95d067d733458c30ace3e3c53','','none','','2026-08-02 15:31:45'),
+(356,'47a4f81ba97c4644dd8294cd01','','none','','2026-08-02 15:36:33'),
+(357,'78c321d6cc434574095c704520','','none','','2026-08-02 15:36:33'),
+(359,'a94a746f2806ff27bc235d4850','','none','','2026-08-02 14:52:06'),
+(360,'ca9ef351b32b4c56b6723ad1e5','','none','','2026-08-02 18:07:32'),
+(362,'5f4f654182713e0e29d4832996','','none','','2026-08-03 20:23:08'),
+(363,'87896f6d83908d161b7acb1bc2','','none','','2026-08-03 20:23:08'),
+(364,'003c164f2a40251b4b706e18a1','dockercart','referral','','2026-08-04 07:28:08'),
+(367,'9a027c4afca86d38c58bd70478','','none','','2026-08-04 12:17:18'),
+(369,'003c164f2a40251b4b706e18a1','','none','','2026-08-05 09:31:01'),
+(370,'e4c7ce40ddf48d7a4e1ac6fda9','','none','','2026-08-05 10:03:33'),
+(371,'ed2b44c42f97e9db56cb3a8c91','','none','','2026-08-05 10:03:37'),
+(372,'0e97a9302f223309bcc6b311b8','','none','','2026-08-05 10:03:37'),
+(373,'22cec36fcefcb1a2b0bbb6fe09','','none','','2026-08-05 10:04:11'),
+(374,'c712e581195e99b7b51720f2ed','','none','','2026-08-05 10:04:11'),
+(375,'ace80e28b3efd0d2921bcb2135','','none','','2026-08-05 10:04:14'),
+(376,'cd6ce733efe13f3c77f0e7d209','','none','','2026-08-05 10:04:14'),
+(377,'5c4e22d3240e777d0641d6af84','','none','','2026-08-05 10:04:30'),
+(378,'84a4cc163f1989f4dcc61267c3','','none','','2026-08-05 10:04:30'),
+(379,'66b187a397b1c93f32974b1624','','none','','2026-08-05 10:04:34'),
+(380,'ddb32b1c95fa7218dc76cd9cc4','','none','','2026-08-05 10:04:34'),
+(381,'055b0a1b723b59f25fa4a86e85','','none','','2026-08-05 10:04:34'),
+(382,'29b1d1eb4ef2cc12fa16ad7128','','none','','2026-08-05 10:04:42'),
+(383,'0d0d63cf984b6259bdbcb5bf4d','','none','','2026-08-05 10:04:52'),
+(384,'c9b864b988834211fa72ca90f6','','none','','2026-08-05 10:05:01'),
+(385,'a5172a5dd78390febdfb2f67b6','','none','','2026-08-05 10:05:12'),
+(386,'ad6657be2a7522950630df13f6','','none','','2026-08-05 10:05:12'),
+(387,'28b788e3adb98113bf3a4b329a','','none','','2026-08-05 10:06:10'),
+(388,'0aaa2da7c76fc575734e605711','','none','','2026-08-05 10:06:10'),
+(389,'2fe6fc3441ccb759fb2c7cd5d8','','none','','2026-08-05 10:08:47'),
+(390,'93d06a351f2fb29f312bac78d9','','none','','2026-08-05 10:08:47'),
+(391,'83aac9bd1fcf504fdd2b2a016a','','none','','2026-08-05 10:09:02'),
+(392,'03b2742535cad72ee8251b08a1','','none','','2026-08-05 10:09:02'),
+(393,'883cd103f39a8f12d5c0915f6b','','none','','2026-08-05 10:09:02'),
+(394,'f188013afc03b84de0eec54077','','none','','2026-08-05 10:09:06'),
+(395,'4acf82e056719cb6b9d079d6c7','','none','','2026-08-05 10:09:11'),
+(396,'2e6f4509b10d8c54c8d9019276','','none','','2026-08-05 10:09:16'),
+(397,'c1aa777b67c0f45374cf0cc923','','none','','2026-08-05 10:10:17'),
+(398,'bdb8536d067a6a1b47b7e60529','','none','','2026-08-05 10:10:17'),
+(399,'2dfb2dc39f7b7e1eedd777a3fe','','none','','2026-08-05 10:12:36'),
+(400,'3a666d48ce677221fb0e2e182a','','none','','2026-08-05 10:12:36'),
+(401,'7ac7ca7c6cc1457677f08169dc','','none','','2026-08-05 10:12:41'),
+(402,'fcad163cf68fd84c25b64dd248','','none','','2026-08-05 10:12:41'),
+(403,'a0f2d1bacd42be35ec88856122','','none','','2026-08-05 10:13:00'),
+(404,'0f5d284bfa7f29a26edd78fe97','','none','','2026-08-05 10:13:00'),
+(405,'b16d5947986ef5798231b501f6','','none','','2026-08-05 10:13:00'),
+(406,'63717d574614d445d9a21f6074','','none','','2026-08-05 10:16:44'),
+(407,'e3ba6e15288b980a2aaa40da47','','none','','2026-08-05 10:16:45'),
+(408,'26185be97d38c13653407b6162','','none','','2026-08-05 10:16:52'),
+(410,'957d91a9ba9804f4cca94fc8f0','','none','','2026-08-05 11:20:48'),
+(411,'3d1e0b049ad16c099a5de58387','','none','','2026-08-05 11:20:48'),
+(412,'3d67c9e1f4be453a6e79d77367','','none','','2026-08-05 11:20:48'),
+(413,'877f0760493ae56c19f4209ac0','','none','','2026-08-05 11:25:14'),
+(414,'8e0b231fce6c7415e4bd7586ea','','none','','2026-08-05 11:25:15'),
+(415,'a134367f4b53f0242e08825290','','none','','2026-08-05 11:25:19'),
+(416,'f2c7108f16b645de261fad2d15','','none','','2026-08-05 11:25:24'),
+(417,'a492d2e20fe8459828ecd4493d','','none','','2026-08-05 11:25:24'),
+(418,'2e164ae9c8a4f72397973b5aa2','','none','','2026-08-05 11:26:28'),
+(419,'a041ed1e4996cbeceba4c233b9','','none','','2026-08-05 11:26:28'),
+(420,'2bcf9b82a040a1ee178d41dd90','','none','','2026-08-05 11:26:31'),
+(421,'f722148ff0154336114e185369','','none','','2026-08-05 11:26:34'),
+(422,'9e1ba02dd2be5bf0b46f41a060','','none','','2026-08-05 11:26:37'),
+(423,'9e5edff91cd7bb436c02f7b99b','','none','','2026-08-05 11:29:16'),
+(424,'e33e805337fa08ea5303264602','','none','','2026-08-05 11:29:16'),
+(425,'9bb2da08cd5d22581d2e350671','','none','','2026-08-05 11:29:16'),
+(426,'ab7e171c934707570fac9dad76','','none','','2026-08-05 11:29:33'),
+(427,'7dc42e29ba2b5fccad6394bc36','','none','','2026-08-05 11:30:05'),
+(428,'1b9bfbfba9fa325a4f7898702e','','none','','2026-08-05 11:30:05'),
+(429,'4924561345130a9a84d5112f82','','none','','2026-08-05 11:30:10'),
+(430,'164b85aff158985404cf116107','','none','','2026-08-05 11:30:25'),
+(431,'e4708270ed2f1d6a9bcef8e5aa','','none','','2026-08-05 11:31:17'),
+(432,'db74b14a85dedc0eb363956436','','none','','2026-08-05 11:31:17'),
+(433,'fc6f5380ce3acc3f3bb00d6433','','none','','2026-08-05 11:31:25'),
+(434,'df87d101ec68e5c66212387c39','','none','','2026-08-05 11:33:38'),
+(435,'63f151507c5ccf136c7b3844b7','','none','','2026-08-05 11:33:39'),
+(436,'a92346aff858785339d08928aa','','none','','2026-08-05 11:33:44'),
+(437,'6dd3955cca170a6bc1b1344b4c','','none','','2026-08-05 11:33:49'),
+(438,'5cc4b6670dd82fe02672bbde27','','none','','2026-08-05 11:50:36'),
+(439,'735ddf9751dd9694d09bbe2dcb','','none','','2026-08-05 11:50:36'),
+(440,'de151c664db2c280d605ab8336','','none','','2026-08-05 11:51:47'),
+(441,'b2abf9956fd19aacbbd42ccef6','','none','','2026-08-05 11:51:47'),
+(442,'9e84d7748a8918e151ead13d29','','none','','2026-08-05 11:51:59'),
+(443,'c26c99b62d83dc8316d2d645d9','','none','','2026-08-05 11:52:03'),
+(444,'cb338183e4091372cc80572e69','','none','','2026-08-05 11:52:43'),
+(445,'89ec8224fa1ee16f9c59a94848','','none','','2026-08-05 11:52:50'),
+(446,'54575eb58afc66a48a116a9cd3','','none','','2026-08-05 11:54:56'),
+(447,'edba74cef247f9d6f0121f2bb4','','none','','2026-08-05 11:55:52'),
+(448,'9703c9a3fdff8c44b0ebed3faf','','none','','2026-08-05 11:56:38'),
+(449,'4e9c000b246b49f3f74301c33b','','none','','2026-08-05 11:57:00'),
+(450,'8572346957cd2f0c1023d7127e','','none','','2026-08-05 11:58:09'),
+(451,'96d8251e9fe34048e53396551a','','none','','2026-08-05 11:58:25'),
+(452,'eef768eb623f53c6a2141101a5','','none','','2026-08-05 12:01:50'),
+(453,'bfe5e48421b8f013118b71e488','','none','','2026-08-05 12:02:19'),
+(454,'fffa5786a744aff0ed0c35de0a','','none','','2026-08-05 12:04:11'),
+(455,'aebf96dc9b3048c901665bdc67','','none','','2026-08-05 12:04:35'),
+(456,'ab1623d527364048f83cc99bd9','','none','','2026-08-05 12:04:40'),
+(457,'43c19d84953b59ec847ca60504','','none','','2026-08-05 12:04:51'),
+(458,'5e55f680e56b993d39adae0165','','none','','2026-08-05 12:15:36'),
+(459,'fbd6b241a707809a7bbf786a6a','','none','','2026-08-05 12:15:41'),
+(460,'e96c2c585601f1c667f91f6010','','none','','2026-08-05 12:15:46'),
+(461,'9e86bdf1f27c57e6456ac6714b','','none','','2026-08-05 12:15:46'),
+(462,'b7c51699e2f063d5ac1523bbf3','','none','','2026-08-05 12:15:53'),
+(463,'dc7099e34831a1d02a45a5e04e','','none','','2026-08-05 12:16:01'),
+(464,'75674cebe08900a1f7e177de8a','','none','','2026-08-05 12:16:01'),
+(465,'6d11288c5bb1dbb5095e6bc43b','','none','','2026-08-05 12:16:07'),
+(466,'70d890e54346f8ec213d301727','','none','','2026-08-05 12:16:07'),
+(467,'8cfbd3744dfd3105acb7c1e649','','none','','2026-08-05 12:16:18'),
+(468,'b499813d6e8daa78d65cfdcfcd','','none','','2026-08-05 12:16:22'),
+(469,'14af36a15622dbdfb0c01671a3','','none','','2026-08-05 12:16:29'),
+(470,'57548490650ea20561ed4e26a4','','none','','2026-08-05 12:16:29'),
+(471,'77e490d5703cf06f1b20b6a382','','none','','2026-08-05 12:16:35'),
+(472,'a2c2f2967e7c2e17f5a0e8b1a5','','none','','2026-08-05 12:16:40'),
+(473,'304b9e750880587a9fe8f31ac3','','none','','2026-08-05 12:16:40'),
+(474,'8b491626520a7fc45214030bfa','','none','','2026-08-05 12:16:55'),
+(475,'0f108601258657d57a7af4395e','','none','','2026-08-05 12:16:55'),
+(476,'0cf41921d86693333de3a292e6','','none','','2026-08-05 12:19:07'),
+(477,'a220f840efb64d52f7b35d84d4','','none','','2026-08-05 12:24:23'),
+(478,'04598ee32648677bd1d345f313','','none','','2026-08-05 12:24:31'),
+(479,'ce9cf170cafb09f33ad611e885','','none','','2026-08-05 12:27:49'),
+(480,'8061131cb95873128e59e76905','','none','','2026-08-05 12:28:26'),
+(481,'278c71bc0ffb1b2ff5686b850a','','none','','2026-08-05 12:28:54'),
+(482,'d2bf94621f0df4b1e21f0c10c0','','none','','2026-08-05 12:28:54'),
+(483,'378bc1aa6aa4404d2214d96199','','none','','2026-08-05 12:28:58'),
+(484,'fa872d467900a46d0ed3992d73','','none','','2026-08-05 12:29:05'),
+(485,'4c9b05738e82f0645ee562b2f9','','none','','2026-08-05 12:33:03'),
+(486,'4409f3fc8a4e1d91fa117f4dc7','','none','','2026-08-05 12:33:12'),
+(487,'7f5320965375e993aaf6823c4a','','none','','2026-08-05 12:39:25'),
+(488,'8c64faa5765d47426c325b8615','','none','','2026-08-05 12:42:50'),
+(489,'977aa203a7d41fd4ca34928e86','','none','','2026-08-05 12:42:59'),
+(490,'bbb1aa2d472b45715f3f5b53ba','','none','','2026-08-05 12:43:07'),
+(492,'49cd40626e1f4c1c92768633ae','','none','','2026-08-05 17:15:52'),
+(493,'6cdceac22bc66c07df7838dcd5','','none','','2026-08-05 17:16:07'),
+(494,'62cec18595f157dad5b5aa64b8','','none','','2026-08-05 17:16:10'),
+(495,'e8d096fd7a5d8302b22a1ce0c4','','none','','2026-08-05 17:16:12'),
+(496,'e7733a20def0709ee45db105ca','','none','','2026-08-05 17:16:18'),
+(497,'556d326772573479246e86e841','','none','','2026-08-05 17:17:10'),
+(498,'b099c4ccb0288610d3c9f6c3f1','','none','','2026-08-05 17:37:17'),
+(499,'12678e20f38004fea7d867db1a','','none','','2026-08-05 17:37:24'),
+(500,'603734bfe49124ba9dba3976d8','','none','','2026-08-05 17:37:51'),
+(501,'6f437afa05e399de8a9186e40f','','none','','2026-08-05 17:37:56'),
+(502,'bea99bd19ae3e29e98bcd5650d','','none','','2026-08-05 17:37:56'),
+(503,'4627df44d1128aea1546dbc765','','none','','2026-08-05 17:43:20'),
+(504,'52b6a43fd5b70815b97e7879cb','','none','','2026-08-05 17:43:20'),
+(505,'ddd13888406be7d9b6633f2c2a','','none','','2026-08-05 17:43:20'),
+(506,'579b45c04c4b087029efbba69f','','none','','2026-08-05 17:43:40'),
+(507,'f4ef12efc2174f8aac7b13ba79','','none','','2026-08-05 17:52:44'),
+(508,'d595b3e0f1c11f1f0347a8c2ad','','none','','2026-08-05 17:52:44'),
+(509,'7dac29267729ad84a637d1f672','','none','','2026-08-05 17:52:44'),
+(514,'1914b583e3bdf857d139b6e0df','','none','','2026-08-06 10:29:10'),
+(515,'423fb8e09ec00edca02dbd5292','','none','','2026-08-06 12:45:49'),
+(516,'bb6d8f7f3c4b4b5a9e1c0efa12','','none','','2026-08-06 15:39:19'),
+(517,'a50adfc7cf31add9b871d0df12','','none','','2026-08-06 15:39:24'),
+(518,'eae85c67cc45c036af4cce3485','','none','','2026-08-06 15:39:30'),
+(519,'df47b51ab9d7f86b5bbc8624b0','','none','','2026-08-06 15:40:04'),
+(520,'4d79c53585833b3089c9cfadd8','','none','','2026-08-06 15:40:53'),
+(521,'83f8522328be5f59f1ebd2ba4c','','none','','2026-08-06 15:41:22'),
+(522,'e9fc1bf4c8cf894dc703248bd4','','none','','2026-08-06 15:42:01'),
+(523,'399d7e850f17fa12920b365b7c','','none','','2026-08-06 15:42:40'),
+(525,'cf60389ae728e02269625e01c8','','none','','2026-08-06 15:53:26'),
+(526,'2b4c6ec6741f9c04a70bd9ee58','','none','','2026-08-06 15:59:32'),
+(527,'7aebb49e02257924ee3f202cdc','','none','','2026-08-06 16:04:08'),
+(528,'11d6b4859ae489c2c23f5a83df','','none','','2026-08-06 16:08:41'),
+(529,'999aa7815d37a77c3fd77e6d16','','none','','2026-08-06 16:10:55'),
+(530,'8770b0621ee193a1c32a39a1bb','','none','','2026-08-06 16:10:55'),
+(531,'3b1ac2122492d11cb741980b62','','none','','2026-08-06 16:11:56'),
+(532,'d8c65a7e20df43b79ef579e763','','none','','2026-08-06 16:12:03'),
+(533,'aa31678859f4395348e0c99cde','','none','','2026-08-06 16:12:03'),
+(534,'8394dd8796f9810210e7f0417c','','none','','2026-08-06 16:12:12'),
+(535,'1ab7fabea841683f3bbc5ed4a1','','none','','2026-08-06 16:12:37'),
+(536,'a107677a2d681d43f99869ca59','','none','','2026-08-06 16:13:07'),
+(537,'0ad170d66969668bc01f1bb6f9','','none','','2026-08-06 16:13:16'),
+(538,'9b32635268faa8e9d9d040c4a2','','none','','2026-08-06 16:17:23'),
+(539,'e17137393f25d0636de8343cfd','','none','','2026-08-06 16:17:23'),
+(540,'b76287198ef2a9a25623c02dd8','','none','','2026-08-06 16:17:23'),
+(541,'c12c6d30d43e50978154366d42','','none','','2026-08-06 16:17:32'),
+(542,'9c85ded13943777a42e7f7db1d','','none','','2026-08-06 16:18:19'),
+(543,'a2bc17672679a9554b1be03096','','none','','2026-08-06 16:18:19'),
+(544,'bd03f9a6877b16e68623468db2','','none','','2026-08-06 16:18:19'),
+(545,'12e5459e23bd1d2e45f84bf3fc','','none','','2026-08-06 16:18:38'),
+(546,'1e9ce33fa5404e2aade2720132','','none','','2026-08-06 16:18:38'),
+(547,'dc140c01d3a471df0cdc5a10f7','','none','','2026-08-06 16:19:03'),
+(548,'a244a82a9dd69f43cb06b15f73','','none','','2026-08-06 16:19:34'),
+(549,'b510dd99aba009735f04662ed7','','none','','2026-08-06 16:20:16'),
+(550,'05cf51d107372fdde055ae876f','','none','','2026-08-06 16:20:28'),
+(551,'1dea61a78778baa6e2cf86de69','','none','','2026-08-06 16:20:44'),
+(552,'674402c065afe8f2cad654d226','','none','','2026-08-06 16:59:12'),
+(553,'d35237251b1971fa9857dd3840','','none','','2026-08-06 17:37:39'),
+(554,'fe4cdc2ce0d05e526221ca9f37','','none','','2026-08-06 17:37:50'),
+(555,'3c48f01c415e1b89653b3ef73e','','none','','2026-08-06 17:37:50'),
+(556,'48b18438cc527f3375b21b468f','','none','','2026-08-06 17:37:50'),
+(557,'7dd7258b29d1f50533b536223b','','none','','2026-08-06 17:40:41'),
+(558,'67d4de93c7417c5447f1644a17','','none','','2026-08-06 17:40:41'),
+(559,'94b7506d64465f4ecd72ee7d2a','','none','','2026-08-06 17:40:42'),
+(560,'2c280d9d18c377a6e4ad017d69','','none','','2026-08-06 17:40:42'),
+(561,'ca0f36b82c8ade992541c034ee','','none','','2026-08-06 17:42:44'),
+(562,'58b4f31428a56576bf1f243470','','none','','2026-08-06 17:42:44'),
+(563,'261530ab4881ad4bda4cb72083','','none','','2026-08-06 17:42:44'),
+(566,'39372a52abc0fcadcafc59f9b1','','none','','2026-08-07 09:26:52'),
+(567,'84afc3d45fd3c1f1f9df5539d4','','none','','2026-08-07 09:26:55'),
+(568,'14a23a6bf048dcd22a5306dd71','','none','','2026-08-07 09:26:55'),
+(569,'6fdc7c852de370c9289e0ffa1a','','none','','2026-08-07 09:26:58'),
+(570,'0c14ae0875a26e6cc887b9bff8','','none','','2026-08-07 09:27:01'),
+(571,'e6850907c29488afe46bb15e70','','none','','2026-08-07 09:27:02'),
+(572,'ec59c91e58a8723e4ac987309b','','none','','2026-08-07 09:27:05'),
+(573,'8e311b7bcab45d843f32351570','','none','','2026-08-07 09:27:05'),
+(574,'f813b102c8f783d52088710102','','none','','2026-08-07 09:27:08'),
+(575,'e9b7c57367399101a6bbf98892','','none','','2026-08-07 09:27:12'),
+(576,'245696b5d3954cf0b5dd561148','','none','','2026-08-07 09:27:12'),
+(577,'7cb3200b5ca33cfd5fd812af86','','none','','2026-08-07 09:27:16'),
+(578,'7e08969cfc872594d8c9ab483a','','none','','2026-08-07 09:27:20'),
+(579,'476bb8c03f6dbd32ecebf7263d','','none','','2026-08-07 09:27:24'),
+(580,'3cf57007791e456b810b6bdd5e','','none','','2026-08-07 09:27:27'),
+(581,'cd2a521a4ab26a225fbccbfe85','','none','','2026-08-07 09:27:31'),
+(582,'ba79c860579c2a9368c6f6b439','','none','','2026-08-07 09:27:31'),
+(583,'3d128512ca66401bd8939d8afa','','none','','2026-08-07 09:27:31'),
+(584,'4312dcb2aa26cbd788feca673b','','none','','2026-08-07 10:03:00'),
+(585,'5dc36aed11521e73a6cb7745b5','','none','','2026-08-07 10:04:15'),
+(586,'81be824652b2fe2585ec09b989','','none','','2026-08-07 10:05:34'),
+(587,'29e610d18799282f7159ae42f9','','none','','2026-08-07 10:05:52'),
+(588,'fa46589ba121eb834665632363','','none','','2026-08-07 10:05:52'),
+(589,'2b5558490327e25c0291bcab97','','none','','2026-08-07 10:11:45'),
+(590,'dc38af68077b6240677aa5fe9f','','none','','2026-08-07 10:13:40'),
+(591,'3c2ca99ded8011c7e46f2ac39d','','none','','2026-08-07 10:18:19'),
+(592,'56d70e8dde6bbf855be7292ac8','','none','','2026-08-07 10:23:35'),
+(593,'9bb5ee62cc45a5339645cbe912','','none','','2026-08-07 10:27:49'),
+(594,'bc45c7bd71f5d873722ec452ec','','none','','2026-08-07 10:31:20'),
+(595,'807feb1750c4a776d1d6ccb22f','','none','','2026-08-07 10:36:57'),
+(596,'0e091dd74d62db4f4d61dfbcca','','none','','2026-08-07 10:36:57'),
+(597,'de026893be473f84e9755bf5de','','none','','2026-08-07 10:37:04'),
+(598,'fb6655549f6797e2c255cd799b','','none','','2026-08-07 10:37:04'),
+(599,'99d338a41ee46d17dcf65dcaaa','','none','','2026-08-07 10:37:10'),
+(600,'19400b9e61bd162a7e110e39a7','','none','','2026-08-07 10:37:10'),
+(601,'1b1dfe7bb403fbb9f9c51351d4','','none','','2026-08-07 10:37:10'),
+(602,'fd3790b5e115b0bb4fd0367277','','none','','2026-08-07 10:37:16'),
+(603,'1e9d563716bf7aafd06b98f93c','','none','','2026-08-07 10:37:16'),
+(604,'29b6d9f9f06173522f6cf0fa3b','','none','','2026-08-07 10:38:42'),
+(605,'0731abc98bee65e32a539f4d4d','','none','','2026-08-07 10:38:42'),
+(606,'9cef79fba01b16dfae389d8763','','none','','2026-08-07 10:38:49'),
+(607,'0c5e4ae01e8de9baa50fa61f56','','none','','2026-08-07 10:38:49'),
+(608,'560de1c1e63cf8d7d9bbe0921c','','none','','2026-08-07 10:39:03'),
+(610,'cc47030da6e3f35db4fdbe88c2','','none','','2026-08-08 09:54:43'),
+(611,'98a18b89d2e3f66ddf210a3b2e','','none','','2026-08-08 09:54:43'),
+(612,'31b310f65e5a590de0cb6adaa7','','none','','2026-08-08 09:54:43'),
+(613,'4fee9aa67df19b441fae7b5faf','','none','','2026-08-08 09:54:43'),
+(614,'26ec58471725e6569aed4d4884','','none','','2026-08-08 09:54:47'),
+(615,'d5e5f75e264058f7d6b5fe47dc','','none','','2026-08-08 09:54:47'),
+(616,'860d5f6cf635f6bc8697874c49','','none','','2026-08-08 11:09:10'),
+(617,'0d048875dcd795428d3bfed48f','','none','','2026-08-08 11:09:14'),
+(618,'7c02648e89261b34cee374cf15','','none','','2026-08-08 11:09:17'),
+(619,'be25c9702f9191ae9c4c89230b','','none','','2026-08-08 11:09:26'),
+(620,'bb4d4f4903136670264b245aed','','none','','2026-08-08 11:09:33'),
+(621,'7cc709d1c7660528fd08d309ea','','none','','2026-08-08 11:09:34'),
+(622,'672fde1ff3b0c4d72ebea26734','','none','','2026-08-08 11:09:34'),
+(623,'4a13ccd5b6ae8ea5bd15bdfbae','','none','','2026-08-08 11:09:41'),
+(624,'3cf5f5953cf81bcbadc8e3866d','','none','','2026-08-08 11:09:48'),
+(625,'f7b145cc309f4c5bff7225094c','','none','','2026-08-08 11:09:48'),
+(626,'e19cf75326ec891a9a284d5c2b','','none','','2026-08-08 11:09:53'),
+(627,'72f4b1e9381635115d1c52fdb2','','none','','2026-08-08 11:10:00'),
+(628,'ae032262276af7502d0bd2dbd7','','none','','2026-08-08 11:10:07'),
+(629,'083dec4435c1d534740ffa9d87','','none','','2026-08-08 11:10:07'),
+(630,'c2a24ada2853c86e08f455483a','','none','','2026-08-08 11:10:19'),
+(631,'64c0a8e7b2756c70cf65e02d6c','','none','','2026-08-08 11:10:24'),
+(632,'d4fc56d76a162c00e2fb96b075','','none','','2026-08-08 11:10:31'),
+(633,'fd6df3335a206c9abfb89576f5','','none','','2026-08-08 11:16:53'),
+(634,'167376b74bce8fe7e4dfc64041','','none','','2026-08-08 11:16:57'),
+(635,'489afe728cce618c835075b8d9','','none','','2026-08-08 11:17:01'),
+(636,'a2506e745c036fb7eb22760bf6','','none','','2026-08-08 11:17:06'),
+(637,'9214efc35b2e3c9e2fb57e8ede','','none','','2026-08-08 11:17:06'),
+(638,'1567b6b7b5f3a6a0c0f8a48d7e','','none','','2026-08-08 11:17:13'),
+(639,'e6955a52d44f22009ede49ec32','','none','','2026-08-08 11:17:26'),
+(640,'b412ca6871b9ba678d04e88c74','','none','','2026-08-08 11:24:22'),
+(641,'58aa574d15df8adc8b5a2612ad','','none','','2026-08-08 11:26:52'),
+(642,'830978dc2dd0db8c97a2209047','','none','','2026-08-08 11:26:52'),
+(643,'f64e94fcbb4851f10e26f7fe07','','none','','2026-08-08 11:26:57'),
+(644,'b7940e17e1bb32f0dfd8b35e30','','none','','2026-08-08 11:26:57'),
+(645,'5b66ffb5642a5e95d13abed6aa','','none','','2026-08-08 11:26:57'),
+(646,'1a7a77f180d0a0e525b2b6241e','','none','','2026-08-08 11:26:57'),
+(647,'8592b47d228d54e2d896df5209','','none','','2026-08-08 11:30:24'),
+(648,'30ec34b1a39aa71fe0cbf1d0f0','','none','','2026-08-08 11:30:30'),
+(649,'1eb946a995f466259a0c25cd8c','','none','','2026-08-08 11:30:35'),
+(650,'a5b1c0c02688f799a8a2e92730','','none','','2026-08-08 11:30:52'),
+(651,'6a4f1a80f2baf13620f2ba7195','','none','','2026-08-08 11:30:57'),
+(652,'ad9568389c4cc5d89a9f6067c9','','none','','2026-08-08 11:31:13'),
+(653,'c497bc748b4cee4e279f056d60','','none','','2026-08-08 11:31:18'),
+(654,'c3f6b4b2b8fbaafc3071e2a73e','','none','','2026-08-08 11:31:18'),
+(655,'4ec787024f2f4cb3eb595ac3dd','','none','','2026-08-08 11:32:13'),
+(656,'786b9938c41cc24508628386bb','','none','','2026-08-08 11:32:13'),
+(657,'d36d69b96a788dcc5371f16631','','none','','2026-08-08 11:32:52'),
+(658,'135171b6e1d489c3a6068cd68b','','none','','2026-08-08 11:32:52'),
+(659,'cdf857a8a43ee97f8b08292542','','none','','2026-08-08 11:36:29'),
+(660,'579b0e42582d8284df8594e925','','none','','2026-08-08 11:36:29'),
+(661,'60f4159f0f19a7a1efef42b2b2','','none','','2026-08-08 11:36:33'),
+(666,'ce2a213d36b7d3a63e0dd1991e','','none','','2026-08-09 10:05:34'),
+(667,'e42ae82f7d3e0f1dcea27eecb8','','none','','2026-08-09 10:06:09'),
+(668,'b78eb1912dbf7c935a81a41b3c','','none','','2026-08-09 10:06:42'),
+(669,'8ece84d40686cee3ddab31e868','','none','','2026-08-09 10:07:12'),
+(670,'977253ab3d17cb3c2d318d2cf2','','none','','2026-08-09 10:07:55'),
+(671,'10366f1103812ddee52b9662e1','','none','','2026-08-09 10:08:03'),
+(672,'113101aaffbd0a1141dfe5707e','','none','','2026-08-09 10:08:21'),
+(673,'d49415a55395cdc0a021bef11f','','none','','2026-08-09 10:08:26'),
+(674,'399f21e44bc1ac8d1be20d6847','','none','','2026-08-09 10:08:30'),
+(675,'f32e5f81b85c5eaa57f9ffc783','','none','','2026-08-09 10:08:35'),
+(676,'9ed490a9d915d4bcc870b39918','','none','','2026-08-09 10:09:34'),
+(677,'786f542740b6d75b31da6cbf0f','','none','','2026-08-09 10:09:47'),
+(678,'41e2a409d152487d7189d0ec2f','','none','','2026-08-09 10:11:25'),
+(679,'3b1db855e41fc67b55ff423bd0','','none','','2026-08-09 10:11:41'),
+(680,'8fb67261f6fd923b99f4002d9a','','none','','2026-08-09 10:11:59'),
+(681,'8cde7716180b7d859f8897604b','','none','','2026-08-09 10:12:12'),
+(682,'d6e8f3867147acafe24cd434e5','','none','','2026-08-09 10:12:16'),
+(683,'9510171fe7b146948d1584cd23','','none','','2026-08-09 10:12:21'),
+(684,'adeebaab36ceaa84f684190388','','none','','2026-08-09 10:12:27'),
+(685,'f25dfea9b85ae79df93fff9d86','','none','','2026-08-09 10:12:27'),
+(686,'04b58445439b67c62f7fcf9968','','none','','2026-08-09 10:12:54'),
+(687,'72ae418cc24e7a8eeef357fa7b','','none','','2026-08-09 10:12:54'),
+(688,'7cf75ec65ddfbf3ef2a57fe31d','','none','','2026-08-09 10:13:13'),
+(689,'745f8be32d528ef3de465d7d99','','none','','2026-08-09 10:13:27'),
+(690,'fcac2d5e2ba2ea9a5db759fb0b','','none','','2026-08-09 10:13:37'),
+(691,'f07fbecde691f896f4b16c1199','','none','','2026-08-09 10:14:20'),
+(692,'3ee83e57356681400e6e26e652','','none','','2026-08-09 10:14:39'),
+(693,'956003dcf4fc15521f308b8ec5','','none','','2026-08-09 10:14:59'),
+(694,'815a8ec5ba0729026bac5cd6bd','','none','','2026-08-09 10:15:09'),
+(695,'95d6dabd71364dfd5ecf9868fd','','none','','2026-08-09 10:15:19'),
+(696,'ad4f1969bffaeab31501868262','','none','','2026-08-09 10:15:33'),
+(697,'17d50c26566545ee962a86a8e2','','none','','2026-08-09 10:15:53'),
+(698,'2c0e853b8adbe29f37af8c1d49','','none','','2026-08-09 10:16:03'),
+(699,'162025894cdd4fe1915a11f55e','','none','','2026-08-09 10:16:13'),
+(700,'945412d967f953a7e1702f4755','','none','','2026-08-09 10:16:23'),
+(701,'1a6d23fbd188bf44baa39a9ab0','','none','','2026-08-09 10:16:42'),
+(702,'c3362d5f5ea51aa9f3cc3c871a','','none','','2026-08-09 10:17:02'),
+(703,'f3dbaf4e9a863958a344fcbe52','','none','','2026-08-09 10:17:12'),
+(704,'72ddd356b47959bb861871030b','','none','','2026-08-09 10:17:22'),
+(705,'7c5bd254694e1f03ede9ee88e6','','none','','2026-08-09 10:18:09'),
+(706,'c437aba4a9b2f6496d6817ae75','','none','','2026-08-09 10:18:46'),
+(707,'93784aa674a9bfb921de0713a1','','none','','2026-08-09 10:19:13'),
+(708,'30e8024f7b51811bdae3dd2ca1','','none','','2026-08-09 10:19:44'),
+(709,'26fc4b8d3293c6fa4e38b7606e','','none','','2026-08-09 10:19:54'),
+(710,'971b0ab467faa8b13d61481c86','','none','','2026-08-09 10:20:38'),
+(711,'d5c4c4c021ea13a8fd5303e3bb','','none','','2026-08-09 10:20:45'),
+(712,'b11c8083042700746b22d9dcd4','','none','','2026-08-09 10:45:22'),
+(713,'16d2a6343a1149075303f384e2','','none','','2026-08-09 10:45:22');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4254,6 +5810,7 @@ CREATE TABLE `oc_dockercart_universal_payment` (
   `shipping_methods` text DEFAULT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   `sort_order` int(3) NOT NULL DEFAULT 0,
+  `reserve_minutes` int(11) DEFAULT NULL,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`method_id`),
@@ -4271,8 +5828,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_universal_payment` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_universal_payment` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_universal_payment` VALUES
-(4,0,NULL,NULL,NULL,1,0,'2026-06-30 11:14:27','2026-07-15 09:45:25'),
-(5,0,NULL,NULL,NULL,1,0,'2026-07-15 09:45:47','2026-07-15 09:45:47');
+(4,0,NULL,NULL,NULL,1,0,NULL,'2026-06-30 11:14:27','2026-07-15 09:45:25'),
+(5,0,NULL,NULL,NULL,1,0,NULL,'2026-07-15 09:45:47','2026-07-15 09:45:47');
 /*!40000 ALTER TABLE `oc_dockercart_universal_payment` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4420,7 +5977,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1041 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3063 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4492,13 +6049,99 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (763,NULL,'66511bcd02e10ab44e07eaeb8f',5023,'2026-07-27 09:03:24','2026-07-27 09:03:24'),
 (764,NULL,'66511bcd02e10ab44e07eaeb8f',5044,'2026-07-27 13:52:27','2026-07-27 13:52:27'),
 (765,NULL,'66511bcd02e10ab44e07eaeb8f',5001,'2026-07-27 19:31:32','2026-07-27 19:31:32'),
-(766,NULL,'9783b87f78a7ef5c40cb979c87',5031,'2026-07-29 08:30:02','2026-07-29 08:30:02'),
-(767,NULL,'9783b87f78a7ef5c40cb979c87',5014,'2026-07-29 08:51:43','2026-07-29 08:51:43'),
-(871,NULL,'9783b87f78a7ef5c40cb979c87',5044,'2026-07-29 14:59:36','2026-07-29 14:59:36'),
-(931,NULL,'9783b87f78a7ef5c40cb979c87',5021,'2026-07-29 15:05:14','2026-07-29 15:05:14'),
-(935,NULL,'9783b87f78a7ef5c40cb979c87',5001,'2026-07-29 15:05:26','2026-07-29 15:05:26'),
 (1004,NULL,'fd7fd7a5eb09071d292ecd11da',5023,'2026-07-29 15:26:21','2026-07-29 15:26:21'),
-(1040,NULL,'9783b87f78a7ef5c40cb979c87',5023,'2026-07-29 15:47:40','2026-07-29 15:47:40');
+(1266,NULL,'9783b87f78a7ef5c40cb979c87',5015,'2026-07-29 18:35:09','2026-07-29 18:35:09'),
+(1345,NULL,'9783b87f78a7ef5c40cb979c87',5052,'2026-07-29 18:53:11','2026-07-29 18:53:11'),
+(1462,NULL,'9783b87f78a7ef5c40cb979c87',5031,'2026-07-30 11:58:50','2026-07-30 11:58:50'),
+(1466,NULL,'9783b87f78a7ef5c40cb979c87',5037,'2026-07-30 11:59:18','2026-07-30 11:59:18'),
+(1471,NULL,'9783b87f78a7ef5c40cb979c87',5024,'2026-07-30 12:17:53','2026-07-30 12:17:53'),
+(1502,NULL,'9783b87f78a7ef5c40cb979c87',5021,'2026-07-30 13:29:03','2026-07-30 13:29:03'),
+(1517,NULL,'9783b87f78a7ef5c40cb979c87',5051,'2026-07-30 17:06:39','2026-07-30 17:06:39'),
+(1521,NULL,'9783b87f78a7ef5c40cb979c87',5014,'2026-07-30 20:45:23','2026-07-30 20:45:23'),
+(1525,NULL,'9783b87f78a7ef5c40cb979c87',5001,'2026-07-31 08:37:57','2026-07-31 08:37:57'),
+(1527,NULL,'9783b87f78a7ef5c40cb979c87',5023,'2026-07-31 09:08:57','2026-07-31 09:08:57'),
+(1835,NULL,'c3046b2a9ac4354e66cc23e71a',5013,'2026-08-02 14:31:03','2026-08-02 14:31:03'),
+(1853,NULL,'c3046b2a9ac4354e66cc23e71a',5031,'2026-08-02 15:04:42','2026-08-02 15:04:42'),
+(1854,NULL,'c3046b2a9ac4354e66cc23e71a',5061,'2026-08-02 15:04:45','2026-08-02 15:04:45'),
+(1855,NULL,'c3046b2a9ac4354e66cc23e71a',5062,'2026-08-02 15:04:50','2026-08-02 15:04:50'),
+(1862,NULL,'c3046b2a9ac4354e66cc23e71a',5014,'2026-08-02 15:11:47','2026-08-02 15:11:47'),
+(1870,NULL,'c3046b2a9ac4354e66cc23e71a',5073,'2026-08-02 15:17:52','2026-08-02 15:17:52'),
+(1874,NULL,'c3046b2a9ac4354e66cc23e71a',5071,'2026-08-02 15:18:06','2026-08-02 15:18:06'),
+(1879,NULL,'c3046b2a9ac4354e66cc23e71a',5072,'2026-08-03 17:08:27','2026-08-03 17:08:27'),
+(1881,NULL,'c3046b2a9ac4354e66cc23e71a',5037,'2026-08-03 18:07:25','2026-08-03 18:07:25'),
+(1882,NULL,'c3046b2a9ac4354e66cc23e71a',5023,'2026-08-03 18:07:27','2026-08-03 18:07:27'),
+(2968,NULL,'7cf75ec65ddfbf3ef2a57fe31d',5001,'2026-08-09 10:13:13','2026-08-09 10:13:13'),
+(2969,NULL,'7cf75ec65ddfbf3ef2a57fe31d',5002,'2026-08-09 10:13:15','2026-08-09 10:13:15'),
+(2970,NULL,'7cf75ec65ddfbf3ef2a57fe31d',5003,'2026-08-09 10:13:16','2026-08-09 10:13:16'),
+(2971,NULL,'745f8be32d528ef3de465d7d99',5001,'2026-08-09 10:13:27','2026-08-09 10:13:27'),
+(2972,NULL,'745f8be32d528ef3de465d7d99',5002,'2026-08-09 10:13:29','2026-08-09 10:13:29'),
+(2973,NULL,'745f8be32d528ef3de465d7d99',5003,'2026-08-09 10:13:31','2026-08-09 10:13:31'),
+(2974,NULL,'fcac2d5e2ba2ea9a5db759fb0b',5001,'2026-08-09 10:13:37','2026-08-09 10:13:37'),
+(2975,NULL,'fcac2d5e2ba2ea9a5db759fb0b',5002,'2026-08-09 10:13:39','2026-08-09 10:13:39'),
+(2976,NULL,'fcac2d5e2ba2ea9a5db759fb0b',5003,'2026-08-09 10:13:41','2026-08-09 10:13:41'),
+(2977,NULL,'f07fbecde691f896f4b16c1199',5001,'2026-08-09 10:14:21','2026-08-09 10:14:21'),
+(2978,NULL,'f07fbecde691f896f4b16c1199',5002,'2026-08-09 10:14:22','2026-08-09 10:14:22'),
+(2979,NULL,'f07fbecde691f896f4b16c1199',5003,'2026-08-09 10:14:24','2026-08-09 10:14:24'),
+(2980,NULL,'3ee83e57356681400e6e26e652',5001,'2026-08-09 10:14:40','2026-08-09 10:14:40'),
+(2981,NULL,'3ee83e57356681400e6e26e652',5002,'2026-08-09 10:14:41','2026-08-09 10:14:41'),
+(2982,NULL,'3ee83e57356681400e6e26e652',5003,'2026-08-09 10:14:43','2026-08-09 10:14:43'),
+(2983,NULL,'956003dcf4fc15521f308b8ec5',5001,'2026-08-09 10:14:59','2026-08-09 10:14:59'),
+(2984,NULL,'956003dcf4fc15521f308b8ec5',5002,'2026-08-09 10:15:01','2026-08-09 10:15:01'),
+(2985,NULL,'956003dcf4fc15521f308b8ec5',5003,'2026-08-09 10:15:03','2026-08-09 10:15:03'),
+(2986,NULL,'815a8ec5ba0729026bac5cd6bd',5001,'2026-08-09 10:15:09','2026-08-09 10:15:09'),
+(2987,NULL,'815a8ec5ba0729026bac5cd6bd',5002,'2026-08-09 10:15:11','2026-08-09 10:15:11'),
+(2988,NULL,'815a8ec5ba0729026bac5cd6bd',5003,'2026-08-09 10:15:13','2026-08-09 10:15:13'),
+(2989,NULL,'95d6dabd71364dfd5ecf9868fd',5001,'2026-08-09 10:15:19','2026-08-09 10:15:19'),
+(2990,NULL,'95d6dabd71364dfd5ecf9868fd',5002,'2026-08-09 10:15:21','2026-08-09 10:15:21'),
+(2991,NULL,'95d6dabd71364dfd5ecf9868fd',5003,'2026-08-09 10:15:23','2026-08-09 10:15:23'),
+(2992,NULL,'ad4f1969bffaeab31501868262',5001,'2026-08-09 10:15:33','2026-08-09 10:15:33'),
+(2993,NULL,'ad4f1969bffaeab31501868262',5002,'2026-08-09 10:15:35','2026-08-09 10:15:35'),
+(2994,NULL,'ad4f1969bffaeab31501868262',5003,'2026-08-09 10:15:37','2026-08-09 10:15:37'),
+(2995,NULL,'17d50c26566545ee962a86a8e2',5001,'2026-08-09 10:15:53','2026-08-09 10:15:53'),
+(2996,NULL,'17d50c26566545ee962a86a8e2',5002,'2026-08-09 10:15:55','2026-08-09 10:15:55'),
+(2997,NULL,'17d50c26566545ee962a86a8e2',5003,'2026-08-09 10:15:56','2026-08-09 10:15:56'),
+(2998,NULL,'2c0e853b8adbe29f37af8c1d49',5001,'2026-08-09 10:16:03','2026-08-09 10:16:03'),
+(2999,NULL,'2c0e853b8adbe29f37af8c1d49',5002,'2026-08-09 10:16:05','2026-08-09 10:16:05'),
+(3000,NULL,'2c0e853b8adbe29f37af8c1d49',5003,'2026-08-09 10:16:07','2026-08-09 10:16:07'),
+(3001,NULL,'162025894cdd4fe1915a11f55e',5001,'2026-08-09 10:16:13','2026-08-09 10:16:13'),
+(3002,NULL,'162025894cdd4fe1915a11f55e',5002,'2026-08-09 10:16:15','2026-08-09 10:16:15'),
+(3003,NULL,'162025894cdd4fe1915a11f55e',5003,'2026-08-09 10:16:17','2026-08-09 10:16:17'),
+(3004,NULL,'945412d967f953a7e1702f4755',5001,'2026-08-09 10:16:23','2026-08-09 10:16:23'),
+(3005,NULL,'945412d967f953a7e1702f4755',5002,'2026-08-09 10:16:25','2026-08-09 10:16:25'),
+(3006,NULL,'945412d967f953a7e1702f4755',5003,'2026-08-09 10:16:27','2026-08-09 10:16:27'),
+(3007,NULL,'1a6d23fbd188bf44baa39a9ab0',5001,'2026-08-09 10:16:42','2026-08-09 10:16:42'),
+(3008,NULL,'1a6d23fbd188bf44baa39a9ab0',5002,'2026-08-09 10:16:44','2026-08-09 10:16:44'),
+(3009,NULL,'1a6d23fbd188bf44baa39a9ab0',5003,'2026-08-09 10:16:45','2026-08-09 10:16:45'),
+(3010,NULL,'c3362d5f5ea51aa9f3cc3c871a',5001,'2026-08-09 10:17:02','2026-08-09 10:17:02'),
+(3011,NULL,'c3362d5f5ea51aa9f3cc3c871a',5002,'2026-08-09 10:17:04','2026-08-09 10:17:04'),
+(3012,NULL,'c3362d5f5ea51aa9f3cc3c871a',5003,'2026-08-09 10:17:06','2026-08-09 10:17:06'),
+(3013,NULL,'f3dbaf4e9a863958a344fcbe52',5001,'2026-08-09 10:17:12','2026-08-09 10:17:12'),
+(3014,NULL,'f3dbaf4e9a863958a344fcbe52',5002,'2026-08-09 10:17:14','2026-08-09 10:17:14'),
+(3015,NULL,'f3dbaf4e9a863958a344fcbe52',5003,'2026-08-09 10:17:16','2026-08-09 10:17:16'),
+(3016,NULL,'72ddd356b47959bb861871030b',5001,'2026-08-09 10:17:22','2026-08-09 10:17:22'),
+(3017,NULL,'72ddd356b47959bb861871030b',5002,'2026-08-09 10:17:24','2026-08-09 10:17:24'),
+(3018,NULL,'72ddd356b47959bb861871030b',5003,'2026-08-09 10:17:26','2026-08-09 10:17:26'),
+(3019,NULL,'7c5bd254694e1f03ede9ee88e6',5001,'2026-08-09 10:18:09','2026-08-09 10:18:09'),
+(3020,NULL,'7c5bd254694e1f03ede9ee88e6',5002,'2026-08-09 10:18:11','2026-08-09 10:18:11'),
+(3021,NULL,'7c5bd254694e1f03ede9ee88e6',5003,'2026-08-09 10:18:12','2026-08-09 10:18:12'),
+(3022,NULL,'c437aba4a9b2f6496d6817ae75',100001,'2026-08-09 10:18:46','2026-08-09 10:18:46'),
+(3023,NULL,'93784aa674a9bfb921de0713a1',100001,'2026-08-09 10:19:13','2026-08-09 10:19:13'),
+(3024,NULL,'30e8024f7b51811bdae3dd2ca1',100001,'2026-08-09 10:19:44','2026-08-09 10:19:44'),
+(3025,NULL,'26fc4b8d3293c6fa4e38b7606e',5001,'2026-08-09 10:19:54','2026-08-09 10:19:54'),
+(3026,NULL,'26fc4b8d3293c6fa4e38b7606e',5002,'2026-08-09 10:19:56','2026-08-09 10:19:56'),
+(3027,NULL,'26fc4b8d3293c6fa4e38b7606e',5003,'2026-08-09 10:19:58','2026-08-09 10:19:58'),
+(3028,NULL,'971b0ab467faa8b13d61481c86',100001,'2026-08-09 10:20:38','2026-08-09 10:20:38'),
+(3029,NULL,'d5c4c4c021ea13a8fd5303e3bb',100001,'2026-08-09 10:20:45','2026-08-09 10:20:45'),
+(3032,NULL,'003c164f2a40251b4b706e18a1',5031,'2026-08-09 10:30:21','2026-08-09 10:30:21'),
+(3033,NULL,'003c164f2a40251b4b706e18a1',5064,'2026-08-09 10:30:33','2026-08-09 10:30:33'),
+(3037,NULL,'003c164f2a40251b4b706e18a1',5021,'2026-08-09 10:44:38','2026-08-09 10:44:38'),
+(3038,NULL,'003c164f2a40251b4b706e18a1',5024,'2026-08-09 10:47:59','2026-08-09 10:47:59'),
+(3042,NULL,'003c164f2a40251b4b706e18a1',5070,'2026-08-09 10:55:27','2026-08-09 10:55:27'),
+(3056,NULL,'003c164f2a40251b4b706e18a1',5010,'2026-08-09 11:19:41','2026-08-09 11:19:41'),
+(3058,NULL,'003c164f2a40251b4b706e18a1',5005,'2026-08-09 11:25:48','2026-08-09 11:25:48'),
+(3060,NULL,'003c164f2a40251b4b706e18a1',5002,'2026-08-09 11:38:41','2026-08-09 11:38:41'),
+(3061,NULL,'003c164f2a40251b4b706e18a1',5072,'2026-08-09 11:42:52','2026-08-09 11:42:52'),
+(3062,NULL,'003c164f2a40251b4b706e18a1',5023,'2026-08-09 11:48:15','2026-08-09 11:48:15');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4575,7 +6218,7 @@ CREATE TABLE `oc_event` (
   `status` tinyint(1) NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`event_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=903 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=908 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4641,7 +6284,12 @@ INSERT INTO `oc_event` VALUES
 (669,'dockercart_search_information_delete','admin/model/catalog/information/deleteInformation/after','extension/module/dockercart_search/eventInformationDelete',1,0),
 (670,'dockercart_search_autocomplete','catalog/view/common/header/after','extension/module/dockercart_search/addAutocompleteScript',1,0),
 (671,'dockercart_search_override','catalog/model/catalog/product/getProducts/after','extension/module/dockercart_search/overrideGetProducts',1,0),
-(672,'dockercart_search_admin_menu','admin/view/common/column_left/before','extension/module/dockercart_search/eventAdminMenu',1,0);
+(672,'dockercart_search_admin_menu','admin/view/common/column_left/before','extension/module/dockercart_search/eventAdminMenu',1,0),
+(903,'dockercart_search_variant_add','admin/model/catalog/product_configurable/addVariant/after','extension/module/dockercart_search/eventVariantAdd',1,0),
+(904,'dockercart_search_variant_edit','admin/model/catalog/product_configurable/updateVariant/after','extension/module/dockercart_search/eventVariantEdit',1,0),
+(905,'dockercart_search_variant_delete','admin/model/catalog/product_configurable/deleteVariant/after','extension/module/dockercart_search/eventVariantDelete',1,0),
+(906,'dockercart_search_variant_delete_all','admin/model/catalog/product_configurable/deleteAllVariants/after','extension/module/dockercart_search/eventVariantDeleteAll',1,0),
+(907,'admin_mail_order','admin/model/sale/order/addOrderHistory/after','mail/order',1,0);
 /*!40000 ALTER TABLE `oc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4659,7 +6307,7 @@ CREATE TABLE `oc_extension` (
   `type` varchar(32) NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`extension_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=443 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=488 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4729,7 +6377,9 @@ INSERT INTO `oc_extension` VALUES
 (416,'dashboard','traffic_source'),
 (439,'module','dockercart_seo_description'),
 (440,'module','dockercart_brand_carousel'),
-(442,'currency','ecb');
+(442,'currency','ecb'),
+(462,'dashboard','dockercart_top_products'),
+(463,'dashboard','dockercart_category_revenue');
 /*!40000 ALTER TABLE `oc_extension` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5607,8 +7257,9 @@ CREATE TABLE `oc_option` (
   `type` varchar(32) NOT NULL,
   `sort_order` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
+  `show_option_price` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99903 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5619,20 +7270,18 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_option` WRITE;
 /*!40000 ALTER TABLE `oc_option` DISABLE KEYS */;
 INSERT INTO `oc_option` VALUES
-(1,'select',1,1),
-(2,'checkbox',2,1),
-(4,'text',3,1),
-(5,'select',4,1),
-(6,'textarea',5,1),
-(7,'file',6,1),
-(8,'date',7,1),
-(9,'time',8,1),
-(10,'datetime',9,1),
-(11,'select',10,1),
-(12,'date',11,1),
-(15,'select',99,1),
-(7001,'color',1,1),
-(7002,'radio',2,1);
+(1,'select',1,1,1),
+(2,'select',2,1,1),
+(3,'select',3,1,1),
+(4,'radio',4,1,1),
+(5,'radio',5,1,1),
+(6,'select',6,1,1),
+(7,'radio',7,1,1),
+(8,'radio',8,1,1),
+(9,'select',9,1,1),
+(10,'select',10,1,1),
+(11,'checkbox',11,1,1),
+(12,'radio',12,1,1);
 /*!40000 ALTER TABLE `oc_option` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5661,49 +7310,157 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_option_description` WRITE;
 /*!40000 ALTER TABLE `oc_option_description` DISABLE KEYS */;
 INSERT INTO `oc_option_description` VALUES
-(1,1,'Size'),
-(1,2,'Розмір'),
-(1,3,'Размер'),
-(2,1,'Checkbox'),
-(2,2,'Прапорець'),
-(2,3,'Флажок'),
-(4,1,'Text'),
-(4,2,'Текст'),
-(4,3,'Текст'),
-(5,1,'Select'),
-(5,2,'Виберіть'),
-(5,3,'Выбирать'),
-(6,1,'Textarea'),
-(6,2,'Текстове поле'),
-(6,3,'Текстовое поле'),
-(7,1,'File'),
-(7,2,'Файл'),
-(7,3,'Файл'),
-(8,1,'Date'),
-(8,2,'Дата'),
-(8,3,'Дата'),
-(9,1,'Time'),
-(9,2,'Час'),
-(9,3,'Время'),
-(10,1,'Date &amp; Time'),
-(10,2,'Дата та час'),
-(10,3,'Дата и время'),
-(11,1,'Size'),
-(11,2,'Розмір'),
-(11,3,'Размер'),
-(12,1,'Delivery Date'),
-(12,2,'Дата доставки'),
-(12,3,'Дата доставки'),
-(15,1,'Condition'),
-(15,2,'Стан'),
-(15,3,'Состояние'),
-(7001,1,'Color'),
-(7001,2,'Колір'),
-(7001,3,'Цвет'),
-(7002,1,'Warranty'),
-(7002,2,'Гарантія'),
-(7002,3,'Гарантия');
+(1,1,'Color'),
+(1,2,'Колір'),
+(1,3,'Цвет'),
+(2,1,'Size'),
+(2,2,'Розмір'),
+(2,3,'Размер'),
+(3,1,'Storage'),
+(3,2,'Память'),
+(3,3,'Память'),
+(4,1,'RAM'),
+(4,2,'Оперативна память'),
+(4,3,'Оперативная память'),
+(5,1,'Warranty'),
+(5,2,'Гарантія'),
+(5,3,'Гарантия'),
+(6,1,'Condition'),
+(6,2,'Стан'),
+(6,3,'Состояние'),
+(7,1,'Edition'),
+(7,2,'Видання'),
+(7,3,'Издание'),
+(8,1,'Material'),
+(8,2,'Матеріал'),
+(8,3,'Материал'),
+(9,1,'Capacity'),
+(9,2,'Місткість'),
+(9,3,'Ёмкость'),
+(10,1,'Screen size'),
+(10,2,'Розмір екрана'),
+(10,3,'Размер экрана'),
+(11,1,'Accessories'),
+(11,2,'Аксесуари'),
+(11,3,'Аксессуары'),
+(12,1,'Delivery'),
+(12,2,'Доставка'),
+(12,3,'Доставка');
 /*!40000 ALTER TABLE `oc_option_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_option_set`
+--
+
+DROP TABLE IF EXISTS `oc_option_set`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_option_set` (
+  `option_set_id` int(11) NOT NULL AUTO_INCREMENT,
+  `sort_order` int(3) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`option_set_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_option_set`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_option_set` WRITE;
+/*!40000 ALTER TABLE `oc_option_set` DISABLE KEYS */;
+INSERT INTO `oc_option_set` VALUES
+(1,1,1),
+(2,2,1),
+(3,3,1),
+(4,4,1);
+/*!40000 ALTER TABLE `oc_option_set` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_option_set_description`
+--
+
+DROP TABLE IF EXISTS `oc_option_set_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_option_set_description` (
+  `option_set_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  PRIMARY KEY (`option_set_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_option_set_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_option_set_description` WRITE;
+/*!40000 ALTER TABLE `oc_option_set_description` DISABLE KEYS */;
+INSERT INTO `oc_option_set_description` VALUES
+(1,1,'Smartphone config'),
+(1,2,'Конфігурація смартфона'),
+(1,3,'Конфигурация смартфона'),
+(2,1,'Clothing config'),
+(2,2,'Конфігурація одягу'),
+(2,3,'Конфигурация одежды'),
+(3,1,'Tech extras'),
+(3,2,'Додаткові опції техніки'),
+(3,3,'Дополнительные опции техники'),
+(4,1,'Delivery options'),
+(4,2,'Опції доставки'),
+(4,3,'Опции доставки');
+/*!40000 ALTER TABLE `oc_option_set_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_option_set_option`
+--
+
+DROP TABLE IF EXISTS `oc_option_set_option`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_option_set_option` (
+  `option_set_id` int(11) NOT NULL,
+  `option_id` int(11) NOT NULL,
+  `sort_order` int(3) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`option_set_id`,`option_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_option_set_option`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_option_set_option` WRITE;
+/*!40000 ALTER TABLE `oc_option_set_option` DISABLE KEYS */;
+INSERT INTO `oc_option_set_option` VALUES
+(1,1,0),
+(1,3,1),
+(1,4,2),
+(1,5,3),
+(1,11,4),
+(2,1,1),
+(2,2,0),
+(2,6,3),
+(2,8,2),
+(3,5,0),
+(3,10,2),
+(3,11,1),
+(4,6,1),
+(4,12,0);
+/*!40000 ALTER TABLE `oc_option_set_option` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -5722,7 +7479,7 @@ CREATE TABLE `oc_option_value` (
   `color_code` varchar(9) NOT NULL DEFAULT '',
   `sort_order` int(11) NOT NULL,
   PRIMARY KEY (`option_value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99923 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5739,38 +7496,38 @@ INSERT INTO `oc_option_value` VALUES
 (4,1,'','',4),
 (5,1,'','',5),
 (6,1,'','',6),
-(7,1,'','',7),
-(8,1,'','',8),
-(9,1,'','',9),
-(10,1,'','',10),
-(11,1,'','',11),
-(12,1,'','',12),
-(13,1,'','',13),
-(14,1,'','',14),
-(15,1,'','',15),
-(23,2,'','',1),
-(24,2,'','',2),
-(31,1,'','',2),
-(32,1,'','',1),
-(39,5,'','',1),
-(40,5,'','',2),
-(41,5,'','',3),
-(42,5,'','',4),
-(43,1,'','',3),
-(44,2,'','',3),
-(45,2,'','',4),
-(46,11,'','',1),
-(47,11,'','',2),
-(48,11,'','',3),
-(49,1,'','',6),
-(50,15,'','#000000',1),
-(51,15,'','#000000',2),
-(7101,7001,'','#000000',1),
-(7102,7001,'','#ffffff',1),
-(7103,7001,'','#d9d9d9',1),
-(7104,7001,'','#0c6cc6',1),
-(7201,7002,'','#000000',0),
-(7202,7002,'','#000000',1);
+(7,2,'','',1),
+(8,2,'','',2),
+(9,2,'','',3),
+(10,2,'','',4),
+(11,2,'','',5),
+(12,2,'','',6),
+(13,3,'','',1),
+(14,3,'','',2),
+(15,3,'','',3),
+(16,4,'','',1),
+(17,4,'','',2),
+(18,4,'','',3),
+(19,5,'','',1),
+(20,5,'','',2),
+(21,6,'','',1),
+(22,6,'','',2),
+(23,7,'','',1),
+(24,7,'','',2),
+(25,8,'','',1),
+(26,8,'','',2),
+(27,8,'','',3),
+(28,9,'','',1),
+(29,9,'','',2),
+(30,9,'','',3),
+(31,10,'','',1),
+(32,10,'','',2),
+(33,10,'','',3),
+(34,11,'','',1),
+(35,11,'','',2),
+(36,11,'','',3),
+(37,12,'','',1),
+(38,12,'','',2);
 /*!40000 ALTER TABLE `oc_option_value` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5800,117 +7557,120 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_option_value_description` WRITE;
 /*!40000 ALTER TABLE `oc_option_value_description` DISABLE KEYS */;
 INSERT INTO `oc_option_value_description` VALUES
-(1,1,1,'S'),
-(1,2,1,'С'),
-(1,3,1,'S'),
-(2,1,1,'M'),
-(2,2,1,'М'),
-(2,3,1,'M'),
-(3,1,1,'L'),
-(3,2,1,'Л'),
-(3,3,1,'L'),
-(4,1,1,'XL'),
-(4,2,1,'XL'),
-(4,3,1,'XL'),
-(5,1,1,'XS'),
-(5,2,1,'XS'),
-(5,3,1,'XS'),
-(6,1,1,'28'),
-(6,2,1,'28'),
-(6,3,1,'28'),
-(7,1,1,'30'),
-(7,2,1,'30'),
-(7,3,1,'30'),
-(8,1,1,'32'),
-(8,2,1,'32'),
-(8,3,1,'32'),
-(9,1,1,'34'),
-(9,2,1,'34'),
-(9,3,1,'34'),
-(10,1,1,'One Size'),
-(10,2,1,'Один розмір'),
-(10,3,1,'Один размер'),
-(11,1,1,'2T'),
-(11,2,1,'2Т'),
-(11,3,1,'2T'),
-(12,1,1,'3T'),
-(12,2,1,'3Т'),
-(12,3,1,'3T'),
-(13,1,1,'4T'),
-(13,2,1,'4Т'),
-(13,3,1,'4T'),
-(14,1,1,'5T'),
-(14,2,1,'5Т'),
-(14,3,1,'5T'),
-(15,1,1,'6T'),
-(15,2,1,'6Т'),
-(15,3,1,'6T'),
-(23,1,2,'Checkbox 1'),
-(23,2,2,'Прапорець 1'),
-(23,3,2,'Флажок 1'),
-(24,1,2,'Checkbox 2'),
-(24,2,2,'Прапорець 2'),
-(24,3,2,'Флажок 2'),
-(31,1,1,'Medium'),
-(31,2,1,'Середній'),
-(31,3,1,'Середина'),
-(32,1,1,'Small'),
-(32,2,1,'Малий'),
-(32,3,1,'Маленький'),
-(39,1,5,'Red'),
-(39,2,5,'Червоний'),
-(39,3,5,'Красный'),
-(40,1,5,'Blue'),
-(40,2,5,'Синій'),
-(40,3,5,'Синий'),
-(41,1,5,'Green'),
-(41,2,5,'Зелений'),
-(41,3,5,'Зеленый'),
-(42,1,5,'Yellow'),
-(42,2,5,'Жовтий'),
-(42,3,5,'Желтый'),
-(43,1,1,'Large'),
-(43,2,1,'Великий'),
-(43,3,1,'Большой'),
-(44,1,2,'Checkbox 3'),
-(44,2,2,'Прапорець 3'),
-(44,3,2,'Флажок 3'),
-(45,1,2,'Checkbox 4'),
-(45,2,2,'Прапорець 4'),
-(45,3,2,'Флажок 4'),
-(46,1,11,'Small'),
-(46,2,11,'Малий'),
-(46,3,11,'Маленький'),
-(47,1,11,'Medium'),
-(47,2,11,'Середній'),
-(47,3,11,'Середина'),
-(48,1,11,'Large'),
-(48,2,11,'Великий'),
-(48,3,11,'Большой'),
-(50,1,15,'New'),
-(50,2,15,'Нове'),
-(50,3,15,'Новый'),
-(51,1,15,'Regular'),
-(51,2,15,'Звичайне'),
-(51,3,15,'Обычный'),
-(7101,1,7001,'Black'),
-(7101,2,7001,'Чорний'),
-(7101,3,7001,'Черный'),
-(7102,1,7001,'White'),
-(7102,2,7001,'Білий'),
-(7102,3,7001,'Белый'),
-(7103,1,7001,'Silver'),
-(7103,2,7001,'Срібло'),
-(7103,3,7001,'Серебро'),
-(7104,1,7001,'Blue'),
-(7104,2,7001,'Синій'),
-(7104,3,7001,'Синий'),
-(7201,1,7002,'Standard 12 Months'),
-(7201,2,7002,'Стандартні 12 місяців'),
-(7201,3,7002,'Стандартный 12 месяцев'),
-(7202,1,7002,'Extended 24 Months'),
-(7202,2,7002,'Подовжено на 24 місяці'),
-(7202,3,7002,'Продлён на 24 месяца');
+(1,1,1,'Black'),
+(1,2,1,'Чорний'),
+(1,3,1,'Черный'),
+(2,1,1,'White'),
+(2,2,1,'Білий'),
+(2,3,1,'Белый'),
+(3,1,1,'Silver'),
+(3,2,1,'Срібло'),
+(3,3,1,'Серебро'),
+(4,1,1,'Blue'),
+(4,2,1,'Синій'),
+(4,3,1,'Синий'),
+(5,1,1,'Green'),
+(5,2,1,'Зелений'),
+(5,3,1,'Зеленый'),
+(6,1,1,'Red'),
+(6,2,1,'Червоний'),
+(6,3,1,'Красный'),
+(7,1,2,'XS'),
+(7,2,2,'XS'),
+(7,3,2,'XS'),
+(8,1,2,'S'),
+(8,2,2,'S'),
+(8,3,2,'S'),
+(9,1,2,'M'),
+(9,2,2,'M'),
+(9,3,2,'M'),
+(10,1,2,'L'),
+(10,2,2,'L'),
+(10,3,2,'L'),
+(11,1,2,'XL'),
+(11,2,2,'XL'),
+(11,3,2,'XL'),
+(12,1,2,'XXL'),
+(12,2,2,'XXL'),
+(12,3,2,'XXL'),
+(13,1,3,'128 GB'),
+(13,2,3,'128 ГБ'),
+(13,3,3,'128 ГБ'),
+(14,1,3,'256 GB'),
+(14,2,3,'256 ГБ'),
+(14,3,3,'256 ГБ'),
+(15,1,3,'512 GB'),
+(15,2,3,'512 ГБ'),
+(15,3,3,'512 ГБ'),
+(16,1,4,'8 GB'),
+(16,2,4,'8 ГБ'),
+(16,3,4,'8 ГБ'),
+(17,1,4,'12 GB'),
+(17,2,4,'12 ГБ'),
+(17,3,4,'12 ГБ'),
+(18,1,4,'16 GB'),
+(18,2,4,'16 ГБ'),
+(18,3,4,'16 ГБ'),
+(19,1,5,'12 months'),
+(19,2,5,'12 місяців'),
+(19,3,5,'12 месяцев'),
+(20,1,5,'24 months'),
+(20,2,5,'24 місяці'),
+(20,3,5,'24 месяца'),
+(21,1,6,'New'),
+(21,2,6,'Новий'),
+(21,3,6,'Новый'),
+(22,1,6,'Used'),
+(22,2,6,'Вживаний'),
+(22,3,6,'Б/у'),
+(23,1,7,'Standard'),
+(23,2,7,'Стандартне'),
+(23,3,7,'Стандартное'),
+(24,1,7,'Deluxe'),
+(24,2,7,'Делюкс'),
+(24,3,7,'Делюкс'),
+(25,1,8,'Leather'),
+(25,2,8,'Шкіра'),
+(25,3,8,'Кожа'),
+(26,1,8,'Suede'),
+(26,2,8,'Замша'),
+(26,3,8,'Замша'),
+(27,1,8,'Textile'),
+(27,2,8,'Текстиль'),
+(27,3,8,'Текстиль'),
+(28,1,9,'1 L'),
+(28,2,9,'1 л'),
+(28,3,9,'1 л'),
+(29,1,9,'2 L'),
+(29,2,9,'2 л'),
+(29,3,9,'2 л'),
+(30,1,9,'5 L'),
+(30,2,9,'5 л'),
+(30,3,9,'5 л'),
+(31,1,10,'13\"'),
+(31,2,10,'13\"'),
+(31,3,10,'13\"'),
+(32,1,10,'14\"'),
+(32,2,10,'14\"'),
+(32,3,10,'14\"'),
+(33,1,10,'16\"'),
+(33,2,10,'16\"'),
+(33,3,10,'16\"'),
+(34,1,11,'Charger'),
+(34,2,11,'Зарядний пристрій'),
+(34,3,11,'Зарядное устройство'),
+(35,1,11,'Case'),
+(35,2,11,'Чохол'),
+(35,3,11,'Чехол'),
+(36,1,11,'Glass protector'),
+(36,2,11,'Скло захисне'),
+(36,3,11,'Стекло защитное'),
+(37,1,12,'Courier'),
+(37,2,12,'Курʼєр'),
+(37,3,12,'Курьер'),
+(38,1,12,'Pickup point'),
+(38,2,12,'Поштомат'),
+(38,3,12,'Постамат');
 /*!40000 ALTER TABLE `oc_option_value_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5969,9 +7729,15 @@ CREATE TABLE `oc_order` (
   `shipping_custom_field` mediumtext NOT NULL,
   `shipping_method` varchar(128) NOT NULL,
   `shipping_code` varchar(128) NOT NULL,
-  `tracking_number` varchar(64) NOT NULL DEFAULT '',
+  `tracking_number` varchar(1024) NOT NULL DEFAULT '',
+  `utm_source` varchar(128) NOT NULL DEFAULT '',
+  `utm_medium` varchar(64) NOT NULL DEFAULT '',
+  `utm_campaign` varchar(128) NOT NULL DEFAULT '',
   `comment` mediumtext NOT NULL,
   `total` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `paid_amount` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `reward_awarded` tinyint(1) NOT NULL DEFAULT 0,
+  `reward_revoked_points` int(11) NOT NULL DEFAULT 0,
   `order_status_id` int(11) NOT NULL DEFAULT 0,
   `affiliate_id` int(11) NOT NULL,
   `commission` decimal(15,4) NOT NULL,
@@ -5988,8 +7754,10 @@ CREATE TABLE `oc_order` (
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`order_id`),
-  KEY `idx_order_date_status` (`order_status_id`,`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+  KEY `idx_order_date_status` (`order_status_id`,`date_added`),
+  KEY `idx_order_utm_source` (`utm_source`,`date_added`),
+  KEY `idx_order_utm_medium` (`utm_medium`,`date_added`)
+) ENGINE=InnoDB AUTO_INCREMENT=99605 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5999,10 +7767,70 @@ CREATE TABLE `oc_order` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order` WRITE;
 /*!40000 ALTER TABLE `oc_order` DISABLE KEYS */;
-INSERT INTO `oc_order` VALUES
-(93,0,'INV-2025-00',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Cash on Delivery','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Universal Shipping 1','dockercart_universal.dockercart_universal_3','','',88981.8194,0,0,0.0000,0,'',1,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-03 14:20:46','2026-07-03 14:20:46'),
-(94,0,'INV-2025-00',0,'DockerCart','http://dockercart.local:8080/',0,1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Cash on Delivery','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Universal Shipping 1','dockercart_universal.dockercart_universal_3','','',88981.8194,0,0,0.0000,0,'',1,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-07-03 14:20:50','2026-07-03 14:20:50');
 /*!40000 ALTER TABLE `oc_order` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_order_claim`
+--
+
+DROP TABLE IF EXISTS `oc_order_claim`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_claim` (
+  `session_id` varchar(128) NOT NULL,
+  `order_id` int(11) NOT NULL DEFAULT 0,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`session_id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_claim`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_claim` WRITE;
+/*!40000 ALTER TABLE `oc_order_claim` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_order_claim` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_order_document`
+--
+
+DROP TABLE IF EXISTS `oc_order_document`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_document` (
+  `order_document_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `document_type` varchar(32) NOT NULL,
+  `storage_key` varchar(128) NOT NULL,
+  `invoice_no` varchar(64) NOT NULL DEFAULT '',
+  `public_token` varchar(64) DEFAULT NULL,
+  `render_version` varchar(32) DEFAULT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`order_document_id`),
+  UNIQUE KEY `ux_order_document_type` (`order_id`,`document_type`),
+  UNIQUE KEY `ux_order_document_public_token` (`public_token`),
+  KEY `idx_order_document_storage_key` (`storage_key`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_document`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_document` WRITE;
+/*!40000 ALTER TABLE `oc_order_document` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_order_document` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -6024,7 +7852,7 @@ CREATE TABLE `oc_order_history` (
   `comment_params` mediumtext DEFAULT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=427 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6056,7 +7884,7 @@ CREATE TABLE `oc_order_option` (
   `value` mediumtext NOT NULL,
   `type` varchar(32) NOT NULL,
   PRIMARY KEY (`order_option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=250 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=495 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6066,12 +7894,41 @@ CREATE TABLE `oc_order_option` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_option` WRITE;
 /*!40000 ALTER TABLE `oc_order_option` DISABLE KEYS */;
-INSERT INTO `oc_order_option` VALUES
-(240,93,161,9223,9940,'Color','Silver','color'),
-(241,93,161,9046,9864,'Warranty','Standard 12 Months','radio'),
-(242,94,162,9223,9940,'Color','Silver','color'),
-(243,94,162,9046,9864,'Warranty','Standard 12 Months','radio');
 /*!40000 ALTER TABLE `oc_order_option` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_order_payment`
+--
+
+DROP TABLE IF EXISTS `oc_order_payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_payment` (
+  `order_payment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `amount` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `payment_method` varchar(128) NOT NULL DEFAULT '',
+  `payment_code` varchar(128) NOT NULL DEFAULT '',
+  `reference` varchar(255) NOT NULL DEFAULT '',
+  `comment` mediumtext NOT NULL,
+  `created_by` int(11) NOT NULL DEFAULT 0,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`order_payment_id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_payment`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_payment` WRITE;
+/*!40000 ALTER TABLE `oc_order_payment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_order_payment` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -6098,7 +7955,7 @@ CREATE TABLE `oc_order_product` (
   `variant_sku` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`order_product_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=469 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6108,9 +7965,6 @@ CREATE TABLE `oc_order_product` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_product` WRITE;
 /*!40000 ALTER TABLE `oc_order_product` DISABLE KEYS */;
-INSERT INTO `oc_order_product` VALUES
-(161,93,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0,0,''),
-(162,94,5023,'Adidas Ultraboost Light','DEMO-5023',1.00,88981.8194,88981.8194,0.0000,0,0,'');
 /*!40000 ALTER TABLE `oc_order_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6140,9 +7994,35 @@ CREATE TABLE `oc_order_product_discount` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_product_discount` WRITE;
 /*!40000 ALTER TABLE `oc_order_product_discount` DISABLE KEYS */;
-INSERT INTO `oc_order_product_discount` VALUES
-(59,4,5.0000,'2026-04-07 17:15:08');
 /*!40000 ALTER TABLE `oc_order_product_discount` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_order_product_override`
+--
+
+DROP TABLE IF EXISTS `oc_order_product_override`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_product_override` (
+  `order_product_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`order_product_id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_product_override`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_product_override` WRITE;
+/*!40000 ALTER TABLE `oc_order_product_override` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_order_product_override` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -6222,6 +8102,74 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_order_shipment`
+--
+
+DROP TABLE IF EXISTS `oc_order_shipment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_shipment` (
+  `shipment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `tracking_number` varchar(255) NOT NULL DEFAULT '',
+  `comment` mediumtext NOT NULL,
+  `created_by` int(11) NOT NULL DEFAULT 0,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`shipment_id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_shipment`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_shipment` WRITE;
+/*!40000 ALTER TABLE `oc_order_shipment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_order_shipment` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_order_shipment_item`
+--
+
+DROP TABLE IF EXISTS `oc_order_shipment_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_order_shipment_item` (
+  `shipment_item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `shipment_id` int(11) NOT NULL,
+  `order_product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`shipment_item_id`),
+  KEY `shipment_id` (`shipment_id`),
+  KEY `order_product_id` (`order_product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_order_shipment_item`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_order_shipment_item` WRITE;
+/*!40000 ALTER TABLE `oc_order_shipment_item` DISABLE KEYS */;
+INSERT INTO `oc_order_shipment_item` VALUES
+(3,2,174,1),
+(4,3,173,5),
+(5,4,272,2),
+(6,5,272,1),
+(7,6,272,1),
+(8,7,181,3);
+/*!40000 ALTER TABLE `oc_order_shipment_item` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_order_status`
 --
 
@@ -6233,7 +8181,7 @@ CREATE TABLE `oc_order_status` (
   `language_id` int(11) NOT NULL,
   `name` varchar(32) NOT NULL,
   PRIMARY KEY (`order_status_id`,`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6261,7 +8209,19 @@ INSERT INTO `oc_order_status` VALUES
 (130,3,'Отменён'),
 (131,1,'Awaiting Payment'),
 (131,2,'Очікування оплати'),
-(131,3,'Ожидание оплаты');
+(131,3,'Ожидание оплаты'),
+(132,1,'Confirmed'),
+(132,2,'Підтверджено'),
+(132,3,'Подтверждён'),
+(133,1,'Packing'),
+(133,2,'Збірка'),
+(133,3,'Сборка'),
+(134,1,'Refunded'),
+(134,2,'Повернення коштів'),
+(134,3,'Возврат средств'),
+(135,1,'Awaiting request'),
+(135,2,'Чекає запиту'),
+(135,3,'Ожидает запроса');
 /*!40000 ALTER TABLE `oc_order_status` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6283,7 +8243,7 @@ CREATE TABLE `oc_order_total` (
   `sort_order` int(11) NOT NULL,
   PRIMARY KEY (`order_total_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=290 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=749 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6293,13 +8253,6 @@ CREATE TABLE `oc_order_total` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_total` WRITE;
 /*!40000 ALTER TABLE `oc_order_total` DISABLE KEYS */;
-INSERT INTO `oc_order_total` VALUES
-(274,93,'sub_total','Sub-Total',88981.8194,1),
-(275,93,'shipping','Universal Shipping 1',0.0000,3),
-(276,93,'total','Total',88981.8194,9),
-(277,94,'sub_total','Sub-Total',88981.8194,1),
-(278,94,'shipping','Universal Shipping 1',0.0000,3),
-(279,94,'total','Total',88981.8194,9);
 /*!40000 ALTER TABLE `oc_order_total` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6364,6 +8317,7 @@ CREATE TABLE `oc_product` (
   `stock_status_id` int(11) NOT NULL,
   `image` varchar(255) DEFAULT NULL,
   `model_3d` varchar(255) NOT NULL DEFAULT '',
+  `image_360` varchar(255) NOT NULL DEFAULT '',
   `manufacturer_id` int(11) NOT NULL,
   `shipping` tinyint(1) NOT NULL DEFAULT 1,
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
@@ -6383,6 +8337,7 @@ CREATE TABLE `oc_product` (
   `quantity_step` decimal(15,2) NOT NULL DEFAULT 1.00,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   `status` tinyint(1) NOT NULL DEFAULT 0,
+  `discontinued` tinyint(1) NOT NULL DEFAULT 0,
   `viewed` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
@@ -6390,7 +8345,7 @@ CREATE TABLE `oc_product` (
   KEY `idx_product_status_price` (`status`,`price`),
   KEY `idx_product_manufacturer` (`manufacturer_id`,`status`),
   KEY `idx_product_status_quantity` (`status`,`quantity`)
-) ENGINE=InnoDB AUTO_INCREMENT=100001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=100002 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6401,95 +8356,95 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',0,'SKU-5001','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','',310,1,50000.0000,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,28,'2026-03-03 08:51:04','2026-07-21 10:52:09'),
-(5002,'DEMO-5002',0,'SKU-5002','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','',312,1,61349.1282,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,8,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5003,'DEMO-5003',0,'SKU-5003','','','','','','A1',32.00,0,7,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','',302,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5004,'DEMO-5004',0,'SKU-5004','','','','','','A1',39.00,0,7,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,11,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5005,'DEMO-5005',0,'SKU-5005','','','','','','A1',46.00,0,7,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,2,'2026-03-03 08:51:04','2026-05-12 08:25:38'),
-(5006,'DEMO-5006',0,'SKU-5006','','','','','','A1',53.00,0,7,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,90,'2026-03-03 08:51:04','2026-07-24 19:36:42'),
-(5007,'DEMO-5007',0,'SKU-5007','','','','','','A1',60.00,0,7,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5008,'DEMO-5008',0,'SKU-5008','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5009,'DEMO-5009',0,'SKU-5009','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5010,'DEMO-5010',0,'SKU-5010','','','','','','A1',81.00,0,7,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','',304,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5011,'DEMO-5011',0,'SKU-5011','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:04','2026-05-30 11:35:52'),
-(5012,'DEMO-5012',0,'SKU-5012','','','','','','A1',28.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,12,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
-(5013,'DEMO-5013',0,'SKU-5013','','','','','','A1',35.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,2,'2026-03-03 08:51:04','2026-05-30 16:37:55'),
-(5014,'DEMO-5014',0,'SKU-5014','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,18,'2026-03-03 08:51:05','2026-04-27 08:57:15'),
-(5015,'DEMO-5015',0,'SKU-5015','','','','','','A1',48.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5016,'DEMO-5016',0,'SKU-5016','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5017,'DEMO-5017',0,'SKU-5017','','','','','','A1',63.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,4,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5018,'DEMO-5018',0,'SKU-5018','','','','','','A1',70.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,2,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5019,'DEMO-5019',0,'SKU-5019','','','','','','A1',77.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5020,'DEMO-5020',0,'SKU-5020','','','','','','A1',84.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5021,'DEMO-5021',0,'SKU-5021','','','','','','A1',24.00,0,7,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,11,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5022,'DEMO-5022',0,'SKU-5022','','','','','','A1',31.00,0,7,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,2,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5023,'DEMO-5023',1101,'SKU-5023','','','','','','A1',23.00,0,7,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','catalog/Aero_Airship_01.glb',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,736,'2026-03-03 08:51:05','2026-07-29 15:38:40'),
-(5024,'DEMO-5024',0,'SKU-5024','','','','','','A1',45.00,0,7,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,2,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5025,'DEMO-5025',0,'SKU-5025','','','','','','A1',52.00,0,7,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,4,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5026,'DEMO-5026',0,'SKU-5026','','','','','','A1',59.00,0,7,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5027,'DEMO-5027',0,'SKU-5027','','','','','','A1',66.00,0,7,'catalog/demo/demo-seed/products/fashion/the-north-face-nuptse-jacket.jpg','',306,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5028,'DEMO-5028',0,'SKU-5028','','','','','','A1',73.00,0,7,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5029,'DEMO-5029',0,'SKU-5029','','','','','','A1',80.00,0,7,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5030,'DEMO-5030',0,'SKU-5030','','','','','','A1',87.00,0,7,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
-(5031,'DEMO-5031',0,'SKU-5031','','','','','','A1',27.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,8,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5032,'DEMO-5032',0,'SKU-5032','','','','','','A1',34.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,2,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5033,'DEMO-5033',0,'SKU-5033','','','','','','A1',41.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,1,'2026-03-03 08:51:06','2026-05-30 10:52:48'),
-(5034,'DEMO-5034',0,'SKU-5034','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg','',310,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:06','2026-06-24 10:41:14'),
-(5035,'DEMO-5035',0,'SKU-5035','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg','',312,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5036,'DEMO-5036',0,'SKU-5036','','','','','','A1',62.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5037,'DEMO-5037',0,'SKU-5037','','','','','','A1',69.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg','',304,1,2507.1787,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,11,'2026-03-03 08:51:06','2026-07-20 13:37:31'),
-(5038,'DEMO-5038',0,'SKU-5038','','','','','','A1',76.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg','',306,1,22973.9438,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5039,'DEMO-5039',0,'SKU-5039','','','','','','A1',83.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg','',308,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5040,'DEMO-5040',0,'SKU-5040','','','','','','A1',90.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg','',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5041,'DEMO-5041',0,'SKU-5041','','','','','','A1',30.00,0,7,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','',302,1,716.3400,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,2,'2026-03-03 08:51:06','2026-07-06 17:23:29'),
-(5042,'DEMO-5042',0,'SKU-5042','','','','','','A1',37.00,0,7,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,3,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5043,'DEMO-5043',0,'SKU-5043','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5044,'DEMO-5044',0,'SKU-5044','','','','','','A1',51.00,0,7,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel.jpg','',308,1,1228.0059,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,4,'2026-03-03 08:51:06','2026-05-12 08:02:53'),
-(5045,'DEMO-5045',0,'SKU-5045','','','','','','A1',58.00,0,7,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5046,'DEMO-5046',0,'SKU-5046','','','','','','A1',65.00,0,7,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean.jpg','',312,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5047,'DEMO-5047',0,'SKU-5047','','','','','','A1',72.00,0,7,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6.jpg','',302,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
-(5048,'DEMO-5048',0,'SKU-5048','','','','','','A1',79.00,0,7,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro.jpg','',304,1,15298.9069,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5049,'DEMO-5049',0,'SKU-5049','','','','','','A1',86.00,0,7,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6.jpg','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5050,'DEMO-5050',0,'SKU-5050','','','','','','A1',0.00,1,7,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale.jpg','',308,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:07','2026-05-30 10:53:42'),
-(5051,'DEMO-5051',0,'SKU-5051','','','','','','A1',33.00,0,7,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled.jpg','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,5,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5052,'DEMO-5052',0,'SKU-5052','','','','','','A1',32.00,0,7,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,1,'2026-03-03 08:51:07','2026-05-27 11:04:26'),
-(5053,'DEMO-5053',0,'SKU-5053','','','','','','A1',47.00,0,7,'catalog/demo/demo-seed/products/toys-games/xbox-series-x.jpg','',304,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5054,'DEMO-5054',0,'SKU-5054','','','','','','A1',54.00,0,7,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,4,'2026-03-03 08:51:07','2026-05-30 16:47:03'),
-(5055,'DEMO-5055',0,'SKU-5055','','','','','','A1',61.00,0,7,'catalog/demo/demo-seed/products/toys-games/lego-technic-mclaren-formula-1.jpg','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5056,'DEMO-5056',0,'SKU-5056','','','','','','A1',68.00,0,7,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg','',310,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5057,'DEMO-5057',0,'SKU-5057','','','','','','A1',75.00,0,7,'catalog/demo/demo-seed/products/toys-games/ravensburger-disney-villainous.jpg','',312,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,14,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5058,'DEMO-5058',0,'SKU-5058','','','','','','A1',82.00,0,7,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5059,'DEMO-5059',0,'SKU-5059','','','','','','A1',89.00,0,7,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5060,'DEMO-5060',0,'SKU-5060','','','','','','A1',96.00,0,7,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5061,'DEMO-5061',0,'SKU-5061','','','','','','A1',36.00,0,7,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,3,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
-(5062,'DEMO-5062',0,'SKU-5062','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,2,'2026-03-03 08:51:07','2026-05-28 09:02:02'),
-(5063,'DEMO-5063',0,'SKU-5063','','','','','','A1',47.00,0,7,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5064,'DEMO-5064',0,'SKU-5064','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5065,'DEMO-5065',0,'SKU-5065','','','','','','A1',64.00,0,7,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg','',306,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5066,'DEMO-5066',0,'SKU-5066','','','','','','A1',71.00,0,7,'catalog/demo/demo-seed/products/books-media/dune-by-frank-herbert.jpg','',308,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:08','2026-05-28 09:01:55'),
-(5067,'DEMO-5067',0,'SKU-5067','','','','','','A1',78.00,0,7,'catalog/demo/demo-seed/products/books-media/harry-potter-and-the-sorcerers-stone.jpg','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,2,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5068,'DEMO-5068',0,'SKU-5068','','','','','','A1',85.00,0,7,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5069,'DEMO-5069',0,'SKU-5069','','','','','','A1',92.00,0,7,'catalog/demo/demo-seed/products/books-media/rich-dad-poor-dad.jpg','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5070,'DEMO-5070',0,'SKU-5070','','','','','','A1',0.00,1,7,'catalog/demo/demo-seed/products/books-media/the-lean-startup.jpg','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:08','2026-06-24 15:31:03'),
-(5071,'DEMO-5071',0,'SKU-5071','','','','','','A1',39.00,0,7,'catalog/demo/demo-seed/products/automotive/garmin-dash-cam-67w.jpg','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,3,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5072,'DEMO-5072',0,'SKU-5072','','','','','','A1',46.00,0,7,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg','',310,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5073,'DEMO-5073',0,'SKU-5073','','','','','','A1',53.00,0,7,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg','',312,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5074,'DEMO-5074',0,'SKU-5074','','','','','','A1',60.00,0,7,'catalog/demo/demo-seed/products/automotive/bosch-icon-wiper-blades.jpg','',302,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5075,'DEMO-5075',0,'SKU-5075','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg','',304,1,9.0000,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,4,'2026-03-03 08:51:08','2026-06-20 11:31:20'),
-(5076,'DEMO-5076',0,'SKU-5076','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg','',306,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,6,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5077,'DEMO-5077',0,'SKU-5077','','','','','','A1',79.00,0,7,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg','',308,1,0.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,17,'2026-03-03 08:51:08','2026-07-19 12:41:05'),
-(5078,'DEMO-5078',0,'SKU-5078','','','','','','A1',88.00,0,7,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg','',310,1,15298.9069,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5079,'DEMO-5079',0,'SKU-5079','','','','','','A1',95.00,0,7,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg','',312,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5080,'DEMO-5080',0,'SKU-5080','','','','','','A1',17.00,0,7,'catalog/demo/demo-seed/products/automotive/weathertech-floorliner-set.jpg','',302,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
-(5081,'DEMO-5081',0,'SKU-5081','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg','',306,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5082,'DEMO-5082',0,'SKU-5082','','','','','','A1',49.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/petsafe-drinkwell-fountain.jpg','',308,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5083,'DEMO-5083',0,'SKU-5083','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/kong-classic-dog-toy.jpg','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5085,'DEMO-5085',0,'SKU-5085','','','','','','A1',70.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5086,'DEMO-5086',0,'SKU-5086','','','','','','A1',77.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/purina-pro-plan-adult.jpg','',304,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5087,'DEMO-5087',0,'SKU-5087','','','','','','A1',84.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/catit-senses-2.0-digger.jpg','',306,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,5,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5088,'DEMO-5088',0,'SKU-5088','','','','','','A1',91.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/surefeed-microchip-feeder.jpg','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5089,'DEMO-5089',0,'SKU-5089','','','','','','A1',98.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
-(5090,'DEMO-5090',0,'SKU-5090','','','','','','A1',20.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/hartz-groomers-brush.jpg','',312,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,'2026-03-03 08:51:09','2026-03-03 08:51:09');
+(5001,'DEMO-5001',0,'SKU-5001','','','','','','A1',25.00,1,7,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_lounge_chair.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,158,'2026-03-03 08:51:04','2026-08-07 10:27:48'),
+(5002,'DEMO-5002',0,'SKU-5002','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','',312,1,61349.1282,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,49,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5003,'DEMO-5003',0,'SKU-5003','','','','','','A1',32.00,0,7,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,97,'2026-03-03 08:51:04','2026-08-02 07:59:26'),
+(5004,'DEMO-5004',0,'SKU-5004','','','','','','A1',39.00,0,7,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','','',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,17,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5005,'DEMO-5005',0,'SKU-5005','','','','','','A1',46.00,0,7,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:04','2026-05-12 08:25:38'),
+(5006,'DEMO-5006',0,'SKU-5006','','','','','','A1',53.00,0,7,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','','',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,0,185,'2026-03-03 08:51:04','2026-08-02 07:56:19'),
+(5007,'DEMO-5007',0,'SKU-5007','','','','','','A1',60.00,0,7,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5008,'DEMO-5008',0,'SKU-5008','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,3,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5009,'DEMO-5009',0,'SKU-5009','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5010,'DEMO-5010',0,'SKU-5010','','','','','','A1',81.00,0,7,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','','',304,1,7623.8700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,10,'2026-03-03 08:51:04','2026-08-02 07:59:59'),
+(5011,'DEMO-5011',0,'SKU-5011','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,4,'2026-03-03 08:51:04','2026-05-30 11:35:52'),
+(5012,'DEMO-5012',0,'SKU-5012','','','','','','A1',28.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,59,'2026-03-03 08:51:04','2026-03-03 08:51:04'),
+(5013,'DEMO-5013',0,'SKU-5013','','','','','','A1',35.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,6,'2026-03-03 08:51:04','2026-05-30 16:37:55'),
+(5014,'DEMO-5014',0,'SKU-5014','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,327,'2026-03-03 08:51:05','2026-08-02 07:59:43'),
+(5015,'DEMO-5015',0,'SKU-5015','','','','','','A1',48.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,3,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5016,'DEMO-5016',0,'SKU-5016','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,6,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5017,'DEMO-5017',0,'SKU-5017','','','','','','A1',63.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','','',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,5,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5018,'DEMO-5018',0,'SKU-5018','','','','','','A1',70.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,5,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5019,'DEMO-5019',0,'SKU-5019','','','','','','A1',77.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5020,'DEMO-5020',0,'SKU-5020','','','','','','A1',84.00,0,7,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,2,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5021,'DEMO-5021',0,'SKU-5021','','','','','','A1',24.00,0,7,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,39,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5022,'DEMO-5022',0,'SKU-5022','','','','','','A1',31.00,0,7,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,4,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5023,'DEMO-5023',1101,'SKU-5023','','','','','','A1',15.00,0,7,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','catalog/Aero_Airship_01.glb','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,1761,'2026-03-03 08:51:05','2026-08-06 19:20:41'),
+(5024,'DEMO-5024',0,'SKU-5024','','','','','','A1',45.00,0,7,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5025,'DEMO-5025',0,'SKU-5025','','','','','','A1',52.00,0,7,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5026,'DEMO-5026',0,'SKU-5026','','','','','','A1',59.00,0,7,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5027,'DEMO-5027',0,'SKU-5027','','','','','','A1',66.00,0,7,'catalog/demo/demo-seed/products/fashion/the-north-face-nuptse-jacket.jpg','','',306,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,0,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5028,'DEMO-5028',0,'SKU-5028','','','','','','A1',73.00,0,7,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,0,'2026-03-03 08:51:05','2026-08-03 23:21:44'),
+(5029,'DEMO-5029',0,'SKU-5029','','','','','','A1',80.00,0,7,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5030,'DEMO-5030',0,'SKU-5030','','','','','','A1',87.00,0,7,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,2,'2026-03-03 08:51:05','2026-03-03 08:51:05'),
+(5031,'DEMO-5031',0,'SKU-5031','','','','','','A1',27.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,21,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5032,'DEMO-5032',0,'SKU-5032','','','','','','A1',34.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,15,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5033,'DEMO-5033',0,'SKU-5033','','','','','','A1',41.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,9,'2026-03-03 08:51:06','2026-05-30 10:52:48'),
+(5034,'DEMO-5034',0,'SKU-5034','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg','','',310,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,0,'2026-03-03 08:51:06','2026-06-24 10:41:14'),
+(5035,'DEMO-5035',0,'SKU-5035','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg','','',312,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5036,'DEMO-5036',0,'SKU-5036','','','','','','A1',62.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,6,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5037,'DEMO-5037',0,'SKU-5037','','','','','','A1',68.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg','','',304,1,2507.1787,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,26,'2026-03-03 08:51:06','2026-07-20 13:37:31'),
+(5038,'DEMO-5038',0,'SKU-5038','','','','','','A1',76.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg','','',306,1,22973.9438,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5039,'DEMO-5039',0,'SKU-5039','','','','','','A1',83.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg','','',308,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5040,'DEMO-5040',0,'SKU-5040','','','','','','A1',90.00,0,7,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg','','',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5041,'DEMO-5041',0,'SKU-5041','','','','','','A1',30.00,0,7,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','','',302,1,716.3400,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,11,'2026-03-03 08:51:06','2026-07-06 17:23:29'),
+(5042,'DEMO-5042',0,'SKU-5042','','','','','','A1',37.00,0,7,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,13,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5043,'DEMO-5043',0,'SKU-5043','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5044,'DEMO-5044',0,'SKU-5044','','','','','','A1',51.00,0,7,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel.jpg','','',308,1,1228.0059,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,6,'2026-03-03 08:51:06','2026-05-12 08:02:53'),
+(5045,'DEMO-5045',0,'SKU-5045','','','','','','A1',58.00,0,7,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,2,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5046,'DEMO-5046',0,'SKU-5046','','','','','','A1',65.00,0,7,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean.jpg','','',312,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,0,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5047,'DEMO-5047',0,'SKU-5047','','','','','','A1',72.00,0,7,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6.jpg','','',302,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,1,'2026-03-03 08:51:06','2026-03-03 08:51:06'),
+(5048,'DEMO-5048',0,'SKU-5048','','','','','','A1',0.00,0,7,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro.jpg','','',304,1,15298.9069,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,2,'2026-03-03 08:51:07','2026-08-06 17:34:40'),
+(5049,'DEMO-5049',0,'SKU-5049','','','','','','A1',86.00,0,7,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5050,'DEMO-5050',0,'SKU-5050','','','','','','A1',0.00,1,7,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale.jpg','','',308,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,1,'2026-03-03 08:51:07','2026-05-30 10:53:42'),
+(5051,'DEMO-5051',0,'SKU-5051','','','','','','A1',33.00,0,7,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,10,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5052,'DEMO-5052',0,'SKU-5052','','','','','','A1',32.00,0,7,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,3,'2026-03-03 08:51:07','2026-05-27 11:04:26'),
+(5053,'DEMO-5053',0,'SKU-5053','','','','','','A1',47.00,0,7,'catalog/demo/demo-seed/products/toys-games/xbox-series-x.jpg','','',304,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5054,'DEMO-5054',0,'SKU-5054','','','','','','A1',54.00,0,7,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,19,'2026-03-03 08:51:07','2026-05-30 16:47:03'),
+(5055,'DEMO-5055',0,'SKU-5055','','','','','','A1',61.00,0,7,'catalog/demo/demo-seed/products/toys-games/lego-technic-mclaren-formula-1.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5056,'DEMO-5056',0,'SKU-5056','','','','','','A1',68.00,0,7,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg','','',310,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5057,'DEMO-5057',0,'SKU-5057','','','','','','A1',75.00,0,7,'catalog/demo/demo-seed/products/toys-games/ravensburger-disney-villainous.jpg','','',312,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,15,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5058,'DEMO-5058',0,'SKU-5058','','','','','','A1',82.00,0,7,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5059,'DEMO-5059',0,'SKU-5059','','','','','','A1',89.00,0,7,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5060,'DEMO-5060',0,'SKU-5060','','','','','','A1',96.00,0,7,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','','',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5061,'DEMO-5061',0,'SKU-5061','','','','','','A1',36.00,0,7,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,9,'2026-03-03 08:51:07','2026-03-03 08:51:07'),
+(5062,'DEMO-5062',0,'SKU-5062','','','','','','A1',43.00,0,7,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,6,'2026-03-03 08:51:07','2026-05-28 09:02:02'),
+(5063,'DEMO-5063',0,'SKU-5063','','','','','','A1',47.00,0,7,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,5,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5064,'DEMO-5064',0,'SKU-5064','','','','','','A1',55.00,0,7,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,3,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5065,'DEMO-5065',0,'SKU-5065','','','','','','A1',64.00,0,7,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg','','',306,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5066,'DEMO-5066',0,'SKU-5066','','','','','','A1',71.00,0,7,'catalog/demo/demo-seed/products/books-media/dune-by-frank-herbert.jpg','','',308,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,2,'2026-03-03 08:51:08','2026-05-28 09:01:55'),
+(5067,'DEMO-5067',0,'SKU-5067','','','','','','A1',78.00,0,7,'catalog/demo/demo-seed/products/books-media/harry-potter-and-the-sorcerers-stone.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,3,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5068,'DEMO-5068',0,'SKU-5068','','','','','','A1',85.00,0,7,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5069,'DEMO-5069',0,'SKU-5069','','','','','','A1',92.00,0,7,'catalog/demo/demo-seed/products/books-media/rich-dad-poor-dad.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5070,'DEMO-5070',0,'SKU-5070','','','','','','A1',0.00,1,7,'catalog/demo/demo-seed/products/books-media/the-lean-startup.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,2,'2026-03-03 08:51:08','2026-06-24 15:31:03'),
+(5071,'DEMO-5071',0,'SKU-5071','','','','','','A1',39.00,0,7,'catalog/demo/demo-seed/products/automotive/garmin-dash-cam-67w.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,26,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5072,'DEMO-5072',0,'SKU-5072','','','','','','A1',46.00,0,7,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg','','',310,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,18,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5073,'DEMO-5073',0,'SKU-5073','','','','','','A1',53.00,0,7,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg','','',312,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5074,'DEMO-5074',0,'SKU-5074','','','','','','A1',60.00,0,7,'catalog/demo/demo-seed/products/automotive/bosch-icon-wiper-blades.jpg','','',302,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5075,'DEMO-5075',0,'SKU-5075','','','','','','A1',67.00,0,7,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg','','',304,1,9.0000,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:08','2026-06-20 11:31:20'),
+(5076,'DEMO-5076',0,'SKU-5076','','','','','','A1',74.00,0,7,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg','','',306,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,7,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5077,'DEMO-5077',0,'SKU-5077','','','','','','A1',25.00,0,7,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg','','',308,1,0.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,20,'2026-03-03 08:51:08','2026-07-19 12:41:05'),
+(5078,'DEMO-5078',0,'SKU-5078','','','','','','A1',88.00,0,7,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg','','',310,1,15298.9069,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5079,'DEMO-5079',0,'SKU-5079','','','','','','A1',95.00,0,7,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg','','',312,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5080,'DEMO-5080',0,'SKU-5080','','','','','','A1',17.00,0,7,'catalog/demo/demo-seed/products/automotive/weathertech-floorliner-set.jpg','','',302,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:08','2026-03-03 08:51:08'),
+(5081,'DEMO-5081',0,'SKU-5081','','','','','','A1',42.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg','','',306,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5082,'DEMO-5082',0,'SKU-5082','','','','','','A1',49.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/petsafe-drinkwell-fountain.jpg','','',308,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5083,'DEMO-5083',0,'SKU-5083','','','','','','A1',56.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/kong-classic-dog-toy.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5085,'DEMO-5085',0,'SKU-5085','','','','','','A1',70.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5086,'DEMO-5086',0,'SKU-5086','','','','','','A1',77.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/purina-pro-plan-adult.jpg','','',304,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5087,'DEMO-5087',0,'SKU-5087','','','','','','A1',84.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/catit-senses-2.0-digger.jpg','','',306,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,5,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5088,'DEMO-5088',0,'SKU-5088','','','','','','A1',91.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/surefeed-microchip-feeder.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5089,'DEMO-5089',0,'SKU-5089','','','','','','A1',98.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09'),
+(5090,'DEMO-5090',0,'SKU-5090','','','','','','A1',20.00,0,7,'catalog/demo/demo-seed/products/pet-supplies/hartz-groomers-brush.jpg','','',312,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:09','2026-03-03 08:51:09');
 /*!40000 ALTER TABLE `oc_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6550,807 +8505,1311 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_attribute` WRITE;
 /*!40000 ALTER TABLE `oc_product_attribute` DISABLE KEYS */;
 INSERT INTO `oc_product_attribute` VALUES
-(5001,5001,1,'LEGO'),
-(5001,5001,2,'LEGO'),
-(5001,5001,3,'LEGO'),
-(5001,5002,1,'Premium composite'),
-(5001,5002,2,'Преміальний композитний матеріал'),
-(5001,5002,3,'Высококачественный композитный материал'),
-(5001,5003,1,'24 months official warranty'),
-(5001,5003,2,'24 місяці офіційної гарантії'),
-(5001,5003,3,'Официальная гарантия 24 месяца.'),
-(5002,5001,1,'Purina'),
-(5002,5001,2,'Пуріна'),
-(5002,5001,3,'Purina'),
-(5002,5002,1,'Premium composite'),
-(5002,5002,2,'Преміальний композитний матеріал'),
-(5002,5002,3,'Высококачественный композитный материал'),
-(5002,5003,1,'24 months official warranty'),
-(5002,5003,2,'24 місяці офіційної гарантії'),
-(5002,5003,3,'Официальная гарантия 24 месяца.'),
-(5003,5001,1,'Samsung'),
-(5003,5001,2,'Самсунг'),
-(5003,5001,3,'Samsung'),
-(5003,5002,1,'Premium composite'),
-(5003,5002,2,'Преміальний композитний матеріал'),
-(5003,5002,3,'Высококачественный композитный материал'),
-(5003,5003,1,'24 months official warranty'),
-(5003,5003,2,'24 місяці офіційної гарантії'),
-(5003,5003,3,'Официальная гарантия 24 месяца.'),
-(5004,5001,1,'Nike'),
-(5004,5001,2,'Найк'),
-(5004,5001,3,'Nike'),
-(5004,5002,1,'Premium composite'),
-(5004,5002,2,'Преміальний композитний матеріал'),
-(5004,5002,3,'Высококачественный композитный материал'),
-(5004,5003,1,'24 months official warranty'),
-(5004,5003,2,'24 місяці офіційної гарантії'),
-(5004,5003,3,'Официальная гарантия 24 месяца.'),
-(5005,5001,1,'Philips'),
-(5005,5001,2,'Філіпс'),
-(5005,5001,3,'Philips'),
-(5005,5002,1,'Premium composite'),
-(5005,5002,2,'Преміальний композитний матеріал'),
-(5005,5002,3,'Высококачественный композитный материал'),
-(5005,5003,1,'24 months official warranty'),
-(5005,5003,2,'24 місяці офіційної гарантії'),
-(5005,5003,3,'Официальная гарантия 24 месяца.'),
-(5006,5001,1,'Dyson'),
-(5006,5001,2,'Дайсон'),
-(5006,5001,3,'Дайсон'),
-(5006,5002,1,'Premium composite'),
-(5006,5002,2,'Преміальний композитний матеріал'),
-(5006,5002,3,'Высококачественный композитный материал'),
-(5006,5003,1,'24 months official warranty'),
-(5006,5003,2,'24 місяці офіційної гарантії'),
-(5006,5003,3,'Официальная гарантия 24 месяца.'),
-(5007,5001,1,'LEGO'),
-(5007,5001,2,'LEGO'),
-(5007,5001,3,'LEGO'),
-(5007,5002,1,'Premium composite'),
-(5007,5002,2,'Преміальний композитний матеріал'),
-(5007,5002,3,'Высококачественный композитный материал'),
-(5007,5003,1,'24 months official warranty'),
-(5007,5003,2,'24 місяці офіційної гарантії'),
-(5007,5003,3,'Официальная гарантия 24 месяца.'),
-(5008,5001,1,'Purina'),
-(5008,5001,2,'Пуріна'),
-(5008,5001,3,'Purina'),
-(5008,5002,1,'Premium composite'),
-(5008,5002,2,'Преміальний композитний матеріал'),
-(5008,5002,3,'Высококачественный композитный материал'),
-(5008,5003,1,'24 months official warranty'),
-(5008,5003,2,'24 місяці офіційної гарантії'),
-(5008,5003,3,'Официальная гарантия 24 месяца.'),
-(5009,5001,1,'Samsung'),
-(5009,5001,2,'Самсунг'),
-(5009,5001,3,'Samsung'),
-(5009,5002,1,'Premium composite'),
-(5009,5002,2,'Преміальний композитний матеріал'),
-(5009,5002,3,'Высококачественный композитный материал'),
-(5009,5003,1,'24 months official warranty'),
-(5009,5003,2,'24 місяці офіційної гарантії'),
-(5009,5003,3,'Официальная гарантия 24 месяца.'),
-(5010,5001,1,'Nike'),
-(5010,5001,2,'Найк'),
-(5010,5001,3,'Nike'),
-(5010,5002,1,'Premium composite'),
-(5010,5002,2,'Преміальний композитний матеріал'),
-(5010,5002,3,'Высококачественный композитный материал'),
-(5010,5003,1,'24 months official warranty'),
-(5010,5003,2,'24 місяці офіційної гарантії'),
-(5010,5003,3,'Официальная гарантия 24 месяца.'),
-(5011,5001,1,'Dyson'),
-(5011,5001,2,'Дайсон'),
-(5011,5001,3,'Дайсон'),
-(5011,5002,1,'Premium composite'),
-(5011,5002,2,'Преміальний композитний матеріал'),
-(5011,5002,3,'Высококачественный композитный материал'),
-(5011,5003,1,'24 months official warranty'),
-(5011,5003,2,'24 місяці офіційної гарантії'),
-(5011,5003,3,'Официальная гарантия 24 месяца.'),
-(5012,5001,1,'LEGO'),
-(5012,5001,2,'LEGO'),
-(5012,5001,3,'LEGO'),
-(5012,5002,1,'Premium composite'),
-(5012,5002,2,'Преміальний композитний матеріал'),
-(5012,5002,3,'Высококачественный композитный материал'),
-(5012,5003,1,'24 months official warranty'),
-(5012,5003,2,'24 місяці офіційної гарантії'),
-(5012,5003,3,'Официальная гарантия 24 месяца.'),
-(5013,5001,1,'Purina'),
-(5013,5001,2,'Пуріна'),
-(5013,5001,3,'Purina'),
-(5013,5002,1,'Premium composite'),
-(5013,5002,2,'Преміальний композитний матеріал'),
-(5013,5002,3,'Высококачественный композитный материал'),
-(5013,5003,1,'24 months official warranty'),
-(5013,5003,2,'24 місяці офіційної гарантії'),
-(5013,5003,3,'Официальная гарантия 24 месяца.'),
-(5014,5001,1,'Samsung'),
-(5014,5001,2,'Самсунг'),
-(5014,5001,3,'Samsung'),
-(5014,5002,1,'Premium composite'),
-(5014,5002,2,'Преміальний композитний матеріал'),
-(5014,5002,3,'Высококачественный композитный материал'),
-(5014,5003,1,'24 months official warranty'),
-(5014,5003,2,'24 місяці офіційної гарантії'),
-(5014,5003,3,'Официальная гарантия 24 месяца.'),
-(5015,5001,1,'Nike'),
-(5015,5001,2,'Найк'),
-(5015,5001,3,'Nike'),
-(5015,5002,1,'Premium composite'),
-(5015,5002,2,'Преміальний композитний матеріал'),
-(5015,5002,3,'Высококачественный композитный материал'),
-(5015,5003,1,'24 months official warranty'),
-(5015,5003,2,'24 місяці офіційної гарантії'),
-(5015,5003,3,'Официальная гарантия 24 месяца.'),
-(5016,5001,1,'Philips'),
-(5016,5001,2,'Філіпс'),
-(5016,5001,3,'Philips'),
-(5016,5002,1,'Premium composite'),
-(5016,5002,2,'Преміальний композитний матеріал'),
-(5016,5002,3,'Высококачественный композитный материал'),
-(5016,5003,1,'24 months official warranty'),
-(5016,5003,2,'24 місяці офіційної гарантії'),
-(5016,5003,3,'Официальная гарантия 24 месяца.'),
-(5017,5001,1,'Dyson'),
-(5017,5001,2,'Дайсон'),
-(5017,5001,3,'Дайсон'),
-(5017,5002,1,'Premium composite'),
-(5017,5002,2,'Преміальний композитний матеріал'),
-(5017,5002,3,'Высококачественный композитный материал'),
-(5017,5003,1,'24 months official warranty'),
-(5017,5003,2,'24 місяці офіційної гарантії'),
-(5017,5003,3,'Официальная гарантия 24 месяца.'),
-(5018,5001,1,'LEGO'),
-(5018,5001,2,'LEGO'),
-(5018,5001,3,'LEGO'),
-(5018,5002,1,'Premium composite'),
-(5018,5002,2,'Преміальний композитний матеріал'),
-(5018,5002,3,'Высококачественный композитный материал'),
-(5018,5003,1,'24 months official warranty'),
-(5018,5003,2,'24 місяці офіційної гарантії'),
-(5018,5003,3,'Официальная гарантия 24 месяца.'),
-(5019,5001,1,'Purina'),
-(5019,5001,2,'Пуріна'),
-(5019,5001,3,'Purina'),
-(5019,5002,1,'Premium composite'),
-(5019,5002,2,'Преміальний композитний матеріал'),
-(5019,5002,3,'Высококачественный композитный материал'),
-(5019,5003,1,'24 months official warranty'),
-(5019,5003,2,'24 місяці офіційної гарантії'),
-(5019,5003,3,'Официальная гарантия 24 месяца.'),
-(5020,5001,1,'Samsung'),
-(5020,5001,2,'Самсунг'),
-(5020,5001,3,'Samsung'),
-(5020,5002,1,'Premium composite'),
-(5020,5002,2,'Преміальний композитний матеріал'),
-(5020,5002,3,'Высококачественный композитный материал'),
-(5020,5003,1,'24 months official warranty'),
-(5020,5003,2,'24 місяці офіційної гарантії'),
-(5020,5003,3,'Официальная гарантия 24 месяца.'),
-(5021,5001,1,'Philips'),
-(5021,5001,2,'Філіпс'),
-(5021,5001,3,'Philips'),
-(5021,5002,1,'Premium composite'),
-(5021,5002,2,'Преміальний композитний матеріал'),
-(5021,5002,3,'Высококачественный композитный материал'),
-(5021,5003,1,'24 months official warranty'),
-(5021,5003,2,'24 місяці офіційної гарантії'),
-(5021,5003,3,'Официальная гарантия 24 месяца.'),
-(5022,5001,1,'Dyson'),
-(5022,5001,2,'Дайсон'),
-(5022,5001,3,'Дайсон'),
-(5022,5002,1,'Premium composite'),
-(5022,5002,2,'Преміальний композитний матеріал'),
-(5022,5002,3,'Высококачественный композитный материал'),
-(5022,5003,1,'24 months official warranty'),
-(5022,5003,2,'24 місяці офіційної гарантії'),
-(5022,5003,3,'Официальная гарантия 24 месяца.'),
-(5023,5001,1,'LEGO'),
-(5023,5001,2,'LEGO'),
-(5023,5001,3,'LEGO'),
-(5023,5002,1,'Premium composite'),
-(5023,5002,2,'Преміальний композитний матеріал'),
-(5023,5002,3,'Высококачественный композитный материал'),
-(5023,5003,1,'24 months official warranty'),
-(5023,5003,2,'24 місяці офіційної гарантії'),
-(5023,5003,3,'Официальная гарантия 24 месяца.'),
-(5024,5001,1,'Purina'),
-(5024,5001,2,'Пуріна'),
-(5024,5001,3,'Purina'),
-(5024,5002,1,'Premium composite'),
-(5024,5002,2,'Преміальний композитний матеріал'),
-(5024,5002,3,'Высококачественный композитный материал'),
-(5024,5003,1,'24 months official warranty'),
-(5024,5003,2,'24 місяці офіційної гарантії'),
-(5024,5003,3,'Официальная гарантия 24 месяца.'),
-(5025,5001,1,'Samsung'),
-(5025,5001,2,'Самсунг'),
-(5025,5001,3,'Samsung'),
-(5025,5002,1,'Premium composite'),
-(5025,5002,2,'Преміальний композитний матеріал'),
-(5025,5002,3,'Высококачественный композитный материал'),
-(5025,5003,1,'24 months official warranty'),
-(5025,5003,2,'24 місяці офіційної гарантії'),
-(5025,5003,3,'Официальная гарантия 24 месяца.'),
-(5026,5001,1,'Nike'),
-(5026,5001,2,'Найк'),
-(5026,5001,3,'Nike'),
-(5026,5002,1,'Premium composite'),
-(5026,5002,2,'Преміальний композитний матеріал'),
-(5026,5002,3,'Высококачественный композитный материал'),
-(5026,5003,1,'24 months official warranty'),
-(5026,5003,2,'24 місяці офіційної гарантії'),
-(5026,5003,3,'Официальная гарантия 24 месяца.'),
-(5027,5001,1,'Philips'),
-(5027,5001,2,'Філіпс'),
-(5027,5001,3,'Philips'),
-(5027,5002,1,'Premium composite'),
-(5027,5002,2,'Преміальний композитний матеріал'),
-(5027,5002,3,'Высококачественный композитный материал'),
-(5027,5003,1,'24 months official warranty'),
-(5027,5003,2,'24 місяці офіційної гарантії'),
-(5027,5003,3,'Официальная гарантия 24 месяца.'),
-(5028,5001,1,'Dyson'),
-(5028,5001,2,'Дайсон'),
-(5028,5001,3,'Дайсон'),
-(5028,5002,1,'Premium composite'),
-(5028,5002,2,'Преміальний композитний матеріал'),
-(5028,5002,3,'Высококачественный композитный материал'),
-(5028,5003,1,'24 months official warranty'),
-(5028,5003,2,'24 місяці офіційної гарантії'),
-(5028,5003,3,'Официальная гарантия 24 месяца.'),
-(5029,5001,1,'LEGO'),
-(5029,5001,2,'LEGO'),
-(5029,5001,3,'LEGO'),
-(5029,5002,1,'Premium composite'),
-(5029,5002,2,'Преміальний композитний матеріал'),
-(5029,5002,3,'Высококачественный композитный материал'),
-(5029,5003,1,'24 months official warranty'),
-(5029,5003,2,'24 місяці офіційної гарантії'),
-(5029,5003,3,'Официальная гарантия 24 месяца.'),
-(5030,5001,1,'Purina'),
-(5030,5001,2,'Пуріна'),
-(5030,5001,3,'Purina'),
-(5030,5002,1,'Premium composite'),
-(5030,5002,2,'Преміальний композитний матеріал'),
-(5030,5002,3,'Высококачественный композитный материал'),
-(5030,5003,1,'24 months official warranty'),
-(5030,5003,2,'24 місяці офіційної гарантії'),
-(5030,5003,3,'Официальная гарантия 24 месяца.'),
-(5031,5001,1,'Nike'),
-(5031,5001,2,'Найк'),
-(5031,5001,3,'Nike'),
-(5031,5002,1,'Premium composite'),
-(5031,5002,2,'Преміальний композитний матеріал'),
-(5031,5002,3,'Высококачественный композитный материал'),
-(5031,5003,1,'24 months official warranty'),
-(5031,5003,2,'24 місяці офіційної гарантії'),
-(5031,5003,3,'Официальная гарантия 24 месяца.'),
-(5032,5001,1,'Philips'),
-(5032,5001,2,'Філіпс'),
-(5032,5001,3,'Philips'),
-(5032,5002,1,'Premium composite'),
-(5032,5002,2,'Преміальний композитний матеріал'),
-(5032,5002,3,'Высококачественный композитный материал'),
-(5032,5003,1,'24 months official warranty'),
-(5032,5003,2,'24 місяці офіційної гарантії'),
-(5032,5003,3,'Официальная гарантия 24 месяца.'),
-(5033,5001,1,'Dyson'),
-(5033,5001,2,'Дайсон'),
-(5033,5001,3,'Дайсон'),
-(5033,5002,1,'Premium composite'),
-(5033,5002,2,'Преміальний композитний матеріал'),
-(5033,5002,3,'Высококачественный композитный материал'),
-(5033,5003,1,'24 months official warranty'),
-(5033,5003,2,'24 місяці офіційної гарантії'),
-(5033,5003,3,'Официальная гарантия 24 месяца.'),
-(5034,5001,1,'LEGO'),
-(5034,5001,2,'LEGO'),
-(5034,5001,3,'LEGO'),
-(5034,5002,1,'Premium composite'),
-(5034,5002,2,'Преміальний композитний матеріал'),
-(5034,5002,3,'Высококачественный композитный материал'),
-(5034,5003,1,'24 months official warranty'),
-(5034,5003,2,'24 місяці офіційної гарантії'),
-(5034,5003,3,'Официальная гарантия 24 месяца.'),
-(5035,5001,1,'Purina'),
-(5035,5001,2,'Пуріна'),
-(5035,5001,3,'Purina'),
-(5035,5002,1,'Premium composite'),
-(5035,5002,2,'Преміальний композитний матеріал'),
-(5035,5002,3,'Высококачественный композитный материал'),
-(5035,5003,1,'24 months official warranty'),
-(5035,5003,2,'24 місяці офіційної гарантії'),
-(5035,5003,3,'Официальная гарантия 24 месяца.'),
-(5036,5001,1,'Samsung'),
-(5036,5001,2,'Самсунг'),
-(5036,5001,3,'Samsung'),
-(5036,5002,1,'Premium composite'),
-(5036,5002,2,'Преміальний композитний матеріал'),
-(5036,5002,3,'Высококачественный композитный материал'),
-(5036,5003,1,'24 months official warranty'),
-(5036,5003,2,'24 місяці офіційної гарантії'),
-(5036,5003,3,'Официальная гарантия 24 месяца.'),
-(5037,5001,1,'Nike'),
-(5037,5001,2,'Найк'),
-(5037,5001,3,'Nike'),
-(5037,5002,1,'Premium composite'),
-(5037,5002,2,'Преміальний композитний матеріал'),
-(5037,5002,3,'Высококачественный композитный материал'),
-(5037,5003,1,'24 months official warranty'),
-(5037,5003,2,'24 місяці офіційної гарантії'),
-(5037,5003,3,'Официальная гарантия 24 месяца.'),
-(5038,5001,1,'Philips'),
-(5038,5001,2,'Філіпс'),
-(5038,5001,3,'Philips'),
-(5038,5002,1,'Premium composite'),
-(5038,5002,2,'Преміальний композитний матеріал'),
-(5038,5002,3,'Высококачественный композитный материал'),
-(5038,5003,1,'24 months official warranty'),
-(5038,5003,2,'24 місяці офіційної гарантії'),
-(5038,5003,3,'Официальная гарантия 24 месяца.'),
-(5039,5001,1,'Dyson'),
-(5039,5001,2,'Дайсон'),
-(5039,5001,3,'Дайсон'),
-(5039,5002,1,'Premium composite'),
-(5039,5002,2,'Преміальний композитний матеріал'),
-(5039,5002,3,'Высококачественный композитный материал'),
-(5039,5003,1,'24 months official warranty'),
-(5039,5003,2,'24 місяці офіційної гарантії'),
-(5039,5003,3,'Официальная гарантия 24 месяца.'),
-(5040,5001,1,'LEGO'),
-(5040,5001,2,'LEGO'),
-(5040,5001,3,'LEGO'),
-(5040,5002,1,'Premium composite'),
-(5040,5002,2,'Преміальний композитний матеріал'),
-(5040,5002,3,'Высококачественный композитный материал'),
-(5040,5003,1,'24 months official warranty'),
-(5040,5003,2,'24 місяці офіційної гарантії'),
-(5040,5003,3,'Официальная гарантия 24 месяца.'),
-(5041,5001,1,'Samsung'),
-(5041,5001,2,'Самсунг'),
-(5041,5001,3,'Samsung'),
-(5041,5002,1,'Premium composite'),
-(5041,5002,2,'Преміальний композитний матеріал'),
-(5041,5002,3,'Высококачественный композитный материал'),
-(5041,5003,1,'24 months official warranty'),
-(5041,5003,2,'24 місяці офіційної гарантії'),
-(5041,5003,3,'Официальная гарантия 24 месяца.'),
-(5042,5001,1,'Nike'),
-(5042,5001,2,'Найк'),
-(5042,5001,3,'Nike'),
-(5042,5002,1,'Premium composite'),
-(5042,5002,2,'Преміальний композитний матеріал'),
-(5042,5002,3,'Высококачественный композитный материал'),
-(5042,5003,1,'24 months official warranty'),
-(5042,5003,2,'24 місяці офіційної гарантії'),
-(5042,5003,3,'Официальная гарантия 24 месяца.'),
-(5043,5001,1,'Philips'),
-(5043,5001,2,'Філіпс'),
-(5043,5001,3,'Philips'),
-(5043,5002,1,'Premium composite'),
-(5043,5002,2,'Преміальний композитний матеріал'),
-(5043,5002,3,'Высококачественный композитный материал'),
-(5043,5003,1,'24 months official warranty'),
-(5043,5003,2,'24 місяці офіційної гарантії'),
-(5043,5003,3,'Официальная гарантия 24 месяца.'),
-(5044,5001,1,'Dyson'),
-(5044,5001,2,'Дайсон'),
-(5044,5001,3,'Дайсон'),
-(5044,5002,1,'Premium composite'),
-(5044,5002,2,'Преміальний композитний матеріал'),
-(5044,5002,3,'Высококачественный композитный материал'),
-(5044,5003,1,'24 months official warranty'),
-(5044,5003,2,'24 місяці офіційної гарантії'),
-(5044,5003,3,'Официальная гарантия 24 месяца.'),
-(5045,5001,1,'LEGO'),
-(5045,5001,2,'LEGO'),
-(5045,5001,3,'LEGO'),
-(5045,5002,1,'Premium composite'),
-(5045,5002,2,'Преміальний композитний матеріал'),
-(5045,5002,3,'Высококачественный композитный материал'),
-(5045,5003,1,'24 months official warranty'),
-(5045,5003,2,'24 місяці офіційної гарантії'),
-(5045,5003,3,'Официальная гарантия 24 месяца.'),
-(5046,5001,1,'Purina'),
-(5046,5001,2,'Пуріна'),
-(5046,5001,3,'Purina'),
-(5046,5002,1,'Premium composite'),
-(5046,5002,2,'Преміальний композитний матеріал'),
-(5046,5002,3,'Высококачественный композитный материал'),
-(5046,5003,1,'24 months official warranty'),
-(5046,5003,2,'24 місяці офіційної гарантії'),
-(5046,5003,3,'Официальная гарантия 24 месяца.'),
-(5047,5001,1,'Samsung'),
-(5047,5001,2,'Самсунг'),
-(5047,5001,3,'Samsung'),
-(5047,5002,1,'Premium composite'),
-(5047,5002,2,'Преміальний композитний матеріал'),
-(5047,5002,3,'Высококачественный композитный материал'),
-(5047,5003,1,'24 months official warranty'),
-(5047,5003,2,'24 місяці офіційної гарантії'),
-(5047,5003,3,'Официальная гарантия 24 месяца.'),
-(5048,5001,1,'Nike'),
-(5048,5001,2,'Найк'),
-(5048,5001,3,'Nike'),
-(5048,5002,1,'Premium composite'),
-(5048,5002,2,'Преміальний композитний матеріал'),
-(5048,5002,3,'Высококачественный композитный материал'),
-(5048,5003,1,'24 months official warranty'),
-(5048,5003,2,'24 місяці офіційної гарантії'),
-(5048,5003,3,'Официальная гарантия 24 месяца.'),
-(5049,5001,1,'Philips'),
-(5049,5001,2,'Філіпс'),
-(5049,5001,3,'Philips'),
-(5049,5002,1,'Premium composite'),
-(5049,5002,2,'Преміальний композитний матеріал'),
-(5049,5002,3,'Высококачественный композитный материал'),
-(5049,5003,1,'24 months official warranty'),
-(5049,5003,2,'24 місяці офіційної гарантії'),
-(5049,5003,3,'Официальная гарантия 24 месяца.'),
-(5050,5001,1,'Dyson'),
-(5050,5001,2,'Дайсон'),
-(5050,5001,3,'Дайсон'),
-(5050,5002,1,'Premium composite'),
-(5050,5002,2,'Преміальний композитний матеріал'),
-(5050,5002,3,'Высококачественный композитный материал'),
-(5050,5003,1,'24 months official warranty'),
-(5050,5003,2,'24 місяці офіційної гарантії'),
-(5050,5003,3,'Официальная гарантия 24 месяца.'),
-(5051,5001,1,'Purina'),
-(5051,5001,2,'Пуріна'),
-(5051,5001,3,'Purina'),
-(5051,5002,1,'Premium composite'),
-(5051,5002,2,'Преміальний композитний матеріал'),
-(5051,5002,3,'Высококачественный композитный материал'),
-(5051,5003,1,'24 months official warranty'),
-(5051,5003,2,'24 місяці офіційної гарантії'),
-(5051,5003,3,'Официальная гарантия 24 месяца.'),
-(5052,5001,1,'Samsung'),
-(5052,5001,2,'Самсунг'),
-(5052,5001,3,'Samsung'),
-(5052,5002,1,'Premium composite'),
-(5052,5002,2,'Преміальний композитний матеріал'),
-(5052,5002,3,'Высококачественный композитный материал'),
-(5052,5003,1,'24 months official warranty'),
-(5052,5003,2,'24 місяці офіційної гарантії'),
-(5052,5003,3,'Официальная гарантия 24 месяца.'),
-(5053,5001,1,'Nike'),
-(5053,5001,2,'Найк'),
-(5053,5001,3,'Nike'),
-(5053,5002,1,'Premium composite'),
-(5053,5002,2,'Преміальний композитний матеріал'),
-(5053,5002,3,'Высококачественный композитный материал'),
-(5053,5003,1,'24 months official warranty'),
-(5053,5003,2,'24 місяці офіційної гарантії'),
-(5053,5003,3,'Официальная гарантия 24 месяца.'),
-(5054,5001,1,'Philips'),
-(5054,5001,2,'Філіпс'),
-(5054,5001,3,'Philips'),
-(5054,5002,1,'Premium composite'),
-(5054,5002,2,'Преміальний композитний матеріал'),
-(5054,5002,3,'Высококачественный композитный материал'),
-(5054,5003,1,'24 months official warranty'),
-(5054,5003,2,'24 місяці офіційної гарантії'),
-(5054,5003,3,'Официальная гарантия 24 месяца.'),
-(5055,5001,1,'Dyson'),
-(5055,5001,2,'Дайсон'),
-(5055,5001,3,'Дайсон'),
-(5055,5002,1,'Premium composite'),
-(5055,5002,2,'Преміальний композитний матеріал'),
-(5055,5002,3,'Высококачественный композитный материал'),
-(5055,5003,1,'24 months official warranty'),
-(5055,5003,2,'24 місяці офіційної гарантії'),
-(5055,5003,3,'Официальная гарантия 24 месяца.'),
-(5056,5001,1,'LEGO'),
-(5056,5001,2,'LEGO'),
-(5056,5001,3,'LEGO'),
-(5056,5002,1,'Premium composite'),
-(5056,5002,2,'Преміальний композитний матеріал'),
-(5056,5002,3,'Высококачественный композитный материал'),
-(5056,5003,1,'24 months official warranty'),
-(5056,5003,2,'24 місяці офіційної гарантії'),
-(5056,5003,3,'Официальная гарантия 24 месяца.'),
-(5057,5001,1,'Purina'),
-(5057,5001,2,'Пуріна'),
-(5057,5001,3,'Purina'),
-(5057,5002,1,'Premium composite'),
-(5057,5002,2,'Преміальний композитний матеріал'),
-(5057,5002,3,'Высококачественный композитный материал'),
-(5057,5003,1,'24 months official warranty'),
-(5057,5003,2,'24 місяці офіційної гарантії'),
-(5057,5003,3,'Официальная гарантия 24 месяца.'),
-(5058,5001,1,'Samsung'),
-(5058,5001,2,'Самсунг'),
-(5058,5001,3,'Samsung'),
-(5058,5002,1,'Premium composite'),
-(5058,5002,2,'Преміальний композитний матеріал'),
-(5058,5002,3,'Высококачественный композитный материал'),
-(5058,5003,1,'24 months official warranty'),
-(5058,5003,2,'24 місяці офіційної гарантії'),
-(5058,5003,3,'Официальная гарантия 24 месяца.'),
-(5059,5001,1,'Nike'),
-(5059,5001,2,'Найк'),
-(5059,5001,3,'Nike'),
-(5059,5002,1,'Premium composite'),
-(5059,5002,2,'Преміальний композитний матеріал'),
-(5059,5002,3,'Высококачественный композитный материал'),
-(5059,5003,1,'24 months official warranty'),
-(5059,5003,2,'24 місяці офіційної гарантії'),
-(5059,5003,3,'Официальная гарантия 24 месяца.'),
-(5060,5001,1,'Philips'),
-(5060,5001,2,'Філіпс'),
-(5060,5001,3,'Philips'),
-(5060,5002,1,'Premium composite'),
-(5060,5002,2,'Преміальний композитний матеріал'),
-(5060,5002,3,'Высококачественный композитный материал'),
-(5060,5003,1,'24 months official warranty'),
-(5060,5003,2,'24 місяці офіційної гарантії'),
-(5060,5003,3,'Официальная гарантия 24 месяца.'),
-(5061,5001,1,'LEGO'),
-(5061,5001,2,'LEGO'),
-(5061,5001,3,'LEGO'),
-(5061,5002,1,'Premium composite'),
-(5061,5002,2,'Преміальний композитний матеріал'),
-(5061,5002,3,'Высококачественный композитный материал'),
-(5061,5003,1,'24 months official warranty'),
-(5061,5003,2,'24 місяці офіційної гарантії'),
-(5061,5003,3,'Официальная гарантия 24 месяца.'),
-(5062,5001,1,'Purina'),
-(5062,5001,2,'Пуріна'),
-(5062,5001,3,'Purina'),
-(5062,5002,1,'Premium composite'),
-(5062,5002,2,'Преміальний композитний матеріал'),
-(5062,5002,3,'Высококачественный композитный материал'),
-(5062,5003,1,'24 months official warranty'),
-(5062,5003,2,'24 місяці офіційної гарантії'),
-(5062,5003,3,'Официальная гарантия 24 месяца.'),
-(5063,5001,1,'Samsung'),
-(5063,5001,2,'Самсунг'),
-(5063,5001,3,'Samsung'),
-(5063,5002,1,'Premium composite'),
-(5063,5002,2,'Преміальний композитний матеріал'),
-(5063,5002,3,'Высококачественный композитный материал'),
-(5063,5003,1,'24 months official warranty'),
-(5063,5003,2,'24 місяці офіційної гарантії'),
-(5063,5003,3,'Официальная гарантия 24 месяца.'),
-(5064,5001,1,'Nike'),
-(5064,5001,2,'Найк'),
-(5064,5001,3,'Nike'),
-(5064,5002,1,'Premium composite'),
-(5064,5002,2,'Преміальний композитний матеріал'),
-(5064,5002,3,'Высококачественный композитный материал'),
-(5064,5003,1,'24 months official warranty'),
-(5064,5003,2,'24 місяці офіційної гарантії'),
-(5064,5003,3,'Официальная гарантия 24 месяца.'),
-(5065,5001,1,'Philips'),
-(5065,5001,2,'Філіпс'),
-(5065,5001,3,'Philips'),
-(5065,5002,1,'Premium composite'),
-(5065,5002,2,'Преміальний композитний матеріал'),
-(5065,5002,3,'Высококачественный композитный материал'),
-(5065,5003,1,'24 months official warranty'),
-(5065,5003,2,'24 місяці офіційної гарантії'),
-(5065,5003,3,'Официальная гарантия 24 месяца.'),
-(5066,5001,1,'Dyson'),
-(5066,5001,2,'Дайсон'),
-(5066,5001,3,'Дайсон'),
-(5066,5002,1,'Premium composite'),
-(5066,5002,2,'Преміальний композитний матеріал'),
-(5066,5002,3,'Высококачественный композитный материал'),
-(5066,5003,1,'24 months official warranty'),
-(5066,5003,2,'24 місяці офіційної гарантії'),
-(5066,5003,3,'Официальная гарантия 24 месяца.'),
-(5067,5001,1,'LEGO'),
-(5067,5001,2,'LEGO'),
-(5067,5001,3,'LEGO'),
-(5067,5002,1,'Premium composite'),
-(5067,5002,2,'Преміальний композитний матеріал'),
-(5067,5002,3,'Высококачественный композитный материал'),
-(5067,5003,1,'24 months official warranty'),
-(5067,5003,2,'24 місяці офіційної гарантії'),
-(5067,5003,3,'Официальная гарантия 24 месяца.'),
-(5068,5001,1,'Purina'),
-(5068,5001,2,'Пуріна'),
-(5068,5001,3,'Purina'),
-(5068,5002,1,'Premium composite'),
-(5068,5002,2,'Преміальний композитний матеріал'),
-(5068,5002,3,'Высококачественный композитный материал'),
-(5068,5003,1,'24 months official warranty'),
-(5068,5003,2,'24 місяці офіційної гарантії'),
-(5068,5003,3,'Официальная гарантия 24 месяца.'),
-(5069,5001,1,'Samsung'),
-(5069,5001,2,'Самсунг'),
-(5069,5001,3,'Samsung'),
-(5069,5002,1,'Premium composite'),
-(5069,5002,2,'Преміальний композитний матеріал'),
-(5069,5002,3,'Высококачественный композитный материал'),
-(5069,5003,1,'24 months official warranty'),
-(5069,5003,2,'24 місяці офіційної гарантії'),
-(5069,5003,3,'Официальная гарантия 24 месяца.'),
-(5070,5001,1,'Nike'),
-(5070,5001,2,'Найк'),
-(5070,5001,3,'Nike'),
-(5070,5002,1,'Premium composite'),
-(5070,5002,2,'Преміальний композитний матеріал'),
-(5070,5002,3,'Высококачественный композитный материал'),
-(5070,5003,1,'24 months official warranty'),
-(5070,5003,2,'24 місяці офіційної гарантії'),
-(5070,5003,3,'Официальная гарантия 24 месяца.'),
-(5071,5001,1,'Dyson'),
-(5071,5001,2,'Дайсон'),
-(5071,5001,3,'Дайсон'),
-(5071,5002,1,'Premium composite'),
-(5071,5002,2,'Преміальний композитний матеріал'),
-(5071,5002,3,'Высококачественный композитный материал'),
-(5071,5003,1,'24 months official warranty'),
-(5071,5003,2,'24 місяці офіційної гарантії'),
-(5071,5003,3,'Официальная гарантия 24 месяца.'),
-(5072,5001,1,'LEGO'),
-(5072,5001,2,'LEGO'),
-(5072,5001,3,'LEGO'),
-(5072,5002,1,'Premium composite'),
-(5072,5002,2,'Преміальний композитний матеріал'),
-(5072,5002,3,'Высококачественный композитный материал'),
-(5072,5003,1,'24 months official warranty'),
-(5072,5003,2,'24 місяці офіційної гарантії'),
-(5072,5003,3,'Официальная гарантия 24 месяца.'),
-(5073,5001,1,'Purina'),
-(5073,5001,2,'Пуріна'),
-(5073,5001,3,'Purina'),
-(5073,5002,1,'Premium composite'),
-(5073,5002,2,'Преміальний композитний матеріал'),
-(5073,5002,3,'Высококачественный композитный материал'),
-(5073,5003,1,'24 months official warranty'),
-(5073,5003,2,'24 місяці офіційної гарантії'),
-(5073,5003,3,'Официальная гарантия 24 месяца.'),
-(5074,5001,1,'Samsung'),
-(5074,5001,2,'Самсунг'),
-(5074,5001,3,'Samsung'),
-(5074,5002,1,'Premium composite'),
-(5074,5002,2,'Преміальний композитний матеріал'),
-(5074,5002,3,'Высококачественный композитный материал'),
-(5074,5003,1,'24 months official warranty'),
-(5074,5003,2,'24 місяці офіційної гарантії'),
-(5074,5003,3,'Официальная гарантия 24 месяца.'),
-(5075,5001,1,'Nike'),
-(5075,5001,2,'Найк'),
-(5075,5001,3,'Nike'),
-(5075,5002,1,'Premium composite'),
-(5075,5002,2,'Преміальний композитний матеріал'),
-(5075,5002,3,'Высококачественный композитный материал'),
-(5075,5003,1,'24 months official warranty'),
-(5075,5003,2,'24 місяці офіційної гарантії'),
-(5075,5003,3,'Официальная гарантия 24 месяца.'),
-(5076,5001,1,'Philips'),
-(5076,5001,2,'Філіпс'),
-(5076,5001,3,'Philips'),
-(5076,5002,1,'Premium composite'),
-(5076,5002,2,'Преміальний композитний матеріал'),
-(5076,5002,3,'Высококачественный композитный материал'),
-(5076,5003,1,'24 months official warranty'),
-(5076,5003,2,'24 місяці офіційної гарантії'),
-(5076,5003,3,'Официальная гарантия 24 месяца.'),
-(5077,5001,1,'Dyson'),
-(5077,5001,2,'Дайсон'),
-(5077,5001,3,'Дайсон'),
-(5077,5002,1,'Premium composite'),
-(5077,5002,2,'Преміальний композитний матеріал'),
-(5077,5002,3,'Высококачественный композитный материал'),
-(5077,5003,1,'24 months official warranty'),
-(5077,5003,2,'24 місяці офіційної гарантії'),
-(5077,5003,3,'Официальная гарантия 24 месяца.'),
-(5078,5001,1,'LEGO'),
-(5078,5001,2,'LEGO'),
-(5078,5001,3,'LEGO'),
-(5078,5002,1,'Premium composite'),
-(5078,5002,2,'Преміальний композитний матеріал'),
-(5078,5002,3,'Высококачественный композитный материал'),
-(5078,5003,1,'24 months official warranty'),
-(5078,5003,2,'24 місяці офіційної гарантії'),
-(5078,5003,3,'Официальная гарантия 24 месяца.'),
-(5079,5001,1,'Purina'),
-(5079,5001,2,'Пуріна'),
-(5079,5001,3,'Purina'),
-(5079,5002,1,'Premium composite'),
-(5079,5002,2,'Преміальний композитний матеріал'),
-(5079,5002,3,'Высококачественный композитный материал'),
-(5079,5003,1,'24 months official warranty'),
-(5079,5003,2,'24 місяці офіційної гарантії'),
-(5079,5003,3,'Официальная гарантия 24 месяца.'),
-(5080,5001,1,'Samsung'),
-(5080,5001,2,'Самсунг'),
-(5080,5001,3,'Samsung'),
-(5080,5002,1,'Premium composite'),
-(5080,5002,2,'Преміальний композитний матеріал'),
-(5080,5002,3,'Высококачественный композитный материал'),
-(5080,5003,1,'24 months official warranty'),
-(5080,5003,2,'24 місяці офіційної гарантії'),
-(5080,5003,3,'Официальная гарантия 24 месяца.'),
-(5081,5001,1,'Philips'),
-(5081,5001,2,'Філіпс'),
-(5081,5001,3,'Philips'),
-(5081,5002,1,'Premium composite'),
-(5081,5002,2,'Преміальний композитний матеріал'),
-(5081,5002,3,'Высококачественный композитный материал'),
-(5081,5003,1,'24 months official warranty'),
-(5081,5003,2,'24 місяці офіційної гарантії'),
-(5081,5003,3,'Официальная гарантия 24 месяца.'),
-(5082,5001,1,'Dyson'),
-(5082,5001,2,'Дайсон'),
-(5082,5001,3,'Дайсон'),
-(5082,5002,1,'Premium composite'),
-(5082,5002,2,'Преміальний композитний матеріал'),
-(5082,5002,3,'Высококачественный композитный материал'),
-(5082,5003,1,'24 months official warranty'),
-(5082,5003,2,'24 місяці офіційної гарантії'),
-(5082,5003,3,'Официальная гарантия 24 месяца.'),
-(5083,5001,1,'LEGO'),
-(5083,5001,2,'LEGO'),
-(5083,5001,3,'LEGO'),
-(5083,5002,1,'Premium composite'),
-(5083,5002,2,'Преміальний композитний матеріал'),
-(5083,5002,3,'Высококачественный композитный материал'),
-(5083,5003,1,'24 months official warranty'),
-(5083,5003,2,'24 місяці офіційної гарантії'),
-(5083,5003,3,'Официальная гарантия 24 месяца.'),
-(5085,5001,1,'Samsung'),
-(5085,5001,2,'Самсунг'),
-(5085,5001,3,'Samsung'),
-(5085,5002,1,'Premium composite'),
-(5085,5002,2,'Преміальний композитний матеріал'),
-(5085,5002,3,'Высококачественный композитный материал'),
-(5085,5003,1,'24 months official warranty'),
-(5085,5003,2,'24 місяці офіційної гарантії'),
-(5085,5003,3,'Официальная гарантия 24 месяца.'),
-(5086,5001,1,'Nike'),
-(5086,5001,2,'Найк'),
-(5086,5001,3,'Nike'),
-(5086,5002,1,'Premium composite'),
-(5086,5002,2,'Преміальний композитний матеріал'),
-(5086,5002,3,'Высококачественный композитный материал'),
-(5086,5003,1,'24 months official warranty'),
-(5086,5003,2,'24 місяці офіційної гарантії'),
-(5086,5003,3,'Официальная гарантия 24 месяца.'),
-(5087,5001,1,'Philips'),
-(5087,5001,2,'Філіпс'),
-(5087,5001,3,'Philips'),
-(5087,5002,1,'Premium composite'),
-(5087,5002,2,'Преміальний композитний матеріал'),
-(5087,5002,3,'Высококачественный композитный материал'),
-(5087,5003,1,'24 months official warranty'),
-(5087,5003,2,'24 місяці офіційної гарантії'),
-(5087,5003,3,'Официальная гарантия 24 месяца.'),
-(5088,5001,1,'Dyson'),
-(5088,5001,2,'Дайсон'),
-(5088,5001,3,'Дайсон'),
-(5088,5002,1,'Premium composite'),
-(5088,5002,2,'Преміальний композитний матеріал'),
-(5088,5002,3,'Высококачественный композитный материал'),
-(5088,5003,1,'24 months official warranty'),
-(5088,5003,2,'24 місяці офіційної гарантії'),
-(5088,5003,3,'Официальная гарантия 24 месяца.'),
-(5089,5001,1,'LEGO'),
-(5089,5001,2,'LEGO'),
-(5089,5001,3,'LEGO'),
-(5089,5002,1,'Premium composite'),
-(5089,5002,2,'Преміальний композитний матеріал'),
-(5089,5002,3,'Высококачественный композитный материал'),
-(5089,5003,1,'24 months official warranty'),
-(5089,5003,2,'24 місяці офіційної гарантії'),
-(5089,5003,3,'Официальная гарантия 24 месяца.'),
-(5090,5001,1,'Purina'),
-(5090,5001,2,'Пуріна'),
-(5090,5001,3,'Purina'),
-(5090,5002,1,'Premium composite'),
-(5090,5002,2,'Преміальний композитний матеріал'),
-(5090,5002,3,'Высококачественный композитный материал'),
-(5090,5003,1,'24 months official warranty'),
-(5090,5003,2,'24 місяці офіційної гарантії'),
-(5090,5003,3,'Официальная гарантия 24 месяца.');
+(5001,1,1,'Apple'),
+(5001,1,2,'Apple'),
+(5001,1,3,'Apple'),
+(5001,2,1,'iPhone 15 Pro'),
+(5001,2,2,'iPhone 15 Pro'),
+(5001,2,3,'iPhone 15 Pro'),
+(5001,3,1,'Titanium'),
+(5001,3,2,'Титан'),
+(5001,3,3,'Титан'),
+(5001,4,1,'12 months'),
+(5001,4,2,'12 місяців'),
+(5001,4,3,'12 месяцев'),
+(5001,5,1,'China'),
+(5001,5,2,'Китай'),
+(5001,5,3,'Китай'),
+(5001,6,1,'2023'),
+(5001,6,2,'2023'),
+(5001,6,3,'2023'),
+(5001,9,1,'CE, FCC'),
+(5001,9,2,'CE, FCC'),
+(5001,9,3,'CE, FCC'),
+(5001,15,1,'6.1\"'),
+(5001,15,2,'6.1\"'),
+(5001,15,3,'6.1\"'),
+(5001,16,1,'2556x1179'),
+(5001,16,2,'2556x1179'),
+(5001,16,3,'2556x1179'),
+(5001,17,1,'3274 mAh'),
+(5001,17,2,'3274 мАг'),
+(5001,17,3,'3274 мАч'),
+(5001,18,1,'A17 Pro'),
+(5001,18,2,'A17 Pro'),
+(5001,18,3,'A17 Pro'),
+(5001,19,1,'8 GB'),
+(5001,19,2,'8 ГБ'),
+(5001,19,3,'8 ГБ'),
+(5001,20,1,'256 GB'),
+(5001,20,2,'256 ГБ'),
+(5001,20,3,'256 ГБ'),
+(5001,21,1,'iOS 17'),
+(5001,21,2,'iOS 17'),
+(5001,21,3,'iOS 17'),
+(5001,22,1,'5G, Wi-Fi 6E, Bluetooth 5.3'),
+(5001,22,2,'5G, Wi-Fi 6E, Bluetooth 5.3'),
+(5001,22,3,'5G, Wi-Fi 6E, Bluetooth 5.3'),
+(5001,26,1,'up to 23 h'),
+(5001,26,2,'до 23 год'),
+(5001,26,3,'до 23 ч'),
+(5001,27,1,'IP68'),
+(5001,27,2,'IP68'),
+(5001,27,3,'IP68'),
+(5001,30,1,'~1.5 h'),
+(5001,30,2,'~1,5 год'),
+(5001,30,3,'~1,5 ч'),
+(5002,1,1,'Samsung'),
+(5002,1,2,'Samsung'),
+(5002,1,3,'Samsung'),
+(5002,2,1,'Galaxy S24 Ultra'),
+(5002,2,2,'Galaxy S24 Ultra'),
+(5002,2,3,'Galaxy S24 Ultra'),
+(5002,3,1,'Titanium gray'),
+(5002,3,2,'Титановий сірий'),
+(5002,3,3,'Титаново-серый'),
+(5002,4,1,'24 months'),
+(5002,4,2,'24 місяці'),
+(5002,4,3,'24 месяца'),
+(5002,5,1,'Vietnam'),
+(5002,5,2,'Вʼєтнам'),
+(5002,5,3,'Вьетнам'),
+(5002,6,1,'2024'),
+(5002,6,2,'2024'),
+(5002,6,3,'2024'),
+(5002,9,1,'CE, FCC'),
+(5002,9,2,'CE, FCC'),
+(5002,9,3,'CE, FCC'),
+(5002,15,1,'6.8\"'),
+(5002,15,2,'6.8\"'),
+(5002,15,3,'6.8\"'),
+(5002,16,1,'3120x1440'),
+(5002,16,2,'3120x1440'),
+(5002,16,3,'3120x1440'),
+(5002,17,1,'5000 mAh'),
+(5002,17,2,'5000 мАг'),
+(5002,17,3,'5000 мАч'),
+(5002,18,1,'Snapdragon 8 Gen 3'),
+(5002,18,2,'Snapdragon 8 Gen 3'),
+(5002,18,3,'Snapdragon 8 Gen 3'),
+(5002,19,1,'12 GB'),
+(5002,19,2,'12 ГБ'),
+(5002,19,3,'12 ГБ'),
+(5002,20,1,'512 GB'),
+(5002,20,2,'512 ГБ'),
+(5002,20,3,'512 ГБ'),
+(5002,21,1,'Android 14'),
+(5002,21,2,'Android 14'),
+(5002,21,3,'Android 14'),
+(5002,22,1,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5002,22,2,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5002,22,3,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5002,26,1,'up to 20 h'),
+(5002,26,2,'до 20 год'),
+(5002,26,3,'до 20 ч'),
+(5002,27,1,'IP68'),
+(5002,27,2,'IP68'),
+(5002,27,3,'IP68'),
+(5002,30,1,'~1.2 h'),
+(5002,30,2,'~1,2 год'),
+(5002,30,3,'~1,2 ч'),
+(5003,1,1,'Google'),
+(5003,1,2,'Google'),
+(5003,1,3,'Google'),
+(5003,2,1,'Pixel 8 Pro'),
+(5003,2,2,'Pixel 8 Pro'),
+(5003,2,3,'Pixel 8 Pro'),
+(5003,3,1,'Obsidian'),
+(5003,3,2,'Обсидіан'),
+(5003,3,3,'Обсидиан'),
+(5003,4,1,'12 months'),
+(5003,4,2,'12 місяців'),
+(5003,4,3,'12 месяцев'),
+(5003,5,1,'China'),
+(5003,5,2,'Китай'),
+(5003,5,3,'Китай'),
+(5003,6,1,'2023'),
+(5003,6,2,'2023'),
+(5003,6,3,'2023'),
+(5003,9,1,'CE'),
+(5003,9,2,'CE'),
+(5003,9,3,'CE'),
+(5003,15,1,'6.7\"'),
+(5003,15,2,'6.7\"'),
+(5003,15,3,'6.7\"'),
+(5003,16,1,'2992x1344'),
+(5003,16,2,'2992x1344'),
+(5003,16,3,'2992x1344'),
+(5003,17,1,'5050 mAh'),
+(5003,17,2,'5050 мАг'),
+(5003,17,3,'5050 мАч'),
+(5003,18,1,'Tensor G3'),
+(5003,18,2,'Tensor G3'),
+(5003,18,3,'Tensor G3'),
+(5003,19,1,'12 GB'),
+(5003,19,2,'12 ГБ'),
+(5003,19,3,'12 ГБ'),
+(5003,20,1,'128 GB'),
+(5003,20,2,'128 ГБ'),
+(5003,20,3,'128 ГБ'),
+(5003,21,1,'Android 14'),
+(5003,21,2,'Android 14'),
+(5003,21,3,'Android 14'),
+(5003,22,1,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5003,22,2,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5003,22,3,'5G, Wi-Fi 7, Bluetooth 5.3'),
+(5003,26,1,'up to 24 h'),
+(5003,26,2,'до 24 год'),
+(5003,26,3,'до 24 ч'),
+(5003,27,1,'IP68'),
+(5003,27,2,'IP68'),
+(5003,27,3,'IP68'),
+(5003,30,1,'~1.5 h'),
+(5003,30,2,'~1,5 год'),
+(5003,30,3,'~1,5 ч'),
+(5004,1,1,'OnePlus'),
+(5004,1,2,'OnePlus'),
+(5004,1,3,'OnePlus'),
+(5004,2,1,'12'),
+(5004,2,2,'12'),
+(5004,2,3,'12'),
+(5004,3,1,'Emerald'),
+(5004,3,2,'Смарагдовий'),
+(5004,3,3,'Изумрудный'),
+(5004,4,1,'24 months'),
+(5004,4,2,'24 місяці'),
+(5004,4,3,'24 месяца'),
+(5004,5,1,'China'),
+(5004,5,2,'Китай'),
+(5004,5,3,'Китай'),
+(5004,6,1,'2023'),
+(5004,6,2,'2023'),
+(5004,6,3,'2023'),
+(5004,9,1,'CE'),
+(5004,9,2,'CE'),
+(5004,9,3,'CE'),
+(5004,15,1,'6.82\"'),
+(5004,15,2,'6.82\"'),
+(5004,15,3,'6.82\"'),
+(5004,16,1,'3168x1440'),
+(5004,16,2,'3168x1440'),
+(5004,16,3,'3168x1440'),
+(5004,17,1,'5400 mAh'),
+(5004,17,2,'5400 мАг'),
+(5004,17,3,'5400 мАч'),
+(5004,18,1,'Snapdragon 8 Gen 3'),
+(5004,18,2,'Snapdragon 8 Gen 3'),
+(5004,18,3,'Snapdragon 8 Gen 3'),
+(5004,19,1,'16 GB'),
+(5004,19,2,'16 ГБ'),
+(5004,19,3,'16 ГБ'),
+(5004,20,1,'512 GB'),
+(5004,20,2,'512 ГБ'),
+(5004,20,3,'512 ГБ'),
+(5004,21,1,'OxygenOS 14'),
+(5004,21,2,'OxygenOS 14'),
+(5004,21,3,'OxygenOS 14'),
+(5004,22,1,'5G, Wi-Fi 6, Bluetooth 5.4'),
+(5004,22,2,'5G, Wi-Fi 6, Bluetooth 5.4'),
+(5004,22,3,'5G, Wi-Fi 6, Bluetooth 5.4'),
+(5004,26,1,'up to 26 h'),
+(5004,26,2,'до 26 год'),
+(5004,26,3,'до 26 ч'),
+(5004,27,1,'IP65'),
+(5004,27,2,'IP65'),
+(5004,27,3,'IP65'),
+(5004,30,1,'~0.9 h'),
+(5004,30,2,'~0,9 год'),
+(5004,30,3,'~0,9 ч'),
+(5005,1,1,'Dell'),
+(5005,1,2,'Dell'),
+(5005,1,3,'Dell'),
+(5005,4,1,'24 months'),
+(5005,4,2,'24 місяці'),
+(5005,4,3,'24 месяца'),
+(5005,7,1,'Aluminium'),
+(5005,7,2,'Алюміній'),
+(5005,7,3,'Алюминий'),
+(5005,14,1,'1.17 kg'),
+(5005,14,2,'1,17 кг'),
+(5005,14,3,'1,17 кг'),
+(5005,15,1,'13.4\"'),
+(5005,15,2,'13.4\"'),
+(5005,15,3,'13.4\"'),
+(5005,16,1,'1920x1200'),
+(5005,16,2,'1920x1200'),
+(5005,16,3,'1920x1200'),
+(5005,18,1,'Intel Core i7-1365U'),
+(5005,18,2,'Intel Core i7-1365U'),
+(5005,18,3,'Intel Core i7-1365U'),
+(5005,19,1,'16 GB'),
+(5005,19,2,'16 ГБ'),
+(5005,19,3,'16 ГБ'),
+(5005,20,1,'512 GB SSD'),
+(5005,20,2,'512 ГБ SSD'),
+(5005,20,3,'512 ГБ SSD'),
+(5005,21,1,'Windows 11 Pro'),
+(5005,21,2,'Windows 11 Pro'),
+(5005,21,3,'Windows 11 Pro'),
+(5005,26,1,'up to 12 h'),
+(5005,26,2,'до 12 год'),
+(5005,26,3,'до 12 ч'),
+(5006,1,1,'Apple'),
+(5006,1,2,'Apple'),
+(5006,1,3,'Apple'),
+(5006,4,1,'12 months'),
+(5006,4,2,'12 місяців'),
+(5006,4,3,'12 месяцев'),
+(5006,7,1,'Aluminium'),
+(5006,7,2,'Алюміній'),
+(5006,7,3,'Алюминий'),
+(5006,14,1,'1.24 kg'),
+(5006,14,2,'1,24 кг'),
+(5006,14,3,'1,24 кг'),
+(5006,15,1,'13.6\"'),
+(5006,15,2,'13.6\"'),
+(5006,15,3,'13.6\"'),
+(5006,16,1,'2560x1664'),
+(5006,16,2,'2560x1664'),
+(5006,16,3,'2560x1664'),
+(5006,18,1,'Apple M3'),
+(5006,18,2,'Apple M3'),
+(5006,18,3,'Apple M3'),
+(5006,19,1,'8 GB'),
+(5006,19,2,'8 ГБ'),
+(5006,19,3,'8 ГБ'),
+(5006,20,1,'256 GB SSD'),
+(5006,20,2,'256 ГБ SSD'),
+(5006,20,3,'256 ГБ SSD'),
+(5006,21,1,'macOS Sonoma'),
+(5006,21,2,'macOS Sonoma'),
+(5006,21,3,'macOS Sonoma'),
+(5006,26,1,'up to 18 h'),
+(5006,26,2,'до 18 год'),
+(5006,26,3,'до 18 ч'),
+(5007,1,1,'Lenovo'),
+(5007,1,2,'Lenovo'),
+(5007,1,3,'Lenovo'),
+(5007,4,1,'36 months'),
+(5007,4,2,'36 місяців'),
+(5007,4,3,'36 месяцев'),
+(5007,7,1,'Carbon fibre'),
+(5007,7,2,'Карбон'),
+(5007,7,3,'Карбон'),
+(5007,14,1,'1.09 kg'),
+(5007,14,2,'1,09 кг'),
+(5007,14,3,'1,09 кг'),
+(5007,15,1,'14\"'),
+(5007,15,2,'14\"'),
+(5007,15,3,'14\"'),
+(5007,16,1,'1920x1200'),
+(5007,16,2,'1920x1200'),
+(5007,16,3,'1920x1200'),
+(5007,18,1,'Intel Core i7-1370P'),
+(5007,18,2,'Intel Core i7-1370P'),
+(5007,18,3,'Intel Core i7-1370P'),
+(5007,19,1,'16 GB'),
+(5007,19,2,'16 ГБ'),
+(5007,19,3,'16 ГБ'),
+(5007,20,1,'1 TB SSD'),
+(5007,20,2,'1 ТБ SSD'),
+(5007,20,3,'1 ТБ SSD'),
+(5007,21,1,'Windows 11 Pro'),
+(5007,21,2,'Windows 11 Pro'),
+(5007,21,3,'Windows 11 Pro'),
+(5007,26,1,'up to 15 h'),
+(5007,26,2,'до 15 год'),
+(5007,26,3,'до 15 ч'),
+(5008,1,1,'Sony'),
+(5008,1,2,'Sony'),
+(5008,1,3,'Sony'),
+(5008,4,1,'12 months'),
+(5008,4,2,'12 місяців'),
+(5008,4,3,'12 месяцев'),
+(5008,10,1,'Over-ear headphones'),
+(5008,10,2,'Повнорозмірні навушники'),
+(5008,10,3,'Полноразмерные наушники'),
+(5008,17,1,'—'),
+(5008,17,2,'—'),
+(5008,17,3,'—'),
+(5008,22,1,'Bluetooth 5.2, NFC'),
+(5008,22,2,'Bluetooth 5.2, NFC'),
+(5008,22,3,'Bluetooth 5.2, NFC'),
+(5008,26,1,'up to 30 h'),
+(5008,26,2,'до 30 год'),
+(5008,26,3,'до 30 ч'),
+(5008,28,1,'30 dB ANC'),
+(5008,28,2,'30 дБ ANC'),
+(5008,28,3,'30 дБ ANC'),
+(5009,1,1,'Bose'),
+(5009,1,2,'Bose'),
+(5009,1,3,'Bose'),
+(5009,4,1,'12 months'),
+(5009,4,2,'12 місяців'),
+(5009,4,3,'12 месяцев'),
+(5009,10,1,'Over-ear headphones'),
+(5009,10,2,'Повнорозмірні навушники'),
+(5009,10,3,'Полноразмерные наушники'),
+(5009,22,1,'Bluetooth 5.3'),
+(5009,22,2,'Bluetooth 5.3'),
+(5009,22,3,'Bluetooth 5.3'),
+(5009,26,1,'up to 24 h'),
+(5009,26,2,'до 24 год'),
+(5009,26,3,'до 24 ч'),
+(5009,28,1,'30 dB ANC'),
+(5009,28,2,'30 дБ ANC'),
+(5009,28,3,'30 дБ ANC'),
+(5010,1,1,'JBL'),
+(5010,1,2,'JBL'),
+(5010,1,3,'JBL'),
+(5010,4,1,'12 months'),
+(5010,4,2,'12 місяців'),
+(5010,4,3,'12 месяцев'),
+(5010,10,1,'Portable speaker'),
+(5010,10,2,'Портативна колонка'),
+(5010,10,3,'Портативная колонка'),
+(5010,22,1,'Bluetooth 5.1'),
+(5010,22,2,'Bluetooth 5.1'),
+(5010,22,3,'Bluetooth 5.1'),
+(5010,23,1,'20 W'),
+(5010,23,2,'20 Вт'),
+(5010,23,3,'20 Вт'),
+(5010,26,1,'up to 20 h'),
+(5010,26,2,'до 20 год'),
+(5010,26,3,'до 20 ч'),
+(5010,27,1,'IP67'),
+(5010,27,2,'IP67'),
+(5010,27,3,'IP67'),
+(5011,1,1,'Instant Pot'),
+(5011,1,2,'Instant Pot'),
+(5011,1,3,'Instant Pot'),
+(5011,4,1,'24 months'),
+(5011,4,2,'24 місяці'),
+(5011,4,3,'24 месяца'),
+(5011,10,1,'Multicooker'),
+(5011,10,2,'Мультиварка'),
+(5011,10,3,'Мультиварка'),
+(5011,23,1,'1000 W'),
+(5011,23,2,'1000 Вт'),
+(5011,23,3,'1000 Вт'),
+(5011,24,1,'220-240 V'),
+(5011,24,2,'220-240 В'),
+(5011,24,3,'220-240 В'),
+(5011,25,1,'6 L'),
+(5011,25,2,'6 л'),
+(5011,25,3,'6 л'),
+(5011,38,1,'14 programs'),
+(5011,38,2,'14 програм'),
+(5011,38,3,'14 программ'),
+(5011,41,1,'Yes'),
+(5011,41,2,'Так'),
+(5011,41,3,'Да'),
+(5012,1,1,'Philips'),
+(5012,1,2,'Philips'),
+(5012,1,3,'Philips'),
+(5012,4,1,'24 months'),
+(5012,4,2,'24 місяці'),
+(5012,4,3,'24 месяца'),
+(5012,10,1,'Air fryer'),
+(5012,10,2,'Аерофритюрниця'),
+(5012,10,3,'Аэрофритюрница'),
+(5012,23,1,'2225 W'),
+(5012,23,2,'2225 Вт'),
+(5012,23,3,'2225 Вт'),
+(5012,24,1,'220-240 V'),
+(5012,24,2,'220-240 В'),
+(5012,24,3,'220-240 В'),
+(5012,25,1,'6.2 L'),
+(5012,25,2,'6,2 л'),
+(5012,25,3,'6,2 л'),
+(5012,29,1,'up to 200 °C'),
+(5012,29,2,'до 200 °C'),
+(5012,29,3,'до 200 °C'),
+(5013,1,1,'DeLonghi'),
+(5013,1,2,'DeLonghi'),
+(5013,1,3,'DeLonghi'),
+(5013,4,1,'24 months'),
+(5013,4,2,'24 місяці'),
+(5013,4,3,'24 месяца'),
+(5013,10,1,'Coffee machine'),
+(5013,10,2,'Кавоварка'),
+(5013,10,3,'Кофемашина'),
+(5013,23,1,'1450 W'),
+(5013,23,2,'1450 Вт'),
+(5013,23,3,'1450 Вт'),
+(5013,25,1,'1.8 L'),
+(5013,25,2,'1,8 л'),
+(5013,25,3,'1,8 л'),
+(5013,29,1,'up to 95 °C'),
+(5013,29,2,'до 95 °C'),
+(5013,29,3,'до 95 °C'),
+(5014,1,1,'KitchenAid'),
+(5014,1,2,'KitchenAid'),
+(5014,1,3,'KitchenAid'),
+(5014,4,1,'12 months'),
+(5014,4,2,'12 місяців'),
+(5014,4,3,'12 месяцев'),
+(5014,10,1,'Stand mixer'),
+(5014,10,2,'Планетарний міксер'),
+(5014,10,3,'Планетарный миксер'),
+(5014,23,1,'300 W'),
+(5014,23,2,'300 Вт'),
+(5014,23,3,'300 Вт'),
+(5014,25,1,'4.8 L'),
+(5014,25,2,'4,8 л'),
+(5014,25,3,'4,8 л'),
+(5014,38,1,'10 speeds'),
+(5014,38,2,'10 швидкостей'),
+(5014,38,3,'10 скоростей'),
+(5015,1,1,'Tefal'),
+(5015,1,2,'Tefal'),
+(5015,1,3,'Tefal'),
+(5015,4,1,'24 months'),
+(5015,4,2,'24 місяці'),
+(5015,4,3,'24 месяца'),
+(5015,7,1,'Aluminium, non-stick'),
+(5015,7,2,'Алюміній, антипригарне'),
+(5015,7,3,'Алюминий, антипригарное'),
+(5015,10,1,'Cookware set'),
+(5015,10,2,'Набір посуду'),
+(5015,10,3,'Набор посуды'),
+(5015,41,1,'Yes'),
+(5015,41,2,'Так'),
+(5015,41,3,'Да'),
+(5015,50,1,'6 pcs'),
+(5015,50,2,'6 шт'),
+(5015,50,3,'6 шт'),
+(5016,1,1,'Le Creuset'),
+(5016,1,2,'Le Creuset'),
+(5016,1,3,'Le Creuset'),
+(5016,4,1,'30 years'),
+(5016,4,2,'30 років'),
+(5016,4,3,'30 лет'),
+(5016,7,1,'Cast iron'),
+(5016,7,2,'Чавун'),
+(5016,7,3,'Чугун'),
+(5016,10,1,'Dutch oven'),
+(5016,10,2,'Каструля'),
+(5016,10,3,'Кастрюля'),
+(5016,14,1,'5.1 kg'),
+(5016,14,2,'5,1 кг'),
+(5016,14,3,'5,1 кг'),
+(5016,25,1,'4.2 L'),
+(5016,25,2,'4,2 л'),
+(5016,25,3,'4,2 л'),
+(5017,1,1,'Dyson'),
+(5017,1,2,'Dyson'),
+(5017,1,3,'Dyson'),
+(5017,4,1,'24 months'),
+(5017,4,2,'24 місяці'),
+(5017,4,3,'24 месяца'),
+(5017,10,1,'Cordless vacuum'),
+(5017,10,2,'Бездротовий пилосос'),
+(5017,10,3,'Беспроводной пылесос'),
+(5017,17,1,'25.2 V'),
+(5017,17,2,'25,2 В'),
+(5017,17,3,'25,2 В'),
+(5017,23,1,'545 W'),
+(5017,23,2,'545 Вт'),
+(5017,23,3,'545 Вт'),
+(5017,26,1,'up to 60 min'),
+(5017,26,2,'до 60 хв'),
+(5017,26,3,'до 60 мин'),
+(5018,1,1,'iRobot'),
+(5018,1,2,'iRobot'),
+(5018,1,3,'iRobot'),
+(5018,4,1,'12 months'),
+(5018,4,2,'12 місяців'),
+(5018,4,3,'12 месяцев'),
+(5018,10,1,'Robot vacuum'),
+(5018,10,2,'Робот-пилосос'),
+(5018,10,3,'Робот-пылесос'),
+(5018,26,1,'up to 85 min'),
+(5018,26,2,'до 85 хв'),
+(5018,26,3,'до 85 мин'),
+(5018,28,1,'55 dB'),
+(5018,28,2,'55 дБ'),
+(5018,28,3,'55 дБ'),
+(5019,1,1,'Ninja'),
+(5019,1,2,'Ninja'),
+(5019,1,3,'Ninja'),
+(5019,4,1,'12 months'),
+(5019,4,2,'12 місяців'),
+(5019,4,3,'12 месяцев'),
+(5019,10,1,'Blender'),
+(5019,10,2,'Блендер'),
+(5019,10,3,'Блендер'),
+(5019,23,1,'1400 W'),
+(5019,23,2,'1400 Вт'),
+(5019,23,3,'1400 Вт'),
+(5019,25,1,'1.4 L'),
+(5019,25,2,'1,4 л'),
+(5019,25,3,'1,4 л'),
+(5019,38,1,'4 programs'),
+(5019,38,2,'4 програми'),
+(5019,38,3,'4 программы'),
+(5020,1,1,'Nespresso'),
+(5020,1,2,'Nespresso'),
+(5020,1,3,'Nespresso'),
+(5020,4,1,'12 months'),
+(5020,4,2,'12 місяців'),
+(5020,4,3,'12 месяцев'),
+(5020,10,1,'Coffee machine'),
+(5020,10,2,'Кавоварка'),
+(5020,10,3,'Кофемашина'),
+(5020,23,1,'1350 W'),
+(5020,23,2,'1350 Вт'),
+(5020,23,3,'1350 Вт'),
+(5020,25,1,'1.1 L'),
+(5020,25,2,'1,1 л'),
+(5020,25,3,'1,1 л'),
+(5020,30,1,'25 s'),
+(5020,30,2,'25 с'),
+(5020,30,3,'25 с'),
+(5021,1,1,'Levi\'s'),
+(5021,1,2,'Levi\'s'),
+(5021,1,3,'Levi\'s'),
+(5021,3,1,'Blue'),
+(5021,3,2,'Синій'),
+(5021,3,3,'Синий'),
+(5021,7,1,'Denim'),
+(5021,7,2,'Денім'),
+(5021,7,3,'Деним'),
+(5021,40,1,'30 °C'),
+(5021,40,2,'30 °C'),
+(5021,40,3,'30 °C'),
+(5021,43,1,'99% cotton, 1% elastane'),
+(5021,43,2,'99% бавовна, 1% еластан'),
+(5021,43,3,'99% хлопок, 1% эластан'),
+(5021,54,1,'Unisex'),
+(5021,54,2,'Унісекс'),
+(5021,54,3,'Унисекс'),
+(5022,1,1,'Nike'),
+(5022,1,2,'Nike'),
+(5022,1,3,'Nike'),
+(5022,3,1,'Black'),
+(5022,3,2,'Чорний'),
+(5022,3,3,'Черный'),
+(5022,7,1,'Textile'),
+(5022,7,2,'Текстиль'),
+(5022,7,3,'Текстиль'),
+(5022,11,1,'Standard'),
+(5022,11,2,'Стандартна'),
+(5022,11,3,'Стандартная'),
+(5022,42,1,'Yes'),
+(5022,42,2,'Так'),
+(5022,42,3,'Да'),
+(5023,1,1,'Adidas'),
+(5023,1,2,'Adidas'),
+(5023,1,3,'Adidas'),
+(5023,3,1,'White'),
+(5023,3,2,'Білий'),
+(5023,3,3,'Белый'),
+(5023,7,1,'Knitted'),
+(5023,7,2,'Трикотаж'),
+(5023,7,3,'Трикотаж'),
+(5023,42,1,'Yes'),
+(5023,42,2,'Так'),
+(5023,42,3,'Да'),
+(5023,55,1,'All-season'),
+(5023,55,2,'Всесезонне'),
+(5023,55,3,'Всесезонная'),
+(5024,1,1,'Uniqlo'),
+(5024,1,2,'Uniqlo'),
+(5024,1,3,'Uniqlo'),
+(5024,3,1,'Black'),
+(5024,3,2,'Чорний'),
+(5024,3,3,'Черный'),
+(5024,7,1,'Nylon'),
+(5024,7,2,'Нейлон'),
+(5024,7,3,'Нейлон'),
+(5024,40,1,'30 °C'),
+(5024,40,2,'30 °C'),
+(5024,40,3,'30 °C'),
+(5024,43,1,'100% nylon'),
+(5024,43,2,'100% нейлон'),
+(5024,43,3,'100% нейлон'),
+(5024,55,1,'Winter'),
+(5024,55,2,'Зима'),
+(5024,55,3,'Зима'),
+(5025,1,1,'Calvin Klein'),
+(5025,1,2,'Calvin Klein'),
+(5025,1,3,'Calvin Klein'),
+(5025,3,1,'White'),
+(5025,3,2,'Білий'),
+(5025,3,3,'Белый'),
+(5025,7,1,'Cotton'),
+(5025,7,2,'Бавовна'),
+(5025,7,3,'Хлопок'),
+(5025,40,1,'40 °C'),
+(5025,40,2,'40 °C'),
+(5025,40,3,'40 °C'),
+(5025,43,1,'97% cotton, 3% elastane'),
+(5025,43,2,'97% бавовна, 3% еластан'),
+(5025,43,3,'97% хлопок, 3% эластан'),
+(5026,1,1,'Tommy Hilfiger'),
+(5026,1,2,'Tommy Hilfiger'),
+(5026,1,3,'Tommy Hilfiger'),
+(5026,3,1,'Navy'),
+(5026,3,2,'Темно-синій'),
+(5026,3,3,'Темно-синий'),
+(5026,7,1,'Cotton'),
+(5026,7,2,'Бавовна'),
+(5026,7,3,'Хлопок'),
+(5026,40,1,'40 °C'),
+(5026,40,2,'40 °C'),
+(5026,40,3,'40 °C'),
+(5027,1,1,'The North Face'),
+(5027,1,2,'The North Face'),
+(5027,1,3,'The North Face'),
+(5027,3,1,'Black'),
+(5027,3,2,'Чорний'),
+(5027,3,3,'Черный'),
+(5027,7,1,'Nylon'),
+(5027,7,2,'Нейлон'),
+(5027,7,3,'Нейлон'),
+(5027,42,1,'Yes'),
+(5027,42,2,'Так'),
+(5027,42,3,'Да'),
+(5027,43,1,'100% nylon'),
+(5027,43,2,'100% нейлон'),
+(5027,43,3,'100% нейлон'),
+(5027,55,1,'Winter'),
+(5027,55,2,'Зима'),
+(5027,55,3,'Зима'),
+(5028,1,1,'Converse'),
+(5028,1,2,'Converse'),
+(5028,1,3,'Converse'),
+(5028,3,1,'Black'),
+(5028,3,2,'Чорний'),
+(5028,3,3,'Черный'),
+(5028,7,1,'Canvas'),
+(5028,7,2,'Канвас'),
+(5028,7,3,'Канвас'),
+(5028,42,1,'Yes'),
+(5028,42,2,'Так'),
+(5028,42,3,'Да'),
+(5029,1,1,'Ray-Ban'),
+(5029,1,2,'Ray-Ban'),
+(5029,1,3,'Ray-Ban'),
+(5029,3,1,'Black'),
+(5029,3,2,'Чорний'),
+(5029,3,3,'Черный'),
+(5029,7,1,'Acetate'),
+(5029,7,2,'Ацетат'),
+(5029,7,3,'Ацетат'),
+(5029,9,1,'CE'),
+(5029,9,2,'CE'),
+(5029,9,3,'CE'),
+(5030,1,1,'Fjallraven'),
+(5030,1,2,'Fjallraven'),
+(5030,1,3,'Fjallraven'),
+(5030,3,1,'Forest green'),
+(5030,3,2,'Лісовий зелений'),
+(5030,3,3,'Лесной зелёный'),
+(5030,7,1,'Vinylon F'),
+(5030,7,2,'Vinylon F'),
+(5030,7,3,'Vinylon F'),
+(5030,25,1,'16 L'),
+(5030,25,2,'16 л'),
+(5030,25,3,'16 л'),
+(5030,42,1,'Yes'),
+(5030,42,2,'Так'),
+(5030,42,3,'Да'),
+(5031,1,1,'Garmin'),
+(5031,1,2,'Garmin'),
+(5031,1,3,'Garmin'),
+(5031,4,1,'12 months'),
+(5031,4,2,'12 місяців'),
+(5031,4,3,'12 месяцев'),
+(5031,15,1,'1.3\"'),
+(5031,15,2,'1.3\"'),
+(5031,15,3,'1.3\"'),
+(5031,17,1,'up to 23 days'),
+(5031,17,2,'до 23 днів'),
+(5031,17,3,'до 23 дней'),
+(5031,27,1,'5 ATM'),
+(5031,27,2,'5 ATM'),
+(5031,27,3,'5 ATM'),
+(5031,36,1,'Running, cycling'),
+(5031,36,2,'Біг, велосипед'),
+(5031,36,3,'Бег, велосипед'),
+(5032,1,1,'Polar'),
+(5032,1,2,'Polar'),
+(5032,1,3,'Polar'),
+(5032,4,1,'12 months'),
+(5032,4,2,'12 місяців'),
+(5032,4,3,'12 месяцев'),
+(5032,22,1,'Bluetooth 5.0, ANT+'),
+(5032,22,2,'Bluetooth 5.0, ANT+'),
+(5032,22,3,'Bluetooth 5.0, ANT+'),
+(5032,36,1,'Running, fitness'),
+(5032,36,2,'Біг, фітнес'),
+(5032,36,3,'Бег, фитнес'),
+(5033,1,1,'TRX'),
+(5033,1,2,'TRX'),
+(5033,1,3,'TRX'),
+(5033,4,1,'24 months'),
+(5033,4,2,'24 місяці'),
+(5033,4,3,'24 месяца'),
+(5033,14,1,'1.1 kg'),
+(5033,14,2,'1,1 кг'),
+(5033,14,3,'1,1 кг'),
+(5033,36,1,'Full body'),
+(5033,36,2,'Все тіло'),
+(5033,36,3,'Все тело'),
+(5034,1,1,'Yeti'),
+(5034,1,2,'Yeti'),
+(5034,1,3,'Yeti'),
+(5034,7,1,'Stainless steel'),
+(5034,7,2,'Нержавіюча сталь'),
+(5034,7,3,'Нержавеющая сталь'),
+(5034,25,1,'1 L'),
+(5034,25,2,'1 л'),
+(5034,25,3,'1 л'),
+(5034,42,1,'Yes'),
+(5034,42,2,'Так'),
+(5034,42,3,'Да'),
+(5035,1,1,'Coleman'),
+(5035,1,2,'Coleman'),
+(5035,1,3,'Coleman'),
+(5035,4,1,'12 months'),
+(5035,4,2,'12 місяців'),
+(5035,4,3,'12 месяцев'),
+(5035,14,1,'4.2 kg'),
+(5035,14,2,'4,2 кг'),
+(5035,14,3,'4,2 кг'),
+(5035,42,1,'Yes'),
+(5035,42,2,'Так'),
+(5035,42,3,'Да'),
+(5036,1,1,'Osprey'),
+(5036,1,2,'Osprey'),
+(5036,1,3,'Osprey'),
+(5036,7,1,'Nylon'),
+(5036,7,2,'Нейлон'),
+(5036,7,3,'Нейлон'),
+(5036,25,1,'65 L'),
+(5036,25,2,'65 л'),
+(5036,25,3,'65 л'),
+(5036,42,1,'Yes'),
+(5036,42,2,'Так'),
+(5036,42,3,'Да'),
+(5037,1,1,'Black Diamond'),
+(5037,1,2,'Black Diamond'),
+(5037,1,3,'Black Diamond'),
+(5037,4,1,'12 months'),
+(5037,4,2,'12 місяців'),
+(5037,4,3,'12 месяцев'),
+(5037,17,1,'400 lm'),
+(5037,17,2,'400 лм'),
+(5037,17,3,'400 лм'),
+(5037,27,1,'IPX8'),
+(5037,27,2,'IPX8'),
+(5037,27,3,'IPX8'),
+(5038,1,1,'GoPro'),
+(5038,1,2,'GoPro'),
+(5038,1,3,'GoPro'),
+(5038,4,1,'12 months'),
+(5038,4,2,'12 місяців'),
+(5038,4,3,'12 месяцев'),
+(5038,16,1,'5.3K / 60 fps'),
+(5038,16,2,'5.3K / 60 fps'),
+(5038,16,3,'5.3K / 60 fps'),
+(5038,27,1,'Waterproof 10 m'),
+(5038,27,2,'Водонепроникний 10 м'),
+(5038,27,3,'Водонепроницаемый 10 м'),
+(5039,1,1,'Schwinn'),
+(5039,1,2,'Schwinn'),
+(5039,1,3,'Schwinn'),
+(5039,4,1,'24 months'),
+(5039,4,2,'24 місяці'),
+(5039,4,3,'24 месяца'),
+(5039,14,1,'35 kg'),
+(5039,14,2,'35 кг'),
+(5039,14,3,'35 кг'),
+(5039,23,1,'250 W'),
+(5039,23,2,'250 Вт'),
+(5039,23,3,'250 Вт'),
+(5040,1,1,'Therm-a-Rest'),
+(5040,1,2,'Therm-a-Rest'),
+(5040,1,3,'Therm-a-Rest'),
+(5040,7,1,'Nylon'),
+(5040,7,2,'Нейлон'),
+(5040,7,3,'Нейлон'),
+(5040,14,1,'0.44 kg'),
+(5040,14,2,'0,44 кг'),
+(5040,14,3,'0,44 кг'),
+(5040,29,1,'R 4.5'),
+(5040,29,2,'R 4.5'),
+(5040,29,3,'R 4.5'),
+(5041,1,1,'CeraVe'),
+(5041,1,2,'CeraVe'),
+(5041,1,3,'CeraVe'),
+(5041,10,1,'Cleanser'),
+(5041,10,2,'Очищувальний засіб'),
+(5041,10,3,'Очищающее средство'),
+(5041,25,1,'236 ml'),
+(5041,25,2,'236 мл'),
+(5041,25,3,'236 мл'),
+(5042,1,1,'La Roche-Posay'),
+(5042,1,2,'La Roche-Posay'),
+(5042,1,3,'La Roche-Posay'),
+(5042,10,1,'Sunscreen'),
+(5042,10,2,'Сонцезахисний крем'),
+(5042,10,3,'Солнцезащитный крем'),
+(5042,25,1,'50 ml'),
+(5042,25,2,'50 мл'),
+(5042,25,3,'50 мл'),
+(5043,1,1,'The Ordinary'),
+(5043,1,2,'The Ordinary'),
+(5043,1,3,'The Ordinary'),
+(5043,10,1,'Serum'),
+(5043,10,2,'Сироватка'),
+(5043,10,3,'Сыворотка'),
+(5043,25,1,'30 ml'),
+(5043,25,2,'30 мл'),
+(5043,25,3,'30 мл'),
+(5044,1,1,'Neutrogena'),
+(5044,1,2,'Neutrogena'),
+(5044,1,3,'Neutrogena'),
+(5044,10,1,'Moisturizer'),
+(5044,10,2,'Зволожувальний крем'),
+(5044,10,3,'Увлажняющий крем'),
+(5044,25,1,'50 ml'),
+(5044,25,2,'50 мл'),
+(5044,25,3,'50 мл'),
+(5045,1,1,'Dyson'),
+(5045,1,2,'Dyson'),
+(5045,1,3,'Dyson'),
+(5045,4,1,'24 months'),
+(5045,4,2,'24 місяці'),
+(5045,4,3,'24 месяца'),
+(5045,10,1,'Hair dryer'),
+(5045,10,2,'Фен'),
+(5045,10,3,'Фен'),
+(5045,23,1,'1600 W'),
+(5045,23,2,'1600 Вт'),
+(5045,23,3,'1600 Вт'),
+(5046,1,1,'Philips'),
+(5046,1,2,'Philips'),
+(5046,1,3,'Philips'),
+(5046,4,1,'24 months'),
+(5046,4,2,'24 місяці'),
+(5046,4,3,'24 месяца'),
+(5046,10,1,'Electric toothbrush'),
+(5046,10,2,'Електрична щітка'),
+(5046,10,3,'Электрическая щетка'),
+(5046,26,1,'up to 14 days'),
+(5046,26,2,'до 14 днів'),
+(5046,26,3,'до 14 дней'),
+(5047,1,1,'Oral-B'),
+(5047,1,2,'Oral-B'),
+(5047,1,3,'Oral-B'),
+(5047,4,1,'12 months'),
+(5047,4,2,'12 місяців'),
+(5047,4,3,'12 месяцев'),
+(5047,10,1,'Electric toothbrush'),
+(5047,10,2,'Електрична щітка'),
+(5047,10,3,'Электрическая щетка'),
+(5047,38,1,'3 modes'),
+(5047,38,2,'3 режими'),
+(5047,38,3,'3 режима'),
+(5048,1,1,'Braun'),
+(5048,1,2,'Braun'),
+(5048,1,3,'Braun'),
+(5048,4,1,'24 months'),
+(5048,4,2,'24 місяці'),
+(5048,4,3,'24 месяца'),
+(5048,10,1,'Shaver'),
+(5048,10,2,'Електробритва'),
+(5048,10,3,'Электробритва'),
+(5048,42,1,'Yes'),
+(5048,42,2,'Так'),
+(5048,42,3,'Да'),
+(5049,1,1,'Fitbit'),
+(5049,1,2,'Fitbit'),
+(5049,1,3,'Fitbit'),
+(5049,4,1,'12 months'),
+(5049,4,2,'12 місяців'),
+(5049,4,3,'12 месяцев'),
+(5049,15,1,'1.04\"'),
+(5049,15,2,'1.04\"'),
+(5049,15,3,'1.04\"'),
+(5049,26,1,'up to 7 days'),
+(5049,26,2,'до 7 днів'),
+(5049,26,3,'до 7 дней'),
+(5050,1,1,'Renpho'),
+(5050,1,2,'Renpho'),
+(5050,1,3,'Renpho'),
+(5050,4,1,'12 months'),
+(5050,4,2,'12 місяців'),
+(5050,4,3,'12 месяцев'),
+(5050,10,1,'Smart scale'),
+(5050,10,2,'Розумні ваги'),
+(5050,10,3,'Умные весы'),
+(5050,22,1,'Bluetooth 4.0'),
+(5050,22,2,'Bluetooth 4.0'),
+(5050,22,3,'Bluetooth 4.0'),
+(5051,1,1,'Nintendo'),
+(5051,1,2,'Nintendo'),
+(5051,1,3,'Nintendo'),
+(5051,4,1,'12 months'),
+(5051,4,2,'12 місяців'),
+(5051,4,3,'12 месяцев'),
+(5051,15,1,'7\"'),
+(5051,15,2,'7\"'),
+(5051,15,3,'7\"'),
+(5051,16,1,'1280x720'),
+(5051,16,2,'1280x720'),
+(5051,16,3,'1280x720'),
+(5051,17,1,'4310 mAh'),
+(5051,17,2,'4310 мАг'),
+(5051,17,3,'4310 мАч'),
+(5051,20,1,'64 GB'),
+(5051,20,2,'64 ГБ'),
+(5051,20,3,'64 ГБ'),
+(5051,21,1,'Nintendo Switch OS'),
+(5051,21,2,'Nintendo Switch OS'),
+(5051,21,3,'Nintendo Switch OS'),
+(5052,1,1,'Sony'),
+(5052,1,2,'Sony'),
+(5052,1,3,'Sony'),
+(5052,4,1,'12 months'),
+(5052,4,2,'12 місяців'),
+(5052,4,3,'12 месяцев'),
+(5052,16,1,'4K / 120 fps'),
+(5052,16,2,'4K / 120 fps'),
+(5052,16,3,'4K / 120 fps'),
+(5052,20,1,'1 TB SSD'),
+(5052,20,2,'1 ТБ SSD'),
+(5052,20,3,'1 ТБ SSD'),
+(5052,21,1,'PlayStation OS'),
+(5052,21,2,'PlayStation OS'),
+(5052,21,3,'PlayStation OS'),
+(5052,46,1,'PlayStation 5'),
+(5052,46,2,'PlayStation 5'),
+(5052,46,3,'PlayStation 5'),
+(5053,1,1,'Microsoft'),
+(5053,1,2,'Microsoft'),
+(5053,1,3,'Microsoft'),
+(5053,4,1,'12 months'),
+(5053,4,2,'12 місяців'),
+(5053,4,3,'12 месяцев'),
+(5053,16,1,'4K / 120 fps'),
+(5053,16,2,'4K / 120 fps'),
+(5053,16,3,'4K / 120 fps'),
+(5053,20,1,'1 TB SSD'),
+(5053,20,2,'1 ТБ SSD'),
+(5053,20,3,'1 ТБ SSD'),
+(5053,46,1,'Xbox'),
+(5053,46,2,'Xbox'),
+(5053,46,3,'Xbox'),
+(5054,1,1,'LEGO'),
+(5054,1,2,'LEGO'),
+(5054,1,3,'LEGO'),
+(5054,37,1,'10+'),
+(5054,37,2,'10+'),
+(5054,37,3,'10+'),
+(5054,49,1,'7541 pcs'),
+(5054,49,2,'7541 деталей'),
+(5054,49,3,'7541 деталь'),
+(5054,50,1,'1 set'),
+(5054,50,2,'1 набір'),
+(5054,50,3,'1 набор'),
+(5054,53,1,'10+ years'),
+(5054,53,2,'10+ років'),
+(5054,53,3,'10+ лет'),
+(5055,1,1,'LEGO'),
+(5055,1,2,'LEGO'),
+(5055,1,3,'LEGO'),
+(5055,37,1,'18+'),
+(5055,37,2,'18+'),
+(5055,37,3,'18+'),
+(5055,49,1,'1101 pcs'),
+(5055,49,2,'1101 деталь'),
+(5055,49,3,'1101 деталь'),
+(5055,53,1,'18+ years'),
+(5055,53,2,'18+ років'),
+(5055,53,3,'18+ лет'),
+(5056,1,1,'Mattel'),
+(5056,1,2,'Mattel'),
+(5056,1,3,'Mattel'),
+(5056,37,1,'7+'),
+(5056,37,2,'7+'),
+(5056,37,3,'7+'),
+(5056,50,1,'112 cards'),
+(5056,50,2,'112 карт'),
+(5056,50,3,'112 карт'),
+(5057,1,1,'Ravensburger'),
+(5057,1,2,'Ravensburger'),
+(5057,1,3,'Ravensburger'),
+(5057,37,1,'8+'),
+(5057,37,2,'8+'),
+(5057,37,3,'8+'),
+(5057,50,1,'1000 pcs'),
+(5057,50,2,'1000 шт'),
+(5057,50,3,'1000 шт'),
+(5058,1,1,'Hasbro'),
+(5058,1,2,'Hasbro'),
+(5058,1,3,'Hasbro'),
+(5058,37,1,'8+'),
+(5058,37,2,'8+'),
+(5058,37,3,'8+'),
+(5058,53,1,'8+ years'),
+(5058,53,2,'8+ років'),
+(5058,53,3,'8+ лет'),
+(5059,1,1,'Hasbro'),
+(5059,1,2,'Hasbro'),
+(5059,1,3,'Hasbro'),
+(5059,37,1,'6+'),
+(5059,37,2,'6+'),
+(5059,37,3,'6+'),
+(5059,53,1,'6+ years'),
+(5059,53,2,'6+ років'),
+(5059,53,3,'6+ лет'),
+(5060,1,1,'Mattel'),
+(5060,1,2,'Mattel'),
+(5060,1,3,'Mattel'),
+(5060,37,1,'3+'),
+(5060,37,2,'3+'),
+(5060,37,3,'3+'),
+(5060,50,1,'20 pcs'),
+(5060,50,2,'20 шт'),
+(5060,50,3,'20 шт'),
+(5061,1,1,'Avery'),
+(5061,1,2,'Avery'),
+(5061,1,3,'Avery'),
+(5061,52,1,'2018'),
+(5061,52,2,'2018'),
+(5061,52,3,'2018'),
+(5061,53,1,'16+'),
+(5061,53,2,'16+'),
+(5061,53,3,'16+'),
+(5062,1,1,'Random House'),
+(5062,1,2,'Random House'),
+(5062,1,3,'Random House'),
+(5062,52,1,'2016'),
+(5062,52,2,'2016'),
+(5062,52,3,'2016'),
+(5063,1,1,'Crown'),
+(5063,1,2,'Crown'),
+(5063,1,3,'Crown'),
+(5063,52,1,'2020'),
+(5063,52,2,'2020'),
+(5063,52,3,'2020'),
+(5064,1,1,'Vintage'),
+(5064,1,2,'Vintage'),
+(5064,1,3,'Vintage'),
+(5064,52,1,'2015'),
+(5064,52,2,'2015'),
+(5064,52,3,'2015'),
+(5065,1,1,'HarperCollins'),
+(5065,1,2,'HarperCollins'),
+(5065,1,3,'HarperCollins'),
+(5065,52,1,'2012'),
+(5065,52,2,'2012'),
+(5065,52,3,'2012'),
+(5066,1,1,'Ace Books'),
+(5066,1,2,'Ace Books'),
+(5066,1,3,'Ace Books'),
+(5066,52,1,'2019'),
+(5066,52,2,'2019'),
+(5066,52,3,'2019'),
+(5067,1,1,'Bloomsbury'),
+(5067,1,2,'Bloomsbury'),
+(5067,1,3,'Bloomsbury'),
+(5067,52,1,'1997'),
+(5067,52,2,'1997'),
+(5067,52,3,'1997'),
+(5068,1,1,'Penguin'),
+(5068,1,2,'Penguin'),
+(5068,1,3,'Penguin'),
+(5068,52,1,'1969'),
+(5068,52,2,'1969'),
+(5068,52,3,'1969'),
+(5069,1,1,'Plata Publishing'),
+(5069,1,2,'Plata Publishing'),
+(5069,1,3,'Plata Publishing'),
+(5069,52,1,'1997'),
+(5069,52,2,'1997'),
+(5069,52,3,'1997'),
+(5070,1,1,'Crown Business'),
+(5070,1,2,'Crown Business'),
+(5070,1,3,'Crown Business'),
+(5070,52,1,'2011'),
+(5070,52,2,'2011'),
+(5070,52,3,'2011'),
+(5071,1,1,'Garmin'),
+(5071,1,2,'Garmin'),
+(5071,1,3,'Garmin'),
+(5071,4,1,'12 months'),
+(5071,4,2,'12 місяців'),
+(5071,4,3,'12 месяцев'),
+(5071,16,1,'1440p'),
+(5071,16,2,'1440p'),
+(5071,16,3,'1440p'),
+(5071,27,1,'IPX6'),
+(5071,27,2,'IPX6'),
+(5071,27,3,'IPX6'),
+(5072,1,1,'NOCO'),
+(5072,1,2,'NOCO'),
+(5072,1,3,'NOCO'),
+(5072,4,1,'24 months'),
+(5072,4,2,'24 місяці'),
+(5072,4,3,'24 месяца'),
+(5072,25,1,'2000 A'),
+(5072,25,2,'2000 А'),
+(5072,25,3,'2000 А'),
+(5073,1,1,'Michelin'),
+(5073,1,2,'Michelin'),
+(5073,1,3,'Michelin'),
+(5073,7,1,'Rubber'),
+(5073,7,2,'Гума'),
+(5073,7,3,'Резина'),
+(5073,11,1,'24\"'),
+(5073,11,2,'24\"'),
+(5073,11,3,'24\"'),
+(5074,1,1,'Bosch'),
+(5074,1,2,'Bosch'),
+(5074,1,3,'Bosch'),
+(5074,7,1,'Rubber'),
+(5074,7,2,'Гума'),
+(5074,7,3,'Резина'),
+(5074,11,1,'24\"'),
+(5074,11,2,'24\"'),
+(5074,11,3,'24\"'),
+(5075,1,1,'Armor All'),
+(5075,1,2,'Armor All'),
+(5075,1,3,'Armor All'),
+(5075,25,1,'100 pcs'),
+(5075,25,2,'100 шт'),
+(5075,25,3,'100 шт'),
+(5076,1,1,'Meguiar\'s'),
+(5076,1,2,'Meguiar\'s'),
+(5076,1,3,'Meguiar\'s'),
+(5076,25,1,'473 ml'),
+(5076,25,2,'473 мл'),
+(5076,25,3,'473 мл'),
+(5077,1,1,'Anker'),
+(5077,1,2,'Anker'),
+(5077,1,3,'Anker'),
+(5077,4,1,'18 months'),
+(5077,4,2,'18 місяців'),
+(5077,4,3,'18 месяцев'),
+(5077,22,1,'Bluetooth 5.0, AUX'),
+(5077,22,2,'Bluetooth 5.0, AUX'),
+(5077,22,3,'Bluetooth 5.0, AUX'),
+(5078,1,1,'Pioneer'),
+(5078,1,2,'Pioneer'),
+(5078,1,3,'Pioneer'),
+(5078,4,1,'12 months'),
+(5078,4,2,'12 місяців'),
+(5078,4,3,'12 месяцев'),
+(5078,23,1,'4x50 W'),
+(5078,23,2,'4x50 Вт'),
+(5078,23,3,'4x50 Вт'),
+(5079,1,1,'Philips'),
+(5079,1,2,'Philips'),
+(5079,1,3,'Philips'),
+(5079,4,1,'12 months'),
+(5079,4,2,'12 місяців'),
+(5079,4,3,'12 месяцев'),
+(5079,24,1,'12 V'),
+(5079,24,2,'12 В'),
+(5079,24,3,'12 В'),
+(5080,1,1,'WeatherTech'),
+(5080,1,2,'WeatherTech'),
+(5080,1,3,'WeatherTech'),
+(5080,7,1,'Rubber'),
+(5080,7,2,'Гума'),
+(5080,7,3,'Резина'),
+(5080,11,1,'Universal'),
+(5080,11,2,'Універсальні'),
+(5080,11,3,'Универсальные'),
+(5081,1,1,'Furbo'),
+(5081,1,2,'Furbo'),
+(5081,1,3,'Furbo'),
+(5081,4,1,'12 months'),
+(5081,4,2,'12 місяців'),
+(5081,4,3,'12 месяцев'),
+(5081,16,1,'1080p'),
+(5081,16,2,'1080p'),
+(5081,16,3,'1080p'),
+(5081,22,1,'Wi-Fi, 2-way audio'),
+(5081,22,2,'Wi-Fi, двосторонній звук'),
+(5081,22,3,'Wi-Fi, двусторонний звук'),
+(5082,1,1,'PetSafe'),
+(5082,1,2,'PetSafe'),
+(5082,1,3,'PetSafe'),
+(5082,4,1,'24 months'),
+(5082,4,2,'24 місяці'),
+(5082,4,3,'24 месяца'),
+(5082,10,1,'Pet fountain'),
+(5082,10,2,'Фонтан для тварин'),
+(5082,10,3,'Фонтан для животных'),
+(5082,25,1,'2.2 L'),
+(5082,25,2,'2,2 л'),
+(5082,25,3,'2,2 л'),
+(5083,1,1,'KONG'),
+(5083,1,2,'KONG'),
+(5083,1,3,'KONG'),
+(5083,7,1,'Rubber'),
+(5083,7,2,'Гума'),
+(5083,7,3,'Резина'),
+(5083,10,1,'Dog toy'),
+(5083,10,2,'Іграшка для собак'),
+(5083,10,3,'Игрушка для собак'),
+(5085,1,1,'Whiskas'),
+(5085,1,2,'Whiskas'),
+(5085,1,3,'Whiskas'),
+(5085,10,1,'Cat food'),
+(5085,10,2,'Корм для котів'),
+(5085,10,3,'Корм для кошек'),
+(5085,14,1,'1.9 kg'),
+(5085,14,2,'1,9 кг'),
+(5085,14,3,'1,9 кг'),
+(5086,1,1,'Purina'),
+(5086,1,2,'Purina'),
+(5086,1,3,'Purina'),
+(5086,10,1,'Cat food'),
+(5086,10,2,'Корм для котів'),
+(5086,10,3,'Корм для кошек'),
+(5086,14,1,'3 kg'),
+(5086,14,2,'3 кг'),
+(5086,14,3,'3 кг'),
+(5087,1,1,'Catit'),
+(5087,1,2,'Catit'),
+(5087,1,3,'Catit'),
+(5087,4,1,'12 months'),
+(5087,4,2,'12 місяців'),
+(5087,4,3,'12 месяцев'),
+(5087,10,1,'Cat toy'),
+(5087,10,2,'Іграшка для котів'),
+(5087,10,3,'Игрушка для кошек'),
+(5088,1,1,'SureFeed'),
+(5088,1,2,'SureFeed'),
+(5088,1,3,'SureFeed'),
+(5088,4,1,'24 months'),
+(5088,4,2,'24 місяці'),
+(5088,4,3,'24 месяца'),
+(5088,10,1,'Pet feeder'),
+(5088,10,2,'Годівниця для тварин'),
+(5088,10,3,'Кормушка для животных'),
+(5089,1,1,'Earth Rated'),
+(5089,1,2,'Earth Rated'),
+(5089,1,3,'Earth Rated'),
+(5089,25,1,'270 pcs'),
+(5089,25,2,'270 шт'),
+(5089,25,3,'270 шт'),
+(5090,1,1,'Hartz'),
+(5090,1,2,'Hartz'),
+(5090,1,3,'Hartz'),
+(5090,7,1,'Nylon'),
+(5090,7,2,'Нейлон'),
+(5090,7,3,'Нейлон'),
+(5090,10,1,'Grooming brush'),
+(5090,10,2,'Щітка для шерсті'),
+(5090,10,3,'Щетка для шерсти');
 /*!40000 ALTER TABLE `oc_product_attribute` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7386,8 +9845,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_bundle` WRITE;
 /*!40000 ALTER TABLE `oc_product_bundle` DISABLE KEYS */;
 INSERT INTO `oc_product_bundle` VALUES
-(1,'','percentage',10.00,'0000-00-00','0000-00-00',1,0,0,'2026-07-25 09:33:28'),
-(2,'','percentage',18.00,'0000-00-00','0000-00-00',1,0,0,'2026-07-25 09:33:28');
+(1,'','percentage',10.00,'0000-00-00','0000-00-00',1,0,1,'2026-07-25 09:33:28'),
+(2,'','percentage',18.00,'0000-00-00','0000-00-00',1,0,1,'2026-07-25 09:33:28');
 /*!40000 ALTER TABLE `oc_product_bundle` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7407,7 +9866,7 @@ CREATE TABLE `oc_product_bundle_product` (
   PRIMARY KEY (`bundle_product_id`),
   KEY `bundle_id` (`bundle_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=238 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=413 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7418,13 +9877,13 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_bundle_product` WRITE;
 /*!40000 ALTER TABLE `oc_product_bundle_product` DISABLE KEYS */;
 INSERT INTO `oc_product_bundle_product` VALUES
-(231,2,5023),
-(232,2,5006),
-(233,2,5075),
-(234,2,5001),
-(235,1,5023),
-(236,1,5006),
-(237,1,5001);
+(406,1,5023),
+(407,1,5001),
+(408,1,5006),
+(409,2,5023),
+(410,2,5001),
+(411,2,5006),
+(412,2,5075);
 /*!40000 ALTER TABLE `oc_product_bundle_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7480,7 +9939,7 @@ CREATE TABLE `oc_product_bxgy` (
   PRIMARY KEY (`product_bxgy_id`),
   KEY `product_id` (`product_id`),
   KEY `reward_product_id` (`reward_product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7491,9 +9950,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_bxgy` WRITE;
 /*!40000 ALTER TABLE `oc_product_bxgy` DISABLE KEYS */;
 INSERT INTO `oc_product_bxgy` VALUES
-(8,5006,5057,2,'percentage',70.00,'2026-07-23','0000-00-00',0,'2026-07-25 09:33:28'),
-(38,5023,5037,1,'percentage',70.00,'2026-07-23','0000-00-00',0,'2026-07-25 10:12:03'),
-(39,5023,5001,2,'percentage',10.00,'0000-00-00','0000-00-00',0,'2026-07-25 07:23:07');
+(68,5006,5057,2,'percentage',70.00,'2026-07-23','0000-00-00',0,'2026-07-25 09:33:28'),
+(83,5023,5037,1,'percentage',70.00,'2026-07-23','0000-00-00',0,'2026-07-25 10:12:03'),
+(84,5023,5001,2,'percentage',10.00,'0000-00-00','0000-00-00',0,'2026-07-25 07:23:07');
 /*!40000 ALTER TABLE `oc_product_bxgy` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7524,7 +9983,7 @@ LOCK TABLES `oc_product_configurable` WRITE;
 /*!40000 ALTER TABLE `oc_product_configurable` DISABLE KEYS */;
 INSERT INTO `oc_product_configurable` VALUES
 (5001,1,52),
-(5023,1,100);
+(5023,1,212);
 /*!40000 ALTER TABLE `oc_product_configurable` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7591,15 +10050,15 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_description` WRITE;
 /*!40000 ALTER TABLE `oc_product_description` DISABLE KEYS */;
 INSERT INTO `oc_product_description` VALUES
-(5001,1,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro is part of our curated Electronics collection and was selected for quality, reliability, and customer value.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Authentic product from LEGO&lt;/li&gt;\r\n&lt;li&gt;Official warranty and support&lt;/li&gt;\r\n&lt;li&gt;Carefully selected for demo catalog realism&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Best for customers looking for a reliable option in Smartphones.&lt;/p&gt;','Electronics','Apple iPhone 15 Pro','Apple iPhone 15 Pro from LEGO with verified specs, fast shipping, and warranty support.','electronics,smartphones'),
-(5001,2,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro входить до нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Автентичний продукт від LEGO&lt;/li&gt;\r\n&lt;li&gt;Офіційна гарантія та підтримка&lt;/li&gt;\r\n&lt;li&gt;Ретельно відібрані для реалістичності демонстраційного каталогу&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Найкращий варіант для клієнтів, які шукають надійний варіант смартфонів.&lt;/p&gt;','Електроніка','Apple iPhone 15 Pro','Apple iPhone 15 Pro від LEGO з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, смартфони'),
-(5001,3,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригинальный продукт от LEGO.&lt;/li&gt;\r\n&lt;li&gt;Официальная гарантия и поддержка&lt;/li&gt;\r\n&lt;li&gt;Тщательно отобранные для реалистичного оформления демонстрационного каталога.&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Лучший вариант для покупателей, ищущих надежный смартфон.&lt;/p&gt;','Электроника','Apple iPhone 15 Pro','Конструктор LEGO Apple iPhone 15 Pro с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, смартфоны'),
+(5001,1,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro is part of our curated Electronics collection and was selected for quality, reliability, and customer value.&lt;/p&gt;','Electronics','Apple iPhone 15 Pro','Apple iPhone 15 Pro from LEGO with verified specs, fast shipping, and warranty support.','electronics,smartphones'),
+(5001,2,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro входить до нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.&lt;/p&gt;','Електроніка','Apple iPhone 15 Pro','Apple iPhone 15 Pro від LEGO з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, смартфони'),
+(5001,3,'Apple iPhone 15 Pro','&lt;p&gt;Apple iPhone 15 Pro входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.&lt;/p&gt;','Электроника','Apple iPhone 15 Pro','Конструктор LEGO Apple iPhone 15 Pro с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, смартфоны'),
 (5002,1,'Samsung Galaxy S24 Ultra','<p>Samsung Galaxy S24 Ultra is part of our curated Electronics collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Purina</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Laptops.</p>','Electronics','Samsung Galaxy S24 Ultra','Samsung Galaxy S24 Ultra from Purina with verified specs, fast shipping, and warranty support.','electronics,laptops'),
 (5002,2,'Samsung Galaxy S24 Ультра','<p>Samsung Galaxy S24 Ultra є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.</p><ul><li> Автентичний продукт від Purina</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант ноутбуків.</p>','Електроніка','Samsung Galaxy S24 Ультра','Samsung Galaxy S24 Ultra від Purina з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, ноутбуки'),
 (5002,3,'Samsung Galaxy S24 Ultra','<p>Смартфон Samsung Galaxy S24 Ultra входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.</p><ul><li> Оригинальный продукт от Purina</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный ноутбук.</p>','Электроника','Samsung Galaxy S24 Ultra','Смартфон Samsung Galaxy S24 Ultra от Purina с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, ноутбуки'),
-(5003,1,'Google Pixel 8 Pro','<p>Google Pixel 8 Pro is part of our curated Electronics collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Samsung</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Audio.</p>','Electronics','Google Pixel 8 Pro','Google Pixel 8 Pro from Samsung with verified specs, fast shipping, and warranty support.','electronics,audio'),
-(5003,2,'Google Pixel 8 Pro','<p>Google Pixel 8 Pro є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Samsung</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий вибір для клієнтів, які шукають надійний варіант аудіо.</p>','Електроніка','Google Pixel 8 Pro','Google Pixel 8 Pro від Samsung з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, аудіо'),
-(5003,3,'Google Pixel 8 Pro','<p>Смартфон Google Pixel 8 Pro входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.</p><ul><li> Оригинальный продукт от Samsung.</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный источник аудиотехники.</p>','Электроника','Google Pixel 8 Pro','Смартфон Google Pixel 8 Pro от Samsung с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, аудио'),
+(5003,1,'Google Pixel 8 Pro','&lt;p&gt;Google Pixel 8 Pro is part of our curated Electronics collection and was selected for quality, reliability, and customer value.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Authentic product from Samsung&lt;/li&gt;\r\n&lt;li&gt;Official warranty and support&lt;/li&gt;\r\n&lt;li&gt;Carefully selected for demo catalog realism&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Best for customers looking for a reliable option in Audio.&lt;/p&gt;','Electronics','Google Pixel 8 Pro','Google Pixel 8 Pro from Samsung with verified specs, fast shipping, and warranty support.','electronics,audio'),
+(5003,2,'Google Pixel 8 Pro','&lt;p&gt;Google Pixel 8 Pro є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригінальний продукт від Samsung&lt;/li&gt;\r\n&lt;li&gt;Офіційна гарантія та підтримка&lt;/li&gt;\r\n&lt;li&gt;Ретельно відібрані для реалістичності демонстраційного каталогу&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Найкращий вибір для клієнтів, які шукають надійний варіант аудіо.&lt;/p&gt;','Електроніка','Google Pixel 8 Pro','Google Pixel 8 Pro від Samsung з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, аудіо'),
+(5003,3,'Google Pixel 8 Pro','&lt;p&gt;Смартфон Google Pixel 8 Pro входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригинальный продукт от Samsung.&lt;/li&gt;\r\n&lt;li&gt;Официальная гарантия и поддержка&lt;/li&gt;\r\n&lt;li&gt;Тщательно отобранные для реалистичного оформления демонстрационного каталога.&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Лучший вариант для покупателей, ищущих надежный источник аудиотехники.&lt;/p&gt;','Электроника','Google Pixel 8 Pro','Смартфон Google Pixel 8 Pro от Samsung с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, аудио'),
 (5004,1,'OnePlus 12','<p>OnePlus 12 is part of our curated Electronics collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Nike</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Smartphones.</p>','Electronics','OnePlus 12','OnePlus 12 from Nike with verified specs, fast shipping, and warranty support.','electronics,smartphones'),
 (5004,2,'OnePlus 12','<p>OnePlus 12 є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Nike</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант смартфонів.</p>','Електроніка','OnePlus 12','OnePlus 12 від Nike з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, смартфони'),
 (5004,3,'OnePlus 12','<p>Смартфон OnePlus 12 входит в нашу тщательно отобранную коллекцию электроники и был выбран за качество, надежность и выгодную цену для покупателя.</p><ul><li> Оригинальный продукт от Nike</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный смартфон.</p>','Электроника','OnePlus 12','Продается OnePlus 12 от Nike с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, смартфоны'),
@@ -7618,9 +10077,9 @@ INSERT INTO `oc_product_description` VALUES
 (5009,1,'Bose QuietComfort Ultra','<p>Bose QuietComfort Ultra is part of our curated Electronics collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Samsung</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Audio.</p>','Electronics','Bose QuietComfort Ultra','Bose QuietComfort Ultra from Samsung with verified specs, fast shipping, and warranty support.','electronics,audio'),
 (5009,2,'Bose QuietComfort Ultra','<p>Bose QuietComfort Ultra є частиною нашої кураторської колекції електроніки та була обрана за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Samsung</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий вибір для клієнтів, які шукають надійний варіант аудіо.</p>','Електроніка','Bose QuietComfort Ultra','Bose QuietComfort Ultra від Samsung з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, аудіо'),
 (5009,3,'Bose QuietComfort Ultra','<p>Наушники Bose QuietComfort Ultra входят в нашу тщательно отобранную коллекцию электроники и были выбраны за качество, надежность и выгодную цену для покупателя.</p><ul><li> Оригинальный продукт от Samsung.</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный источник аудиотехники.</p>','Электроника','Bose QuietComfort Ultra','Наушники Bose QuietComfort Ultra от Samsung с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, аудио'),
-(5010,1,'JBL Charge 5','<p>JBL Charge 5 is part of our curated Electronics collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Nike</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Smartphones.</p>','Electronics','JBL Charge 5','JBL Charge 5 from Nike with verified specs, fast shipping, and warranty support.','electronics,smartphones'),
-(5010,2,'JBL Charge 5','<p>JBL Charge 5 є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Nike</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант смартфонів.</p>','Електроніка','JBL Charge 5','JBL Charge 5 від Nike з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, смартфони'),
-(5010,3,'JBL Charge 5','<p>Акустическая система JBL Charge 5 входит в нашу тщательно отобранную коллекцию электроники и была выбрана за качество, надежность и выгодную цену для покупателя.</p><ul><li> Оригинальный продукт от Nike</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный смартфон.</p>','Электроника','JBL Charge 5','Наушники JBL Charge 5 от Nike с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, смартфоны'),
+(5010,1,'JBL Charge 5','&lt;p&gt;JBL Charge 5 is part of our curated Electronics collection and was selected for quality, reliability, and customer value.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Authentic product from Nike&lt;/li&gt;\r\n&lt;li&gt;Official warranty and support&lt;/li&gt;\r\n&lt;li&gt;Carefully selected for demo catalog realism&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Best for customers looking for a reliable option in Smartphones.&lt;/p&gt;','Electronics','JBL Charge 5','JBL Charge 5 from Nike with verified specs, fast shipping, and warranty support.','electronics,smartphones'),
+(5010,2,'JBL Charge 5','&lt;p&gt;JBL Charge 5 є частиною нашої кураторської колекції електроніки та був обраний за якість, надійність та цінність для клієнта.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригінальний продукт від Nike&lt;/li&gt;\r\n&lt;li&gt;Офіційна гарантія та підтримка&lt;/li&gt;\r\n&lt;li&gt;Ретельно відібрані для реалістичності демонстраційного каталогу&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Найкращий варіант для клієнтів, які шукають надійний варіант смартфонів.&lt;/p&gt;','Електроніка','JBL Charge 5','JBL Charge 5 від Nike з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','електроніка, смартфони'),
+(5010,3,'JBL Charge 5','&lt;p&gt;Акустическая система JBL Charge 5 входит в нашу тщательно отобранную коллекцию электроники и была выбрана за качество, надежность и выгодную цену для покупателя.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригинальный продукт от Nike&lt;/li&gt;\r\n&lt;li&gt;Официальная гарантия и поддержка&lt;/li&gt;\r\n&lt;li&gt;Тщательно отобранные для реалистичного оформления демонстрационного каталога.&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Лучший вариант для покупателей, ищущих надежный смартфон.&lt;/p&gt;','Электроника','JBL Charge 5','Наушники JBL Charge 5 от Nike с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','электроника, смартфоны'),
 (5011,1,'Instant Pot Duo Plus','&lt;p&gt;Instant Pot Duo Plus is part of our curated Home &amp;amp; Kitchen collection and was selected for quality, reliability, and customer value.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Authentic product from Dyson&lt;/li&gt;\r\n&lt;li&gt;Official warranty and support&lt;/li&gt;\r\n&lt;li&gt;Carefully selected for demo catalog realism&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Best for customers looking for a reliable option in Cookware.&lt;/p&gt;','Home &amp; Kitchen','Instant Pot Duo Plus','Instant Pot Duo Plus from Dyson with verified specs, fast shipping, and warranty support.','home-kitchen,cookware'),
 (5011,2,'Instant Pot Duo Plus','&lt;p&gt;Instant Pot Duo Plus є частиною нашої кураторської колекції товарів для дому та кухні та був обраний за якість, надійність та цінність для клієнта.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригінальний продукт від Dyson&lt;/li&gt;\r\n&lt;li&gt;Офіційна гарантія та підтримка&lt;/li&gt;\r\n&lt;li&gt;Ретельно відібрані для реалістичності демонстраційного каталогу&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Найкращий варіант для клієнтів, які шукають надійний варіант посуду.&lt;/p&gt;','Дім і кухня','Instant Pot Duo Plus','Пилосос Instant Pot Duo Plus від Dyson з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','домашня кухня, посуд'),
 (5011,3,'Мультиварка Instant Pot Duo Plus','&lt;p&gt;Мультиварка Instant Pot Duo Plus входит в нашу тщательно подобранную коллекцию товаров для дома и кухни и была выбрана за качество, надежность и выгодную цену для покупателей.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригинальный продукт от Dyson&lt;/li&gt;\r\n&lt;li&gt;Официальная гарантия и поддержка&lt;/li&gt;\r\n&lt;li&gt;Тщательно отобранные для реалистичного оформления демонстрационного каталога.&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Лучший вариант для покупателей, ищущих надежную посуду.&lt;/p&gt;','Дом и кухня','Мультиварка Instant Pot Duo Plus','Мультиварка Instant Pot Duo Plus от Dyson с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','домашняя кухня, кухонная утварь'),
@@ -7732,9 +10191,9 @@ INSERT INTO `oc_product_description` VALUES
 (5047,1,'Oral-B iO Series 6','<p>Oral-B iO Series 6 is part of our curated Beauty & Health collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Samsung</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Skincare.</p>','Beauty & Health','Oral-B iO Series 6','Oral-B iO Series 6 from Samsung with verified specs, fast shipping, and warranty support.','beauty-health,skincare'),
 (5047,2,'Oral-B iO серії 6','<p>Oral-B iO Series 6 є частиною нашої кураторської колекції «Краса та здоров’я» та була обрана за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Samsung</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант догляду за шкірою.</p>','Краса та здоров\'я','Oral-B iO серії 6','Oral-B iO Series 6 від Samsung з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','краса-здоров\'я, догляд за шкірою'),
 (5047,3,'Серия Oral-B iO 6','<p>Oral-B iO Series 6 входит в нашу тщательно подобранную коллекцию «Красота и здоровье» и был выбран за качество, надежность и ценность для клиента.</p><ul><li> Оригинальный продукт от Samsung.</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный источник средств по уходу за кожей.</p>','Красота и здоровье','Серия Oral-B iO 6','Ротовая щетка Oral-B iO Series 6 от Samsung с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','красота-здоровье, уход за кожей'),
-(5048,1,'Braun Series 9 Pro','<p>Braun Series 9 Pro is part of our curated Beauty & Health collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Nike</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Haircare.</p>','Beauty & Health','Braun Series 9 Pro','Braun Series 9 Pro from Nike with verified specs, fast shipping, and warranty support.','beauty-health,haircare'),
-(5048,2,'Braun Series 9 Pro','<p>Braun Series 9 Pro є частиною нашої кураторської колекції «Краса та здоров’я» та була обрана за якість, надійність та цінність для клієнта.</p><ul><li> Оригінальний продукт від Nike</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант догляду за волоссям.</p>','Краса та здоров\'я','Braun Series 9 Pro','Braun Series 9 Pro від Nike з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','краса-здоров\'я, догляд за волоссям'),
-(5048,3,'Braun Series 9 Pro','<p>Наушники Braun Series 9 Pro входят в нашу тщательно подобранную коллекцию товаров для красоты и здоровья и были выбраны за качество, надежность и выгодную цену для покупателей.</p><ul><li> Оригинальный продукт от Nike</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для покупателей, ищущих надежный источник средств по уходу за волосами.</p>','Красота и здоровье','Braun Series 9 Pro','Кроссовки Braun Series 9 Pro от Nike с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','красота-здоровье, уход за волосами'),
+(5048,1,'Braun Series 9 Pro','&lt;p&gt;Braun Series 9 Pro is part of our curated Beauty &amp;amp; Health collection and was selected for quality, reliability, and customer value.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Authentic product from Nike&lt;/li&gt;\r\n&lt;li&gt;Official warranty and support&lt;/li&gt;\r\n&lt;li&gt;Carefully selected for demo catalog realism&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Best for customers looking for a reliable option in Haircare.&lt;/p&gt;','Beauty &amp; Health','Braun Series 9 Pro','Braun Series 9 Pro from Nike with verified specs, fast shipping, and warranty support.','beauty-health,haircare'),
+(5048,2,'Braun Series 9 Pro','&lt;p&gt;Braun Series 9 Pro є частиною нашої кураторської колекції &amp;laquo;Краса та здоров&amp;rsquo;я&amp;raquo; та була обрана за якість, надійність та цінність для клієнта.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригінальний продукт від Nike&lt;/li&gt;\r\n&lt;li&gt;Офіційна гарантія та підтримка&lt;/li&gt;\r\n&lt;li&gt;Ретельно відібрані для реалістичності демонстраційного каталогу&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Найкращий варіант для клієнтів, які шукають надійний варіант догляду за волоссям.&lt;/p&gt;','Краса та здоров\'я','Braun Series 9 Pro','Braun Series 9 Pro від Nike з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','краса-здоров\'я, догляд за волоссям'),
+(5048,3,'Braun Series 9 Pro','&lt;p&gt;Наушники Braun Series 9 Pro входят в нашу тщательно подобранную коллекцию товаров для красоты и здоровья и были выбраны за качество, надежность и выгодную цену для покупателей.&lt;/p&gt;\r\n&lt;ul&gt;\r\n&lt;li&gt;Оригинальный продукт от Nike&lt;/li&gt;\r\n&lt;li&gt;Официальная гарантия и поддержка&lt;/li&gt;\r\n&lt;li&gt;Тщательно отобранные для реалистичного оформления демонстрационного каталога.&lt;/li&gt;\r\n&lt;/ul&gt;\r\n&lt;p&gt;Лучший вариант для покупателей, ищущих надежный источник средств по уходу за волосами.&lt;/p&gt;','Красота и здоровье','Braun Series 9 Pro','Кроссовки Braun Series 9 Pro от Nike с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','красота-здоровье, уход за волосами'),
 (5049,1,'Fitbit Charge 6','<p>Fitbit Charge 6 is part of our curated Beauty & Health collection and was selected for quality, reliability, and customer value.</p><ul>  <li>Authentic product from Philips</li>  <li>Official warranty and support</li>  <li>Carefully selected for demo catalog realism</li></ul><p>Best for customers looking for a reliable option in Wellness.</p>','Beauty & Health','Fitbit Charge 6','Fitbit Charge 6 from Philips with verified specs, fast shipping, and warranty support.','beauty-health,wellness'),
 (5049,2,'Fitbit Charge 6','<p>Fitbit Charge 6 є частиною нашої кураторської колекції «Краса та здоров’я» та був обраний за якість, надійність та цінність для клієнта.</p><ul><li> Автентичний продукт від Philips</li><li> Офіційна гарантія та підтримка</li><li> Ретельно відібрані для реалістичності демонстраційного каталогу</li></ul><p> Найкращий варіант для клієнтів, які шукають надійний варіант у сфері велнесу.</p>','Краса та здоров\'я','Fitbit Charge 6','Fitbit Charge 6 від Philips з перевіреними характеристиками, швидкою доставкою та гарантійною підтримкою.','краса-здоров\'я, благополуччя'),
 (5049,3,'Fitbit Charge 6','<p>Фитнес-браслет Fitbit Charge 6 входит в нашу тщательно подобранную коллекцию товаров для красоты и здоровья и был выбран за качество, надежность и выгодную цену для покупателей.</p><ul><li> Оригинальный продукт от Philips</li><li> Официальная гарантия и поддержка</li><li> Тщательно отобранные для реалистичного оформления демонстрационного каталога.</li></ul><p> Лучший вариант для клиентов, ищущих надежный источник оздоровления.</p>','Красота и здоровье','Fitbit Charge 6','Фитнес-браслет Fitbit Charge 6 от Philips с проверенными характеристиками, быстрой доставкой и гарантийным обслуживанием.','красота-здоровье, благополучие'),
@@ -7883,7 +10342,7 @@ CREATE TABLE `oc_product_discount` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_discount_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=420 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7894,6 +10353,33 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_discount` WRITE;
 /*!40000 ALTER TABLE `oc_product_discount` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oc_product_discount` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_fbt`
+--
+
+DROP TABLE IF EXISTS `oc_product_fbt`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_fbt` (
+  `product_id` int(11) NOT NULL,
+  `fbt_id` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`,`fbt_id`),
+  KEY `fbt_id` (`fbt_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_fbt`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_fbt` WRITE;
+/*!40000 ALTER TABLE `oc_product_fbt` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_product_fbt` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -7916,7 +10402,7 @@ CREATE TABLE `oc_product_gift` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_gift_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7947,7 +10433,7 @@ CREATE TABLE `oc_product_image` (
   PRIMARY KEY (`product_image_id`),
   KEY `product_id` (`product_id`),
   KEY `language_id` (`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3070 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=3121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7959,12 +10445,10 @@ LOCK TABLES `oc_product_image` WRITE;
 /*!40000 ALTER TABLE `oc_product_image` DISABLE KEYS */;
 INSERT INTO `oc_product_image` VALUES
 (2,5002,NULL,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra-2.jpg',1),
-(3,5003,NULL,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg',1),
 (4,5004,NULL,'catalog/demo/demo-seed/products/electronics/oneplus-12-2.jpg',1),
 (7,5007,NULL,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon-2.jpg',1),
 (8,5008,NULL,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5-2.jpg',1),
 (9,5009,NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra-2.jpg',1),
-(10,5010,NULL,'catalog/demo/demo-seed/products/electronics/jbl-charge-5-2.jpg',1),
 (12,5012,NULL,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl-2.jpg',1),
 (15,5015,NULL,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set-2.jpg',1),
 (16,5016,NULL,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven-2.jpg',1),
@@ -7993,7 +10477,6 @@ INSERT INTO `oc_product_image` VALUES
 (45,5045,NULL,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer-2.jpg',1),
 (46,5046,NULL,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean-2.jpg',1),
 (47,5047,NULL,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6-2.jpg',1),
-(48,5048,NULL,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro-2.jpg',1),
 (49,5049,NULL,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6-2.jpg',1),
 (51,5051,NULL,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled-2.jpg',1),
 (53,5053,NULL,'catalog/demo/demo-seed/products/toys-games/xbox-series-x-2.jpg',1),
@@ -10740,7 +13223,6 @@ INSERT INTO `oc_product_image` VALUES
 (2801,1574,NULL,'catalog/dockercart_import_yml/profile_1/8/3/832c4e48bf51eb0dc7eb509ac73460bb.jpg',0),
 (2802,1574,NULL,'catalog/dockercart_import_yml/profile_1/b/9/b989590d3bf5269ab1291444c80e0ae4.jpg',0),
 (2803,1575,NULL,'catalog/dockercart_import_yml/profile_1/1/a/1a4b8e7974e4206cc3e81a55f5b2a221.jpg',0),
-(2806,5014,NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer-2.jpg',1),
 (2807,5041,NULL,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser-2.jpg',1),
 (2822,5044,NULL,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel-2.jpg',1),
 (2824,5005,NULL,'catalog/demo/demo-seed/products/electronics/dell-xps-13-2.jpg',1),
@@ -10755,10 +13237,14 @@ INSERT INTO `oc_product_image` VALUES
 (2911,5070,NULL,'catalog/demo/demo-seed/products/books-media/the-lean-startup-2.jpg',1),
 (2963,5077,NULL,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',1),
 (2982,5037,NULL,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400-2.jpg',1),
-(2996,5001,NULL,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',1),
-(3039,5006,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1),
-(3068,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',0),
-(3069,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1);
+(3098,5006,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1),
+(3099,5003,NULL,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg',1),
+(3100,5014,NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer-2.jpg',1),
+(3101,5010,NULL,'catalog/demo/demo-seed/products/electronics/jbl-charge-5-2.jpg',1),
+(3105,5001,NULL,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',1),
+(3114,5048,NULL,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro-2.jpg',1),
+(3119,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',0),
+(3120,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1);
 /*!40000 ALTER TABLE `oc_product_image` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10778,7 +13264,7 @@ CREATE TABLE `oc_product_option` (
   `value` mediumtext NOT NULL,
   `required` tinyint(1) NOT NULL,
   PRIMARY KEY (`product_option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=990062 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10789,183 +13275,151 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_option` WRITE;
 /*!40000 ALTER TABLE `oc_product_option` DISABLE KEYS */;
 INSERT INTO `oc_product_option` VALUES
-(9001,5001,7001,'',1),
-(9002,5001,7002,'',1),
-(9003,5002,7001,'',1),
-(9004,5002,7002,'',1),
-(9005,5003,7001,'',1),
-(9006,5003,7002,'',1),
-(9007,5004,7001,'',1),
-(9008,5004,7002,'',1),
-(9009,5005,7001,'',1),
-(9010,5005,7002,'',1),
-(9011,5006,7001,'',1),
-(9012,5006,7002,'',1),
-(9013,5007,7001,'',1),
-(9014,5007,7002,'',1),
-(9015,5008,7001,'',1),
-(9016,5008,7002,'',1),
-(9017,5009,7001,'',1),
-(9018,5009,7002,'',1),
-(9019,5010,7001,'',1),
-(9020,5010,7002,'',1),
-(9021,5011,7001,'',1),
-(9022,5011,7002,'',1),
-(9023,5012,7001,'',1),
-(9024,5012,7002,'',1),
-(9025,5013,7001,'',1),
-(9026,5013,7002,'',1),
-(9027,5014,7001,'',1),
-(9028,5014,7002,'',1),
-(9029,5015,7001,'',1),
-(9030,5015,7002,'',1),
-(9031,5016,7001,'',1),
-(9032,5016,7002,'',1),
-(9033,5017,7001,'',1),
-(9034,5017,7002,'',1),
-(9035,5018,7001,'',1),
-(9036,5018,7002,'',1),
-(9037,5019,7001,'',1),
-(9038,5019,7002,'',1),
-(9039,5020,7001,'',1),
-(9040,5020,7002,'',1),
-(9041,5021,7001,'',1),
-(9042,5021,7002,'',1),
-(9043,5022,7001,'',1),
-(9044,5022,7002,'',1),
-(9047,5024,7001,'',1),
-(9048,5024,7002,'',1),
-(9049,5025,7001,'',1),
-(9050,5025,7002,'',1),
-(9051,5026,7001,'',1),
-(9052,5026,7002,'',1),
-(9053,5027,7001,'',1),
-(9054,5027,7002,'',1),
-(9055,5028,7001,'',1),
-(9056,5028,7002,'',1),
-(9057,5029,7001,'',1),
-(9058,5029,7002,'',1),
-(9059,5030,7001,'',1),
-(9060,5030,7002,'',1),
-(9061,5031,7001,'',1),
-(9062,5031,7002,'',1),
-(9063,5032,7001,'',1),
-(9064,5032,7002,'',1),
-(9065,5033,7001,'',1),
-(9066,5033,7002,'',1),
-(9069,5035,7001,'',1),
-(9070,5035,7002,'',1),
-(9071,5036,7001,'',1),
-(9072,5036,7002,'',1),
-(9073,5037,7001,'',1),
-(9074,5037,7002,'',1),
-(9075,5038,7001,'',1),
-(9076,5038,7002,'',1),
-(9077,5039,7001,'',1),
-(9078,5039,7002,'',1),
-(9079,5040,7001,'',1),
-(9080,5040,7002,'',1),
-(9081,5041,7001,'',1),
-(9082,5041,7002,'',1),
-(9083,5042,7001,'',1),
-(9084,5042,7002,'',1),
-(9085,5043,7001,'',1),
-(9086,5043,7002,'',1),
-(9087,5044,7001,'',1),
-(9088,5044,7002,'',1),
-(9089,5045,7001,'',1),
-(9090,5045,7002,'',1),
-(9091,5046,7001,'',1),
-(9092,5046,7002,'',1),
-(9093,5047,7001,'',1),
-(9094,5047,7002,'',1),
-(9095,5048,7001,'',1),
-(9096,5048,7002,'',1),
-(9097,5049,7001,'',1),
-(9098,5049,7002,'',1),
-(9099,5050,7001,'',1),
-(9100,5050,7002,'',1),
-(9101,5051,7001,'',1),
-(9102,5051,7002,'',1),
-(9103,5052,7001,'',1),
-(9104,5052,7002,'',1),
-(9105,5053,7001,'',1),
-(9106,5053,7002,'',1),
-(9107,5054,7001,'',1),
-(9108,5054,7002,'',1),
-(9109,5055,7001,'',1),
-(9110,5055,7002,'',1),
-(9111,5056,7001,'',1),
-(9112,5056,7002,'',1),
-(9113,5057,7001,'',1),
-(9114,5057,7002,'',1),
-(9115,5058,7001,'',1),
-(9116,5058,7002,'',1),
-(9117,5059,7001,'',1),
-(9118,5059,7002,'',1),
-(9119,5060,7001,'',1),
-(9120,5060,7002,'',1),
-(9121,5061,7001,'',1),
-(9122,5061,7002,'',1),
-(9123,5062,7001,'',1),
-(9124,5062,7002,'',1),
-(9125,5063,7001,'',1),
-(9126,5063,7002,'',1),
-(9127,5064,7001,'',1),
-(9128,5064,7002,'',1),
-(9129,5065,7001,'',1),
-(9130,5065,7002,'',1),
-(9131,5066,7001,'',1),
-(9132,5066,7002,'',1),
-(9133,5067,7001,'',1),
-(9134,5067,7002,'',1),
-(9135,5068,7001,'',1),
-(9136,5068,7002,'',1),
-(9137,5069,7001,'',1),
-(9138,5069,7002,'',1),
-(9139,5070,7001,'',1),
-(9140,5070,7002,'',1),
-(9141,5071,7001,'',1),
-(9142,5071,7002,'',1),
-(9143,5072,7001,'',1),
-(9144,5072,7002,'',1),
-(9145,5073,7001,'',1),
-(9146,5073,7002,'',1),
-(9147,5074,7001,'',1),
-(9148,5074,7002,'',1),
-(9149,5075,7001,'',1),
-(9150,5075,7002,'',1),
-(9151,5076,7001,'',1),
-(9152,5076,7002,'',1),
-(9155,5078,7001,'',1),
-(9156,5078,7002,'',1),
-(9157,5079,7001,'',1),
-(9158,5079,7002,'',1),
-(9159,5080,7001,'',1),
-(9160,5080,7002,'',1),
-(9161,5081,7001,'',1),
-(9162,5081,7002,'',1),
-(9163,5082,7001,'',1),
-(9164,5082,7002,'',1),
-(9165,5083,7001,'',1),
-(9166,5083,7002,'',1),
-(9169,5085,7001,'',1),
-(9170,5085,7002,'',1),
-(9171,5086,7001,'',1),
-(9172,5086,7002,'',1),
-(9173,5087,7001,'',1),
-(9174,5087,7002,'',1),
-(9175,5088,7001,'',1),
-(9176,5088,7002,'',1),
-(9177,5089,7001,'',1),
-(9178,5089,7002,'',1),
-(9179,5090,7001,'',1),
-(9180,5090,7002,'',1),
-(9227,5077,7001,'',1),
-(9230,5023,7001,'',1),
-(9231,5023,7002,'',1),
-(9251,5023,5,'',0),
-(9253,5023,9,'',1);
+(9001,5001,1,'',1),
+(9002,5001,3,'',1),
+(9003,5001,4,'',1),
+(9004,5001,5,'',1),
+(9005,5001,11,'',0),
+(9006,5002,1,'',1),
+(9007,5002,3,'',1),
+(9008,5002,4,'',1),
+(9009,5002,5,'',1),
+(9010,5002,11,'',0),
+(9011,5003,1,'',1),
+(9012,5003,3,'',1),
+(9013,5003,4,'',1),
+(9014,5003,5,'',1),
+(9015,5003,11,'',0),
+(9016,5004,1,'',1),
+(9017,5004,3,'',1),
+(9018,5004,4,'',1),
+(9019,5004,5,'',1),
+(9020,5004,11,'',0),
+(9021,5005,10,'',1),
+(9022,5005,4,'',1),
+(9023,5005,20,'',0),
+(9024,5006,10,'',1),
+(9025,5006,4,'',1),
+(9026,5006,20,'',0),
+(9027,5007,10,'',1),
+(9028,5007,4,'',1),
+(9029,5007,20,'',0),
+(9030,5008,1,'',1),
+(9031,5008,5,'',1),
+(9032,5009,1,'',1),
+(9033,5009,5,'',1),
+(9034,5010,1,'',1),
+(9035,5010,5,'',1),
+(9036,5011,5,'',1),
+(9037,5011,12,'',0),
+(9038,5012,5,'',1),
+(9039,5012,12,'',0),
+(9040,5013,5,'',1),
+(9041,5013,12,'',0),
+(9042,5014,5,'',1),
+(9043,5014,12,'',0),
+(9044,5015,5,'',1),
+(9045,5015,12,'',0),
+(9046,5016,5,'',1),
+(9047,5016,12,'',0),
+(9048,5017,5,'',1),
+(9049,5017,12,'',0),
+(9050,5018,5,'',1),
+(9051,5018,12,'',0),
+(9052,5019,5,'',1),
+(9053,5019,12,'',0),
+(9054,5020,5,'',1),
+(9055,5020,12,'',0),
+(9056,5021,2,'',1),
+(9057,5021,1,'',1),
+(9058,5022,2,'',1),
+(9059,5022,1,'',1),
+(9060,5023,2,'',1),
+(9061,5023,1,'',1),
+(9062,5024,2,'',1),
+(9063,5024,1,'',1),
+(9064,5025,2,'',1),
+(9065,5025,1,'',1),
+(9066,5026,2,'',1),
+(9067,5026,1,'',1),
+(9068,5027,2,'',1),
+(9069,5027,1,'',1),
+(9070,5028,2,'',1),
+(9071,5028,1,'',1),
+(9072,5029,2,'',1),
+(9073,5029,1,'',1),
+(9074,5030,2,'',1),
+(9075,5030,1,'',1),
+(9076,5031,2,'',1),
+(9077,5031,1,'',1),
+(9078,5032,2,'',1),
+(9079,5032,1,'',1),
+(9080,5033,2,'',1),
+(9081,5033,1,'',1),
+(9082,5034,2,'',1),
+(9083,5034,1,'',1),
+(9084,5035,2,'',1),
+(9085,5035,1,'',1),
+(9086,5036,2,'',1),
+(9087,5036,1,'',1),
+(9088,5037,2,'',1),
+(9089,5037,1,'',1),
+(9090,5038,2,'',1),
+(9091,5038,1,'',1),
+(9092,5039,2,'',1),
+(9093,5039,1,'',1),
+(9094,5040,2,'',1),
+(9095,5040,1,'',1),
+(9096,5051,7,'',1),
+(9097,5051,12,'',0),
+(9098,5052,7,'',1),
+(9099,5052,12,'',0),
+(9100,5053,7,'',1),
+(9101,5053,12,'',0),
+(9102,5054,7,'',1),
+(9103,5054,12,'',0),
+(9104,5055,7,'',1),
+(9105,5055,12,'',0),
+(9106,5056,7,'',1),
+(9107,5056,12,'',0),
+(9108,5057,7,'',1),
+(9109,5057,12,'',0),
+(9110,5058,7,'',1),
+(9111,5058,12,'',0),
+(9112,5059,7,'',1),
+(9113,5059,12,'',0),
+(9114,5060,7,'',1),
+(9115,5060,12,'',0),
+(9116,5071,5,'',1),
+(9117,5071,12,'',0),
+(9118,5072,5,'',1),
+(9119,5072,12,'',0),
+(9120,5073,5,'',1),
+(9121,5073,12,'',0),
+(9122,5074,5,'',1),
+(9123,5074,12,'',0),
+(9124,5075,5,'',1),
+(9125,5075,12,'',0),
+(9126,5076,5,'',1),
+(9127,5076,12,'',0),
+(9128,5077,5,'',1),
+(9129,5077,12,'',0),
+(9130,5078,5,'',1),
+(9131,5078,12,'',0),
+(9132,5079,5,'',1),
+(9133,5079,12,'',0),
+(9134,5085,9,'',1),
+(9135,5085,12,'',0),
+(9136,5086,9,'',1),
+(9137,5086,12,'',0),
+(9138,5087,9,'',1),
+(9139,5087,12,'',0),
+(9140,5088,9,'',1),
+(9141,5088,12,'',0),
+(9142,5089,9,'',1),
+(9143,5089,12,'',0),
+(9144,5090,9,'',1),
+(9145,5090,12,'',0);
 /*!40000 ALTER TABLE `oc_product_option` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10996,7 +13450,7 @@ CREATE TABLE `oc_product_option_value` (
   `sort_order` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`product_option_value_id`),
   KEY `idx_product_option` (`product_id`,`option_id`,`option_value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10027 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=990192 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11007,363 +13461,393 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_option_value` WRITE;
 /*!40000 ALTER TABLE `oc_product_option_value` DISABLE KEYS */;
 INSERT INTO `oc_product_option_value` VALUES
-(9505,9003,5002,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9506,9003,5002,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9507,9004,5002,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9508,9004,5002,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9509,9005,5003,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9510,9005,5003,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9511,9006,5003,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9512,9006,5003,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9513,9007,5004,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9514,9007,5004,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9515,9008,5004,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9516,9008,5004,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9517,9009,5005,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9518,9009,5005,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9519,9010,5005,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9520,9010,5005,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9521,9011,5006,7001,7101,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9522,9011,5006,7001,7103,0.00,0,7.7594,'+',0,'+',0.0000,'+',0,1),
-(9523,9012,5006,7002,7201,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,2),
-(9524,9012,5006,7002,7202,0.00,0,16.3809,'+',0,'+',0.0000,'+',0,3),
-(9525,9013,5007,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9526,9013,5007,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9527,9014,5007,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9528,9014,5007,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9529,9015,5008,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9530,9015,5008,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9531,9016,5008,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9532,9016,5008,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9533,9017,5009,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9534,9017,5009,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9535,9018,5009,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9536,9018,5009,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9537,9019,5010,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9538,9019,5010,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9539,9020,5010,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9540,9020,5010,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9541,9021,5011,7001,7103,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9542,9021,5011,7001,7101,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9543,9022,5011,7002,7202,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9544,9022,5011,7002,7201,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9545,9023,5012,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9546,9023,5012,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9547,9024,5012,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9548,9024,5012,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9549,9025,5013,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9550,9025,5013,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9551,9026,5013,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9552,9026,5013,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9553,9027,5014,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9554,9027,5014,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9555,9028,5014,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9556,9028,5014,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9557,9029,5015,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9558,9029,5015,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9559,9030,5015,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9560,9030,5015,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9561,9031,5016,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9562,9031,5016,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9563,9032,5016,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9564,9032,5016,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9565,9033,5017,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9566,9033,5017,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9567,9034,5017,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9568,9034,5017,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9569,9035,5018,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9570,9035,5018,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9571,9036,5018,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9572,9036,5018,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9573,9037,5019,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9574,9037,5019,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9575,9038,5019,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9576,9038,5019,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9577,9039,5020,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9578,9039,5020,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9579,9040,5020,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9580,9040,5020,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9581,9041,5021,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9582,9041,5021,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9583,9042,5021,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9584,9042,5021,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9585,9043,5022,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9586,9043,5022,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9587,9044,5022,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9588,9044,5022,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9593,9047,5024,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9594,9047,5024,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9595,9048,5024,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9596,9048,5024,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9597,9049,5025,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9598,9049,5025,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9599,9050,5025,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9600,9050,5025,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9601,9051,5026,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9602,9051,5026,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9603,9052,5026,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9604,9052,5026,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9605,9053,5027,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9606,9053,5027,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9607,9054,5027,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9608,9054,5027,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9609,9055,5028,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9610,9055,5028,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9611,9056,5028,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9612,9056,5028,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9613,9057,5029,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9614,9057,5029,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9615,9058,5029,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9616,9058,5029,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9617,9059,5030,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9618,9059,5030,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9619,9060,5030,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9620,9060,5030,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9621,9061,5031,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9622,9061,5031,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9623,9062,5031,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9624,9062,5031,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9625,9063,5032,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9626,9063,5032,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9627,9064,5032,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9628,9064,5032,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9629,9065,5033,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9630,9065,5033,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9631,9066,5033,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9632,9066,5033,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9637,9069,5035,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9638,9069,5035,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9639,9070,5035,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9640,9070,5035,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9641,9071,5036,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9642,9071,5036,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9643,9072,5036,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9644,9072,5036,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9645,9073,5037,7001,7101,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9646,9073,5037,7001,7103,0.00,0,460.5022,'+',0,'+',0.0000,'+',0,1),
-(9647,9074,5037,7002,7201,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,2),
-(9648,9074,5037,7002,7202,0.00,0,972.1713,'+',0,'+',0.0000,'+',0,3),
-(9649,9075,5038,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9650,9075,5038,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9651,9076,5038,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9652,9076,5038,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9653,9077,5039,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9654,9077,5039,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9655,9078,5039,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9656,9078,5039,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9657,9079,5040,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9658,9079,5040,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9659,9080,5040,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9660,9080,5040,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9661,9081,5041,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9662,9081,5041,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9663,9082,5041,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9664,9082,5041,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9665,9083,5042,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9666,9083,5042,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9667,9084,5042,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9668,9084,5042,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9669,9085,5043,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9670,9085,5043,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9671,9086,5043,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9672,9086,5043,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9673,9087,5044,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9674,9087,5044,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9675,9088,5044,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9676,9088,5044,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9677,9089,5045,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9678,9089,5045,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9679,9090,5045,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9680,9090,5045,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9681,9091,5046,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9682,9091,5046,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9683,9092,5046,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9684,9092,5046,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9685,9093,5047,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9686,9093,5047,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9687,9094,5047,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9688,9094,5047,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9689,9095,5048,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9690,9095,5048,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9691,9096,5048,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9692,9096,5048,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9693,9097,5049,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9694,9097,5049,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9695,9098,5049,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9696,9098,5049,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9697,9099,5050,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9698,9099,5050,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9699,9100,5050,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9700,9100,5050,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9701,9101,5051,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9702,9101,5051,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9703,9102,5051,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9704,9102,5051,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9705,9103,5052,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9706,9103,5052,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9707,9104,5052,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9708,9104,5052,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9709,9105,5053,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9710,9105,5053,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9711,9106,5053,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9712,9106,5053,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9713,9107,5054,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9714,9107,5054,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9715,9108,5054,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9716,9108,5054,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9717,9109,5055,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9718,9109,5055,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9719,9110,5055,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9720,9110,5055,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9721,9111,5056,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9722,9111,5056,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9723,9112,5056,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9724,9112,5056,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9725,9113,5057,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9726,9113,5057,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9727,9114,5057,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9728,9114,5057,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9729,9115,5058,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9730,9115,5058,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9731,9116,5058,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9732,9116,5058,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9733,9117,5059,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9734,9117,5059,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9735,9118,5059,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9736,9118,5059,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9737,9119,5060,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9738,9119,5060,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9739,9120,5060,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9740,9120,5060,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9741,9121,5061,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9742,9121,5061,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9743,9122,5061,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9744,9122,5061,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9745,9123,5062,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9746,9123,5062,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9747,9124,5062,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9748,9124,5062,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9749,9125,5063,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9750,9125,5063,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9751,9126,5063,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9752,9126,5063,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9753,9127,5064,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9754,9127,5064,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9755,9128,5064,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9756,9128,5064,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9757,9129,5065,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9758,9129,5065,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9759,9130,5065,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9760,9130,5065,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9761,9131,5066,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9762,9131,5066,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9763,9132,5066,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9764,9132,5066,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9765,9133,5067,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9766,9133,5067,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9767,9134,5067,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9768,9134,5067,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9769,9135,5068,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9770,9135,5068,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9771,9136,5068,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9772,9136,5068,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9773,9137,5069,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9774,9137,5069,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9775,9138,5069,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9776,9138,5069,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9777,9139,5070,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9778,9139,5070,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9779,9140,5070,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9780,9140,5070,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9781,9141,5071,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9782,9141,5071,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9783,9142,5071,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9784,9142,5071,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9785,9143,5072,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9786,9143,5072,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9787,9144,5072,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9788,9144,5072,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9789,9145,5073,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9790,9145,5073,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9791,9146,5073,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9792,9146,5073,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9793,9147,5074,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9794,9147,5074,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9795,9148,5074,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9796,9148,5074,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9797,9149,5075,7001,7103,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9798,9149,5075,7001,7101,50.00,0,9.0000,'+',0,'+',0.0000,'+',0,0),
-(9799,9150,5075,7002,7202,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9800,9150,5075,7002,7201,100.00,0,19.0000,'+',0,'+',0.0000,'+',0,0),
-(9801,9151,5076,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9802,9151,5076,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9803,9152,5076,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9804,9152,5076,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9809,9155,5078,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9810,9155,5078,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9811,9156,5078,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9812,9156,5078,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9813,9157,5079,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9814,9157,5079,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9815,9158,5079,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9816,9158,5079,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9817,9159,5080,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9818,9159,5080,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9819,9160,5080,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9820,9160,5080,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9821,9161,5081,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9822,9161,5081,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9823,9162,5081,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9824,9162,5081,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9825,9163,5082,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9826,9163,5082,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9827,9164,5082,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9828,9164,5082,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9829,9165,5083,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9830,9165,5083,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9831,9166,5083,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9832,9166,5083,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9837,9169,5085,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9838,9169,5085,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9839,9170,5085,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9840,9170,5085,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9841,9171,5086,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9842,9171,5086,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9843,9172,5086,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9844,9172,5086,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9845,9173,5087,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9846,9173,5087,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9847,9174,5087,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9848,9174,5087,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9849,9175,5088,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9850,9175,5088,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9851,9176,5088,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9852,9176,5088,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9853,9177,5089,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9854,9177,5089,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9855,9178,5089,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9856,9178,5089,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9857,9179,5090,7001,7101,50.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9858,9179,5090,7001,7103,50.00,0,460.5022,'+',0,'+',0.0000,'+',0,0),
-(9859,9180,5090,7002,7201,100.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9860,9180,5090,7002,7202,100.00,0,972.1713,'+',0,'+',0.0000,'+',0,0),
-(9865,9001,5001,7001,7104,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9866,9002,5001,7002,7201,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,1),
-(9947,9227,5077,7001,7101,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9948,9227,5077,7001,7102,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9949,9227,5077,7001,7103,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9950,9227,5077,7001,7104,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9955,9230,5023,7001,7101,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9956,9230,5023,7001,7102,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9957,9230,5023,7001,7103,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9958,9230,5023,7001,7104,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9959,9231,5023,7002,7201,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9960,9231,5023,7002,7202,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,0),
-(9993,9251,5023,5,39,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,9),
-(9994,9251,5023,5,40,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,7),
-(9995,9251,5023,5,41,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,8),
-(9996,9251,5023,5,42,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,6);
+(9865,9001,5001,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9866,9001,5001,1,2,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9867,9001,5001,1,3,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9868,9002,5001,3,13,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9869,9002,5001,3,14,25.00,1,3500.0000,'+',0,'+',0.0000,'+',0,0),
+(9870,9002,5001,3,15,10.00,1,7000.0000,'+',0,'+',0.0000,'+',0,0),
+(9871,9003,5001,4,16,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9872,9003,5001,4,17,30.00,1,2000.0000,'+',0,'+',0.0000,'+',0,0),
+(9873,9004,5001,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9874,9004,5001,5,20,40.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(9875,9005,5001,11,34,99.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(9876,9005,5001,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9877,9005,5001,11,36,99.00,1,500.0000,'+',0,'+',0.0000,'+',0,0),
+(9878,9006,5002,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9879,9006,5002,1,3,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9880,9006,5002,1,4,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9881,9007,5002,3,14,25.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9882,9007,5002,3,15,15.00,1,3500.0000,'+',0,'+',0.0000,'+',0,0),
+(9883,9008,5002,4,17,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9884,9008,5002,4,18,20.00,1,3000.0000,'+',0,'+',0.0000,'+',0,0),
+(9885,9009,5002,5,20,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9886,9010,5002,11,34,99.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(9887,9010,5002,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9888,9011,5003,1,2,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9889,9011,5003,1,4,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9890,9011,5003,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9891,9012,5003,3,13,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9892,9012,5003,3,14,20.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(9893,9013,5003,4,16,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9894,9013,5003,4,17,20.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(9895,9014,5003,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9896,9015,5003,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9897,9015,5003,11,36,99.00,1,500.0000,'+',0,'+',0.0000,'+',0,0),
+(9898,9016,5004,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9899,9016,5004,1,6,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9900,9017,5004,3,14,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9901,9017,5004,3,15,15.00,1,3000.0000,'+',0,'+',0.0000,'+',0,0),
+(9902,9018,5004,4,17,25.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9903,9018,5004,4,18,15.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(9904,9019,5004,5,20,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9905,9020,5004,11,34,99.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(9906,9020,5004,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9907,9021,5005,10,31,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9908,9021,5005,10,32,25.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9909,9022,5005,4,16,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9910,9022,5005,4,17,20.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(9911,9023,5005,11,34,99.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(9912,9023,5005,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9913,9024,5006,10,31,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9914,9024,5006,10,33,15.00,1,8000.0000,'+',0,'+',0.0000,'+',0,0),
+(9915,9025,5006,4,16,25.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9916,9025,5006,4,17,15.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(9917,9026,5006,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9918,9027,5007,10,32,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9919,9027,5007,10,33,15.00,1,6000.0000,'+',0,'+',0.0000,'+',0,0),
+(9920,9028,5007,4,17,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9921,9028,5007,4,18,15.00,1,3000.0000,'+',0,'+',0.0000,'+',0,0),
+(9922,9029,5007,11,34,99.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(9923,9029,5007,11,35,99.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9924,9030,5008,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9925,9030,5008,1,2,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9926,9031,5008,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9927,9031,5008,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9928,9032,5009,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9929,9032,5009,1,2,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9930,9033,5009,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9931,9033,5009,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9932,9034,5010,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9933,9034,5010,1,4,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9934,9035,5010,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9935,9035,5010,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9936,9036,5011,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9937,9036,5011,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(9938,9037,5011,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9939,9037,5011,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9940,9038,5012,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9941,9038,5012,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(9942,9039,5012,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9943,9039,5012,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9944,9040,5013,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9945,9040,5013,5,20,30.00,1,2000.0000,'+',0,'+',0.0000,'+',0,0),
+(9946,9041,5013,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9947,9041,5013,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9948,9042,5014,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9949,9042,5014,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9950,9043,5014,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9951,9043,5014,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9952,9044,5015,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9953,9044,5015,5,20,30.00,1,1000.0000,'+',0,'+',0.0000,'+',0,0),
+(9954,9045,5015,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9955,9045,5015,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9956,9046,5016,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9957,9046,5016,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(9958,9047,5016,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9959,9047,5016,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9960,9048,5017,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9961,9048,5017,5,20,30.00,1,2000.0000,'+',0,'+',0.0000,'+',0,0),
+(9962,9049,5017,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9963,9049,5017,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9964,9050,5018,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9965,9050,5018,5,20,30.00,1,2000.0000,'+',0,'+',0.0000,'+',0,0),
+(9966,9051,5018,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9967,9051,5018,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9968,9052,5019,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9969,9052,5019,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(9970,9053,5019,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9971,9053,5019,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9972,9054,5020,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9973,9054,5020,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(9974,9055,5020,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9975,9055,5020,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9976,9056,5021,2,8,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9977,9056,5021,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9978,9056,5021,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9979,9057,5021,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9980,9057,5021,1,4,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9981,9058,5022,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9982,9058,5022,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9983,9058,5022,2,11,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9984,9059,5022,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9985,9059,5022,1,2,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9986,9060,5023,2,8,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9987,9060,5023,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9988,9060,5023,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9989,9061,5023,1,2,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9990,9061,5023,1,3,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9991,9062,5024,2,7,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9992,9062,5024,2,8,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9993,9062,5024,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9994,9063,5024,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9995,9063,5024,1,2,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9996,9064,5025,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9997,9064,5025,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9998,9065,5025,1,2,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(9999,9065,5025,1,3,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10000,9066,5026,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10001,9066,5026,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10002,9066,5026,2,11,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10003,9067,5026,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10004,9067,5026,1,4,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10005,9068,5027,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10006,9068,5027,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10007,9068,5027,2,11,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10008,9069,5027,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10009,9069,5027,1,4,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10010,9070,5028,2,8,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10011,9070,5028,2,9,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10012,9070,5028,2,10,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10013,9071,5028,1,1,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10014,9071,5028,1,2,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10015,9072,5029,2,7,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10016,9072,5029,2,8,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10017,9072,5029,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10018,9073,5029,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10019,9073,5029,1,3,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10020,9074,5030,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10021,9074,5030,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10022,9075,5030,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10023,9075,5030,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10024,9076,5031,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10025,9076,5031,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10026,9077,5031,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10027,9077,5031,1,4,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10028,9078,5032,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10029,9078,5032,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10030,9079,5032,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10031,9079,5032,1,2,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10032,9080,5033,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10033,9080,5033,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10034,9081,5033,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10035,9081,5033,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10036,9082,5034,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10037,9082,5034,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10038,9083,5034,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10039,9083,5034,1,4,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10040,9084,5035,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10041,9084,5035,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10042,9085,5035,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10043,9085,5035,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10044,9086,5036,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10045,9086,5036,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10046,9087,5036,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10047,9087,5036,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10048,9088,5037,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10049,9088,5037,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10050,9089,5037,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10051,9089,5037,1,3,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10052,9090,5038,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10053,9090,5038,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10054,9091,5038,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10055,9091,5038,1,4,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10056,9092,5039,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10057,9092,5039,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10058,9093,5039,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10059,9093,5039,1,2,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10060,9094,5040,2,9,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10061,9094,5040,2,10,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10062,9095,5040,1,1,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10063,9095,5040,1,5,20.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10064,9096,5051,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10065,9096,5051,7,24,20.00,1,2500.0000,'+',0,'+',0.0000,'+',0,0),
+(10066,9097,5051,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10067,9097,5051,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10068,9098,5052,7,23,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10069,9098,5052,7,24,15.00,1,3000.0000,'+',0,'+',0.0000,'+',0,0),
+(10070,9099,5052,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10071,9099,5052,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10072,9100,5053,7,23,40.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10073,9100,5053,7,24,15.00,1,3000.0000,'+',0,'+',0.0000,'+',0,0),
+(10074,9101,5053,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10075,9101,5053,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10076,9102,5054,7,23,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10077,9102,5054,7,24,10.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(10078,9103,5054,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10079,9103,5054,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10080,9104,5055,7,23,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10081,9104,5055,7,24,10.00,1,2000.0000,'+',0,'+',0.0000,'+',0,0),
+(10082,9105,5055,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10083,9105,5055,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10084,9106,5056,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10085,9106,5056,7,24,20.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(10086,9107,5056,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10087,9107,5056,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10088,9108,5057,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10089,9108,5057,7,24,20.00,1,1000.0000,'+',0,'+',0.0000,'+',0,0),
+(10090,9109,5057,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10091,9109,5057,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10092,9110,5058,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10093,9110,5058,7,24,20.00,1,600.0000,'+',0,'+',0.0000,'+',0,0),
+(10094,9111,5058,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10095,9111,5058,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10096,9112,5059,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10097,9112,5059,7,24,20.00,1,500.0000,'+',0,'+',0.0000,'+',0,0),
+(10098,9113,5059,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10099,9113,5059,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10100,9114,5060,7,23,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10101,9114,5060,7,24,20.00,1,700.0000,'+',0,'+',0.0000,'+',0,0),
+(10102,9115,5060,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10103,9115,5060,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10104,9116,5071,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10105,9116,5071,5,20,30.00,1,1200.0000,'+',0,'+',0.0000,'+',0,0),
+(10106,9117,5071,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10107,9117,5071,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10108,9118,5072,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10109,9118,5072,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(10110,9119,5072,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10111,9119,5072,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10112,9120,5073,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10113,9120,5073,5,20,30.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(10114,9121,5073,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10115,9121,5073,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10116,9122,5074,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10117,9122,5074,5,20,30.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(10118,9123,5074,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10119,9123,5074,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10120,9124,5075,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10121,9124,5075,5,20,30.00,1,500.0000,'+',0,'+',0.0000,'+',0,0),
+(10122,9125,5075,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10123,9125,5075,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10124,9126,5076,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10125,9126,5076,5,20,30.00,1,800.0000,'+',0,'+',0.0000,'+',0,0),
+(10126,9127,5076,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10127,9127,5076,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10128,9128,5077,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10129,9128,5077,5,20,30.00,1,600.0000,'+',0,'+',0.0000,'+',0,0),
+(10130,9129,5077,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10131,9129,5077,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10132,9130,5078,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10133,9130,5078,5,20,30.00,1,1500.0000,'+',0,'+',0.0000,'+',0,0),
+(10134,9131,5078,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10135,9131,5078,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10136,9132,5079,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10137,9132,5079,5,20,30.00,1,1000.0000,'+',0,'+',0.0000,'+',0,0),
+(10138,9133,5079,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10139,9133,5079,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10140,9134,5085,9,28,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10141,9134,5085,9,29,40.00,1,300.0000,'+',0,'+',0.0000,'+',0,0),
+(10142,9135,5085,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10143,9135,5085,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10144,9136,5086,9,28,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10145,9136,5086,9,29,40.00,1,400.0000,'+',0,'+',0.0000,'+',0,0),
+(10146,9137,5086,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10147,9137,5086,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10148,9138,5087,9,28,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10149,9138,5087,9,29,40.00,1,250.0000,'+',0,'+',0.0000,'+',0,0),
+(10150,9139,5087,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10151,9139,5087,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10152,9140,5088,9,29,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10153,9140,5088,9,30,20.00,1,500.0000,'+',0,'+',0.0000,'+',0,0),
+(10154,9141,5088,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10155,9141,5088,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10156,9142,5089,9,28,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10157,9142,5089,9,29,40.00,1,200.0000,'+',0,'+',0.0000,'+',0,0),
+(10158,9143,5089,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10159,9143,5089,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10160,9144,5090,9,28,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10161,9144,5090,9,29,40.00,1,150.0000,'+',0,'+',0.0000,'+',0,0),
+(10162,9145,5090,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10163,9145,5090,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0);
 /*!40000 ALTER TABLE `oc_product_option_value` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_rating`
+--
+
+DROP TABLE IF EXISTS `oc_product_rating`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_rating` (
+  `product_id` int(11) NOT NULL,
+  `rating` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `review_count` int(11) NOT NULL DEFAULT 0,
+  `distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`distribution`)),
+  `date_modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_rating`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_rating` WRITE;
+/*!40000 ALTER TABLE `oc_product_rating` DISABLE KEYS */;
+INSERT INTO `oc_product_rating` VALUES
+(5001,5.00,2,'{\"5\":2,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 11:56:43'),
+(5002,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 11:38:41'),
+(5003,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:19:58'),
+(5004,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 09:50:04'),
+(5005,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 11:25:48'),
+(5006,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 19:49:33'),
+(5007,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 17:19:14'),
+(5008,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 09:42:47'),
+(5009,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:06:41'),
+(5010,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 11:19:41'),
+(5011,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 08:17:44'),
+(5012,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 18:59:23'),
+(5013,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 08:18:42'),
+(5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 08:18:22'),
+(5015,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-02 11:56:31'),
+(5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:05:14'),
+(5017,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:01:29'),
+(5018,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 09:40:37'),
+(5020,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 09:32:18'),
+(5021,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:44:38'),
+(5023,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-08 11:08:26'),
+(5024,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:47:59'),
+(5025,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:15:59'),
+(5029,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 13:13:34'),
+(5030,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:21:23'),
+(5031,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:30:21'),
+(5032,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:17:43'),
+(5033,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:23:13'),
+(5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:17:53'),
+(5037,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 17:19:50'),
+(5038,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:17:45'),
+(5040,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 11:08:50'),
+(5041,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 09:42:31'),
+(5042,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 18:40:14'),
+(5045,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 14:04:32'),
+(5048,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 17:34:46'),
+(5050,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 17:44:22'),
+(5051,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 17:56:09'),
+(5052,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 10:59:45'),
+(5053,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:05:44'),
+(5054,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 10:09:33'),
+(5061,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 19:10:43'),
+(5062,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 09:32:22'),
+(5063,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:05:49'),
+(5064,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:30:33'),
+(5065,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:48:23'),
+(5066,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 19:40:31'),
+(5067,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 11:45:16'),
+(5070,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:55:27'),
+(5071,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 08:17:42'),
+(5072,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 11:42:52'),
+(5073,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-02 15:17:52'),
+(5074,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 10:58:33'),
+(5076,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:23:24'),
+(5077,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 11:30:57'),
+(5079,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 11:40:30'),
+(100001,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:20:45');
+/*!40000 ALTER TABLE `oc_product_rating` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -11808,6 +14292,35 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_product_similar`
+--
+
+DROP TABLE IF EXISTS `oc_product_similar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_similar` (
+  `product_id` int(11) NOT NULL,
+  `similar_id` int(11) NOT NULL,
+  PRIMARY KEY (`product_id`,`similar_id`),
+  KEY `similar_id` (`similar_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_similar`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_similar` WRITE;
+/*!40000 ALTER TABLE `oc_product_similar` DISABLE KEYS */;
+INSERT INTO `oc_product_similar` VALUES
+(5023,5001);
+/*!40000 ALTER TABLE `oc_product_similar` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_product_special`
 --
 
@@ -11826,7 +14339,7 @@ CREATE TABLE `oc_product_special` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_special_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=260 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11837,11 +14350,11 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_special` WRITE;
 /*!40000 ALTER TABLE `oc_product_special` DISABLE KEYS */;
 INSERT INTO `oc_product_special` VALUES
-(2,5003,1,1,36789.0102,'2024-01-01','9999-12-31',0,'2026-07-25 09:33:28'),
-(4,5010,1,1,6088.8626,'2024-01-01','9999-12-31',0,'2026-07-25 09:33:28'),
-(8,5014,1,1,20415.5981,'2024-01-01','9999-12-31',0,'2026-07-25 09:33:28'),
-(29,5006,1,1,619.8860,'2024-01-01','9999-12-31',0,'2026-07-25 09:33:28'),
-(42,5023,1,0,500.0000,'0000-00-00','0000-00-00',0,'2026-07-25 10:12:03');
+(57,5006,1,1,619.8860,'2024-01-01','2026-12-31',0,'2026-07-25 09:33:28'),
+(58,5003,1,1,36789.0102,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
+(59,5014,1,1,20415.5981,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
+(60,5010,1,1,6088.8626,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
+(68,5023,1,0,500.0000,'0000-00-00','2026-07-07',0,'2026-07-25 10:12:03');
 /*!40000 ALTER TABLE `oc_product_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -12105,8 +14618,10 @@ LOCK TABLES `oc_product_to_layout` WRITE;
 /*!40000 ALTER TABLE `oc_product_to_layout` DISABLE KEYS */;
 INSERT INTO `oc_product_to_layout` VALUES
 (5001,0,0),
+(5003,0,0),
 (5005,0,0),
 (5006,0,0),
+(5010,0,0),
 (5011,0,0),
 (5013,0,0),
 (5014,0,0),
@@ -12116,6 +14631,7 @@ INSERT INTO `oc_product_to_layout` VALUES
 (5037,0,0),
 (5041,0,0),
 (5044,0,0),
+(5048,0,0),
 (5050,0,0),
 (5052,0,0),
 (5054,0,0),
@@ -13808,8 +16324,11 @@ CREATE TABLE `oc_product_variant` (
   `variant_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `sku` varchar(64) NOT NULL DEFAULT '',
+  `model` varchar(64) NOT NULL DEFAULT '',
   `upc` varchar(12) NOT NULL DEFAULT '',
   `ean` varchar(14) NOT NULL DEFAULT '',
+  `jan` varchar(13) NOT NULL DEFAULT '',
+  `isbn` varchar(17) NOT NULL DEFAULT '',
   `mpn` varchar(64) NOT NULL DEFAULT '',
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
   `quantity` decimal(15,4) DEFAULT 0.0000,
@@ -13824,7 +16343,7 @@ CREATE TABLE `oc_product_variant` (
   UNIQUE KEY `ux_product_variant_hash` (`product_id`,`variant_hash`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `fk_pv_product` FOREIGN KEY (`product_id`) REFERENCES `oc_product` (`product_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=275 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13835,15 +16354,15 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_variant` WRITE;
 /*!40000 ALTER TABLE `oc_product_variant` DISABLE KEYS */;
 INSERT INTO `oc_product_variant` VALUES
-(52,5001,'A!','','','',0.0000,50.0000,1,0.0000,1,'','7104',0,1),
-(97,5023,'ABC-1','','','',100.0000,50.0000,1,0.0000,1,'','7101-7201',0,1),
-(98,5023,'ABC-2','','','',200.0000,50.0000,1,0.0000,1,'','7101-7202',0,1),
-(99,5023,'ABC-3','','','',300.0000,50.0000,1,0.0000,1,'','7102-7201',0,1),
-(100,5023,'ABC-4','','','',400.0000,50.0000,1,0.0000,1,'','7102-7202',0,1),
-(101,5023,'ABC-5','','','',500.0000,50.0000,1,0.0000,1,'','7103-7201',0,1),
-(102,5023,'ABC-6','','','',600.0000,50.0000,1,0.0000,1,'','7103-7202',0,1),
-(103,5023,'ABC-7','','','',700.0000,50.0000,1,0.0000,1,'','7104-7201',0,1),
-(104,5023,'ABC-8','','','',800.0000,50.0000,1,0.0000,1,'','7104-7202',0,1);
+(52,5001,'A!','','','','','','',0.0000,50.0000,1,0.0000,1,'','7104',0,1),
+(209,5023,'ABC-1','A1','','','','','',100.0000,0.0000,1,0.0000,1,'','7101-7201',0,1),
+(210,5023,'','A2','','','','','',200.0000,0.0000,1,0.0000,1,'','7101-7202',0,1),
+(211,5023,'','A3','','','','','',300.0000,0.0000,1,0.0000,1,'','7102-7201',0,1),
+(212,5023,'','A4','','','','','',20000.0000,42.0000,1,0.0000,1,'','7102-7202',0,1),
+(213,5023,'','A5','','','','','',400.0000,12.0000,1,0.0000,1,'','7103-7201',0,1),
+(214,5023,'','A6','','','','','',500.0000,0.0000,1,0.0000,1,'','7103-7202',0,1),
+(215,5023,'','A7','','','','','',600.0000,0.0000,1,0.0000,1,'','7104-7201',0,1),
+(216,5023,'','A8','','','','','',700.0000,0.0000,1,0.0000,1,'','7104-7202',0,1);
 /*!40000 ALTER TABLE `oc_product_variant` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -13877,22 +16396,22 @@ LOCK TABLES `oc_product_variant_value` WRITE;
 /*!40000 ALTER TABLE `oc_product_variant_value` DISABLE KEYS */;
 INSERT INTO `oc_product_variant_value` VALUES
 (52,5001,7001,7104),
-(97,5023,7001,7101),
-(98,5023,7001,7101),
-(99,5023,7001,7102),
-(100,5023,7001,7102),
-(101,5023,7001,7103),
-(102,5023,7001,7103),
-(103,5023,7001,7104),
-(104,5023,7001,7104),
-(97,5023,7002,7201),
-(99,5023,7002,7201),
-(101,5023,7002,7201),
-(103,5023,7002,7201),
-(98,5023,7002,7202),
-(100,5023,7002,7202),
-(102,5023,7002,7202),
-(104,5023,7002,7202);
+(209,5023,7001,7101),
+(210,5023,7001,7101),
+(211,5023,7001,7102),
+(212,5023,7001,7102),
+(213,5023,7001,7103),
+(214,5023,7001,7103),
+(215,5023,7001,7104),
+(216,5023,7001,7104),
+(209,5023,7002,7201),
+(211,5023,7002,7201),
+(213,5023,7002,7201),
+(215,5023,7002,7201),
+(210,5023,7002,7202),
+(212,5023,7002,7202),
+(214,5023,7002,7202),
+(216,5023,7002,7202);
 /*!40000 ALTER TABLE `oc_product_variant_value` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -13915,7 +16434,7 @@ CREATE TABLE `oc_product_video` (
   PRIMARY KEY (`product_video_id`),
   KEY `product_id` (`product_id`),
   KEY `language_id` (`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13928,7 +16447,7 @@ LOCK TABLES `oc_product_video` WRITE;
 INSERT INTO `oc_product_video` VALUES
 (53,99999,NULL,'mp4','catalog/demo/demo-seed/banners/0306.mp4',0),
 (54,100000,NULL,'mp4','catalog/demo/demo-seed/banners/0306.mp4',0),
-(59,5023,NULL,'mp4','catalog/demo/demo-seed/banners/0306.mp4',0);
+(81,5023,NULL,'mp4','catalog/demo/demo-seed/banners/0306.mp4',0);
 /*!40000 ALTER TABLE `oc_product_video` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14069,6 +16588,7 @@ DROP TABLE IF EXISTS `oc_return`;
 CREATE TABLE `oc_return` (
   `return_id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
+  `type` varchar(16) NOT NULL DEFAULT 'full',
   `product_id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
   `firstname` varchar(32) NOT NULL,
@@ -14078,6 +16598,8 @@ CREATE TABLE `oc_return` (
   `product` varchar(255) NOT NULL,
   `model` varchar(64) NOT NULL,
   `quantity` int(11) NOT NULL,
+  `amount` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `refunded` tinyint(1) NOT NULL DEFAULT 0,
   `opened` tinyint(1) NOT NULL,
   `return_reason_id` int(11) NOT NULL,
   `return_action_id` int(11) NOT NULL,
@@ -14086,8 +16608,11 @@ CREATE TABLE `oc_return` (
   `date_ordered` date NOT NULL DEFAULT '0000-00-00',
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
-  PRIMARY KEY (`return_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`return_id`),
+  KEY `order_id` (`order_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `return_status_id` (`return_status_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14097,6 +16622,9 @@ CREATE TABLE `oc_return` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_return` WRITE;
 /*!40000 ALTER TABLE `oc_return` DISABLE KEYS */;
+INSERT INTO `oc_return` VALUES
+(1,104,'partial',5023,2,'John','Doe','john@example.com','1234567890','Adidas Ultraboost Light','UBL-01',1,400.0000,1,0,1,1,3,'test partial','2026-08-01','2026-08-01 14:37:03','2026-08-01 14:37:28'),
+(2,104,'full',5023,2,'John','Doe','john@example.com','1234567890','Adidas Ultraboost Light','UBL-01',2,800.0000,1,0,1,1,3,'full rest','2026-08-01','2026-08-01 14:37:38','2026-08-01 14:37:47');
 /*!40000 ALTER TABLE `oc_return` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14156,8 +16684,9 @@ CREATE TABLE `oc_return_history` (
   `notify` tinyint(1) NOT NULL,
   `comment` mediumtext NOT NULL,
   `date_added` datetime NOT NULL,
-  PRIMARY KEY (`return_history_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`return_history_id`),
+  KEY `return_id` (`return_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14167,7 +16696,49 @@ CREATE TABLE `oc_return_history` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_return_history` WRITE;
 /*!40000 ALTER TABLE `oc_return_history` DISABLE KEYS */;
+INSERT INTO `oc_return_history` VALUES
+(1,1,3,0,'completed','2026-08-01 14:37:28'),
+(2,2,3,0,'done','2026-08-01 14:37:47');
 /*!40000 ALTER TABLE `oc_return_history` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_return_product`
+--
+
+DROP TABLE IF EXISTS `oc_return_product`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_return_product` (
+  `return_product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `return_id` int(11) NOT NULL,
+  `order_product_id` int(11) NOT NULL DEFAULT 0,
+  `product_id` int(11) NOT NULL DEFAULT 0,
+  `variant_id` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `model` varchar(64) NOT NULL DEFAULT '',
+  `quantity` int(11) NOT NULL DEFAULT 0,
+  `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `total` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  PRIMARY KEY (`return_product_id`),
+  KEY `return_id` (`return_id`),
+  KEY `order_product_id` (`order_product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_return_product`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_return_product` WRITE;
+/*!40000 ALTER TABLE `oc_return_product` DISABLE KEYS */;
+INSERT INTO `oc_return_product` VALUES
+(1,1,301,5023,0,'Adidas Ultraboost Light','UBL-01',1,400.0000,0.0000),
+(2,2,301,5023,0,'Adidas Ultraboost Light','UBL-01',2,400.0000,800.0000);
+/*!40000 ALTER TABLE `oc_return_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -14265,13 +16836,16 @@ CREATE TABLE `oc_review` (
   `customer_id` int(11) NOT NULL,
   `author` varchar(64) NOT NULL,
   `text` mediumtext NOT NULL,
-  `rating` int(11) NOT NULL,
+  `rating` decimal(3,1) NOT NULL DEFAULT 0.0,
   `status` tinyint(1) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT 0,
+  `ip` varchar(40) NOT NULL DEFAULT '',
+  `criteria_group_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`review_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14282,6 +16856,251 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_review` WRITE;
 /*!40000 ALTER TABLE `oc_review` DISABLE KEYS */;
 /*!40000 ALTER TABLE `oc_review` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_criteria`
+--
+
+DROP TABLE IF EXISTS `oc_review_criteria`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_criteria` (
+  `criteria_id` int(11) NOT NULL AUTO_INCREMENT,
+  `criteria_group_id` int(11) NOT NULL,
+  `type` enum('rating','text') NOT NULL DEFAULT 'text',
+  `is_required` tinyint(1) NOT NULL DEFAULT 0,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`criteria_id`),
+  KEY `criteria_group_id` (`criteria_group_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_criteria`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_criteria` WRITE;
+/*!40000 ALTER TABLE `oc_review_criteria` DISABLE KEYS */;
+INSERT INTO `oc_review_criteria` VALUES
+(1,1,'text',1,1),
+(2,1,'text',0,2);
+/*!40000 ALTER TABLE `oc_review_criteria` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_criteria_description`
+--
+
+DROP TABLE IF EXISTS `oc_review_criteria_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_criteria_description` (
+  `criteria_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `help` text DEFAULT NULL,
+  PRIMARY KEY (`criteria_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_criteria_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_criteria_description` WRITE;
+/*!40000 ALTER TABLE `oc_review_criteria_description` DISABLE KEYS */;
+INSERT INTO `oc_review_criteria_description` VALUES
+(1,1,'Pros',NULL),
+(1,2,'Достоїнства',NULL),
+(1,3,'Достоинства',NULL),
+(2,1,'Cons',NULL),
+(2,2,'Недоліки',NULL),
+(2,3,'Недостатки',NULL);
+/*!40000 ALTER TABLE `oc_review_criteria_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_criteria_group`
+--
+
+DROP TABLE IF EXISTS `oc_review_criteria_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_criteria_group` (
+  `criteria_group_id` int(11) NOT NULL AUTO_INCREMENT,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`criteria_group_id`),
+  KEY `is_default` (`is_default`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_criteria_group`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_criteria_group` WRITE;
+/*!40000 ALTER TABLE `oc_review_criteria_group` DISABLE KEYS */;
+INSERT INTO `oc_review_criteria_group` VALUES
+(1,1,0);
+/*!40000 ALTER TABLE `oc_review_criteria_group` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_criteria_group_description`
+--
+
+DROP TABLE IF EXISTS `oc_review_criteria_group_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_criteria_group_description` (
+  `criteria_group_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`criteria_group_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_criteria_group_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_criteria_group_description` WRITE;
+/*!40000 ALTER TABLE `oc_review_criteria_group_description` DISABLE KEYS */;
+INSERT INTO `oc_review_criteria_group_description` VALUES
+(1,1,'Default (Pros / Cons)'),
+(1,2,'За замовчуванням (Достоїнства / Недоліки)'),
+(1,3,'По умолчанию (Достоинства / Недостатки)');
+/*!40000 ALTER TABLE `oc_review_criteria_group_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_criteria_value`
+--
+
+DROP TABLE IF EXISTS `oc_review_criteria_value`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_criteria_value` (
+  `review_id` int(11) NOT NULL,
+  `criteria_id` int(11) NOT NULL,
+  `value` text NOT NULL,
+  PRIMARY KEY (`review_id`,`criteria_id`),
+  KEY `criteria_id` (`criteria_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_criteria_value`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_criteria_value` WRITE;
+/*!40000 ALTER TABLE `oc_review_criteria_value` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_review_criteria_value` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_image`
+--
+
+DROP TABLE IF EXISTS `oc_review_image`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_image` (
+  `review_image_id` int(11) NOT NULL AUTO_INCREMENT,
+  `review_id` int(11) NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`review_image_id`),
+  KEY `review_id` (`review_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_image`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_image` WRITE;
+/*!40000 ALTER TABLE `oc_review_image` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_review_image` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_video`
+--
+
+DROP TABLE IF EXISTS `oc_review_video`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_video` (
+  `review_video_id` int(11) NOT NULL AUTO_INCREMENT,
+  `review_id` int(11) NOT NULL,
+  `video_type` enum('youtube','mp4') NOT NULL DEFAULT 'youtube',
+  `video` varchar(255) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`review_video_id`),
+  KEY `review_id` (`review_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_video`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_video` WRITE;
+/*!40000 ALTER TABLE `oc_review_video` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_review_video` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_review_vote`
+--
+
+DROP TABLE IF EXISTS `oc_review_vote`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_review_vote` (
+  `review_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `vote` tinyint(1) NOT NULL DEFAULT 1,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`review_id`,`customer_id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_review_vote`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_review_vote` WRITE;
+/*!40000 ALTER TABLE `oc_review_vote` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_review_vote` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -14344,8 +17163,38 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20260716_add_configurable_product_catalog_view.sql','2026-07-15 09:21:59'),
 ('20260716_add_configurable_product_pricefrom_copy.sql','2026-07-15 09:54:58'),
 ('20260716_add_configurable_product_view_event.sql','2026-07-15 09:04:50'),
-('20260716_add_product_variant_customer_group_price.sql','2026-07-15 09:57:36');
+('20260716_add_product_variant_customer_group_price.sql','2026-07-15 09:57:36'),
+('20260804_add_dashboard_analytics_widgets.sql','2026-08-01 13:48:49'),
+('20260804_dashboard_widget_layout.sql','2026-08-01 14:00:30');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_search_query_mapping`
+--
+
+DROP TABLE IF EXISTS `oc_search_query_mapping`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_search_query_mapping` (
+  `mapping_id` int(11) NOT NULL AUTO_INCREMENT,
+  `source` varchar(255) NOT NULL,
+  `target` varchar(255) NOT NULL,
+  PRIMARY KEY (`mapping_id`),
+  UNIQUE KEY `uq_source` (`source`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_search_query_mapping`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_search_query_mapping` WRITE;
+/*!40000 ALTER TABLE `oc_search_query_mapping` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_search_query_mapping` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -14369,7 +17218,7 @@ CREATE TABLE `oc_seo_url` (
   KEY `idx_store_id` (`store_id`),
   KEY `idx_store_language_query` (`store_id`,`language_id`,`query`(191)),
   KEY `idx_store_keyword` (`store_id`,`keyword`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=6551 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=6642 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14572,8 +17421,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5375,0,2,'category_id=1103','electronics-audio-2'),
 (5378,0,1,'product_id=5002','electronics-samsung-galaxy-s24-ultra-1'),
 (5379,0,2,'product_id=5002','electronics-samsung-galaxy-s24-ultra-2'),
-(5380,0,1,'product_id=5003','electronics-google-pixel-8-pro-1'),
-(5381,0,2,'product_id=5003','electronics-google-pixel-8-pro-2'),
 (5382,0,1,'product_id=5004','electronics-oneplus-12-1'),
 (5383,0,2,'product_id=5004','electronics-oneplus-12-2'),
 (5388,0,1,'product_id=5007','electronics-lenovo-thinkpad-x1-carbon-1'),
@@ -14582,8 +17429,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5391,0,2,'product_id=5008','electronics-sony-wh-1000xm5-2'),
 (5392,0,1,'product_id=5009','electronics-bose-quietcomfort-ultra-1'),
 (5393,0,2,'product_id=5009','electronics-bose-quietcomfort-ultra-2'),
-(5394,0,1,'product_id=5010','electronics-jbl-charge-5-1'),
-(5395,0,2,'product_id=5010','electronics-jbl-charge-5-2'),
 (5406,0,1,'product_id=5012','home-kitchen-philips-airfryer-xxl-1'),
 (5407,0,2,'product_id=5012','home-kitchen-philips-airfryer-xxl-2'),
 (5412,0,1,'product_id=5015','home-kitchen-tefal-ingenio-cookware-set-1'),
@@ -14658,8 +17503,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5499,0,2,'product_id=5046','beauty-health-philips-sonicare-protectiveclean-2'),
 (5500,0,1,'product_id=5047','beauty-health-oral-b-io-series-6-1'),
 (5501,0,2,'product_id=5047','beauty-health-oral-b-io-series-6-2'),
-(5502,0,1,'product_id=5048','beauty-health-braun-series-9-pro-1'),
-(5503,0,2,'product_id=5048','beauty-health-braun-series-9-pro-2'),
 (5504,0,1,'product_id=5049','beauty-health-fitbit-charge-6-1'),
 (5505,0,2,'product_id=5049','beauty-health-fitbit-charge-6-2'),
 (5510,0,1,'category_id=1601','toys-games-board-games-1'),
@@ -14748,9 +17591,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5619,0,2,'product_id=5090','pet-supplies-hartz-groomers-brush-2'),
 (5626,0,1,'information_id=3','privacy-policy'),
 (5627,0,2,'information_id=3','privacy-policy'),
-(5662,0,1,'product_id=5014','home-kitchen-kitchenaid-artisan-mixer-1'),
-(5663,0,2,'product_id=5014','home-kitchen-kitchenaid-artisan-mixer-2'),
-(5664,0,3,'product_id=5014','mikser-kitchenaid-artisan'),
 (5665,0,1,'product_id=5041','beauty-health-cerave-hydrating-cleanser'),
 (5666,0,2,'product_id=5041','beauty-health-cerave-hydrating-cleanser-2'),
 (5667,0,3,'product_id=5041','ochischayuschee-sredstvo-dlya-litsa-cerave'),
@@ -14828,22 +17668,34 @@ INSERT INTO `oc_seo_url` VALUES
 (6317,0,3,'product_id=5077','bluetooth-priemnik-anker-roav'),
 (6348,0,1,'product_id=5037','sports-outdoors-black-diamond-spot-400-1'),
 (6349,0,2,'product_id=5037','sports-outdoors-black-diamond-spot-400-2'),
-(6371,0,1,'product_id=5001','apple-iphone-15-pro'),
-(6372,0,2,'product_id=5001','apple-iphone-15-pro'),
-(6373,0,3,'product_id=5001','apple-iphone-15-pro'),
 (6421,0,1,'category_id=101','electronics'),
 (6422,0,2,'category_id=101','elektronika'),
-(6438,0,1,'category_id=108','automotive'),
-(6439,0,2,'category_id=108','avtomobilna-promislovist'),
-(6440,0,3,'category_id=108','avtomobilnaya-promyshlennost'),
-(6503,0,1,'product_id=5006','electronics-apple-macbook-air-m3-1'),
-(6504,0,2,'product_id=5006','electronics-apple-macbook-air-m3-2'),
-(6505,0,3,'product_id=5006','apple-macbook-air-m3'),
 (6536,0,1,'manufacturer_id=310','brand-lego-1'),
 (6537,0,2,'manufacturer_id=310','brand-lego-2'),
-(6548,0,1,'product_id=5023','adidas-ultraboost-light'),
-(6549,0,2,'product_id=5023','adidas-ultraboost-light'),
-(6550,0,3,'product_id=5023','adidas-ultraboost-light');
+(6593,0,1,'product_id=5006','electronics-apple-macbook-air-m3-1'),
+(6594,0,2,'product_id=5006','electronics-apple-macbook-air-m3-2'),
+(6595,0,3,'product_id=5006','apple-macbook-air-m3'),
+(6596,0,1,'product_id=5003','electronics-google-pixel-8-pro-1'),
+(6597,0,2,'product_id=5003','electronics-google-pixel-8-pro-2'),
+(6598,0,1,'product_id=5014','home-kitchen-kitchenaid-artisan-mixer-1'),
+(6599,0,2,'product_id=5014','home-kitchen-kitchenaid-artisan-mixer-2'),
+(6600,0,3,'product_id=5014','mikser-kitchenaid-artisan'),
+(6601,0,1,'product_id=5010','electronics-jbl-charge-5-1'),
+(6602,0,2,'product_id=5010','electronics-jbl-charge-5-2'),
+(6609,0,1,'product_id=5001','apple-iphone-15-pro'),
+(6610,0,2,'product_id=5001','apple-iphone-15-pro'),
+(6611,0,3,'product_id=5001','apple-iphone-15-pro'),
+(6625,0,1,'checkout/dockercart_checkout/restore','restore-cart'),
+(6626,0,2,'checkout/dockercart_checkout/restore','restore-cart'),
+(6627,0,3,'checkout/dockercart_checkout/restore','restore-cart'),
+(6628,0,1,'product_id=5048','beauty-health-braun-series-9-pro-1'),
+(6629,0,2,'product_id=5048','beauty-health-braun-series-9-pro-2'),
+(6636,0,1,'product_id=5023','adidas-ultraboost-light'),
+(6637,0,2,'product_id=5023','adidas-ultraboost-light'),
+(6638,0,3,'product_id=5023','adidas-ultraboost-light'),
+(6639,0,1,'category_id=108','automotive'),
+(6640,0,2,'category_id=108','avtomobilna-promislovist'),
+(6641,0,3,'category_id=108','avtomobilnaya-promyshlennost');
 /*!40000 ALTER TABLE `oc_seo_url` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14872,8 +17724,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('9783b87f78a7ef5c40cb979c87','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-07-29 13:47:41'),
-('fd7fd7a5eb09071d292ecd11da','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-07-29 13:26:22');
+('003c164f2a40251b4b706e18a1','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-09 09:48:15'),
+('16d2a6343a1149075303f384e2','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-09 08:45:22'),
+('b11c8083042700746b22d9dcd4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-09 08:45:22');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -14894,7 +17747,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26865 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=29372 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -14938,8 +17791,6 @@ INSERT INTO `oc_setting` VALUES
 (179,0,'report_customer_reward','report_customer_reward_sort_order','3',0),
 (180,0,'report_customer_search','report_customer_search_sort_order','3',0),
 (181,0,'report_customer_search','report_customer_search_status','1',0),
-(182,0,'report_customer_transaction','report_customer_transaction_status','1',0),
-(183,0,'report_customer_transaction','report_customer_transaction_status_sort_order','4',0),
 (186,0,'report_sale_shipping','report_sale_shipping_status','1',0),
 (187,0,'report_sale_shipping','report_sale_shipping_sort_order','6',0),
 (188,0,'report_sale_return','report_sale_return_status','1',0),
@@ -14999,16 +17850,8 @@ INSERT INTO `oc_setting` VALUES
 (22641,0,'theme_dockercart','theme_dockercart_image_cart_height','64',0),
 (22642,0,'theme_dockercart','theme_dockercart_image_location_width','268',0),
 (22643,0,'theme_dockercart','theme_dockercart_image_location_height','50',0),
-(24630,0,'module_dockercart_search','module_dockercart_search_min_chars','3',0),
-(24631,0,'module_dockercart_search','module_dockercart_search_results_limit','20',0),
-(24632,0,'module_dockercart_search','module_dockercart_search_query_mappings','',0),
-(24633,0,'module_dockercart_search','module_dockercart_search_host','manticore',0),
-(24634,0,'module_dockercart_search','module_dockercart_search_port','9306',0),
-(24635,0,'module_dockercart_search','module_dockercart_search_http_port','9308',0),
-(24636,0,'module_dockercart_search','module_dockercart_search_autocomplete','1',0),
-(24637,0,'module_dockercart_search','module_dockercart_search_autocomplete_limit','10',0),
 (26063,0,'report_dockercart_analytics','report_dockercart_analytics_status','1',0),
-(26064,0,'report_dockercart_analytics','report_dockercart_analytics_sort_order','14',0),
+(26064,0,'report_dockercart_analytics','report_dockercart_analytics_sort_order','0',0),
 (26149,0,'dashboard_chart','dashboard_chart_width','12',0),
 (26150,0,'dashboard_chart','dashboard_chart_status','1',0),
 (26151,0,'dashboard_chart','dashboard_chart_sort_order','5',0),
@@ -15023,7 +17866,7 @@ INSERT INTO `oc_setting` VALUES
 (26160,0,'dashboard_dockercart_repeat','dashboard_dockercart_repeat_sort_order','8',0),
 (26178,0,'dashboard_traffic_source','dashboard_traffic_source_width','3',0),
 (26179,0,'dashboard_traffic_source','dashboard_traffic_source_status','1',0),
-(26180,0,'dashboard_traffic_source','dashboard_traffic_source_sort_order','9',0),
+(26180,0,'dashboard_traffic_source','dashboard_traffic_source_sort_order','11',0),
 (26184,0,'dashboard_recent','dashboard_recent_width','9',0),
 (26185,0,'dashboard_recent','dashboard_recent_status','1',0),
 (26186,0,'dashboard_recent','dashboard_recent_sort_order','20',0),
@@ -15082,196 +17925,296 @@ INSERT INTO `oc_setting` VALUES
 (26589,0,'module_dockercart_checkout','module_dockercart_checkout_cache_ttl','3600',0),
 (26590,0,'module_dockercart_checkout','module_dockercart_checkout_debug','0',0),
 (26591,0,'currency_ecb','currency_ecb_status','1',0),
-(26592,0,'config','config_name_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
-(26593,0,'config','config_owner_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart\",\"3\":\"DockerCart\"}',1),
-(26594,0,'config','config_address_i18n','{\"1\":\"1 Main Street, Kyiv, Ukraine\",\"2\":\"\\u0432\\u0443\\u043b. \\u0413\\u043e\\u043b\\u043e\\u0432\\u043d\\u0430, 1, \\u041a\\u0438\\u0457\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0457\\u043d\\u0430\",\"3\":\"\\u0413\\u043b\\u0430\\u0432\\u043d\\u0430\\u044f \\u0443\\u043b\\u0438\\u0446\\u0430, 1, \\u041a\\u0438\\u0435\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\"}',1),
-(26595,0,'config','config_open_i18n','{\"1\":\"Mon\\u2013Fri: 9 AM \\u2013 6 PM\",\"2\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00 \\u2013 18:00\",\"3\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00\\u201318:00\"}',1),
-(26596,0,'config','config_comment_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(26597,0,'config','config_theme','dockercart',0),
-(26598,0,'config','config_layout_id','4',0),
-(26599,0,'config','config_contact_form_status','0',0),
-(26600,0,'config','config_geocode','',0),
-(26601,0,'config','config_email','admin@example.com',0),
-(26602,0,'config','config_telephone','+1 555-555-1234',0),
-(26603,0,'config','config_fax','+1 555-111-1232',0),
-(26604,0,'config','config_images','[]',1),
-(26605,0,'config','config_meta_title_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
-(26606,0,'config','config_meta_description_i18n','{\"1\":\"DockerCart Store\",\"2\":\"\\u041c\\u0430\\u0433\\u0430\\u0437\\u0438\\u043d DockerCart\",\"3\":\"\"}',1),
-(26607,0,'config','config_meta_keyword_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(26608,0,'config','config_country_id','220',0),
-(26609,0,'config','config_zone_id','3490',0),
-(26610,0,'config','config_timezone','Europe/Kyiv',0),
-(26611,0,'config','config_language','en-gb',0),
-(26612,0,'config','config_admin_language','en-gb',0),
-(26613,0,'config','config_currency','UAH',0),
-(26614,0,'config','config_currency_engine','ecb',0),
-(26615,0,'config','config_currency_auto','1',0),
-(26616,0,'config','config_symbol_left_space','0',0),
-(26617,0,'config','config_symbol_right_space','0',0),
-(26618,0,'config','config_length_class_id','1',0),
-(26619,0,'config','config_weight_class_id','1',0),
-(26620,0,'config','config_product_count','1',0),
-(26621,0,'config','config_limit_admin','20',0),
-(26622,0,'config','config_review_status','1',0),
-(26623,0,'config','config_review_guest','1',0),
-(26624,0,'config','config_voucher_min','1',0),
-(26625,0,'config','config_voucher_max','1000',0),
-(26626,0,'config','config_tax','1',0),
-(26627,0,'config','config_tax_default','shipping',0),
-(26628,0,'config','config_tax_customer','shipping',0),
-(26629,0,'config','config_customer_activity','1',0),
-(26630,0,'config','config_customer_search','1',0),
-(26631,0,'config','config_customer_price','0',0),
-(26632,0,'config','config_account_download_status','0',0),
-(26633,0,'config','config_customer_group_id','1',0),
-(26634,0,'config','config_login_attempts','5',0),
-(26635,0,'config','config_customer_group_display','[\"1\"]',1),
-(26636,0,'config','config_account_id','3',0),
-(26637,0,'config','config_cart_weight','1',0),
-(26638,0,'config','config_checkout_guest','1',0),
-(26639,0,'config','config_checkout_id','5',0),
-(26640,0,'config','config_order_status_id','1',0),
-(26641,0,'config','config_fraud_status_id','130',0),
-(26642,0,'config','config_api_id','3',0),
-(26643,0,'config','config_processing_status','[\"127\",\"128\"]',1),
-(26644,0,'config','config_complete_status','[\"129\"]',1),
-(26645,0,'config','config_stock_display','0',0),
-(26646,0,'config','config_stock_warning','0',0),
-(26647,0,'config','config_stock_checkout','0',0),
-(26648,0,'config','config_affiliate_status','0',0),
-(26649,0,'config','config_affiliate_approval','0',0),
-(26650,0,'config','config_affiliate_auto','0',0),
-(26651,0,'config','config_affiliate_group_id','1',0),
-(26652,0,'config','config_affiliate_commission','5',0),
-(26653,0,'config','config_affiliate_id','4',0),
-(26654,0,'config','config_return_id','0',0),
-(26655,0,'config','config_return_status_id','2',0),
-(26656,0,'config','config_captcha','',0),
-(26657,0,'config','config_captcha_page','[\"register\",\"guest\",\"review\",\"return\",\"contact\"]',1),
-(26658,0,'config','config_logo','catalog/demo/dockercart_logo.png',0),
-(26659,0,'config','config_icon','catalog/cart.png',0),
-(26660,0,'config','config_image_max_dimension','',0),
-(26661,0,'config','config_mail_engine','smtp',0),
-(26662,0,'config','config_mail_smtp_hostname','',0),
-(26663,0,'config','config_mail_smtp_auth_method','login',0),
-(26664,0,'config','config_mail_smtp_oauth_client_id','',0),
-(26665,0,'config','config_mail_smtp_oauth_client_secret','',0),
-(26666,0,'config','config_mail_smtp_oauth_refresh_token','',0),
-(26667,0,'config','config_mail_smtp_oauth_token','',0),
-(26668,0,'config','config_mail_smtp_username','',0),
-(26669,0,'config','config_mail_smtp_password','',0),
-(26670,0,'config','config_mail_smtp_port','25',0),
-(26671,0,'config','config_mail_smtp_timeout','5',0),
-(26672,0,'config','config_mail_alert_email','',0),
-(26673,0,'config','config_maintenance','0',0),
-(26674,0,'config','config_seo_url','1',0),
-(26675,0,'config','config_product_cache_status','0',0),
-(26676,0,'config','config_robots','abot\r\ndbot\r\nebot\r\nhbot\r\nkbot\r\nlbot\r\nmbot\r\nnbot\r\nobot\r\npbot\r\nrbot\r\nsbot\r\ntbot\r\nvbot\r\nybot\r\nzbot\r\nbot.\r\nbot/\r\n_bot\r\n.bot\r\n/bot\r\n-bot\r\n:bot\r\n(bot\r\ncrawl\r\nslurp\r\nspider\r\nseek\r\naccoona\r\nacoon\r\nadressendeutschland\r\nah-ha.com\r\nahoy\r\naltavista\r\nananzi\r\nanthill\r\nappie\r\narachnophilia\r\narale\r\naraneo\r\naranha\r\narchitext\r\naretha\r\narks\r\nasterias\r\natlocal\r\natn\r\natomz\r\naugurfind\r\nbackrub\r\nbannana_bot\r\nbaypup\r\nbdfetch\r\nbig brother\r\nbiglotron\r\nbjaaland\r\nblackwidow\r\nblaiz\r\nblog\r\nblo.\r\nbloodhound\r\nboitho\r\nbooch\r\nbradley\r\nbutterfly\r\ncalif\r\ncassandra\r\nccubee\r\ncfetch\r\ncharlotte\r\nchurl\r\ncienciaficcion\r\ncmc\r\ncollective\r\ncomagent\r\ncombine\r\ncomputingsite\r\ncsci\r\ncurl\r\ncusco\r\ndaumoa\r\ndeepindex\r\ndelorie\r\ndepspid\r\ndeweb\r\ndie blinde kuh\r\ndigger\r\nditto\r\ndmoz\r\ndocomo\r\ndownload express\r\ndtaagent\r\ndwcp\r\nebiness\r\nebingbong\r\ne-collector\r\nejupiter\r\nemacs-w3 search engine\r\nesther\r\nevliya celebi\r\nezresult\r\nfalcon\r\nfelix ide\r\nferret\r\nfetchrover\r\nfido\r\nfindlinks\r\nfireball\r\nfish search\r\nfouineur\r\nfunnelweb\r\ngazz\r\ngcreep\r\ngenieknows\r\ngetterroboplus\r\ngeturl\r\nglx\r\ngoforit\r\ngolem\r\ngrabber\r\ngrapnel\r\ngralon\r\ngriffon\r\ngromit\r\ngrub\r\ngulliver\r\nhamahakki\r\nharvest\r\nhavindex\r\nhelix\r\nheritrix\r\nhku www octopus\r\nhomerweb\r\nhtdig\r\nhtml index\r\nhtml_analyzer\r\nhtmlgobble\r\nhubater\r\nhyper-decontextualizer\r\nia_archiver\r\nibm_planetwide\r\nichiro\r\niconsurf\r\niltrovatore\r\nimage.kapsi.net\r\nimagelock\r\nincywincy\r\nindexer\r\ninfobee\r\ninformant\r\ningrid\r\ninktomisearch.com\r\ninspector web\r\nintelliagent\r\ninternet shinchakubin\r\nip3000\r\niron33\r\nisraeli-search\r\nivia\r\njack\r\njakarta\r\njavabee\r\njetbot\r\njumpstation\r\nkatipo\r\nkdd-explorer\r\nkilroy\r\nknowledge\r\nkototoi\r\nkretrieve\r\nlabelgrabber\r\nlachesis\r\nlarbin\r\nlegs\r\nlibwww\r\nlinkalarm\r\nlink validator\r\nlinkscan\r\nlockon\r\nlwp\r\nlycos\r\nmagpie\r\nmantraagent\r\nmapoftheinternet\r\nmarvin/\r\nmattie\r\nmediafox\r\nmediapartners\r\nmercator\r\nmerzscope\r\nmicrosoft url control\r\nminirank\r\nmiva\r\nmj12\r\nmnogosearch\r\nmoget\r\nmonster\r\nmoose\r\nmotor\r\nmultitext\r\nmuncher\r\nmuscatferret\r\nmwd.search\r\nmyweb\r\nnajdi\r\nnameprotect\r\nnationaldirectory\r\nnazilla\r\nncsa beta\r\nnec-meshexplorer\r\nnederland.zoek\r\nnetcarta webmap engine\r\nnetmechanic\r\nnetresearchserver\r\nnetscoop\r\nnewscan-online\r\nnhse\r\nnokia6682/\r\nnomad\r\nnoyona\r\nnutch\r\nnzexplorer\r\nobjectssearch\r\noccam\r\nomni\r\nopen text\r\nopenfind\r\nopenintelligencedata\r\norb search\r\nosis-project\r\npack rat\r\npageboy\r\npagebull\r\npage_verifier\r\npanscient\r\nparasite\r\npartnersite\r\npatric\r\npear.\r\npegasus\r\nperegrinator\r\npgp key agent\r\nphantom\r\nphpdig\r\npicosearch\r\npiltdownman\r\npimptrain\r\npinpoint\r\npioneer\r\npiranha\r\nplumtreewebaccessor\r\npogodak\r\npoirot\r\npompos\r\npoppelsdorf\r\npoppi\r\npopular iconoclast\r\npsycheclone\r\npublisher\r\npython\r\nrambler\r\nraven search\r\nroach\r\nroad runner\r\nroadhouse\r\nrobbie\r\nrobofox\r\nrobozilla\r\nrules\r\nsalty\r\nsbider\r\nscooter\r\nscoutjet\r\nscrubby\r\nsearch.\r\nsearchprocess\r\nsemanticdiscovery\r\nsenrigan\r\nsg-scout\r\nshai\'hulud\r\nshark\r\nshopwiki\r\nsidewinder\r\nsift\r\nsilk\r\nsimmany\r\nsite searcher\r\nsite valet\r\nsitetech-rover\r\nskymob.com\r\nsleek\r\nsmartwit\r\nsna-\r\nsnappy\r\nsnooper\r\nsohu\r\nspeedfind\r\nsphere\r\nsphider\r\nspinner\r\nspyder\r\nsteeler/\r\nsuke\r\nsuntek\r\nsupersnooper\r\nsurfnomore\r\nsven\r\nsygol\r\nszukacz\r\ntach black widow\r\ntarantula\r\ntempleton\r\n/teoma\r\nt-h-u-n-d-e-r-s-t-o-n-e\r\ntheophrastus\r\ntitan\r\ntitin\r\ntkwww\r\ntoutatis\r\nt-rex\r\ntutorgig\r\ntwiceler\r\ntwisted\r\nucsd\r\nudmsearch\r\nurl check\r\nupdated\r\nvagabondo\r\nvalkyrie\r\nverticrawl\r\nvictoria\r\nvision-search\r\nvolcano\r\nvoyager/\r\nvoyager-hc\r\nw3c_validator\r\nw3m2\r\nw3mir\r\nwalker\r\nwallpaper\r\nwanderer\r\nwauuu\r\nwavefire\r\nweb core\r\nweb hopper\r\nweb wombat\r\nwebbandit\r\nwebcatcher\r\nwebcopy\r\nwebfoot\r\nweblayers\r\nweblinker\r\nweblog monitor\r\nwebmirror\r\nwebmonkey\r\nwebquest\r\nwebreaper\r\nwebsitepulse\r\nwebsnarf\r\nwebstolperer\r\nwebvac\r\nwebwalk\r\nwebwatch\r\nwebwombat\r\nwebzinger\r\nwhizbang\r\nwhowhere\r\nwild ferret\r\nworldlight\r\nwwwc\r\nwwwster\r\nxenu\r\nxget\r\nxift\r\nxirq\r\nyandex\r\nyanga\r\nyeti\r\nyodao\r\nzao\r\nzippp\r\nzyborg\r\nGooglebot\r\nBingbot\r\nBingPreview\r\nDuckDuckBot\r\nBaiduspider\r\nYandexBot\r\nYandexMobileBot\r\nfacebookexternalhit\r\nTwitterbot\r\nLinkedInBot\r\nSlackbot\r\nTelegramBot\r\nWhatsApp\r\nGPTBot\r\nChatGPT-User\r\nGoogle-Extended\r\nClaude-Web\r\nPerplexityBot\r\nBytespider\r\nAmazonbot\r\nApplebot-Extended\r\ncohere-ai\r\nDiffbot\r\nImagesift\r\nYouBot\r\nMeta-ExternalAgent\r\nCCBot\r\nOAI-SearchBot\r\nSemrushBot\r\nAhrefsBot\r\nDotBot\r\nDataForSeoBot\r\nPetalBot\r\nZoominfoBot\r\nScreaming Frog\r\nGo-http-client\r\nokhttp\r\naxios\r\nWget\r\nHeadlessChrome\r\nPhantomJS\r\nJava/\r\nPingdom\r\nUptimeRobot\r\nGTmetrix\r\nWebPageTest\r\nNewRelicPinger\r\nDatadogAgent\r\nSite24x7\r\nzgrab\r\nmasscan\r\nnmap\r\nNessus\r\nNikto\r\nwpscan',0),
-(26677,0,'config','config_compression','4',0),
-(26678,0,'config','config_secure','1',0),
-(26679,0,'config','config_password','1',0),
-(26680,0,'config','config_shared','0',0),
-(26681,0,'config','config_encryption','',0),
-(26682,0,'config','config_file_max_size','10485760',0),
-(26683,0,'config','config_file_ext_allowed','zip\r\ntxt\r\npng\r\njpe\r\njpeg\r\njpg\r\ngif\r\nbmp\r\nico\r\ntiff\r\ntif\r\nsvg\r\nsvgz\r\nwebp\r\nzip\r\nrar\r\nmsi\r\ncab\r\nmp3\r\nqt\r\nmov\r\npdf\r\npsd\r\nai\r\neps\r\nps\r\ndoc',0),
-(26684,0,'config','config_file_mime_allowed','text/plain\r\nimage/png\r\nimage/jpeg\r\nimage/gif\r\nimage/bmp\r\nimage/tiff\r\nimage/svg+xml\r\nimage/webp\r\napplication/zip\r\n&quot;application/zip&quot;\r\napplication/x-zip\r\n&quot;application/x-zip&quot;\r\napplication/x-zip-compressed\r\n&quot;application/x-zip-compressed&quot;\r\napplication/rar\r\n&quot;application/rar&quot;\r\napplication/x-rar\r\n&quot;application/x-rar&quot;\r\napplication/x-rar-compressed\r\n&quot;application/x-rar-compressed&quot;\r\napplication/octet-stream\r\n&quot;application/octet-stream&quot;\r\naudio/mpeg\r\nvideo/quicktime\r\napplication/pdf',0),
-(26685,0,'config','config_error_display','1',0),
-(26686,0,'config','config_error_log','1',0),
-(26687,0,'config','config_error_filename','error.log',0),
-(26688,0,'config','config_image','',0),
-(26689,0,'config','config_meta_title','DockerCart',0),
-(26690,0,'config','config_meta_description','',0),
-(26691,0,'config','config_meta_keyword','',0),
-(26692,0,'config','config_name','DockerCart',0),
-(26693,0,'config','config_owner','DockerCart',0),
-(26694,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
-(26695,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
-(26696,0,'config','config_comment','',0),
-(26781,0,'dockercart_theme','dockercart_theme_status','1',0),
-(26782,0,'dockercart_theme','dockercart_theme_logo_dark','catalog/demo/dockercart_logo_white.png',0),
-(26783,0,'dockercart_theme','dockercart_theme_logo_light','catalog/demo/dockercart_logo.png',0),
-(26784,0,'dockercart_theme','dockercart_theme_favicon_master','catalog/demo/dockercart_favicon.png',0),
-(26785,0,'dockercart_theme','dockercart_theme_menu_type','horizontal',0),
-(26786,0,'dockercart_theme','dockercart_theme_call_for_price_status','1',0),
-(26787,0,'dockercart_theme','dockercart_theme_messenger_fab_status','0',0),
-(26788,0,'dockercart_theme','dockercart_theme_product_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Shipping\",\"2\":\"Доставка\",\"3\":\"Доставка\"},\"text\":{\"1\":\"Free Shipping\",\"2\":\"Швидка доставка\",\"3\":\"Быстрая доставка\"}},{\"icon\":\"shield-check\",\"sort_order\":1,\"title\":{\"1\":\"Warranty\",\"2\":\"Гарантия\",\"3\":\"Гарантия\"},\"text\":{\"1\":\"Official warranty\",\"2\":\"Офіційна гарантія\",\"3\":\"Официальная гарантия\"}},{\"icon\":\"refresh-ccw\",\"sort_order\":2,\"title\":{\"1\":\"Return\",\"2\":\"Возврат\",\"3\":\"Возврат\"},\"text\":{\"1\":\"30-days return\",\"2\":\"14 днів на повернення\",\"3\":\"14 дней на возврат\"}}]',0),
-(26789,0,'dockercart_theme','dockercart_theme_category_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Catalog depth\",\"2\":\"Глибина каталогу\",\"3\":\"Глубина каталога\"},\"text\":{\"1\":\"%s+ products\",\"2\":\"%s+ товарів\",\"3\":\"%s+ товаров\"}},{\"icon\":\"badge-check\",\"sort_order\":1,\"title\":{\"1\":\"Brand coverage\",\"2\":\"Покриття брендів\",\"3\":\"Покрытие брендов\"},\"text\":{\"1\":\"%s famous brands\",\"2\":\"%s відомих брендів\",\"3\":\"%s известных брендов\"}},{\"icon\":\"headset\",\"sort_order\":2,\"title\":{\"1\":\"Support\",\"2\":\"Підтримка\",\"3\":\"Поддержка\"},\"text\":{\"1\":\"Expert assistance before and after purchase\",\"2\":\"Експертна підтримка до і після покупки\",\"3\":\"Экспертная помощь до и после покупки\"}}]',0),
-(26790,0,'dockercart_theme','dockercart_theme_quickview_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Free Shipping\",\"2\":\"Швидка доставка\",\"3\":\"Быстрая доставка\"}},{\"icon\":\"shield-check\",\"sort_order\":1,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Official Guarantee\",\"2\":\"Офіційна гарантія\",\"3\":\"Официальная гарантия\"}},{\"icon\":\"refresh-ccw\",\"sort_order\":2,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Hassle-free returns within 30 days.\",\"2\":\"Повернення протягом 14 днів\",\"3\":\"Возврат в течении 14 дней\"}}]',0),
-(26791,0,'dockercart_theme','dockercart_theme_custom_css','',0),
-(26792,0,'dockercart_theme','dockercart_theme_custom_js','',0),
-(26793,0,'dockercart_theme','dockercart_theme_social_1_image','catalog/social/facebook.png',0),
-(26794,0,'dockercart_theme','dockercart_theme_social_1_link','https://demo.dockercart.net/',0),
-(26795,0,'dockercart_theme','dockercart_theme_messenger_1_image','catalog/social/telegram.png',0),
-(26796,0,'dockercart_theme','dockercart_theme_messenger_1_link','https://telegram.org/',0),
-(26797,0,'dockercart_theme','dockercart_theme_messenger_1_name','Telegram',0),
-(26798,0,'dockercart_theme','dockercart_theme_payment_1_image','',0),
-(26799,0,'dockercart_theme','dockercart_theme_payment_1_link','',0),
-(26800,0,'dockercart_theme','dockercart_theme_social_2_image','catalog/social/instagram.png',0),
-(26801,0,'dockercart_theme','dockercart_theme_social_2_link','https://demo.dockercart.net/',0),
-(26802,0,'dockercart_theme','dockercart_theme_messenger_2_image','catalog/social/viber.png',0),
-(26803,0,'dockercart_theme','dockercart_theme_messenger_2_link','https://www.viber.com/',0),
-(26804,0,'dockercart_theme','dockercart_theme_messenger_2_name','Viber',0),
-(26805,0,'dockercart_theme','dockercart_theme_payment_2_image','',0),
-(26806,0,'dockercart_theme','dockercart_theme_payment_2_link','',0),
-(26807,0,'dockercart_theme','dockercart_theme_social_3_image','catalog/social/linkedin.png',0),
-(26808,0,'dockercart_theme','dockercart_theme_social_3_link','https://demo.dockercart.net/',0),
-(26809,0,'dockercart_theme','dockercart_theme_messenger_3_image','catalog/social/whatsapp.png',0),
-(26810,0,'dockercart_theme','dockercart_theme_messenger_3_link','http://whatsapp.com/',0),
-(26811,0,'dockercart_theme','dockercart_theme_messenger_3_name','WhatsApp',0),
-(26812,0,'dockercart_theme','dockercart_theme_payment_3_image','',0),
-(26813,0,'dockercart_theme','dockercart_theme_payment_3_link','',0),
-(26814,0,'dockercart_theme','dockercart_theme_social_4_image','',0),
-(26815,0,'dockercart_theme','dockercart_theme_social_4_link','',0),
-(26816,0,'dockercart_theme','dockercart_theme_messenger_4_image','',0),
-(26817,0,'dockercart_theme','dockercart_theme_messenger_4_link','',0),
-(26818,0,'dockercart_theme','dockercart_theme_messenger_4_name','',0),
-(26819,0,'dockercart_theme','dockercart_theme_payment_4_image','',0),
-(26820,0,'dockercart_theme','dockercart_theme_payment_4_link','',0),
-(26821,0,'dockercart_theme','dockercart_theme_social_5_image','',0),
-(26822,0,'dockercart_theme','dockercart_theme_social_5_link','',0),
-(26823,0,'dockercart_theme','dockercart_theme_messenger_5_image','',0),
-(26824,0,'dockercart_theme','dockercart_theme_messenger_5_link','',0),
-(26825,0,'dockercart_theme','dockercart_theme_messenger_5_name','',0),
-(26826,0,'dockercart_theme','dockercart_theme_payment_5_image','',0),
-(26827,0,'dockercart_theme','dockercart_theme_payment_5_link','',0),
-(26828,0,'dockercart_theme','dockercart_theme_social_6_image','',0),
-(26829,0,'dockercart_theme','dockercart_theme_social_6_link','',0),
-(26830,0,'dockercart_theme','dockercart_theme_messenger_6_image','',0),
-(26831,0,'dockercart_theme','dockercart_theme_messenger_6_link','',0),
-(26832,0,'dockercart_theme','dockercart_theme_messenger_6_name','',0),
-(26833,0,'dockercart_theme','dockercart_theme_payment_6_image','',0),
-(26834,0,'dockercart_theme','dockercart_theme_payment_6_link','',0),
-(26835,0,'dockercart_theme','dockercart_theme_social_7_image','',0),
-(26836,0,'dockercart_theme','dockercart_theme_social_7_link','',0),
-(26837,0,'dockercart_theme','dockercart_theme_messenger_7_image','',0),
-(26838,0,'dockercart_theme','dockercart_theme_messenger_7_link','',0),
-(26839,0,'dockercart_theme','dockercart_theme_messenger_7_name','',0),
-(26840,0,'dockercart_theme','dockercart_theme_payment_7_image','',0),
-(26841,0,'dockercart_theme','dockercart_theme_payment_7_link','',0),
-(26842,0,'dockercart_theme','dockercart_theme_social_8_image','',0),
-(26843,0,'dockercart_theme','dockercart_theme_social_8_link','',0),
-(26844,0,'dockercart_theme','dockercart_theme_messenger_8_image','',0),
-(26845,0,'dockercart_theme','dockercart_theme_messenger_8_link','',0),
-(26846,0,'dockercart_theme','dockercart_theme_messenger_8_name','',0),
-(26847,0,'dockercart_theme','dockercart_theme_payment_8_image','',0),
-(26848,0,'dockercart_theme','dockercart_theme_payment_8_link','',0),
-(26849,0,'dockercart_theme','dockercart_theme_social_9_image','',0),
-(26850,0,'dockercart_theme','dockercart_theme_social_9_link','',0),
-(26851,0,'dockercart_theme','dockercart_theme_messenger_9_image','',0),
-(26852,0,'dockercart_theme','dockercart_theme_messenger_9_link','',0),
-(26853,0,'dockercart_theme','dockercart_theme_messenger_9_name','',0),
-(26854,0,'dockercart_theme','dockercart_theme_payment_9_image','',0),
-(26855,0,'dockercart_theme','dockercart_theme_payment_9_link','',0),
-(26856,0,'dockercart_theme','dockercart_theme_social_10_image','',0),
-(26857,0,'dockercart_theme','dockercart_theme_social_10_link','',0),
-(26858,0,'dockercart_theme','dockercart_theme_messenger_10_image','',0),
-(26859,0,'dockercart_theme','dockercart_theme_messenger_10_link','',0),
-(26860,0,'dockercart_theme','dockercart_theme_messenger_10_name','',0),
-(26861,0,'dockercart_theme','dockercart_theme_payment_10_image','',0),
-(26862,0,'dockercart_theme','dockercart_theme_payment_10_link','',0),
-(26863,0,'dockercart_theme','dockercart_theme_header_links','[]',0),
-(26864,0,'dockercart_theme','dockercart_theme_footer_links','[]',0);
+(27029,0,'report_customer_transaction','report_customer_transaction_sort_order','1',0),
+(27030,0,'report_customer_transaction','report_customer_transaction_status','1',0),
+(27053,0,'module_dockercart_search','module_dockercart_search_status','1',0),
+(27054,0,'module_dockercart_search','module_dockercart_search_min_chars','2',0),
+(27055,0,'module_dockercart_search','module_dockercart_search_results_limit','20',0),
+(27056,0,'module_dockercart_search','module_dockercart_search_query_mappings','',0),
+(27057,0,'module_dockercart_search','module_dockercart_search_host','manticore',0),
+(27058,0,'module_dockercart_search','module_dockercart_search_port','9306',0),
+(27059,0,'module_dockercart_search','module_dockercart_search_http_port','9308',0),
+(27060,0,'module_dockercart_search','module_dockercart_search_autocomplete','1',0),
+(27061,0,'module_dockercart_search','module_dockercart_search_voice','1',0),
+(27062,0,'module_dockercart_search','module_dockercart_search_autocomplete_limit','10',0),
+(27116,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_status','1',0),
+(27117,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_width','3',0),
+(27118,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_sort_order','10',0),
+(27119,0,'dashboard_dockercart_category_revenue','dashboard_dockercart_category_revenue_status','1',0),
+(27120,0,'dashboard_dockercart_category_revenue','dashboard_dockercart_category_revenue_width','12',0),
+(27121,0,'dashboard_dockercart_category_revenue','dashboard_dockercart_category_revenue_sort_order','9',0),
+(27122,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_stack','traffic_source',0),
+(27171,0,'dockercart_sitemap','dockercart_sitemap_reviews','1',0),
+(29076,0,'config','config_url','http://dockercart.local:8080/',0),
+(29077,0,'config','config_ssl','http://dockercart.local:8080/',0),
+(29108,0,'config','config_order_flow_shipping_status','128',0),
+(29109,0,'config','config_reward_auto_award','1',0),
+(29110,0,'config','config_order_flow_steps','[\"1\",\"132\",\"133\",\"128\",\"129\"]',1),
+(29111,0,'config','config_order_flow_transitions','{\"1\":[\"130\",\"131\"],\"131\":[\"130\",\"132\"],\"132\":[\"130\",\"134\"],\"133\":[\"130\",\"134\"],\"128\":[\"130\",\"134\"],\"129\":[\"134\"]}',1),
+(29112,0,'config','config_cancelled_status','130',0),
+(29115,0,'config','config_review_images_enabled','1',0),
+(29116,0,'config','config_review_max_images','3',0),
+(29117,0,'config','config_review_video_enabled','1',0),
+(29118,0,'config','config_review_image_max_size','5242880',0),
+(29119,0,'config','config_review_video_max_size','52428800',0),
+(29120,0,'config','config_review_image_dimension','1600',0),
+(29121,0,'config','config_review_auto_approve','0',0),
+(29122,0,'config','config_review_verify_purchase','1',0),
+(29123,0,'config','config_review_show_distribution','1',0),
+(29124,0,'config','config_review_per_page','10',0),
+(29125,0,'config','config_review_rate_limit_count','5',0),
+(29126,0,'config','config_review_rate_limit_minutes','60',0),
+(29127,0,'config','config_review_honeypot','1',0),
+(29128,0,'config','config_reward_auto_revoke','1',0),
+(29129,0,'config','config_reward_delay_days','14',0),
+(29130,0,'config','config_cart_abandoned_enable','1',0),
+(29131,0,'config','config_cart_abandoned_delay_days','1',0),
+(29132,0,'config','config_cart_abandoned_retention_days','90',0),
+(29133,0,'config','config_cart_abandoned_waves','[{\"days\":1,\"discount\":0}]',1),
+(29137,0,'config','config_seller_name','',0),
+(29138,0,'config','config_seller_address','',0),
+(29141,0,'config','config_seller_tax_numbers','[]',1),
+(29146,0,'config','config_name_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
+(29147,0,'config','config_owner_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart\",\"3\":\"DockerCart\"}',1),
+(29148,0,'config','config_address_i18n','{\"1\":\"1 Main Street, Kyiv, Ukraine\",\"2\":\"\\u0432\\u0443\\u043b. \\u0413\\u043e\\u043b\\u043e\\u0432\\u043d\\u0430, 1, \\u041a\\u0438\\u0457\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0457\\u043d\\u0430\",\"3\":\"\\u0413\\u043b\\u0430\\u0432\\u043d\\u0430\\u044f \\u0443\\u043b\\u0438\\u0446\\u0430, 1, \\u041a\\u0438\\u0435\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\"}',1),
+(29149,0,'config','config_open_i18n','{\"1\":\"Mon\\u2013Fri: 9 AM \\u2013 6 PM\",\"2\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00 \\u2013 18:00\",\"3\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00\\u201318:00\"}',1),
+(29150,0,'config','config_comment_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(29151,0,'config','config_theme','dockercart',0),
+(29152,0,'config','config_layout_id','4',0),
+(29153,0,'config','config_contact_form_status','0',0),
+(29154,0,'config','config_geocode','',0),
+(29155,0,'config','config_email','admin@example.com',0),
+(29156,0,'config','config_telephone','+1 555-555-1234',0),
+(29157,0,'config','config_fax','+1 555-111-1232',0),
+(29158,0,'config','config_images','[]',1),
+(29159,0,'config','config_meta_title_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
+(29160,0,'config','config_meta_description_i18n','{\"1\":\"DockerCart Store\",\"2\":\"\\u041c\\u0430\\u0433\\u0430\\u0437\\u0438\\u043d DockerCart\",\"3\":\"\"}',1),
+(29161,0,'config','config_meta_keyword_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(29162,0,'config','config_country_id','220',0),
+(29163,0,'config','config_zone_id','3490',0),
+(29164,0,'config','config_timezone','Europe/Kyiv',0),
+(29165,0,'config','config_language','en-gb',0),
+(29166,0,'config','config_admin_language','en-gb',0),
+(29167,0,'config','config_currency','UAH',0),
+(29168,0,'config','config_currency_engine','ecb',0),
+(29169,0,'config','config_currency_auto','1',0),
+(29170,0,'config','config_symbol_left_space','0',0),
+(29171,0,'config','config_symbol_right_space','0',0),
+(29172,0,'config','config_length_class_id','1',0),
+(29173,0,'config','config_weight_class_id','1',0),
+(29174,0,'config','config_product_count','1',0),
+(29175,0,'config','config_limit_admin','20',0),
+(29176,0,'config','config_review_status','1',0),
+(29177,0,'config','config_review_guest','1',0),
+(29178,0,'config','config_voucher_min','1',0),
+(29179,0,'config','config_voucher_max','1000',0),
+(29180,0,'config','config_tax','1',0),
+(29181,0,'config','config_tax_default','shipping',0),
+(29182,0,'config','config_tax_customer','shipping',0),
+(29183,0,'config','config_customer_activity','1',0),
+(29184,0,'config','config_customer_search','1',0),
+(29185,0,'config','config_customer_price','0',0),
+(29186,0,'config','config_account_download_status','0',0),
+(29187,0,'config','config_customer_group_id','1',0),
+(29188,0,'config','config_login_attempts','5',0),
+(29189,0,'config','config_customer_group_display','[\"1\"]',1),
+(29190,0,'config','config_account_id','3',0),
+(29191,0,'config','config_cart_weight','1',0),
+(29192,0,'config','config_checkout_guest','1',0),
+(29193,0,'config','config_checkout_id','5',0),
+(29194,0,'config','config_order_status_id','1',0),
+(29195,0,'config','config_fraud_status_id','130',0),
+(29196,0,'config','config_processing_status','[\"127\",\"133\",\"128\"]',1),
+(29197,0,'config','config_complete_status','[\"129\"]',1),
+(29198,0,'config','config_stock_display','0',0),
+(29199,0,'config','config_stock_warning','1',0),
+(29200,0,'config','config_stock_checkout','0',0),
+(29201,0,'config','config_stock_reserve_enabled','1',0),
+(29202,0,'config','config_stock_reserve_minutes','30',0),
+(29203,0,'config','config_affiliate_status','0',0),
+(29204,0,'config','config_affiliate_approval','0',0),
+(29205,0,'config','config_affiliate_auto','0',0),
+(29206,0,'config','config_affiliate_group_id','1',0),
+(29207,0,'config','config_affiliate_commission','5',0),
+(29208,0,'config','config_affiliate_id','4',0),
+(29209,0,'config','config_return_id','0',0),
+(29210,0,'config','config_return_status_id','2',0),
+(29211,0,'config','config_captcha','',0),
+(29212,0,'config','config_captcha_page','[\"register\",\"guest\",\"review\",\"return\",\"contact\"]',1),
+(29213,0,'config','config_logo','catalog/demo/dockercart_logo.png',0),
+(29214,0,'config','config_icon','catalog/cart.png',0),
+(29215,0,'config','config_image_max_dimension','',0),
+(29216,0,'config','config_mail_engine','smtp',0),
+(29217,0,'config','config_mail_smtp_hostname','',0),
+(29218,0,'config','config_mail_smtp_auth_method','login',0),
+(29219,0,'config','config_mail_smtp_oauth_client_id','',0),
+(29220,0,'config','config_mail_smtp_oauth_client_secret','',0),
+(29221,0,'config','config_mail_smtp_oauth_refresh_token','',0),
+(29222,0,'config','config_mail_smtp_oauth_token','',0),
+(29223,0,'config','config_mail_smtp_username','',0),
+(29224,0,'config','config_mail_smtp_password','',0),
+(29225,0,'config','config_mail_smtp_port','25',0),
+(29226,0,'config','config_mail_smtp_timeout','5',0),
+(29227,0,'config','config_mail_alert_email','',0),
+(29228,0,'config','config_maintenance','0',0),
+(29229,0,'config','config_seo_url','1',0),
+(29230,0,'config','config_product_cache_status','0',0),
+(29231,0,'config','config_robots','abot\r\ndbot\r\nebot\r\nhbot\r\nkbot\r\nlbot\r\nmbot\r\nnbot\r\nobot\r\npbot\r\nrbot\r\nsbot\r\ntbot\r\nvbot\r\nybot\r\nzbot\r\nbot.\r\nbot/\r\n_bot\r\n.bot\r\n/bot\r\n-bot\r\n:bot\r\n(bot\r\ncrawl\r\nslurp\r\nspider\r\nseek\r\naccoona\r\nacoon\r\nadressendeutschland\r\nah-ha.com\r\nahoy\r\naltavista\r\nananzi\r\nanthill\r\nappie\r\narachnophilia\r\narale\r\naraneo\r\naranha\r\narchitext\r\naretha\r\narks\r\nasterias\r\natlocal\r\natn\r\natomz\r\naugurfind\r\nbackrub\r\nbannana_bot\r\nbaypup\r\nbdfetch\r\nbig brother\r\nbiglotron\r\nbjaaland\r\nblackwidow\r\nblaiz\r\nblog\r\nblo.\r\nbloodhound\r\nboitho\r\nbooch\r\nbradley\r\nbutterfly\r\ncalif\r\ncassandra\r\nccubee\r\ncfetch\r\ncharlotte\r\nchurl\r\ncienciaficcion\r\ncmc\r\ncollective\r\ncomagent\r\ncombine\r\ncomputingsite\r\ncsci\r\ncurl\r\ncusco\r\ndaumoa\r\ndeepindex\r\ndelorie\r\ndepspid\r\ndeweb\r\ndie blinde kuh\r\ndigger\r\nditto\r\ndmoz\r\ndocomo\r\ndownload express\r\ndtaagent\r\ndwcp\r\nebiness\r\nebingbong\r\ne-collector\r\nejupiter\r\nemacs-w3 search engine\r\nesther\r\nevliya celebi\r\nezresult\r\nfalcon\r\nfelix ide\r\nferret\r\nfetchrover\r\nfido\r\nfindlinks\r\nfireball\r\nfish search\r\nfouineur\r\nfunnelweb\r\ngazz\r\ngcreep\r\ngenieknows\r\ngetterroboplus\r\ngeturl\r\nglx\r\ngoforit\r\ngolem\r\ngrabber\r\ngrapnel\r\ngralon\r\ngriffon\r\ngromit\r\ngrub\r\ngulliver\r\nhamahakki\r\nharvest\r\nhavindex\r\nhelix\r\nheritrix\r\nhku www octopus\r\nhomerweb\r\nhtdig\r\nhtml index\r\nhtml_analyzer\r\nhtmlgobble\r\nhubater\r\nhyper-decontextualizer\r\nia_archiver\r\nibm_planetwide\r\nichiro\r\niconsurf\r\niltrovatore\r\nimage.kapsi.net\r\nimagelock\r\nincywincy\r\nindexer\r\ninfobee\r\ninformant\r\ningrid\r\ninktomisearch.com\r\ninspector web\r\nintelliagent\r\ninternet shinchakubin\r\nip3000\r\niron33\r\nisraeli-search\r\nivia\r\njack\r\njakarta\r\njavabee\r\njetbot\r\njumpstation\r\nkatipo\r\nkdd-explorer\r\nkilroy\r\nknowledge\r\nkototoi\r\nkretrieve\r\nlabelgrabber\r\nlachesis\r\nlarbin\r\nlegs\r\nlibwww\r\nlinkalarm\r\nlink validator\r\nlinkscan\r\nlockon\r\nlwp\r\nlycos\r\nmagpie\r\nmantraagent\r\nmapoftheinternet\r\nmarvin/\r\nmattie\r\nmediafox\r\nmediapartners\r\nmercator\r\nmerzscope\r\nmicrosoft url control\r\nminirank\r\nmiva\r\nmj12\r\nmnogosearch\r\nmoget\r\nmonster\r\nmoose\r\nmotor\r\nmultitext\r\nmuncher\r\nmuscatferret\r\nmwd.search\r\nmyweb\r\nnajdi\r\nnameprotect\r\nnationaldirectory\r\nnazilla\r\nncsa beta\r\nnec-meshexplorer\r\nnederland.zoek\r\nnetcarta webmap engine\r\nnetmechanic\r\nnetresearchserver\r\nnetscoop\r\nnewscan-online\r\nnhse\r\nnokia6682/\r\nnomad\r\nnoyona\r\nnutch\r\nnzexplorer\r\nobjectssearch\r\noccam\r\nomni\r\nopen text\r\nopenfind\r\nopenintelligencedata\r\norb search\r\nosis-project\r\npack rat\r\npageboy\r\npagebull\r\npage_verifier\r\npanscient\r\nparasite\r\npartnersite\r\npatric\r\npear.\r\npegasus\r\nperegrinator\r\npgp key agent\r\nphantom\r\nphpdig\r\npicosearch\r\npiltdownman\r\npimptrain\r\npinpoint\r\npioneer\r\npiranha\r\nplumtreewebaccessor\r\npogodak\r\npoirot\r\npompos\r\npoppelsdorf\r\npoppi\r\npopular iconoclast\r\npsycheclone\r\npublisher\r\npython\r\nrambler\r\nraven search\r\nroach\r\nroad runner\r\nroadhouse\r\nrobbie\r\nrobofox\r\nrobozilla\r\nrules\r\nsalty\r\nsbider\r\nscooter\r\nscoutjet\r\nscrubby\r\nsearch.\r\nsearchprocess\r\nsemanticdiscovery\r\nsenrigan\r\nsg-scout\r\nshai\'hulud\r\nshark\r\nshopwiki\r\nsidewinder\r\nsift\r\nsilk\r\nsimmany\r\nsite searcher\r\nsite valet\r\nsitetech-rover\r\nskymob.com\r\nsleek\r\nsmartwit\r\nsna-\r\nsnappy\r\nsnooper\r\nsohu\r\nspeedfind\r\nsphere\r\nsphider\r\nspinner\r\nspyder\r\nsteeler/\r\nsuke\r\nsuntek\r\nsupersnooper\r\nsurfnomore\r\nsven\r\nsygol\r\nszukacz\r\ntach black widow\r\ntarantula\r\ntempleton\r\n/teoma\r\nt-h-u-n-d-e-r-s-t-o-n-e\r\ntheophrastus\r\ntitan\r\ntitin\r\ntkwww\r\ntoutatis\r\nt-rex\r\ntutorgig\r\ntwiceler\r\ntwisted\r\nucsd\r\nudmsearch\r\nurl check\r\nupdated\r\nvagabondo\r\nvalkyrie\r\nverticrawl\r\nvictoria\r\nvision-search\r\nvolcano\r\nvoyager/\r\nvoyager-hc\r\nw3c_validator\r\nw3m2\r\nw3mir\r\nwalker\r\nwallpaper\r\nwanderer\r\nwauuu\r\nwavefire\r\nweb core\r\nweb hopper\r\nweb wombat\r\nwebbandit\r\nwebcatcher\r\nwebcopy\r\nwebfoot\r\nweblayers\r\nweblinker\r\nweblog monitor\r\nwebmirror\r\nwebmonkey\r\nwebquest\r\nwebreaper\r\nwebsitepulse\r\nwebsnarf\r\nwebstolperer\r\nwebvac\r\nwebwalk\r\nwebwatch\r\nwebwombat\r\nwebzinger\r\nwhizbang\r\nwhowhere\r\nwild ferret\r\nworldlight\r\nwwwc\r\nwwwster\r\nxenu\r\nxget\r\nxift\r\nxirq\r\nyandex\r\nyanga\r\nyeti\r\nyodao\r\nzao\r\nzippp\r\nzyborg\r\nGooglebot\r\nBingbot\r\nBingPreview\r\nDuckDuckBot\r\nBaiduspider\r\nYandexBot\r\nYandexMobileBot\r\nfacebookexternalhit\r\nTwitterbot\r\nLinkedInBot\r\nSlackbot\r\nTelegramBot\r\nWhatsApp\r\nGPTBot\r\nChatGPT-User\r\nGoogle-Extended\r\nClaude-Web\r\nPerplexityBot\r\nBytespider\r\nAmazonbot\r\nApplebot-Extended\r\ncohere-ai\r\nDiffbot\r\nImagesift\r\nYouBot\r\nMeta-ExternalAgent\r\nCCBot\r\nOAI-SearchBot\r\nSemrushBot\r\nAhrefsBot\r\nDotBot\r\nDataForSeoBot\r\nPetalBot\r\nZoominfoBot\r\nScreaming Frog\r\nGo-http-client\r\nokhttp\r\naxios\r\nWget\r\nHeadlessChrome\r\nPhantomJS\r\nJava/\r\nPingdom\r\nUptimeRobot\r\nGTmetrix\r\nWebPageTest\r\nNewRelicPinger\r\nDatadogAgent\r\nSite24x7\r\nzgrab\r\nmasscan\r\nnmap\r\nNessus\r\nNikto\r\nwpscan',0),
+(29232,0,'config','config_compression','4',0),
+(29233,0,'config','config_secure','1',0),
+(29234,0,'config','config_password','1',0),
+(29235,0,'config','config_shared','0',0),
+(29236,0,'config','config_encryption','',0),
+(29237,0,'config','config_file_max_size','10485760',0),
+(29238,0,'config','config_file_ext_allowed','zip\r\ntxt\r\npng\r\njpe\r\njpeg\r\njpg\r\ngif\r\nbmp\r\nico\r\ntiff\r\ntif\r\nsvg\r\nsvgz\r\nwebp\r\nzip\r\nrar\r\nmsi\r\ncab\r\nmp3\r\nqt\r\nmov\r\npdf\r\npsd\r\nai\r\neps\r\nps\r\ndoc',0),
+(29239,0,'config','config_file_mime_allowed','text/plain\r\nimage/png\r\nimage/jpeg\r\nimage/gif\r\nimage/bmp\r\nimage/tiff\r\nimage/svg+xml\r\nimage/webp\r\napplication/zip\r\n&quot;application/zip&quot;\r\napplication/x-zip\r\n&quot;application/x-zip&quot;\r\napplication/x-zip-compressed\r\n&quot;application/x-zip-compressed&quot;\r\napplication/rar\r\n&quot;application/rar&quot;\r\napplication/x-rar\r\n&quot;application/x-rar&quot;\r\napplication/x-rar-compressed\r\n&quot;application/x-rar-compressed&quot;\r\napplication/octet-stream\r\n&quot;application/octet-stream&quot;\r\naudio/mpeg\r\nvideo/quicktime\r\napplication/pdf',0),
+(29240,0,'config','config_error_display','1',0),
+(29241,0,'config','config_error_log','1',0),
+(29242,0,'config','config_error_filename','error.log',0),
+(29243,0,'config','config_invoice_prefix','INV-',0),
+(29244,0,'config','config_invoice_valid_days','0',0),
+(29245,0,'config','config_invoice_language','',0),
+(29246,0,'config','config_seller_name_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(29247,0,'config','config_seller_address_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(29248,0,'config','config_seller_email','',0),
+(29249,0,'config','config_seller_telephone','',0),
+(29250,0,'config','config_seller_bank_name','',0),
+(29251,0,'config','config_seller_bank_swift','',0),
+(29252,0,'config','config_seller_bank_account','',0),
+(29253,0,'config','config_seller_invoice_logo','',0),
+(29254,0,'config','config_image','',0),
+(29255,0,'config','config_meta_title','DockerCart',0),
+(29256,0,'config','config_meta_description','',0),
+(29257,0,'config','config_meta_keyword','',0),
+(29258,0,'config','config_name','DockerCart',0),
+(29259,0,'config','config_owner','DockerCart',0),
+(29260,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
+(29261,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
+(29262,0,'config','config_comment','',0),
+(29263,0,'config','config_product_image_360_enable','1',0),
+(29264,0,'dockercart_theme','dockercart_theme_status','1',0),
+(29265,0,'dockercart_theme','dockercart_theme_logo_dark','catalog/demo/dockercart_logo_white.png',0),
+(29266,0,'dockercart_theme','dockercart_theme_logo_light','catalog/demo/dockercart_logo.png',0),
+(29267,0,'dockercart_theme','dockercart_theme_favicon_master','catalog/demo/dockercart_favicon.png',0),
+(29268,0,'dockercart_theme','dockercart_theme_menu_type','horizontal',0),
+(29269,0,'dockercart_theme','dockercart_theme_call_for_price_status','1',0),
+(29270,0,'dockercart_theme','dockercart_theme_call_for_price_mode','request',0),
+(29271,0,'dockercart_theme','dockercart_theme_sale_timer_status','1',0),
+(29272,0,'dockercart_theme','dockercart_theme_messenger_fab_status','0',0),
+(29273,0,'dockercart_theme','dockercart_theme_product_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Shipping\",\"2\":\"Доставка\",\"3\":\"Доставка\"},\"text\":{\"1\":\"Free Shipping\",\"2\":\"Швидка доставка\",\"3\":\"Быстрая доставка\"}},{\"icon\":\"shield-check\",\"sort_order\":1,\"title\":{\"1\":\"Warranty\",\"2\":\"Гарантия\",\"3\":\"Гарантия\"},\"text\":{\"1\":\"Official warranty\",\"2\":\"Офіційна гарантія\",\"3\":\"Официальная гарантия\"}},{\"icon\":\"refresh-ccw\",\"sort_order\":2,\"title\":{\"1\":\"Return\",\"2\":\"Возврат\",\"3\":\"Возврат\"},\"text\":{\"1\":\"30-days return\",\"2\":\"14 днів на повернення\",\"3\":\"14 дней на возврат\"}}]',0),
+(29274,0,'dockercart_theme','dockercart_theme_category_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Catalog depth\",\"2\":\"Глибина каталогу\",\"3\":\"Глубина каталога\"},\"text\":{\"1\":\"%s+ products\",\"2\":\"%s+ товарів\",\"3\":\"%s+ товаров\"}},{\"icon\":\"badge-check\",\"sort_order\":1,\"title\":{\"1\":\"Brand coverage\",\"2\":\"Покриття брендів\",\"3\":\"Покрытие брендов\"},\"text\":{\"1\":\"%s famous brands\",\"2\":\"%s відомих брендів\",\"3\":\"%s известных брендов\"}},{\"icon\":\"headset\",\"sort_order\":2,\"title\":{\"1\":\"Support\",\"2\":\"Підтримка\",\"3\":\"Поддержка\"},\"text\":{\"1\":\"Expert assistance before and after purchase\",\"2\":\"Експертна підтримка до і після покупки\",\"3\":\"Экспертная помощь до и после покупки\"}}]',0),
+(29275,0,'dockercart_theme','dockercart_theme_quickview_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Free Shipping\",\"2\":\"Швидка доставка\",\"3\":\"Быстрая доставка\"}},{\"icon\":\"shield-check\",\"sort_order\":1,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Official Guarantee\",\"2\":\"Офіційна гарантія\",\"3\":\"Официальная гарантия\"}},{\"icon\":\"refresh-ccw\",\"sort_order\":2,\"title\":{\"1\":\"\",\"2\":\"\",\"3\":\"\"},\"text\":{\"1\":\"Hassle-free returns within 30 days.\",\"2\":\"Повернення протягом 14 днів\",\"3\":\"Возврат в течении 14 дней\"}}]',0),
+(29276,0,'dockercart_theme','dockercart_theme_custom_css','',0),
+(29277,0,'dockercart_theme','dockercart_theme_custom_js','',0),
+(29278,0,'dockercart_theme','dockercart_theme_social_1_image','catalog/social/facebook.png',0),
+(29279,0,'dockercart_theme','dockercart_theme_social_1_link','https://demo.dockercart.net/',0),
+(29280,0,'dockercart_theme','dockercart_theme_messenger_1_image','catalog/social/telegram.png',0),
+(29281,0,'dockercart_theme','dockercart_theme_messenger_1_link','https://telegram.org/',0),
+(29282,0,'dockercart_theme','dockercart_theme_messenger_1_name','Telegram',0),
+(29283,0,'dockercart_theme','dockercart_theme_payment_1_image','',0),
+(29284,0,'dockercart_theme','dockercart_theme_payment_1_link','',0),
+(29285,0,'dockercart_theme','dockercart_theme_social_2_image','catalog/social/instagram.png',0),
+(29286,0,'dockercart_theme','dockercart_theme_social_2_link','https://demo.dockercart.net/',0),
+(29287,0,'dockercart_theme','dockercart_theme_messenger_2_image','catalog/social/viber.png',0),
+(29288,0,'dockercart_theme','dockercart_theme_messenger_2_link','https://www.viber.com/',0),
+(29289,0,'dockercart_theme','dockercart_theme_messenger_2_name','Viber',0),
+(29290,0,'dockercart_theme','dockercart_theme_payment_2_image','',0),
+(29291,0,'dockercart_theme','dockercart_theme_payment_2_link','',0),
+(29292,0,'dockercart_theme','dockercart_theme_social_3_image','catalog/social/linkedin.png',0),
+(29293,0,'dockercart_theme','dockercart_theme_social_3_link','https://demo.dockercart.net/',0),
+(29294,0,'dockercart_theme','dockercart_theme_messenger_3_image','catalog/social/whatsapp.png',0),
+(29295,0,'dockercart_theme','dockercart_theme_messenger_3_link','http://whatsapp.com/',0),
+(29296,0,'dockercart_theme','dockercart_theme_messenger_3_name','WhatsApp',0),
+(29297,0,'dockercart_theme','dockercart_theme_payment_3_image','',0),
+(29298,0,'dockercart_theme','dockercart_theme_payment_3_link','',0),
+(29299,0,'dockercart_theme','dockercart_theme_social_4_image','',0),
+(29300,0,'dockercart_theme','dockercart_theme_social_4_link','',0),
+(29301,0,'dockercart_theme','dockercart_theme_messenger_4_image','',0),
+(29302,0,'dockercart_theme','dockercart_theme_messenger_4_link','',0),
+(29303,0,'dockercart_theme','dockercart_theme_messenger_4_name','',0),
+(29304,0,'dockercart_theme','dockercart_theme_payment_4_image','',0),
+(29305,0,'dockercart_theme','dockercart_theme_payment_4_link','',0),
+(29306,0,'dockercart_theme','dockercart_theme_social_5_image','',0),
+(29307,0,'dockercart_theme','dockercart_theme_social_5_link','',0),
+(29308,0,'dockercart_theme','dockercart_theme_messenger_5_image','',0),
+(29309,0,'dockercart_theme','dockercart_theme_messenger_5_link','',0),
+(29310,0,'dockercart_theme','dockercart_theme_messenger_5_name','',0),
+(29311,0,'dockercart_theme','dockercart_theme_payment_5_image','',0),
+(29312,0,'dockercart_theme','dockercart_theme_payment_5_link','',0),
+(29313,0,'dockercart_theme','dockercart_theme_social_6_image','',0),
+(29314,0,'dockercart_theme','dockercart_theme_social_6_link','',0),
+(29315,0,'dockercart_theme','dockercart_theme_messenger_6_image','',0),
+(29316,0,'dockercart_theme','dockercart_theme_messenger_6_link','',0),
+(29317,0,'dockercart_theme','dockercart_theme_messenger_6_name','',0),
+(29318,0,'dockercart_theme','dockercart_theme_payment_6_image','',0),
+(29319,0,'dockercart_theme','dockercart_theme_payment_6_link','',0),
+(29320,0,'dockercart_theme','dockercart_theme_social_7_image','',0),
+(29321,0,'dockercart_theme','dockercart_theme_social_7_link','',0),
+(29322,0,'dockercart_theme','dockercart_theme_messenger_7_image','',0),
+(29323,0,'dockercart_theme','dockercart_theme_messenger_7_link','',0),
+(29324,0,'dockercart_theme','dockercart_theme_messenger_7_name','',0),
+(29325,0,'dockercart_theme','dockercart_theme_payment_7_image','',0),
+(29326,0,'dockercart_theme','dockercart_theme_payment_7_link','',0),
+(29327,0,'dockercart_theme','dockercart_theme_social_8_image','',0),
+(29328,0,'dockercart_theme','dockercart_theme_social_8_link','',0),
+(29329,0,'dockercart_theme','dockercart_theme_messenger_8_image','',0),
+(29330,0,'dockercart_theme','dockercart_theme_messenger_8_link','',0),
+(29331,0,'dockercart_theme','dockercart_theme_messenger_8_name','',0),
+(29332,0,'dockercart_theme','dockercart_theme_payment_8_image','',0),
+(29333,0,'dockercart_theme','dockercart_theme_payment_8_link','',0),
+(29334,0,'dockercart_theme','dockercart_theme_social_9_image','',0),
+(29335,0,'dockercart_theme','dockercart_theme_social_9_link','',0),
+(29336,0,'dockercart_theme','dockercart_theme_messenger_9_image','',0),
+(29337,0,'dockercart_theme','dockercart_theme_messenger_9_link','',0),
+(29338,0,'dockercart_theme','dockercart_theme_messenger_9_name','',0),
+(29339,0,'dockercart_theme','dockercart_theme_payment_9_image','',0),
+(29340,0,'dockercart_theme','dockercart_theme_payment_9_link','',0),
+(29341,0,'dockercart_theme','dockercart_theme_social_10_image','',0),
+(29342,0,'dockercart_theme','dockercart_theme_social_10_link','',0),
+(29343,0,'dockercart_theme','dockercart_theme_messenger_10_image','',0),
+(29344,0,'dockercart_theme','dockercart_theme_messenger_10_link','',0),
+(29345,0,'dockercart_theme','dockercart_theme_messenger_10_name','',0),
+(29346,0,'dockercart_theme','dockercart_theme_payment_10_image','',0),
+(29347,0,'dockercart_theme','dockercart_theme_payment_10_link','',0),
+(29348,0,'dockercart_theme','dockercart_theme_header_links','[]',0),
+(29349,0,'dockercart_theme','dockercart_theme_footer_links','[]',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_stock_reservation`
+--
+
+DROP TABLE IF EXISTS `oc_stock_reservation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_stock_reservation` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(128) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `variant_id` int(11) NOT NULL DEFAULT 0,
+  `quantity` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `order_id` int(11) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`reservation_id`),
+  KEY `idx_reservation_session` (`session_id`),
+  KEY `idx_reservation_product` (`product_id`,`variant_id`),
+  KEY `idx_reservation_expiry` (`expires_at`),
+  KEY `idx_reservation_order` (`order_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_stock_reservation`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_stock_reservation` WRITE;
+/*!40000 ALTER TABLE `oc_stock_reservation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_stock_reservation` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -15570,7 +18513,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_user_group` WRITE;
 /*!40000 ALTER TABLE `oc_user_group` DISABLE KEYS */;
 INSERT INTO `oc_user_group` VALUES
-(1,'Administrator','{\"access\":{\"0\":\"catalog\\/attribute\",\"1\":\"catalog\\/attribute_group\",\"2\":\"catalog\\/category\",\"3\":\"catalog\\/download\",\"4\":\"catalog\\/information\",\"5\":\"catalog\\/manufacturer\",\"6\":\"catalog\\/option\",\"7\":\"catalog\\/product\",\"8\":\"catalog\\/product_bundle\",\"9\":\"catalog\\/product_configurable\",\"10\":\"catalog\\/review\",\"11\":\"common\\/admin_search\",\"12\":\"common\\/column_left\",\"13\":\"common\\/developer\",\"14\":\"common\\/filemanager\",\"15\":\"common\\/profile\",\"16\":\"common\\/security\",\"17\":\"customer\\/custom_field\",\"18\":\"customer\\/customer\",\"19\":\"customer\\/customer_approval\",\"20\":\"customer\\/customer_group\",\"21\":\"design\\/banner\",\"22\":\"design\\/layout\",\"23\":\"design\\/seo_url\",\"24\":\"design\\/theme\",\"25\":\"design\\/translation\",\"26\":\"event\\/dockercart_about_tab\",\"27\":\"event\\/dockercart_license_admin\",\"28\":\"event\\/language\",\"29\":\"event\\/theme\",\"35\":\"extension\\/dashboard\\/activity\",\"36\":\"extension\\/dashboard\\/chart\",\"37\":\"extension\\/dashboard\\/customer\",\"38\":\"extension\\/dashboard\\/dockercart_aov\",\"39\":\"extension\\/dashboard\\/dockercart_conversion\",\"40\":\"extension\\/dashboard\\/dockercart_repeat\",\"41\":\"extension\\/dashboard\\/order\",\"42\":\"extension\\/dashboard\\/recent\",\"43\":\"extension\\/dashboard\\/sale\",\"44\":\"extension\\/dashboard\\/traffic_source\",\"45\":\"extension\\/dashboard\\/viewed_product\",\"46\":\"extension\\/extension\\/advertise\",\"47\":\"extension\\/extension\\/analytics\",\"48\":\"extension\\/extension\\/captcha\",\"49\":\"extension\\/extension\\/currency\",\"50\":\"extension\\/extension\\/dashboard\",\"51\":\"extension\\/extension\\/feed\",\"52\":\"extension\\/extension\\/fraud\",\"53\":\"extension\\/extension\\/menu\",\"54\":\"extension\\/extension\\/module\",\"55\":\"extension\\/extension\\/payment\",\"56\":\"extension\\/extension\\/promotion\",\"57\":\"extension\\/extension\\/report\",\"58\":\"extension\\/extension\\/shipping\",\"59\":\"extension\\/extension\\/theme\",\"60\":\"extension\\/extension\\/total\",\"61\":\"extension\\/feed\\/dockercart_sitemap\",\"62\":\"extension\\/module\\/account\",\"63\":\"extension\\/module\\/banner\",\"64\":\"extension\\/module\\/bestseller\",\"65\":\"extension\\/module\\/carousel\",\"66\":\"extension\\/module\\/category\",\"67\":\"extension\\/module\\/dockercart_blog\",\"68\":\"extension\\/module\\/dockercart_blog_author\",\"69\":\"extension\\/module\\/dockercart_blog_category\",\"70\":\"extension\\/module\\/dockercart_blog_comment\",\"71\":\"extension\\/module\\/dockercart_blog_install\",\"72\":\"extension\\/module\\/dockercart_blog_latest\",\"73\":\"extension\\/module\\/dockercart_blog_post\",\"74\":\"extension\\/module\\/dockercart_brand_carousel\",\"75\":\"extension\\/module\\/dockercart_category_tree\",\"76\":\"extension\\/module\\/dockercart_checkout\",\"77\":\"extension\\/module\\/dockercart_newsletter\",\"78\":\"extension\\/module\\/dockercart_search\",\"79\":\"extension\\/module\\/dockercart_seo_description\",\"80\":\"extension\\/module\\/dockercart_shop_features\",\"81\":\"extension\\/module\\/dockercart_theme\",\"82\":\"extension\\/module\\/dockercart_viewed\",\"83\":\"extension\\/module\\/featured\",\"85\":\"extension\\/module\\/latest\",\"86\":\"extension\\/module\\/slideshow\",\"87\":\"extension\\/module\\/special\",\"89\":\"extension\\/payment\\/dockercart_universal\",\"90\":\"extension\\/report\\/customer_activity\",\"91\":\"extension\\/report\\/customer_order\",\"92\":\"extension\\/report\\/customer_reward\",\"93\":\"extension\\/report\\/customer_search\",\"94\":\"extension\\/report\\/customer_transaction\",\"95\":\"extension\\/report\\/dockercart_analytics\",\"96\":\"extension\\/report\\/marketing\",\"97\":\"extension\\/report\\/product_purchased\",\"98\":\"extension\\/report\\/product_viewed\",\"99\":\"extension\\/report\\/sale_coupon\",\"100\":\"extension\\/report\\/sale_order\",\"101\":\"extension\\/report\\/sale_return\",\"102\":\"extension\\/report\\/sale_shipping\",\"104\":\"extension\\/shipping\\/dockercart_universal\",\"105\":\"extension\\/store\",\"106\":\"extension\\/theme\\/dockercart\",\"107\":\"extension\\/total\\/coupon\",\"108\":\"extension\\/total\\/credit\",\"109\":\"extension\\/total\\/handling\",\"110\":\"extension\\/total\\/low_order_fee\",\"111\":\"extension\\/total\\/reward\",\"112\":\"extension\\/total\\/shipping\",\"113\":\"extension\\/total\\/sub_total\",\"114\":\"extension\\/total\\/tax\",\"115\":\"extension\\/total\\/total\",\"116\":\"extension\\/total\\/voucher\",\"117\":\"localisation\\/country\",\"118\":\"localisation\\/currency\",\"119\":\"localisation\\/geo_zone\",\"120\":\"localisation\\/language\",\"121\":\"localisation\\/length_class\",\"122\":\"localisation\\/location\",\"123\":\"localisation\\/order_status\",\"124\":\"localisation\\/return_action\",\"125\":\"localisation\\/return_reason\",\"126\":\"localisation\\/return_status\",\"127\":\"localisation\\/stock_status\",\"128\":\"localisation\\/tax_class\",\"129\":\"localisation\\/tax_rate\",\"130\":\"localisation\\/weight_class\",\"131\":\"localisation\\/zone\",\"132\":\"mail\\/affiliate\",\"133\":\"mail\\/customer\",\"134\":\"mail\\/forgotten\",\"135\":\"mail\\/return\",\"136\":\"mail\\/reward\",\"137\":\"mail\\/transaction\",\"138\":\"marketing\\/contact\",\"139\":\"marketing\\/coupon\",\"140\":\"marketing\\/marketing\",\"141\":\"marketplace\\/event\",\"142\":\"marketplace\\/extension\",\"143\":\"marketplace\\/install\",\"144\":\"marketplace\\/installer\",\"145\":\"marketplace\\/modification\",\"146\":\"report\\/report\",\"147\":\"sale\\/order\",\"148\":\"sale\\/return\",\"149\":\"sale\\/voucher\",\"150\":\"sale\\/voucher_theme\",\"151\":\"setting\\/setting\",\"152\":\"setting\\/store\",\"153\":\"startup\\/error\",\"154\":\"startup\\/event\",\"155\":\"startup\\/login\",\"156\":\"startup\\/permission\",\"157\":\"startup\\/router\",\"158\":\"startup\\/sass\",\"159\":\"startup\\/startup\",\"160\":\"tool\\/backup\",\"161\":\"tool\\/dockercart_scheduler\",\"162\":\"tool\\/log\",\"163\":\"tool\\/upload\",\"164\":\"user\\/api\",\"165\":\"user\\/user\",\"166\":\"user\\/user_permission\",\"172\":\"extension\\/module\\/dockercart_seo_description\",\"173\":\"extension\\/module\\/dockercart_brand_carousel\",\"175\":\"extension\\/currency\\/ecb\"},\"modify\":{\"0\":\"catalog\\/attribute\",\"1\":\"catalog\\/attribute_group\",\"2\":\"catalog\\/category\",\"3\":\"catalog\\/download\",\"4\":\"catalog\\/information\",\"5\":\"catalog\\/manufacturer\",\"6\":\"catalog\\/option\",\"7\":\"catalog\\/product\",\"8\":\"catalog\\/product_bundle\",\"9\":\"catalog\\/product_configurable\",\"10\":\"catalog\\/review\",\"11\":\"common\\/admin_search\",\"12\":\"common\\/column_left\",\"13\":\"common\\/developer\",\"14\":\"common\\/filemanager\",\"15\":\"common\\/profile\",\"16\":\"common\\/security\",\"17\":\"customer\\/custom_field\",\"18\":\"customer\\/customer\",\"19\":\"customer\\/customer_approval\",\"20\":\"customer\\/customer_group\",\"21\":\"design\\/banner\",\"22\":\"design\\/layout\",\"23\":\"design\\/seo_url\",\"24\":\"design\\/theme\",\"25\":\"design\\/translation\",\"26\":\"event\\/dockercart_about_tab\",\"27\":\"event\\/dockercart_license_admin\",\"28\":\"event\\/language\",\"29\":\"event\\/theme\",\"35\":\"extension\\/dashboard\\/activity\",\"36\":\"extension\\/dashboard\\/chart\",\"37\":\"extension\\/dashboard\\/customer\",\"38\":\"extension\\/dashboard\\/dockercart_aov\",\"39\":\"extension\\/dashboard\\/dockercart_conversion\",\"40\":\"extension\\/dashboard\\/dockercart_repeat\",\"41\":\"extension\\/dashboard\\/order\",\"42\":\"extension\\/dashboard\\/recent\",\"43\":\"extension\\/dashboard\\/sale\",\"44\":\"extension\\/dashboard\\/traffic_source\",\"45\":\"extension\\/dashboard\\/viewed_product\",\"46\":\"extension\\/extension\\/advertise\",\"47\":\"extension\\/extension\\/analytics\",\"48\":\"extension\\/extension\\/captcha\",\"49\":\"extension\\/extension\\/currency\",\"50\":\"extension\\/extension\\/dashboard\",\"51\":\"extension\\/extension\\/feed\",\"52\":\"extension\\/extension\\/fraud\",\"53\":\"extension\\/extension\\/menu\",\"54\":\"extension\\/extension\\/module\",\"55\":\"extension\\/extension\\/payment\",\"56\":\"extension\\/extension\\/promotion\",\"57\":\"extension\\/extension\\/report\",\"58\":\"extension\\/extension\\/shipping\",\"59\":\"extension\\/extension\\/theme\",\"60\":\"extension\\/extension\\/total\",\"61\":\"extension\\/feed\\/dockercart_sitemap\",\"62\":\"extension\\/module\\/account\",\"63\":\"extension\\/module\\/banner\",\"64\":\"extension\\/module\\/bestseller\",\"65\":\"extension\\/module\\/carousel\",\"66\":\"extension\\/module\\/category\",\"67\":\"extension\\/module\\/dockercart_blog\",\"68\":\"extension\\/module\\/dockercart_blog_author\",\"69\":\"extension\\/module\\/dockercart_blog_category\",\"70\":\"extension\\/module\\/dockercart_blog_comment\",\"71\":\"extension\\/module\\/dockercart_blog_install\",\"72\":\"extension\\/module\\/dockercart_blog_latest\",\"73\":\"extension\\/module\\/dockercart_blog_post\",\"74\":\"extension\\/module\\/dockercart_brand_carousel\",\"75\":\"extension\\/module\\/dockercart_category_tree\",\"76\":\"extension\\/module\\/dockercart_checkout\",\"77\":\"extension\\/module\\/dockercart_newsletter\",\"78\":\"extension\\/module\\/dockercart_search\",\"79\":\"extension\\/module\\/dockercart_seo_description\",\"80\":\"extension\\/module\\/dockercart_shop_features\",\"81\":\"extension\\/module\\/dockercart_theme\",\"82\":\"extension\\/module\\/dockercart_viewed\",\"83\":\"extension\\/module\\/featured\",\"85\":\"extension\\/module\\/latest\",\"86\":\"extension\\/module\\/slideshow\",\"87\":\"extension\\/module\\/special\",\"89\":\"extension\\/payment\\/dockercart_universal\",\"90\":\"extension\\/report\\/customer_activity\",\"91\":\"extension\\/report\\/customer_order\",\"92\":\"extension\\/report\\/customer_reward\",\"93\":\"extension\\/report\\/customer_search\",\"94\":\"extension\\/report\\/customer_transaction\",\"95\":\"extension\\/report\\/dockercart_analytics\",\"96\":\"extension\\/report\\/marketing\",\"97\":\"extension\\/report\\/product_purchased\",\"98\":\"extension\\/report\\/product_viewed\",\"99\":\"extension\\/report\\/sale_coupon\",\"100\":\"extension\\/report\\/sale_order\",\"101\":\"extension\\/report\\/sale_return\",\"102\":\"extension\\/report\\/sale_shipping\",\"104\":\"extension\\/shipping\\/dockercart_universal\",\"105\":\"extension\\/store\",\"106\":\"extension\\/theme\\/dockercart\",\"107\":\"extension\\/total\\/coupon\",\"108\":\"extension\\/total\\/credit\",\"109\":\"extension\\/total\\/handling\",\"110\":\"extension\\/total\\/low_order_fee\",\"111\":\"extension\\/total\\/reward\",\"112\":\"extension\\/total\\/shipping\",\"113\":\"extension\\/total\\/sub_total\",\"114\":\"extension\\/total\\/tax\",\"115\":\"extension\\/total\\/total\",\"116\":\"extension\\/total\\/voucher\",\"117\":\"localisation\\/country\",\"118\":\"localisation\\/currency\",\"119\":\"localisation\\/geo_zone\",\"120\":\"localisation\\/language\",\"121\":\"localisation\\/length_class\",\"122\":\"localisation\\/location\",\"123\":\"localisation\\/order_status\",\"124\":\"localisation\\/return_action\",\"125\":\"localisation\\/return_reason\",\"126\":\"localisation\\/return_status\",\"127\":\"localisation\\/stock_status\",\"128\":\"localisation\\/tax_class\",\"129\":\"localisation\\/tax_rate\",\"130\":\"localisation\\/weight_class\",\"131\":\"localisation\\/zone\",\"132\":\"mail\\/affiliate\",\"133\":\"mail\\/customer\",\"134\":\"mail\\/forgotten\",\"135\":\"mail\\/return\",\"136\":\"mail\\/reward\",\"137\":\"mail\\/transaction\",\"138\":\"marketing\\/contact\",\"139\":\"marketing\\/coupon\",\"140\":\"marketing\\/marketing\",\"141\":\"marketplace\\/event\",\"142\":\"marketplace\\/extension\",\"143\":\"marketplace\\/install\",\"144\":\"marketplace\\/installer\",\"145\":\"marketplace\\/modification\",\"146\":\"report\\/report\",\"147\":\"sale\\/order\",\"148\":\"sale\\/return\",\"149\":\"sale\\/voucher\",\"150\":\"sale\\/voucher_theme\",\"151\":\"setting\\/setting\",\"152\":\"setting\\/store\",\"153\":\"startup\\/error\",\"154\":\"startup\\/event\",\"155\":\"startup\\/login\",\"156\":\"startup\\/permission\",\"157\":\"startup\\/router\",\"158\":\"startup\\/sass\",\"159\":\"startup\\/startup\",\"160\":\"tool\\/backup\",\"161\":\"tool\\/dockercart_scheduler\",\"162\":\"tool\\/log\",\"163\":\"tool\\/upload\",\"164\":\"user\\/api\",\"165\":\"user\\/user\",\"166\":\"user\\/user_permission\",\"172\":\"extension\\/module\\/dockercart_seo_description\",\"173\":\"extension\\/module\\/dockercart_brand_carousel\",\"175\":\"extension\\/currency\\/ecb\"}}');
+(1,'Administrator','{\"access\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/stock_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/dockercart_category_revenue\"], \"modify\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/stock_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/dockercart_category_revenue\"]}');
 /*!40000 ALTER TABLE `oc_user_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -15794,7 +18737,7 @@ CREATE TABLE `oc_zone` (
   `code` varchar(32) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`zone_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4239 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=99103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -24088,6 +27031,95 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `test_customer_reward`
+--
+
+DROP TABLE IF EXISTS `test_customer_reward`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `test_customer_reward` (
+  `customer_reward_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `description` text NOT NULL,
+  `points` int(8) NOT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`customer_reward_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test_customer_reward`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `test_customer_reward` WRITE;
+/*!40000 ALTER TABLE `test_customer_reward` DISABLE KEYS */;
+/*!40000 ALTER TABLE `test_customer_reward` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `test_order`
+--
+
+DROP TABLE IF EXISTS `test_order`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `test_order` (
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` int(11) NOT NULL,
+  `paid_amount` decimal(15,4) NOT NULL DEFAULT 0.0000,
+  `reward_awarded` tinyint(1) NOT NULL DEFAULT 0,
+  `reward_revoked_points` int(11) NOT NULL DEFAULT 0,
+  `order_status_id` int(11) NOT NULL DEFAULT 0,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test_order`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `test_order` WRITE;
+/*!40000 ALTER TABLE `test_order` DISABLE KEYS */;
+/*!40000 ALTER TABLE `test_order` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `test_order_product`
+--
+
+DROP TABLE IF EXISTS `test_order_product`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `test_order_product` (
+  `order_product_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `reward` int(8) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`order_product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `test_order_product`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `test_order_product` WRITE;
+/*!40000 ALTER TABLE `test_order_product` DISABLE KEYS */;
+/*!40000 ALTER TABLE `test_order_product` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Dumping events for database 'dockercart'
 --
 
@@ -24104,4 +27136,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-07-29 15:47:51
+-- Dump completed on 2026-08-09 11:48:41
