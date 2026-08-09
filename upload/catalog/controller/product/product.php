@@ -408,7 +408,23 @@ class ControllerProductProduct extends Controller {
 			} elseif ($this->config->get('config_stock_display')) {
 				$data['stock'] = $product_info['quantity'];
 			} else {
-				$data['stock'] = $this->language->get('text_instock');
+				// Use the stock status from the database ("In stock"/"Есть в наличии"),
+				// not a hardcoded language string.
+				$stock_status_id = !empty($product_info['stock_status_id']) ? (int)$product_info['stock_status_id'] : 0;
+
+				$this->load->model('localisation/stock_status');
+				$stock_status = $this->model_localisation_stock_status->getStockStatus($stock_status_id);
+
+				$data['stock'] = $stock_status ? $stock_status['name'] : $this->language->get('text_instock');
+			}
+
+			// DB stock status name for the JS variant switcher (avoid hardcoded "В наличии")
+			if (!empty($product_info['stock_status_id'])) {
+				$this->load->model('localisation/stock_status');
+				$stock_status = $this->model_localisation_stock_status->getStockStatus((int)$product_info['stock_status_id']);
+				$data['stock_status_instock'] = $stock_status ? $stock_status['name'] : $this->language->get('text_instock');
+			} else {
+				$data['stock_status_instock'] = $this->language->get('text_instock');
 			}
 
 			$data['is_in_stock'] = ((int)$product_info['quantity'] > 0) || !empty($product_info['preorder']);
