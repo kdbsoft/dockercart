@@ -2435,6 +2435,46 @@ class ModelCatalogProduct extends Model
             (int) $this->config->get("config_language_id") .
             "'";
 
+        if (!empty($data["filter_search"])) {
+            $search_like = "%" . $this->db->escape($data["filter_search"]) . "%";
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_variant pvs ON (pvs.product_id = p.product_id)";
+            $where .=
+                " AND (pd.name LIKE '" .
+                $search_like .
+                "' OR p.model LIKE '" .
+                $search_like .
+                "' OR p.sku LIKE '" .
+                $search_like .
+                "' OR p.upc LIKE '" .
+                $search_like .
+                "' OR p.ean LIKE '" .
+                $search_like .
+                "' OR p.jan LIKE '" .
+                $search_like .
+                "' OR p.isbn LIKE '" .
+                $search_like .
+                "' OR p.mpn LIKE '" .
+                $search_like .
+                "' OR pvs.sku LIKE '" .
+                $search_like .
+                "' OR pvs.model LIKE '" .
+                $search_like .
+                "' OR pvs.upc LIKE '" .
+                $search_like .
+                "' OR pvs.ean LIKE '" .
+                $search_like .
+                "' OR pvs.jan LIKE '" .
+                $search_like .
+                "' OR pvs.isbn LIKE '" .
+                $search_like .
+                "' OR pvs.mpn LIKE '" .
+                $search_like .
+                "')";
+        }
+
         if (!empty($data["filter_name"])) {
             $where .=
                 " AND pd.name LIKE '%" .
@@ -3101,6 +3141,46 @@ class ModelCatalogProduct extends Model
             " WHERE pd.language_id = '" .
             (int) $this->config->get("config_language_id") .
             "'";
+
+        if (!empty($data["filter_search"])) {
+            $search_like = "%" . $this->db->escape($data["filter_search"]) . "%";
+            $joins .=
+                " LEFT JOIN " .
+                DB_PREFIX .
+                "product_variant pvs ON (pvs.product_id = p.product_id)";
+            $where .=
+                " AND (pd.name LIKE '" .
+                $search_like .
+                "' OR p.model LIKE '" .
+                $search_like .
+                "' OR p.sku LIKE '" .
+                $search_like .
+                "' OR p.upc LIKE '" .
+                $search_like .
+                "' OR p.ean LIKE '" .
+                $search_like .
+                "' OR p.jan LIKE '" .
+                $search_like .
+                "' OR p.isbn LIKE '" .
+                $search_like .
+                "' OR p.mpn LIKE '" .
+                $search_like .
+                "' OR pvs.sku LIKE '" .
+                $search_like .
+                "' OR pvs.model LIKE '" .
+                $search_like .
+                "' OR pvs.upc LIKE '" .
+                $search_like .
+                "' OR pvs.ean LIKE '" .
+                $search_like .
+                "' OR pvs.jan LIKE '" .
+                $search_like .
+                "' OR pvs.isbn LIKE '" .
+                $search_like .
+                "' OR pvs.mpn LIKE '" .
+                $search_like .
+                "')";
+        }
 
         if (!empty($data["filter_name"])) {
             $where .=
