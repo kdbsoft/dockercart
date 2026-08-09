@@ -12,6 +12,8 @@ class ControllerCommonAccountMenu extends Controller {
 		$data['customer_name'] = $customer_info ? trim($customer_info['firstname'] . ' ' . $customer_info['lastname']) : '';
 		$data['customer_telephone'] = $customer_info ? $customer_info['telephone'] : '';
 		$data['account_href'] = $this->url->link('account/account', '', true);
+		$data['register_href'] = $this->url->link('account/register', '', true);
+		$data['customer_logged'] = (bool)$this->customer->isLogged();
 
 		$data['menu_items'] = array(
 			array(

@@ -1,4 +1,5 @@
 <aside class="space-y-6">
+  {% if customer_logged %}
   <a href="{{ account_href }}" class="flex items-center gap-3 px-3 py-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group">
     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
       <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
@@ -10,22 +11,38 @@
       {% endif %}
     </div>
   </a>
+  {% else %}
+  <a href="{{ register_href }}" class="flex items-center justify-between gap-3 px-3 py-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+        <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
+      </div>
+      <div class="min-w-0">
+        <p class="text-sm font-semibold text-gray-900">{{ text_register }}</p>
+        <p class="text-xs text-gray-500">{{ text_guest_heading }}</p>
+      </div>
+    </div>
+    <i data-lucide="arrow-right" class="w-4 h-4 text-gray-400 flex-shrink-0 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all"></i>
+  </a>
+  {% endif %}
 {% for group in menu_items %}
   <div>
     <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2 px-2">{{ group.heading }}</p>
-    <ul class="space-y-0.5">
+    <ul class="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-0.5">
       {% for key, item in group.children %}
         {% if item.status is not defined or item.status %}
         <li>
           <a href="{{ item.href }}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+            class="group flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-3 px-3 py-3 lg:py-2.5 rounded-xl text-sm font-medium transition-all
             {% if current_route == key %}
-              bg-blue-50 text-blue-700
+              bg-blue-50 text-blue-700 border border-blue-200
             {% else %}
-              text-gray-600 hover:text-gray-900 hover:bg-gray-50
+              bg-white border border-gray-100 shadow-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 hover:border-blue-200 hover:shadow-md lg:border-transparent lg:bg-transparent lg:shadow-none lg:hover:border-transparent
             {% endif %}">
-            <i data-lucide="{{ item.icon }}" class="w-4 h-4 {% if current_route == key %}text-blue-500{% else %}text-gray-400{% endif %}"></i>
-            {{ item.text }}
+            <div class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 transition-colors {% if current_route == key %}bg-blue-100{% else %}group-hover:bg-blue-100{% endif %}">
+              <i data-lucide="{{ item.icon }}" class="w-4 h-4 transition-colors {% if current_route == key %}text-blue-500{% else %}text-gray-400 group-hover:text-blue-500{% endif %}"></i>
+            </div>
+            <span class="text-center lg:text-left leading-tight">{{ item.text }}</span>
           </a>
         </li>
         {% endif %}

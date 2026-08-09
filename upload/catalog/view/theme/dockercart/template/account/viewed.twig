@@ -17,32 +17,32 @@
       {{ content_top }}
 
       <div class="flex flex-col lg:flex-row gap-6 items-start">
-        <aside class="lg:w-60 flex-shrink-0">
+        <aside class="lg:w-72 flex-shrink-0">
           {{ account_menu }}
         </aside>
         <div class="flex-1 min-w-0">
 
       {% if products %}
-      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6">
-        <div class="flex flex-col gap-3">
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6 min-w-0">
+        <div class="flex flex-col gap-3 min-w-0">
           {% for product in products %}
-          <div class="product-card group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex items-stretch overflow-hidden cursor-pointer"
+          <div class="product-card group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex items-stretch overflow-hidden cursor-pointer min-w-0"
                data-id="{{ product.product_id }}" data-href="{{ product.href }}"
                onclick="window.location.href = '{{ product.href|e('js') }}';">
             <a href="{{ product.href }}" class="w-[100px] flex-shrink-0 bg-gray-50 overflow-hidden block" aria-label="{{ product.name }}" onclick="event.stopPropagation();">
               <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
             </a>
             <div class="flex-1 min-w-0 p-3 sm:p-4 flex flex-col justify-center">
-              <div class="flex items-center justify-between gap-2 mb-1">
-                <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400">
-                  <i data-lucide="clock" class="w-3.5 h-3.5"></i>
-                  {{ text_viewed_on }} {{ product.date_viewed }}
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 min-w-0">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                  <span class="break-words">{{ text_viewed_on }} {{ product.date_viewed }}</span>
                 </span>
                 {% if product.special and product.discount > 0 %}
                 <span class="bg-red-500 text-white px-1.5 py-0.5 rounded-lg text-[10px] font-bold flex-shrink-0">-{{ product.discount }}%</span>
                 {% endif %}
               </div>
-              <h3 class="text-sm font-bold text-gray-900 leading-snug mb-1 truncate">
+              <h3 class="text-sm font-bold text-gray-900 leading-snug mb-1 break-words">
                 <a href="{{ product.href }}" class="hover:text-blue-600 transition" onclick="event.stopPropagation();">{{ product.name }}</a>
               </h3>
               {% if product.rating %}
