@@ -151,6 +151,10 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 		rm -f $$TMP_FILE; \
 		echo "Dump failed"; \
 		exit 1; \
+	elif [ $${PIPESTATUS[0]} -ne 0 ]; then \
+		rm -f $$TMP_FILE; \
+		echo "Dump failed (mariadb-dump exit code $${PIPESTATUS[0]})"; \
+		exit 1; \
 	fi; \
 	mv $$TMP_FILE docker/mysql/init.sql; \
 	echo "Dump written to docker/mysql/init.sql — review and commit when ready."
