@@ -289,7 +289,7 @@
   ============================================================ -->
 <!-- Ensure mobile overlay and menu sit above the sticky header (z-[9999]) -->
 <div id="dc-mobile-overlay" class="fixed inset-0 z-[10000] bg-black/40 hidden" onclick="dcCloseMobileMenu()"></div>
-<div id="dc-mobile-menu" class="fixed top-0 left-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col overflow-y-auto dc-mobile-menu-closed">
+<div id="dc-mobile-menu" class="fixed top-0 left-0 bottom-0 z-[10001] w-[280px] bg-white shadow-2xl flex flex-col overflow-y-auto dc-mobile-menu-closed hidden lg:hidden">
   <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
     {% if logo %}
       <img src="{{ logo }}" alt="{{ name }}" class="object-contain max-w-[180px] sm:max-w-[220px]" />
@@ -597,13 +597,17 @@ document.addEventListener('click', function(e) {
 });
 
 function dcOpenMobileMenu() {
-  document.getElementById('dc-mobile-menu').classList.remove('dc-mobile-menu-closed');
+  document.getElementById('dc-mobile-menu').classList.remove('dc-mobile-menu-closed', 'hidden', 'lg:hidden');
   document.getElementById('dc-mobile-overlay').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
 
 function dcCloseMobileMenu() {
-  document.getElementById('dc-mobile-menu').classList.add('dc-mobile-menu-closed');
+  var menu = document.getElementById('dc-mobile-menu');
+  menu.classList.add('dc-mobile-menu-closed');
+  if (window.matchMedia('(min-width: 1024px)').matches) {
+    menu.classList.add('hidden');
+  }
   document.getElementById('dc-mobile-overlay').classList.add('hidden');
   document.body.style.overflow = '';
 }
