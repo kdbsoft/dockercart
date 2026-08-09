@@ -427,7 +427,7 @@ class ControllerCheckoutCart extends Controller {
 					$pc = new ProductConfigurable($this->registry);
 					$variant_info = $pc->getVariant((int)$option['variant_id']);
 
-					if (!$variant_info) {
+					if (!$variant_info || empty($variant_info['status']) || (int)$variant_info['product_id'] !== (int)$product_id) {
 						$json['error']['variant'] = $this->language->get('error_variant_invalid');
 					} elseif ((float)$variant_info['quantity'] <= 0 && empty($variant_info['preorder']) && !$this->config->get('config_stock_checkout')) {
 						$json['error']['stock'] = $this->language->get('error_stock');

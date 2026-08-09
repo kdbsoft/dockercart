@@ -10,6 +10,27 @@
 	var variantMap = {};
 	var compatMap = {};
 
+	function variantInStock(v) {
+		if (matrix.preorder) return true;
+		var qty = parseFloat(v.quantity);
+		var subtract = v.subtract;
+		// subtract 0 = stock is not tracked; qty > 0 = in stock
+		return (subtract === 0 || subtract === '0' || (!isNaN(qty) && qty > 0));
+	}
+
+	function variantHasValues(v, pairs) {
+		var vpairs = {};
+		(v.values || []).forEach(function(vv) {
+			vpairs[vv.option_id] = vv.option_value_id;
+		});
+
+		for (var i = 0; i < pairs.length; i++) {
+			var parts = pairs[i].split(':');
+			if (vpairs[parts[0]] != parts[1]) return false;
+		}
+		return true;
+	}
+
 	matrix.variants.forEach(function(v) {
 		var key = (v.values || []).map(function(vv) {
 			return vv.option_id + ':' + vv.option_value_id;
@@ -51,6 +72,9 @@
 	var taxEl = document.querySelector('[id^="dc-unit-tax"]');
 	var discountsEl = document.getElementById('dc-variant-discounts');
 	var discountText = '{{ text_discount|e('js') }}';
+	var youSaveEl = document.getElementById('dc-you-save');
+	var youSaveAmountEl = document.getElementById('dc-you-save-amount');
+	var saleTimerEl = document.querySelector('.dc-sale-timer');
 
 	function getOvIdForPov(axis, povId) {
 		if (!axis.pov_map) return null;
@@ -70,6 +94,23 @@
 			if (!compat[pair]) return false;
 		}
 		return true;
+	}
+
+	function isValueInStock(axis, ovId, currentSelection) {
+		var pairs = [axis.option_id + ':' + ovId];
+
+		for (var selOid in currentSelection) {
+			if (selOid == axis.option_id) continue;
+			pairs.push(selOid + ':' + currentSelection[selOid]);
+		}
+
+		// There must be a single variant combining the current selection with
+		// this value that is actually in stock.
+		for (var i = 0; i < matrix.variants.length; i++) {
+			var v = matrix.variants[i];
+			if (variantInStock(v) && variantHasValues(v, pairs)) return true;
+		}
+		return false;
 	}
 
 	function updateAvailableOptions() {
@@ -103,15 +144,20 @@
 				if (!ovId) return;
 
 				var available = Object.keys(currentSelection).length === 0 || isValueAvailable(axis, ovId, currentSelection);
+				var inStock = Object.keys(currentSelection).length === 0 || isValueInStock(axis, ovId, currentSelection);
 
 				if (inp.tagName === 'OPTION') {
-					if (val) inp.disabled = !available;
+					if (val) inp.disabled = !available || !inStock;
 				} else {
-					inp.disabled = !available;
+					inp.disabled = !available || !inStock;
 					var label = inp.closest('label');
 					if (label) {
+						label.classList.toggle('oos', available && !inStock);
 						if (!available) {
 							label.style.opacity = '0.35';
+							label.style.pointerEvents = 'none';
+						} else if (!inStock) {
+							label.style.opacity = '';
 							label.style.pointerEvents = 'none';
 						} else {
 							label.style.opacity = '';
@@ -157,21 +203,47 @@
 		return variantMap[pairs.join('|')] || null;
 	}
 
+	function updateYouSave(variant, hasSpecial) {
+		if (!youSaveEl || !youSaveAmountEl) return;
+
+		var save = 0;
+
+		if (hasSpecial && variant) {
+			var full = parseFloat(variant.special_from);
+			var actual = parseFloat(variant.special);
+			if (!isNaN(full) && !isNaN(actual)) {
+				save = full - actual;
+			}
+		}
+
+		if (save > 0) {
+			if (typeof dcFormatMoney === 'function') {
+				youSaveAmountEl.textContent = dcFormatMoney(save);
+			}
+			youSaveEl.classList.remove('hidden');
+		} else {
+			youSaveEl.classList.add('hidden');
+		}
+	}
+
 	function updateVariantUI(variant, preservePrice) {
 		if (variantInput) variantInput.value = variant ? variant.variant_id : '';
 
 		var hasSpecial = variant && variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from;
 
-		if (priceEl && priceRegularContainer && priceSpecialContainer && !preservePrice) {
+		var hasPriceContainers = !!(priceEl && priceRegularContainer && priceSpecialContainer);
+
+		if (hasPriceContainers && !preservePrice) {
 			if (hasSpecial) {
 				priceRegularContainer.classList.add('hidden');
 				priceSpecialContainer.classList.remove('hidden');
+				if (saleTimerEl) saleTimerEl.classList.remove('hidden');
 
 				var specialPrice = parseFloat(variant.special);
 				var regularPrice = parseFloat(variant.special_from);
 
 				if (!isNaN(specialPrice)) {
-					priceEl.dataset.currentPrice = String(specialPrice);
+					priceEl.dataset.salePrice = String(specialPrice);
 				}
 
 				if (typeof dcFormatMoney === 'function') {
@@ -182,15 +254,18 @@
 			} else {
 				priceSpecialContainer.classList.add('hidden');
 				priceRegularContainer.classList.remove('hidden');
+				if (saleTimerEl) saleTimerEl.classList.add('hidden');
 
 				var price = (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) ? parseFloat(variant.price) : originalBasePrice;
 				if (isNaN(price)) price = originalBasePrice;
-				priceEl.dataset.currentPrice = String(price);
+				priceEl.dataset.salePrice = String(price);
 				if (typeof dcFormatMoney === 'function') {
 					var symbol = priceEl.dataset.currencySymbol || '';
 					priceEl.textContent = dcFormatMoney(price, symbol);
 				}
 			}
+
+			updateYouSave(variant, hasSpecial);
 		}
 
 		if (skuEl) {
@@ -217,18 +292,32 @@
 			discountsEl.classList.toggle('hidden', vd.length === 0);
 		}
 
-		// Sync base price for dcRecalcOptionPrice so it doesn't overwrite variant price
+		// Sync price data for dcRecalcOptionPrice: basePrice is the full variant
+		// price, salePrice is the price the customer actually pays (the sale
+		// price when the variant is on sale).
 		if (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) {
-			var vPrice = parseFloat(variant.price);
-			// When the variant is on sale, option adjustments must be applied
-			// on top of the sale price, not the regular price.
-			if (variant.special !== undefined && variant.special !== null && parseFloat(variant.special) > 0
-				&& variant.special_from !== undefined && parseFloat(variant.special) < parseFloat(variant.special_from)) {
+			var vFullPrice = parseFloat(variant.price);
+			var vPrice = null;
+			var hasOwnSpecial = variant.special !== undefined && variant.special !== null && parseFloat(variant.special) > 0
+				&& variant.special_from !== undefined && parseFloat(variant.special) < vFullPrice;
+
+			if (hasOwnSpecial) {
 				vPrice = parseFloat(variant.special);
+			} else if (preservePrice || (hasPriceContainers && !priceSpecialContainer.classList.contains('hidden'))) {
+				// Server-rendered price is authoritative on init (the default
+				// variant may be on a product-level sale): keep salePrice as is.
+				vPrice = null;
+			} else {
+				// No own special and no server-rendered product special visible:
+				// the customer pays the full variant price.
+				vPrice = vFullPrice;
 			}
+
 			if (priceEl) {
-				priceEl.dataset.basePrice = String(vPrice);
-				priceEl.dataset.currentPrice = String(vPrice);
+				priceEl.dataset.basePrice = String(vFullPrice);
+				if (vPrice !== null) {
+					priceEl.dataset.salePrice = String(vPrice);
+				}
 			}
 		} else {
 			if (priceEl && originalBasePrice > 0) {
@@ -253,7 +342,7 @@
 			if (stockBadgeEl) {
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
 				if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
-				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[13px] font-bold uppercase text-gray-400';
+				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-gray-400';
 				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
 				if (dot) {
 					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 bg-transparent border-gray-300';
@@ -271,7 +360,7 @@
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
 				var instockLabel = stockBadgeEl.dataset.stockInstock || stockBadgeEl.dataset.textInstock || '';
 				if (stockText) stockText.textContent = showQty ? String(Math.floor(qty)) : instockLabel;
-				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[13px] font-bold uppercase text-emerald-700';
+				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-emerald-600';
 				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
 				if (dot) {
 					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 bg-emerald-500 border-emerald-500';
@@ -413,6 +502,7 @@
 		var variant = getCurrentVariant();
 		if (variant) {
 			updateVariantUI(variant, true);
+			updateYouSave(variant, variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from);
 		}
 
 		isInitPhase = false;

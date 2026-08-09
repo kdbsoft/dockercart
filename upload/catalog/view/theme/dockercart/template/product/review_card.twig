@@ -6,7 +6,7 @@
         <div class="flex flex-wrap items-center gap-2">
           <strong class="text-[15px] font-bold text-gray-900 truncate">{{ review.author }}</strong>
           {% if review.verified %}
-          <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5" title="{{ text_verified }}">
             <i data-lucide="badge-check" width="12" height="12"></i>{{ text_verified }}
           </span>
           {% endif %}
