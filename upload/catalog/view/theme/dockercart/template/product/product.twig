@@ -27,6 +27,35 @@
   .dc-color-option { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 12px; min-height: 88px; border-radius: 12px; border: 1px solid #e5e7eb; cursor: pointer; transition: border-color .15s, background .15s; }
   .dc-color-option.active { border-color: #2563eb; background: #eff6ff; }
   .dc-color-option.oos { cursor: not-allowed; border-color: #f3f4f6; opacity: 0.5; }
+  /* Out-of-stock option values: struck through with a cross over the whole
+     label, not clickable */
+  label.oos {
+    position: relative;
+    display: inline-block;
+  }
+  label.oos .option-btn,
+  label.oos .dc-color-option {
+    text-decoration: none;
+    opacity: 0.55;
+  }
+  label.oos::before,
+  label.oos::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 50%;
+    width: 1px;
+    background: #9ca3af;
+    pointer-events: none;
+    z-index: 1;
+  }
+  label.oos::before {
+    transform: rotate(45deg);
+  }
+  label.oos::after {
+    transform: rotate(-45deg);
+  }
 
   /* ── 3D Modal (vanilla, no Bootstrap) ──────────────── */
   .dc-modal-overlay { position: fixed; inset: 0; z-index: 1050; background: rgba(0,0,0,0.5); }
@@ -177,7 +206,7 @@
       <!-- Info -->
       <div>
         <div class="flex items-center gap-2 mb-3">
-          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-stock-instock="{{ stock_status_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="inline-flex items-center gap-1.5 text-[13px] font-bold uppercase {% if is_preorder is defined and is_preorder %}text-amber-700{% elseif is_in_stock %}text-emerald-700{% else %}text-gray-400{% endif %}">
+          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-stock-instock="{{ stock_status_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="inline-flex items-center gap-1.5 text-[14px] font-bold {% if is_preorder is defined and is_preorder %}text-amber-700{% elseif is_in_stock %}text-emerald-700{% else %}text-gray-400{% endif %}">
             <span class="dc-stock-dot w-2.5 h-2.5 rounded-full border-2 {% if is_in_stock %}bg-emerald-500 border-emerald-500{% else %}bg-transparent border-gray-300{% endif %}"></span><span class="dc-stock-text">{{ stock }}</span>
           </span>
           {% if is_discontinued is defined and is_discontinued %}
@@ -213,7 +242,7 @@
             {% endif %}
           {% elseif not special %}
             <div class="flex items-baseline gap-3 flex-wrap" id="dc-price-regular">
-              <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
+              <span id="dc-unit-price" data-base-price="{{ dc_full_price_value|default(dc_base_price_value|default(0)) }}" data-sale-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
               {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
             </div>
             <div class="flex flex-col gap-1 hidden" id="dc-price-special">
@@ -225,22 +254,26 @@
               </div>
             </div>
           {% else %}
-            <div class="flex flex-col gap-1">
-              <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start">{{ text_sale }}</span>
+            <div class="flex items-baseline gap-3 flex-wrap hidden" id="dc-price-regular">
+              <span id="dc-unit-price" data-base-price="{{ dc_full_price_value|default(dc_base_price_value|default(0)) }}" data-sale-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
+              {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
+            </div>
+            <div class="flex flex-col gap-1" id="dc-price-special">
+              <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
               <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <span id="dc-unit-price" data-base-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ special }}</span>
-                <span class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
+                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ special }}</span>
+                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
                 {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
+            </div>
             {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default(''), timer_label_days: text_timer_days|default(''), timer_label_hours: text_timer_hours|default(''), timer_label_minutes: text_timer_minutes|default(''), timer_label_seconds: text_timer_seconds|default('') } %}
-        </div>
-        {% if you_save_amount %}
-        <div class="mt-1.5">
-          <span class="text-md font-semibold text-green-600">{{ text_you_save }}: {{ you_save_amount }}</span>
+          {% endif %}
+        {% if you_save_amount or is_configurable %}
+        <div class="mt-1.5{% if not you_save_amount %} hidden{% endif %}" id="dc-you-save">
+          <span class="text-md font-semibold text-green-600">{{ text_you_save }}: <span id="dc-you-save-amount">{{ you_save_amount }}</span></span>
         </div>
         {% endif %}
-        {% endif %}
-      </div>
+        </div>
         {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
         {% if discounts %}
         <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
@@ -315,13 +348,13 @@
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
                 <span class="dc-color-option{{ is_selected ? ' active' : '' }}">
                   <span class="dc-color-swatch{% if option_value.is_hit %} dc-color-swatch--hit{% endif %}" style="background-color: {{ option_value.color_code }}">
                     {% if option_value.is_hit %}<span class="dc-color-hit" title="Hit">&#9733;</span>{% endif %}
                   </span>
                   <span class="text-xs font-semibold">{{ option_value.name }}</span>
-                  {% if option.show_option_price and option_value.price and option_value.price_value != 0 %}<span class="text-[10px] text-gray-500">({{ option_value.price_prefix }}{{ option_value.price }})</span>{% endif %}
+                  {% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %}<span class="text-[10px] text-gray-500">({{ option_value.price_prefix }}{{ option_value.price }})</span>{% endif %}
                 </span>
               </label>
               {% endfor %}
@@ -332,9 +365,9 @@
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
-                  {{ option_value.name }}{% if option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
+                  {{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
               {% endfor %}
@@ -345,7 +378,7 @@
               <option value="">{{ text_select }}</option>
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
-              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}"{{ is_selected ? ' selected' : '' }}>{{ option_value.name }}{% if option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
+              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}"{{ is_selected ? ' selected' : '' }}>{{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
               {% endfor %}
             </select>
 
@@ -354,9 +387,9 @@
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
-                <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox"{{ is_selected ? ' checked' : '' }} />
+                <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-checkbox"{{ is_selected ? ' checked' : '' }} />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
-                  {{ option_value.name }}{% if option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
+                  {{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
               </label>
               {% endfor %}
@@ -869,16 +902,20 @@ function dcRecalcOptionPrice() {
   var priceEl = document.getElementById('dc-unit-price');
   if (!priceEl) return;
 
-  // Sale price (currentPrice) wins over the regular basePrice when it is lower,
-  // so option adjustments are applied on top of the price the customer sees.
+  // basePrice is the full price, salePrice is the price the customer actually
+  // pays (sale price when on sale). Option adjustments are applied on top of
+  // the actual price so the sale discount is not lost. currentPrice always
+  // holds the last computed total, so the base is taken from salePrice
+  // (or basePrice) — never from currentPrice — to stay idempotent.
   var basePrice = parseFloat(priceEl.dataset.basePrice || '0');
-  var currentPrice = parseFloat(priceEl.dataset.currentPrice || '0');
+  var salePrice = parseFloat(priceEl.dataset.salePrice || '0');
+  var base = basePrice;
 
-  if (currentPrice > 0 && currentPrice < basePrice) {
-    basePrice = currentPrice;
+  if (salePrice > 0 && salePrice < basePrice) {
+    base = salePrice;
   }
 
-  if (!basePrice) {
+  if (!base) {
     dcUpdateSubtotal();
     return;
   }
@@ -902,12 +939,26 @@ function dcRecalcOptionPrice() {
     adjustment += (prefix === '-') ? -val : val;
   });
 
-  var current = Math.max(0, basePrice + adjustment);
+  var current = Math.max(0, base + adjustment);
   priceEl.dataset.currentPrice = String(current);
 
   var symbol = priceEl.dataset.currencySymbol || dcDetectCurrencySymbol(priceEl.textContent);
   priceEl.dataset.currencySymbol = symbol;
-  priceEl.textContent = dcFormatMoney(current, symbol);
+
+  // Update whichever price element is actually visible: the static sale price
+  // span when the special container is shown, otherwise the base price span.
+  var specialContainer = document.getElementById('dc-price-special');
+  var priceSpecialEl = document.getElementById('dc-unit-price-special');
+  var priceStrikethroughEl = document.getElementById('dc-unit-price-strikethrough');
+
+  if (specialContainer && !specialContainer.classList.contains('hidden') && priceSpecialEl) {
+    priceSpecialEl.textContent = dcFormatMoney(current, symbol);
+    if (priceStrikethroughEl && basePrice > 0 && base > 0 && base < basePrice) {
+      priceStrikethroughEl.textContent = dcFormatMoney(basePrice + adjustment, symbol);
+    }
+  } else {
+    priceEl.textContent = dcFormatMoney(current, symbol);
+  }
 
   dcUpdateSubtotal();
 }

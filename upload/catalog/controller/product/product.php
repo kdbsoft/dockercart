@@ -574,6 +574,7 @@ class ControllerProductProduct extends Controller {
 				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
 				$tax_price = (float)$product_info['special'];
 				$data['dc_base_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
+				$data['dc_full_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
 
 				if ($data['price'] !== false && (float)$product_info['special'] < (float)$product_info['price']) {
 					$data['you_save_amount'] = $this->currency->format(
@@ -586,10 +587,12 @@ class ControllerProductProduct extends Controller {
 				$data['special'] = false;
 				$tax_price = (float)$product_info['price'];
 				$data['dc_base_price_value'] = (float)$this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'], '', false);
+				$data['dc_full_price_value'] = $data['dc_base_price_value'];
 			}
 
 			if ($data['price'] === false) {
 				$data['dc_base_price_value'] = 0.0;
+				$data['dc_full_price_value'] = 0.0;
 			}
 
 			if ($this->config->get('config_tax')) {
@@ -717,7 +720,8 @@ class ControllerProductProduct extends Controller {
 					'type'                 => $option['type'],
 					'value'                => $option['value'],
 					'required'             => $option['required'],
-					'show_option_price'    => $option['show_option_price']
+					'show_option_price'    => $option['show_option_price'],
+					'is_configurable_axis' => !empty($option['is_configurable_axis'])
 				);
 			}
 
@@ -728,6 +732,17 @@ class ControllerProductProduct extends Controller {
 				$variants = $pc->getVariants($product_id);
 				$axes = $pc->getConfigurableOptions($product_id);
 				$default_variant = !empty($configurable['default_variant_id']) ? $pc->getVariant($configurable['default_variant_id']) : array();
+
+				// Disabled variants must not be selectable on the storefront:
+				// the cart resolves variants by status=1 and would fall back to
+				// the plain product otherwise.
+				$variants = array_values(array_filter($variants, function ($v) {
+					return !empty($v['status']);
+				}));
+
+				if (!empty($default_variant) && empty($default_variant['status'])) {
+					$default_variant = array();
+				}
 
 				// If ?variant_id matches the default variant, 301 redirect to clean product URL
 				$variant_from_url = isset($this->request->get['variant_id']) ? (int)$this->request->get['variant_id'] : 0;
@@ -900,6 +915,12 @@ class ControllerProductProduct extends Controller {
 				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
 					$default_variant['special'] = $default_special_price;
 					$default_variant['special_from'] = $default_effective_price;
+				} elseif (!is_null($product_info['special']) && (float)$product_info['special'] >= 0
+					&& (float)$product_info['special'] < $default_effective_price) {
+					// The default variant carries the product's own price, so the
+					// product-level special applies to it as well.
+					$default_variant['special'] = (float)$product_info['special'];
+					$default_variant['special_from'] = $default_effective_price;
 				}
 
 				$default_variant['discounts'] = array();
@@ -938,6 +959,21 @@ class ControllerProductProduct extends Controller {
 						$currency_code, '', false
 					);
 				}
+
+				// Keep the variants list in sync with the default variant (the
+				// product-level special applies to it as well).
+				foreach ($variants as &$variant) {
+					if ((int)$variant['variant_id'] === (int)$default_variant['variant_id']) {
+						if (isset($default_variant['special'])) {
+							$variant['special'] = $default_variant['special'];
+							$variant['special_from'] = $default_variant['special_from'];
+						} else {
+							unset($variant['special'], $variant['special_from']);
+						}
+						break;
+					}
+				}
+				unset($variant);
 			}
 
 				$data['is_configurable'] = true;
@@ -946,6 +982,7 @@ class ControllerProductProduct extends Controller {
 					'variants'           => $variants,
 					'default_variant_id' => (int)($configurable['default_variant_id'] ?? 0),
 					'default_variant'    => $default_variant,
+					'preorder'           => !empty($product_info['preorder']),
 				));
 
 				// Schema.org variant data
@@ -1065,8 +1102,9 @@ class ControllerProductProduct extends Controller {
 				if (!empty($selected_variant) && $data['price'] !== false) {
 					if (isset($selected_variant['price']) && $selected_variant['price'] !== '' && (float)$selected_variant['price'] > 0) {
 						$sv_price = (float)$selected_variant['price'];
-						// Option price adjustments are applied on top of the price the
-						// customer actually pays: the sale price when the variant is on sale.
+						// Full price stays the base for option adjustments; the price the
+						// customer actually pays (the sale price when the variant is on
+						// sale) is what option adjustments are applied on top of.
 						$sv_base_price = $sv_price;
 
 						if (isset($selected_variant['special']) && (float)$selected_variant['special'] > 0
@@ -1075,6 +1113,10 @@ class ControllerProductProduct extends Controller {
 						}
 
 						$data['dc_base_price_value'] = $sv_base_price;
+						$data['dc_full_price_value'] = (float)$this->currency->format(
+							$this->tax->calculate($sv_price, $tax_class_id, $tax),
+							$this->session->data['currency'], '', false
+						);
 						$data['price'] = $this->currency->format(
 							$this->tax->calculate($sv_price, $tax_class_id, $tax),
 							$this->session->data['currency']
@@ -1086,6 +1128,26 @@ class ControllerProductProduct extends Controller {
 								$this->tax->calculate($sv_special, $tax_class_id, $tax),
 								$this->session->data['currency']
 							);
+							$data['you_save_amount'] = $this->currency->format(
+								$this->tax->calculate($sv_price, $tax_class_id, $tax) -
+								$this->tax->calculate($sv_special, $tax_class_id, $tax),
+								$this->session->data['currency']
+							);
+						} else {
+							// Variant without its own special: keep the product-level
+							// special only for the default variant (the product's own
+							// price), otherwise show the full variant price.
+							if ((int)$selected_variant['variant_id'] === (int)($configurable['default_variant_id'] ?? 0)
+								&& !is_null($product_info['special']) && (float)$product_info['special'] >= 0
+								&& (float)$product_info['special'] < $sv_price) {
+								$data['dc_base_price_value'] = (float)$this->currency->format(
+									$this->tax->calculate((float)$product_info['special'], $tax_class_id, $tax),
+									$this->session->data['currency'], '', false
+								);
+							} else {
+								$data['special'] = false;
+								$data['you_save_amount'] = false;
+							}
 						}
 
 						if ($this->config->get('config_tax')) {
