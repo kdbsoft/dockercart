@@ -33,8 +33,8 @@
     {% if text_be_first_hint is defined and text_be_first_hint %}
     <p class="mt-2 text-sm text-gray-500">{{ text_be_first_hint }}</p>
     {% endif %}
-    <button type="button" data-review-modal-open class="mt-7 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition shadow-sm shadow-blue-200">
-      <i data-lucide="square-pen" width="16" height="16"></i>{{ text_write|default(text_leave_review) }}
+    <button type="button" data-review-modal-open class="mt-7 inline-flex items-center gap-2 px-5 py-3 border border-blue-600 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-50 transition">
+      <i data-lucide="message-square-plus" width="16" height="16"></i>{{ text_leave_review|default(text_write) }}
     </button>
   </div>
 {% endif %}

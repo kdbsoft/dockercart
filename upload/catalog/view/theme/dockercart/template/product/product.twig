@@ -439,8 +439,8 @@
                     </div>
                     <button type="button" {% if fbt_can_add %}onclick="cart.add('{{ product.product_id }}', {{ product.minimum }});"{% else %}disabled{% endif %}
                       title="{% if product.is_in_stock %}{{ button_cart }}{% else %}{{ text_out_of_stock }}{% endif %}"
-                      class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition {% if fbt_can_add %}bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-sm{% else %}bg-gray-200 text-gray-400 cursor-not-allowed{% endif %}">
-                      <i data-lucide="shopping-cart" class="w-5 h-5 pointer-events-none"></i>
+                      class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition {% if fbt_can_add %}bg-transparent hover:bg-blue-50 active:bg-blue-100 text-blue-600{% else %}text-gray-300 cursor-not-allowed{% endif %}">
+                      <i data-lucide="shopping-cart" class="w-4 h-4 pointer-events-none"></i>
                     </button>
                   </div>
                 </div>
