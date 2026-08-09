@@ -1,30 +1,40 @@
 {% set toolbar_id = toolbar_id|default('listing') %}
-{% set toolbar_variant = toolbar_variant|default('blue') %}
-{% set eyebrow_class = 'text-blue-500' %}
-{% set line_class = 'bg-blue-300' %}
-{% if toolbar_variant == 'red' %}
-  {% set eyebrow_class = 'text-red-500' %}
-  {% set line_class = 'bg-red-300' %}
-{% elseif toolbar_variant == 'teal' %}
-  {% set eyebrow_class = 'text-teal-500' %}
-  {% set line_class = 'bg-teal-300' %}
-{% elseif toolbar_variant == 'gray' %}
-  {% set eyebrow_class = 'text-gray-400' %}
-  {% set line_class = 'bg-gray-300' %}
-{% endif %}
 
 <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
-  <div class="hidden lg:block">
-    <div class="flex items-end justify-between gap-8">
-      <div class="min-w-0 flex-1">
-        <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest {{ eyebrow_class }}"><span class="w-4 h-px {{ line_class }}"></span>{{ listing_eyebrow }}</p>
-        <div class="mt-2 flex flex-wrap items-center gap-3">
-          <h2 class="text-2xl font-extrabold leading-tight text-gray-900">{{ listing_title }}</h2>
-          <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-600">{{ listing_count }}</span>
+  <div class="hidden lg:flex min-w-0 flex-wrap items-center justify-between gap-3">
+    <span class="shrink-0 text-sm font-semibold text-gray-500">{{ listing_count }}</span>
+
+    <div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+      {% if sorts is defined and sorts %}
+      <div class="flex h-9 min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2.5 transition focus-within:border-gray-400 focus-within:bg-white">
+        <i data-lucide="arrow-down-up" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
+        <label for="{{ toolbar_id }}-desktop-sort" class="shrink-0 text-[11px] font-semibold text-gray-500">{{ text_sort }}</label>
+        <div class="relative min-w-0 w-44">
+          <select id="{{ toolbar_id }}-desktop-sort" onchange="location = this.value;" class="dc-toolbar-select h-9 w-full appearance-none border-0 bg-transparent py-1 pl-0 pr-7 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-0">
+            {% for sort_item in sorts %}
+            <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
+            {% endfor %}
+          </select>
+          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
         </div>
       </div>
+      {% endif %}
       {% if limits is defined and limits %}
-      <div class="flex min-h-[48px] shrink-0 items-center rounded-2xl border border-gray-200 bg-white p-1" role="group" aria-label="{{ text_view_grid|default('Grid') }}">
+      <div class="flex h-9 min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2.5 transition focus-within:border-gray-400 focus-within:bg-white">
+        <i data-lucide="list-filter" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
+        <label for="{{ toolbar_id }}-desktop-limit" class="shrink-0 text-[11px] font-semibold text-gray-500">{{ text_limit }}</label>
+        <div class="relative w-20">
+          <select id="{{ toolbar_id }}-desktop-limit" onchange="location = this.value;" class="dc-toolbar-select h-9 w-full appearance-none border-0 bg-transparent py-1 pl-0 pr-6 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-0">
+            {% for limit_item in limits %}
+            <option value="{{ limit_item.href }}" {% if limit_item.value == limit %}selected{% endif %}>{{ limit_item.text }}</option>
+            {% endfor %}
+          </select>
+          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
+        </div>
+      </div>
+      {% endif %}
+      {% if limits is defined and limits %}
+      <div class="flex h-9 shrink-0 items-center rounded-xl border border-gray-200 bg-gray-50 p-0.5" role="group" aria-label="{{ text_view_grid|default('Grid') }}">
         <div class="dc-view-toggle items-center gap-0.5 border-0 p-0">
           <button class="dc-view-btn{% if view_mode == 'grid' %} is-active{% endif %}" data-view="grid" title="{{ text_view_grid|default('Grid') }}" aria-pressed="{{ view_mode == 'grid' ? 'true' : 'false' }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -39,73 +49,39 @@
       </div>
       {% endif %}
     </div>
-
-    <div class="mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-gray-100 pt-4">
-      {% if sorts is defined and sorts %}
-      <div class="flex min-h-[48px] items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 transition focus-within:border-gray-300 focus-within:bg-white">
-        <i data-lucide="arrow-down-up" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
-        <label for="{{ toolbar_id }}-desktop-sort" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">{{ text_sort }}</label>
-        <div class="relative min-w-0 w-44">
-          <select id="{{ toolbar_id }}-desktop-sort" onchange="location = this.value;" class="dc-toolbar-select h-full w-full appearance-none border-0 bg-transparent py-1 pl-0 pr-8 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-0">
-            {% for sort_item in sorts %}
-            <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
-            {% endfor %}
-          </select>
-          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
-        </div>
-      </div>
-      {% endif %}
-      {% if limits is defined and limits %}
-      <div class="flex min-h-[48px] items-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 transition focus-within:border-gray-300 focus-within:bg-white">
-        <i data-lucide="list-filter" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
-        <label for="{{ toolbar_id }}-desktop-limit" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">{{ text_limit }}</label>
-        <div class="relative w-20">
-          <select id="{{ toolbar_id }}-desktop-limit" onchange="location = this.value;" class="dc-toolbar-select h-full w-full appearance-none border-0 bg-transparent py-1 pl-0 pr-7 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-0">
-            {% for limit_item in limits %}
-            <option value="{{ limit_item.href }}" {% if limit_item.value == limit %}selected{% endif %}>{{ limit_item.text }}</option>
-            {% endfor %}
-          </select>
-          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
-        </div>
-      </div>
-      {% endif %}
-
-    </div>
   </div>
 
   <div class="lg:hidden">
-    <div class="flex items-start justify-between gap-3">
-      <div class="min-w-0">
-        <p class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] {{ eyebrow_class }}"><span class="w-3 h-px {{ line_class }}"></span>{{ listing_eyebrow }}</p>
-        <h2 class="mt-1 text-xl font-extrabold leading-tight text-gray-900">{{ listing_title }}</h2>
-      </div>
-      <span class="inline-flex max-w-[44%] shrink-0 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-right text-xs font-bold leading-tight text-gray-600">{{ listing_count }}</span>
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <span class="text-sm font-semibold text-gray-500">{{ listing_count }}</span>
     </div>
 
-    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {% if sorts is defined and sorts %}
-      <label for="{{ toolbar_id }}-sort" class="flex min-w-0 flex-col gap-2 rounded-2xl border border-gray-200 bg-gray-50/70 p-3 transition focus-within:border-gray-300 focus-within:bg-white">
-        <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500"><i data-lucide="arrow-down-up" class="h-4 w-4 text-gray-400" aria-hidden="true"></i>{{ text_sort }}</span>
-        <div class="relative">
-          <select id="{{ toolbar_id }}-sort" onchange="location = this.value;" class="dc-toolbar-select min-h-[48px] w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2 pr-10 text-base font-semibold text-gray-800 {% if toolbar_variant == 'teal' %}focus:border-teal-400{% else %}focus:border-blue-400{% endif %} focus:outline-none sm:min-h-[42px] sm:text-sm">
+      <label for="{{ toolbar_id }}-sort" class="flex h-[42px] min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2.5 transition focus-within:border-gray-400 focus-within:bg-white">
+        <i data-lucide="arrow-down-up" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
+        <span class="shrink-0 text-[11px] font-semibold text-gray-500">{{ text_sort }}</span>
+        <div class="relative min-w-0 flex-1">
+          <select id="{{ toolbar_id }}-sort" onchange="location = this.value;" class="dc-toolbar-select h-[42px] w-full appearance-none border-0 bg-transparent px-0 py-2 pr-7 text-base font-semibold text-gray-800 {% if toolbar_variant == 'teal' %}focus:border-teal-400{% else %}focus:border-blue-400{% endif %} focus:outline-none focus:ring-0">
             {% for sort_item in sorts %}
             <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
             {% endfor %}
           </select>
-          <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
         </div>
       </label>
       {% endif %}
       {% if limits is defined and limits %}
-      <label for="{{ toolbar_id }}-limit" class="flex min-w-0 flex-col gap-2 rounded-2xl border border-gray-200 bg-gray-50/70 p-3 transition focus-within:border-gray-300 focus-within:bg-white">
-        <span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500"><i data-lucide="list-filter" class="h-4 w-4 text-gray-400" aria-hidden="true"></i>{{ text_limit }}</span>
-        <div class="relative">
-          <select id="{{ toolbar_id }}-limit" onchange="location = this.value;" class="dc-toolbar-select min-h-[48px] w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 py-2 pr-10 text-base font-semibold text-gray-800 {% if toolbar_variant == 'teal' %}focus:border-teal-400{% else %}focus:border-blue-400{% endif %} focus:outline-none sm:min-h-[42px] sm:text-sm">
+      <label for="{{ toolbar_id }}-limit" class="flex h-[42px] min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2.5 transition focus-within:border-gray-400 focus-within:bg-white">
+        <i data-lucide="list-filter" class="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true"></i>
+        <span class="shrink-0 text-[11px] font-semibold text-gray-500">{{ text_limit }}</span>
+        <div class="relative min-w-0 flex-1">
+          <select id="{{ toolbar_id }}-limit" onchange="location = this.value;" class="dc-toolbar-select h-[42px] w-full appearance-none border-0 bg-transparent px-0 py-2 pr-7 text-base font-semibold text-gray-800 {% if toolbar_variant == 'teal' %}focus:border-teal-400{% else %}focus:border-blue-400{% endif %} focus:outline-none focus:ring-0">
             {% for limit_item in limits %}
             <option value="{{ limit_item.href }}" {% if limit_item.value == limit %}selected{% endif %}>{{ limit_item.text }}</option>
             {% endfor %}
           </select>
-          <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
+          <i data-lucide="chevron-down" class="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
         </div>
       </label>
       {% endif %}
