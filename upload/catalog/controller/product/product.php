@@ -330,6 +330,10 @@ class ControllerProductProduct extends Controller {
 			$data['quantity_step'] = $this->formatQuantityValue($quantity_step);
 			$data['text_quantity_step'] = sprintf($this->language->get('text_quantity_step'), $data['quantity_step']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', '', true), $this->url->link('account/register', '', true));
+			$data['tab_description'] = $this->language->get('tab_description');
+			$data['tab_attribute'] = $this->language->get('tab_attribute');
+			$data['text_attributes_show_more'] = $this->language->get('text_attributes_show_more');
+			$data['text_attributes_show_less'] = $this->language->get('text_attributes_show_less');
 			// Localized label for the image zoom hint
 			$data['text_zoom'] = $this->language->get('text_zoom');
 			// Localized hint for the 360° viewer
