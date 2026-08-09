@@ -224,11 +224,11 @@
         form.querySelectorAll('.dc-review-alert').forEach(function (el) { el.remove(); });
 
         if (json.error) {
-          form.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 mb-3"><button type="button" class="close float-right">×</button>' + json.error + '</div>');
+          form.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert flex items-start justify-between gap-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 mb-3"><span class="flex-1 min-w-0">' + json.error + '</span><button type="button" class="close shrink-0">×</button></div>');
         }
 
         if (json.success) {
-          form.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-3"><button type="button" class="close float-right">×</button>' + json.success + '</div>');
+          form.insertAdjacentHTML('afterbegin', '<div class="dc-review-alert flex items-start justify-between gap-3 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-3"><span class="flex-1 min-w-0">' + json.success + '</span><button type="button" class="close shrink-0">×</button></div>');
           clearReviewForm(form);
 
           var review = document.getElementById('review');
