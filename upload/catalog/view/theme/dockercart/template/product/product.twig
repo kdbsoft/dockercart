@@ -328,7 +328,7 @@
             </div>
 
             {% elseif option.type == 'radio' %}
-            <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
+            <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}" data-required="{{ option.required ? '1' : '0' }}">
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               <label class="cursor-pointer">
@@ -976,6 +976,18 @@ function initRatingStars() {
 /* ── Option buttons (radio / checkbox) ────────────────── */
 function initOptionButtons() {
   document.querySelectorAll('.dc-option-radio').forEach(function(radio) {
+    var group = radio.closest('[id^="input-option"]');
+    var optional = group && group.getAttribute('data-required') === '0';
+
+    // Clicking an already selected optional radio clears the selection
+    radio.addEventListener('click', function(e) {
+      if (!optional || !radio.checked) return;
+      e.preventDefault();
+      radio.checked = false;
+      if (radio.nextElementSibling) radio.nextElementSibling.classList.remove('active');
+      dcRecalcOptionPrice();
+    });
+
     radio.addEventListener('change', function() {
       document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function(r) {
         if (r.nextElementSibling) r.nextElementSibling.classList.remove('active');
