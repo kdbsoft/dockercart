@@ -103,6 +103,10 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_search'])) {
+				$url .= '&filter_search=' . urlencode(html_entity_decode($this->request->get['filter_search'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
@@ -253,6 +257,10 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_search'])) {
+				$url .= '&filter_search=' . urlencode(html_entity_decode($this->request->get['filter_search'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
@@ -331,6 +339,10 @@ class ControllerCatalogProduct extends Controller {
 				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
 			}
 
+			if (isset($this->request->get['filter_search'])) {
+				$url .= '&filter_search=' . urlencode(html_entity_decode($this->request->get['filter_search'], ENT_QUOTES, 'UTF-8'));
+			}
+
 			if (isset($this->request->get['filter_price'])) {
 				$url .= '&filter_price=' . $this->request->get['filter_price'];
 			}
@@ -407,6 +419,10 @@ class ControllerCatalogProduct extends Controller {
 
 			if (isset($this->request->get['filter_sku'])) {
 				$url .= '&filter_sku=' . urlencode(html_entity_decode($this->request->get['filter_sku'], ENT_QUOTES, 'UTF-8'));
+			}
+
+			if (isset($this->request->get['filter_search'])) {
+				$url .= '&filter_search=' . urlencode(html_entity_decode($this->request->get['filter_search'], ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['filter_price'])) {
@@ -493,6 +509,12 @@ class ControllerCatalogProduct extends Controller {
 			$filter_sku = $this->request->get['filter_sku'];
 		} else {
 			$filter_sku = '';
+		}
+
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = $this->request->get['filter_search'];
+		} else {
+			$filter_search = '';
 		}
 
 		if (isset($this->request->get['filter_manufacturer'])) {
@@ -618,7 +640,10 @@ class ControllerCatalogProduct extends Controller {
 			array('key' => 'quantity', 'label' => $this->language->get('entry_quantity'), 'type' => 'number'),
 			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'select', 'options' => $status_options),
 			array('key' => 'manufacturer', 'label' => $this->language->get('entry_manufacturer'), 'type' => 'text')
-		), $tab_counts);
+		), $tab_counts, '', array(), array(
+			'placeholder' => $this->language->get('text_search_products'),
+			'url'         => $this->url->link('catalog/product/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+		));
 
 		$data['active_filter'] = $active_filter;
 
@@ -628,6 +653,7 @@ class ControllerCatalogProduct extends Controller {
 			'filter_name'	      => $filter_name,
 			'filter_model'	      => $filter_model,
 			'filter_sku'	      => $filter_sku,
+			'filter_search'	      => $filter_search,
 			'filter_price'	      => $filter_price,
 			'filter_quantity_min' => $filter_quantity_min,
 			'filter_quantity_max' => $filter_quantity_max,
@@ -909,6 +935,7 @@ class ControllerCatalogProduct extends Controller {
 		$data['filter_name'] = $filter_name;
 		$data['filter_model'] = $filter_model;
 		$data['filter_sku'] = $filter_sku;
+		$data['filter_search'] = $filter_search;
 		$data['filter_price'] = $filter_price;
 		$data['filter_quantity_min'] = $filter_quantity_min;
 		$data['filter_quantity_max'] = $filter_quantity_max;
@@ -2483,7 +2510,33 @@ class ControllerCatalogProduct extends Controller {
 	public function autocomplete() {
 		$json = array();
 
-		if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model']) || isset($this->request->get['filter_sku'])) {
+		// Search-as-you-type for the product list toolbar (name / model / all SKUs)
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->load->model('catalog/product');
+
+				$filter_data = array(
+					'filter_search' => $filter_search,
+					'sort'          => 'pd.name',
+					'order'         => 'ASC',
+					'start'         => 0,
+					'limit'         => 8
+				);
+
+				$results = $this->model_catalog_product->getProducts($filter_data);
+
+				foreach ($results as $result) {
+					$json[] = array(
+						'id'       => $result['product_id'],
+						'name'     => $result['name'],
+						'subtitle' => $result['model'],
+						'href'     => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $result['product_id'], true)
+					);
+				}
+			}
+		} elseif (isset($this->request->get['filter_name']) || isset($this->request->get['filter_model']) || isset($this->request->get['filter_sku'])) {
 			$this->load->model('catalog/product');
 			$this->load->model('catalog/option');
 			$this->load->model('tool/image');

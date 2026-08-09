@@ -24,6 +24,8 @@ $_['text_promo_gifts']       = 'Gifts';
 $_['text_promo_rewards']     = 'Reward Points';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 $_['text_layout_info']       = 'You can override the default page layout for this product. Leave empty to use the default layout.';
+$_['text_quick_find']        = 'Quick find product...';
+$_['text_search_products']   = 'Search products by name or SKU...';
 // Subtitle
 
 $_['text_list_subtitle'] = 'Browse, filter and manage your products';
