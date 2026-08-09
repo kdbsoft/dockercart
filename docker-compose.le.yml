@@ -15,7 +15,7 @@ services:
       - ./docker/nginx/ssl/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
 
   certbot:
-    image: certbot/certbot:latest
+    image: certbot/certbot:2.7.4
     container_name: ${CERTBOT_CONTAINER_NAME:-dockercart_certbot}
     restart: ${RESTART_POLICY:-unless-stopped}
     depends_on:
