@@ -4380,7 +4380,8 @@ INSERT INTO `oc_dockercart_scheduler_task` VALUES
 (96,'currency_refresh','Currency Refresh',1,'daily','2026-08-09 07:46:18',NULL,'2026-07-29 10:46:20','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
 (117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-09 11:44:26',NULL,'2026-08-01 18:17:04','2026-08-09 11:44:26',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
 (140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-09 07:46:18',NULL,'2026-08-06 08:09:03','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-09 07:46:18',NULL,'2026-08-06 15:36:09','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0);
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-09 07:46:18',NULL,'2026-08-06 15:36:09','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(142,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-09 07:46:18',NULL,'2026-08-09 07:46:18','2026-08-09 07:46:18',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -17937,6 +17938,7 @@ INSERT INTO `oc_setting` VALUES
 (27060,0,'module_dockercart_search','module_dockercart_search_autocomplete','1',0),
 (27061,0,'module_dockercart_search','module_dockercart_search_voice','1',0),
 (27062,0,'module_dockercart_search','module_dockercart_search_autocomplete_limit','10',0),
+(27063,0,'module_dockercart_search','module_dockercart_search_admin_fallback','1',0),
 (27116,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_status','1',0),
 (27117,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_width','3',0),
 (27118,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_sort_order','10',0),

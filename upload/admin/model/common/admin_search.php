@@ -60,8 +60,113 @@ class ModelCommonAdminSearch extends Model {
         return $map[$type] ?? null;
     }
 
+    /**
+     * Public search helper for admin autocompletes.
+     *
+     * Searches a single Manticore index and decodes composite (multilingual)
+     * document IDs back to entity IDs. Returns false when Manticore is
+     * unavailable (caller falls back to its SQL path), or when the admin
+     * SQL fallback is disabled (caller returns an empty result, matching
+     * the global admin search behaviour).
+     *
+     * @param string $type  entity type (product/order/customer/...)
+     * @param string $query search text
+     * @param array  $opts  limit, offset, filters (extra Manticore filters)
+     * @return array|false ['results' => [['id' => int, 'row' => array]], 'total' => int]
+     */
+    public function searchEntity($type, $query, $opts = []) {
+        $query = trim((string)$query);
+
+        if ($query === '') {
+            return ['results' => [], 'total' => 0];
+        }
+
+        $manticore = $this->getManticore();
+
+        // Admin SQL fallback disabled → behave like the global search (empty result)
+        if ($this->config->get('module_dockercart_search_admin_fallback') === '0') {
+            return ['results' => [], 'total' => 0];
+        }
+
+        if (!$manticore->connect()) {
+            return false;
+        }
+
+        $index = $this->getIndexName($type);
+
+        if (!$index) {
+            return false;
+        }
+
+        // Order numbers are often typed with a leading "#" (e.g. "#123").
+        // The hash is not part of the indexed value, so strip it before search.
+        if ($type === 'order') {
+            $query = ltrim($query, '#');
+        }
+
+        $filters = [];
+
+        if ($this->isMultilingualIndex($type)) {
+            $filters['language_id'] = (int)$this->config->get('config_language_id');
+        }
+
+        if (!empty($opts['filters']) && is_array($opts['filters'])) {
+            $filters = array_merge($filters, $opts['filters']);
+        }
+
+        $search_options = [
+            'filters'  => $filters,
+            'limit'    => (int)($opts['limit'] ?? 20),
+            'offset'   => (int)($opts['offset'] ?? 0),
+            'wildcard' => true,
+            'ranker'   => 'proximity_bm25',
+        ];
+
+        $result = $manticore->searchWithMeta($index, $query, $search_options);
+
+        // Query error (not just empty result) → fall back to SQL
+        if ($manticore->getLastError() !== '') {
+            return false;
+        }
+
+        $results = [];
+
+        foreach (($result['results'] ?? []) as $row) {
+            $results[] = [
+                'id'  => $this->getEntityId($type, $row),
+                'row' => $row,
+            ];
+        }
+
+        return [
+            'results' => $results,
+            'total'   => (int)($result['total'] ?? count($results)),
+        ];
+    }
+
+    /**
+     * Check whether Manticore is available and admin search fallback is on.
+     */
+    public function isManticoreAvailable() {
+        if ($this->config->get('module_dockercart_search_admin_fallback') === '0') {
+            return false;
+        }
+
+        return $this->getManticore()->ping();
+    }
+
+    /**
+     * Decode a Manticore document ID back to the entity ID.
+     * Composite (multilingual) indexes use IDs: entity_id * 100 + language_id.
+     */
+    private function getEntityId($type, $row) {
+        return $this->isMultilingualIndex($type)
+            ? (int)floor($row['id'] / 100)
+            : (int)$row['id'];
+    }
+
     private function isMultilingualIndex($type) {
-        return in_array($type, ['product', 'category', 'manufacturer', 'information']);
+        return in_array($type, ['product', 'category', 'information']);
     }
 
     public function suggest($query) {
