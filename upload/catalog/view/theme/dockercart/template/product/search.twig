@@ -146,42 +146,24 @@
 
         <div>
           {% if products %}
-          <div class="bg-white border border-gray-100 rounded-3xl p-4 sm:p-5 mb-5 shadow-sm">
-            <div class="flex flex-wrap gap-3 items-center justify-between">
-              <div>
-                <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400"><span class="w-4 h-px bg-gray-300"></span>{{ text_shop_by }}</p>
-                <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5">{{ text_search_results }}</h2>
-              </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                <span class="text-sm text-gray-500">{{ text_products }}</span>
-                {% if sorts is defined and sorts %}
-                <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
-                  {% for sort_item in sorts %}
-                  <option value="{{ sort_item.href }}" {% if sort_item.value == '%s-%s'|format(sort, order) %}selected{% endif %}>{{ sort_item.text }}</option>
-                  {% endfor %}
-                </select>
-                {% endif %}
-                {% if limits is defined and limits %}
-                <select onchange="location = this.value;" class="rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white cursor-pointer">
-                  {% for limit_item in limits %}
-                  <option value="{{ limit_item.href }}" {% if limit_item.value == limit %}selected{% endif %}>{{ limit_item.text }}</option>
-                  {% endfor %}
-                </select>
-                <div class="dc-view-toggle items-center gap-0.5 border border-gray-200 rounded-xl p-0.5 ml-2">
-                  <button class="dc-view-btn{% if view_mode == 'grid' %} is-active{% endif %}" data-view="grid" title="{{ text_view_grid|default('Grid') }}" aria-pressed="{{ view_mode == 'grid' ? 'true' : 'false' }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  </button>
-                  <button class="dc-view-btn{% if view_mode == 'list' %} is-active{% endif %}" data-view="list" title="{{ text_view_list|default('List') }}" aria-pressed="{{ view_mode == 'list' ? 'true' : 'false' }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                  </button>
-                  <button class="dc-view-btn{% if view_mode == 'table' %} is-active{% endif %}" data-view="table" title="{{ text_view_table|default('Table') }}" aria-pressed="{{ view_mode == 'table' ? 'true' : 'false' }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                  </button>
-                </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
+          {% include 'dockercart/template/common/partials/listing_toolbar.twig' with {
+            toolbar_id: 'search-toolbar',
+            toolbar_variant: 'gray',
+            listing_eyebrow: text_shop_by,
+            listing_title: text_search_results,
+            listing_count: text_products,
+            text_sort: text_sort,
+            text_limit: text_limit,
+            sorts: sorts,
+            limits: limits,
+            sort: sort,
+            order: order,
+            limit: limit,
+            view_mode: view_mode,
+            text_view_grid: text_view_grid,
+            text_view_list: text_view_list,
+            text_view_table: text_view_table
+          } %}
 
           {% if spell_correction %}
           <div class="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-2xl flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
