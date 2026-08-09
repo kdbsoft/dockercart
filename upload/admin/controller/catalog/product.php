@@ -964,11 +964,15 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function getForm() {
-		$this->load->language('catalog/product_bundle');
-		$this->load->language('catalog/product_configurable');
+		$this->load->language('catalog/product');
 
 		$data['heading_title'] = $this->language->get('heading_title');
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+
+		// Load additional sections AFTER the base language file so their
+		// shared keys (text_add/text_edit) do not override the product ones.
+		$this->load->language('catalog/product_bundle');
+		$this->load->language('catalog/product_configurable');
 		$data['text_form_subtitle'] = !isset($this->request->get['product_id'])
 		    ? $this->language->get('text_add_product_subtitle')
 		    : $this->language->get('text_edit_product_subtitle');
@@ -1111,6 +1115,12 @@ class ControllerCatalogProduct extends Controller {
 			$data['error_option'] = $this->error['option'];
 		} else {
 			$data['error_option'] = array();
+		}
+
+		if (isset($this->error['default_variant'])) {
+			$data['error_default_variant'] = $this->error['default_variant'];
+		} else {
+			$data['error_default_variant'] = '';
 		}
 
 		$url = '';
@@ -2247,6 +2257,24 @@ class ControllerCatalogProduct extends Controller {
 								break;
 							}
 						}
+					}
+				}
+			}
+		}
+
+		// A configurable product must have a default variant selected, otherwise
+		// the storefront cannot determine which variant to show first.
+		if (isset($this->request->get['product_id'])) {
+			$configurable_query = $this->db->query("SELECT pc.default_variant_id, (SELECT COUNT(*) FROM " . DB_PREFIX . "product_variant pv WHERE pv.product_id = pc.product_id AND pv.status = '1') AS active_variants FROM " . DB_PREFIX . "product_configurable pc WHERE pc.product_id = '" . (int)$this->request->get['product_id'] . "' AND pc.is_configurable = '1'");
+
+			if ($configurable_query->num_rows) {
+				$configurable = $configurable_query->row;
+
+				if ((int)$configurable['active_variants'] > 0) {
+					$default_valid = !empty($configurable['default_variant_id']) && $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$configurable['default_variant_id'] . "' AND product_id = '" . (int)$this->request->get['product_id'] . "' AND status = '1'")->num_rows;
+
+					if (!$default_valid) {
+						$this->error['default_variant'] = $this->language->get('error_default_variant');
 					}
 				}
 			}
