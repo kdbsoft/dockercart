@@ -45,7 +45,10 @@ class ManticoreClient {
         }
 
         try {
-            $this->connection = new \mysqli($this->host, '', '', '', $this->port);
+            // Suppress the E_WARNING emitted by mysqli when the host is
+            // unreachable (DNS/connect failure) — the error is read from
+            // connect_error below, and callers expect a clean false.
+            $this->connection = @new \mysqli($this->host, '', '', '', $this->port);
 
             if ($this->connection->connect_error) {
                 $this->last_error = 'Connection failed: ' . $this->connection->connect_error;

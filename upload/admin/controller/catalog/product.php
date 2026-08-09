@@ -2516,16 +2516,22 @@ class ControllerCatalogProduct extends Controller {
 
 			if ($filter_search !== '') {
 				$this->load->model('catalog/product');
+				$this->load->model('common/admin_search');
 
-				$filter_data = array(
-					'filter_search' => $filter_search,
-					'sort'          => 'pd.name',
-					'order'         => 'ASC',
-					'start'         => 0,
-					'limit'         => 8
-				);
+				$results = $this->getHybridProductResults($filter_search, 8);
 
-				$results = $this->model_catalog_product->getProducts($filter_data);
+				if ($results === null) {
+					// Fallback: Manticore unavailable → SQL LIKE path
+					$filter_data = array(
+						'filter_search' => $filter_search,
+						'sort'          => 'pd.name',
+						'order'         => 'ASC',
+						'start'         => 0,
+						'limit'         => 8
+					);
+
+					$results = $this->model_catalog_product->getProducts($filter_data);
+				}
 
 				foreach ($results as $result) {
 					$json[] = array(
@@ -2562,32 +2568,57 @@ class ControllerCatalogProduct extends Controller {
 				'limit'        => $limit
 			);
 
+			$this->load->model('common/admin_search');
+
+			// Manticore path: single MATCH over name/model/SKU/variant codes (OR semantics for filter_any,
+			// per-field MATCH otherwise). Falls back to the SQL LIKE path when Manticore is unavailable.
+			$manticore_search = '';
+
 			if ($filter_any) {
-				// OR-search across name/model/SKU: run each filter separately and merge
-				$results = array();
-				$seen = array();
+				$manticore_search = trim(implode(' ', array_filter(array($filter_name, $filter_model, $filter_sku))));
+			} elseif ($filter_name !== '') {
+				$manticore_search = $filter_name;
+			} elseif ($filter_model !== '') {
+				$manticore_search = $filter_model;
+			} elseif ($filter_sku !== '') {
+				$manticore_search = $filter_sku;
+			}
 
-				foreach (array('filter_name' => $filter_name, 'filter_model' => $filter_model, 'filter_sku' => $filter_sku) as $filter_key => $filter_value) {
-					if ($filter_value === '') {
-						continue;
-					}
+			$results = null;
 
-					$single_filter = array('start' => 0, 'limit' => $limit * 3);
-					$single_filter[$filter_key] = $filter_value;
+			if ($manticore_search !== '') {
+				$results = $this->getHybridProductResults($manticore_search, $limit);
+			}
 
-					$rows = $this->model_catalog_product->getProducts($single_filter);
+			if ($results === null) {
+				// Fallback: Manticore unavailable → SQL LIKE path (original behaviour)
+				if ($filter_any) {
+					// OR-search across name/model/SKU: run each filter separately and merge
+					$results = array();
+					$seen = array();
 
-					foreach ($rows as $row) {
-						if (!isset($seen[(int)$row['product_id']])) {
-							$seen[(int)$row['product_id']] = true;
-							$results[] = $row;
+					foreach (array('filter_name' => $filter_name, 'filter_model' => $filter_model, 'filter_sku' => $filter_sku) as $filter_key => $filter_value) {
+						if ($filter_value === '') {
+							continue;
+						}
+
+						$single_filter = array('start' => 0, 'limit' => $limit * 3);
+						$single_filter[$filter_key] = $filter_value;
+
+						$rows = $this->model_catalog_product->getProducts($single_filter);
+
+						foreach ($rows as $row) {
+							if (!isset($seen[(int)$row['product_id']])) {
+								$seen[(int)$row['product_id']] = true;
+								$results[] = $row;
+							}
 						}
 					}
-				}
 
-				$results = array_slice($results, 0, $limit);
-			} else {
-				$results = $this->model_catalog_product->getProducts($filter_data);
+					$results = array_slice($results, 0, $limit);
+				} else {
+					$results = $this->model_catalog_product->getProducts($filter_data);
+				}
 			}
 
 			if ($results) {
@@ -2721,6 +2752,55 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Hybrid product search: Manticore finds & ranks, MySQL enriches.
+	 *
+	 * Returns full product rows (from the catalog product model) in Manticore
+	 * relevance order, or null when Manticore is unavailable (caller falls
+	 * back to the SQL LIKE path).
+	 *
+	 * @param string $search
+	 * @param int    $limit
+	 * @return array|null
+	 */
+	private function getHybridProductResults($search, $limit) {
+		$search = trim((string)$search);
+
+		if ($search === '') {
+			return array();
+		}
+
+		$manticore = $this->model_common_admin_search->searchEntity('product', $search, array('limit' => $limit));
+
+		if ($manticore === false) {
+			return null;
+		}
+
+		$product_ids = array_column($manticore['results'], 'id');
+
+		if (!$product_ids) {
+			return array();
+		}
+
+		$rows = $this->model_catalog_product->getProducts(array(
+			'filter_product_ids' => $product_ids,
+			'start'              => 0,
+			'limit'              => count($product_ids)
+		));
+
+		// Restore Manticore relevance order (getProducts sorts by name by default)
+		$order = array_flip(array_map('intval', $product_ids));
+		$ordered = array();
+
+		foreach ($rows as $row) {
+			$ordered[$order[(int)$row['product_id']]] = $row;
+		}
+
+		ksort($ordered);
+
+		return array_values($ordered);
 	}
 
 	private function getPriceDisplayInfo($amount, $currency_id, array $currency_map): array {

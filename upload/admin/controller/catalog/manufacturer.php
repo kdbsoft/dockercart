@@ -719,16 +719,34 @@ class ControllerCatalogManufacturer extends Controller {
 		$json = array();
 
 		if (isset($this->request->get['filter_name'])) {
-			$this->load->model('catalog/manufacturer');
+			$filter_name = (string)$this->request->get['filter_name'];
 
-			$filter_data = array(
-				'filter_name' => $this->request->get['filter_name'],
-				'filter_status' => 1,
-				'start'       => 0,
-				'limit'       => 5
-			);
+			$this->load->model('common/admin_search');
 
-			$results = $this->model_catalog_manufacturer->getManufacturers($filter_data);
+			$manticore = $this->model_common_admin_search->searchEntity('manufacturer', $filter_name, array('limit' => 5));
+
+			if ($manticore === false) {
+				// Fallback: Manticore unavailable → SQL LIKE path
+				$this->load->model('catalog/manufacturer');
+
+				$filter_data = array(
+					'filter_name' => $filter_name,
+					'filter_status' => 1,
+					'start'       => 0,
+					'limit'       => 5
+				);
+
+				$results = $this->model_catalog_manufacturer->getManufacturers($filter_data);
+			} else {
+				$results = array();
+
+				foreach ($manticore['results'] as $result) {
+					$results[] = array(
+						'manufacturer_id' => $result['id'],
+						'name'            => $result['row']['name'] ?? ''
+					);
+				}
+			}
 
 			foreach ($results as $result) {
 				$json[] = array(

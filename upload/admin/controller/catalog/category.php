@@ -1128,17 +1128,35 @@ class ControllerCatalogCategory extends Controller {
 		$json = array();
 
 		if (isset($this->request->get['filter_name'])) {
-			$this->load->model('catalog/category');
+			$filter_name = (string)$this->request->get['filter_name'];
 
-			$filter_data = array(
-				'filter_name' => $this->request->get['filter_name'],
-				'sort'        => 'name',
-				'order'       => 'ASC',
-				'start'       => 0,
-				'limit'       => 5
-			);
+			$this->load->model('common/admin_search');
 
-			$results = $this->model_catalog_category->getCategories($filter_data);
+			$manticore = $this->model_common_admin_search->searchEntity('category', $filter_name, array('limit' => 5));
+
+			if ($manticore === false) {
+				// Fallback: Manticore unavailable → SQL LIKE path
+				$this->load->model('catalog/category');
+
+				$filter_data = array(
+					'filter_name' => $filter_name,
+					'sort'        => 'name',
+					'order'       => 'ASC',
+					'start'       => 0,
+					'limit'       => 5
+				);
+
+				$results = $this->model_catalog_category->getCategories($filter_data);
+			} else {
+				$results = array();
+
+				foreach ($manticore['results'] as $result) {
+					$results[] = array(
+						'category_id' => $result['id'],
+						'name'        => $result['row']['name'] ?? ''
+					);
+				}
+			}
 
 			foreach ($results as $result) {
 				$json[] = array(
