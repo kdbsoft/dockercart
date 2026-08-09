@@ -220,6 +220,12 @@
 		// Sync base price for dcRecalcOptionPrice so it doesn't overwrite variant price
 		if (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) {
 			var vPrice = parseFloat(variant.price);
+			// When the variant is on sale, option adjustments must be applied
+			// on top of the sale price, not the regular price.
+			if (variant.special !== undefined && variant.special !== null && parseFloat(variant.special) > 0
+				&& variant.special_from !== undefined && parseFloat(variant.special) < parseFloat(variant.special_from)) {
+				vPrice = parseFloat(variant.special);
+			}
 			if (priceEl) {
 				priceEl.dataset.basePrice = String(vPrice);
 				priceEl.dataset.currentPrice = String(vPrice);

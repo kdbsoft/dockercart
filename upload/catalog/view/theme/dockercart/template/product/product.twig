@@ -869,7 +869,15 @@ function dcRecalcOptionPrice() {
   var priceEl = document.getElementById('dc-unit-price');
   if (!priceEl) return;
 
+  // Sale price (currentPrice) wins over the regular basePrice when it is lower,
+  // so option adjustments are applied on top of the price the customer sees.
   var basePrice = parseFloat(priceEl.dataset.basePrice || '0');
+  var currentPrice = parseFloat(priceEl.dataset.currentPrice || '0');
+
+  if (currentPrice > 0 && currentPrice < basePrice) {
+    basePrice = currentPrice;
+  }
+
   if (!basePrice) {
     dcUpdateSubtotal();
     return;
@@ -978,25 +986,32 @@ function initOptionButtons() {
   document.querySelectorAll('.dc-option-radio').forEach(function(radio) {
     var group = radio.closest('[id^="input-option"]');
     var optional = group && group.getAttribute('data-required') === '0';
+    var label = radio.closest('label');
+    if (!label) return;
 
     // Clicking an already selected optional radio clears the selection
-    radio.addEventListener('click', function(e) {
-      if (!optional || !radio.checked) return;
+    label.addEventListener('click', function(e) {
       e.preventDefault();
-      radio.checked = false;
-      if (radio.nextElementSibling) radio.nextElementSibling.classList.remove('active');
-      dcRecalcOptionPrice();
-    });
 
-    radio.addEventListener('change', function() {
+      if (optional && radio.checked) {
+        radio.checked = false;
+        if (radio.nextElementSibling) radio.nextElementSibling.classList.remove('active');
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+        dcRecalcOptionPrice();
+        return;
+      }
+
       document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function(r) {
+        r.checked = false;
         if (r.nextElementSibling) r.nextElementSibling.classList.remove('active');
       });
-      if (radio.checked && radio.nextElementSibling) radio.nextElementSibling.classList.add('active');
+      radio.checked = true;
+      if (radio.nextElementSibling) radio.nextElementSibling.classList.add('active');
 
       var radioGroup = document.getElementById('input-option' + radio.name.replace(/[^0-9]/g, ''));
       if (radioGroup) radioGroup.classList.remove('dc-option-required-error');
 
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
       dcRecalcOptionPrice();
     });
   });

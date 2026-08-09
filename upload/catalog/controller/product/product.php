@@ -1065,7 +1065,16 @@ class ControllerProductProduct extends Controller {
 				if (!empty($selected_variant) && $data['price'] !== false) {
 					if (isset($selected_variant['price']) && $selected_variant['price'] !== '' && (float)$selected_variant['price'] > 0) {
 						$sv_price = (float)$selected_variant['price'];
-						$data['dc_base_price_value'] = $sv_price;
+						// Option price adjustments are applied on top of the price the
+						// customer actually pays: the sale price when the variant is on sale.
+						$sv_base_price = $sv_price;
+
+						if (isset($selected_variant['special']) && (float)$selected_variant['special'] > 0
+							&& (float)$selected_variant['special'] < $sv_price) {
+							$sv_base_price = (float)$selected_variant['special'];
+						}
+
+						$data['dc_base_price_value'] = $sv_base_price;
 						$data['price'] = $this->currency->format(
 							$this->tax->calculate($sv_price, $tax_class_id, $tax),
 							$this->session->data['currency']
