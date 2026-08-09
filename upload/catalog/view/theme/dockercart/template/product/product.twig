@@ -177,7 +177,9 @@
       <!-- Info -->
       <div>
         <div class="flex items-center gap-2 mb-3">
-          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="px-2 py-0.5 rounded-full text-[13px] font-bold {% if is_preorder is defined and is_preorder %}bg-amber-100 text-amber-700{% elseif is_in_stock %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-600{% endif %}">{{ stock }}</span>
+          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-stock-instock="{{ stock_status_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="inline-flex items-center gap-1.5 text-[13px] font-bold uppercase {% if is_preorder is defined and is_preorder %}text-amber-700{% elseif is_in_stock %}text-emerald-700{% else %}text-gray-400{% endif %}">
+            <span class="dc-stock-dot w-2.5 h-2.5 rounded-full border-2 {% if is_in_stock %}bg-emerald-500 border-emerald-500{% else %}bg-transparent border-gray-300{% endif %}"></span><span class="dc-stock-text">{{ stock }}</span>
+          </span>
           {% if is_discontinued is defined and is_discontinued %}
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-200 text-gray-600 text-[13px] font-bold">
             <i data-lucide="ban" class="w-4 h-4"></i>{{ text_discontinued }}
