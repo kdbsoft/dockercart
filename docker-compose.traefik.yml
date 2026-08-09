@@ -193,7 +193,7 @@ services:
       start_period: 30s
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:12.3.2
     container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
@@ -255,7 +255,7 @@ services:
   #     - traefik
 
   manticore:
-    image: manticoresearch/manticore:latest
+    image: manticoresearch/manticore:6.3.8
     container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
