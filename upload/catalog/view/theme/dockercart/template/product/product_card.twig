@@ -15,8 +15,13 @@
     link_hover       — e.g. "hover:text-blue-600 transition"
     btn_cart_classes — e.g. "bg-blue-600 text-white hover:bg-blue-700"
 #}
+<style>
+  .dc-star { position: relative; display: inline-block; color: #e5e7eb; line-height: 1; }
+  .dc-star.active { color: #f59e0b; }
+  .dc-star.dc-star-partial { color: #e5e7eb; }
+  .dc-star.dc-star-partial::after { content: '★'; position: absolute; inset: 0; color: #f59e0b; clip-path: inset(0 calc(100% - var(--pct)) 0 0); }
+</style>
 {% if view_mode == 'table' %}
-
 <div class="product-card dc-table-row" data-id="{{ product.product_id }}" data-href="{{ product.href }}" data-description="{{ product.description }}" data-model="{{ product.model|default('') }}" data-in-wishlist="{{ product.in_wishlist|default(0) }}" data-rating="{{ product.rating|default(0) }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
   <div class="w-[50px] h-[50px] rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
     <a href="{{ product.href }}">
@@ -58,7 +63,14 @@
   <div class="flex items-center gap-0.5">
     {% if product.rating %}
       {% for i in 1..5 %}
-        <span class="text-[11px] {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
+        {% set diff = product.rating - (i - 1) %}
+        {% if diff >= 1 %}
+          <span class="dc-star active text-[11px]">★</span>
+        {% elseif diff > 0 %}
+          <span class="dc-star dc-star-partial text-[11px]" style="--pct: {{ (diff * 100) | round }}%">★</span>
+        {% else %}
+          <span class="dc-star text-[11px]">★</span>
+        {% endif %}
       {% endfor %}
     {% endif %}
   </div>
@@ -118,7 +130,14 @@
     {% if product.rating %}
       <div class="flex items-center mb-2">
         {% for i in 1..5 %}
-          <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
+          {% set diff = product.rating - (i - 1) %}
+          {% if diff >= 1 %}
+            <span class="dc-star active text-xs">★</span>
+          {% elseif diff > 0 %}
+            <span class="dc-star dc-star-partial text-xs" style="--pct: {{ (diff * 100) | round }}%">★</span>
+          {% else %}
+            <span class="dc-star text-xs">★</span>
+          {% endif %}
         {% endfor %}
         <span class="text-[10px] text-gray-400 ml-1">{{ review_count_label(product.reviews|default(0)) }}</span>
       </div>
@@ -156,7 +175,7 @@
       {% endfor %}
     </div>
     {% endif %}
-      <div class="mt-auto flex flex-wrap items-end justify-between gap-3">
+      <div class="mt-auto pt-3 flex flex-wrap items-end justify-between gap-3">
         <div class="flex items-baseline gap-1 flex-wrap">
           {% set cfp = (product.call_for_price is defined and product.call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) %}
           {% if cfp %}
@@ -236,7 +255,14 @@
     {% if product.rating %}
       <div class="flex items-center mb-2">
         {% for i in 1..5 %}
-          <span class="text-xs {% if product.rating >= i %}text-amber-400{% else %}text-gray-200{% endif %}">★</span>
+          {% set diff = product.rating - (i - 1) %}
+          {% if diff >= 1 %}
+            <span class="dc-star active text-xs">★</span>
+          {% elseif diff > 0 %}
+            <span class="dc-star dc-star-partial text-xs" style="--pct: {{ (diff * 100) | round }}%">★</span>
+          {% else %}
+            <span class="dc-star text-xs">★</span>
+          {% endif %}
         {% endfor %}
         <span class="text-[10px] text-gray-400 ml-1">{{ review_count_label(product.reviews|default(0)) }}</span>
       </div>
