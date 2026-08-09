@@ -7,6 +7,26 @@
 html { scroll-behavior: smooth; }
 body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 
+select:not(.dc-toolbar-select):not([multiple]):not([size]):not([style*="background-image"]) {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+select:not(.dc-toolbar-select):not([multiple]):not([size]):not([style*="background-image"])::-ms-expand {
+  display: none;
+}
+
+select:not(.dc-toolbar-select):not([multiple]):not([size]):not([style*="background-image"]):focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%232563eb' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+}
+
+
 /* ── Header layer order (prevents topbar dropdown clipping under main row) ── */
 #navbar {
   isolation: isolate;
