@@ -587,6 +587,8 @@ class ControllerProductCategory extends Controller {
 			$data['text_view_grid'] = $this->language->get('text_view_grid');
 			$data['text_view_list'] = $this->language->get('text_view_list');
 			$data['text_view_table'] = $this->language->get('text_view_table');
+			$data['text_sort'] = $this->language->get('text_sort');
+			$data['text_limit'] = $this->language->get('text_limit');
 
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
