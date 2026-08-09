@@ -3,9 +3,6 @@ class ControllerProductCategories extends Controller {
 	public function index() {
 		$this->load->language('product/categories');
 
-		// Also load category module strings (shared labels)
-		$this->load->language('extension/module/category');
-
 		$this->load->model('catalog/category');
 		$this->load->model('catalog/product');
 		$this->load->model('tool/image');
