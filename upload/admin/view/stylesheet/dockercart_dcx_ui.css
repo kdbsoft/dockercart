@@ -256,7 +256,7 @@
 .dcx-banner-layout__preview {
     flex-shrink: 0;
     width: 180px;
-    height: 100px;
+    height: 180px;
     border-radius: 10px;
     overflow: hidden;
     background: var(--dc-gray-100, #f3f4f6);

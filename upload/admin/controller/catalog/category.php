@@ -624,8 +624,8 @@ class ControllerCatalogCategory extends Controller {
 				'banner_enabled'        => !empty($banner_image),
 				'banner_image'          => $banner_image,
 				'banner_thumb'          => ($banner_image && is_file(DIR_IMAGE . $banner_image))
-					? $this->model_tool_image->resize($banner_image, 140, 140)
-					: $this->model_tool_image->resize('no_image.png', 140, 140),
+					? $this->model_tool_image->resize($banner_image, 360, 360)
+					: $this->model_tool_image->resize('no_image.png', 360, 360),
 				'banner_link_type'      => $parsed_link['type'],
 				'banner_link_value'     => $parsed_link['value'],
 				'banner_link_entity_name' => $parsed_link['entity_name'],

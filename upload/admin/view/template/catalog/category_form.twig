@@ -90,7 +90,7 @@
                   <label class="dcx-checkbox-label dcx-banner-toggle">
                     <input type="checkbox" name="category_banner[{{ language.language_id }}][enabled]" value="1" {% if banner_links[language.language_id] and banner_links[language.language_id].banner_enabled %}checked="checked"{% endif %} id="banner-toggle-{{ language.language_id }}" />
                     <span>{{ entry_banner_image }}</span>
-                    <span data-toggle="tooltip" title="{{ help_banner_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                    <span data-toggle="tooltip" title="{{ help_banner_image }} ({{ text_banner_ratio }})"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                   </label>
                 </div>
                 <div class="dcx-banner-layout" id="banner-layout-{{ language.language_id }}">
