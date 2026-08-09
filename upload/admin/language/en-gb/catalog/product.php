@@ -179,6 +179,7 @@ $_['error_option_is_axis']     = 'This option cannot be added as a simple option
 $_['error_simple_option_is_axis'] = 'This option is a variant axis. Remove it from axes first.';
 $_['error_option_already_added'] = 'This option has already been added.';
 $_['error_axis_conflicts_simple'] = 'This option already exists as a simple option. Remove it from simple options first.';
+$_['error_default_variant'] = 'For combined variants, a default variant must be selected (star in the variants table).';
 $_['error_quantity_step']     = 'Quantity Step must be a positive number with up to 2 decimal places!';
 $_['error_minimum_value']     = 'Minimum Quantity must be a positive number with up to 2 decimal places!';
 $_['error_minimum_step']      = 'Minimum Quantity must be divisible by Quantity Step!';

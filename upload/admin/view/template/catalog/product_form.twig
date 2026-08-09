@@ -584,6 +584,9 @@
                   </div>
 
                   <div id="dc-variants-section" {% if not is_configurable %}style="display:none"{% endif %}>
+                    {% if error_default_variant %}
+                    <div class="alert alert-danger" id="dc-error-default-variant"><i data-lucide="circle-alert" width="14" height="14"></i> {{ error_default_variant }}</div>
+                    {% endif %}
                     {% include 'catalog/product_variants.twig' %}
                   </div>
 
