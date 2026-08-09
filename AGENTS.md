@@ -150,6 +150,14 @@ skip migrations with `SKIP_MIGRATIONS=1 make update`.
 
 ## Agent workflow
 
+- **Browser testing: always use `agent-browser`** (not Playwright/Puppeteer/MCP browser
+  tools) whenever a browser is needed — checking the storefront, admin, user flows,
+  links, or layout. It drives Chrome/Chromium via CDP and gives accessibility-tree
+  snapshots with `@eN` refs for reliable interaction. Open the storefront at:
+  **http://dockercart.local:8080/** (Traefik mode; hostname must resolve — it is in
+  `/etc/hosts` → `127.0.0.1`). Load the usage guide first with
+  `agent-browser skills get core` and follow the snapshot-ref workflow
+  (`open` → `snapshot -i` → `click @eN` / `fill @eN` → re-snapshot).
 - **Never restart containers for code changes.** All app code lives in bind-mounted volumes
   (`upload/`, `storage/`). Edits on the host are instantly visible inside the running
   containers. Restarting is only needed after `docker-compose*.yml` changes, image rebuilds,
