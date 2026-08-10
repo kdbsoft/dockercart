@@ -848,4 +848,132 @@ class ProductConfigurable {
 	private function touchProduct($product_id) {
 		$this->db->query("UPDATE " . DB_PREFIX . "product SET date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'");
 	}
+
+	/**
+	 * Build the cart/order option_data for a variant: one entry per axis
+	 * option value (product_option_id, product_option_value_id, name, value,
+	 * type), mirroring the storefront add-to-cart payload. Returns [] when
+	 * the variant is missing.
+	 *
+	 * @param int $variant_id
+	 * @return array
+	 */
+	public function getVariantOptionData($variant_id) {
+		$variant = $this->getVariant((int)$variant_id);
+
+		if (empty($variant) || empty($variant['values'])) {
+			return array();
+		}
+
+		$product_id = (int)$variant['product_id'];
+
+		$option_ids = array();
+		$option_value_ids = array();
+
+		foreach ($variant['values'] as $value) {
+			$option_ids[(int)$value['option_id']] = true;
+			$option_value_ids[(int)$value['option_value_id']] = true;
+		}
+
+		$query = $this->db->query(
+			"SELECT po.product_option_id, po.product_id, po.option_id, po.required, o.type FROM "
+			. DB_PREFIX . "product_option po LEFT JOIN `" . DB_PREFIX . "option` o ON (po.option_id = o.option_id) "
+			. "WHERE po.product_id = '" . $product_id . "' AND po.option_id IN (" . implode(',', array_keys($option_ids)) . ") ORDER BY po.sort_order ASC"
+		);
+
+		$product_option_rows = array();
+
+		foreach ($query->rows as $row) {
+			$product_option_rows[(int)$row['option_id']] = $row;
+		}
+
+		$query = $this->db->query(
+			"SELECT pov.product_option_id, pov.product_option_value_id, pov.option_value_id, pov.quantity, pov.subtract, pov.price, pov.price_prefix, pov.points, pov.points_prefix, pov.weight, pov.weight_prefix FROM "
+			. DB_PREFIX . "product_option_value pov WHERE pov.product_option_id IN ("
+			. implode(',', array_map(function ($po) {
+				return (int)$po['product_option_id'];
+			}, array_values($product_option_rows)))
+			. ") AND pov.option_value_id IN (" . implode(',', array_keys($option_value_ids)) . ")"
+		);
+
+		$product_option_value_rows = array();
+
+		foreach ($query->rows as $row) {
+			$key = (int)$row['product_option_id'] . ':' . (int)$row['option_value_id'];
+			$product_option_value_rows[$key] = $row;
+		}
+
+		$option_data = array();
+
+		foreach ($variant['values'] as $value) {
+			$po = isset($product_option_rows[(int)$value['option_id']]) ? $product_option_rows[(int)$value['option_id']] : array();
+
+			if (empty($po)) {
+				continue;
+			}
+
+			$key = (int)$po['product_option_id'] . ':' . (int)$value['option_value_id'];
+			$pov = isset($product_option_value_rows[$key]) ? $product_option_value_rows[$key] : array();
+
+			if (empty($pov)) {
+				continue;
+			}
+
+			$option_data[] = array(
+				'product_option_id'       => (int)$po['product_option_id'],
+				'product_option_value_id' => (int)$pov['product_option_value_id'],
+				'name'                    => (string)($value['name'] ?? ''),
+				'value'                   => (string)($value['name'] ?? ''),
+				'type'                    => (string)($po['type'] ?? ''),
+			);
+		}
+
+		return $option_data;
+	}
+
+	/**
+	 * Gift/BXGY reward variant data: the product's default variant when the
+	 * gift product is configurable and the variant is available (status = 1
+	 * and, when stock is tracked, quantity > 0). Returns [] for non-
+	 * configurable products or when no valid variant exists — the caller then
+	 * skips the gift line instead of adding a variant-less order row.
+	 *
+	 * @param int $gift_product_id
+	 * @return array ['variant_id', 'variant_sku', 'model', 'label', 'option']
+	 */
+	public function getGiftVariantData($gift_product_id) {
+		if (!$this->isConfigurable((int)$gift_product_id)) {
+			return array();
+		}
+
+		$variant = $this->getDefaultVariant((int)$gift_product_id);
+
+		if (empty($variant) || empty($variant['status'])) {
+			return array();
+		}
+
+		$stock_checkout = (int)$this->config->get('config_stock_checkout');
+
+		if ((int)$variant['subtract'] === 1 && (float)$variant['quantity'] <= 0 && !$stock_checkout) {
+			return array();
+		}
+
+		$label_parts = array();
+
+		foreach ($variant['values'] as $value) {
+			if (!empty($value['name'])) {
+				$label_parts[] = $value['name'];
+			}
+		}
+
+		$option_data = $this->getVariantOptionData((int)$variant['variant_id']);
+
+		return array(
+			'variant_id'  => (int)$variant['variant_id'],
+			'variant_sku' => (string)($variant['sku'] ?? ''),
+			'model'       => !empty($variant['model']) ? $variant['model'] : (string)($variant['sku'] ?? ''),
+			'label'       => implode(', ', $label_parts),
+			'option'      => $option_data,
+		);
+	}
 }

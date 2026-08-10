@@ -1470,6 +1470,51 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
+	/**
+	 * Attach the default-variant label to gift names for configurable gift
+	 * products, e.g. "Sofa (Blue, XL)".
+	 *
+	 * @param array $gift_rows rows from getProductGiftsByIds()
+	 * @return array
+	 */
+	public function hydrateGiftVariants(array $gift_rows) {
+		if (empty($gift_rows)) {
+			return $gift_rows;
+		}
+
+		$gift_product_ids = array();
+
+		foreach ($gift_rows as $gift) {
+			$gift_product_ids[(int)$gift['gift_product_id']] = true;
+		}
+
+		$pc = new ProductConfigurable($this->registry);
+		$defaults = $pc->getDefaultVariantsByProductIds(array_keys($gift_product_ids));
+
+		foreach ($gift_rows as &$gift) {
+			$gift_pid = (int)$gift['gift_product_id'];
+
+			if (!isset($defaults[$gift_pid])) {
+				continue;
+			}
+
+			$variant = $defaults[$gift_pid];
+			$label_parts = array();
+
+			foreach ($variant['values'] as $value) {
+				if (!empty($value['name'])) {
+					$label_parts[] = $value['name'];
+				}
+			}
+
+			if (!empty($label_parts)) {
+				$gift['name'] = $gift['name'] . ' (' . implode(', ', $label_parts) . ')';
+			}
+		}
+
+		return $gift_rows;
+	}
+
 	private function autoRenewProductEntities() {
 		static $done = [];
 

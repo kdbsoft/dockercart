@@ -51,7 +51,15 @@
                 <button onclick="dcCartAdjust('{{ product.cart_id }}', 1, '{{ product.quantity_step|default(1) }}', '{{ product.minimum|default(1) }}', '{{ product.quantity }}')" class="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm font-bold transition" aria-label="Increase quantity">+</button>
               </div>
               <div class="flex items-center gap-2">
+                {% if product.bxgy_original_price %}
+                <div class="text-right">
+                  <span class="block text-[10px] text-red-400 line-through">{{ product.bxgy_original_price }}</span>
+                  <span class="block text-sm font-semibold text-emerald-600">{{ product.total }}</span>
+                  <span class="block text-[9px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
+                </div>
+                {% else %}
                 <span class="text-sm font-semibold text-gray-900">{{ product.total }}</span>
+                {% endif %}
                 <button onclick="dcCartRemove('{{ product.cart_id }}')" class="p-1 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition" title="Remove">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
