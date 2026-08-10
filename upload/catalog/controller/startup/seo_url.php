@@ -1255,10 +1255,15 @@ class ControllerStartupSeoUrl extends Controller
                 // Check if a shorter SEO keyword exists for this exact route
                 $shorter_seo_keyword = $this->getSeoKeyword($potential_route);
 
-                if (!$shorter_seo_keyword) {
-                    $this->request->get["route"] = $potential_route;
-                    return;
+                if ($shorter_seo_keyword) {
+                    // Route is reachable via a canonical SEO keyword — redirect
+                    // the slash-form path to it (e.g. /checkout/dockercart_checkout
+                    // → /fast-checkout) instead of falling through to a 404.
+                    $this->performCanonicalRedirect($shorter_seo_keyword);
                 }
+
+                $this->request->get["route"] = $potential_route;
+                return;
             }
         }
 
