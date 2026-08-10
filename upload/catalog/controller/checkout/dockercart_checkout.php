@@ -718,6 +718,20 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 return;
             }
 
+            // The cart changed — re-validate the applied coupon so the totals
+            // reflect reality (an invalid coupon is dropped from the session).
+            if (!empty($this->session->data["coupon"])) {
+                $this->load->model("extension/total/coupon");
+
+                $coupon_info = $this->model_extension_total_coupon->getCoupon(
+                    $this->session->data["coupon"],
+                );
+
+                if (!$coupon_info) {
+                    unset($this->session->data["coupon"]);
+                }
+            }
+
             $json["success"] = true;
             $json["products"] = $this->getCartProducts();
             $json["totals"] = $this->getCartTotals();
@@ -2167,13 +2181,18 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         foreach ($cart_products as $product) {
             $price = (float) $product["price"];
-            $tax = isset($product["tax"]) ? (float) $product["tax"] : 0;
+            $tax = $this->tax->getTax($price, (int) ($product["tax_class_id"] ?? 0));
 
-            if (isset($bxgy_discounts[(int) $product["product_id"]])) {
-                $per_unit_discount = $bxgy_discounts[(int) $product["product_id"]]["discount_amount"];
+            $bxgy_key = (int) $product["product_id"] . ":" . (int) ($product["variant_id"] ?? 0);
 
-                if ($price > 0 && $per_unit_discount > 0) {
-                    $new_price = max(0, $price - $per_unit_discount);
+            if (isset($bxgy_discounts[$bxgy_key])) {
+                $per_unit_discount = $bxgy_discounts[$bxgy_key]["per_unit"];
+                $units = (int) $bxgy_discounts[$bxgy_key]["units"];
+                $line_discount = $per_unit_discount * min($units, (int) $product["quantity"]);
+
+                if ($price > 0 && $line_discount > 0) {
+                    $new_price_total = max(0, $price * (int) $product["quantity"] - $line_discount);
+                    $new_price = (int) $product["quantity"] > 0 ? $new_price_total / (int) $product["quantity"] : 0;
                     // Scale tax proportionally to the price change (pre-tax discount).
                     if ($price > 0) {
                         $tax = $tax * ($new_price / $price);
@@ -2197,10 +2216,15 @@ class ControllerCheckoutDockercartCheckout extends Controller
             ];
         }
 
-        // Product Gifts: add zero-price gift lines when minimum quantity is met
+        // Product Gifts: add zero-price gift lines when minimum quantity is met.
+        // Configurable gift products use their default variant (order row gets
+        // the variant id + axis options); when no valid variant exists the
+        // gift line is skipped.
         $this->load->model("catalog/product");
         $this->load->language("product/product");
         $text_gift = $this->language->get("text_gift");
+
+        $pc = new ProductConfigurable($this->registry);
 
         $gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, "product_id"));
 
@@ -2208,21 +2232,37 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $gifts = isset($gifts_map[(int)$cart_product["product_id"]]) ? $gifts_map[(int)$cart_product["product_id"]] : [];
 
             foreach ($gifts as $gift) {
-                if ($cart_product["quantity"] >= (int)$gift["minimum_quantity"]) {
-                    $order_data["products"][] = [
-                        "product_id"  => (int) $gift["gift_product_id"],
-                        "variant_id"  => 0,
-                        "variant_sku" => '',
-                        "name"        => ($text_gift ? $text_gift . ': ' : '') . $gift["name"],
-                        "model"       => '',
-                        "quantity"    => 1,
-                        "price"       => 0,
-                        "total"       => 0,
-                        "tax"         => 0,
-                        "reward"      => 0,
-                        "option"      => [],
-                    ];
+                if ($cart_product["quantity"] < (int)$gift["minimum_quantity"]) {
+                    continue;
                 }
+
+                $gift_variant = $pc->getGiftVariantData((int) $gift["gift_product_id"]);
+
+                // Configurable gift products use their default variant; when
+                // no valid variant exists the gift line is skipped.
+                if ($pc->isConfigurable((int) $gift["gift_product_id"]) && empty($gift_variant)) {
+                    continue;
+                }
+
+                $gift_name = $gift["name"];
+
+                if (!empty($gift_variant)) {
+                    $gift_name = $gift_variant["label"] !== '' ? $gift_name . ' (' . $gift_variant["label"] . ')' : $gift_name;
+                }
+
+                $order_data["products"][] = [
+                    "product_id"  => (int) $gift["gift_product_id"],
+                    "variant_id"  => isset($gift_variant["variant_id"]) ? (int)$gift_variant["variant_id"] : 0,
+                    "variant_sku" => isset($gift_variant["variant_sku"]) ? $gift_variant["variant_sku"] : '',
+                    "name"        => ($text_gift ? $text_gift . ': ' : '') . $gift_name,
+                    "model"       => isset($gift_variant["model"]) ? $gift_variant["model"] : '',
+                    "quantity"    => 1,
+                    "price"       => 0,
+                    "total"       => 0,
+                    "tax"         => 0,
+                    "reward"      => 0,
+                    "option"      => isset($gift_variant["option"]) ? $gift_variant["option"] : [],
+                ];
             }
         }
 
@@ -2277,6 +2317,11 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     : 0,
             ];
         }
+
+        // The order total must match the full totals pipeline (subtotal +
+        // shipping + tax + discounts), not just cart->getTotal() which only
+        // covers products with tax.
+        $order_data["total"] = $total;
 
         return $order_data;
     }
@@ -2366,6 +2411,22 @@ class ControllerCheckoutDockercartCheckout extends Controller
         }
 
         if (!isset($json["error"]) && !isset($json["redirect"])) {
+            // DockerCart: re-validate the coupon right before order creation.
+            // The cart may have changed since the coupon was applied (qty,
+            // items removed), making it invalid — silently dropping it from
+            // the totals while keeping it in session would mislead the UI.
+            if (!empty($this->session->data["coupon"])) {
+                $this->load->model("extension/total/coupon");
+
+                $coupon_info = $this->model_extension_total_coupon->getCoupon(
+                    $this->session->data["coupon"],
+                );
+
+                if (!$coupon_info) {
+                    unset($this->session->data["coupon"]);
+                }
+            }
+
             // Store comment
             if (isset($data["comment"])) {
                 $this->session->data["comment"] = strip_tags($data["comment"]);
@@ -2512,6 +2573,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $products[] = [
                 "cart_id" => $product["cart_id"],
                 "product_id" => $product["product_id"],
+                "variant_id" => (int) ($product["variant_id"] ?? 0),
+                "variant_sku" => isset($product["variant_sku"]) ? $product["variant_sku"] : '',
                 "name" => $product["name"],
                 "model" => $product["model"],
                 "thumb" => $this->model_tool_image->resize(
@@ -2553,15 +2616,19 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $bxgy_discounts = $bxgy_lib->getPerProductDiscounts($cart_products);
 
         foreach ($products as &$product) {
-            $pid = (int) $product["product_id"];
+            $key = (int) $product["product_id"] . ":" . (int) ($product["variant_id"] ?? 0);
 
-            if (isset($bxgy_discounts[$pid])) {
-                $per_unit_discount = $bxgy_discounts[$pid]["discount_amount"];
-
-                $discounted_raw = max(0, (float)($product["price_raw"] ?? 0) - $per_unit_discount);
+            if (isset($bxgy_discounts[$key])) {
+                $per_unit_discount = $bxgy_discounts[$key]["per_unit"];
+                $units = (int) $bxgy_discounts[$key]["units"];
+                $line_discount = $per_unit_discount * min($units, (int) $product["quantity"]);
+                $raw_price = (float) ($product["price_raw"] ?? 0);
+                $discounted_raw = $raw_price * (int) $product["quantity"];
+                $discounted_raw = max(0, $discounted_raw - $line_discount);
+                $discounted_raw = (int) $product["quantity"] > 0 ? $discounted_raw / (int) $product["quantity"] : 0;
                 $product["price_raw"] = $discounted_raw;
-                $product["bxgy_original_price"] = $bxgy_discounts[$pid]["original_price_formatted"];
-                $product["bxgy_discount_text"] = $bxgy_discounts[$pid]["text"];
+                $product["bxgy_original_price"] = $bxgy_discounts[$key]["original_price_formatted"];
+                $product["bxgy_discount_text"] = $bxgy_discounts[$key]["text"];
                 $product["price"] = $this->currency->format(
                     $this->tax->calculate(
                         $discounted_raw,
@@ -2599,9 +2666,15 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         $cart_products = $this->cart->getProducts();
         $gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, "product_id"));
+        $gifts_map = $this->model_catalog_product->hydrateGiftVariants($gifts_map ? array_merge(...array_values($gifts_map)) : array());
+        $gifts_by_pid = [];
+
+        foreach ($gifts_map as $gift) {
+            $gifts_by_pid[(int)$gift["product_id"]][] = $gift;
+        }
 
         foreach ($cart_products as $product) {
-            $product_gifts = isset($gifts_map[(int)$product["product_id"]]) ? $gifts_map[(int)$product["product_id"]] : [];
+            $product_gifts = isset($gifts_by_pid[(int)$product["product_id"]]) ? $gifts_by_pid[(int)$product["product_id"]] : [];
 
             foreach ($product_gifts as $gift) {
                 if ($product["quantity"] >= (int)$gift["minimum_quantity"]) {

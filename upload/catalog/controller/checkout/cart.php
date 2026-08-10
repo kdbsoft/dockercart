@@ -114,17 +114,19 @@ class ControllerCheckoutCart extends Controller {
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 
-					$bxgy_key = (int) $product['product_id'];
+					$bxgy_key = (int) $product['product_id'] . ':' . (int) ($product['variant_id'] ?? 0);
 					$original_price = $price = $unit_price;
 					$original_total = $total = $unit_price * $product['quantity'];
 					$bxgy_original_price_fmt = false;
 					$bxgy_discount_text = '';
 
 					if (isset($bxgy_discounts[$bxgy_key])) {
-						$per_unit_discount = $bxgy_discounts[$bxgy_key]['discount_amount'];
+						$per_unit_discount = $bxgy_discounts[$bxgy_key]['per_unit'];
 						$bxgy_original_price_fmt = $bxgy_discounts[$bxgy_key]['original_price_formatted'];
 						$bxgy_discount_text = $bxgy_discounts[$bxgy_key]['text'];
-						$discounted = max(0, (float)$product['price'] - $per_unit_discount);
+						$line_discount = $per_unit_discount * min((int)$bxgy_discounts[$bxgy_key]['units'], (int)$product['quantity']);
+						$discounted_total = max(0, (float)$product['price'] * (int)$product['quantity'] - $line_discount);
+						$discounted = (int)$product['quantity'] > 0 ? $discounted_total / (int)$product['quantity'] : 0;
 						$price = $this->tax->calculate($discounted, $product['tax_class_id'], $this->config->get('config_tax'));
 						$total = $price * $product['quantity'];
 					}
@@ -185,9 +187,15 @@ class ControllerCheckoutCart extends Controller {
 			$cart_products = $this->cart->getProducts();
 
 			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, 'product_id'));
+			$gifts_map = $this->model_catalog_product->hydrateGiftVariants($gifts_map ? array_merge(...array_values($gifts_map)) : array());
+			$gifts_by_pid = array();
+
+			foreach ($gifts_map as $gift) {
+				$gifts_by_pid[(int)$gift['product_id']][] = $gift;
+			}
 
 			foreach ($cart_products as $product) {
-				$gifts = isset($gifts_map[(int)$product['product_id']]) ? $gifts_map[(int)$product['product_id']] : array();
+				$gifts = isset($gifts_by_pid[(int)$product['product_id']]) ? $gifts_by_pid[(int)$product['product_id']] : array();
 
 				foreach ($gifts as $gift) {
 					if ($product['quantity'] >= (int)$gift['minimum_quantity']) {
@@ -390,7 +398,9 @@ class ControllerCheckoutCart extends Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
-			if (!empty($product_info['call_for_price'])) {
+			$cfp_by_theme = $this->config->get('dockercart_theme_call_for_price_status') && ((float)$product_info['price'] <= 0);
+
+			if (!empty($product_info['call_for_price']) || $cfp_by_theme) {
 				$json['error']['call_for_price'] = $this->language->get('error_call_for_price');
 			}
 
@@ -429,7 +439,7 @@ class ControllerCheckoutCart extends Controller {
 
 					if (!$variant_info || empty($variant_info['status']) || (int)$variant_info['product_id'] !== (int)$product_id) {
 						$json['error']['variant'] = $this->language->get('error_variant_invalid');
-					} elseif ((float)$variant_info['quantity'] <= 0 && empty($variant_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+					} elseif ((float)$variant_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
 						$json['error']['stock'] = $this->language->get('error_stock');
 					}
 				}

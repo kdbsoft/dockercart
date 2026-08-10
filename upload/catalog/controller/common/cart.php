@@ -59,6 +59,11 @@ class ControllerCommonCart extends Controller {
 
 		$cart_products = $this->cart->getProducts();
 
+		// BXGY per-item discounts (mirror checkout/cart so the drawer shows
+		// the same discounted prices as the cart page).
+		$bxgy_lib = new Bxgy($this->registry);
+		$bxgy_discounts = $bxgy_lib->getPerProductDiscounts($cart_products);
+
 		// Bulk lookup for file-option upload names (one query instead of per option)
 		$upload_codes = array();
 
@@ -103,11 +108,27 @@ class ControllerCommonCart extends Controller {
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 				$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 
+				$bxgy_key = (int) $product['product_id'] . ':' . (int) ($product['variant_id'] ?? 0);
+				$bxgy_original_price_fmt = false;
+				$bxgy_discount_text = '';
+
+				if (isset($bxgy_discounts[$bxgy_key])) {
+					$per_unit_discount = $bxgy_discounts[$bxgy_key]['per_unit'];
+					$bxgy_original_price_fmt = $bxgy_discounts[$bxgy_key]['original_price_formatted'];
+					$bxgy_discount_text = $bxgy_discounts[$bxgy_key]['text'];
+					$line_discount = $per_unit_discount * min((int)$bxgy_discounts[$bxgy_key]['units'], (int)$product['quantity']);
+					$discounted_total = max(0, (float)$product['price'] * (int)$product['quantity'] - $line_discount);
+					$discounted = (int)$product['quantity'] > 0 ? $discounted_total / (int)$product['quantity'] : 0;
+					$unit_price = $this->tax->calculate($discounted, $product['tax_class_id'], $this->config->get('config_tax'));
+				}
+
 				$price = $this->currency->format($unit_price, $this->session->data['currency']);
 				$total = $this->currency->format($unit_price * $product['quantity'], $this->session->data['currency']);
 			} else {
 				$price = false;
 				$total = false;
+				$bxgy_original_price_fmt = false;
+				$bxgy_discount_text = '';
 			}
 
 			$data['products'][] = array(
@@ -121,6 +142,8 @@ class ControllerCommonCart extends Controller {
 				'quantity_step' => $this->formatQuantityValue(isset($product['quantity_step']) ? $product['quantity_step'] : 1),
 				'price'     => $price,
 				'total'     => $total,
+				'bxgy_original_price' => $bxgy_original_price_fmt,
+				'bxgy_discount_text'  => $bxgy_discount_text,
 				'href'      => $this->url->link('product/product', 'product_id=' . $product['product_id'])
 			);
 		}
@@ -146,9 +169,15 @@ class ControllerCommonCart extends Controller {
 
 		$cart_products = $this->cart->getProducts();
 		$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products, 'product_id'));
+		$gifts_map = $this->model_catalog_product->hydrateGiftVariants($gifts_map ? array_merge(...array_values($gifts_map)) : array());
+		$gifts_by_pid = array();
+
+		foreach ($gifts_map as $gift) {
+			$gifts_by_pid[(int)$gift['product_id']][] = $gift;
+		}
 
 		foreach ($cart_products as $product) {
-			$gifts = isset($gifts_map[(int)$product['product_id']]) ? $gifts_map[(int)$product['product_id']] : array();
+			$gifts = isset($gifts_by_pid[(int)$product['product_id']]) ? $gifts_by_pid[(int)$product['product_id']] : array();
 
 			foreach ($gifts as $gift) {
 				if ($product['quantity'] >= (int)$gift['minimum_quantity']) {
