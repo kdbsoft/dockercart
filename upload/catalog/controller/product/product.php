@@ -595,13 +595,24 @@ class ControllerProductProduct extends Controller {
 				$data['dc_full_price_value'] = 0.0;
 			}
 
+			if (!empty($product_info['call_for_price']) || ($this->config->get('dockercart_theme_call_for_price_status') && ($data['price'] === false || (float)$data['dc_base_price_value'] <= 0))) {
+				$data['you_save_amount'] = false;
+				$data['special'] = false;
+			}
+
 			if ($this->config->get('config_tax')) {
 				$data['tax'] = $this->currency->format($tax_price, $this->session->data['currency']);
 			} else {
 				$data['tax'] = false;
 			}
 
-			$discounts = $this->model_catalog_product->getProductDiscounts($product_id);
+			$discounts = array();
+
+			// Configurable products price by variant — quantity discounts are
+			// managed per variant, so product-level discounts must not apply.
+			if (empty($product_info['is_configurable'])) {
+				$discounts = $this->model_catalog_product->getProductDiscounts($product_id);
+			}
 
 			$data['discounts'] = array();
 
@@ -614,6 +625,7 @@ class ControllerProductProduct extends Controller {
 
 			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array((int)$product_id));
 			$gifts = isset($gifts_map[(int)$product_id]) ? $gifts_map[(int)$product_id] : array();
+			$gifts = $this->model_catalog_product->hydrateGiftVariants($gifts);
 
 			$data['gifts'] = array();
 
@@ -848,8 +860,9 @@ class ControllerProductProduct extends Controller {
 						}
 
 						$variant['discounts'][] = array(
-							'quantity' => (int)$vd['quantity'],
-							'price'    => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'])
+							'quantity'    => (int)$vd['quantity'],
+							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
@@ -936,8 +949,9 @@ class ControllerProductProduct extends Controller {
 						}
 
 						$default_variant['discounts'][] = array(
-							'quantity' => (int)$vd['quantity'],
-							'price'    => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'])
+							'quantity'    => (int)$vd['quantity'],
+							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
@@ -1083,6 +1097,8 @@ class ControllerProductProduct extends Controller {
 					$data['is_preorder'] = ((int)$selected_variant['quantity'] <= 0) && !empty($product_info['preorder']);
 					if (!$data['is_in_stock']) {
 						$data['stock'] = $this->language->get('text_out_of_stock');
+					} elseif ($data['is_preorder']) {
+						$data['stock'] = $this->language->get('text_preorder');
 					}
 
 					// Override heading and meta title with variant suffix

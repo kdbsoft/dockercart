@@ -498,6 +498,22 @@ class Cart
                     }
                 }
 
+                // Default variant per product: the product-level special only
+                // falls back to the default variant (mirrors the product page).
+                $default_variant_map = [];
+
+                $dv_query = $this->db->query(
+                    "SELECT product_id, default_variant_id FROM " .
+                        DB_PREFIX .
+                        "product_configurable WHERE product_id IN (" .
+                        $in .
+                        ") AND default_variant_id IS NOT NULL AND default_variant_id > 0",
+                );
+
+                foreach ($dv_query->rows as $row) {
+                    $default_variant_map[(int) $row["product_id"]] = (int) $row["default_variant_id"];
+                }
+
                 $vs_query = $this->db->query(
                     "SELECT variant_id, price FROM " .
                         DB_PREFIX .
@@ -833,6 +849,19 @@ class Cart
                         if ((float) $best_special < (float) $price) {
                             $price = (float) $best_special;
                         }
+                    } elseif (
+                        isset($product_special_map[(int) $cart["product_id"]])
+                        && isset($default_variant_map[(int) $cart["product_id"]])
+                        && (int) $default_variant_map[(int) $cart["product_id"]] === $variant_id
+                    ) {
+                        // The product-level special only applies to the default
+                        // variant (mirrors the product page); other variants
+                        // price by their own data.
+                        $best_product_special = (float) $product_special_map[(int) $cart["product_id"]][0]["price"];
+
+                        if ($best_product_special < (float) $price) {
+                            $price = $best_product_special;
+                        }
                     }
 
                     // Variant quantity discounts (DockerCart)
@@ -854,7 +883,12 @@ class Cart
                     if (isset($variant_discount_map[$variant_id])) {
                         foreach ($variant_discount_map[$variant_id] as $vd_row) {
                             if ((float) $vd_row["quantity"] <= $variant_discount_quantity) {
-                                $price = (float) $vd_row["price"];
+                                // Apply only when it beats the current price
+                                // (special / group price), mirroring the plain
+                                // product flow below.
+                                if ((float) $vd_row["price"] < (float) $price) {
+                                    $price = (float) $vd_row["price"];
+                                }
                                 break;
                             }
                         }
