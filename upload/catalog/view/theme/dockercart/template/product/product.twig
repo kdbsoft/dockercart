@@ -206,8 +206,8 @@
       <!-- Info -->
       <div>
         <div class="flex items-center gap-2 mb-3">
-          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-stock-instock="{{ stock_status_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="inline-flex items-center gap-1.5 text-[14px] font-bold {% if is_preorder is defined and is_preorder %}text-amber-700{% elseif is_in_stock %}text-emerald-700{% else %}text-gray-400{% endif %}">
-            <span class="dc-stock-dot w-2.5 h-2.5 rounded-full border-2 {% if is_in_stock %}bg-emerald-500 border-emerald-500{% else %}bg-transparent border-gray-300{% endif %}"></span><span class="dc-stock-text">{{ stock }}</span>
+          <span id="dc-stock-badge" data-stock-display="{{ config_stock_display ? '1' : '0' }}" data-text-instock="{{ text_instock }}" data-stock-instock="{{ stock_status_instock }}" data-text-preorder="{{ text_preorder }}" data-text-out-of-stock="{{ text_out_of_stock }}" class="inline-flex items-center gap-1.5 text-[14px] font-bold {% if is_preorder is defined and is_preorder %}text-amber-700{% elseif is_in_stock %}text-emerald-700{% else %}text-red-600{% endif %}">
+            <span class="dc-stock-dot w-2.5 h-2.5 rounded-full border-2 {% if is_in_stock %}bg-emerald-500 border-emerald-500{% else %}bg-red-500 border-red-500{% endif %}"></span><span class="dc-stock-text">{{ stock }}</span>
           </span>
           {% if is_discontinued is defined and is_discontinued %}
           <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-200 text-gray-600 text-[13px] font-bold">
@@ -268,7 +268,7 @@
             </div>
             {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default(''), timer_label_days: text_timer_days|default(''), timer_label_hours: text_timer_hours|default(''), timer_label_minutes: text_timer_minutes|default(''), timer_label_seconds: text_timer_seconds|default('') } %}
           {% endif %}
-        {% if you_save_amount or is_configurable %}
+        {% if not show_call_for_price and (you_save_amount or is_configurable) %}
         <div class="mt-1.5{% if not you_save_amount %} hidden{% endif %}" id="dc-you-save">
           <span class="text-md font-semibold text-green-600">{{ text_you_save }}: <span id="dc-you-save-amount">{{ you_save_amount }}</span></span>
         </div>
@@ -581,11 +581,11 @@
         {% set _attribute_index = _attribute_index + attribute_group.attribute|length %}
         {% set _group_visible_count = (6 - _group_start) > 0 ? min(attribute_group.attribute|length, 6 - _group_start) : 0 %}
         <div class="product-attribute-group mb-4 last:mb-0{% if _group_visible_count == 0 %} hidden{% endif %}">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">{{ attribute_group.name }}</p>
+          <p class="text-xs font-bold tracking-wider text-gray-500 mb-2">{{ attribute_group.name }}</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1.5">
             {% for attribute in attribute_group.attribute %}
             {% set _position = _group_start + loop.index0 + 1 %}
-            <div class="product-attribute-item rounded-lg border border-gray-100 px-2.5 py-2 text-xs leading-5{% if _position > 6 %} hidden{% endif %}">
+            <div class="product-attribute-item rounded-lg border border-gray-100 px-3 py-2.5 text-sm leading-6{% if _position > 6 %} hidden{% endif %}">
               <span class="text-gray-400">{{ attribute.name }}:</span> <span class="font-semibold text-gray-800">{{ attribute.text }}</span>
             </div>
             {% endfor %}
@@ -998,6 +998,29 @@ function dcUpdateSubtotal() {
   if (qty <= dcMinQty && dcMinQty == 1) { subEl.classList.add('hidden'); return; }
   var unit = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
   if (isNaN(unit)) { subEl.classList.add('hidden'); return; }
+
+  // Option adjustments sit on top of the base/sale price: currentPrice =
+  // base + options. The tiered quantity discount applies to the base price
+  // only (mirrors the cart), options are added afterwards.
+  var base = parseFloat(priceEl.dataset.salePrice || priceEl.dataset.basePrice || '0');
+  var optionAdjustment = 0;
+  if (base > 0) optionAdjustment = unit - base;
+
+  // Apply the current variant's tiered quantity discount (mirrors the cart):
+  // pick the best tier whose quantity threshold is met and that beats the
+  // current unit price.
+  var variant = window.dcCurrentVariant || null;
+  if (variant && Array.isArray(variant.discounts)) {
+    var best = null;
+    variant.discounts.forEach(function(d) {
+      var dv = parseFloat(d.price_value);
+      if (!isNaN(dv) && d.quantity <= qty && (best === null || d.quantity > best.quantity)) {
+        best = { quantity: d.quantity, price: dv };
+      }
+    });
+    if (best && best.price < base) unit = best.price + optionAdjustment;
+  }
+
   var total = dcFormatMoney(unit * qty);
   subEl.textContent = '{{ text_total }}' + ' ' + total;
   subEl.classList.remove('hidden');
