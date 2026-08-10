@@ -13,9 +13,7 @@
 	function variantInStock(v) {
 		if (matrix.preorder) return true;
 		var qty = parseFloat(v.quantity);
-		var subtract = v.subtract;
-		// subtract 0 = stock is not tracked; qty > 0 = in stock
-		return (subtract === 0 || subtract === '0' || (!isNaN(qty) && qty > 0));
+		return (!isNaN(qty) && qty > 0);
 	}
 
 	function variantHasValues(v, pairs) {
@@ -69,7 +67,7 @@
 	var skuEl = document.getElementById('dc-variant-model');
 	var originalSku = skuEl ? (skuEl.dataset.baseModel || skuEl.textContent) : '';
 	var isInitPhase = true;
-	var taxEl = document.querySelector('[id^="dc-unit-tax"]');
+	var taxEls = document.querySelectorAll('[id^="dc-unit-tax"]');
 	var discountsEl = document.getElementById('dc-variant-discounts');
 	var discountText = '{{ text_discount|e('js') }}';
 	var youSaveEl = document.getElementById('dc-you-save');
@@ -206,6 +204,13 @@
 	function updateYouSave(variant, hasSpecial) {
 		if (!youSaveEl || !youSaveAmountEl) return;
 
+		// Never show savings when the price is on request (call for price)
+		var isCfp = {{ show_call_for_price is defined and show_call_for_price ? 'true' : 'false' }};
+		if (isCfp) {
+			youSaveEl.classList.add('hidden');
+			return;
+		}
+
 		var save = 0;
 
 		if (hasSpecial && variant) {
@@ -227,6 +232,9 @@
 	}
 
 	function updateVariantUI(variant, preservePrice) {
+		// Expose the current variant so dcUpdateSubtotal can apply tiered
+		// quantity discounts to the subtotal (mirrors the cart).
+		window.dcCurrentVariant = variant;
 		if (variantInput) variantInput.value = variant ? variant.variant_id : '';
 
 		var hasSpecial = variant && variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from;
@@ -272,11 +280,11 @@
 			skuEl.textContent = (variant && (variant.model || variant.sku)) ? (variant.model || variant.sku) : originalSku;
 		}
 
-		// Tax
-		if (taxEl && variant && variant.tax_text) {
-			taxEl.textContent = '{{ text_tax|e('js') }} ' + variant.tax_text;
-		} else if (taxEl) {
-			taxEl.textContent = '';
+		// Tax (update every price container — regular and special variants of
+		// the block both carry a #dc-unit-tax element)
+		var taxText = (variant && variant.tax_text) ? '{{ text_tax|e('js') }} ' + variant.tax_text : '';
+		if (taxEls) {
+			taxEls.forEach(function(el) { el.textContent = taxText; });
 		}
 
 		// Quantity discounts
@@ -333,19 +341,26 @@
 			mainImgEl.src = defaultImgSrc;
 		}
 
-		if (variant && variant.quantity <= 0 && variant.subtract == 1) {
-			if (cartBtn) cartBtn.classList.add('hidden');
-			if (qtyWrapEl) qtyWrapEl.classList.add('hidden');
-			if (outOfStockEl) outOfStockEl.classList.remove('hidden');
+		if (variant && variant.quantity <= 0) {
+			var isPreorder = !!matrix.preorder;
+
+			if (cartBtn) cartBtn.classList.toggle('hidden', !isPreorder);
+			if (qtyWrapEl) qtyWrapEl.classList.toggle('hidden', !isPreorder);
+			if (outOfStockEl) outOfStockEl.classList.toggle('hidden', isPreorder);
 
 			// Update stock badge
 			if (stockBadgeEl) {
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
-				if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
-				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-gray-400';
+				if (isPreorder) {
+					if (stockText) stockText.textContent = stockBadgeEl.dataset.textPreorder || '';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-amber-700';
+				} else {
+					if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-red-600';
+				}
 				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
 				if (dot) {
-					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 bg-transparent border-gray-300';
+					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 ' + (isPreorder ? 'bg-amber-500 border-amber-500' : 'bg-red-500 border-red-500');
 				}
 			}
 		} else {
