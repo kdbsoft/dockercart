@@ -63,12 +63,9 @@ class BxgyTest extends TestCase
 			define('DIR_MODIFICATION', sys_get_temp_dir() . '/dctest_mod/');
 		}
 
-		if (!function_exists('modification')) {
-			function modification($file)
-			{
-				return $file;
-			}
-		}
+		// Global-scope helpers (modification() etc.) — must be loaded outside
+		// this namespace or the framework Loader/Model cannot see them.
+		require_once __DIR__ . '/../Checkout/global_functions.php';
 
 		$dbDriver = new \DB\MySQLi($host, $user, $pass, $name, $port);
 		require_once __DIR__ . '/../../../upload/system/library/config.php';

@@ -65,12 +65,9 @@ class OrderPricingTest extends TestCase
 			define('DIR_MODIFICATION', sys_get_temp_dir() . '/dctest_mod/');
 		}
 
-		if (!function_exists('modification')) {
-			function modification($file)
-			{
-				return $file;
-			}
-		}
+		// Global-scope helpers (modification() etc.) — must be loaded outside
+		// this namespace or the framework Loader/Model cannot see them.
+		require_once __DIR__ . '/../Checkout/global_functions.php';
 
 		$dbDriver = new \DB\MySQLi($host, $user, $pass, $name, $port);
 		require_once __DIR__ . '/../../../upload/system/library/config.php';
@@ -305,6 +302,42 @@ class OrderPricingTest extends TestCase
 		$this->assertTrue($p['bxgy_applied']);
 
 		self::$db->query("DELETE FROM " . DB_PREFIX . "product_bxgy WHERE product_id = '" . (int)self::$testProductId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)self::$testOrderId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)self::$testOrderId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_product_override WHERE order_id = '" . (int)self::$testOrderId . "'");
+	}
+
+	public function testBxgyRecalculatedOnTriggerQuantityChange(): void
+	{
+		// Rule: 2 triggers of product 1 -> 25% off reward product 2.
+		self::$db->query("INSERT IGNORE INTO " . DB_PREFIX . "product_bxgy SET product_id = '" . (int)self::$testProductId . "', reward_product_id = '" . (int)self::$testProductId2 . "', trigger_quantity = '2', discount_type = 'percentage', discount_value = '25.00', date_start = '0000-00-00', date_end = '0000-00-00', date_added = NOW()");
+
+		// Add trigger (qty 1) and reward lines.
+		$trigger_id = self::$model->addProductToOrder(self::$testOrderId, self::$testProductId, 1, []);
+		$reward_id = self::$model->addProductToOrder(self::$testOrderId, self::$testProductId2, 1, []);
+
+		$this->assertGreaterThan(0, $trigger_id);
+		$this->assertGreaterThan(0, $reward_id);
+
+		// 1 trigger < 2 -> no sets -> reward keeps its catalog price (150 special).
+		$reward_row = self::$db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_product_id = '" . (int)$reward_id . "'")->row;
+		$this->assertEquals(150.0, round((float)$reward_row['price'], 4));
+
+		// Bump trigger to qty 2 -> one set -> reward gets 25% off: 112.5.
+		self::$model->updateOrderProductQuantity($trigger_id, self::$testOrderId, 2);
+
+		$reward_row = self::$db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_product_id = '" . (int)$reward_id . "'")->row;
+		$this->assertEquals(112.5, round((float)$reward_row['price'], 4));
+		$this->assertEquals(112.5, round((float)$reward_row['total'], 4));
+
+		// Drop trigger back to qty 1 -> discount disappears again.
+		self::$model->updateOrderProductQuantity($trigger_id, self::$testOrderId, 1);
+
+		$reward_row = self::$db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_product_id = '" . (int)$reward_id . "'")->row;
+		$this->assertEquals(150.0, round((float)$reward_row['price'], 4));
+
+		self::$db->query("DELETE FROM " . DB_PREFIX . "product_bxgy WHERE product_id = '" . (int)self::$testProductId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)self::$testOrderId . "'");
 	}
 
 	public function testAddProductAddsGiftLineWhenMinimumMet(): void
@@ -324,6 +357,7 @@ class OrderPricingTest extends TestCase
 		$this->assertStringContainsString('gift', strtolower($gift['name']));
 
 		self::$db->query("DELETE FROM " . DB_PREFIX . "product_gift WHERE product_id = '" . (int)self::$testProductId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)self::$testOrderId . "'");
 	}
 
 	public function testAddProductSkipsGiftBelowMinimum(): void
@@ -340,5 +374,6 @@ class OrderPricingTest extends TestCase
 		$this->assertSame($before, $after);
 
 		self::$db->query("DELETE FROM " . DB_PREFIX . "product_gift WHERE product_id = '" . (int)self::$testProductId . "'");
+		self::$db->query("DELETE FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)self::$testOrderId . "'");
 	}
 }
