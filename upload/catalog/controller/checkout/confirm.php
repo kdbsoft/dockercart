@@ -233,11 +233,16 @@ class ControllerCheckoutConfirm extends Controller {
 				$price = (float) $product['price'];
 				$tax = $this->tax->getTax($product['price'], $product['tax_class_id']);
 
-				if (isset($bxgy_discounts[(int) $product['product_id']])) {
-					$per_unit_discount = $bxgy_discounts[(int) $product['product_id']]['discount_amount'];
+				$bxgy_key = (int) $product['product_id'] . ':' . (int) ($product['variant_id'] ?? 0);
 
-					if ($price > 0 && $per_unit_discount > 0) {
-						$new_price = max(0, $price - $per_unit_discount);
+				if (isset($bxgy_discounts[$bxgy_key])) {
+					$per_unit_discount = $bxgy_discounts[$bxgy_key]['per_unit'];
+					$units = (int) $bxgy_discounts[$bxgy_key]['units'];
+					$line_discount = $per_unit_discount * min($units, (int) $product['quantity']);
+
+					if ($price > 0 && $line_discount > 0) {
+						$new_price_total = max(0, $price * (int) $product['quantity'] - $line_discount);
+						$new_price = (int) $product['quantity'] > 0 ? $new_price_total / (int) $product['quantity'] : 0;
 						$tax = $tax * ($new_price / $price);
 						$price = $new_price;
 					}
@@ -260,6 +265,7 @@ class ControllerCheckoutConfirm extends Controller {
 
 			// Product Gifts
 			$this->load->model('catalog/product');
+			$pc = new ProductConfigurable($this->registry);
 
 			$cart_products_for_gifts = $this->cart->getProducts();
 			$gifts_map = $this->model_catalog_product->getProductGiftsByIds(array_column($cart_products_for_gifts, 'product_id'));
@@ -268,21 +274,37 @@ class ControllerCheckoutConfirm extends Controller {
 				$gifts = isset($gifts_map[(int)$cart_product['product_id']]) ? $gifts_map[(int)$cart_product['product_id']] : array();
 
 				foreach ($gifts as $gift) {
-					if ($cart_product['quantity'] >= (int)$gift['minimum_quantity']) {
-						$order_data['products'][] = array(
-							'product_id' => $gift['gift_product_id'],
-							'name'       => $gift['name'],
-							'model'      => '',
-							'option'     => array(),
-							'download'   => array(),
-							'quantity'   => 1,
-							'subtract'   => 0,
-							'price'      => 0,
-							'total'      => 0,
-							'tax'        => 0,
-							'reward'     => 0
-						);
+					if ($cart_product['quantity'] < (int)$gift['minimum_quantity']) {
+						continue;
 					}
+
+					$gift_variant = $pc->getGiftVariantData((int)$gift['gift_product_id']);
+
+					// Configurable gift products use their default variant; when
+					// no valid variant exists the gift line is skipped.
+					if ($pc->isConfigurable((int)$gift['gift_product_id']) && empty($gift_variant)) {
+						continue;
+					}
+
+					$gift_name = $gift['name'];
+
+					if (!empty($gift_variant)) {
+						$gift_name = $gift_variant['label'] !== '' ? $gift_name . ' (' . $gift_variant['label'] . ')' : $gift_name;
+					}
+
+					$order_data['products'][] = array(
+						'product_id' => $gift['gift_product_id'],
+						'name'       => $gift_name,
+						'model'      => isset($gift_variant['model']) ? $gift_variant['model'] : '',
+						'option'     => isset($gift_variant['option']) ? $gift_variant['option'] : array(),
+						'download'   => array(),
+						'quantity'   => 1,
+						'subtract'   => 0,
+						'price'      => 0,
+						'total'      => 0,
+						'tax'        => 0,
+						'reward'     => 0
+					);
 				}
 			}
 
