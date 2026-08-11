@@ -29,7 +29,8 @@ class ReviewCriteria {
 
 			$rating = (float)$value;
 
-			if ($rating < 1 || $rating > 5) {
+			// Ratings are whole numbers 1-5 only
+			if ($rating < 1 || $rating > 5 || $rating != (int)$rating) {
 				return 'rating';
 			}
 

@@ -2119,7 +2119,10 @@ class ControllerProductProduct extends Controller {
 				if (ReviewCriteria::hasRatingCriteria($criteria)) {
 					$rating = ReviewCriteria::computeOverallRating($criteria, $criteria_values);
 				} else {
-					if (empty($post['rating']) || $post['rating'] < 0 || $post['rating'] > 5) {
+					// Ratings are whole numbers 1-5 only
+					$rating_raw = isset($post['rating']) ? $post['rating'] : '';
+
+					if ($rating_raw === '' || !is_numeric($rating_raw) || (float)$rating_raw < 1 || (float)$rating_raw > 5 || (float)$rating_raw != (int)$rating_raw) {
 						$json['error'] = $this->language->get('error_rating');
 					} else {
 						$rating = (float)$post['rating'];

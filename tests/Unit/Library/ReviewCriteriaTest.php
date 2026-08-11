@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../../upload/system/library/review_criteria.php';
 class ReviewCriteriaTest extends TestCase {
 	public function testValidateRatingValue(): void {
 		$this->assertSame('', ReviewCriteria::validateValue('rating', '4'));
-		$this->assertSame('', ReviewCriteria::validateValue('rating', 4.5));
+		$this->assertSame('rating', ReviewCriteria::validateValue('rating', 4.5));
 		$this->assertSame('rating', ReviewCriteria::validateValue('rating', '7'));
 		$this->assertSame('rating', ReviewCriteria::validateValue('rating', 'abc'));
 		$this->assertSame('required', ReviewCriteria::validateValue('rating', '', ['required' => true]));
