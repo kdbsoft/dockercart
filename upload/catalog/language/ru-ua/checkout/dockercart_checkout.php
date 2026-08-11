@@ -27,6 +27,7 @@ $_["entry_lastname"] = "Фамилия";
 $_["entry_password"] = "Пароль";
 $_["entry_postcode"] = "Почтовый индекс";
 $_["entry_reward"] = "Бонусные баллы";
+$_["text_earn_total_reward"] = "Вы заработаете %s баллов за этот заказ";
 $_["entry_tax_id"] = "ИНН";
 $_["entry_telephone"] = "Телефон";
 $_["entry_voucher"] = "Подарочный сертификат";

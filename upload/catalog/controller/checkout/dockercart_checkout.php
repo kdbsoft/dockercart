@@ -410,6 +410,32 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $data["totals"] = $this->getCartTotals();
         $data["gifts"] = $this->getCartGifts();
 
+        // Reward points: what the customer will earn and what they can spend
+        $total_reward = 0;
+        $points_total = 0;
+
+        foreach ($this->cart->getProducts() as $reward_product) {
+            $total_reward += (int) $reward_product["reward"];
+            $points_total += (int) $reward_product["points"];
+        }
+
+        $data["total_reward"] = $total_reward;
+
+        if ($this->customer->isLogged()) {
+            $reward_balance = (int) $this->customer->getRewardPoints();
+            $data["reward_balance"] = $reward_balance;
+            $data["reward_max"] = $points_total > 0
+                ? min($reward_balance, $points_total)
+                : 0;
+            $data["reward_applied"] = isset($this->session->data["reward"])
+                ? (int) $this->session->data["reward"]
+                : 0;
+        } else {
+            $data["reward_balance"] = 0;
+            $data["reward_max"] = 0;
+            $data["reward_applied"] = 0;
+        }
+
         // Journal 3 detection
         $data["is_journal3"] = $this->isJournal3Theme();
 
@@ -448,6 +474,17 @@ class ControllerCheckoutDockercartCheckout extends Controller
             $this->language->get("entry_coupon") ?: "Enter promo code";
         $data["button_coupon"] =
             $this->language->get("button_apply_coupon") ?: "Apply";
+        $data["text_earn_total_reward"] =
+            $this->language->get("text_earn_total_reward") ?:
+            "You'll earn %s points on this order";
+        $data["text_reward_points"] =
+            $this->language->get("text_reward_points") ?:
+            "You have %s reward points available";
+        $data["button_apply_reward"] =
+            $this->language->get("button_apply_reward") ?: "Apply Points";
+        $data["text_reward_applied"] =
+            $this->language->get("text_reward_applied") ?:
+            "Reward points applied";
         $data["text_sub_total"] = "Subtotal";
         $data["text_tax"] = "Tax";
         $data["text_gift"] = $this->language->get("text_gift") ?: "Gift with Purchase";
