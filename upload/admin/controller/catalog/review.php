@@ -355,8 +355,8 @@ class ControllerCatalogReview extends Controller {
 				'name'            => $result['name'],
 				'author'          => $result['author'],
 				'author_raw'      => $result['author'],
-				'rating'          => $result['rating'],
-				'rating_raw'      => $result['rating'],
+				'rating'          => ReviewRating::format((float)$result['rating']),
+				'rating_raw'      => (string)(int)$result['rating'],
 				'verified'        => (int)$result['verified'],
 				'has_media'       => ((int)$result['image_count'] + (int)$result['video_count']) > 0,
 				'likes'           => (int)$result['likes'],
@@ -597,7 +597,8 @@ class ControllerCatalogReview extends Controller {
 		if (isset($this->request->post['rating'])) {
 			$data['rating'] = $this->request->post['rating'];
 		} elseif (!empty($review_info)) {
-			$data['rating'] = $review_info['rating'];
+			// oc_review.rating is decimal(3,1); whole ratings arrive as "5.0" — cast to int
+			$data['rating'] = (string)(int)$review_info['rating'];
 		} else {
 			$data['rating'] = '';
 		}
@@ -819,7 +820,7 @@ class ControllerCatalogReview extends Controller {
 				} else {
 					$this->model_catalog_review->updateReviewField($review_id, array('rating' => $val));
 					$json['success'] = true;
-					$json['value_html'] = number_format($val, 1, '.', '');
+					$json['value_html'] = ReviewRating::format($val);
 				}
 			} elseif ($field === 'verified') {
 				$val = (int)$value;

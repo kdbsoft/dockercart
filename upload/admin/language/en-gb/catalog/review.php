@@ -61,7 +61,7 @@ $_['tab_status']            = 'Status';
 $_['help_product']      = 'Start typing to search for a product';
 $_['help_images']       = 'Up to 3 images. Use the image manager to pick files from the store media library.';
 $_['help_video']        = 'Paste a YouTube ID / link, or a path to an MP4 file in the media library.';
-$_['help_rating']       = 'Overall rating (0-5, fractional allowed). When the group has rating criteria it is computed from their average.';
+$_['help_rating']       = 'Review score (1-5, whole number). When the group has rating criteria it is computed from their average.';
 $_['help_verified']     = 'Mark the review as a verified purchase.';
 
 // Error
@@ -69,7 +69,7 @@ $_['error_permission']  = 'Warning: You do not have permission to modify reviews
 $_['error_product']     = 'Product required!';
 $_['error_author']      = 'Author must be between 3 and 64 characters!';
 $_['error_text']        = 'Review Text must be at least 1 character!';
-$_['error_rating']      = 'Review rating required!';
+$_['error_rating']      = 'Rating must be a whole number from 1 to 5!';
 $_['error_invalid_date'] = 'Invalid date format!';
 // Expandable rows
 $_['text_review_setting'] = 'Review Settings';
