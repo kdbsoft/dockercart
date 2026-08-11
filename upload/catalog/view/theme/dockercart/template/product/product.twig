@@ -274,7 +274,11 @@
         </div>
         {% endif %}
         </div>
-        {% if points %}<p class="text-xs text-blue-600 mt-1">{{ text_points }} {{ points }}</p>{% endif %}
+        {% if points %}
+        <div class="mt-2 flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-50 rounded-xl px-3 py-2">
+          <i data-lucide="coins" class="w-4 h-4 text-blue-500"></i> {{ text_points }} {{ points }}
+        </div>
+        {% endif %}
         {% if discounts %}
         <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
         {% endif %}
@@ -334,7 +338,14 @@
         <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-lg text-blue-700 font-bold mt-2{% else %}hidden text-lg text-blue-700 font-bold mt-2{% endif %}"></p>
         {% endif %}
 
-        {% if reward %}<p class="text-xs text-gray-500 mt-2">{{ text_reward }} {{ reward }}</p>{% endif %}
+        {% if reward %}
+        <div class="mt-4 p-4 bg-teal-50 rounded-2xl">
+          <h3 class="text-sm font-bold text-teal-800 flex items-center gap-1.5 mb-2">
+            <i data-lucide="badge-percent" class="w-4 h-4"></i> {{ text_earn_reward_title }}
+          </h3>
+          <p class="text-sm font-semibold text-teal-700">{{ text_earn_reward|replace({'%s': reward}) }}</p>
+        </div>
+        {% endif %}
 
         <!-- Options + Cart form -->
         <div id="product">

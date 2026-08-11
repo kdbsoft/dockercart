@@ -75,6 +75,7 @@ $_["entry_coupon"] = "Coupon Code";
 $_["entry_voucher"] = "Gift Voucher";
 $_["entry_reward"] = "Reward Points";
 $_["text_reward_points"] = "You have %s reward points available";
+$_["text_earn_total_reward"] = "You'll earn %s points on this order";
 $_["button_apply_coupon"] = "Apply Coupon";
 $_["button_apply_voucher"] = "Apply Voucher";
 $_["button_apply_reward"] = "Apply Points";

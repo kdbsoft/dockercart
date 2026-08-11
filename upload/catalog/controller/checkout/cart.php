@@ -218,6 +218,14 @@ class ControllerCheckoutCart extends Controller {
 			$data['text_gift'] = $this->language->get('text_gift');
 			$data['text_free'] = $this->language->get('text_free');
 
+			// Reward points block strings (defined in checkout language file)
+			$this->load->language('checkout/dockercart_checkout');
+
+			$data['text_reward_points'] = $this->language->get('text_reward_points');
+			$data['button_apply_reward'] = $this->language->get('button_apply_reward');
+			$data['text_reward_applied'] = $this->language->get('text_reward_applied');
+			$data['button_remove'] = $this->language->get('button_remove');
+
 			// Totals
 			$this->load->model('setting/extension');
 
@@ -272,6 +280,35 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			$data['continue'] = '/';
+
+			// Total reward points the customer will earn for this order
+			$total_reward = 0;
+
+			foreach ($products as $product) {
+				$total_reward += (int)$product['reward'];
+			}
+
+			$data['total_reward'] = $total_reward;
+
+			// Reward points the customer can spend on this order
+			if ($this->customer->isLogged()) {
+				$reward_max = $this->customer->getRewardPoints();
+				$points_total = 0;
+
+				foreach ($products as $product) {
+					$points_total += (int)$product['points'];
+				}
+
+				if ($points_total > 0 && $reward_max > $points_total) {
+					$reward_max = $points_total;
+				}
+
+				$data['reward_max'] = $reward_max;
+				$data['reward_applied'] = isset($this->session->data['reward']) ? (int)$this->session->data['reward'] : 0;
+			} else {
+				$data['reward_max'] = 0;
+				$data['reward_applied'] = 0;
+			}
 
 			$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 

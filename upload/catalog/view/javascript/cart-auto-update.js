@@ -62,6 +62,22 @@ document.addEventListener('DOMContentLoaded', function() {
 			return false;
 		});
 	});
+
+	// Apply reward points
+	const applyRewardBtn = document.getElementById('apply-reward');
+	if (applyRewardBtn) {
+		applyRewardBtn.addEventListener('click', function() {
+			applyReward();
+		});
+	}
+
+	// Remove applied reward points
+	const removeRewardBtn = document.getElementById('remove-reward');
+	if (removeRewardBtn) {
+		removeRewardBtn.addEventListener('click', function() {
+			applyReward(0);
+		});
+	}
 });
 
 function parseQuantity(value, fallback = 0) {
@@ -241,6 +257,50 @@ function removeVoucher(voucherKey) {
 	.catch(error => {
 		console.error('Error removing voucher:', error);
 		showNotification('error', 'Ошибка при удалении сертификата');
+	});
+}
+
+/**
+ * Apply or remove reward points via AJAX
+ */
+function applyReward(points = null) {
+	const baseUrl = document.querySelector('base')?.getAttribute('href') || '/';
+	const input = document.getElementById('reward-input');
+
+	if (points === null) {
+		points = input ? parseInt(input.value, 10) : 0;
+		if (Number.isNaN(points) || points < 0) points = 0;
+	}
+
+	fetch(baseUrl + 'index.php?route=checkout/dockercart_checkout/reward', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'X-Requested-With': 'XMLHttpRequest'
+		},
+		body: `reward=${encodeURIComponent(points)}`
+	})
+	.then(response => response.json())
+	.then(json => {
+		if (json.error) {
+			showNotification('error', json.error);
+			return;
+		}
+		if (json.success) {
+			showNotification('success', json.success);
+		}
+		if (json.totals) {
+			updateCartTotals(json.totals);
+			if (json.total !== undefined) {
+				updateHeaderTotals(json.total);
+			}
+		}
+		// Reload the cart page so the reward block state (applied/removed) stays in sync
+		location.reload();
+	})
+	.catch(error => {
+		console.error('Error applying reward points:', error);
+		showNotification('error', 'Ошибка при применении баллов');
 	});
 }
 
