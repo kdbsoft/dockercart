@@ -45,7 +45,8 @@ small.text-muted svg { vertical-align: middle; }
                       <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}" class="sortable">{{ column_name }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }} sortable">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}" class="sortable">{{ column_model }}</a> {% endif %}</td>
                       <td class="text-left">{{ column_category }}</td>
-                      <td class="text-right">{% if sort == 'p.price' %} <a href="{{ sort_price }}" class="{{ order|lower }} sortable">{{ column_price }}</a> {% else %} <a href="{{ sort_price }}" class="sortable">{{ column_price }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'm.name' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }} sortable">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}" class="sortable">{{ column_manufacturer }}</a> {% endif %}</td>
+                      <td class="text-center">{{ column_store }}</td>
                       <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
                       <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
                     </tr>
@@ -79,15 +80,14 @@ small.text-muted svg { vertical-align: middle; }
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
-                    <td class="text-right">
-                      {% if product.special %}
-                        <span style="text-decoration: line-through;">
-                          <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
-                        </span><br/>
-                        <div class="text-danger">{{ product.special }}</div>
-                      {% else %}
-                        <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="price" data-value="{{ product.price_raw }}">{{ product.price }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
-                      {% endif %}
+                    <td class="text-left">
+                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="manufacturer" data-value="{{ product.manufacturer_id }}">
+                        {{ product.manufacturer ?: text_none }}
+                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge">{{ product.store_count }}</span>
                     </td>
                     <td class="text-right">
                       {% if product.has_options %}
@@ -129,7 +129,7 @@ small.text-muted svg { vertical-align: middle; }
                   {% endfor %}
                   {% else %}
                   <tr>
-                    <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                    <td class="text-center" colspan="8">{{ text_no_results }}</td>
                   </tr>
                   {% endif %}
                     </tbody>
@@ -165,12 +165,6 @@ $('#button-filter').on('click', function() {
 
 	if (filter_sku) {
 		url += '&filter_sku=' + encodeURIComponent(filter_sku);
-	}
-
-	var filter_price = $('input[name=\'filter_price\']').val();
-
-	if (filter_price) {
-		url += '&filter_price=' + encodeURIComponent(filter_price);
 	}
 
 	var filter_quantity_min = $('input[name=\'filter_quantity_min\']').val();
@@ -418,6 +412,48 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				});
 			},
 			error: function() {
+				$span.removeClass('editing'); $span.html($span.data('display'));
+			}
+		});
+	} else if (field === 'manufacturer') {
+		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_none }}</option>');
+		{% for manufacturer in manufacturers %}
+		$select.append('<option value="{{ manufacturer.manufacturer_id }}"' + (rawValue == {{ manufacturer.manufacturer_id }} ? ' selected' : '') + '>{{ manufacturer.name|e('js') }}</option>');
+		{% endfor %}
+		$span.html($select);
+		$select.focus();
+
+		var saved = false;
+
+		$select.on('change', function() {
+			saved = true;
+			var productId = $span.data('product-id');
+			var newValue = $(this).val();
+
+			$.ajax({
+				url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { product_id: productId, field: 'manufacturer', value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
+					} else {
+						$span.data('value', newValue);
+						$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+						lucide.createIcons({ nodes: [$span[0]] });
+					}
+				},
+				error: function() {
+					$span.removeClass('editing'); $span.html($span.data('display'));
+				}
+			});
+		});
+
+		$select.on('blur', function() {
+			if (!saved) {
 				$span.removeClass('editing'); $span.html($span.data('display'));
 			}
 		});

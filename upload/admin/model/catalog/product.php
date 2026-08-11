@@ -2423,11 +2423,13 @@ class ModelCatalogProduct extends Model
     public function getProducts($data = [])
     {
         $sql =
-            "SELECT p.*, pd.* FROM " .
+            "SELECT p.*, pd.*, m.name AS manufacturer_name FROM " .
             DB_PREFIX .
             "product p LEFT JOIN " .
             DB_PREFIX .
-            "product_description pd ON (p.product_id = pd.product_id)";
+            "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " .
+            DB_PREFIX .
+            "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
 
         $joins = "";
         $where =
@@ -2489,13 +2491,6 @@ class ModelCatalogProduct extends Model
                 "%'";
         }
 
-        if (!empty($data["filter_price"])) {
-            $where .=
-                " AND p.price LIKE '" .
-                $this->db->escape($data["filter_price"]) .
-                "%'";
-        }
-
         if (
             isset($data["filter_quantity_min"]) &&
             $data["filter_quantity_min"] !== ""
@@ -2543,10 +2538,6 @@ class ModelCatalogProduct extends Model
         }
 
         if (!empty($data["filter_manufacturer"])) {
-            $joins .=
-                " LEFT JOIN " .
-                DB_PREFIX .
-                "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
             $where .=
                 " AND m.name LIKE '%" .
                 $this->db->escape($data["filter_manufacturer"]) .
@@ -2586,7 +2577,7 @@ class ModelCatalogProduct extends Model
         $sort_data = [
             "pd.name",
             "p.model",
-            "p.price",
+            "m.name",
             "p.quantity",
             "p.status",
             "p.sort_order",
@@ -3143,7 +3134,9 @@ class ModelCatalogProduct extends Model
             DB_PREFIX .
             "product p LEFT JOIN " .
             DB_PREFIX .
-            "product_description pd ON (p.product_id = pd.product_id)";
+            "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " .
+            DB_PREFIX .
+            "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
 
         $joins = "";
         $where =
@@ -3205,13 +3198,6 @@ class ModelCatalogProduct extends Model
                 "%'";
         }
 
-        if (isset($data["filter_price"]) && !is_null($data["filter_price"])) {
-            $where .=
-                " AND p.price LIKE '" .
-                $this->db->escape($data["filter_price"]) .
-                "%'";
-        }
-
         if (
             isset($data["filter_quantity_min"]) &&
             $data["filter_quantity_min"] !== ""
@@ -3250,10 +3236,6 @@ class ModelCatalogProduct extends Model
         }
 
         if (!empty($data["filter_manufacturer"])) {
-            $joins .=
-                " LEFT JOIN " .
-                DB_PREFIX .
-                "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)";
             $where .=
                 " AND m.name LIKE '%" .
                 $this->db->escape($data["filter_manufacturer"]) .
@@ -3438,6 +3420,38 @@ class ModelCatalogProduct extends Model
                 "UPDATE " . DB_PREFIX . "product_description SET name = '" . $this->db->escape($name) . "' WHERE product_id = '" . (int)$product_id . "' AND language_id = '" . (int)$language_id . "'"
             );
         }
+    }
+
+    public function updateProductManufacturer($product_id, $manufacturer_id)
+    {
+        $this->db->query(
+            "UPDATE " . DB_PREFIX . "product SET manufacturer_id = '" . (int)$manufacturer_id . "', date_modified = NOW() WHERE product_id = '" . (int)$product_id . "'"
+        );
+    }
+
+    public function getProductStoreCounts(array $product_ids)
+    {
+        if (!$product_ids) {
+            return array();
+        }
+
+        $product_ids = array_map('intval', $product_ids);
+
+        $query = $this->db->query(
+            "SELECT product_id, COUNT(*) AS store_count FROM " .
+                DB_PREFIX .
+                "product_to_store WHERE product_id IN (" .
+                implode(',', $product_ids) .
+                ") GROUP BY product_id"
+        );
+
+        $store_counts = array();
+
+        foreach ($query->rows as $row) {
+            $store_counts[(int)$row['product_id']] = (int)$row['store_count'];
+        }
+
+        return $store_counts;
     }
 
     public function updateProductCategories($product_id, $category_ids)
