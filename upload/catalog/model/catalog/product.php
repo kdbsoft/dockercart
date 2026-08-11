@@ -529,6 +529,26 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
+		// Attach rating distribution (per-star counts) from the rating cache in
+		// one bulk query so listing cards can render an on-hover breakdown.
+		$ids_for_ratings = array_keys($product_data);
+
+		if ($ids_for_ratings) {
+			$rating_query = $this->db->query("SELECT product_id, distribution FROM " . DB_PREFIX . "product_rating WHERE product_id IN (" . implode(',', $ids_for_ratings) . ") AND review_count > 0");
+
+			foreach ($rating_query->rows as $rating_row) {
+				$pid = (int)$rating_row['product_id'];
+
+				if (!isset($product_data[$pid])) {
+					continue;
+				}
+
+				$distribution = json_decode((string)$rating_row['distribution'], true);
+
+				$product_data[$pid]['rating_distribution'] = is_array($distribution) ? $distribution : array();
+			}
+		}
+
 		return $product_data;
 	}
 

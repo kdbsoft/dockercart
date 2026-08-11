@@ -1369,7 +1369,7 @@ class ControllerProductProduct extends Controller {
 				}
 
 				if ($this->config->get('config_review_status')) {
-					$rating = (int)$result['rating'];
+					$rating = (float)$result['rating'];
 				} else {
 					$rating = false;
 				}
@@ -1472,7 +1472,7 @@ class ControllerProductProduct extends Controller {
 				}
 
 				if ($this->config->get('config_review_status')) {
-					$rating = (int)$result['rating'];
+					$rating = (float)$result['rating'];
 				} else {
 					$rating = false;
 				}
@@ -1575,7 +1575,7 @@ class ControllerProductProduct extends Controller {
 				}
 
 				if ($this->config->get('config_review_status')) {
-					$rating = (int)$result['rating'];
+					$rating = (float)$result['rating'];
 				} else {
 					$rating = false;
 				}

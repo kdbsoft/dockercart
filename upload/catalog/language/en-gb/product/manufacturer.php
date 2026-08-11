@@ -17,6 +17,7 @@ $_['text_preorder']      = 'Pre-Order';
 $_['text_out_of_stock']  = 'Out Of Stock';
 $_['text_manufacturer'] = 'Brand:';
 $_['text_reviews_word']   = 'reviews';
+$_['text_all_reviews']    = 'All reviews';
 $_['text_model']        = 'Product Code:';
 $_['text_points']       = 'Reward Points:';
 $_['text_price']        = 'Price:';

@@ -112,7 +112,7 @@ class ControllerProductCompare extends Controller {
 					'manufacturer' => $product_info['manufacturer'],
 					'availability' => $availability,
 					'minimum'      => $product_info['minimum'] > 0 ? $product_info['minimum'] : 1,
-					'rating'       => (int)$product_info['rating'],
+					'rating'       => (float)$product_info['rating'],
 					'reviews'      => review_count_label((int)$product_info['reviews'], $this->language->get('code')),
 					'weight'       => $this->weight->format($product_info['weight'], $product_info['weight_class_id']),
 					'length'       => $this->length->format($product_info['length'], $product_info['length_class_id']),

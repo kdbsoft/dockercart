@@ -36,6 +36,7 @@ $_['text_rating_desc'] = 'Рейтинг (найвищий)';
 $_['text_refine'] = 'Уточнити пошук';
 $_['text_shop_by'] = 'Обрати з';
 $_['text_reviews_word'] = 'відгуки';
+$_['text_all_reviews'] = 'Всі відгуки';
 $_['text_shop_all'] = 'Показати всі %s →';
 $_['text_sort'] = 'Сортувати за:';
 $_['text_subcategories'] = 'Підкатегорії';

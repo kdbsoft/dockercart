@@ -98,7 +98,7 @@ class ControllerAccountViewed extends Controller {
 				'price'       => $price,
 				'special'     => $special,
 				'discount'    => $discount_percent,
-				'rating'      => !empty($product_info['rating']) ? (int)$product_info['rating'] : 0,
+				'rating'      => !empty($product_info['rating']) ? (float)$product_info['rating'] : 0,
 				'reviews'     => !empty($product_info['reviews']) ? (int)$product_info['reviews'] : 0,
 				'price_raw'   => (float)$product_info['price'],
 				'call_for_price' => !empty($product_info['call_for_price']),

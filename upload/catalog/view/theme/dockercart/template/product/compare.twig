@@ -99,9 +99,10 @@
               <td class="px-4 py-3 text-center">
                 {% if product.rating %}
                 <div class="flex items-center justify-center gap-1">
-                  <div class="flex text-yellow-400">
+                  <div class="flex text-amber-500">
                     {% for i in 1..5 %}
-                    {% if product.rating >= i %}★{% else %}<span class="text-gray-300">★</span>{% endif %}
+                    {% set diff = product.rating - (i - 1) %}
+                    {% if diff >= 1 %}★{% elseif diff > 0 %}<span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: {{ (diff * 100) | round }}%">★</span></span>{% else %}<span class="text-gray-300">★</span>{% endif %}
                     {% endfor %}
                   </div>
                   <span class="text-xs text-gray-500 ml-1">({{ product.reviews }})</span>

@@ -429,7 +429,7 @@ class ControllerProductManufacturer extends Controller {
 				}
 
 				if ($this->config->get('config_review_status')) {
-					$rating = (int)$result['rating'];
+					$rating = (float)$result['rating'];
 				} else {
 					$rating = false;
 				}
@@ -463,6 +463,7 @@ class ControllerProductManufacturer extends Controller {
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 					'rating'      => $result['rating'],
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
+					'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -472,7 +473,8 @@ class ControllerProductManufacturer extends Controller {
 					'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 					'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 					'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
-					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url)
+					'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'] . $url),
+					'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 				);
 			}
 
@@ -633,6 +635,10 @@ class ControllerProductManufacturer extends Controller {
 
 			// short word for "reviews" (used in listing templates)
 			$data['text_reviews'] = $this->language->get('text_reviews_word');
+
+			// rating distribution popover on listing cards
+			$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+			$data['text_all_reviews'] = $this->language->get('text_all_reviews');
 			$data['text_model'] = $this->language->get('text_model');
 			$data['text_quantity'] = $this->language->get('text_quantity');
 
@@ -823,8 +829,9 @@ class ControllerProductManufacturer extends Controller {
 				'special'     => $special,
 				'discount'    => $discount_percent,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-				'rating'      => (int)$result['rating'],
+				'rating'      => (float)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -833,7 +840,8 @@ class ControllerProductManufacturer extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 					'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
-				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id'])
+				'href'        => $this->url->link('product/product', 'manufacturer_id=' . $result['manufacturer_id'] . '&product_id=' . $result['product_id']),
+				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -870,6 +878,8 @@ class ControllerProductManufacturer extends Controller {
 				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
 				'call_for_price_phone' => $this->config->get('config_telephone'),
 				'call_for_price_mode' => ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request',
+				'show_distribution' => (int)$this->config->get('config_review_show_distribution'),
+				'text_all_reviews' => $this->language->get('text_all_reviews'),
 			));
 		}
 
