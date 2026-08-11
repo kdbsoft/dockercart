@@ -5,6 +5,7 @@ $_['heading_title']          = 'Products';
 // Text
 $_['text_success']           = 'Success: You have modified the product!';
 $_['text_list']              = 'Product List';
+$_['text_none']              = 'None';
 $_['text_min']               = 'Min';
 $_['text_max']               = 'Max';
 $_['text_add']               = 'Add Product';
@@ -51,7 +52,8 @@ $_['column_name']            = 'Product';
 $_['column_category']        = 'Categories';
 $_['column_model']           = 'Product Code';
 $_['column_image']           = 'Image';
-$_['column_price']           = 'Price';
+$_['column_manufacturer']    = 'Manufacturer';
+$_['column_store']           = 'Stores';
 $_['column_quantity']        = 'Quantity';
 $_['column_status']          = 'Status';
 $_['column_action']          = 'Action';
