@@ -8,6 +8,11 @@ dist/
 node_modules/
 /.zed/
 
+# Agent/tool local-only dirs
+.opencode/
+.commandcode/
+AGENTS.md
+
 # Config and Htaccess Files
 /upload/.htaccess
 /upload/config.php
@@ -62,6 +67,9 @@ export-yml-[0-9]*-*.xml
 # PHPUnit cache
 .phpunit.cache/
 .php-cs-fixer.cache
+
+# Local test suites (not part of the repo test suite in ./tests/)
+/upload/tests/
 
 # IDE Project files
 /.idea
