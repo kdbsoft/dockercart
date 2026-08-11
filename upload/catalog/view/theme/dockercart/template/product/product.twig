@@ -280,10 +280,27 @@
         </div>
         {% endif %}
         {% if discounts %}
-        <div class="mt-2 space-y-0.5">{% for discount in discounts %}<p class="text-xs text-gray-500">{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</p>{% endfor %}</div>
+        <div class="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/60 overflow-hidden">
+          <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 border-b border-emerald-100 flex items-center gap-1.5">
+            <i data-lucide="badge-percent" class="w-3.5 h-3.5"></i>{{ text_quantity_discount }}
+          </div>
+          <div class="divide-y divide-emerald-100">
+          {% for discount in discounts %}
+            <div class="flex items-center justify-between gap-3 px-3 py-2">
+              <span class="text-sm text-gray-600">{{ discount.quantity }}{{ text_discount }}</span>
+              <span class="text-sm font-bold text-emerald-700 whitespace-nowrap">{{ discount.price }}</span>
+            </div>
+          {% endfor %}
+          </div>
+        </div>
         {% endif %}
         {% if is_configurable %}
-        <div id="dc-variant-discounts" class="mt-2 space-y-0.5 hidden"></div>
+        <div id="dc-variant-discounts" class="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/60 overflow-hidden hidden">
+          <div class="px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 border-b border-emerald-100 flex items-center gap-1.5">
+            <i data-lucide="badge-percent" class="w-3.5 h-3.5"></i>{{ text_quantity_discount }}
+          </div>
+          <div id="dc-variant-discounts-list" class="divide-y divide-emerald-100"></div>
+        </div>
         {% endif %}
         {% if gifts %}
         <div class="mt-4 p-4 bg-amber-50 rounded-2xl">

@@ -20,6 +20,7 @@ $_['text_day'] = 'день';
 $_['text_delivery'] = 'Доставка';
 $_['text_delivery_desc'] = 'Бесплатная доставка';
 $_['text_discount'] = ' или более ';
+$_['text_quantity_discount'] = 'Скидки от количества';
 $_['text_error'] = 'Товар не найден!';
 $_['text_instock'] = 'В наличии';
 $_['text_preorder'] = 'Предзаказ';
