@@ -92,7 +92,9 @@
                   </ul>
                   {% endif %}
                   {% if product.reward %}
-                  <p class="text-xs text-blue-500 mt-0.5">{{ product.reward }}</p>
+                  <p class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg px-2 py-1">
+                    <i data-lucide="coins" class="w-3.5 h-3.5 text-blue-500"></i> {{ product.reward }}
+                  </p>
                   {% endif %}
                   {% if product.model %}<p class="text-xs text-gray-400 mt-0.5">{{ text_model }} {{ product.model }}</p>{% endif %}
                   {# Unit price – mobile #}
@@ -205,6 +207,33 @@
         <div class="w-full lg:w-80 xl:w-96 flex-shrink-0">
           <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sticky top-4">
             <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_cart_total }}</p>
+
+            {% if total_reward > 0 %}
+            <div class="mb-4 p-3 bg-teal-50 rounded-xl flex items-start gap-2.5">
+              <i data-lucide="badge-percent" class="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5"></i>
+              <p class="text-xs font-semibold text-teal-700">{{ text_earn_total_reward|replace({'%s': total_reward}) }}</p>
+            </div>
+            {% endif %}
+
+            {% if reward_max > 0 %}
+            <div class="mb-4 p-3 bg-blue-50 rounded-xl">
+              <p class="text-xs font-semibold text-blue-700 mb-2">{{ text_reward_points|replace({'%s': reward_max}) }}</p>
+              <div class="flex gap-2 items-stretch">
+                <input type="number" name="reward" id="reward-input" min="0" max="{{ reward_max }}" value="{{ reward_applied }}"
+                  class="flex-1 min-w-0 w-20 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                <button type="button" id="apply-reward" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition text-sm whitespace-nowrap">
+                  {{ button_apply_reward }}
+                </button>
+              </div>
+              {% if reward_applied > 0 %}
+              <div class="mt-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-blue-700">{{ text_reward_applied }}</span>
+                <button type="button" id="remove-reward" class="text-xs font-medium text-blue-600 hover:text-blue-800 underline">{{ button_remove }}</button>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+
             <div class="space-y-2 divide-y divide-gray-50" data-cart-totals>
               {% for total in totals %}
               <div class="flex items-center justify-between py-2 {% if loop.last %}pt-3{% endif %}" data-total-row>

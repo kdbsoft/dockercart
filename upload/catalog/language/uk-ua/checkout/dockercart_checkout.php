@@ -27,6 +27,7 @@ $_["entry_lastname"] = "Прізвище";
 $_["entry_password"] = "Пароль";
 $_["entry_postcode"] = "Поштовий індекс";
 $_["entry_reward"] = "Бонусні бали";
+$_["text_earn_total_reward"] = "Ви заробите %s балів за це замовлення";
 $_["entry_tax_id"] = "Податковий ідентифікатор";
 $_["entry_telephone"] = "Телефон";
 $_["entry_voucher"] = "Подарунковий сертифікат";
