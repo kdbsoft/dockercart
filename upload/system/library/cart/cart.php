@@ -898,6 +898,17 @@ class Cart
                     if (isset($variant_cg_price_map[$variant_id]) && $variant_cg_price_map[$variant_id] > 0) {
                         $has_variant_group_price = true;
                     }
+
+                    // Global % customer group discount/markup applies to variants
+                    // the same way it applies to plain products below (and on
+                    // the product page), unless a per-variant group price is set.
+                    if ($has_variant_group_price) {
+                        // Per-variant group price set — skip global % discount/markup
+                    } elseif ($customer_group_discount > 0) {
+                        $price *= (100 - $customer_group_discount) / 100;
+                    } elseif ($customer_group_markup > 0) {
+                        $price *= (100 + $customer_group_markup) / 100;
+                    }
                 }
 
                 if (!$variant_id) {

@@ -1325,10 +1325,16 @@ class ModelSaleOrder extends Model {
 		$variant_id = 0;
 		$variant_sku = '';
 		$model = $product_info['model'];
-		$price = (float)$product_info['price'];
 		$option_price = 0.0;
 		$stock = (float)$product_info['quantity'];
 		$subtract = (bool)$product_info['subtract'];
+
+		// Use the RAW catalog price (not the normalized one from getProduct(),
+		// which already applied the group discount/markup): applyCatalogPricingToPrice
+		// applies the full storefront pricing chain itself, and feeding it an
+		// already-discounted price would apply the group percent twice.
+		$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
+		$price = (float)($raw_price_query->num_rows ? $raw_price_query->row['price'] : $product_info['price']);
 
 		// DockerCart: catalog pricing (customer group price / quantity discount /
 		// special / group percent) applies to plain products as on the storefront.
@@ -1406,17 +1412,34 @@ class ModelSaleOrder extends Model {
 				if ($customer_group_id) {
 					$cg_price = $pc->getVariantCustomerGroupPrice($variant_id, $customer_group_id);
 
+					// The global % group discount/markup applies to the variant
+					// special/discount only when no per-variant group price is
+					// set (mirrors the storefront product page and cart).
+					$cg_multiplier = 1.0;
+
+					if ($cg_price === null || $cg_price <= 0) {
+						$cg_multiplier = $this->getCustomerGroupMultiplier($customer_group_id);
+					}
+
 					if ($cg_price !== null && $cg_price > 0) {
 						$price = $cg_price;
 					}
 
 					$special_price = $pc->getVariantSpecialPrice($variant_id, $customer_group_id);
 
+					if ($special_price !== null) {
+						$special_price = $special_price * $cg_multiplier;
+					}
+
 					if ($special_price !== null && $special_price < $price) {
 						$price = $special_price;
 					}
 
 					$discount_price = $pc->getVariantDiscountPrice($variant_id, $customer_group_id, $quantity);
+
+					if ($discount_price !== null) {
+						$discount_price = $discount_price * $cg_multiplier;
+					}
 
 					if ($discount_price !== null && $discount_price < $price) {
 						$price = $discount_price;
@@ -1682,7 +1705,11 @@ class ModelSaleOrder extends Model {
 			return 0.0;
 		}
 
-		$price = (float)$product_info['price'];
+		// Use the RAW catalog price: applyCatalogPricingToPrice applies the full
+		// storefront pricing chain itself (getProduct() already normalized the
+		// group discount/markup, which would double-apply).
+		$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
+		$price = (float)($raw_price_query->num_rows ? $raw_price_query->row['price'] : $product_info['price']);
 
 		// Plain product: catalog pricing (group price / discount / special).
 		if ($variant_id <= 0) {
@@ -1710,11 +1737,24 @@ class ModelSaleOrder extends Model {
 		if ($customer_group_id) {
 			$cg_price = $pc->getVariantCustomerGroupPrice((int)$variant_id, $customer_group_id);
 
+			// The global % group discount/markup applies to the variant
+			// special/discount only when no per-variant group price is set
+			// (mirrors the storefront product page and cart).
+			$cg_multiplier = 1.0;
+
+			if ($cg_price === null || $cg_price <= 0) {
+				$cg_multiplier = $this->getCustomerGroupMultiplier($customer_group_id);
+			}
+
 			if ($cg_price !== null && $cg_price > 0) {
 				$price = $cg_price;
 			}
 
 			$special_price = $pc->getVariantSpecialPrice((int)$variant_id, $customer_group_id);
+
+			if ($special_price !== null) {
+				$special_price = $special_price * $cg_multiplier;
+			}
 
 			if ($special_price !== null && $special_price < $price) {
 				$price = $special_price;
@@ -1722,8 +1762,34 @@ class ModelSaleOrder extends Model {
 
 			$discount_price = $pc->getVariantDiscountPrice((int)$variant_id, $customer_group_id, (float)$quantity);
 
+			if ($discount_price !== null) {
+				$discount_price = $discount_price * $cg_multiplier;
+			}
+
 			if ($discount_price !== null && $discount_price < $price) {
 				$price = $discount_price;
+			}
+		}
+
+		// Product-level special only applies to the default variant of a
+		// configurable product (mirrors the storefront cart and product page).
+		if ($customer_group_id) {
+			$default_query = $this->db->query("SELECT default_variant_id FROM " . DB_PREFIX . "product_configurable WHERE product_id = '" . (int)$product_id . "' AND default_variant_id IS NOT NULL AND default_variant_id > 0");
+
+			if ($default_query->num_rows && (int)$default_query->row['default_variant_id'] === (int)$variant_id) {
+				$special_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
+
+				if ($special_query->num_rows) {
+					$special_price = (float)$special_query->row['price'];
+
+					if ($cg_multiplier != 1.0) {
+						$special_price = $special_price * $cg_multiplier;
+					}
+
+					if ($special_price < $price) {
+						$price = $special_price;
+					}
+				}
 			}
 		}
 
@@ -1764,6 +1830,54 @@ class ModelSaleOrder extends Model {
 	}
 
 	/**
+	 * Global customer group % discount/markup multiplier, read from the
+	 * customer_group row (mirrors the storefront startup). Returns 1.0 when
+	 * the group has no discount/markup.
+	 *
+	 * @param int $customer_group_id
+	 * @return float
+	 */
+	private function getCustomerGroupMultiplier($customer_group_id) {
+		$multiplier = 1.0;
+
+		if (!$customer_group_id) {
+			return $multiplier;
+		}
+
+		$group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+
+		if ($group_query->num_rows) {
+			$customer_group_discount = (float)$group_query->row['discount_percent'];
+
+			if ($customer_group_discount < 0) {
+				$customer_group_discount = 0;
+			} elseif ($customer_group_discount > 100) {
+				$customer_group_discount = 100;
+			}
+
+			$customer_group_markup = (float)$group_query->row['markup_percent'];
+
+			if ($customer_group_markup < 0) {
+				$customer_group_markup = 0;
+			} elseif ($customer_group_markup > 100) {
+				$customer_group_markup = 100;
+			}
+
+			if ($customer_group_discount > 0 && $customer_group_markup > 0) {
+				$customer_group_markup = 0;
+			}
+
+			if ($customer_group_discount > 0) {
+				$multiplier = (100 - $customer_group_discount) / 100;
+			} elseif ($customer_group_markup > 0) {
+				$multiplier = (100 + $customer_group_markup) / 100;
+			}
+		}
+
+		return $multiplier;
+	}
+
+	/**
 	 * Applies the storefront catalog pricing rules to a base unit price:
 	 * per-product customer group price, quantity discount, special, then the
 	 * group-wide discount/markup percent (skipped when a per-product group
@@ -1771,7 +1885,7 @@ class ModelSaleOrder extends Model {
 	 *
 	 * @return array{price: float, applied: bool}
 	 */
-	private function applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $base_price) {
+	public function applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $base_price) {
 		$price = (float)$base_price;
 		$applied = false;
 

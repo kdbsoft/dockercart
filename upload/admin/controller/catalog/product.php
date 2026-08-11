@@ -2672,7 +2672,27 @@ class ControllerCatalogProduct extends Controller {
 					$product_id = (int)$result['product_id'];
 					$is_configurable = !empty($configurable_map[$product_id]);
 
-					$price_text = $this->currency->format($result['price'], $format_currency, $currency_value);
+					// The search results are normalized for the admin's default
+					// customer group; when the picker targets a specific order
+					// customer group, re-apply the storefront catalog pricing for
+					// that group so the displayed price matches what will be
+					// charged (mirrors sale/order calculateProductPricing()).
+					$display_price = (float)$result['price'];
+
+					if (!$is_configurable && $customer_group_id > 0) {
+						$this->load->model('sale/order');
+
+						$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
+						$raw_price = $raw_price_query->num_rows ? (float)$raw_price_query->row['price'] : $display_price;
+
+						$catalog_pricing = $this->model_sale_order->applyCatalogPricingToPrice($product_id, 0, 1, $customer_group_id, $raw_price);
+
+						if ($catalog_pricing['applied']) {
+							$display_price = $catalog_pricing['price'];
+						}
+					}
+
+					$price_text = $this->currency->format($display_price, $format_currency, $currency_value);
 
 					$price_min = 0.0;
 					$price_max = 0.0;
