@@ -46,6 +46,7 @@ $_['button_bundle_add'] = 'Добавить комплект в корзину';
 $_['text_returns'] = 'Возвраты';
 $_['text_returns_desc'] = 'Возврат в течение 14 дней';
 $_['text_reviews'] = '%s отзывов';
+$_['text_all_reviews'] = 'Все отзывы';
 $_['text_reward'] = 'Бонусные баллы:';
 $_['text_earn_reward_title'] = 'Бонус за покупку';
 $_['text_earn_reward'] = 'Вы получите %s баллов за эту покупку';

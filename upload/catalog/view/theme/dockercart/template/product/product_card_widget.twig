@@ -1,6 +1,18 @@
 {# Shared product card for widget modules (latest, bestseller, featured, special, related) #}
-<div class="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col {{ card_extra|default('') }}" data-id="{{ product.product_id }}" data-href="{{ product.href }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
-  <div class="relative overflow-hidden aspect-square bg-gray-50">
+<style>
+  .dc-rating-number { color: #111827; letter-spacing: -.06em; }
+  .dc-dist-bar { height: 8px; border-radius: 9999px; background: #f3f4f6; overflow: hidden; }
+  .dc-dist-bar > span { display: block; height: 100%; border-radius: 9999px; background: #f59e0b; }
+  /* In carousels the popover is positioned by JS (fixed, detached into body)
+     so it never affects the track's scroll size; hidden until a star block is
+     hovered. position:fixed is set inline by JS. */
+  .dc-carousel .dc-rating-popover { display: none; }
+  .dc-carousel .dc-rating-popover.dc-rating-popover--open { display: block; z-index: 60; }
+  .dc-rating-popover, .dc-rating-popover * { cursor: auto; }
+  .dc-rating-popover a { cursor: pointer; }
+</style>
+<div class="product-card group bg-white rounded-2xl overflow-visible border border-gray-100 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col relative hover:z-30 {{ card_extra|default('') }}" data-id="{{ product.product_id }}" data-href="{{ product.href }}" data-rating="{{ product.rating is defined ? product.rating : 0 }}" data-model="{{ product.model is defined ? product.model : '' }}" data-brand="{{ product.manufacturer is defined ? product.manufacturer : '' }}" data-description="{{ product.description|striptags|e('html_attr') }}" data-in-wishlist="{{ product.in_wishlist is defined ? product.in_wishlist : 0 }}" data-stock="{{ (product.stock is defined ? product.stock : '')|e('html_attr') }}" data-is-in-stock="{{ product.is_in_stock ? 1 : 0 }}" data-minimum="{{ product.minimum|default(1) }}" data-call-for-price="{{ (product.call_for_price is defined and product.call_for_price) or (call_for_price_status is defined and call_for_price_status and call_for_price_phone is defined and call_for_price_phone and product.price_raw is defined and product.price_raw <= 0) ? 1 : 0 }}">
+  <div class="relative overflow-hidden aspect-square bg-gray-50 rounded-t-2xl">
     <a href="{{ product.href }}">
       <img src="{{ product.thumb is not empty ? product.thumb : 'image/no_image.png' }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
     </a>
@@ -28,14 +40,43 @@
     <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug mb-2 flex-1 line-clamp-2"><a href="{{ product.href }}" class="hover:text-{{ accent_color|default('blue-600') }} transition">{{ product.name }}</a></h3>
     {% if product.rating is defined and product.rating %}
     <div class="flex items-center gap-1 mb-3">
-      <div class="flex text-xs">
-        {% for i in 1..5 %}
-          {% if product.rating >= i %}
-            <span class="text-amber-400">★</span>
-          {% else %}
-            <span class="text-gray-300">★</span>
-          {% endif %}
-        {% endfor %}
+      <div class="dc-rating-hover relative cursor-pointer">
+        <div class="flex text-xs">
+          {% for i in 1..5 %}
+            {% set diff = product.rating - (i - 1) %}
+            {% if diff >= 1 %}
+              <span class="text-amber-500">★</span>
+            {% elseif diff > 0 %}
+              <span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: {{ (diff * 100) | round }}%">★</span></span>
+            {% else %}
+              <span class="text-gray-300">★</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if show_distribution is defined and show_distribution and product.rating_distribution is defined and product.rating_distribution is not empty and product.reviews is defined and product.reviews %}
+        <div class="dc-rating-popover cursor-auto">
+          <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/70 ring-1 ring-gray-100 p-4 w-60 cursor-auto">
+            <div class="flex items-baseline gap-1.5 mb-3">
+              <span class="dc-rating-number text-xl font-extrabold leading-none">{{ product.rating }}</span>
+              <span class="text-xs text-gray-400">/ 5</span>
+              <span class="text-xs font-semibold text-gray-500 ml-auto">{{ review_count_label(product.reviews) }}</span>
+            </div>
+            <div>
+              {% for i in 5..1 %}
+                {% set count = product.rating_distribution[i] is defined ? product.rating_distribution[i] : 0 %}
+                {% set pct = product.reviews > 0 ? (count * 100 / product.reviews) : 0 %}
+                <div class="flex items-center gap-2 text-xs text-gray-500 py-0.5">
+                  <span class="w-4 flex-shrink-0 tabular-nums">{{ i }}</span>
+                  <span class="text-[10px] text-amber-500 leading-none">★</span>
+                  <div class="dc-dist-bar flex-1"><span style="width: {{ pct | round }}%"></span></div>
+                  <span class="w-6 text-right tabular-nums text-gray-400">{{ count }}</span>
+                </div>
+              {% endfor %}
+            </div>
+            <a href="{{ product.reviews_url is defined and product.reviews_url ? product.reviews_url : product.href }}" class="w-full inline-flex items-center justify-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 mt-3">{{ text_all_reviews|default('') }}<i data-lucide="chevron-right" width="14" height="14"></i></a>
+          </div>
+        </div>
+        {% endif %}
       </div>
       {% if product.reviews is defined %}<span class="text-[10px] text-gray-400 ml-1">{{ review_count_label(product.reviews|default(0)) }}</span>{% endif %}
     </div>

@@ -181,9 +181,117 @@
     wrapper.addEventListener('pointercancel', onUp);
   }
 
+  /**
+   * Rating distribution popovers inside carousels.
+   *
+   * The popover lives in the DOM but is display:none by default, so it never
+   * affects the track's scroll size (no scrollbars). On hover it is shown as
+   * position: fixed, measured from the viewport, so the track's
+   * overflow-x: auto cannot clip it.
+   */
+  function initRatingPopovers(carousel) {
+    var track = carousel.querySelector('.dc-carousel-track');
+    if (!track) return;
+
+    track.querySelectorAll('.dc-rating-hover').forEach(function (hover) {
+      var popover = hover.querySelector('.dc-rating-popover');
+      if (!popover) return;
+
+      // Where the popover lives in the card markup; always restored here on hide
+      var home = popover.parentNode;
+      var homeNext = popover.nextSibling;
+
+      var restore = function () {
+        if (popover.parentNode !== home) {
+          if (homeNext) {
+            home.insertBefore(popover, homeNext);
+          } else {
+            home.appendChild(popover);
+          }
+        }
+      };
+
+      var hideTimer = null;
+
+      var cancelHide = function () {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+      };
+
+      var hide = function () {
+        cancelHide();
+        popover.classList.remove('dc-rating-popover--open');
+        popover.style.position = '';
+        popover.style.zIndex = '';
+        popover.style.left = '';
+        popover.style.top = '';
+        popover.style.visibility = '';
+        restore();
+      };
+
+      // The popover is detached into <body>, so moving from the stars onto it
+      // fires mouseleave on the stars. Delay the hide and cancel it when the
+      // pointer actually enters the popover.
+      var scheduleHide = function () {
+        cancelHide();
+        hideTimer = setTimeout(hide, 150);
+      };
+
+      hover.addEventListener('mouseenter', function () {
+        cancelHide();
+        var rect = hover.getBoundingClientRect();
+
+        // Detach into <body>: the card has a hover transform (scale), which
+        // would otherwise turn position:fixed into a card-relative layout.
+        // z-index must be inline: the popover leaves .dc-carousel, so the
+        // scoped CSS rule no longer matches, and the hovered card (z-30)
+        // would otherwise cover it.
+        document.body.appendChild(popover);
+        popover.style.position = 'fixed';
+        popover.style.zIndex = '60';
+
+        // Measure first: display:block with visibility:hidden at 0,0 (fixed
+        // so it never affects the track), then position and reveal.
+        popover.style.left = '0px';
+        popover.style.top = '0px';
+        popover.classList.add('dc-rating-popover--open');
+        popover.style.visibility = 'hidden';
+
+        var width = popover.offsetWidth || 240;
+        var height = popover.offsetHeight || 200;
+
+        // Popover sits below the stars, centered horizontally (like everywhere
+        // else on the site); flip above only when there is no room below.
+        var left = rect.left + rect.width / 2 - width / 2;
+        var viewport = document.documentElement.clientWidth;
+        left = Math.max(8, Math.min(left, viewport - width - 8));
+
+        var top = rect.bottom + 8;
+        if (top + height > document.documentElement.clientHeight - 8) {
+          // Not enough room below: flip above the stars
+          top = rect.top - height - 8;
+        }
+
+        popover.style.left = left + 'px';
+        popover.style.top = Math.max(8, top) + 'px';
+        popover.style.visibility = '';
+      });
+
+      hover.addEventListener('mouseleave', scheduleHide);
+      popover.addEventListener('mouseenter', cancelHide);
+      popover.addEventListener('mouseleave', scheduleHide);
+
+      window.addEventListener('scroll', hide, { passive: true });
+      window.addEventListener('resize', hide, { passive: true });
+    });
+  }
+
   function boot() {
     var carousels = document.querySelectorAll('.dc-carousel');
     carousels.forEach(initCarousel);
+    carousels.forEach(initRatingPopovers);
 
     document.querySelectorAll('.brands-track').forEach(initBrandMarquee);
   }

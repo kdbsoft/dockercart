@@ -416,20 +416,26 @@
     },
 
     /**
-     * Render star rating HTML
+     * Render star rating HTML with half-star support (e.g. 4.5 shows four
+     * full stars plus one partially filled star).
      * @private
      */
     _renderStars: function(rating = 0) {
       let html = '';
-      const full = Math.floor(rating);
 
-      for (let i = 0; i < 5; i++) {
-        if (i < full) {
-          html += '<span class="text-amber-400">★</span>';
+      for (let i = 1; i <= 5; i++) {
+        const diff = rating - (i - 1);
+
+        if (diff >= 1) {
+          html += '<span class="text-amber-500">★</span>';
+        } else if (diff > 0) {
+          const pct = Math.round(diff * 100);
+          html += '<span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: ' + pct + '%">★</span></span>';
         } else {
           html += '<span class="text-gray-300">★</span>';
         }
       }
+
       return html;
     },
 

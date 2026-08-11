@@ -5,6 +5,47 @@
     <span class="dc-rating-number text-base font-extrabold leading-none">{{ rating_value }}<span class="text-xs font-normal text-gray-400"> / 5</span></span>
     {% endif %}
     <div class="flex self-center justify-center gap-2">
+      {% if review_count %}
+      <div class="dc-rating-hover relative cursor-pointer">
+        <div class="dc-stars dc-stars-summary leading-none" aria-hidden="true">
+          {% for i in 1..5 %}
+            {% set diff = rating - (i - 1) %}
+            {% if diff >= 1 %}
+              <span class="dc-star active">★</span>
+            {% elseif diff >= 0.1 %}
+              <span class="dc-star dc-star-partial" style="--pct: {{ (diff * 100) | round }}%">★</span>
+            {% else %}
+              <span class="dc-star">★</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if show_distribution and rating_distribution is not empty %}
+        <div class="dc-rating-popover absolute left-1/2 -translate-x-1/2 top-full z-50 cursor-auto">
+          <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/70 ring-1 ring-gray-100 p-4 w-60 cursor-auto">
+            <div class="flex items-baseline gap-1.5 mb-3">
+              <span class="dc-rating-number text-xl font-extrabold leading-none">{{ rating_value }}</span>
+              <span class="text-xs text-gray-400">/ 5</span>
+              <span class="text-xs font-semibold text-gray-500 ml-auto">{{ reviews }}</span>
+            </div>
+            <div>
+              {% for i in 5..1 %}
+                {% set count = rating_distribution[i] is defined ? rating_distribution[i] : 0 %}
+                {% set pct = review_count > 0 ? (count * 100 / review_count) : 0 %}
+                <div class="flex items-center gap-2 text-xs text-gray-500 py-0.5">
+                  <span class="w-4 flex-shrink-0 tabular-nums">{{ i }}</span>
+                  <span class="text-[10px] text-amber-500 leading-none">★</span>
+                  <div class="dc-dist-bar flex-1"><span style="width: {{ pct | round }}%"></span></div>
+                  <span class="w-6 text-right tabular-nums text-gray-400">{{ count }}</span>
+                </div>
+              {% endfor %}
+            </div>
+            <a href="{{ reviews_url }}" class="w-full inline-flex items-center justify-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 mt-3">{{ text_all_reviews|default('') }}<i data-lucide="chevron-right" width="14" height="14"></i></a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
       <div class="dc-stars dc-stars-summary leading-none" aria-hidden="true">
         {% for i in 1..5 %}
           {% set diff = rating - (i - 1) %}
@@ -17,6 +58,7 @@
           {% endif %}
         {% endfor %}
       </div>
+      {% endif %}
       <a href="{{ reviews_url }}" class="inline-flex items-center gap-1 text-xs font-bold leading-none text-blue-600 hover:text-blue-700 transition">{{ reviews }}<i data-lucide="arrow-up-right" width="12" height="12"></i></a>
     </div>
   </div>

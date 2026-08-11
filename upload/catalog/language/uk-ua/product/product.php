@@ -42,6 +42,7 @@ $_['text_bundle_save'] = 'Комплект';
 $_['text_bundle_number'] = 'Комплект #%s';
 $_['button_bundle_add'] = 'Додати комплект у кошик';
 $_['text_reviews'] = '%s відгуків';
+$_['text_all_reviews'] = 'Всі відгуки';
 // Додаткові UI рядки
 $_['text_delivery'] = 'Доставка';
 $_['text_delivery_desc'] = 'Швидка доставка';

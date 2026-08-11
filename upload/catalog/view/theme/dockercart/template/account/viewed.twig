@@ -49,8 +49,11 @@
               <div class="flex items-center gap-1 mb-1">
                 <div class="flex text-xs">
                   {% for i in 1..5 %}
-                    {% if product.rating >= i %}
-                    <span class="text-amber-400">★</span>
+                    {% set diff = product.rating - (i - 1) %}
+                    {% if diff >= 1 %}
+                    <span class="text-amber-500">★</span>
+                    {% elseif diff > 0 %}
+                    <span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: {{ (diff * 100) | round }}%">★</span></span>
                     {% else %}
                     <span class="text-gray-300">★</span>
                     {% endif %}

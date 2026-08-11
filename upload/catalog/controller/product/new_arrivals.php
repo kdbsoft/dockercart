@@ -51,6 +51,10 @@ class ControllerProductNewArrivals extends Controller {
 		$data['text_products'] = $this->language->get('text_products');
 		// short word for "reviews"
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
 		$data['text_view_grid'] = $this->language->get('text_view_grid');
 		$data['text_view_list'] = $this->language->get('text_view_list');
 		$data['text_view_table'] = $this->language->get('text_view_table');
@@ -164,7 +168,7 @@ class ControllerProductNewArrivals extends Controller {
 			}
 
 			if ($this->config->get('config_review_status')) {
-				$rating = (int)$result['rating'];
+				$rating = (float)$result['rating'];
 			} else {
 				$rating = false;
 			}
@@ -223,6 +227,7 @@ class ControllerProductNewArrivals extends Controller {
 				'minimum'            => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'             => $rating,
 				'reviews'            => isset($result['reviews']) ? $result['reviews'] : 0,
+				'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'              => $stock,
 				'is_in_stock'        => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder'        => empty($stock_quantity) && !empty($result['preorder']),
@@ -231,7 +236,8 @@ class ControllerProductNewArrivals extends Controller {
 				'new_arrival_badge_class' => $badge_class,
 				'has_gift'               => !empty($result['has_gift']),
 				'category'           => $category_name,
-				'href'               => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
+				'href'               => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
+				'reviews_url'        => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -379,6 +385,10 @@ class ControllerProductNewArrivals extends Controller {
 
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
 		$data['text_model'] = $this->language->get('text_model');
 		$data['text_quantity'] = $this->language->get('text_quantity');
 
@@ -534,8 +544,9 @@ class ControllerProductNewArrivals extends Controller {
 				'special'                 => $special,
 				'discount'                => $discount_percent,
 				'minimum'                 => $result['minimum'] > 0 ? $result['minimum'] : 1,
-				'rating'                  => (int)$result['rating'],
+				'rating'                  => (float)$result['rating'],
 				'reviews'                 => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'rating_distribution'     => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'                   => $stock,
 				'is_in_stock'             => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder'             => empty($stock_quantity) && !empty($result['preorder']),
@@ -543,7 +554,8 @@ class ControllerProductNewArrivals extends Controller {
 				'new_arrival_badge'       => $badge_text,
 				'new_arrival_badge_class' => $badge_class,
 				'has_gift'                => !empty($result['has_gift']),
-				'href'                    => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+				'href'                    => $this->url->link('product/product', 'product_id=' . $result['product_id']),
+				'reviews_url'             => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -560,6 +572,8 @@ class ControllerProductNewArrivals extends Controller {
 				'btn_quick_hover'  => 'hover:bg-teal-600',
 				'link_hover'       => 'hover:text-teal-600 transition',
 				'btn_cart_classes' => 'bg-teal-600 text-white hover:bg-teal-700',
+				'show_distribution' => (int)$this->config->get('config_review_show_distribution'),
+				'text_all_reviews' => $this->language->get('text_all_reviews'),
 			));
 		}
 

@@ -139,12 +139,68 @@ class ModelExtensionModuleDockercartSearch extends Model {
                     $products[] = $product;
                 }
             }
+
+            // Hydrated via getProduct() (per-product cache), which does not
+            // carry the rating distribution used by listing-card popovers.
+            $products = $this->attachRatingDistribution($products);
         }
 
         return [
             'products' => $products,
             'total'    => $total,
         ];
+    }
+
+    /**
+     * Attach per-star rating distribution from oc_product_rating to a list
+     * of hydrated products, mirroring what getProductsByIds() does for
+     * native (MySQL) listings so search cards render the same popover.
+     *
+     * @param array<int, array<string, mixed>> $products
+     * @return array<int, array<string, mixed>>
+     */
+    private function attachRatingDistribution(array $products): array {
+        $ids = [];
+
+        foreach ($products as $product) {
+            if (isset($product['product_id'])) {
+                $ids[] = (int)$product['product_id'];
+            }
+        }
+
+        $ids = array_values(array_unique(array_filter($ids)));
+
+        if (empty($ids)) {
+            return $products;
+        }
+
+        $query = $this->db->query("SELECT product_id, distribution FROM " . DB_PREFIX . "product_rating WHERE product_id IN (" . implode(',', $ids) . ") AND review_count > 0");
+
+        $distributions = [];
+
+        foreach ($query->rows as $row) {
+            $distributions[(int)$row['product_id']] = $row['distribution'];
+        }
+
+        foreach ($products as &$product) {
+            $pid = isset($product['product_id']) ? (int)$product['product_id'] : 0;
+
+            if ($pid && isset($distributions[$pid])) {
+                $decoded = json_decode((string)$distributions[$pid], true);
+
+                if (is_array($decoded)) {
+                    $product['rating_distribution'] = $decoded;
+                }
+            }
+
+            if (!isset($product['rating_distribution'])) {
+                $product['rating_distribution'] = [];
+            }
+        }
+
+        unset($product);
+
+        return $products;
     }
 
     /**

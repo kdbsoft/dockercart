@@ -114,10 +114,12 @@ class ControllerExtensionModuleSpecial extends Controller {
 					'is_preorder' => empty($stock_quantity) && !empty($product_info['preorder']),
 					'rating'      => $rating,
 					'reviews'     => $product_info['reviews'],
+					'rating_distribution' => isset($product_info['rating_distribution']) ? $product_info['rating_distribution'] : array(),
 					'in_wishlist' => in_array((int)$product_info['product_id'], $wishlist_ids) ? 1 : 0,
 					'has_gift'    => !empty($product_info['has_gift']),
 					'call_for_price' => !empty($product_info['call_for_price']),
-					'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id'])
+					'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id']),
+					'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $product_info['product_id'])
 				);
 			}
 
@@ -139,11 +141,13 @@ class ControllerExtensionModuleSpecial extends Controller {
 			$data['text_view_all'] = $this->language->get('text_view_all');
 			$data['button_cart'] = $this->language->get('button_cart');
 			$data['text_reviews'] = $this->language->get('text_reviews');
+			$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
 			$data['text_instock'] = $this->language->get('text_instock');
 			$this->load->language('product/product');
 			$data['text_gift_badge'] = $this->language->get('text_gift_badge');
 			$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 			$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
+			$data['text_all_reviews'] = $this->language->get('text_all_reviews');
 
 			// Call for price
 			$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');

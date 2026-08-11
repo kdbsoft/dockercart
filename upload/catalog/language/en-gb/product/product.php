@@ -38,6 +38,7 @@ $_['text_option_out_of_stock'] = 'Out of stock';
 $_['text_minimum']             = 'This product has a minimum quantity of %s';
 $_['text_quantity_step']       = 'Quantity step: %s';
 $_['text_reviews']             = '%s reviews';
+$_['text_all_reviews']         = 'All reviews';
 $_['text_write']               = 'Write a review';
 $_['text_login']               = 'Please <a href="%s">login</a> or <a href="%s">register</a> to review';
 $_['text_no_reviews']          = 'There are no reviews for this product.';

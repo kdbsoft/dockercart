@@ -14,6 +14,7 @@ $_['text_points']       = 'Бонусні бали:';
 $_['text_price']        = 'Ціна:';
 $_['text_tax']          = 'Без ПДВ:';
 $_['text_reviews_word'] = 'відгуків';
+$_['text_all_reviews'] = 'Всі відгуки';
 $_['text_compare']      = 'Порівняння товарів (%s)';
 $_['text_sort']         = 'Сортувати за:';
 $_['text_default']      = 'За замовчуванням';
