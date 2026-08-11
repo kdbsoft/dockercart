@@ -27,6 +27,7 @@ $_['text_model_asc']    = 'Product Code (A - Z)';
 $_['text_model_desc']   = 'Product Code (Z - A)';
 $_['text_limit']        = 'Show:';
 $_['text_reviews_word']   = 'reviews';
+$_['text_all_reviews']    = 'All reviews';
 // Additional localization for category page UI
 $_['text_subcategories'] = 'Subcategories';
 $_['text_shop_all'] = 'Shop all %s →';

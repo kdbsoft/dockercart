@@ -55,6 +55,10 @@ class ControllerProductSpecial extends Controller {
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
 
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
+
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
@@ -146,7 +150,7 @@ class ControllerProductSpecial extends Controller {
 			}
 
 			if ($this->config->get('config_review_status')) {
-				$rating = (int)$result['rating'];
+				$rating = (float)$result['rating'];
 			} else {
 				$rating = false;
 			}
@@ -186,6 +190,7 @@ class ControllerProductSpecial extends Controller {
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => $result['rating'],
 				'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
+				'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -193,7 +198,8 @@ class ControllerProductSpecial extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
-				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
+				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
+				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -339,6 +345,10 @@ class ControllerProductSpecial extends Controller {
 
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
+
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
 		$data['text_model'] = $this->language->get('text_model');
 		$data['text_quantity'] = $this->language->get('text_quantity');
 		$data['text_view_grid'] = $this->language->get('text_view_grid');
@@ -475,8 +485,9 @@ class ControllerProductSpecial extends Controller {
 				'special'     => $special,
 				'discount'    => $discount_percent,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-				'rating'      => (int)$result['rating'],
+				'rating'      => (float)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -502,6 +513,8 @@ class ControllerProductSpecial extends Controller {
 				'btn_quick_hover'  => 'hover:bg-red-600',
 				'link_hover'       => 'hover:text-blue-600 transition',
 				'btn_cart_classes' => 'bg-blue-600 text-white hover:bg-blue-700',
+				'show_distribution' => (int)$this->config->get('config_review_show_distribution'),
+				'text_all_reviews' => $this->language->get('text_all_reviews'),
 			));
 		}
 

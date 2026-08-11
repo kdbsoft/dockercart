@@ -150,6 +150,10 @@ class ControllerProductSearch extends Controller {
 		// short word for "reviews"
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
 
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
+
 		// Call for price
 		$data['call_for_price_status'] = (int)$this->config->get('dockercart_theme_call_for_price_status');
 		$data['call_for_price_phone'] = $this->config->get('config_telephone');
@@ -567,7 +571,7 @@ class ControllerProductSearch extends Controller {
 				}
 
 				if ($this->config->get('config_review_status')) {
-					$rating = (int)$result['rating'];
+					$rating = (float)$result['rating'];
 				} else {
 					$rating = false;
 				}
@@ -602,6 +606,7 @@ class ControllerProductSearch extends Controller {
 					'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 					'rating'      => $result['rating'],
 					'reviews'     => isset($result['reviews']) ? $result['reviews'] : 0,
+					'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 					'stock'       => $stock,
 					'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 					'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -612,7 +617,8 @@ class ControllerProductSearch extends Controller {
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
-				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
+				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
+				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -899,6 +905,10 @@ class ControllerProductSearch extends Controller {
 		// short word for "reviews" (used in listing templates)
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
 
+		// rating distribution popover on listing cards
+		$data['show_distribution'] = (int)$this->config->get('config_review_show_distribution');
+		$data['text_all_reviews'] = $this->language->get('text_all_reviews');
+
 		// Load-more AJAX
 		$lm_params = '';
 		if (isset($this->request->get['search']))      { $lm_params .= '&search='      . urlencode(html_entity_decode($this->request->get['search'], ENT_QUOTES, 'UTF-8')); }
@@ -1065,8 +1075,9 @@ class ControllerProductSearch extends Controller {
 				'special'     => $special,
 				'discount'    => $discount_percent,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-				'rating'      => (int)$result['rating'],
+				'rating'      => (float)$result['rating'],
 				'reviews'     => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+				'rating_distribution' => isset($result['rating_distribution']) ? $result['rating_distribution'] : array(),
 				'stock'       => $stock,
 				'is_in_stock' => ($stock_quantity > 0) || !empty($result['preorder']),
 				'is_preorder' => empty($stock_quantity) && !empty($result['preorder']),
@@ -1076,7 +1087,8 @@ class ControllerProductSearch extends Controller {
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
 				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
-				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url)
+				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
+				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
 			);
 		}
 
@@ -1113,6 +1125,8 @@ class ControllerProductSearch extends Controller {
 				'call_for_price_status' => (int)$this->config->get('dockercart_theme_call_for_price_status'),
 				'call_for_price_phone' => $this->config->get('config_telephone'),
 				'call_for_price_mode' => ($this->config->get('dockercart_theme_call_for_price_mode') === 'call') ? 'call' : 'request',
+				'show_distribution' => (int)$this->config->get('config_review_show_distribution'),
+				'text_all_reviews' => $this->language->get('text_all_reviews'),
 			));
 		}
 

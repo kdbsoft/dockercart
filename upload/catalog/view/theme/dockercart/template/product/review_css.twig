@@ -33,6 +33,10 @@
   .dc-rating-number { color: #111827; letter-spacing: -.06em; }
   .dc-dist-bar { height: 8px; border-radius: 9999px; background: #f3f4f6; overflow: hidden; }
   .dc-dist-bar > span { display: block; height: 100%; border-radius: 9999px; background: #f59e0b; }
+  .dc-rating-popover { opacity: 0; pointer-events: none; transition: opacity .15s ease; }
+  .dc-rating-hover:hover .dc-rating-popover { opacity: 1; pointer-events: auto; }
+  .dc-rating-popover, .dc-rating-popover * { cursor: auto; }
+  .dc-rating-popover a { cursor: pointer; }
 
   .dc-review-card { position: relative; transition: border-color .2s; }
   .dc-review-card-divider { height: 1px; background: #f3f4f6; }
