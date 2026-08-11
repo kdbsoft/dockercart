@@ -600,7 +600,10 @@ class ControllerProductProduct extends Controller {
 				$data['special'] = false;
 			}
 
-			if ($this->config->get('config_tax')) {
+			// "Ex Tax" is only meaningful when the product actually has a tax
+			// class; for tax-free products (tax_class_id = 0) the price already
+			// has no tax, so the label would just echo the price back.
+			if ($this->config->get('config_tax') && (int)$product_info['tax_class_id'] > 0) {
 				$data['tax'] = $this->currency->format($tax_price, $this->session->data['currency']);
 			} else {
 				$data['tax'] = false;
@@ -807,6 +810,21 @@ class ControllerProductProduct extends Controller {
 			$tax = $this->config->get('config_tax');
 			$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
 			$customer_group_id = (int)$this->config->get('config_customer_group_id');
+
+			// Global customer group discount/markup (percent). Applied to the raw
+			// variant prices the same way normalizeProductRow() applies it to
+			// plain products, so the product page and the cart agree.
+			$cg_discount = (float)$this->config->get('config_customer_group_discount');
+			$cg_markup = (float)$this->config->get('config_customer_group_markup');
+
+			if ($cg_discount > 0) {
+				$cg_multiplier = (100 - $cg_discount) / 100;
+			} elseif ($cg_markup > 0) {
+				$cg_multiplier = (100 + $cg_markup) / 100;
+			} else {
+				$cg_multiplier = 1.0;
+			}
+
 			$variant_discounts = $pc->getVariantsDiscounts($product_id);
 			$variant_cg_prices = $pc->getVariantCustomerGroupPrices($product_id);
 			$variant_specials = $pc->getVariantsSpecials($product_id);
@@ -861,8 +879,8 @@ class ControllerProductProduct extends Controller {
 
 						$variant['discounts'][] = array(
 							'quantity'    => (int)$vd['quantity'],
-							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency']),
-							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'], '', false)
+							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
@@ -872,15 +890,43 @@ class ControllerProductProduct extends Controller {
 				$effective_price = (float)$variant['price'];
 
 				if ($variant_cg_price !== null) {
+					// Per-variant group price override: the global % discount/
+					// markup does not apply on top of it (mirrors the cart).
 					$effective_price = $variant_cg_price;
 					$variant['price'] = $variant_cg_price;
+				} else {
+					// Apply the global customer group discount/markup so the
+					// product page matches the cart (and plain products).
+					$effective_price = $effective_price * $cg_multiplier;
+					$variant['price'] = $effective_price;
 				}
 
 				$variant_special_price = isset($variant_special_map[(int)$variant['variant_id']]) ? $variant_special_map[(int)$variant['variant_id']] : null;
 
+				if ($variant_special_price !== null && $variant_cg_price === null) {
+					// The global % discount/markup applies to the special only
+					// when no per-variant group price override is set (mirrors
+					// the cart, which skips the % adjustment in that case).
+					$variant_special_price = $variant_special_price * $cg_multiplier;
+				}
+
 				if ($variant_special_price !== null && $variant_special_price < $effective_price) {
 					$variant['special'] = $variant_special_price;
 					$variant['special_from'] = $effective_price;
+				}
+
+				// Variant tax (formatted string for display) — computed from the
+				// raw (pre-tax) price/special, before the values below are
+				// converted to tax-included display numbers. Only for products
+				// that actually carry a tax class: for tax-free products the
+				// "Ex Tax" label would just echo the price back.
+				$variant['tax_text'] = '';
+				if ($this->config->get('config_tax') && $tax_class_id > 0) {
+					$tax_price_for_variant = isset($variant['special']) ? (float)$variant['special'] : (float)$variant['price'];
+					$variant['tax_text'] = $this->currency->format(
+						$tax_price_for_variant,
+						$this->session->data['currency']
+					);
 				}
 
 				if (isset($variant['price']) && $variant['price'] !== '') {
@@ -900,16 +946,6 @@ class ControllerProductProduct extends Controller {
 						$currency_code, '', false
 					);
 				}
-
-				// Variant tax (formatted string for display)
-				$variant['tax_text'] = '';
-				if ($this->config->get('config_tax')) {
-					$tax_price_for_variant = isset($variant['special']) ? (float)$variant['special'] : (float)$variant['price'];
-					$variant['tax_text'] = $this->currency->format(
-						$this->tax->calculate($tax_price_for_variant, $tax_class_id, $tax),
-						$this->session->data['currency']
-					);
-				}
 			}
 			unset($variant);
 
@@ -919,11 +955,22 @@ class ControllerProductProduct extends Controller {
 				$default_effective_price = (float)$default_variant['price'];
 
 				if ($default_cg_price !== null) {
+					// Per-variant group price override: the global % discount/
+					// markup does not apply on top of it (mirrors the cart).
 					$default_effective_price = $default_cg_price;
 					$default_variant['price'] = $default_cg_price;
+				} else {
+					$default_effective_price = $default_effective_price * $cg_multiplier;
+					$default_variant['price'] = $default_effective_price;
 				}
 
 				$default_special_price = isset($variant_special_map[(int)$default_variant['variant_id']]) ? $variant_special_map[(int)$default_variant['variant_id']] : null;
+
+				if ($default_special_price !== null && $default_cg_price === null) {
+					// See the variants loop above: the % discount/markup applies
+					// to the special only without a per-variant group price.
+					$default_special_price = $default_special_price * $cg_multiplier;
+				}
 
 				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
 					$default_variant['special'] = $default_special_price;
@@ -950,8 +997,8 @@ class ControllerProductProduct extends Controller {
 
 						$default_variant['discounts'][] = array(
 							'quantity'    => (int)$vd['quantity'],
-							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency']),
-							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'], $tax_class_id, $tax), $this->session->data['currency'], '', false)
+							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
@@ -1117,6 +1164,11 @@ class ControllerProductProduct extends Controller {
 				// Override base product price/SKU/image with selected variant's data
 				if (!empty($selected_variant) && $data['price'] !== false) {
 					if (isset($selected_variant['price']) && $selected_variant['price'] !== '' && (float)$selected_variant['price'] > 0) {
+						// The selected variant's price/special here are ALREADY
+						// tax-included display values (they were converted in the
+						// variants loop above), so the product-level price must be
+						// set from them directly — applying tax again would
+						// double-charge it (e.g. 862 ₴ → 1 036 ₴).
 						$sv_price = (float)$selected_variant['price'];
 						// Full price stays the base for option adjustments; the price the
 						// customer actually pays (the sale price when the variant is on
@@ -1129,24 +1181,14 @@ class ControllerProductProduct extends Controller {
 						}
 
 						$data['dc_base_price_value'] = $sv_base_price;
-						$data['dc_full_price_value'] = (float)$this->currency->format(
-							$this->tax->calculate($sv_price, $tax_class_id, $tax),
-							$this->session->data['currency'], '', false
-						);
-						$data['price'] = $this->currency->format(
-							$this->tax->calculate($sv_price, $tax_class_id, $tax),
-							$this->session->data['currency']
-						);
+						$data['dc_full_price_value'] = $sv_price;
+						$data['price'] = $this->currency->format($sv_price, $this->session->data['currency']);
 
 						if (isset($selected_variant['special'])) {
 							$sv_special = (float)$selected_variant['special'];
-							$data['special'] = $this->currency->format(
-								$this->tax->calculate($sv_special, $tax_class_id, $tax),
-								$this->session->data['currency']
-							);
+							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency']);
 							$data['you_save_amount'] = $this->currency->format(
-								$this->tax->calculate($sv_price, $tax_class_id, $tax) -
-								$this->tax->calculate($sv_special, $tax_class_id, $tax),
+								$sv_price - $sv_special,
 								$this->session->data['currency']
 							);
 						} else {
@@ -1166,12 +1208,8 @@ class ControllerProductProduct extends Controller {
 							}
 						}
 
-						if ($this->config->get('config_tax')) {
-							$tax_price = isset($selected_variant['special']) ? (float)$selected_variant['special'] : $sv_price;
-							$data['tax'] = $this->currency->format(
-								$this->tax->calculate($tax_price, $tax_class_id, $tax),
-								$this->session->data['currency']
-							);
+						if ($this->config->get('config_tax') && !empty($selected_variant['tax_text'])) {
+							$data['tax'] = $selected_variant['tax_text'];
 						}
 					}
 					if (!empty($selected_variant['model'])) {

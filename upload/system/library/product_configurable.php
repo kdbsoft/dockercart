@@ -404,8 +404,45 @@ class ProductConfigurable {
 	}
 
 	public function getAggregatedPriceRange($product_id, $customer_group_id = null) {
+		// The global % customer group discount/markup applies to every variant
+		// without a per-variant group price override (mirrors the storefront
+		// product page, cart and listings).
+		$cg_multiplier = 1.0;
+
 		if ($customer_group_id !== null) {
-			$query = $this->db->query("SELECT MIN(COALESCE(cgp.price, pv.price)) AS min_price, MAX(COALESCE(cgp.price, pv.price)) AS max_price FROM " . DB_PREFIX . "product_variant pv LEFT JOIN " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pv.product_id = '" . (int)$product_id . "' AND pv.status = '1'");
+			$group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+
+			if ($group_query->num_rows) {
+				$customer_group_discount = (float)$group_query->row['discount_percent'];
+
+				if ($customer_group_discount < 0) {
+					$customer_group_discount = 0;
+				} elseif ($customer_group_discount > 100) {
+					$customer_group_discount = 100;
+				}
+
+				$customer_group_markup = (float)$group_query->row['markup_percent'];
+
+				if ($customer_group_markup < 0) {
+					$customer_group_markup = 0;
+				} elseif ($customer_group_markup > 100) {
+					$customer_group_markup = 100;
+				}
+
+				if ($customer_group_discount > 0 && $customer_group_markup > 0) {
+					$customer_group_markup = 0;
+				}
+
+				if ($customer_group_discount > 0) {
+					$cg_multiplier = (100 - $customer_group_discount) / 100;
+				} elseif ($customer_group_markup > 0) {
+					$cg_multiplier = (100 + $customer_group_markup) / 100;
+				}
+			}
+		}
+
+		if ($customer_group_id !== null) {
+			$query = $this->db->query("SELECT MIN(CASE WHEN cgp.price IS NOT NULL AND cgp.price > 0 THEN cgp.price ELSE pv.price * " . (float)$cg_multiplier . " END) AS min_price, MAX(CASE WHEN cgp.price IS NOT NULL AND cgp.price > 0 THEN cgp.price ELSE pv.price * " . (float)$cg_multiplier . " END) AS max_price FROM " . DB_PREFIX . "product_variant pv LEFT JOIN " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pv.product_id = '" . (int)$product_id . "' AND pv.status = '1'");
 		} else {
 			$query = $this->db->query("SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
 		}
