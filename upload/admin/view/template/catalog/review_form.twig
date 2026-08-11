@@ -98,7 +98,7 @@
                           {% if item.is_required %}<span class="text-danger">*</span>{% endif %}
                         </label>
                         {% if item.type == 'rating' %}
-                        <input type="number" name="criteria[{{ item.criteria_id }}]" value="{{ item.value }}" min="1" max="5" step="0.5" id="criteria-{{ item.criteria_id }}" class="form-control" style="max-width: 120px;" />
+                        <input type="number" name="criteria[{{ item.criteria_id }}]" value="{{ item.value }}" min="1" max="5" step="1" id="criteria-{{ item.criteria_id }}" class="form-control" style="max-width: 120px;" />
                         {% else %}
                         <textarea name="criteria[{{ item.criteria_id }}]" rows="3" id="criteria-{{ item.criteria_id }}" class="form-control">{{ item.value }}</textarea>
                         {% endif %}
@@ -142,7 +142,7 @@
                   <div class="dcx-fields">
                     <div class="dcx-field">
                       <label class="dcx-label">{{ entry_rating }}</label>
-                      <input type="number" name="rating" value="{{ rating }}" min="0" max="5" step="0.5" id="input-rating" class="form-control" style="max-width: 120px;" />
+                      <input type="number" name="rating" value="{{ rating }}" min="1" max="5" step="1" id="input-rating" class="form-control" style="max-width: 120px;" />
                       {% if error_rating %}
                       <div class="text-danger">{{ error_rating }}</div>
                       {% endif %}
