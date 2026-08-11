@@ -375,7 +375,7 @@
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
 				var instockLabel = stockBadgeEl.dataset.stockInstock || stockBadgeEl.dataset.textInstock || '';
 				if (stockText) stockText.textContent = showQty ? String(Math.floor(qty)) : instockLabel;
-				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-emerald-600';
+				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-emerald-700';
 				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
 				if (dot) {
 					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 bg-emerald-500 border-emerald-500';
