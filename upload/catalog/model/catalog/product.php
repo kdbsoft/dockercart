@@ -200,6 +200,20 @@ class ModelCatalogProduct extends Model {
 			$product_data['default_variant'] = $default_variant;
 			$product_data['default_variant_id'] = $default_variant['variant_id'];
 
+			// Global customer group discount/markup (percent), applied to the
+			// default variant price/special exactly like normalizeProductRow()
+			// does for plain products, so listings, the product page and the
+			// cart agree.
+			$cg_multiplier = 1.0;
+			$cg_discount = (float)$this->config->get('config_customer_group_discount');
+			$cg_markup = (float)$this->config->get('config_customer_group_markup');
+
+			if ($cg_discount > 0) {
+				$cg_multiplier = (100 - $cg_discount) / 100;
+			} elseif ($cg_markup > 0) {
+				$cg_multiplier = (100 + $cg_markup) / 100;
+			}
+
 			$product_data['default_option_value_ids'] = array();
 			if (!empty($default_variant['values'])) {
 				foreach ($default_variant['values'] as $dv) {
@@ -210,7 +224,16 @@ class ModelCatalogProduct extends Model {
 			// Override base product data with default variant values
 			if (isset($default_variant['price']) && $default_variant['price'] !== '' && (float)$default_variant['price'] > 0) {
 				$product_data['base_price'] = $product_data['price'];
-				$product_data['price'] = (float)$default_variant['price'];
+
+				// A per-variant group price override wins over the raw variant
+				// price; otherwise the global % discount/markup applies.
+				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+
+				if ($default_cg_price !== null && (float)$default_cg_price > 0) {
+					$product_data['price'] = (float)$default_cg_price;
+				} else {
+					$product_data['price'] = (float)$default_variant['price'] * $cg_multiplier;
+				}
 			}
 			if (isset($default_variant['quantity'])) {
 				$product_data['quantity'] = (float)$default_variant['quantity'];
@@ -244,6 +267,17 @@ class ModelCatalogProduct extends Model {
 
 			// Override special price from variant
 			$variant_special = $pc->getVariantSpecialPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+
+			if ($variant_special !== null) {
+				// The % discount/markup applies to the special only when no
+				// per-variant group price override is set (mirrors the cart).
+				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+
+				if ($default_cg_price === null || (float)$default_cg_price <= 0) {
+					$variant_special = $variant_special * $cg_multiplier;
+				}
+			}
+
 			if ($variant_special !== null && (float)$variant_special < (float)$product_data['price']) {
 				$product_data['special'] = (float)$variant_special;
 
@@ -413,6 +447,21 @@ class ModelCatalogProduct extends Model {
 					$data['default_variant'] = $default_variant;
 					$data['default_variant_id'] = $default_variant['variant_id'];
 
+					// Global customer group discount/markup (percent), applied to
+					// the default variant price/special exactly like
+					// normalizeProductRow() does for plain products — unless a
+					// per-variant group price override is set (mirrors the
+					// product page and the cart).
+					$cg_multiplier = 1.0;
+					$cg_discount = (float)$this->config->get('config_customer_group_discount');
+					$cg_markup = (float)$this->config->get('config_customer_group_markup');
+
+					if ($cg_discount > 0) {
+						$cg_multiplier = (100 - $cg_discount) / 100;
+					} elseif ($cg_markup > 0) {
+						$cg_multiplier = (100 + $cg_markup) / 100;
+					}
+
 					$data['default_option_value_ids'] = array();
 					if (!empty($default_variant['values'])) {
 						foreach ($default_variant['values'] as $dv) {
@@ -422,7 +471,16 @@ class ModelCatalogProduct extends Model {
 
 					if (isset($default_variant['price']) && $default_variant['price'] !== '' && (float)$default_variant['price'] > 0) {
 						$data['base_price'] = $data['price'];
-						$data['price'] = (float)$default_variant['price'];
+
+						$default_cg_price = isset($cg_price_map[$pid][(int)$default_variant['variant_id']])
+							? $cg_price_map[$pid][(int)$default_variant['variant_id']]
+							: null;
+
+						if ($default_cg_price !== null && (float)$default_cg_price > 0) {
+							$data['price'] = (float)$default_cg_price;
+						} else {
+							$data['price'] = (float)$default_variant['price'] * $cg_multiplier;
+						}
 					}
 					if (isset($default_variant['quantity'])) {
 						$data['quantity'] = (float)$default_variant['quantity'];
@@ -471,14 +529,29 @@ class ModelCatalogProduct extends Model {
 							}
 						}
 
-						if ($best_special !== null && (float)$best_special['price'] < (float)$data['price']) {
-							$data['special'] = (float)$best_special['price'];
+						if ($best_special !== null) {
+							$best_special_price = (float)$best_special['price'];
 
-							if (!$data['special_date_end']) {
-								$date_end = (string)$best_special['date_end'];
+							// The % discount/markup applies to the special only
+							// when no per-variant group price override is set
+							// (mirrors the product page and the cart).
+							$default_cg_price = isset($cg_price_map[$pid][(int)$default_variant['variant_id']])
+								? $cg_price_map[$pid][(int)$default_variant['variant_id']]
+								: null;
 
-								if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
-									$data['special_date_end'] = (int)strtotime($date_end);
+							if (($default_cg_price === null || (float)$default_cg_price <= 0) && $cg_multiplier != 1.0) {
+								$best_special_price = $best_special_price * $cg_multiplier;
+							}
+
+							if ($best_special_price < (float)$data['price']) {
+								$data['special'] = $best_special_price;
+
+								if (!$data['special_date_end']) {
+									$date_end = (string)$best_special['date_end'];
+
+									if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
+										$data['special_date_end'] = (int)strtotime($date_end);
+									}
 								}
 							}
 						}
