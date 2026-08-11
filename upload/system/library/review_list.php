@@ -118,6 +118,7 @@ class ReviewList {
 			$date_format = isset($this->language->data['date_format_review']) ? $this->language->get('date_format_review') : $this->language->get('date_format_short');
 
 			$reviews[] = array(
+				'review_id'     => (int)$result['review_id'],
 				'author'        => $result['author'],
 				'author_initials' => $this->initials($result['author']),
 				'avatar_hue'    => abs(crc32($result['author'])) % 360,
