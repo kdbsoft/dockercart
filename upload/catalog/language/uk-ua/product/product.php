@@ -19,6 +19,7 @@ $_['text_benefits'] = 'Переваги:';
 $_['text_brand'] = 'Бренд';
 $_['text_day'] = 'день';
 $_['text_discount'] = ' або більше ';
+$_['text_quantity_discount'] = 'Знижки від кількості';
 $_['text_error'] = 'Товар не знайдено!';
 $_['text_instock'] = 'В наявності';
 $_['text_preorder'] = 'Передзамовлення';
