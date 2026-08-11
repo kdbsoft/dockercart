@@ -814,7 +814,7 @@ class ControllerCatalogReview extends Controller {
 			} elseif ($field === 'rating') {
 				$val = (float)$value;
 
-				if ($val < 0 || $val > 5) {
+				if ($val < 1 || $val > 5 || $val != (int)$val) {
 					$json['error'] = $this->language->get('error_rating');
 				} else {
 					$this->model_catalog_review->updateReviewField($review_id, array('rating' => $val));
@@ -877,7 +877,7 @@ class ControllerCatalogReview extends Controller {
 			$this->error['text'] = $this->language->get('error_text');
 		}
 
-		if (!isset($this->request->post['rating']) || (float)$this->request->post['rating'] < 0 || (float)$this->request->post['rating'] > 5) {
+		if (!isset($this->request->post['rating']) || !is_numeric($this->request->post['rating']) || (float)$this->request->post['rating'] < 1 || (float)$this->request->post['rating'] > 5 || (float)$this->request->post['rating'] != (int)$this->request->post['rating']) {
 			$this->error['rating'] = $this->language->get('error_rating');
 		}
 
