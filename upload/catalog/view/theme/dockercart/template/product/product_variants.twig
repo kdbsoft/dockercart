@@ -290,12 +290,20 @@
 		// Quantity discounts
 		if (discountsEl) {
 			var vd = (variant && Array.isArray(variant.discounts)) ? variant.discounts : [];
-			discountsEl.innerHTML = '';
+			var vdList = document.getElementById('dc-variant-discounts-list');
+			if (vdList) vdList.innerHTML = '';
 			vd.forEach(function(d) {
-				var p = document.createElement('p');
-				p.className = 'text-xs text-gray-500';
-				p.textContent = d.quantity + (discountText || ' ') + d.price;
-				discountsEl.appendChild(p);
+				var row = document.createElement('div');
+				row.className = 'flex items-center justify-between gap-3 px-3 py-2';
+				var label = document.createElement('span');
+				label.className = 'text-sm text-gray-600';
+				label.textContent = d.quantity + (discountText || ' ');
+				var price = document.createElement('span');
+				price.className = 'text-sm font-bold text-emerald-700 whitespace-nowrap';
+				price.textContent = d.price;
+				row.appendChild(label);
+				row.appendChild(price);
+				discountsEl.appendChild(row);
 			});
 			discountsEl.classList.toggle('hidden', vd.length === 0);
 		}

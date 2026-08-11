@@ -16,6 +16,7 @@ $_['text_discontinued']        = 'Discontinued';
 $_['text_tax']                 = 'Ex Tax:';
 $_['text_total']               = 'Total:';
 $_['text_discount']            = ' or more ';
+$_['text_quantity_discount']   = 'Quantity discounts';
 $_['text_option']              = 'Available Options';
 $_['text_sale']                = 'Sale';
 $_['text_call_for_price']      = 'Contact for price';
