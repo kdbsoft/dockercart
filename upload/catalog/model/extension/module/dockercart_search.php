@@ -590,6 +590,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
                     'price'       => $price,
                     'special'     => $special,
                     'tax_class_id'=> $product['tax_class_id'],
+                    'call_for_price' => !empty($product['call_for_price']),
                     'matched_variant_id' => $variant !== null ? (int)$variant['variant_id'] : 0,
                     'matched_variant_model' => $variant !== null ? ($variant['model'] ?: $variant['sku']) : '',
                 ];
