@@ -1043,6 +1043,22 @@ class ControllerCustomerCustomer extends Controller {
 			$data['affiliate_custom_field'] = array();
 		}
 
+		if ($data['customer_id']) {
+			$data['customer_metrics'] = array(
+				'transaction_balance' => $this->currency->format($this->model_customer_customer->getTransactionTotal($data['customer_id']), $this->config->get('config_currency')),
+				'reward_balance'      => (int)$this->model_customer_customer->getRewardTotal($data['customer_id']),
+				'history_total'       => (int)$this->model_customer_customer->getTotalHistories($data['customer_id']),
+				'ip_total'            => (int)$this->model_customer_customer->getTotalIps($data['customer_id'])
+			);
+		} else {
+			$data['customer_metrics'] = array(
+				'transaction_balance' => $this->currency->format(0, $this->config->get('config_currency')),
+				'reward_balance'      => 0,
+				'history_total'       => 0,
+				'ip_total'            => 0
+			);
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -1305,6 +1321,7 @@ class ControllerCustomerCustomer extends Controller {
 		$data['pagination'] = $pagination->render();
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($history_total - $limit)) ? $history_total : ((($page - 1) * $limit) + $limit), $history_total, ceil($history_total / $limit));
+		$data['history_total'] = $history_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_history', $data));
 	}
@@ -1366,6 +1383,7 @@ class ControllerCustomerCustomer extends Controller {
 		$data['pagination'] = $pagination->render();
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($transaction_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($transaction_total - $limit)) ? $transaction_total : ((($page - 1) * $limit) + $limit), $transaction_total, ceil($transaction_total / $limit));
+		$data['transaction_total'] = $transaction_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_transaction', $data));
 	}
@@ -1427,6 +1445,7 @@ class ControllerCustomerCustomer extends Controller {
 		$data['pagination'] = $pagination->render();
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($reward_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($reward_total - $limit)) ? $reward_total : ((($page - 1) * $limit) + $limit), $reward_total, ceil($reward_total / $limit));
+		$data['reward_total'] = $reward_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_reward', $data));
 	}
@@ -1487,6 +1506,7 @@ class ControllerCustomerCustomer extends Controller {
 		$data['pagination'] = $pagination->render();
 
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($ip_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($ip_total - $limit)) ? $ip_total : ((($page - 1) * $limit) + $limit), $ip_total, ceil($ip_total / $limit));
+		$data['ip_total'] = $ip_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_ip', $data));
 	}

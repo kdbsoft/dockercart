@@ -697,119 +697,146 @@
                     </div>
                   </div>
                 </div>
-                {# ── HISTORY / TRANSACTION / REWARD / IP TABS ── #}
                 {% if customer_id %}
-                <ul class="dcx-pills" style="margin-top:4px;">
-                  <li class="active"><a href="#tab-history" data-toggle="tab"><i data-lucide="clock" width="14" height="14"></i> {{ tab_history }}</a></li>
-                  <li><a href="#tab-transaction" data-toggle="tab"><i data-lucide="arrow-left-right" width="14" height="14"></i> {{ tab_transaction }}</a></li>
-                  <li><a href="#tab-reward" data-toggle="tab"><i data-lucide="trophy" width="14" height="14"></i> {{ tab_reward }}</a></li>
-                  <li><a href="#tab-ip" data-toggle="tab"><i data-lucide="shield" width="14" height="14"></i> {{ tab_ip }}</a></li>
-                </ul>
-                <div class="tab-pane active" id="tab-history">
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_history_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div id="history"></div>
+                <div class="dcx-customer-summary">
+                  <div class="dcx-stat-card dcx-stat-card--info">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="wallet" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_store_credit }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-transaction-balance">{{ customer_metrics.transaction_balance }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
                     </div>
                   </div>
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_history_add }}</div></div>
+                  <div class="dcx-stat-card dcx-stat-card--purple">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_reward_points }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-reward-balance">{{ customer_metrics.reward_balance }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
                     </div>
-                    <div class="dcx-panel-body">
+                  </div>
+                  <div class="dcx-stat-card dcx-stat-card--primary">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_notes }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-history-total">{{ customer_metrics.history_total }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_saved_notes }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-stat-card dcx-stat-card--warning">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="shield" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_known_ips }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-ip-total">{{ customer_metrics.ip_total }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_security_signals }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dcx-panel dcx-customer-activity">
+                  <div class="dcx-panel-head">
+                    <div class="dcx-panel-head__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
+                    <div>
+                      <div class="dcx-panel-title">{{ text_notes }}</div>
+                      <div class="dcx-panel-head__subtitle">{{ text_notes_subtitle }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-panel-body">
+                    <div id="customer-notes-list" class="dcx-async-container" aria-live="polite" aria-busy="true"></div>
+                    <div class="dcx-customer-add-form">
+                      <div class="dcx-customer-add-form__head"><i data-lucide="plus-circle" width="15" height="15"></i> {{ text_add_note }}</div>
                       <div class="dcx-fields">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-comment">{{ entry_comment }}</label>
-                          <textarea name="comment" rows="8" placeholder="{{ entry_comment }}" id="input-comment" class="form-control"></textarea>
+                          <textarea name="comment" rows="3" placeholder="{{ entry_comment }}" id="input-comment" class="form-control"></textarea>
                         </div>
                       </div>
                       <div class="text-right">
-                        <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
+                        <button type="button" id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_history_add }}</button>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="tab-pane" id="tab-transaction">
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="arrow-left-right" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_transaction_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div id="transaction"></div>
+
+                <div class="dcx-panel dcx-customer-activity">
+                  <div class="dcx-panel-head">
+                    <div class="dcx-panel-head__icon"><i data-lucide="wallet-cards" width="18" height="18"></i></div>
+                    <div>
+                      <div class="dcx-panel-title">{{ text_financials }}</div>
+                      <div class="dcx-panel-head__subtitle">{{ text_financials_subtitle }}</div>
                     </div>
                   </div>
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_transaction_add }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div class="dcx-fields dcx-fields--row">
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-transaction-description">{{ entry_description }}</label>
-                          <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-transaction-description" class="form-control" />
+                  <div class="dcx-panel-body">
+                    <div class="dcx-customer-financials">
+                      <section class="dcx-customer-financials__section">
+                        <div class="dcx-customer-financials__head">
+                          <div>
+                            <div class="dcx-customer-financials__title"><i data-lucide="wallet" width="15" height="15"></i> {{ text_store_credit }}</div>
+                            <div class="dcx-customer-financials__balance" id="customer-financial-transaction-balance">{{ customer_metrics.transaction_balance }}</div>
+                          </div>
+                          <span class="dcx-customer-financials__caption">{{ text_current_balance }}</span>
                         </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-amount">{{ entry_amount }}</label>
-                          <input type="text" name="amount" value="" placeholder="{{ entry_amount }}" id="input-amount" class="form-control" />
+                        <div id="customer-transactions" class="dcx-async-container" aria-live="polite" aria-busy="true"></div>
+                        <div class="dcx-customer-add-form">
+                          <div class="dcx-customer-add-form__head"><i data-lucide="plus-circle" width="15" height="15"></i> {{ text_add_transaction }}</div>
+                          <div class="dcx-fields dcx-fields--row">
+                            <div class="dcx-field">
+                              <label class="dcx-label" for="input-transaction-description">{{ entry_description }}</label>
+                              <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-transaction-description" class="form-control" />
+                            </div>
+                            <div class="dcx-field dcx-field--amount">
+                              <label class="dcx-label" for="input-amount">{{ entry_amount }}</label>
+                              <input type="text" name="amount" value="" placeholder="{{ entry_amount }}" id="input-amount" class="form-control" />
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <button type="button" id="button-transaction" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_transaction_add }}</button>
+                          </div>
                         </div>
-                      </div>
-                      <div class="text-right">
-                        <button type="button" id="button-transaction" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_transaction_add }}</button>
-                      </div>
+                      </section>
+                      <section class="dcx-customer-financials__section">
+                        <div class="dcx-customer-financials__head">
+                          <div>
+                            <div class="dcx-customer-financials__title"><i data-lucide="trophy" width="15" height="15"></i> {{ text_reward_points }}</div>
+                            <div class="dcx-customer-financials__balance" id="customer-financial-reward-balance">{{ customer_metrics.reward_balance }}</div>
+                          </div>
+                          <span class="dcx-customer-financials__caption">{{ text_current_balance }}</span>
+                        </div>
+                        <div id="customer-rewards" class="dcx-async-container" aria-live="polite" aria-busy="true"></div>
+                        <div class="dcx-customer-add-form">
+                          <div class="dcx-customer-add-form__head"><i data-lucide="plus-circle" width="15" height="15"></i> {{ text_add_reward }}</div>
+                          <div class="dcx-fields dcx-fields--row">
+                            <div class="dcx-field">
+                              <label class="dcx-label" for="input-reward-description">{{ entry_description }}</label>
+                              <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-reward-description" class="form-control" />
+                            </div>
+                            <div class="dcx-field dcx-field--amount">
+                              <label class="dcx-label" for="input-points"><span data-toggle="tooltip" title="{{ help_points }}">{{ entry_points }}</span></label>
+                              <input type="text" name="points" value="" placeholder="{{ entry_points }}" id="input-points" class="form-control" />
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <button type="button" id="button-reward" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_reward_add }}</button>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </div>
                 </div>
-                <div class="tab-pane" id="tab-reward">
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_reward_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div id="reward"></div>
+
+                <div class="dcx-panel dcx-customer-activity">
+                  <div class="dcx-panel-head">
+                    <div class="dcx-panel-head__icon"><i data-lucide="shield" width="18" height="18"></i></div>
+                    <div>
+                      <div class="dcx-panel-title">{{ text_security }}</div>
+                      <div class="dcx-panel-head__subtitle">{{ text_security_subtitle }}</div>
                     </div>
                   </div>
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="circle-plus" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_reward_add }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div class="dcx-fields dcx-fields--row">
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-reward-description">{{ entry_description }}</label>
-                          <input type="text" name="description" value="" placeholder="{{ entry_description }}" id="input-reward-description" class="form-control" />
-                        </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-points">
-                            <span data-toggle="tooltip" title="{{ help_points }}">{{ entry_points }}</span>
-                          </label>
-                          <input type="text" name="points" value="" placeholder="{{ entry_points }}" id="input-points" class="form-control" />
-                        </div>
-                      </div>
-                      <div class="text-right">
-                        <button type="button" id="button-reward" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_reward_add }}</button>
-                      </div>
-                    </div>
+                  <div class="dcx-panel-body">
+                    <div id="customer-ips" class="dcx-async-container" aria-live="polite" aria-busy="true"></div>
                   </div>
                 </div>
                 {% endif %}
-                <div class="tab-pane" id="tab-ip">
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="shield" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_ip_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div id="ip"></div>
-                    </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1119,107 +1146,129 @@
   $('select[name$=\'[country_id]\']').trigger('change');
   //--></script>
   <script type="text/javascript"><!--
-  $('#history').delegate('.pagination a', 'click', function(e) {
+  {% if customer_id %}
+  var customerAsyncText = {
+    loading: '{{ text_loading_customer|e('js') }}',
+    error: '{{ text_activity_error|e('js') }}'
+  };
+
+  function customerAsyncState(type) {
+    var icon = type === 'error' ? 'circle-alert' : 'loader-circle';
+    var text = type === 'error' ? customerAsyncText.error : customerAsyncText.loading;
+    return '<div class="dcx-async-state dcx-async-state--' + type + '"><i data-lucide="' + icon + '" width="16" height="16"></i><span>' + text + '</span></div>';
+  }
+
+  function updateCustomerMetrics($container) {
+    var $meta = $container.find('.dcx-fragment-meta');
+    if (!$meta.length) return;
+    if ($meta.data('balance') !== undefined) {
+      $('#customer-metric-transaction-balance, #customer-financial-transaction-balance').text($meta.data('balance'));
+    }
+    if ($meta.data('reward-balance') !== undefined) {
+      $('#customer-metric-reward-balance, #customer-financial-reward-balance').text($meta.data('reward-balance'));
+    }
+    if ($meta.data('history-total') !== undefined) {
+      $('#customer-metric-history-total').text($meta.data('history-total'));
+    }
+    if ($meta.data('ip-total') !== undefined) {
+      $('#customer-metric-ip-total').text($meta.data('ip-total'));
+    }
+  }
+
+  function loadCustomerFragment(selector, url) {
+    var $container = $(selector);
+    $container.attr('aria-busy', 'true').html(customerAsyncState('loading'));
+    lucide.createIcons();
+    $container.load(url, function(response, status) {
+      $container.attr('aria-busy', 'false');
+      if (status === 'error') {
+        $container.html(customerAsyncState('error'));
+      } else {
+        updateCustomerMetrics($container);
+        lucide.createIcons();
+      }
+    });
+  }
+
+  $('#customer-notes-list, #customer-transactions, #customer-rewards, #customer-ips').on('click', '.pagination a', function(e) {
     e.preventDefault();
-    $('#history').load(this.href);
+    loadCustomerFragment('#' + $(this).closest('.dcx-async-container').attr('id'), this.href);
   });
-  $('#history').load('index.php?route=customer/customer/history&user_token={{ user_token }}&customer_id={{ customer_id }}');
+
+  loadCustomerFragment('#customer-notes-list', 'index.php?route=customer/customer/history&user_token={{ user_token }}&customer_id={{ customer_id }}');
+  loadCustomerFragment('#customer-transactions', 'index.php?route=customer/customer/transaction&user_token={{ user_token }}&customer_id={{ customer_id }}');
+  loadCustomerFragment('#customer-rewards', 'index.php?route=customer/customer/reward&user_token={{ user_token }}&customer_id={{ customer_id }}');
+  loadCustomerFragment('#customer-ips', 'index.php?route=customer/customer/ip&user_token={{ user_token }}&customer_id={{ customer_id }}');
+
   $('#button-history').on('click', function(e) {
     e.preventDefault();
+    var $button = $(this);
     $.ajax({
       url: 'index.php?route=customer/customer/addhistory&user_token={{ user_token }}&customer_id={{ customer_id }}',
       type: 'post',
       dataType: 'json',
-      data: 'comment=' + encodeURIComponent($('#tab-history textarea[name=\'comment\']').val()),
-      beforeSend: function() { $('#button-history').button('loading'); },
-      complete: function() { $('#button-history').button('reset'); },
+      data: 'comment=' + encodeURIComponent($('#input-comment').val()),
+      beforeSend: function() { $button.button('loading'); },
+      complete: function() { $button.button('reset'); },
       success: function(json) {
-        $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-history').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-          lucide.createIcons();
+          $('#customer-notes-list').prepend('<div class="alert alert-danger alert-dismissible">' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         }
         if (json['success']) {
-          $('#tab-history').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
-          lucide.createIcons();
-          $('#history').load('index.php?route=customer/customer/history&user_token={{ user_token }}&customer_id={{ customer_id }}');
-          $('#tab-history textarea[name=\'comment\']').val('');
+          $('#input-comment').val('');
+          loadCustomerFragment('#customer-notes-list', 'index.php?route=customer/customer/history&user_token={{ user_token }}&customer_id={{ customer_id }}');
         }
       },
-      error: function(xhr, ajaxOptions, thrownError) { alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText); }
+      error: function() { $('#customer-notes-list').html(customerAsyncState('error')); lucide.createIcons(); }
     });
   });
-  //--></script>
-  <script type="text/javascript"><!--
-  $('#transaction').delegate('.pagination a', 'click', function(e) {
-    e.preventDefault();
-    $('#transaction').load(this.href);
-  });
-  $('#transaction').load('index.php?route=customer/customer/transaction&user_token={{ user_token }}&customer_id={{ customer_id }}');
+
   $('#button-transaction').on('click', function(e) {
     e.preventDefault();
+    var $button = $(this);
     $.ajax({
       url: 'index.php?route=customer/customer/addtransaction&user_token={{ user_token }}&customer_id={{ customer_id }}',
       type: 'post',
       dataType: 'json',
-      data: 'description=' + encodeURIComponent($('#tab-transaction input[name=\'description\']').val()) + '&amount=' + encodeURIComponent($('#tab-transaction input[name=\'amount\']').val()),
-      beforeSend: function() { $('#button-transaction').button('loading'); },
-      complete: function() { $('#button-transaction').button('reset'); },
+      data: 'description=' + encodeURIComponent($('#input-transaction-description').val()) + '&amount=' + encodeURIComponent($('#input-amount').val()),
+      beforeSend: function() { $button.button('loading'); },
+      complete: function() { $button.button('reset'); },
       success: function(json) {
-        $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-transaction').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-          lucide.createIcons();
+          $('#customer-transactions').prepend('<div class="alert alert-danger alert-dismissible">' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         }
         if (json['success']) {
-          $('#tab-transaction').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
-          lucide.createIcons();
-          $('#transaction').load('index.php?route=customer/customer/transaction&user_token={{ user_token }}&customer_id={{ customer_id }}');
-          $('#tab-transaction input[name=\'amount\']').val('');
-          $('#tab-transaction input[name=\'description\']').val('');
+          $('#input-amount, #input-transaction-description').val('');
+          loadCustomerFragment('#customer-transactions', 'index.php?route=customer/customer/transaction&user_token={{ user_token }}&customer_id={{ customer_id }}');
         }
       },
-      error: function(xhr, ajaxOptions, thrownError) { alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText); }
+      error: function() { $('#customer-transactions').html(customerAsyncState('error')); lucide.createIcons(); }
     });
   });
-  //--></script>
-  <script type="text/javascript"><!--
-  $('#reward').delegate('.pagination a', 'click', function(e) {
-    e.preventDefault();
-    $('#reward').load(this.href);
-  });
-  $('#reward').load('index.php?route=customer/customer/reward&user_token={{ user_token }}&customer_id={{ customer_id }}');
+
   $('#button-reward').on('click', function(e) {
     e.preventDefault();
+    var $button = $(this);
     $.ajax({
       url: 'index.php?route=customer/customer/addreward&user_token={{ user_token }}&customer_id={{ customer_id }}',
       type: 'post',
       dataType: 'json',
-      data: 'description=' + encodeURIComponent($('#tab-reward input[name=\'description\']').val()) + '&points=' + encodeURIComponent($('#tab-reward input[name=\'points\']').val()),
-      beforeSend: function() { $('#button-reward').button('loading'); },
-      complete: function() { $('#button-reward').button('reset'); },
+      data: 'description=' + encodeURIComponent($('#input-reward-description').val()) + '&points=' + encodeURIComponent($('#input-points').val()),
+      beforeSend: function() { $button.button('loading'); },
+      complete: function() { $button.button('reset'); },
       success: function(json) {
-        $('.alert-dismissible').remove();
         if (json['error']) {
-          $('#tab-reward').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-          lucide.createIcons();
+          $('#customer-rewards').prepend('<div class="alert alert-danger alert-dismissible">' + json['error'] + '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
         }
         if (json['success']) {
-          $('#tab-reward').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
-          lucide.createIcons();
-          $('#reward').load('index.php?route=customer/customer/reward&user_token={{ user_token }}&customer_id={{ customer_id }}');
-          $('#tab-reward input[name=\'points\']').val('');
-          $('#tab-reward input[name=\'description\']').val('');
+          $('#input-points, #input-reward-description').val('');
+          loadCustomerFragment('#customer-rewards', 'index.php?route=customer/customer/reward&user_token={{ user_token }}&customer_id={{ customer_id }}');
         }
       },
-      error: function(xhr, ajaxOptions, thrownError) { alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText); }
+      error: function() { $('#customer-rewards').html(customerAsyncState('error')); lucide.createIcons(); }
     });
   });
-  $('#ip').delegate('.pagination a', 'click', function(e) {
-    e.preventDefault();
-    $('#ip').load(this.href);
-  });
-  $('#ip').load('index.php?route=customer/customer/ip&user_token={{ user_token }}&customer_id={{ customer_id }}');
+  {% endif %}
   $('#content').delegate('button[id^=\'button-custom-field\'], button[id^=\'button-address\'][id$=\'-custom-field\']', 'click', function() {
     var node = this;
     $('#form-upload').remove();
