@@ -64,12 +64,8 @@ export-yml-[0-9]*-*.xml
 # If you want to ignore backup installer artifacts in development mode:
 # /upload/backup.install/*
 
-# PHPUnit cache
-.phpunit.cache/
+# PHP-CS-Fixer cache
 .php-cs-fixer.cache
-
-# Local test suites (not part of the repo test suite in ./tests/)
-/upload/tests/
 
 # IDE Project files
 /.idea
