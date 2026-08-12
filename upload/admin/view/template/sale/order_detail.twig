@@ -29,9 +29,14 @@
               <ul class="dropdown-menu dropdown-menu-right">
                 <li><a href="#" onclick="event.preventDefault();addReward();return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
                 <li><a href="#" onclick="event.preventDefault();removeReward();return false"><i data-lucide="star-off" width="14" height="14"></i> {{ button_reward_remove }}</a></li>
+                {% if affiliate_id %}
                 <li class="divider"></li>
+                {% if not commission_total %}
                 <li><a href="#" onclick="event.preventDefault();addCommission();return false"><i data-lucide="coins" width="14" height="14"></i> {{ button_commission_add }}</a></li>
+                {% else %}
                 <li><a href="#" onclick="event.preventDefault();removeCommission();return false"><i data-lucide="coins-off" width="14" height="14"></i> {{ button_commission_remove }}</a></li>
+                {% endif %}
+                {% endif %}
                 <li class="divider"></li>
                 <li><a href="#" onclick="event.preventDefault();duplicateOrder();return false"><i data-lucide="copy" width="14" height="14"></i> {{ button_duplicate_order }}</a></li>
                 <li class="divider"></li>
@@ -264,26 +269,40 @@
       {# Sidebar #}
       <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
 
-        {# Buyer Card (customer + addresses) #}
-        <div class="dcx-sidebar-card" data-panel="buyer">
-          <div class="dcx-sidebar-card__header">
-            <div class="dcx-sidebar-card__header-icon"><i data-lucide="user" width="16" height="16"></i></div>
-            <h3 class="dcx-sidebar-card__title">{{ text_buyer }}</h3>
-            <a href="#" class="dcx-sidebar-edit-link" onclick="event.preventDefault(); togglePanelEditMode('buyer');"><i data-lucide="pencil" width="12" height="12"></i> {{ text_edit_buyer }}</a>
-            <div class="dcx-sidebar-edit-actions">
-              <button type="button" class="btn btn-primary btn-xs" onclick="savePanelChanges('buyer')">
-                <i data-lucide="check" width="13" height="13"></i> {{ button_save }}
-              </button>
-              <button type="button" class="btn btn-default btn-xs" onclick="togglePanelEditMode('buyer')">
-                <i data-lucide="x" width="13" height="13"></i> {{ button_cancel }}
-              </button>
-            </div>
-          </div>
-          <div class="dcx-sidebar-card__body">
-            <div class="dcx-sidebar-card__field">
-              <span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
-              <span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
-              <div class="edit-only" style="display:none">
+		{# Buyer Card (customer + addresses) #}
+		<div class="dcx-sidebar-card" data-panel="buyer" data-customer-id="{{ customer_id }}">
+			<div class="dcx-sidebar-card__header">
+				<div class="dcx-sidebar-card__header-icon"><i data-lucide="user" width="16" height="16"></i></div>
+				<h3 class="dcx-sidebar-card__title">{{ text_buyer }}</h3>
+				<a href="#" class="dcx-sidebar-edit-link" onclick="event.preventDefault(); togglePanelEditMode('buyer');"><i data-lucide="pencil" width="12" height="12"></i> {{ text_edit_buyer }}</a>
+				<div class="dcx-sidebar-edit-actions">
+					<button type="button" class="btn btn-primary btn-xs" onclick="savePanelChanges('buyer')">
+						<i data-lucide="check" width="13" height="13"></i> {{ button_save }}
+					</button>
+					<button type="button" class="btn btn-default btn-xs" onclick="togglePanelEditMode('buyer')">
+						<i data-lucide="x" width="13" height="13"></i> {{ button_cancel }}
+					</button>
+				</div>
+			</div>
+			<div class="dcx-sidebar-card__body">
+				{% if not customer_id %}
+				<div class="dcx-sidebar-card__field">
+					<span class="dcx-sidebar-card__label">{{ text_attach_customer }}</span>
+					<span class="dcx-sidebar-card__value view-only">
+						<a href="#" class="btn btn-default btn-xs" onclick="event.preventDefault(); togglePanelEditMode('buyer');">
+							<i data-lucide="user-plus" width="11" height="11"></i> {{ text_attach_customer }}
+						</a>
+					</span>
+					<div class="edit-only" style="display:none">
+						<input type="text" id="customer-search" class="form-control" placeholder="{{ entry_search_customer }}" autocomplete="off">
+						<input type="hidden" id="customer-search-id" value="">
+					</div>
+				</div>
+				{% endif %}
+			<div class="dcx-sidebar-card__field">
+				<span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
+				<span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
+				<div class="edit-only" style="display:none">
                 <input type="text" class="form-control" value="{{ firstname }}" data-field="firstname" placeholder="{{ entry_firstname }}" style="width:48%;display:inline-block">
                 <input type="text" class="form-control" value="{{ lastname }}" data-field="lastname" placeholder="{{ entry_lastname }}" style="width:48%;display:inline-block">
               </div>
@@ -312,11 +331,18 @@
                 {% endfor %}
               </select>
             </div>
-            {% if customer_link %}
+            {% if customer_id %}
             <div class="dcx-sidebar-card__field" style="margin-top:4px">
               <a href="{{ customer_link }}" target="_blank" class="btn btn-default btn-xs">
                 <i data-lucide="external-link" width="11" height="11"></i> {{ text_view_customer }}
               </a>
+            </div>
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_replace_customer }}</span>
+              <div class="edit-only" style="display:none">
+                <input type="text" id="customer-search" class="form-control" placeholder="{{ entry_search_customer }}" autocomplete="off">
+                <input type="hidden" id="customer-search-id" value="">
+              </div>
             </div>
             {% endif %}
 
@@ -458,16 +484,18 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="dcx-sidebar-card__field">
-              <div class="dcx-sidebar-card__field-row">
+            <div class="dcx-sidebar-card__field dcx-reward-field">
+              <div class="dcx-sidebar-card__field-row dcx-reward-row">
                 <span class="dcx-sidebar-card__label">{{ text_reward }}</span>
-                <span class="dcx-sidebar-card__value">{{ reward }}</span>
-                {% if reward_awarded_text %}
-                <span class="dcx-sidebar-card__value" style="font-size:11px;color:#28a745">{{ reward_awarded_text }}</span>
-                {% elseif reward_delayed %}
-                <span class="dcx-sidebar-card__value" style="font-size:11px;color:#6c757d">{{ text_reward_pending }}</span>
-                {% endif %}
-                <div class="dcx-sidebar-card__actions">
+                <div class="dcx-reward-summary">
+                  <span class="dcx-sidebar-card__value">{{ reward }}</span>
+                  {% if reward_awarded_text %}
+                  <span class="dcx-reward-status dcx-reward-status--awarded">{{ reward_awarded_text }}</span>
+                  {% elseif reward_delayed %}
+                  <span class="dcx-reward-status dcx-reward-status--pending">{{ text_reward_pending }}</span>
+                  {% endif %}
+                </div>
+                <div class="dcx-sidebar-card__actions dcx-reward-actions">
                   <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" data-toggle="tooltip" title="{{ button_reward_add }}">
                     <i data-lucide="plus" width="11" height="11"></i>
                   </button>
@@ -483,12 +511,15 @@
                 <span class="dcx-sidebar-card__label">{{ text_affiliate }}</span>
                 <span class="dcx-sidebar-card__value">{{ affiliate_firstname }} {{ affiliate_lastname }} ({{ commission }})</span>
                 <div class="dcx-sidebar-card__actions">
+                  {% if not commission_total %}
                   <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addCommission()" data-toggle="tooltip" title="{{ button_commission_add }}">
                     <i data-lucide="plus" width="11" height="11"></i>
                   </button>
+                  {% else %}
                   <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeCommission()" data-toggle="tooltip" title="{{ button_commission_remove }}">
                     <i data-lucide="minus" width="11" height="11"></i>
                   </button>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -896,6 +927,22 @@ function savePanelChanges(panelId) {
 				}
 			}
 		});
+		const custIdInput = document.getElementById('customer-search-id');
+		const currentCustomerId = String(panel.dataset.customerId || '');
+		let attachedCustomer = null;
+		if (custIdInput && custIdInput.value && custIdInput.value !== currentCustomerId) {
+			customerGroupChanged = true;
+			attachedCustomer = true;
+			promises.push(api('index.php?route=sale/order_detail/attachCustomer&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+				'POST', { customer_id: custIdInput.value }).then(j => {
+					if (j.error) {
+						showAlert(j.error, 'danger');
+					} else if (j.customer_group_id) {
+						const picker = document.getElementById('product-picker');
+						if (picker) picker.dataset.customerGroupId = j.customer_group_id;
+					}
+				}));
+		}
 		function collectAddrChanges(id) {
 			const el = panel.querySelector('#' + id);
 			if (!el) return [];
@@ -924,7 +971,9 @@ function savePanelChanges(panelId) {
 			});
 		}
 		Promise.all(promises).then(() => {
-			if (customerGroupChanged) {
+			if (attachedCustomer) {
+				showAlertAndReload('{{ text_customer_attached }}');
+			} else if (customerGroupChanged) {
 				showAlertAndReload('{{ text_order_saved }}');
 			} else {
 				showAlert('{{ text_order_saved }}');
@@ -2366,6 +2415,195 @@ function addProduct() {
 				showAlert('{{ text_product_added }}');
 			}
 		});
+}
+
+// ===================== Customer attach =====================
+const customerSearchInputs = document.querySelectorAll('#customer-search');
+const customerSearchId = document.getElementById('customer-search-id');
+let selectedCustomer = null;
+let customerInputListener = null;
+let selectedCustomerAddress = null;
+
+if (customerSearchInputs.length) {
+	const customerDropdown = document.createElement('div');
+	customerDropdown.className = 'dcx-picker__dropdown';
+	customerDropdown.style.display = 'none';
+	customerDropdown.style.position = 'absolute';
+	customerDropdown.style.zIndex = '1000';
+	customerDropdown.style.width = '100%';
+	customerDropdown.style.background = '#fff';
+	customerDropdown.style.border = '1px solid #ddd';
+	customerDropdown.style.borderRadius = '4px';
+	customerDropdown.style.marginTop = '2px';
+	customerDropdown.style.maxHeight = '220px';
+	customerDropdown.style.overflowY = 'auto';
+
+	// Attach dropdown to the last input's parent
+	const lastSearchInput = customerSearchInputs[customerSearchInputs.length - 1];
+	if (lastSearchInput && lastSearchInput.parentElement) {
+		lastSearchInput.parentElement.style.position = 'relative';
+		lastSearchInput.parentElement.appendChild(customerDropdown);
+	}
+
+	// Debounced search on all customer search inputs
+	customerSearchInputs.forEach(input => {
+		input.addEventListener('input', function() {
+			const val = input.value.trim();
+			clearTimeout(customerInputListener);
+			if (val.length < 2) {
+				customerDropdown.style.display = 'none';
+				customerDropdown.innerHTML = '';
+				selectedCustomer = null;
+				customerSearchId.value = '';
+				return;
+			}
+			customerInputListener = setTimeout(function() {
+				api('index.php?route=customer/customer/autocomplete&user_token=' + USER_TOKEN + '&filter_name=' + encodeURIComponent(val), 'GET')
+					.then(function(j) {
+						renderCustomerResults(j || [], customerDropdown);
+					}).catch(function(err) { console.error('Customer search error:', err); });
+			}, 200);
+		});
+
+		input.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				customerDropdown.style.display = 'none';
+			}
+		});
+
+		input.addEventListener('focus', function() {
+			if (customerDropdown.innerHTML && customerDropdown.children.length) {
+				customerDropdown.style.display = 'block';
+			}
+		});
+	});
+
+	function renderCustomerResults(items, dropdown) {
+		dropdown.innerHTML = '';
+		if (!items.length) {
+			const empty = document.createElement('div');
+			empty.className = 'dcx-picker__empty';
+			empty.textContent = '{{ text_no_customers }}';
+			dropdown.appendChild(empty);
+		} else {
+			items.forEach(function(item) {
+				const el = document.createElement('div');
+				el.className = 'dcx-picker__item';
+				el.style.cursor = 'pointer';
+				el.style.padding = '6px 10px';
+				el.style.borderBottom = '1px solid #f0f0f0';
+
+				const nameEl = document.createElement('div');
+				nameEl.className = 'dcx-picker__name';
+				nameEl.textContent = item.name;
+
+				const subEl = document.createElement('div');
+				subEl.className = 'dcx-picker__sub';
+				subEl.textContent = [item.email, item.telephone, item.customer_group].filter(Boolean).join(' · ');
+				el.appendChild(nameEl);
+				el.appendChild(subEl);
+
+				el.addEventListener('mousedown', function(e) {
+					e.preventDefault();
+					selectCustomer(item);
+				});
+				dropdown.appendChild(el);
+			});
+		}
+		dropdown.style.display = 'block';
+	}
+
+	function selectCustomer(item) {
+		selectedCustomer = item;
+		customerSearchId.value = item.customer_id;
+
+		customerSearchInputs.forEach(input => {
+			input.value = item.name;
+		});
+
+		// Fill buyer fields
+		const panel = document.querySelector('[data-panel="buyer"]');
+		if (panel) {
+			const fname = panel.querySelector('input[data-field="firstname"]');
+			const lname = panel.querySelector('input[data-field="lastname"]');
+			const email = panel.querySelector('input[data-field="email"]');
+			const tel = panel.querySelector('input[data-field="telephone"]');
+			if (fname) fname.value = item.firstname || '';
+			if (lname) lname.value = item.lastname || '';
+			if (email) email.value = item.email || '';
+			if (tel) tel.value = item.telephone || '';
+			const groupSel = panel.querySelector('select[data-field="customer_group_id"]');
+			if (groupSel && item.customer_group_id) {
+				groupSel.value = String(item.customer_group_id);
+			}
+		}
+
+		// Store address for later fill if empty
+		selectedCustomerAddress = item.address && item.address.length ? item.address[0] : null;
+		if (selectedCustomerAddress) {
+			const shipFname = panel.querySelector('[data-address-field="shipping_firstname"]');
+			const shipLname = panel.querySelector('[data-address-field="shipping_lastname"]');
+			const shipAddr1 = panel.querySelector('[data-address-field="shipping_address_1"]');
+			const shipCity = panel.querySelector('[data-address-field="shipping_city"]');
+			const shipPostcode = panel.querySelector('[data-address-field="shipping_postcode"]');
+			const shipCountry = panel.querySelector('[data-address-field="shipping_country_id"]');
+			const payFname = panel.querySelector('[data-address-field="payment_firstname"]');
+			const payAddr1 = panel.querySelector('[data-address-field="payment_address_1"]');
+			const payCity = panel.querySelector('[data-address-field="payment_city"]');
+			const payPostcode = panel.querySelector('[data-address-field="payment_postcode"]');
+			const payCountry = panel.querySelector('[data-address-field="payment_country_id"]');
+			const addr = selectedCustomerAddress;
+			// Fill only if the order address is still empty
+			if (shipFname && shipFname.value === '' && shipAddr1 && shipAddr1.value === '' && shipCity && shipCity.value === '') {
+				if (shipFname) shipFname.value = addr.firstname || (item.firstname || '');
+				if (shipLname) shipLname.value = addr.lastname || (item.lastname || '');
+				if (shipAddr1) shipAddr1.value = addr.address_1 || '';
+				if (shipCity) shipCity.value = addr.city || '';
+				if (shipPostcode) shipPostcode.value = addr.postcode || '';
+				if (shipCountry && addr.country_id) shipCountry.value = String(addr.country_id);
+				if (shipCountry && addr.country_id) loadZones(shipCountry, '#edit-ship-zone', addr.zone_id);
+			}
+			if (payFname && payFname.value === '' && payAddr1 && payAddr1.value === '' && payCity && payCity.value === '') {
+				if (payFname) payFname.value = addr.firstname || (item.firstname || '');
+				if (payAddr1) payAddr1.value = addr.address_1 || '';
+				if (payCity) payCity.value = addr.city || '';
+				if (payPostcode) payPostcode.value = addr.postcode || '';
+				if (payCountry && addr.country_id) payCountry.value = String(addr.country_id);
+				if (payCountry && addr.country_id) loadZones(payCountry, '#edit-pay-zone', addr.zone_id);
+			}
+		}
+
+		// Hide dropdown
+		customerDropdown.style.display = 'none';
+		customerDropdown.innerHTML = '';
+
+		showAlert('{{ text_customer_attached }}', 'success');
+	}
+
+	// When the buyer panel edit mode is toggled, reset the search state
+	const buyerPanel = document.querySelector('[data-panel="buyer"]');
+	if (buyerPanel) {
+		const observer = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				if (mutation.type === 'attributes' && mutation.attributeName === 'data-editing') {
+					if (buyerPanel.dataset.editing !== 'true') {
+						selectedCustomer = null;
+						selectedCustomerAddress = null;
+						customerSearchId.value = '';
+						customerSearchInputs.forEach(input => { input.value = ''; });
+					}
+				}
+			});
+		});
+		observer.observe(buyerPanel, { attributes: true });
+	}
+
+	document.addEventListener('mousedown', function(e) {
+		if (customerDropdown && !customerDropdown.contains(e.target) &&
+			!e.target.matches('#customer-search')) {
+			customerDropdown.style.display = 'none';
+		}
+	});
 }
 
 });
