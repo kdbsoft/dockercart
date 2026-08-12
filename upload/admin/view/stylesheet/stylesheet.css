@@ -1973,8 +1973,31 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     margin-left: 6px;
 }
 
-.ext-card {
+/* Masonry layout (CSS columns — cards keep their natural height, no gaps) */
+.ext-masonry {
+    column-count: 4;
+    column-gap: 14px;
+}
+
+.ext-card-wrapper {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
     margin-bottom: 14px;
+}
+
+@media (max-width: 1399px) {
+    .ext-masonry { column-count: 3; }
+}
+
+@media (max-width: 1099px) {
+    .ext-masonry { column-count: 2; }
+}
+
+@media (max-width: 767px) {
+    .ext-masonry { column-count: 1; }
+}
+
+.ext-card {
     transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 

@@ -9,6 +9,24 @@ class ControllerMarketplaceExtension extends Controller {
 		'dockercart_search',
 	);
 
+	// Module extensions that support creating multiple instances (stored in oc_module)
+	private $multi_instance_modules = array(
+		'carousel',
+		'html',
+		'bestseller',
+		'featured',
+		'banner',
+		'dockercart_category_tree',
+		'dockercart_shop_features',
+		'special',
+		'dockercart_brand_carousel',
+		'dockercart_seo_description',
+		'slideshow',
+		'dockercart_blog_latest',
+		'latest',
+		'dockercart_newsletter',
+	);
+
 	// Icon map per extension type
 	private $type_icons = array(
 		'module'    => 'puzzle',
@@ -179,6 +197,7 @@ class ControllerMarketplaceExtension extends Controller {
 					'ext_link'       => $ext_link,
 					'is_official'    => (strpos($code, 'dockercart_') === 0),
 					'is_system'      => $this->isSystemExtension($code),
+					'is_multi_instance' => ($type === 'module' && in_array($code, $this->multi_instance_modules)),
 				);
 				}
 
