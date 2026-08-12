@@ -96,6 +96,8 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
 		$data['edit_mode'] = !empty($this->request->get['edit']);
+		$data['customer_search_url'] = $this->url->link('customer/customer/autocomplete', 'user_token=' . $this->session->data['user_token'], true);
+		$data['attach_url'] = $this->url->link('sale/order_detail/attachCustomer', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 
 		$data['store_id'] = $order_info['store_id'];
 		$data['store_name'] = $order_info['store_name'];
@@ -323,16 +325,19 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['reward'] = $order_info['reward'];
 		$this->load->model('customer/customer');
-		$data['reward_total'] = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
 
-		$reward_points = $order_info['reward'];
-		$reward_awarded = $reward_points > 0 && $data['reward_total'] > 0;
+		$reward_points = max(0, (int)$order_info['reward']);
+		$reward_record_exists = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id) > 0;
+		$reward_awarded_flag = (bool)$order_info['reward_awarded'];
+		$reward_awarded = $reward_points > 0 && $reward_record_exists;
 		$data['reward_awarded'] = $reward_awarded;
 		$data['reward_awarded_text'] = $reward_awarded
-			? sprintf($this->language->get('text_reward_awarded'), $data['reward_total'])
+			? sprintf($this->language->get('text_reward_awarded'), $reward_points)
 			: '';
-
-		$data['reward_delayed'] = (bool)$this->config->get('config_reward_delay_days');
+		$data['reward_delayed'] = $reward_points > 0
+			&& !$reward_awarded_flag
+			&& (bool)$this->config->get('config_reward_auto_award')
+			&& (int)$this->config->get('config_reward_delay_days') > 0;
 
 		$coupon_row = $this->model_sale_order->hasCoupon($order_id);
 		$data['coupon_applied'] = (bool)$coupon_row;
@@ -1164,6 +1169,46 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function attachCustomer(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$customer_id = (int)($this->request->post['customer_id'] ?? 0);
+
+			$this->load->model('customer/customer');
+
+			$customer_info = $this->model_customer_customer->getCustomer($customer_id);
+
+			if (!$customer_info) {
+				$json['error'] = $this->language->get('error_customer');
+			} else {
+				$this->load->model('sale/order');
+
+				$result = $this->model_sale_order->attachCustomer($order_id, $customer_id);
+
+				if ($result) {
+					$json['success'] = $this->language->get('text_customer_attached');
+
+					$order_info = $this->model_sale_order->getOrder($order_id);
+					$json['customer_link'] = $this->url->link('customer/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_id=' . $customer_id, true);
+					$json['customer_group_id'] = (int)$order_info['customer_group_id'];
+					$json['customer_name'] = trim(($order_info['firstname'] ?? '') . ' ' . ($order_info['lastname'] ?? ''));
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
+				} else {
+					$json['error'] = $this->language->get('error_action');
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function quoteShipping(): void {
 		$this->load->language('sale/order');
 
@@ -1596,19 +1641,36 @@ class ControllerSaleOrderDetail extends Controller {
 			$this->load->model('sale/order');
 			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			if ($order_info && $order_info['customer_id'] && ($order_info['reward'] > 0)) {
-				$this->load->model('customer/customer');
-				$reward_total = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id);
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_order_not_found');
+			} elseif (!(int)$order_info['customer_id']) {
+				$json['error'] = $this->language->get('error_reward_no_customer');
+			} elseif ((int)$order_info['reward'] <= 0) {
+				$json['error'] = $this->language->get('error_reward_no_points');
+			} else {
+				require_once DIR_SYSTEM . 'library/dockercart_reward.php';
 
-				if (!$reward_total) {
-					// Manual award marks the order as awarded so the delayed
-					// scheduler run does not double-award it.
-					$this->model_customer_customer->addReward($order_info['customer_id'], $this->language->get('text_order_id') . ' #' . $order_id, $order_info['reward'], $order_id);
-					$this->db->query("UPDATE `" . DB_PREFIX . "order` SET reward_awarded = '1' WHERE order_id = '" . (int)$order_id . "'");
+				$this->db->query('START TRANSACTION');
+
+				try {
+					$reward = new \DockercartReward($this->registry);
+					$awarded = $reward->awardOrderReward($order_id, true);
+
+					if ($awarded === 1) {
+						$this->db->query('COMMIT');
+						$json['success'] = $this->language->get('text_reward_added');
+					} elseif ($awarded === 2) {
+						$this->db->query('COMMIT');
+						$json['error'] = $this->language->get('error_reward_exists');
+					} else {
+						$this->db->query('ROLLBACK');
+						$json['error'] = $this->language->get('error_reward_exists');
+					}
+				} catch (\Throwable $e) {
+					$this->db->query('ROLLBACK');
+					$json['error'] = $this->language->get('error_action');
 				}
 			}
-
-			$json['success'] = $this->language->get('text_reward_added');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -1648,16 +1710,19 @@ class ControllerSaleOrderDetail extends Controller {
 			$this->load->model('sale/order');
 			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			if ($order_info && $order_info['affiliate_id']) {
+			if (!$order_info || !(int)$order_info['affiliate_id']) {
+				$json['error'] = $this->language->get('error_commission_no_affiliate');
+			} else {
 				$this->load->model('customer/customer');
 				$commission_total = $this->model_customer_customer->getTotalTransactionsByOrderId($order_id);
 
-				if (!$commission_total) {
+				if ($commission_total) {
+					$json['error'] = $this->language->get('error_commission_exists');
+				} else {
 					$this->model_customer_customer->addTransaction($order_info['affiliate_id'], $this->language->get('text_order_id') . ' #' . $order_id, $order_info['commission'], $order_id);
+					$json['success'] = $this->language->get('text_commission_added');
 				}
 			}
-
-			$json['success'] = $this->language->get('text_commission_added');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -1674,10 +1739,16 @@ class ControllerSaleOrderDetail extends Controller {
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
 
-			$this->load->model('customer/customer');
-			$this->model_customer_customer->deleteTransaction($order_id);
+			$this->load->model('sale/order');
+			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			$json['success'] = $this->language->get('text_commission_removed');
+			if (!$order_info || !(int)$order_info['affiliate_id']) {
+				$json['error'] = $this->language->get('error_commission_no_affiliate');
+			} else {
+				$this->load->model('customer/customer');
+				$this->model_customer_customer->deleteTransactionByOrderId($order_id);
+				$json['success'] = $this->language->get('text_commission_removed');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
