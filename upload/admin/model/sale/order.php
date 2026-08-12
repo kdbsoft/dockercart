@@ -92,6 +92,11 @@ class ModelSaleOrder extends Model {
 		$store_name = $this->config->get('config_name') ? $this->config->get('config_name') : 'DockerCart';
 		$store_url = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
 
+		$customer_group_id = (int)($this->request->get['customer_group_id'] ?? 0);
+		if (!$customer_group_id) {
+			$customer_group_id = (int)$this->config->get('config_customer_group_id');
+		}
+
 		$currency_code = $this->config->get('config_currency');
 		$currency_id = $this->currency->getId($currency_code);
 		$currency_value = 1.0;
@@ -124,7 +129,7 @@ class ModelSaleOrder extends Model {
 			store_id = '" . (int)$store_id . "',
 			store_name = '" . $this->db->escape($store_name) . "',
 			store_url = '" . $this->db->escape($store_url) . "',
-			customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "',
+			customer_group_id = '" . (int)$customer_group_id . "',
 			custom_field = '[]',
 			payment_custom_field = '[]',
 			shipping_custom_field = '[]',
@@ -807,6 +812,7 @@ class ModelSaleOrder extends Model {
 			'email',
 			'telephone',
 			'tax_number',
+			'customer_group_id',
 			'payment_method',
 			'payment_code',
 			'shipping_method',
@@ -842,6 +848,7 @@ class ModelSaleOrder extends Model {
 		foreach ($allowed as $field) {
 			if (array_key_exists($field, $data)) {
 				$value = ($field === 'tracking_number') ? $this->normalizeTrackingNumber($data[$field]) : $data[$field];
+				$value = ($field === 'customer_group_id') ? (int)$value : $value;
 				$set[] = "`" . $field . "` = '" . $this->db->escape($value) . "'";
 			}
 		}
@@ -1025,7 +1032,7 @@ class ModelSaleOrder extends Model {
 
 	public function updateOrderField($order_id, $field, $value) {
 		$allowed = array(
-			'firstname', 'lastname', 'email', 'telephone', 'tax_number',
+			'firstname', 'lastname', 'email', 'telephone', 'tax_number', 'customer_group_id',
 			'payment_method', 'payment_code', 'shipping_method', 'shipping_code',
 			'payment_firstname', 'payment_lastname', 'payment_company',
 			'payment_address_1', 'payment_address_2', 'payment_city',
@@ -1046,7 +1053,15 @@ class ModelSaleOrder extends Model {
 			$value = $this->normalizeTrackingNumber($value);
 		}
 
+		if ($field === 'customer_group_id') {
+			$value = (int)$value;
+		}
+
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET `" . $field . "` = '" . $this->db->escape((string)$value) . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		if ($field === 'customer_group_id') {
+			$this->recalculatePricesForCustomerGroup($order_id);
+		}
 
 		return true;
 	}
@@ -1742,6 +1757,58 @@ class ModelSaleOrder extends Model {
 			'old_total' => $old_total,
 			'new_total' => $new_total
 		);
+	}
+
+	/**
+	 * Re-price every non-overridden product line of the order from catalog
+	 * data for the order's current customer group (which must already be
+	 * updated in oc_order). Manually overridden lines keep their prices.
+	 * Also re-applies BXGY distribution and recalculates order totals.
+	 *
+	 * @param int $order_id
+	 * @return void
+	 */
+	public function recalculatePricesForCustomerGroup($order_id) {
+		$lines_query = $this->db->query("SELECT order_product_id, product_id, quantity FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' ORDER BY order_product_id");
+
+		if (!$lines_query->num_rows) {
+			return;
+		}
+
+		$overrides = $this->getOrderProductOverrides($order_id);
+
+		foreach ($lines_query->rows as $line) {
+			$opid = (int)$line['order_product_id'];
+
+			if (isset($overrides[$opid])) {
+				continue;
+			}
+
+			$options = $this->getOrderOptions($order_id, $opid);
+
+			$pricing = $this->calculateProductPricing($order_id, (int)$line['product_id'], (float)$line['quantity'], $options);
+
+			if (!$pricing) {
+				continue;
+			}
+
+			$quantity = max(1, (float)$pricing['quantity']);
+
+			if ($pricing['variant_id'] > 0 && (int)$line['variant_id'] > 0) {
+				$pricing['variant_id'] = (int)$line['variant_id'];
+			}
+
+			$new_total = round((float)$pricing['price'] * $quantity, 4);
+			$new_tax = round((float)$pricing['tax'] * $quantity, 4);
+
+			$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . (float)$pricing['price'] . "', total = '" . (float)$new_total . "', tax = '" . (float)$new_tax . "' WHERE order_product_id = '" . (int)$opid . "' AND order_id = '" . (int)$order_id . "'");
+		}
+
+		// BXGY distribution depends on all lines — re-apply it to the
+		// remaining (non-overridden) lines after the group re-pricing.
+		$this->recalculateBxgyForOrderLines($order_id);
+
+		$this->recalculateOrderTotals($order_id);
 	}
 
 	public function applyCoupon($order_id, $code) {
