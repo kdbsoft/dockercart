@@ -6,6 +6,8 @@ $_['heading_title']     = 'SEO Description';
 $_['text_extension']    = 'Add-ons';
 $_['text_success']      = 'Success: You have modified SEO Description module!';
 $_['text_edit']         = 'Edit SEO Description Module';
+$_['text_add'] = 'Add SEO Description Module';
+$_['text_add_subtitle'] = 'Configure SEO description for your store';
 $_['text_default_module_name'] = 'SEO Description';
 $_['text_edit_subtitle'] = 'Configure SEO description for your store';
 

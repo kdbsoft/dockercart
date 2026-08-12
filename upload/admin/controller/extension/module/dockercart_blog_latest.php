@@ -79,6 +79,9 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 
+		$data['text_form'] = !isset($this->request->get['module_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
+		$data['text_form_subtitle'] = !isset($this->request->get['module_id']) ? $this->language->get('text_add_subtitle') : $this->language->get('text_edit_subtitle');
+
 		// Get module settings
 		if (isset($this->request->get['module_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$module_info = $this->model_setting_module->getModule($this->request->get['module_id']);
@@ -101,13 +104,13 @@ class ControllerExtensionModuleDockercartBlogLatest extends Controller {
 				? $data['name_translation'][$language_id]
 				: $module_info['name'];
 		} else {
-			$data['name'] = $this->language->get('heading_title');
+			$data['name'] = '';
 		}
 
 		foreach ($data['languages'] as $lang) {
 			$lid = (int)$lang['language_id'];
 			if (!isset($data['name_translation'][$lid])) {
-				$data['name_translation'][$lid] = !empty($module_info) ? $module_info['name'] : $this->language->get('heading_title');
+				$data['name_translation'][$lid] = !empty($module_info) ? $module_info['name'] : '';
 			}
 		}
 

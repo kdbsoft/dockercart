@@ -6,6 +6,8 @@ $_['heading_title']    = 'Carousel';
 $_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified carousel module!';
 $_['text_edit']        = 'Edit Carousel Module';
+$_['text_add'] = 'Add Carousel Module';
+$_['text_add_subtitle'] = 'Configure settings and options for the new module';
 $_['text_default_module_name'] = 'Carousel';
 // Subtitle
 
