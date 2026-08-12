@@ -171,7 +171,7 @@ class ModelCatalogReview extends Model {
 			$order = 'r.rating ASC, r.date_added DESC';
 		}
 
-		$query = $this->db->query("SELECT r.review_id, r.author, r.rating, r.text, r.verified, r.criteria_group_id, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' ORDER BY " . $order . " LIMIT " . (int)$start . "," . (int)$limit);
+		$query = $this->db->query("SELECT r.review_id, r.author, r.rating, r.text, r.verified, r.criteria_group_id, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND r.parent_id IS NULL ORDER BY " . $order . " LIMIT " . (int)$start . "," . (int)$limit);
 
 		if (!$query->rows) {
 			return array();
@@ -208,7 +208,7 @@ class ModelCatalogReview extends Model {
 	 * Total number of approved reviews for a product.
 	 */
 	public function getTotalReviewsByProductId(int $product_id): int {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1'");
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND r.parent_id IS NULL");
 
 		return (int)$query->row['total'];
 	}
@@ -220,6 +220,64 @@ class ModelCatalogReview extends Model {
 		$query = $this->db->query("SELECT review_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "' LIMIT 1");
 
 		return (bool)$query->num_rows;
+	}
+
+	/**
+	 * Add a one-level-deep reply to a published top-level review.
+	 *
+	 * Replies are plain text only: no rating, verified flag, criteria or
+	 * media, and they never touch the product rating cache. Moderation is
+	 * controlled by config_review_reply_auto_approve.
+	 *
+	 * @return int reply review_id
+	 */
+	public function addReply(int $product_id, int $parent_id, array $data): int {
+		$parent = $this->db->query("SELECT review_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$parent_id . "' AND product_id = '" . (int)$product_id . "' AND parent_id IS NULL AND status = '1' LIMIT 1");
+
+		if (!$parent->num_rows) {
+			return 0;
+		}
+
+		$customer_id = (int)$this->customer->getId();
+		$author = isset($data['name']) ? (string)$data['name'] : '';
+		$text = isset($data['text']) ? (string)$data['text'] : '';
+		$ip = isset($this->request->server['REMOTE_ADDR']) ? (string)$this->request->server['REMOTE_ADDR'] : '';
+
+		$status = (int)$this->config->get('config_review_reply_auto_approve') ? 1 : 0;
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "review SET author = '" . $this->db->escape($author) . "', customer_id = '" . $customer_id . "', product_id = '" . (int)$product_id . "', parent_id = '" . (int)$parent_id . "', author_is_admin = '0', text = '" . $this->db->escape($text) . "', rating = '0', status = '" . $status . "', verified = '0', ip = '" . $this->db->escape($ip) . "', criteria_group_id = NULL, date_added = NOW()");
+
+		return (int)$this->db->getLastId();
+	}
+
+	/**
+	 * Approved replies for a set of review ids, grouped by parent review id.
+	 *
+	 * @param array<int, int> $review_ids
+	 * @return array<int, array<int, array<string, mixed>>> parent_id => [reply]
+	 */
+	public function getRepliesForReviews(array $review_ids): array {
+		if (!$review_ids) {
+			return array();
+		}
+
+		$query = $this->db->query("SELECT parent_id, review_id, author, author_is_admin, text, date_added FROM " . DB_PREFIX . "review WHERE parent_id IN (" . implode(',', $review_ids) . ") AND status = '1' ORDER BY parent_id ASC, date_added ASC");
+
+		$replies = array();
+
+		foreach ($query->rows as $row) {
+			$parent_id = (int)$row['parent_id'];
+
+			$replies[$parent_id][] = array(
+				'reply_id'        => (int)$row['review_id'],
+				'author'          => $row['author'],
+				'author_is_admin' => (int)$row['author_is_admin'] === 1,
+				'text'            => $row['text'],
+				'date_added'      => $row['date_added'],
+			);
+		}
+
+		return $replies;
 	}
 
 	/**
@@ -244,7 +302,12 @@ class ModelCatalogReview extends Model {
 				$this->db->query("UPDATE " . DB_PREFIX . "review_vote SET vote = '" . $vote_value . "', date_added = NOW() WHERE review_id = '" . (int)$review_id . "' AND customer_id = '" . (int)$customer_id . "'");
 			}
 		} else {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "review_vote SET review_id = '" . (int)$review_id . "', customer_id = '" . (int)$customer_id . "', vote = '" . $vote_value . "', date_added = NOW()");
+			// Replies cannot be voted on: refuse when the review is a reply.
+			$top_level = $this->db->query("SELECT review_id FROM " . DB_PREFIX . "review WHERE review_id = '" . (int)$review_id . "' AND parent_id IS NULL LIMIT 1");
+
+			if ($top_level->num_rows) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "review_vote SET review_id = '" . (int)$review_id . "', customer_id = '" . (int)$customer_id . "', vote = '" . $vote_value . "', date_added = NOW()");
+			}
 		}
 
 		$counts = $this->getVoteCounts($review_id);
@@ -362,7 +425,7 @@ class ModelCatalogReview extends Model {
 	 * @return array{rating: float, review_count: int, distribution: array<int, int>}
 	 */
 	public function recalculateProductRating(int $product_id): array {
-		$query = $this->db->query("SELECT rating FROM " . DB_PREFIX . "review WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
+		$query = $this->db->query("SELECT rating FROM " . DB_PREFIX . "review WHERE product_id = '" . (int)$product_id . "' AND status = '1' AND parent_id IS NULL");
 
 		$rows = $query->rows;
 		$ratings = array_map('floatval', array_column($rows, 'rating'));
@@ -390,7 +453,7 @@ class ModelCatalogReview extends Model {
 			$limit = 5;
 		}
 
-		$query = $this->db->query("SELECT review_id, author, rating, text, date_added FROM " . DB_PREFIX . "review WHERE product_id = '" . (int)$product_id . "' AND status = '1' ORDER BY date_added DESC LIMIT " . (int)$limit);
+		$query = $this->db->query("SELECT review_id, author, rating, text, date_added FROM " . DB_PREFIX . "review WHERE product_id = '" . (int)$product_id . "' AND status = '1' AND parent_id IS NULL ORDER BY date_added DESC LIMIT " . (int)$limit);
 
 		$reviews = array();
 

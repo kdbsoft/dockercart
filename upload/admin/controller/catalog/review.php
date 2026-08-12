@@ -249,6 +249,12 @@ class ControllerCatalogReview extends Controller {
 			$filter_date_added = '';
 		}
 
+		if (isset($this->request->get['filter_replies'])) {
+			$filter_replies = $this->request->get['filter_replies'];
+		} else {
+			$filter_replies = '';
+		}
+
 		if (isset($this->request->get['order'])) {
 			$order = $this->request->get['order'];
 		} else {
@@ -283,6 +289,10 @@ class ControllerCatalogReview extends Controller {
 
 		if (isset($this->request->get['filter_date_added'])) {
 			$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
+		}
+
+		if (isset($this->request->get['filter_replies'])) {
+			$url .= '&filter_replies=' . $this->request->get['filter_replies'];
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -321,7 +331,12 @@ class ControllerCatalogReview extends Controller {
 			array('key' => 'product', 'label' => $this->language->get('entry_product'), 'type' => 'text'),
 			array('key' => 'author', 'label' => $this->language->get('entry_author'), 'type' => 'text'),
 			array('key' => 'status', 'label' => $this->language->get('entry_status'), 'type' => 'status'),
-			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date')
+			array('key' => 'date_added', 'label' => $this->language->get('entry_date_added'), 'type' => 'date'),
+			array('key' => 'replies', 'label' => $this->language->get('filter_replies'), 'type' => 'select', 'options' => array(
+				''        => $this->language->get('text_filter_replies_all'),
+				'any'     => $this->language->get('text_filter_replies_any'),
+				'pending' => $this->language->get('text_filter_replies_pending'),
+			)),
 		), $tab_counts);
 
 		$data['active_filter'] = $active_filter;
@@ -333,6 +348,7 @@ class ControllerCatalogReview extends Controller {
 			'filter_author'     => $filter_author,
 			'filter_status'     => $filter_status,
 			'filter_date_added' => $filter_date_added,
+			'filter_replies'    => $filter_replies,
 			'sort'              => $sort,
 			'order'             => $order,
 			'start'             => ($page - 1) * $this->config->get('config_limit_admin'),
@@ -361,6 +377,8 @@ class ControllerCatalogReview extends Controller {
 				'has_media'       => ((int)$result['image_count'] + (int)$result['video_count']) > 0,
 				'likes'           => (int)$result['likes'],
 				'dislikes'        => (int)$result['dislikes'],
+				'reply_count'     => (int)$result['reply_count'],
+				'reply_pending_count' => (int)$result['reply_pending_count'],
 				'status'          => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'      => $result['status'],
 				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
@@ -467,11 +485,23 @@ class ControllerCatalogReview extends Controller {
 		$data['filter_author'] = $filter_author;
 		$data['filter_status'] = $filter_status;
 		$data['filter_date_added'] = $filter_date_added;
+		$data['filter_replies'] = $filter_replies;
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 
 		$data['review_settings'] = $this->url->link('catalog/review_setting', 'user_token=' . $this->session->data['user_token'], true);
+
+		// Replies
+		$data['reply_url'] = $this->url->link('catalog/review/reply', 'user_token=' . $this->session->data['user_token'], true);
+		$data['delete_reply_url'] = $this->url->link('catalog/review/deleteReply', 'user_token=' . $this->session->data['user_token'], true);
+		$data['update_reply_field_url'] = $this->url->link('catalog/review/updateReplyField', 'user_token=' . $this->session->data['user_token'], true);
+		$data['text_reply_admin_badge'] = $this->language->get('text_reply_admin_badge');
+		$data['text_reply_pending'] = $this->language->get('text_reply_pending');
+		$data['entry_reply_text'] = $this->language->get('entry_reply_text');
+		$data['button_reply'] = $this->language->get('button_reply');
+		$data['text_confirm_delete_reply'] = $this->language->get('text_confirm_delete_reply');
+		$data['column_replies'] = $this->language->get('column_replies');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -777,6 +807,19 @@ class ControllerCatalogReview extends Controller {
 				if (!empty($review_info['videos'][0]['video'])) {
 					$json['video'] = $review_info['videos'][0]['video'];
 				}
+
+				$json['replies'] = array();
+
+				foreach ($this->model_catalog_review->getReplies((int)$review_info['review_id']) as $reply) {
+					$json['replies'][] = array(
+						'reply_id'        => (int)$reply['review_id'],
+						'author'          => $reply['author'],
+						'author_is_admin' => (int)$reply['author_is_admin'] === 1,
+						'text'            => nl2br(htmlspecialchars($reply['text'], ENT_QUOTES, 'UTF-8')),
+						'status'          => (int)$reply['status'],
+						'date_added'      => date($this->language->get('date_format_short'), strtotime($reply['date_added'])),
+					);
+				}
 			}
 		}
 
@@ -861,6 +904,169 @@ class ControllerCatalogReview extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	/**
+	 * AJAX: post an admin reply to a review. Replies are always published.
+	 */
+	public function reply() {
+		$this->load->language('catalog/review');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/review')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['review_id']) || !isset($this->request->post['text'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$review_id = (int)$this->request->post['review_id'];
+			$text = trim((string)$this->request->post['text']);
+
+			$min_length = (int)$this->config->get('config_review_reply_min_length');
+			$max_length = (int)$this->config->get('config_review_reply_max_length');
+
+			if ($min_length < 1) {
+				$min_length = 2;
+			}
+
+			if ($max_length < $min_length) {
+				$max_length = 1000;
+			}
+
+			if (utf8_strlen($text) < $min_length || utf8_strlen($text) > $max_length) {
+				$json['error'] = $this->language->get('error_reply_text');
+			} else {
+				$this->load->model('catalog/review');
+
+				$author = (string)$this->config->get('config_review_reply_author_name');
+
+				if ($author === '') {
+					$author = $this->config->get('config_name');
+				}
+
+				$reply_id = $this->model_catalog_review->addReply($review_id, array(
+					'author' => $author,
+					'text'   => $text,
+				));
+
+				if ($reply_id <= 0) {
+					$json['error'] = $this->language->get('error_reply_not_found');
+				} else {
+					$reply_info = $this->model_catalog_review->getReplies($review_id);
+
+					$reply = array();
+
+					foreach ($reply_info as $row) {
+						if ((int)$row['review_id'] === $reply_id) {
+							$reply = array(
+								'reply_id'        => (int)$row['review_id'],
+								'author'          => $row['author'],
+								'author_is_admin' => (int)$row['author_is_admin'] === 1,
+								'text'            => nl2br(htmlspecialchars($row['text'], ENT_QUOTES, 'UTF-8')),
+								'status'          => (int)$row['status'],
+								'date_added'      => date($this->language->get('date_format_short'), strtotime($row['date_added'])),
+							);
+							break;
+						}
+					}
+
+					$json['success'] = $this->language->get('text_reply_added');
+					$json['reply'] = $reply;
+					$json['counts'] = $this->model_catalog_review->getReplyCounts($review_id);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * AJAX: delete a single reply.
+	 */
+	public function deleteReply() {
+		$this->load->language('catalog/review');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/review')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['reply_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$reply_id = (int)$this->request->post['reply_id'];
+
+			$this->load->model('catalog/review');
+
+			$parent = $this->db->query("SELECT parent_id FROM " . DB_PREFIX . "review WHERE review_id = '" . $reply_id . "' LIMIT 1");
+
+			if (!$parent->num_rows || !$parent->row['parent_id']) {
+				$json['error'] = $this->language->get('error_reply_not_found');
+			} else {
+				$parent_id = (int)$parent->row['parent_id'];
+
+				$this->model_catalog_review->deleteReview($reply_id);
+
+				$json['success'] = $this->language->get('text_reply_deleted');
+				$json['counts'] = $this->model_catalog_review->getReplyCounts($parent_id);
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * AJAX: toggle a reply's status.
+	 */
+	public function updateReplyField() {
+		$this->load->language('catalog/review');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/review')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['reply_id']) || !isset($this->request->post['status'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$reply_id = (int)$this->request->post['reply_id'];
+			$status = (int)$this->request->post['status'];
+
+			if ($status !== 0 && $status !== 1) {
+				$json['error'] = 'Invalid status value';
+			} else {
+				$this->load->model('catalog/review');
+
+				$parent = $this->db->query("SELECT parent_id FROM " . DB_PREFIX . "review WHERE review_id = '" . $reply_id . "' LIMIT 1");
+
+				if (!$parent->num_rows || !$parent->row['parent_id']) {
+					$json['error'] = $this->language->get('error_reply_not_found');
+				} else {
+					$parent_id = (int)$parent->row['parent_id'];
+
+					$this->model_catalog_review->updateReplyField($reply_id, array('status' => $status));
+
+					$json['success'] = $this->language->get('text_reply_status_updated');
+					$json['value_html'] = $status ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+					$json['counts'] = $this->model_catalog_review->getReplyCounts($parent_id);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	protected function validateForm() {
 		if (!$this->user->hasPermission('modify', 'catalog/review')) {
 			$this->error['warning'] = $this->language->get('error_permission');
@@ -923,6 +1129,9 @@ class ControllerCatalogReview extends Controller {
 					break;
 				case 'date_added':
 					$data['filter_date_added'] = (string)$value;
+					break;
+				case 'replies':
+					$data['filter_replies'] = (string)$value;
 					break;
 			}
 		}

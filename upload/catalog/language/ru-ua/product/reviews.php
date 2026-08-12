@@ -23,6 +23,21 @@ $_['text_vote_success']          = 'Спасибо за вашу оценку!';
 $_['error_vote']                 = 'Некорректное значение голоса!';
 $_['error_review']               = 'Отзыв не найден!';
 
+// Replies
+$_['text_reply']                 = 'Ответить';
+$_['text_reply_placeholder']     = 'Напишите ответ...';
+$_['text_reply_submit']          = 'Отправить ответ';
+$_['text_reply_login_hint']      = 'Войдите или зарегистрируйтесь, чтобы отвечать на отзывы';
+$_['text_reply_admin_badge']     = 'Магазин';
+$_['text_reply_count']           = 'ответ';
+$_['text_replies_count']         = 'ответа';
+$_['text_reply_added']           = 'Ваш ответ опубликован.';
+$_['text_reply_awaiting_moderation'] = 'Ваш ответ отправлен и ожидает модерации.';
+$_['error_reply_text']           = 'Ответ должен содержать от %s до %s символов!';
+$_['error_reply_login']          = 'Необходимо войти, чтобы отвечать!';
+$_['error_reply_disabled']       = 'Ответы на отзывы отключены!';
+$_['error_reply_not_found']      = 'Отзыв не найден!';
+
 // Section
 $_['text_reviews_section']   = 'Отзывы покупателей';
 
