@@ -190,13 +190,20 @@ class ManticoreClient {
         // (e.g. "red chair" -> "red chair*" didn't match "red wooden chair").
         $raw = (string)$query_text;
 
-        // Split on whitespace (preserve multi-byte characters)
+        // Split on whitespace (preserve multi-byte characters), then drop pure
+        // punctuation tokens ("—", "/", "-"): they carry no searchable text and
+        // would otherwise produce empty or operator-only MATCH terms. This makes
+        // queries like "Google Pixel 8 Pro — White / 128 GB / 8 GB" searchable.
         $tokens = preg_split('/\s+/u', trim($raw), -1, PREG_SPLIT_NO_EMPTY);
+
+        $tokens = array_values(array_filter($tokens, function ($t) {
+            return (bool)preg_match('/[\p{L}\p{N}]/u', (string)$t);
+        }));
 
         if (!empty($options['wildcard'])) {
             $parts = [];
             foreach ($tokens as $t) {
-                $t_esc = $this->escape($t);
+                $t_esc = $this->escape($this->manticoreEscape($t));
                 // For each token use (token | token*) so both exact and prefix matches
                 // are found. Join tokens with space so Manticore treats them as AND.
                 $parts[] = "{$t_esc} | {$t_esc}*";
@@ -209,16 +216,16 @@ class ManticoreClient {
                 $match_expr = $this->escape('');
             }
         } else {
-            $match_expr = $this->escape($raw);
+            $match_expr = $this->escape($this->manticoreEscape(implode(' ', $tokens)));
         }
 
         // For article-like queries containing spaces/_/- between letters and digits,
         // add compact variant OR-branch so:
         //   A 123, A-123, A_123, A123
         // all can match each other when compact value exists in index.
-        $compact_variant = $this->buildCompactArticleVariant($raw);
+        $compact_variant = $this->buildCompactArticleVariant(implode(' ', $tokens));
         if ($compact_variant !== '') {
-            $compact_esc = $this->escape($compact_variant);
+            $compact_esc = $this->escape($this->manticoreEscape($compact_variant));
 
             if (!empty($options['wildcard'])) {
                 $compact_expr = "{$compact_esc} | {$compact_esc}*";
@@ -531,16 +538,32 @@ class ManticoreClient {
     }
 
     /**
-     * Build compact article-like query variant by removing spaces, underscores and hyphens.
+     * Escape Manticore fulltext operators so they are treated as literal text.
+     * Applied per-token BEFORE escape() (which handles the SQL string context).
+     *
+     * @param string $value Token to escape
+     * @return string Escaped token
+     */
+    private function manticoreEscape($value) {
+        $value = (string)$value;
+        return preg_replace('/([\\\\\/\|\-!"@~()$=^<>])/u', '\\\\$1', $value);
+    }
+
+    /**
+     * Build compact article-like query variant by removing spaces, underscores, hyphens,
+     * slashes and dashes.
      *
      * Returns non-empty value only when:
-     *  - query contains at least one separator from [space,_,-], and
-     *  - query contains both letters and digits (article-like pattern).
+     *  - query contains at least one separator from [space,_,-,\,/,—,–], and
+     *  - query contains both letters and digits (article-like pattern), and
+     *  - query has at most 5 tokens and the compact form is short (long variant-label
+     *    queries like "Google Pixel 8 Pro — White / 128 GB / 8 GB" would otherwise
+     *    produce a useless giant OR-branch that matches nothing).
      */
     private function buildCompactArticleVariant($query_text) {
         $query_text = trim((string)$query_text);
 
-        if ($query_text === '' || !preg_match('/[\s_-]/u', $query_text)) {
+        if ($query_text === '' || !preg_match('/[\s_\/\x{2014}\x{2013}]/u', $query_text)) {
             return '';
         }
 
@@ -548,9 +571,18 @@ class ManticoreClient {
             return '';
         }
 
-        $compact = preg_replace('/[\s_-]+/u', '', $query_text);
+        $tokens = preg_split('/\s+/u', $query_text, -1, PREG_SPLIT_NO_EMPTY);
+        $tokens = array_values(array_filter($tokens, function ($t) {
+            return (bool)preg_match('/[\p{L}\p{N}]/u', (string)$t);
+        }));
 
-        if ($compact === '' || $compact === $query_text) {
+        if (count($tokens) > 5) {
+            return '';
+        }
+
+        $compact = preg_replace('/[\s_\/\x{2014}\x{2013}]+/u', '', implode('', $tokens));
+
+        if ($compact === '' || $compact === $query_text || mb_strlen($compact, 'UTF-8') > 30) {
             return '';
         }
 
