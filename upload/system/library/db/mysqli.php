@@ -11,7 +11,6 @@ class MySQLi {
 		}
 
 		if (!$mysqli->connect_errno) {
-			mysqli_report(MYSQLI_REPORT_ERROR);
 			$this->connection = $mysqli;
 //			$this->connection->report_mode = MYSQLI_REPORT_ERROR;
 			$this->connection->set_charset('utf8mb4');
