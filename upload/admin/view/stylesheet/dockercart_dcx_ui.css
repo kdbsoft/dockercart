@@ -1685,6 +1685,28 @@ div.dcx-field.required > .dcx-label:before {
 .dc-promo-card { position: relative; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-lg); padding: 36px 18px 14px; margin-bottom: 10px; background: var(--dc-surface-alt); }
 .dc-promo-card--reward { background: transparent; padding-top: 14px; }
 #rewards-container { max-width: 400px; }
+.dcx-table--reward > thead > tr > td {
+    font-size: 12px;
+    color: var(--dc-gray-700);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+.dcx-table--reward > tbody > tr > td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 13px;
+    color: var(--dc-gray-800);
+    border-bottom: 1px solid var(--dc-border-soft);
+    vertical-align: middle;
+}
+.dcx-table--reward > tbody > tr:hover {
+    background: var(--dc-surface-alt);
+}
+.dcx-table--reward .form-control {
+    height: 32px;
+    font-size: 13px;
+    max-width: 160px;
+}
 .dc-promo-card__actions { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 2px; }
 .dc-promo-card__toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--dc-text-faint); cursor: pointer; padding: 3px 6px; border-radius: var(--dc-radius-sm); transition: all var(--dc-transition-fast); user-select: none; }
 .dc-promo-card__toggle:hover { color: var(--dc-text-muted); background: var(--dc-gray-100); }
