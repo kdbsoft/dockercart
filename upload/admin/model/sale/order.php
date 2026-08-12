@@ -807,6 +807,7 @@ class ModelSaleOrder extends Model {
 
 	public function updateOrderQuick($order_id, $data = array()) {
 		$allowed = array(
+			'customer_id',
 			'firstname',
 			'lastname',
 			'email',
@@ -1032,7 +1033,7 @@ class ModelSaleOrder extends Model {
 
 	public function updateOrderField($order_id, $field, $value) {
 		$allowed = array(
-			'firstname', 'lastname', 'email', 'telephone', 'tax_number', 'customer_group_id',
+			'customer_id', 'firstname', 'lastname', 'email', 'telephone', 'tax_number', 'customer_group_id',
 			'payment_method', 'payment_code', 'shipping_method', 'shipping_code',
 			'payment_firstname', 'payment_lastname', 'payment_company',
 			'payment_address_1', 'payment_address_2', 'payment_city',
@@ -1060,6 +1061,38 @@ class ModelSaleOrder extends Model {
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET `" . $field . "` = '" . $this->db->escape((string)$value) . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
 		if ($field === 'customer_group_id') {
+			$this->recalculatePricesForCustomerGroup($order_id);
+		}
+
+		return true;
+	}
+
+	public function attachCustomer($order_id, $customer_id) {
+		$customer_id = (int)$customer_id;
+
+		if (!$customer_id) {
+			return false;
+		}
+
+		$customer_query = $this->db->query("SELECT customer_id, customer_group_id, firstname, lastname, email, telephone FROM `" . DB_PREFIX . "customer` WHERE customer_id = '" . (int)$customer_id . "'");
+
+		if (!$customer_query->num_rows) {
+			return false;
+		}
+
+		$customer = $customer_query->row;
+
+		$order_query = $this->db->query("SELECT customer_group_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");
+
+		if (!$order_query->num_rows) {
+			return false;
+		}
+
+		$group_changed = (int)$order_query->row['customer_group_id'] !== (int)$customer['customer_group_id'];
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET customer_id = '" . (int)$customer['customer_id'] . "', customer_group_id = '" . (int)$customer['customer_group_id'] . "', firstname = '" . $this->db->escape($customer['firstname']) . "', lastname = '" . $this->db->escape($customer['lastname']) . "', email = '" . $this->db->escape($customer['email']) . "', telephone = '" . $this->db->escape($customer['telephone']) . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		if ($group_changed) {
 			$this->recalculatePricesForCustomerGroup($order_id);
 		}
 
@@ -2785,8 +2818,23 @@ class ModelSaleOrder extends Model {
 			$was_complete = in_array($old_status_id, $complete_statuses);
 			$is_complete = in_array((int)$order_status_id, $complete_statuses);
 
-			// Transition from non-proc/complete to proc/complete → subtract stock, add affiliate commission
+			// Transition from non-proc/complete to proc/complete → confirm totals, subtract stock, add affiliate commission
 			if (!$was_processing && $is_processing) {
+				$order_totals = $this->getOrderTotals($order_id);
+
+				foreach ($order_totals as $order_total) {
+					$this->load->model('extension/total/' . $order_total['code']);
+
+					if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'confirm')) {
+						$fraud_status_id = $this->{'model_extension_total_' . $order_total['code']}->confirm($this->getOrder($order_id), $order_total);
+
+						if ($fraud_status_id) {
+							$this->db->query("ROLLBACK");
+							return false;
+						}
+					}
+				}
+
 				$order_products = $this->getOrderProducts($order_id);
 
 				foreach ($order_products as $order_product) {
@@ -2833,14 +2881,23 @@ class ModelSaleOrder extends Model {
 				$stock_reservation = new \DockercartStockReservation($this->registry);
 				$stock_reservation->releaseOrder((int)$order_id);
 
+				$order_totals = $this->getOrderTotals($order_id);
+
+				foreach ($order_totals as $order_total) {
+					$this->load->model('extension/total/' . $order_total['code']);
+
+					if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'unconfirm')) {
+						$this->{'model_extension_total_' . $order_total['code']}->unconfirm($order_id);
+					}
+				}
+
 				if ((int)$lock_query->row['affiliate_id']) {
 					$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
 				}
 			}
 
 			// Leaving a complete status → revoke the awarded reward points.
-			// Runs after the restock/commission block; the admin flow has no
-			// reward unconfirm() cycle to interfere with.
+			// Runs after unconfirm() so reversal rows remain in the ledger.
 			if ($was_complete && !$is_complete) {
 				$dockercart_reward = new \DockercartReward($this->registry);
 				$dockercart_reward->revokeOrderReward((int)$order_id, 1.0);
