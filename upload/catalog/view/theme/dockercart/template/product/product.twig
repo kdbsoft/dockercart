@@ -346,8 +346,9 @@
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}">
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
-              <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+              {% set is_hidden = is_configurable and option.is_configurable_axis and dc_axis_hidden_pov_ids is defined and option_value.product_option_value_id in dc_axis_hidden_pov_ids %}
+              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden %} disabled{% endif %} />
                 <span class="dc-color-option{{ is_selected ? ' active' : '' }}">
                   <span class="dc-color-swatch{% if option_value.is_hit %} dc-color-swatch--hit{% endif %}" style="background-color: {{ option_value.color_code }}">
                     {% if option_value.is_hit %}<span class="dc-color-hit" title="Hit">&#9733;</span>{% endif %}
@@ -363,8 +364,9 @@
             <div class="flex flex-wrap gap-2" id="input-option{{ option.product_option_id }}" data-required="{{ option.required ? '1' : '0' }}">
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
-              <label class="cursor-pointer">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }} />
+              {% set is_hidden = is_configurable and option.is_configurable_axis and dc_axis_hidden_pov_ids is defined and option_value.product_option_value_id in dc_axis_hidden_pov_ids %}
+              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden %} disabled{% endif %} />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
                   {{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
