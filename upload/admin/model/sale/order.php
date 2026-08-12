@@ -1329,21 +1329,7 @@ class ModelSaleOrder extends Model {
 		$stock = (float)$product_info['quantity'];
 		$subtract = (bool)$product_info['subtract'];
 
-		// Use the RAW catalog price (not the normalized one from getProduct(),
-		// which already applied the group discount/markup): applyCatalogPricingToPrice
-		// applies the full storefront pricing chain itself, and feeding it an
-		// already-discounted price would apply the group percent twice.
-		$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
-		$price = (float)($raw_price_query->num_rows ? $raw_price_query->row['price'] : $product_info['price']);
-
-		// DockerCart: catalog pricing (customer group price / quantity discount /
-		// special / group percent) applies to plain products as on the storefront.
-		$catalog_pricing = $this->applyCatalogPricingToPrice($product_id, 0, $quantity, $customer_group_id, $price);
-
-		if ($catalog_pricing['applied']) {
-			$price = $catalog_pricing['price'];
-		}
-
+		// Резолв варианта из axis-опций (как раньше).
 		$pc = new \ProductConfigurable($this->registry);
 
 		$axis_ids = array();
@@ -1355,6 +1341,8 @@ class ModelSaleOrder extends Model {
 				$axis_ids[] = (int)$row['option_id'];
 			}
 		}
+
+		$option_value_ids = array();
 
 		if ($options || $axis_ids) {
 			$pov_ids = array();
@@ -1373,10 +1361,14 @@ class ModelSaleOrder extends Model {
 				foreach ($pov_query->rows as $row) {
 					if (in_array((int)$row['option_id'], $axis_ids)) {
 						$axis_selection[(int)$row['option_id']] = (int)$row['option_value_id'];
-					} elseif ($row['price_prefix'] == '+') {
-						$option_price += (float)$row['price'];
-					} elseif ($row['price_prefix'] == '-') {
-						$option_price -= (float)$row['price'];
+					} else {
+						$option_value_ids[] = (int)$row['product_option_value_id'];
+
+						if ($row['price_prefix'] == '+') {
+							$option_price += (float)$row['price'];
+						} elseif ($row['price_prefix'] == '-') {
+							$option_price -= (float)$row['price'];
+						}
 					}
 				}
 			}
@@ -1391,7 +1383,6 @@ class ModelSaleOrder extends Model {
 				$variant_id = (int)$variant['variant_id'];
 				$variant_sku = $variant['sku'] ?? '';
 				$variant_model = $variant['model'] ?? '';
-				$price = (float)$variant['price'];
 				$stock = (float)($variant['quantity'] ?? 0);
 				$subtract = (bool)($variant['subtract'] ?? true);
 
@@ -1400,55 +1391,40 @@ class ModelSaleOrder extends Model {
 				} elseif (!empty($variant_sku)) {
 					$model = $variant_sku;
 				}
-
-				// DockerCart: catalog pricing applies to the variant price too,
-				// mirroring the storefront cart (group price, discount, special).
-				$variant_catalog_pricing = $this->applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $price);
-
-				if ($variant_catalog_pricing['applied']) {
-					$price = $variant_catalog_pricing['price'];
-				}
-
-				if ($customer_group_id) {
-					$cg_price = $pc->getVariantCustomerGroupPrice($variant_id, $customer_group_id);
-
-					// The global % group discount/markup applies to the variant
-					// special/discount only when no per-variant group price is
-					// set (mirrors the storefront product page and cart).
-					$cg_multiplier = 1.0;
-
-					if ($cg_price === null || $cg_price <= 0) {
-						$cg_multiplier = $this->getCustomerGroupMultiplier($customer_group_id);
-					}
-
-					if ($cg_price !== null && $cg_price > 0) {
-						$price = $cg_price;
-					}
-
-					$special_price = $pc->getVariantSpecialPrice($variant_id, $customer_group_id);
-
-					if ($special_price !== null) {
-						$special_price = $special_price * $cg_multiplier;
-					}
-
-					if ($special_price !== null && $special_price < $price) {
-						$price = $special_price;
-					}
-
-					$discount_price = $pc->getVariantDiscountPrice($variant_id, $customer_group_id, $quantity);
-
-					if ($discount_price !== null) {
-						$discount_price = $discount_price * $cg_multiplier;
-					}
-
-					if ($discount_price !== null && $discount_price < $price) {
-						$price = $discount_price;
-					}
-				}
 			}
 		}
 
-		$price += $option_price;
+		// DockerCart: единый калькулятор цены (та же формула, что в корзине
+		// и каталоге). Количество для количественных скидок — НАКОПЛЕННОЕ по
+		// заказу (новая строка + существующие с тем же товаром/вариантом),
+		// как в корзине (раньше админка считала только по добавляемой строке).
+		$accumulated = (float)$quantity;
+
+		if ($order_id) {
+			if ($variant_id > 0) {
+				$acc_query = $this->db->query("SELECT SUM(quantity) AS total FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' AND product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
+			} else {
+				$acc_query = $this->db->query("SELECT SUM(quantity) AS total FROM `" . DB_PREFIX . "order_product` WHERE order_id = '" . (int)$order_id . "' AND product_id = '" . (int)$product_id . "' AND (variant_id IS NULL OR variant_id = '0')");
+			}
+
+			$accumulated += (float)($acc_query->num_rows ? $acc_query->row['total'] : 0);
+		}
+
+		$calculator = new \ProductPricingCalculator($this->registry, array(
+			'customer_group_id' => $customer_group_id
+		));
+
+		$pricing = $calculator->calculate((int)$product_id, $variant_id, $accumulated, $option_value_ids);
+
+		$price = (float)$pricing['price'] + (float)$pricing['option_price'];
+		$tax_class_id = (int)$pricing['tax_class_id'];
+
+		if ($tax_class_id <= 0) {
+			$tax_class_id = (int)$product_info['tax_class_id'];
+		}
+
+		$model = $pricing['model'] !== '' ? $pricing['model'] : $model;
+		$variant_sku = $pricing['variant_sku'] !== '' ? $pricing['variant_sku'] : $variant_sku;
 
 		// DockerCart: BXGY per-item discount (pre-tax) — applies to the reward
 		// product price, mirroring the storefront order creation.
@@ -1516,8 +1492,8 @@ class ModelSaleOrder extends Model {
 
 		$tax = 0.0;
 
-		if ($product_info['tax_class_id']) {
-			$tax_rates = $this->tax->getRates($price, $product_info['tax_class_id']);
+		if ($tax_class_id) {
+			$tax_rates = $this->tax->getRates($price, $tax_class_id);
 			foreach ($tax_rates as $tax_rate) {
 				$tax += $tax_rate['amount'];
 			}
@@ -1697,286 +1673,15 @@ class ModelSaleOrder extends Model {
 	 * @return float
 	 */
 	private function recalculateOrderLineBasePrice($product_id, $variant_id, $quantity, $customer_group_id, array $option_value_ids = array()) {
-		$this->load->model('catalog/product');
+		// DockerCart: единый калькулятор цены (та же формула, что в корзине
+		// и каталоге) — цена единицы + опции.
+		$calculator = new \ProductPricingCalculator($this->registry, array(
+			'customer_group_id' => $customer_group_id
+		));
 
-		$product_info = $this->model_catalog_product->getProduct($product_id);
+		$pricing = $calculator->calculate((int)$product_id, (int)$variant_id, (float)$quantity, $option_value_ids);
 
-		if (!$product_info) {
-			return 0.0;
-		}
-
-		// Use the RAW catalog price: applyCatalogPricingToPrice applies the full
-		// storefront pricing chain itself (getProduct() already normalized the
-		// group discount/markup, which would double-apply).
-		$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
-		$price = (float)($raw_price_query->num_rows ? $raw_price_query->row['price'] : $product_info['price']);
-
-		// Plain product: catalog pricing (group price / discount / special).
-		if ($variant_id <= 0) {
-			$catalog_pricing = $this->applyCatalogPricingToPrice($product_id, 0, $quantity, $customer_group_id, $price);
-
-			if ($catalog_pricing['applied']) {
-				$price = $catalog_pricing['price'];
-			}
-
-			$price += $this->calculateOptionPriceForLine($product_id, $customer_group_id, $option_value_ids);
-
-			return $price;
-		}
-
-		// Variant: variant price + variant group price / special / discount.
-		$pc = new \ProductConfigurable($this->registry);
-		$variant = $pc->getVariant((int)$variant_id);
-
-		if (empty($variant)) {
-			return 0.0;
-		}
-
-		$price = (float)$variant['price'];
-
-		if ($customer_group_id) {
-			$cg_price = $pc->getVariantCustomerGroupPrice((int)$variant_id, $customer_group_id);
-
-			// The global % group discount/markup applies to the variant
-			// special/discount only when no per-variant group price is set
-			// (mirrors the storefront product page and cart).
-			$cg_multiplier = 1.0;
-
-			if ($cg_price === null || $cg_price <= 0) {
-				$cg_multiplier = $this->getCustomerGroupMultiplier($customer_group_id);
-			}
-
-			if ($cg_price !== null && $cg_price > 0) {
-				$price = $cg_price;
-			}
-
-			$special_price = $pc->getVariantSpecialPrice((int)$variant_id, $customer_group_id);
-
-			if ($special_price !== null) {
-				$special_price = $special_price * $cg_multiplier;
-			}
-
-			if ($special_price !== null && $special_price < $price) {
-				$price = $special_price;
-			}
-
-			$discount_price = $pc->getVariantDiscountPrice((int)$variant_id, $customer_group_id, (float)$quantity);
-
-			if ($discount_price !== null) {
-				$discount_price = $discount_price * $cg_multiplier;
-			}
-
-			if ($discount_price !== null && $discount_price < $price) {
-				$price = $discount_price;
-			}
-		}
-
-		// Product-level special only applies to the default variant of a
-		// configurable product (mirrors the storefront cart and product page).
-		if ($customer_group_id) {
-			$default_query = $this->db->query("SELECT default_variant_id FROM " . DB_PREFIX . "product_configurable WHERE product_id = '" . (int)$product_id . "' AND default_variant_id IS NOT NULL AND default_variant_id > 0");
-
-			if ($default_query->num_rows && (int)$default_query->row['default_variant_id'] === (int)$variant_id) {
-				$special_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
-
-				if ($special_query->num_rows) {
-					$special_price = (float)$special_query->row['price'];
-
-					if ($cg_multiplier != 1.0) {
-						$special_price = $special_price * $cg_multiplier;
-					}
-
-					if ($special_price < $price) {
-						$price = $special_price;
-					}
-				}
-			}
-		}
-
-		$price += $this->calculateOptionPriceForLine($product_id, $customer_group_id, $option_value_ids);
-
-		return $price;
-	}
-
-	/**
-	 * Sum the price of the given product_option_value_ids for a customer group
-	 * (mirrors the storefront cart option pricing).
-	 *
-	 * @return float
-	 */
-	private function calculateOptionPriceForLine($product_id, $customer_group_id, array $option_value_ids) {
-		$option_price = 0.0;
-
-		if (empty($option_value_ids)) {
-			return $option_price;
-		}
-
-		$ids = array_values(array_unique(array_map('intval', $option_value_ids)));
-
-		$query = $this->db->query("SELECT pov.product_option_value_id, pov.option_id, pov.price, pov.price_prefix, COALESCE(cgp.price, pov.price) AS cg_price, COALESCE(cgp.price_prefix, pov.price_prefix) AS cg_price_prefix FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "dockercart_product_option_value_customer_group_price cgp ON (cgp.product_option_value_id = pov.product_option_value_id AND cgp.customer_group_id = '" . (int)$customer_group_id . "') WHERE pov.product_option_value_id IN (" . implode(',', $ids) . ") AND pov.product_id = '" . (int)$product_id . "'");
-
-		foreach ($query->rows as $row) {
-			$value_price = ($row['cg_price'] !== null) ? (float)$row['cg_price'] : (float)$row['price'];
-			$value_prefix = ($row['cg_price_prefix'] !== null) ? $row['cg_price_prefix'] : $row['price_prefix'];
-
-			if ($value_prefix === '+') {
-				$option_price += $value_price;
-			} elseif ($value_prefix === '-') {
-				$option_price -= $value_price;
-			}
-		}
-
-		return $option_price;
-	}
-
-	/**
-	 * Global customer group % discount/markup multiplier, read from the
-	 * customer_group row (mirrors the storefront startup). Returns 1.0 when
-	 * the group has no discount/markup.
-	 *
-	 * @param int $customer_group_id
-	 * @return float
-	 */
-	private function getCustomerGroupMultiplier($customer_group_id) {
-		$multiplier = 1.0;
-
-		if (!$customer_group_id) {
-			return $multiplier;
-		}
-
-		$group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-
-		if ($group_query->num_rows) {
-			$customer_group_discount = (float)$group_query->row['discount_percent'];
-
-			if ($customer_group_discount < 0) {
-				$customer_group_discount = 0;
-			} elseif ($customer_group_discount > 100) {
-				$customer_group_discount = 100;
-			}
-
-			$customer_group_markup = (float)$group_query->row['markup_percent'];
-
-			if ($customer_group_markup < 0) {
-				$customer_group_markup = 0;
-			} elseif ($customer_group_markup > 100) {
-				$customer_group_markup = 100;
-			}
-
-			if ($customer_group_discount > 0 && $customer_group_markup > 0) {
-				$customer_group_markup = 0;
-			}
-
-			if ($customer_group_discount > 0) {
-				$multiplier = (100 - $customer_group_discount) / 100;
-			} elseif ($customer_group_markup > 0) {
-				$multiplier = (100 + $customer_group_markup) / 100;
-			}
-		}
-
-		return $multiplier;
-	}
-
-	/**
-	 * Applies the storefront catalog pricing rules to a base unit price:
-	 * per-product customer group price, quantity discount, special, then the
-	 * group-wide discount/markup percent (skipped when a per-product group
-	 * price exists). Mirrors Cart::getProducts() / cart.php:655-728.
-	 *
-	 * @return array{price: float, applied: bool}
-	 */
-	public function applyCatalogPricingToPrice($product_id, $variant_id, $quantity, $customer_group_id, $base_price) {
-		$price = (float)$base_price;
-		$applied = false;
-
-		if (!$customer_group_id) {
-			return array('price' => $price, 'applied' => $applied);
-		}
-
-		if ($variant_id > 0) {
-			$group_price_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "' AND customer_group_id = '" . (int)$customer_group_id . "'");
-		} else {
-			$group_price_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "dockercart_product_customer_group_price WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "'");
-		}
-
-		$has_customer_group_price = $group_price_query->num_rows && (float)$group_price_query->row['price'] > 0;
-
-		if ($has_customer_group_price) {
-			$price = (float)$group_price_query->row['price'];
-			$applied = true;
-		}
-
-		// Product quantity discounts apply to plain products only — configurable
-		// products price by variant, so variant-level discounts are used instead
-		// (mirrors the storefront cart).
-		if ($variant_id <= 0) {
-			$discount_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND quantity <= '" . (float)$quantity . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC LIMIT 1");
-
-			if ($discount_query->num_rows && (float)$discount_query->row['price'] < $price) {
-				$price = (float)$discount_query->row['price'];
-				$applied = true;
-			}
-		}
-
-		// Product-level special only applies to the default variant of a
-		// configurable product (mirrors the storefront cart and product page);
-		// other variants price by their own data.
-		if ($variant_id <= 0) {
-			$special_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
-
-			if ($special_query->num_rows && (float)$special_query->row['price'] < $price) {
-				$price = (float)$special_query->row['price'];
-				$applied = true;
-			}
-		} else {
-			$default_query = $this->db->query("SELECT default_variant_id FROM " . DB_PREFIX . "product_configurable WHERE product_id = '" . (int)$product_id . "' AND default_variant_id IS NOT NULL AND default_variant_id > 0");
-
-			if ($default_query->num_rows && (int)$default_query->row['default_variant_id'] === (int)$variant_id) {
-				$special_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "' AND customer_group_id = '" . (int)$customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC LIMIT 1");
-
-				if ($special_query->num_rows && (float)$special_query->row['price'] < $price) {
-					$price = (float)$special_query->row['price'];
-					$applied = true;
-				}
-			}
-		}
-
-		$customer_group_discount = 0.0;
-		$customer_group_markup = 0.0;
-		$group_query = $this->db->query("SELECT discount_percent, markup_percent FROM " . DB_PREFIX . "customer_group WHERE customer_group_id = '" . (int)$customer_group_id . "'");
-		if ($group_query->num_rows) {
-			$customer_group_discount = (float)$group_query->row['discount_percent'];
-
-			if ($customer_group_discount < 0) {
-				$customer_group_discount = 0;
-			} elseif ($customer_group_discount > 100) {
-				$customer_group_discount = 100;
-			}
-
-			$customer_group_markup = (float)$group_query->row['markup_percent'];
-
-			if ($customer_group_markup < 0) {
-				$customer_group_markup = 0;
-			} elseif ($customer_group_markup > 100) {
-				$customer_group_markup = 100;
-			}
-		}
-
-		if ($customer_group_discount > 0 && $customer_group_markup > 0) {
-			$customer_group_markup = 0;
-		}
-
-		if (!$has_customer_group_price) {
-			if ($customer_group_discount > 0) {
-				$price *= (100 - $customer_group_discount) / 100;
-				$applied = true;
-			} elseif ($customer_group_markup > 0) {
-				$price *= (100 + $customer_group_markup) / 100;
-				$applied = true;
-			}
-		}
-
-		return array('price' => $price, 'applied' => $applied);
+		return (float)$pricing['price'] + (float)$pricing['option_price'];
 	}
 
 	public function removeProductFromOrder($order_product_id, $order_id) {
