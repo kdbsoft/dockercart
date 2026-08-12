@@ -345,6 +345,15 @@ initialize_database() {
 
     echo "Checking if database needs initialization..."
 
+    # Если БД уже была проинициализирована ранее (маркер в oc_setting),
+    # никогда не запускаем очистку демо-данных — защита от повторного
+    # срабатывания на рабочем магазине.
+    local seed_marker
+    seed_marker=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
+        -N -B -e "SELECT COUNT(*) FROM \`${db_prefix}setting\` WHERE \`key\` = 'config_dockercart_seed_mode' AND store_id = 0" \
+        "${db_name}" 2>/dev/null || echo "0")
+    seed_marker="$(echo "${seed_marker}" | tr -d '[:space:]')"
+
     # Проверяем, есть ли таблицы в БД
     local table_count
     table_count=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
@@ -400,6 +409,34 @@ INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, ser
   (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0);
 SQL
     echo "DockerCart bootstrap finished."
+
+    # Записываем маркер установки — защита от повторной очистки демо-данных
+    # на рабочем магазине (см. проверку seed_marker выше).
+    MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
+INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized)
+SELECT 0, 'config', 'config_dockercart_seed_mode', '${DOCKERCART_SEED_MODE:-demo}', 0
+WHERE NOT EXISTS (SELECT 1 FROM \`${db_prefix}setting\` WHERE \`key\` = 'config_dockercart_seed_mode' AND store_id = 0);
+SQL
+
+    # Clean install mode: strip demo content. Runs only inside the
+    # "database is empty" branch AND only when this database was never
+    # initialized before (no seed marker) — so an existing production
+    # database can never reach this code.
+    if [ "${DOCKERCART_SEED_MODE:-demo}" = "clean" ] && [ "${seed_marker}" = "0" ]; then
+        local clean_sql="/opt/dockercart-seed/clean_demo.sql"
+        if [ ! -f "${clean_sql}" ]; then
+            echo "ERROR: Clean SQL not found at ${clean_sql}" >&2
+            return 1
+        fi
+        echo "DOCKERCART_SEED_MODE=clean — removing demo data..."
+        if ! MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" < "${clean_sql}"; then
+            echo "ERROR: Failed to remove demo data" >&2
+            return 1
+        fi
+        echo "Demo data removed."
+    elif [ "${DOCKERCART_SEED_MODE:-demo}" = "clean" ] && [ "${seed_marker}" != "0" ]; then
+        echo "WARNING: DOCKERCART_SEED_MODE=clean but database was already initialized — skipping demo cleanup."
+    fi
 }
 
 # Гарантирует наличие config_encryption (пустой ключ ломает шифрование сессий/паролей)

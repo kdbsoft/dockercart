@@ -9,7 +9,9 @@ ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin123}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
 DOCKERCART_URL="${DOCKERCART_URL:-http://dockercart.local}"
+DOCKERCART_SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
 SEED_SQL="/opt/dockercart-seed/init.sql"
+CLEAN_SQL="/opt/dockercart-seed/clean_demo.sql"
 
 if [ "${DOCKERCART_URL%/}" = "${DOCKERCART_URL}" ]; then
   DOCKERCART_URL="${DOCKERCART_URL}/"
@@ -86,6 +88,31 @@ SQL
 if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
   MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "UPDATE \`${DB_PREFIX}product\` SET viewed = 0;" || true
 fi
+
+# Clean install mode: strip demo content after seeding.
+# Only ever runs on a freshly initialized (empty) database — the seed import
+# above is the only path that reaches this code. On existing databases the
+# entrypoint's initialize_database() never runs the clean step.
+if [ "${DOCKERCART_SEED_MODE}" = "clean" ]; then
+  echo "[dockercart-init] DOCKERCART_SEED_MODE=clean — removing demo data..."
+  if [ ! -f "${CLEAN_SQL}" ]; then
+    echo "[dockercart-init] ERROR: Clean SQL not found at ${CLEAN_SQL}" >&2
+    exit 1
+  fi
+  if [ "${DB_PREFIX}" = "oc_" ]; then
+    MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" < "${CLEAN_SQL}"
+  else
+    MYSQL_PWD="${DB_PASSWORD}" sed "s/\`oc_/\`${DB_PREFIX}/g" "${CLEAN_SQL}" | mariadb -u"${DB_USER}" "${DB_NAME}"
+  fi
+  echo "[dockercart-init] Demo data removed."
+fi
+
+# Mark this database as seeded so a later accidental re-run never strips
+# content from a store that already has real data.
+MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "
+INSERT INTO \`${DB_PREFIX}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized)
+SELECT 0, 'config', 'config_dockercart_seed_mode', '${DOCKERCART_SEED_MODE}', 0
+WHERE NOT EXISTS (SELECT 1 FROM \`${DB_PREFIX}setting\` WHERE \`key\` = 'config_dockercart_seed_mode' AND store_id = 0);" || true
 
 echo "[dockercart-init] Bootstrap finished."
 

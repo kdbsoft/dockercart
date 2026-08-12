@@ -75,6 +75,7 @@ services:
       - ./storage:/var/www/storage:z
       - ./VERSION:/var/www/VERSION:ro,z
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro,z
+      - ./docker/mysql/clean_demo.sql:/opt/dockercart-seed/clean_demo.sql:ro,z
       - ./composer.json:/var/www/composer.json:ro,z
       - ./composer.lock:/var/www/composer.lock:ro,z
       - ./.git/info/exclude:/var/www/git-exclude:z
@@ -117,6 +118,7 @@ services:
       - BACKUP_S3_RETENTION_DAYS=${BACKUP_S3_RETENTION_DAYS:-7}
       - BACKUP_S3_INSECURE=${BACKUP_S3_INSECURE:-false}
       - DISALLOW_INDEXING=${DISALLOW_INDEXING:-NO}
+      - DOCKERCART_SEED_MODE=${DOCKERCART_SEED_MODE:-demo}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -215,10 +217,12 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
       DOCKERCART_URL: ${DOCKERCART_URL:-http://dockercart.local}
       TZ: ${TZ:-UTC}
+      DOCKERCART_SEED_MODE: ${DOCKERCART_SEED_MODE:-demo}
     volumes:
       - mariadb-data:/var/lib/mysql
       - ./docker/mysql/init.sh:/docker-entrypoint-initdb.d/10-init.sh:z
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro
+      - ./docker/mysql/clean_demo.sql:/opt/dockercart-seed/clean_demo.sql:ro,z
       - ./docker/mysql/my.cnf.${MARIADB_CONFIG_SIZE:-s}:/etc/mysql/conf.d/my.cnf:ro,z
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:

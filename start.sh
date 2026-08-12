@@ -90,6 +90,43 @@ fi
 echo ""
 
 # ============================================================================
+# SEED MODE (only on fresh install: no existing DB volume)
+# ============================================================================
+
+SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
+DB_VOLUME_NAME="${DB_VOLUME_NAME:-dockercart_mariadb-data}"
+
+# Detect whether a database volume already exists (i.e. this is NOT a first run)
+if ! docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
+    if [ -z "${DOCKERCART_SEED_MODE:-}" ]; then
+        echo -e "${YELLOW}First run detected — no existing database volume.${NC}"
+        echo -e "Do you want to install with demo data? [Y/n]"
+        read -r -p "> " SEED_ANSWER
+        case "${SEED_ANSWER:-}" in
+            [Nn]|[Nn][Oo])
+                SEED_MODE="clean"
+                echo -e "${GREEN}✓ Installing WITHOUT demo data (clean store)${NC}"
+                ;;
+            *)
+                SEED_MODE="demo"
+                echo -e "${GREEN}✓ Installing WITH demo data${NC}"
+                ;;
+        esac
+        echo ""
+    fi
+    # If DOCKERCART_SEED_MODE was already provided in the environment,
+    # respect it without prompting.
+    if [ -n "${DOCKERCART_SEED_MODE:-}" ]; then
+        SEED_MODE="${DOCKERCART_SEED_MODE}"
+        echo -e "${YELLOW}Using DOCKERCART_SEED_MODE=${SEED_MODE} from environment${NC}"
+    fi
+else
+    echo -e "${GREEN}✓ Database volume exists — skipping install prompt${NC}"
+fi
+
+echo ""
+
+# ============================================================================
 # SSL SETUP
 # ============================================================================
 
@@ -184,7 +221,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
     fi
 
     echo "Starting standalone HTTP stack for ACME webroot challenge..."
-    docker compose "${COMPOSE_FILES[@]}" up -d --build
+    DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d --build
 
     ACTIVE_CERT_NAME="dockercart"
     VALID_CERT_NAME=""
@@ -288,7 +325,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
     fi
 
     echo "Switching stack to standalone HTTPS mode..."
-    docker compose -f docker-compose.yml -f docker-compose.le.yml up -d --build
+    DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose -f docker-compose.yml -f docker-compose.le.yml up -d --build
     echo ""
     echo "Store: https://${SSL_DOMAIN}"
     echo "Admin: https://${SSL_DOMAIN}/admin"
@@ -308,7 +345,8 @@ echo ""
 
 docker compose "${COMPOSE_FILES[@]}" down 2>/dev/null || true
 docker compose "${COMPOSE_FILES[@]}" build
-docker compose "${COMPOSE_FILES[@]}" up -d
+# Pass the chosen seed mode for this run only — nothing is written to .env.
+DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d
 
 echo -e "${YELLOW}Waiting for services to be ready...${NC}"
 sleep 10
