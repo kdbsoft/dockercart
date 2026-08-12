@@ -785,12 +785,8 @@ class ControllerProductProduct extends Controller {
 					$variant_pricing[(int)$v['variant_id']] = $variant_calculator->calculate((int)$product_id, (int)$v['variant_id'], 1);
 				}
 
-				// Disabled variants must not be selectable on the storefront:
-				// the cart resolves variants by status=1 and would fall back to
-				// the plain product otherwise.
-				$variants = array_values(array_filter($variants, function ($v) {
-					return !empty($v['status']);
-				}));
+				// Disabled variants are already excluded by getVariants()
+				// (the library filters status = 1 at the source).
 
 				if (!empty($default_variant) && empty($default_variant['status'])) {
 					$default_variant = array();
@@ -2020,15 +2016,9 @@ class ControllerProductProduct extends Controller {
 	 * @return array list of product_option_value_id ints
 	 */
 	private function getEnabledVariantValueIds($product_id) {
-		$query = $this->db->query(
-			"SELECT pov.product_option_value_id FROM " . DB_PREFIX . "product_option_value pov "
-			. "INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.product_id = pov.product_id AND pvv.option_id = pov.option_id AND pvv.option_value_id = pov.option_value_id) "
-			. "INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.variant_id = pvv.variant_id) "
-			. "WHERE pov.product_id = '" . (int)$product_id . "' AND pv.status = '1' "
-			. "GROUP BY pov.product_option_value_id"
-		);
+		$pc = new ProductConfigurable($this->registry);
 
-		return array_map('intval', array_column($query->rows, 'product_option_value_id'));
+		return $pc->getEnabledVariantValueIds($product_id);
 	}
 
 	public function review() {

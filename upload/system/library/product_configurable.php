@@ -114,7 +114,10 @@ class ProductConfigurable {
 
 	public function getOptionValues($option_id, $product_id = null) {
 		if ($product_id !== null) {
-			$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_id = '" . (int)$product_id . "' AND pov.option_id = '" . (int)$option_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY ov.sort_order ASC");
+			// Only option values that belong to at least one ENABLED variant
+			// (status = 1) are returned — disabled variants are hidden from
+			// the storefront, same rule as disabled products.
+			$query = $this->db->query("SELECT ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.product_id = pov.product_id AND pvv.option_id = pov.option_id AND pvv.option_value_id = pov.option_value_id) INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.variant_id = pvv.variant_id) LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE pov.product_id = '" . (int)$product_id . "' AND pov.option_id = '" . (int)$option_id . "' AND pv.status = '1' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' GROUP BY ov.option_value_id, ovd.name, ov.color_code ORDER BY ov.sort_order ASC");
 
 			return $query->rows;
 		}
@@ -125,7 +128,9 @@ class ProductConfigurable {
 	}
 
 	public function getVariants($product_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' ORDER BY sort_order ASC, variant_id ASC");
+		// Only ENABLED variants (status = 1) — disabled variants are hidden
+		// from the storefront, same rule as disabled products.
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1' ORDER BY sort_order ASC, variant_id ASC");
 
 		$variants = array();
 
@@ -471,6 +476,27 @@ class ProductConfigurable {
 		return array('total_stock' => 0, 'variants_in_stock' => 0, 'total_variants' => 0);
 	}
 
+	/**
+	 * Collect the set of product_option_value rows that belong to at least one
+	 * ENABLED variant (status = 1) of a configurable product. Used to filter
+	 * axis option values in getProductOptions() so disabled variants are never
+	 * rendered on the storefront (same rule as disabled products).
+	 *
+	 * @param int $product_id
+	 * @return array list of product_option_value_id ints
+	 */
+	public function getEnabledVariantValueIds($product_id) {
+		$query = $this->db->query(
+			"SELECT pov.product_option_value_id FROM " . DB_PREFIX . "product_option_value pov "
+			. "INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.product_id = pov.product_id AND pvv.option_id = pov.option_id AND pvv.option_value_id = pov.option_value_id) "
+			. "INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.variant_id = pvv.variant_id) "
+			. "WHERE pov.product_id = '" . (int)$product_id . "' AND pv.status = '1' "
+			. "GROUP BY pov.product_option_value_id"
+		);
+
+		return array_map('intval', array_column($query->rows, 'product_option_value_id'));
+	}
+
 	public function getVariantCustomerGroupPrices($product_id) {
 		$query = $this->db->query("SELECT cgp.variant_id, cgp.customer_group_id, cgp.price FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price cgp INNER JOIN " . DB_PREFIX . "product_variant pv ON (cgp.variant_id = pv.variant_id) WHERE pv.product_id = '" . (int)$product_id . "'");
 
@@ -684,7 +710,9 @@ class ProductConfigurable {
 		}
 
 		if (!empty($value_sql_parts)) {
-			$values_query = $this->db->query("SELECT pov.product_id, pov.option_id, ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE (" . implode(' OR ', $value_sql_parts) . ") AND ovd.language_id = '" . $language_id . "' ORDER BY ov.sort_order ASC, ov.option_value_id ASC");
+			// Only option values that belong to at least one ENABLED variant
+			// (status = 1) — disabled variants are hidden from the storefront.
+			$values_query = $this->db->query("SELECT pov.product_id, pov.option_id, ov.option_value_id, ovd.name, ov.color_code FROM " . DB_PREFIX . "product_option_value pov INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.product_id = pov.product_id AND pvv.option_id = pov.option_id AND pvv.option_value_id = pov.option_value_id) INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.variant_id = pvv.variant_id) LEFT JOIN " . DB_PREFIX . "option_value ov ON (pov.option_value_id = ov.option_value_id) LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (ov.option_value_id = ovd.option_value_id) WHERE (" . implode(' OR ', $value_sql_parts) . ") AND pv.status = '1' AND ovd.language_id = '" . $language_id . "' GROUP BY pov.product_id, pov.option_id, ov.option_value_id, ovd.name, ov.color_code ORDER BY ov.sort_order ASC, ov.option_value_id ASC");
 
 			$values_by_key = array();
 
@@ -706,8 +734,9 @@ class ProductConfigurable {
 			unset($axes);
 		}
 
-		// Variants + values
-		$variants_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE product_id IN (" . implode(',', $configurable_ids) . ") ORDER BY product_id ASC, sort_order ASC, variant_id ASC");
+		// Variants + values (only ENABLED variants — disabled ones are not
+		// shown anywhere on the storefront, same rule as disabled products).
+		$variants_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE product_id IN (" . implode(',', $configurable_ids) . ") AND status = '1' ORDER BY product_id ASC, sort_order ASC, variant_id ASC");
 
 		$variant_ids = array();
 
