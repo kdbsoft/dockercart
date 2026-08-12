@@ -85,10 +85,11 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 'category_id' => (int)($result['category_id'] ?? 0),
                 'name'        => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
                 'model'       => $result['model'] ?? '',
+                'matched_variant_model' => $result['matched_variant_model'] ?? '',
                 'image'       => $image,
                 'price'       => $price,
                 'special'     => $special,
-                'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
+                'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . (!empty($result['matched_variant_id']) ? '&variant_id=' . (int)$result['matched_variant_id'] : ''))
             ];
         }
 

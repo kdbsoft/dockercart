@@ -258,6 +258,18 @@ class ManticoreClient {
             }
         }
 
+        // "Out of stock last" for product listings: prepend the stock flag so
+        // in-stock results always come first (for relevance — the default —
+        // tie-break by WEIGHT()). Requires the `out_of_stock` attribute on
+        // the index; only enabled via the `stock_last` option.
+        if (!empty($options['stock_last'])) {
+            if ($order_by === '') {
+                $order_by = ' ORDER BY out_of_stock ASC, WEIGHT() DESC';
+            } else {
+                $order_by = ' ORDER BY out_of_stock ASC, ' . substr($order_by, 10);
+            }
+        }
+
         // Build LIMIT
         $limit = '';
         if (isset($options['limit'])) {
@@ -543,6 +555,29 @@ class ManticoreClient {
         }
 
         return $compact;
+    }
+
+    /**
+     * Get index description (column/field schema) from DESCRIBE.
+     *
+     * @param string $index Index name
+     * @return array List of existing column names, or [] on failure
+     */
+    public function describe($index) {
+        $result = $this->query("DESCRIBE {$this->escapeIdentifier($index)}");
+
+        if (!$result) {
+            return [];
+        }
+
+        $columns = [];
+        while ($row = $result->fetch_assoc()) {
+            if (!empty($row['Field'])) {
+                $columns[] = $row['Field'];
+            }
+        }
+
+        return $columns;
     }
 
     /**

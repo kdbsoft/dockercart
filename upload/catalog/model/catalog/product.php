@@ -243,13 +243,72 @@ class ModelCatalogProduct extends Model {
 
 		$product_data['variant_specials'] = $pc->getVariantsSpecials($product_id);
 
+		// When the search query matched a specific variant code, point the
+		// product data at that variant instead of the default one, so listing
+		// cards deep-link to it and show its code.
+		if (isset($this->request->get['search']) && !empty($this->request->get['search'])) {
+			$this->load->model('extension/module/dockercart_search');
+
+			$matched = $this->model_extension_module_dockercart_search->resolveVariantsForProducts(
+				array((int)$product_id),
+				$this->request->get['search']
+			);
+
+			if (!empty($matched[$product_id]['variant_id'])) {
+				$matched_variant = array();
+
+				foreach ($product_data['variants'] as $variant) {
+					if ((int)$variant['variant_id'] === (int)$matched[$product_id]['variant_id']) {
+						$matched_variant = $variant;
+						break;
+					}
+				}
+
+				if (!empty($matched_variant)) {
+					if (!empty($matched_variant['model'])) {
+						$product_data['model'] = $matched_variant['model'];
+					} elseif (!empty($matched_variant['sku'])) {
+						$product_data['model'] = $matched_variant['sku'];
+					}
+					if (!empty($matched_variant['image'])) {
+						$product_data['image'] = $matched_variant['image'];
+					}
+					if (isset($matched_variant['quantity'])) {
+						$product_data['quantity'] = (float)$matched_variant['quantity'];
+					}
+					$product_data['default_variant_id'] = (int)$matched_variant['variant_id'];
+					$product_data['default_variant'] = $matched_variant;
+					$product_data['matched_variant_id'] = (int)$matched_variant['variant_id'];
+					$product_data['matched_variant_model'] = !empty($matched_variant['model']) ? $matched_variant['model'] : ($matched_variant['sku'] ?? '');
+
+					// Keep swatch "active" states in sync with the matched variant.
+					$product_data['default_option_value_ids'] = array();
+					if (!empty($matched_variant['values'])) {
+						foreach ($matched_variant['values'] as $mv) {
+							$product_data['default_option_value_ids'][] = (int)$mv['option_value_id'];
+						}
+					}
+
+					// Price/special of the matched variant via the shared calculator
+					// (same formula as the cart and product page).
+					$calculator = new ProductPricingCalculator($this->registry);
+					$matched_pricing = $calculator->calculate((int)$product_id, (int)$matched_variant['variant_id'], 1);
+
+					if (!empty($matched_pricing['price'])) {
+						$product_data['price'] = (float)$matched_pricing['price'];
+					}
+					$product_data['special'] = $matched_pricing['special'];
+				}
+			}
+		}
+
 		// Build variant swatches for listing cards
 		$swatches = array();
 		if (!empty($product_data['variants'])) {
 			// Map of option_id => option_value_id for the default variant
 			$default_map = array();
-			if (!empty($default_variant['values'])) {
-				foreach ($default_variant['values'] as $dv) {
+			if (!empty($product_data['default_variant']['values'])) {
+				foreach ($product_data['default_variant']['values'] as $dv) {
 					$default_map[(int)$dv['option_id']] = (int)$dv['option_value_id'];
 				}
 			}
@@ -511,6 +570,62 @@ class ModelCatalogProduct extends Model {
 					));
 				}
 
+				// The search module (Manticore) attaches `matched_variant_*` to
+				// override the default variant with the one that matched the
+				// query. Without this, the cached configurable product resets
+				// to its default variant on every render.
+				if (isset($this->request->get['search']) && !empty($this->request->get['search'])) {
+					$this->load->model('extension/module/dockercart_search');
+
+					$matched = $this->model_extension_module_dockercart_search->resolveVariantsForProducts(
+						array((int)$pid),
+						$this->request->get['search']
+					);
+
+					if (!empty($matched[$pid]['variant_id'])) {
+						$data['matched_variant_id'] = (int)$matched[$pid]['variant_id'];
+						$data['matched_variant_model'] = !empty($matched[$pid]['model']) ? $matched[$pid]['model'] : '';
+
+						// Point the card at the matched variant instead of the
+						// default one (image/price/model follow the variant).
+						$matched_variant = array();
+
+						foreach (array($data['variants'] ?? array()) as $variants) {
+							foreach ($variants as $variant) {
+								if ((int)$variant['variant_id'] === (int)$matched[$pid]['variant_id']) {
+									$matched_variant = $variant;
+									break 2;
+								}
+							}
+						}
+
+						if (!empty($matched_variant)) {
+							if (!empty($matched_variant['image'])) {
+								$data['image'] = $matched_variant['image'];
+							}
+							if (isset($matched_variant['quantity'])) {
+								$data['quantity'] = (float)$matched_variant['quantity'];
+							}
+							if (!empty($matched_variant['model'])) {
+								$data['model'] = $matched_variant['model'];
+							} elseif (!empty($matched_variant['sku'])) {
+								$data['model'] = $matched_variant['sku'];
+							}
+							$data['default_variant_id'] = (int)$matched_variant['variant_id'];
+
+							// Price/special of the matched variant via the shared
+							// calculator (same formula as the cart and product page).
+							$calculator = new ProductPricingCalculator($this->registry);
+							$matched_pricing = $calculator->calculate((int)$pid, (int)$matched_variant['variant_id'], 1);
+
+							if (!empty($matched_pricing['price'])) {
+								$data['price'] = (float)$matched_pricing['price'];
+							}
+							$data['special'] = $matched_pricing['special'];
+						}
+					}
+				}
+
 				$product_data[$pid] = $data;
 			}
 		}
@@ -719,14 +834,14 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, LCASE(" . $data['sort'] . ")";
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, LCASE(" . $data['sort'] . ")";
 			} elseif ($data['sort'] == 'p.price') {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
 			} else {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, " . $data['sort'];
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, " . $data['sort'];
 			}
 		} else {
-			$sql .= " ORDER BY (p.quantity <= 0) ASC, p.sort_order";
+			$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.sort_order";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -761,7 +876,9 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids, array('use_cache' => true));
 		}
 
-		return $product_data;
+		// Товары не в наличии — в конец списка (точное правило: preorder
+		// и живые варианты конфигурируемых считаются в наличии).
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductSpecials($data = array()) {
@@ -777,12 +894,12 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, LCASE(" . $data['sort'] . ")";
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, LCASE(" . $data['sort'] . ")";
 			} else {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, " . $data['sort'];
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, " . $data['sort'];
 			}
 		} else {
-			$sql .= " ORDER BY (p.quantity <= 0) ASC, p.sort_order";
+			$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.sort_order";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {
@@ -817,7 +934,7 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids, array('use_cache' => true));
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getLatestProducts($limit) {
@@ -825,7 +942,7 @@ class ModelCatalogProduct extends Model {
 
 		if (!$product_data) {
 			$product_data = array();
-			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY p.date_added DESC LIMIT " . (int)$limit);
+			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.date_added DESC LIMIT " . (int)$limit);
 
 			$ids = array();
 
@@ -840,7 +957,7 @@ class ModelCatalogProduct extends Model {
 			$this->cache->set('product.latest.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getPopularProducts($limit) {
@@ -848,7 +965,7 @@ class ModelCatalogProduct extends Model {
 
 		if (!$product_data) {
 			$product_data = array();
-			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY p.viewed DESC, p.date_added DESC LIMIT " . (int)$limit);
+			$query = $this->db->query("SELECT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.viewed DESC, p.date_added DESC LIMIT " . (int)$limit);
 
 			$ids = array();
 
@@ -863,7 +980,7 @@ class ModelCatalogProduct extends Model {
 			$this->cache->set('product.popular.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getBestSellerProducts($limit) {
@@ -872,7 +989,7 @@ class ModelCatalogProduct extends Model {
 		if (!$product_data) {
 			$product_data = array();
 
-			$query = $this->db->query("SELECT op.product_id, SUM(op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE o.order_status_id > '0' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' GROUP BY op.product_id ORDER BY total DESC LIMIT " . (int)$limit);
+			$query = $this->db->query("SELECT op.product_id, SUM(op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id) LEFT JOIN `" . DB_PREFIX . "product` p ON (op.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE o.order_status_id > '0' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' GROUP BY op.product_id ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, total DESC LIMIT " . (int)$limit);
 
 			$ids = array();
 
@@ -887,7 +1004,7 @@ class ModelCatalogProduct extends Model {
 			$this->cache->set('product.bestseller.' . (int)$this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id') . '.' . $this->config->get('config_customer_group_id') . '.' . (int)$limit, $product_data);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductAttributes($product_id) {
@@ -1104,7 +1221,7 @@ class ModelCatalogProduct extends Model {
 	public function getProductRelated($product_id) {
 		$product_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_related pr LEFT JOIN " . DB_PREFIX . "product p ON (pr.related_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pr.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_related pr LEFT JOIN " . DB_PREFIX . "product p ON (pr.related_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pr.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, pr.related_id ASC");
 
 		$ids = array();
 
@@ -1116,13 +1233,13 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductUpsell($product_id) {
 		$product_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_upsell pu LEFT JOIN " . DB_PREFIX . "product p ON (pu.upsell_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pu.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_upsell pu LEFT JOIN " . DB_PREFIX . "product p ON (pu.upsell_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pu.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, pu.upsell_id ASC");
 
 		$ids = array();
 
@@ -1134,13 +1251,13 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductAccessory($product_id) {
 		$product_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_accessory pa LEFT JOIN " . DB_PREFIX . "product p ON (pa.accessory_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pa.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_accessory pa LEFT JOIN " . DB_PREFIX . "product p ON (pa.accessory_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pa.product_id = '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, pa.accessory_id ASC");
 
 		$ids = array();
 
@@ -1152,13 +1269,13 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductFbt($product_id) {
 		$product_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_fbt pf LEFT JOIN " . DB_PREFIX . "product p ON (pf.fbt_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pf.product_id = '" . (int)$product_id . "' AND pf.fbt_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY pf.fbt_id ASC");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_fbt pf LEFT JOIN " . DB_PREFIX . "product p ON (pf.fbt_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pf.product_id = '" . (int)$product_id . "' AND pf.fbt_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, pf.fbt_id ASC");
 
 		$ids = array();
 
@@ -1170,14 +1287,14 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids);
 		}
 
-		return $product_data;
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getProductSimilar($product_id) {
 		$product_data = array();
 
 		// Manually assigned similar products
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_similar ps LEFT JOIN " . DB_PREFIX . "product p ON (ps.similar_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE ps.product_id = '" . (int)$product_id . "' AND ps.similar_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY ps.similar_id ASC");
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_similar ps LEFT JOIN " . DB_PREFIX . "product p ON (ps.similar_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE ps.product_id = '" . (int)$product_id . "' AND ps.similar_id <> '" . (int)$product_id . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, ps.similar_id ASC");
 
 		$ids = array();
 
@@ -1188,6 +1305,9 @@ class ModelCatalogProduct extends Model {
 		if ($ids) {
 			$product_data = $this->getProductsByIds($ids);
 		}
+
+		// Вручную назначенные similar: не в наличии — в конец
+		$product_data = ProductStockSorter::sort($product_data);
 
 		// Top up with in-stock products from the same categories when not enough similar ones
 		$limit = 12;
@@ -1371,12 +1491,12 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, LCASE(" . $data['sort'] . ")";
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, LCASE(" . $data['sort'] . ")";
 			} else {
-				$sql .= " ORDER BY (p.quantity <= 0) ASC, " . $data['sort'];
+				$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, " . $data['sort'];
 			}
 		} else {
-			$sql .= " ORDER BY (p.quantity <= 0) ASC, p.date_added";
+			$sql .= " ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.date_added";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'ASC')) {
@@ -1411,7 +1531,8 @@ class ModelCatalogProduct extends Model {
 			$product_data = $this->getProductsByIds($ids, array('use_cache' => true));
 		}
 
-		return $product_data;
+		// Товары не в наличии — в конец списка.
+		return ProductStockSorter::sort($product_data);
 	}
 
 	public function getTotalNewArrivalProducts($days = 90) {

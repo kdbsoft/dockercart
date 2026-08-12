@@ -117,8 +117,10 @@ class ModelExtensionModuleDockercartSearch extends Model {
      * This is idempotent — ALTER TABLE returns an error if the column already exists; we
      * silently ignore those errors so it is safe to call on every re-index operation.
      *
-     * New fields added in v3.1:
-     *   upc, ean, jan, isbn, mpn — product code/article fields for full-text search.
+     * Note: the product code columns (model/sku/upc/ean/jan/isbn/mpn) and `category_ids`
+     * are declared in manticore.conf (rt_field/rt_attr_string/rt_attr_multi) and are created
+     * by the config at table creation time — they must NOT be re-added here (Manticore
+     * rejects duplicates: "field already in schema").
      */
     private function applySchemaUpdates() {
         $manticore = $this->getManticore();
@@ -127,22 +129,49 @@ class ModelExtensionModuleDockercartSearch extends Model {
             return;
         }
 
-        $products_columns = ['upc', 'ean', 'jan', 'isbn', 'mpn'];
+        // NOTE: the product code columns (model/sku/upc/ean/jan/isbn/mpn) and the
+        // `category_ids` MVA are declared in manticore.conf (rt_attr_string / rt_attr_multi)
+        // — they are created by the config at table creation time, so they must NOT be
+        // re-added via ALTER here (Manticore rejects duplicates: "field already in schema").
+        // Only columns that are NOT part of the static config belong in this migration list.
 
-        foreach ($products_columns as $col) {
-            $manticore->query("ALTER TABLE `products` ADD COLUMN `{$col}` text");
+        // Existing product columns (DESCRIBE), so ALTERs below are truly idempotent:
+        // Manticore rejects adding a column that already exists, and the error would
+        // otherwise bubble up and fail the whole reindex.
+        $existing = $manticore->describe('products');
+        $columns  = ['category_ids', 'variant_codes', 'out_of_stock'];
+
+        foreach ($columns as $column) {
+            if (!in_array($column, $existing, true)) {
+                $manticore->query("ALTER TABLE `products` ADD COLUMN `{$column}` " . $this->columnType($column));
+            }
         }
 
-        $manticore->query("ALTER TABLE `products` ADD COLUMN `category_ids` multi");
-
-        // Product variant article codes (configurable products). Added in v3.2.
-        $manticore->query("ALTER TABLE `products` ADD COLUMN `variant_codes` text");
-
         // Order number as a searchable full-text field (admin search by order #). Added in v3.4.
-        $manticore->query("ALTER TABLE `orders` ADD COLUMN `order_number` text");
+        $existing_orders = $manticore->describe('orders');
+        if (!in_array('order_number', $existing_orders, true)) {
+            $manticore->query("ALTER TABLE `orders` ADD COLUMN `order_number` text");
+        }
 
         $this->createOrderIndexSchema();
         $this->createCustomerIndexSchema();
+    }
+
+    /**
+     * Map runtime-added product column names to their Manticore column types
+     * (used only by applySchemaUpdates for idempotent ALTER TABLE statements).
+     */
+    private function columnType($column) {
+        switch ($column) {
+            case 'category_ids':
+                return 'multi';
+
+            case 'out_of_stock':
+                return 'uint';
+
+            default:
+                return 'text';
+        }
     }
 
     /**
@@ -184,7 +213,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         // Get product data — explicitly select all code fields so nothing is missed
         $query = $this->db->query("
             SELECT p.product_id, p.model, p.sku, p.upc, p.ean, p.jan, p.isbn, p.mpn,
-                   p.image, p.manufacturer_id, p.status, p.quantity, p.price,
+                   p.image, p.manufacturer_id, p.status, p.quantity, p.preorder, p.price,
                    p.date_added, p.date_modified,
                    pd.name, pd.description, pd.meta_title, pd.meta_description, pd.meta_keyword, pd.tag
             FROM " . DB_PREFIX . "product p
@@ -271,7 +300,26 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $variant_codes[] = $this->buildSearchableCode($variant['mpn']   ?? '');
         }
 
+        // Number of active variants with stock — used to keep configurable products
+        // out of the "out of stock" bucket when at least one variant is available.
+        $variants_in_stock = (int)$this->db->query("
+            SELECT COUNT(*) AS n
+            FROM " . DB_PREFIX . "product_variant
+            WHERE product_id = '" . (int)$product_id . "'
+            AND status = '1'
+            AND quantity > 0
+        ")->row['n'];
+
         $doc['variant_codes'] = trim(implode(' ', array_filter($variant_codes)));
+
+        // Out-of-stock flag for sorting search results (in-stock first).
+        // Mirrors the storefront rule: quantity <= 0, no preorder, and (for
+        // configurable products) no live variants.
+        $out_of_stock = (int)$product['quantity'] <= 0 && empty($product['preorder']);
+        if ($out_of_stock && $variants_in_stock > 0) {
+            $out_of_stock = false;
+        }
+        $doc['out_of_stock'] = $out_of_stock ? 1 : 0;
 
         // Get special price if exists
         $special_query = $this->db->query("
@@ -532,7 +580,15 @@ class ModelExtensionModuleDockercartSearch extends Model {
             return false;
         }
 
-        $manticore->query("CREATE TABLE IF NOT EXISTS orders (
+        // Manticore 6.x: CREATE TABLE IF NOT EXISTS is not supported (syntax error) —
+        // the orders table is created from manticore.conf. Skip if it already exists.
+        $existing = $manticore->describe('orders');
+
+        if ($existing) {
+            return true;
+        }
+
+        $manticore->query("CREATE TABLE orders (
             id BIGINT PRIMARY KEY,
             order_number TEXT,
             firstname TEXT,
@@ -581,7 +637,15 @@ class ModelExtensionModuleDockercartSearch extends Model {
             return false;
         }
 
-        $manticore->query("CREATE TABLE IF NOT EXISTS customers (
+        // Manticore 6.x: CREATE TABLE IF NOT EXISTS is not supported (syntax error) —
+        // the customers table is created from manticore.conf. Skip if it already exists.
+        $existing = $manticore->describe('customers');
+
+        if ($existing) {
+            return true;
+        }
+
+        $manticore->query("CREATE TABLE customers (
             id BIGINT PRIMARY KEY,
             firstname TEXT,
             lastname TEXT,
@@ -681,9 +745,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $manticore = $this->getManticore();
 
         $query = $this->db->query("
-            SELECT c.*, cg.name AS customer_group_name
+            SELECT c.*, cgd.name AS customer_group_name
             FROM " . DB_PREFIX . "customer c
-            LEFT JOIN " . DB_PREFIX . "customer_group cg ON (c.customer_group_id = cg.customer_group_id)
+            LEFT JOIN " . DB_PREFIX . "customer_group_description cgd ON (c.customer_group_id = cgd.customer_group_id AND cgd.language_id = '" . (int)$this->config->get('config_language_id') . "')
             WHERE c.customer_id = '" . (int)$customer_id . "'
         ");
 

@@ -1711,6 +1711,10 @@ document.addEventListener('DOMContentLoaded', function() {
               }
             }
 
+            if (json.error.variant && typeof dcShowToast === 'function') {
+              dcShowToast(json.error.variant);
+            }
+
             if (json.error.quantity && typeof dcShowToast === 'function') {
               dcShowToast(json.error.quantity);
             } else if (typeof json.error === 'string' && typeof dcShowToast === 'function') {

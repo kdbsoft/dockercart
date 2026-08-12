@@ -19,6 +19,22 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 
 		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', $product_ids));
 
+		// Товары не в наличии — в конец списка
+		$in_stock = array();
+		$out_of_stock = array();
+
+		foreach ($product_ids as $product_id) {
+			$product_info = isset($products_info[(int)$product_id]) ? $products_info[(int)$product_id] : array();
+
+			if (ProductStockSorter::isOutOfStock($product_info)) {
+				$out_of_stock[] = $product_id;
+			} else {
+				$in_stock[] = $product_id;
+			}
+		}
+
+		$product_ids = array_merge($in_stock, $out_of_stock);
+
 		foreach ($product_ids as $product_id) {
 			$product_info = isset($products_info[(int)$product_id]) ? $products_info[(int)$product_id] : false;
 

@@ -1161,8 +1161,17 @@ class ControllerStartupSeoUrl extends Controller
             $excluded_params = array_values(
                 array_diff($excluded_params, ["category_id"]),
             );
+
+            // The search query itself must survive the redirect too — without
+            // it the search page would render empty (no search parameter).
+            $excluded_params = array_values(
+                array_diff($excluded_params, ["search"]),
+            );
         }
 
+        // Variant deep-link query param (?variant_id=N) is preserved so the
+        // redirect target (product page or search page) can pre-select the
+        // variant the customer searched for.
         $remaining_query = $this->buildRemainingQueryString($excluded_params);
 
         // Append /variant-N to the SEO URL path when present

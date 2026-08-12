@@ -616,6 +616,8 @@ class ControllerProductSearch extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
+				'matched_variant_id' => !empty($result['matched_variant_id']) ? (int)$result['matched_variant_id'] : 0,
+				'matched_variant_model' => !empty($result['matched_variant_model']) ? $result['matched_variant_model'] : '',
 				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
 				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
@@ -1025,6 +1027,17 @@ class ControllerProductSearch extends Controller {
 			$category_names_map = $this->model_catalog_category->getProductCategoryNames(array_column($results, 'product_id'));
 		}
 
+		// When the search query matched a specific variant code, resolve it per
+		// product so the card links straight to that variant (deep link).
+		$matched_variant_map = array();
+		if (isset($this->request->get['search']) && !empty($results)) {
+			$this->load->model('extension/module/dockercart_search');
+			$matched_variant_map = $this->model_extension_module_dockercart_search->resolveVariantsForProducts(
+				array_column($results, 'product_id'),
+				$this->request->get['search']
+			);
+		}
+
 		foreach ($results as $result) {
 			$image = $result['image']
 				? $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'))
@@ -1086,6 +1099,8 @@ class ControllerProductSearch extends Controller {
 				'is_configurable' => !empty($result['is_configurable']),
 				'variant_swatches' => !empty($result['variant_swatches']) ? $result['variant_swatches'] : array(),
 				'default_option_value_ids' => !empty($result['default_option_value_ids']) ? $result['default_option_value_ids'] : array(),
+				'matched_variant_id' => isset($matched_variant_map[(int)$result['product_id']]['variant_id']) ? (int)$matched_variant_map[(int)$result['product_id']]['variant_id'] : 0,
+				'matched_variant_model' => isset($matched_variant_map[(int)$result['product_id']]['model']) ? $matched_variant_map[(int)$result['product_id']]['model'] : '',
 				'category'    => isset($category_names_map[(int)$result['product_id']]) ? $category_names_map[(int)$result['product_id']]['name'] : '',
 				'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'] . $url),
 				'reviews_url' => $this->url->link('product/reviews', 'product_id=' . $result['product_id'])
