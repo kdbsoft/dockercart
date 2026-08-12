@@ -143,24 +143,20 @@
 
 				var available = Object.keys(currentSelection).length === 0 || isValueAvailable(axis, ovId, currentSelection);
 				var inStock = isValueInStock(axis, ovId, currentSelection);
+				var selectable = available && inStock;
 
 				if (inp.tagName === 'OPTION') {
-					if (val) inp.disabled = !available || !inStock;
+					inp.disabled = !selectable;
 				} else {
-					inp.disabled = !available || !inStock;
+					inp.disabled = !selectable;
 					var label = inp.closest('label');
 					if (label) {
+						// Values that do not resolve to an enabled, in-stock
+						// variant under the current selection are hidden
+						// entirely instead of being greyed out (disabled
+						// variants are not shown at all, like disabled products).
+						label.classList.toggle('hidden', !selectable);
 						label.classList.toggle('oos', available && !inStock);
-						if (!available) {
-							label.style.opacity = '0.35';
-							label.style.pointerEvents = 'none';
-						} else if (!inStock) {
-							label.style.opacity = '';
-							label.style.pointerEvents = 'none';
-						} else {
-							label.style.opacity = '';
-							label.style.pointerEvents = '';
-						}
 					}
 				}
 			});

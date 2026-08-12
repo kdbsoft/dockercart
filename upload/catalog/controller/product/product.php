@@ -1188,6 +1188,83 @@ class ControllerProductProduct extends Controller {
 				}
 			}
 
+				// Prevent a "flash" of unavailable option values: the server pre-hides
+				// (class="hidden") every axis value that the JS matrix will disable on
+				// init under the currently selected variant. This mirrors exactly what
+				// updateAvailableOptions() does client-side, so the rendered HTML
+				// matches the post-JS state from the first paint.
+				$data['dc_axis_hidden_pov_ids'] = array();
+
+				if (!empty($product_info['is_configurable']) && !empty($selected_variant)) {
+					$selection_map = array();
+
+					if (!empty($selected_variant['values'])) {
+						foreach ($selected_variant['values'] as $vv) {
+							$selection_map[(int)$vv['option_id']] = (int)$vv['option_value_id'];
+						}
+					}
+
+					foreach ($formatted_axes as $axe) {
+						$oid = (int)$axe['option_id'];
+
+						foreach ($axe['pov_map'] as $ov_id => $pov_id) {
+							$ov_id = (int)$ov_id;
+							$pov_id = (int)$pov_id;
+
+							// The selected value of this axis stays visible.
+							if (isset($selection_map[$oid]) && $selection_map[$oid] === $ov_id) {
+								continue;
+							}
+
+							$pairs = array($oid . ':' . $ov_id);
+
+							foreach ($selection_map as $sel_oid => $sel_ov_id) {
+								if ((int)$sel_oid !== $oid) {
+									$pairs[] = (int)$sel_oid . ':' . (int)$sel_ov_id;
+								}
+							}
+
+							$has_stock = false;
+
+							foreach ($variants as $v) {
+								if ((float)$v['quantity'] <= 0 && empty($product_info['preorder'])) {
+									continue;
+								}
+
+								$vpairs = array();
+
+								if (!empty($v['values'])) {
+									foreach ($v['values'] as $vv) {
+										$vpairs[(int)$vv['option_id']] = (int)$vv['option_value_id'];
+									}
+								}
+
+								$match = true;
+
+								foreach ($pairs as $pair) {
+									$parts = explode(':', $pair);
+									$p_oid = (int)$parts[0];
+									$p_ov_id = (int)$parts[1];
+
+									if (!isset($vpairs[$p_oid]) || $vpairs[$p_oid] !== $p_ov_id) {
+										$match = false;
+										break;
+									}
+								}
+
+								if ($match) {
+									$has_stock = true;
+									break;
+								}
+							}
+
+							if (!$has_stock) {
+								$data['dc_axis_hidden_pov_ids'][] = $pov_id;
+							}
+						}
+					}
+				}
+
 			if (!isset($data['minimum'])) {
 				$data['minimum'] = 1;
 			}
