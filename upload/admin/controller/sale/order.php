@@ -395,6 +395,10 @@ class ControllerSaleOrder extends Controller {
 		$data['export_url'] = str_replace('&amp;', '&', $this->url->link('sale/order/exportCsv', 'user_token=' . $this->session->data['user_token'], true));
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		$this->load->model('customer/customer_group');
+		$data['customer_groups'] = $this->model_customer_customer_group->getCustomerGroups();
+		$data['customer_group_default'] = (int)$this->config->get('config_customer_group_id');
+
 		$data['orders'] = array();
 
 		$filter_data = array(

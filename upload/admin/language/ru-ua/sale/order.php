@@ -236,6 +236,8 @@ $_['button_duplicate_order']     = 'Дублировать заказ';
 $_['text_order_duplicated']      = 'Заказ продублирован!';
 $_['button_export_csv']          = 'Выгрузить выбранные заказы в CSV';
 $_['button_new_order']           = 'Создать заказ';
+$_['text_select_customer_group'] = 'Выбор группы покупателя';
+$_['entry_select_group']         = 'Группа покупателя для нового заказа';
 
 $_['button_save']                = 'Сохранить';
 $_['button_cancel']              = 'Отмена';

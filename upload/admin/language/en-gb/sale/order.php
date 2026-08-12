@@ -330,6 +330,8 @@ $_['button_duplicate_order']     = 'Duplicate Order';
 $_['text_order_duplicated']      = 'Order duplicated!';
 $_['button_export_csv']          = 'Export Selected Orders to CSV';
 $_['button_new_order']           = 'New Order';
+$_['text_select_customer_group'] = 'Select Customer Group';
+$_['entry_select_group']         = 'Customer group for the new order';
 
 $_['button_save']                = 'Save';
 $_['button_cancel']              = 'Cancel';

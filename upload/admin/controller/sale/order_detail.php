@@ -127,6 +127,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('customer/customer_group');
 		$customer_group_info = $this->model_customer_customer_group->getCustomerGroup($order_info['customer_group_id']);
 		$data['customer_group'] = $customer_group_info ? $customer_group_info['name'] : '';
+		$data['customer_groups'] = $this->model_customer_customer_group->getCustomerGroups();
 
 		$data['ip'] = $order_info['ip'];
 		$data['forwarded_ip'] = $order_info['forwarded_ip'];
@@ -1130,6 +1131,11 @@ class ControllerSaleOrderDetail extends Controller {
 					if ($recalc !== null) {
 						$this->journalTotalChange($order_id, (float)$recalc['old_total'], (float)$recalc['new_total']);
 					}
+				}
+
+				if ($field === 'customer_group_id') {
+					$order_info = $this->model_sale_order->getOrder($order_id);
+					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
 				}
 
 				$json['success'] = $this->language->get('text_success');
