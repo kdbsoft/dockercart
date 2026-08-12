@@ -142,7 +142,7 @@
 				if (!ovId) return;
 
 				var available = Object.keys(currentSelection).length === 0 || isValueAvailable(axis, ovId, currentSelection);
-				var inStock = Object.keys(currentSelection).length === 0 || isValueInStock(axis, ovId, currentSelection);
+				var inStock = isValueInStock(axis, ovId, currentSelection);
 
 				if (inp.tagName === 'OPTION') {
 					if (val) inp.disabled = !available || !inStock;
@@ -350,7 +350,33 @@
 			mainImgEl.src = defaultImgSrc;
 		}
 
-		if (variant && variant.quantity <= 0) {
+		var noVariant = !variant;
+
+		// When the selected axis combination does not resolve to a variant
+		// (e.g. all variants are disabled), treat it as out of stock instead
+		// of falling into the in-stock branch.
+		if (noVariant) {
+			var isPreorder = !!matrix.preorder;
+
+			if (cartBtn) cartBtn.classList.toggle('hidden', !isPreorder);
+			if (qtyWrapEl) qtyWrapEl.classList.toggle('hidden', !isPreorder);
+			if (outOfStockEl) outOfStockEl.classList.toggle('hidden', isPreorder);
+
+			if (stockBadgeEl) {
+				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
+				if (isPreorder) {
+					if (stockText) stockText.textContent = stockBadgeEl.dataset.textPreorder || '';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-amber-700';
+				} else {
+					if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-red-600';
+				}
+				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
+				if (dot) {
+					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 ' + (isPreorder ? 'bg-amber-500 border-amber-500' : 'bg-red-500 border-red-500');
+				}
+			}
+		} else if (variant && variant.quantity <= 0) {
 			var isPreorder = !!matrix.preorder;
 
 			if (cartBtn) cartBtn.classList.toggle('hidden', !isPreorder);
@@ -527,6 +553,10 @@
 		if (variant) {
 			updateVariantUI(variant, true);
 			updateYouSave(variant, variant.special !== undefined && variant.special !== null && variant.special_from !== undefined && variant.special < variant.special_from);
+		} else if (Object.keys(variantMap).length === 0) {
+			// No enabled variants at all (e.g. all disabled): keep the server
+			// state (out of stock) and make sure no axis can be selected.
+			updateVariantUI(null, true);
 		}
 
 		isInitPhase = false;
