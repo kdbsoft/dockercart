@@ -706,10 +706,27 @@ class ControllerProductProduct extends Controller {
 
 			$data['options'] = array();
 
+			// Map of option_id => product_option_value_id for every option value
+			// that belongs to at least one ENABLED variant. Used to hide disabled
+			// variant option values from the storefront entirely (mirrors how
+			// disabled products are not shown).
+			$enabled_variant_value_ids = array();
+
+			if (!empty($product_info['is_configurable'])) {
+				$enabled_variant_value_ids = $this->getEnabledVariantValueIds($product_id);
+			}
+
 			foreach ($this->model_catalog_product->getProductOptions($product_id) as $option) {
 				$product_option_value_data = array();
+				$is_configurable_axis = !empty($option['is_configurable_axis']);
 
 				foreach ($option['product_option_value'] as $option_value) {
+					if ($is_configurable_axis && !in_array((int)$option_value['product_option_value_id'], $enabled_variant_value_ids)) {
+						// This option value is only used by disabled variants —
+						// do not render it (same rule as disabled products).
+						continue;
+					}
+
 					if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
 						$price = $this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency']);
 					} else {
@@ -728,6 +745,12 @@ class ControllerProductProduct extends Controller {
 				);
 		}
 
+			if (empty($product_option_value_data)) {
+				// All values of a configurable axis belong to disabled variants:
+				// hide the whole axis block.
+				continue;
+			}
+
 			$data['options'][] = array(
 					'product_option_id'    => $option['product_option_id'],
 					'product_option_value' => $product_option_value_data,
@@ -737,7 +760,7 @@ class ControllerProductProduct extends Controller {
 					'value'                => $option['value'],
 					'required'             => $option['required'],
 					'show_option_price'    => $option['show_option_price'],
-					'is_configurable_axis' => !empty($option['is_configurable_axis'])
+					'is_configurable_axis' => $is_configurable_axis
 				);
 			}
 
@@ -1986,6 +2009,26 @@ class ControllerProductProduct extends Controller {
 		$formatted = number_format((float)$value, 2, '.', '');
 
 		return rtrim(rtrim($formatted, '0'), '.');
+	}
+
+	/**
+	 * Collect the product_option_value_id set that belongs to at least one
+	 * ENABLED variant (status = 1) of a configurable product. Option values
+	 * used only by disabled variants are hidden from the storefront.
+	 *
+	 * @param int $product_id
+	 * @return array list of product_option_value_id ints
+	 */
+	private function getEnabledVariantValueIds($product_id) {
+		$query = $this->db->query(
+			"SELECT pov.product_option_value_id FROM " . DB_PREFIX . "product_option_value pov "
+			. "INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.product_id = pov.product_id AND pvv.option_id = pov.option_id AND pvv.option_value_id = pov.option_value_id) "
+			. "INNER JOIN " . DB_PREFIX . "product_variant pv ON (pv.variant_id = pvv.variant_id) "
+			. "WHERE pov.product_id = '" . (int)$product_id . "' AND pv.status = '1' "
+			. "GROUP BY pov.product_option_value_id"
+		);
+
+		return array_map('intval', array_column($query->rows, 'product_option_value_id'));
 	}
 
 	public function review() {
