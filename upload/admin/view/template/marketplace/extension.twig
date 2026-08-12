@@ -90,9 +90,9 @@
         {{ group.label }}
         <small>{{ group.extensions|length }} {{ text_ext_short }}</small>
       </h4>
-      <div class="row ext-cards-row">
+      <div class="ext-masonry">
         {% for ext in group.extensions %}
-        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ext-card-wrapper"
+        <div class="ext-card-wrapper"
              data-type="{{ group.type }}"
              data-name="{{ ext.name|striptags|lower }}"
              data-installed="{{ ext.installed ? '1' : '0' }}"
@@ -147,9 +147,6 @@
                   {% endif %}
                 </div>
                 {% endfor %}
-                <div style="margin-top:4px;">
-                  <a href="{{ ext.edit }}" class="btn btn-xs btn-default"><i data-lucide="circle-plus"></i> {{ button_add }}</a>
-                </div>
               </div>
               {% endif %}
 
@@ -162,9 +159,15 @@
 
             <div class="panel-footer">
               {% if ext.installed %}
+                {% if ext.is_multi_instance %}
+                <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" data-toggle="tooltip" title="{{ button_add }}">
+                  <i data-lucide="circle-plus"></i> {{ button_add }}
+                </a>
+                {% else %}
                 <a href="{{ ext.edit }}" class="btn btn-xs btn-primary" data-toggle="tooltip" title="{{ button_edit }}">
                   <i data-lucide="pencil"></i> {{ button_edit }}
                 </a>
+                {% endif %}
                 {% if not ext.is_system %}
                 <button type="button"
                         class="btn btn-xs btn-danger btn-ext-uninstall"
@@ -190,7 +193,7 @@
           </div>
         </div>
         {% endfor %}
-      </div>{# end .row #}
+      </div>{# end .ext-masonry #}
     </div>{# end .ext-group #}
     {% else %}
     <div class="text-center text-muted" style="padding:40px 0;">
@@ -248,7 +251,7 @@
 
       // Hide entire group heading if nothing visible
       $(this).find('.ext-group-heading').toggle(groupHasVisible);
-      $(this).find('.ext-cards-row').toggle(groupHasVisible);
+      $(this).find('.ext-masonry').toggle(groupHasVisible);
     });
 
     $emptyState.toggle(!anyVisible);
