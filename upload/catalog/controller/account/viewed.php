@@ -34,6 +34,22 @@ class ControllerAccountViewed extends Controller {
 
 		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($viewed_products, 'product_id')));
 
+		// Товары не в наличии — в конец списка
+		$in_stock = array();
+		$out_of_stock = array();
+
+		foreach ($viewed_products as $viewed_product) {
+			$product_info = isset($products_info[(int)$viewed_product['product_id']]) ? $products_info[(int)$viewed_product['product_id']] : array();
+
+			if (ProductStockSorter::isOutOfStock($product_info)) {
+				$out_of_stock[] = $viewed_product;
+			} else {
+				$in_stock[] = $viewed_product;
+			}
+		}
+
+		$viewed_products = array_merge($in_stock, $out_of_stock);
+
 		foreach ($viewed_products as $viewed_product) {
 			$product_info = isset($products_info[(int)$viewed_product['product_id']]) ? $products_info[(int)$viewed_product['product_id']] : false;
 

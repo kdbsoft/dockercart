@@ -78,6 +78,22 @@ class ControllerAccountWishList extends Controller {
 
 		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($results, 'product_id')));
 
+		// Товары не в наличии — в конец списка
+		$in_stock = array();
+		$out_of_stock = array();
+
+		foreach ($results as $result) {
+			$product_info = isset($products_info[(int)$result['product_id']]) ? $products_info[(int)$result['product_id']] : array();
+
+			if (ProductStockSorter::isOutOfStock($product_info)) {
+				$out_of_stock[] = $result;
+			} else {
+				$in_stock[] = $result;
+			}
+		}
+
+		$results = array_merge($in_stock, $out_of_stock);
+
 		foreach ($results as $result) {
 			$product_info = isset($products_info[(int)$result['product_id']]) ? $products_info[(int)$result['product_id']] : false;
 

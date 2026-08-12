@@ -280,7 +280,9 @@
             if (item.model) {
                 var model = document.createElement('div');
                 model.style.cssText = 'font-size:11px;color:#9ca3af;margin-top:1px;';
-                model.textContent = item.model;
+                // When the query matched a specific variant, show the matched
+                // variant's code instead of the default product model.
+                model.textContent = item.matched_variant_model || item.model;
                 info.appendChild(name);
                 info.appendChild(model);
             } else {

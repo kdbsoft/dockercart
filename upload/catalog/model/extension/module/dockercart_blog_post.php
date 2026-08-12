@@ -287,7 +287,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 				AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'
 				AND p.status = '1'
 				AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
-				ORDER BY p.sort_order, pd.name");
+				ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.sort_order, pd.name");
 
 		$this->cache->set($cache_key, $query->rows, 3600);
 
