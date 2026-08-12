@@ -9,7 +9,11 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
+            {% if customer_groups|length > 1 %}
+            <button type="button" id="button-new-order" class="btn btn-primary" data-toggle="modal" data-target="#new-order-modal"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</button>
+            {% else %}
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</a>
+            {% endif %}
             <button type="button" id="button-export-csv" class="btn btn-success dc-btn-selection">
               <i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}
               <i data-lucide="loader" width="16" height="16" class="spin" id="csv-export-spinner" style="display:none"></i>
@@ -414,6 +418,39 @@ $('.order-status-select').on('change', function() {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
 	});
+});
+//--></script>
+
+<div class="modal fade" id="new-order-modal" tabindex="-1" role="dialog" aria-labelledby="new-order-modal-title">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="new-order-modal-title">{{ text_select_customer_group }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="dcx-fields">
+          <div class="dcx-field">
+            <label class="dcx-label" for="new-order-group">{{ entry_select_group }}</label>
+            <select id="new-order-group" class="form-control">
+              {% for group in customer_groups %}
+              <option value="{{ group.customer_group_id }}" {% if group.customer_group_id == customer_group_default %}selected{% endif %}>{{ group.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="button-new-order-confirm"><i data-lucide="plus" width="14" height="14"></i> {{ button_new_order }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#button-new-order-confirm').on('click', function() {
+	var groupId = $('#new-order-group').val();
+	location = '{{ add }}' + (groupId ? '&customer_group_id=' + encodeURIComponent(groupId) : '');
 });
 //--></script>
 </div>

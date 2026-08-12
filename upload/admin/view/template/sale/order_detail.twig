@@ -305,7 +305,12 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_customer_group }}</span>
-              <span class="dcx-sidebar-card__value">{{ customer_group }}</span>
+              <span class="dcx-sidebar-card__value view-only" data-field="customer_group_id">{{ customer_group }}</span>
+              <select class="form-control edit-only" data-field="customer_group_id" style="display:none">
+                {% for group in customer_groups %}
+                <option value="{{ group.customer_group_id }}" {% if group.customer_group_id == customer_group_id %}selected{% endif %}>{{ group.name }}</option>
+                {% endfor %}
+              </select>
             </div>
             {% if customer_link %}
             <div class="dcx-sidebar-card__field" style="margin-top:4px">
@@ -877,12 +882,18 @@ function savePanelChanges(panelId) {
 		});
 	} else if (panelId === 'buyer') {
 		const promises = [];
+		let customerGroupChanged = false;
 		panel.querySelectorAll('input[data-field], select[data-field]').forEach(input => {
 			const viewEl = panel.querySelector('.view-only[data-field="' + input.dataset.field + '"]');
 			const oldVal = viewEl ? viewEl.textContent.trim() : input.defaultValue;
 			if (input.value !== oldVal) {
 				promises.push(api('index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 					'POST', { field: input.dataset.field, value: input.value }));
+				if (input.dataset.field === 'customer_group_id') {
+					customerGroupChanged = true;
+					const picker = document.getElementById('product-picker');
+					if (picker) picker.dataset.customerGroupId = input.value;
+				}
 			}
 		});
 		function collectAddrChanges(id) {
@@ -913,7 +924,11 @@ function savePanelChanges(panelId) {
 			});
 		}
 		Promise.all(promises).then(() => {
-			showAlertAndReload('{{ text_order_saved }}');
+			if (customerGroupChanged) {
+				showAlertAndReload('{{ text_order_saved }}');
+			} else {
+				showAlert('{{ text_order_saved }}');
+			}
 		});
 	} else if (panelId === 'order-details') {
 		const promises = [];
