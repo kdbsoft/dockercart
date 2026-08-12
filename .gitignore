@@ -11,6 +11,7 @@ node_modules/
 # Agent/tool local-only dirs
 .opencode/
 .commandcode/
+.clinerules/
 AGENTS.md
 
 # Config and Htaccess Files
