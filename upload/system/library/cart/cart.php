@@ -148,79 +148,6 @@ class Cart
 
         $product_data = [];
 
-        $customer_group_discount = (float) $this->config->get(
-            "config_customer_group_discount",
-        );
-        $customer_group_markup = (float) $this->config->get(
-            "config_customer_group_markup",
-        );
-        $customer_group_id = (int) $this->config->get(
-            "config_customer_group_id",
-        );
-
-        // Fallback: in some request flows startup config may not preload group pricing.
-        // Read values directly from customer_group so cart/checkout prices stay consistent.
-        if (
-            $customer_group_id > 0 &&
-            $customer_group_discount <= 0 &&
-            $customer_group_markup <= 0
-        ) {
-            $has_markup_percent = false;
-            $markup_column_query = $this->db->query(
-                "SHOW COLUMNS FROM " .
-                    DB_PREFIX .
-                    "customer_group LIKE 'markup_percent'",
-            );
-
-            if ($markup_column_query->num_rows) {
-                $has_markup_percent = true;
-            }
-
-            if ($has_markup_percent) {
-                $customer_group_query = $this->db->query(
-                    "SELECT discount_percent, markup_percent FROM " .
-                        DB_PREFIX .
-                        "customer_group WHERE customer_group_id = '" .
-                        $customer_group_id .
-                        "'",
-                );
-            } else {
-                $customer_group_query = $this->db->query(
-                    "SELECT discount_percent FROM " .
-                        DB_PREFIX .
-                        "customer_group WHERE customer_group_id = '" .
-                        $customer_group_id .
-                        "'",
-                );
-            }
-
-            if ($customer_group_query->num_rows) {
-                $customer_group_discount =
-                    (float) $customer_group_query->row["discount_percent"];
-
-                if ($customer_group_discount < 0) {
-                    $customer_group_discount = 0;
-                } elseif ($customer_group_discount > 100) {
-                    $customer_group_discount = 100;
-                }
-
-                if ($has_markup_percent) {
-                    $customer_group_markup =
-                        (float) $customer_group_query->row["markup_percent"];
-
-                    if ($customer_group_markup < 0) {
-                        $customer_group_markup = 0;
-                    } elseif ($customer_group_markup > 100) {
-                        $customer_group_markup = 100;
-                    }
-                }
-            }
-        }
-
-        if ($customer_group_discount > 0 && $customer_group_markup > 0) {
-            $customer_group_markup = 0;
-        }
-
         $cart_query = $this->db->query(
             "SELECT * FROM " .
                 DB_PREFIX .
@@ -362,187 +289,111 @@ class Cart
             }
         }
 
-        // Bulk pricing/reward/download lookup maps for all cart product ids.
-        $cg_price_map = [];
-        $product_discount_map = [];
-        $product_special_map = [];
+        // Bulk reward/download lookup maps for all cart product ids.
         $reward_map = [];
         $download_map = [];
         $variant_rows = [];
-        $variant_cg_price_map = [];
-        $variant_special_map = [];
-        $variant_discount_map = [];
 
-        if ($cart_query->num_rows) {
-            $price_product_ids = [];
+        $cart_product_ids = [];
 
-            foreach ($cart_query->rows as $cart_row) {
-                $price_product_ids[(int) $cart_row["product_id"]] = true;
-            }
+        foreach ($cart_query->rows as $cart_row) {
+            $cart_product_ids[(int) $cart_row["product_id"]] = true;
+        }
 
-            $price_product_ids = array_keys($price_product_ids);
+        if (!empty($cart_product_ids)) {
+            $in = implode(",", array_keys($cart_product_ids));
             $cg_id = (int) $this->config->get("config_customer_group_id");
 
-            if (!empty($price_product_ids)) {
-                $in = implode(",", $price_product_ids);
+            $reward_query = $this->db->query(
+                "SELECT product_id, points FROM " .
+                    DB_PREFIX .
+                    "product_reward WHERE product_id IN (" .
+                    $in .
+                    ") AND customer_group_id = '" .
+                    $cg_id .
+                    "'",
+            );
 
-                $cg_query = $this->db->query(
-                    "SELECT product_id, price FROM " .
-                        DB_PREFIX .
-                        "dockercart_product_customer_group_price WHERE product_id IN (" .
-                        $in .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "'",
-                );
-
-                foreach ($cg_query->rows as $row) {
-                    $cg_price_map[(int) $row["product_id"]] = (float) $row["price"];
-                }
-
-                $discount_query = $this->db->query(
-                    "SELECT product_id, price, quantity, priority FROM " .
-                        DB_PREFIX .
-                        "product_discount WHERE product_id IN (" .
-                        $in .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC",
-                );
-
-                foreach ($discount_query->rows as $row) {
-                    $product_discount_map[(int) $row["product_id"]][] = $row;
-                }
-
-                $special_query = $this->db->query(
-                    "SELECT product_id, price, priority FROM " .
-                        DB_PREFIX .
-                        "product_special WHERE product_id IN (" .
-                        $in .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC",
-                );
-
-                foreach ($special_query->rows as $row) {
-                    $product_special_map[(int) $row["product_id"]][] = $row;
-                }
-
-                $reward_query = $this->db->query(
-                    "SELECT product_id, points FROM " .
-                        DB_PREFIX .
-                        "product_reward WHERE product_id IN (" .
-                        $in .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "'",
-                );
-
-                foreach ($reward_query->rows as $row) {
-                    $reward_map[(int) $row["product_id"]] = $row["points"];
-                }
-
-                $download_query = $this->db->query(
-                    "SELECT p2d.product_id, d.download_id, d.filename, d.mask, dd.name FROM " .
-                        DB_PREFIX .
-                        "product_to_download p2d LEFT JOIN " .
-                        DB_PREFIX .
-                        "download d ON (p2d.download_id = d.download_id) LEFT JOIN " .
-                        DB_PREFIX .
-                        "download_description dd ON (d.download_id = dd.download_id) WHERE p2d.product_id IN (" .
-                        $in .
-                        ") AND dd.language_id = '" .
-                        (int) $this->config->get("config_language_id") .
-                        "' AND d.status = '1'",
-                );
-
-                foreach ($download_query->rows as $row) {
-                    $download_map[(int) $row["product_id"]][] = $row;
-                }
+            foreach ($reward_query->rows as $row) {
+                $reward_map[(int) $row["product_id"]] = $row["points"];
             }
 
-            // Variant data for all cart lines that carry a variant_id
-            $variant_ids = [];
+            $download_query = $this->db->query(
+                "SELECT p2d.product_id, d.download_id, d.filename, d.mask, dd.name FROM " .
+                    DB_PREFIX .
+                    "product_to_download p2d LEFT JOIN " .
+                    DB_PREFIX .
+                    "download d ON (p2d.download_id = d.download_id) LEFT JOIN " .
+                    DB_PREFIX .
+                    "download_description dd ON (d.download_id = dd.download_id) WHERE p2d.product_id IN (" .
+                    $in .
+                    ") AND dd.language_id = '" .
+                    (int) $this->config->get("config_language_id") .
+                    "' AND d.status = '1'",
+            );
 
-            foreach ($cart_query->rows as $cart_row) {
-                $decoded = json_decode($cart_row["option"], true);
-                $vid = isset($decoded["variant_id"]) ? (int) $decoded["variant_id"] : 0;
-
-                if ($vid > 0) {
-                    $variant_ids[$vid] = true;
-                }
+            foreach ($download_query->rows as $row) {
+                $download_map[(int) $row["product_id"]][] = $row;
             }
+        }
 
-            $variant_ids = array_keys($variant_ids);
+        // DockerCart: единый калькулятор цены (ProductPricingCalculator).
+        // Раньше ценовая лестница (групповая цена → количественная скидка →
+        // спеццена → глобальный % группы) была реализована здесь напрямую;
+        // теперь она живёт в одном месте и переиспользуется каталогом,
+        // корзиной и админкой заказов.
+        $pricing_lines = [];
 
-            if (!empty($variant_ids)) {
-                $in_v = implode(",", $variant_ids);
+        foreach ($cart_query->rows as $cart_row) {
+            $decoded = json_decode($cart_row["option"], true);
+            $vid = isset($decoded["variant_id"]) ? (int) $decoded["variant_id"] : 0;
 
-                $variant_query = $this->db->query(
-                    "SELECT pv.*, cgp.price AS cg_price FROM " .
-                        DB_PREFIX .
-                        "product_variant pv LEFT JOIN " .
-                        DB_PREFIX .
-                        "dockercart_product_variant_customer_group_price cgp ON (cgp.variant_id = pv.variant_id AND cgp.customer_group_id = '" .
-                        $cg_id .
-                        "') WHERE pv.variant_id IN (" .
-                        $in_v .
-                        ") AND pv.status = '1'",
-                );
+            $pricing_lines[] = [
+                "product_id" => (int) $cart_row["product_id"],
+                "variant_id" => $vid,
+                "quantity" => (float) $cart_row["quantity"],
+            ];
 
-                foreach ($variant_query->rows as $row) {
-                    $variant_rows[(int) $row["variant_id"]] = $row;
+            if ($vid > 0) {
+                $variant_ids[$vid] = true;
+            }
+        }
 
-                    if ($row["cg_price"] !== null && (float) $row["cg_price"] > 0) {
-                        $variant_cg_price_map[(int) $row["variant_id"]] = (float) $row["cg_price"];
-                    }
-                }
+        $pricing_result = [];
+        $calculator = new \ProductPricingCalculator($this->registry);
 
-                // Default variant per product: the product-level special only
-                // falls back to the default variant (mirrors the product page).
-                $default_variant_map = [];
+        if (!empty($pricing_lines)) {
+            $pricing_result = $calculator->calculateForLines($pricing_lines);
+        }
 
-                $dv_query = $this->db->query(
-                    "SELECT product_id, default_variant_id FROM " .
-                        DB_PREFIX .
-                        "product_configurable WHERE product_id IN (" .
-                        $in .
-                        ") AND default_variant_id IS NOT NULL AND default_variant_id > 0",
-                );
+        // Variant data for all cart lines that carry a variant_id
+        $variant_ids = [];
 
-                foreach ($dv_query->rows as $row) {
-                    $default_variant_map[(int) $row["product_id"]] = (int) $row["default_variant_id"];
-                }
+        foreach ($cart_query->rows as $cart_row) {
+            $decoded = json_decode($cart_row["option"], true);
+            $vid = isset($decoded["variant_id"]) ? (int) $decoded["variant_id"] : 0;
 
-                $vs_query = $this->db->query(
-                    "SELECT variant_id, price FROM " .
-                        DB_PREFIX .
-                        "dockercart_product_variant_special WHERE variant_id IN (" .
-                        $in_v .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC",
-                );
+            if ($vid > 0) {
+                $variant_ids[$vid] = true;
+            }
+        }
 
-                foreach ($vs_query->rows as $row) {
-                    if (!isset($variant_special_map[(int) $row["variant_id"]])) {
-                        $variant_special_map[(int) $row["variant_id"]] = (float) $row["price"];
-                    }
-                }
+        $variant_ids = array_keys($variant_ids);
 
-                $vd_query = $this->db->query(
-                    "SELECT variant_id, price, quantity FROM " .
-                        DB_PREFIX .
-                        "dockercart_product_variant_discount WHERE variant_id IN (" .
-                        $in_v .
-                        ") AND customer_group_id = '" .
-                        $cg_id .
-                        "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY quantity DESC, priority ASC, price ASC",
-                );
+        if (!empty($variant_ids)) {
+            $in_v = implode(",", $variant_ids);
+            $cg_id = (int) $this->config->get("config_customer_group_id");
 
-                foreach ($vd_query->rows as $row) {
-                    $variant_discount_map[(int) $row["variant_id"]][] = $row;
-                }
+            $variant_query = $this->db->query(
+                "SELECT pv.* FROM " .
+                    DB_PREFIX .
+                    "product_variant pv WHERE pv.variant_id IN (" .
+                    $in_v .
+                    ") AND pv.status = '1'",
+            );
+
+            foreach ($variant_query->rows as $row) {
+                $variant_rows[(int) $row["variant_id"]] = $row;
             }
         }
 
@@ -830,131 +681,23 @@ class Cart
                         } elseif (!empty($variant_sku)) {
                             $product_query["row"]["model"] = $variant_sku;
                         }
-
-                        if (isset($variant_cg_price_map[$variant_id]) && $variant_cg_price_map[$variant_id] > 0) {
-                            $product_query["row"]["price"] = $variant_cg_price_map[$variant_id];
-                        }
                     } else {
                         $stock = false;
                     }
                 }
 
-                $price = $product_query["row"]["price"];
-                $has_variant_group_price = false;
+                // DockerCart: единый калькулятор цены. Цена единицы и опций
+                // берутся из ProductPricingCalculator (bulk-расчёт выше), а не
+                // пересчитываются здесь — формула едина с каталогом и админкой.
+                $price_key = (int) $cart["product_id"] . ":" . $variant_id;
+                $line_pricing = isset($pricing_result["pricing"][$price_key])
+                    ? $pricing_result["pricing"][$price_key]
+                    : null;
 
-                if ($variant_id > 0) {
-                    if (isset($variant_special_map[$variant_id])) {
-                        $best_special = $variant_special_map[$variant_id];
-
-                        if ((float) $best_special < (float) $price) {
-                            $price = (float) $best_special;
-                        }
-                    } elseif (
-                        isset($product_special_map[(int) $cart["product_id"]])
-                        && isset($default_variant_map[(int) $cart["product_id"]])
-                        && (int) $default_variant_map[(int) $cart["product_id"]] === $variant_id
-                    ) {
-                        // The product-level special only applies to the default
-                        // variant (mirrors the product page); other variants
-                        // price by their own data.
-                        $best_product_special = (float) $product_special_map[(int) $cart["product_id"]][0]["price"];
-
-                        if ($best_product_special < (float) $price) {
-                            $price = $best_product_special;
-                        }
-                    }
-
-                    // Variant quantity discounts (DockerCart)
-                    $variant_discount_quantity = 0;
-
-                    foreach ($cart_query->rows as $cart_2) {
-                        if ((int)$cart_2["product_id"] != (int)$cart["product_id"]) {
-                            continue;
-                        }
-
-                        $cart_2_options = json_decode($cart_2["option"], true);
-                        $cart_2_variant_id = isset($cart_2_options["variant_id"]) ? (int)$cart_2_options["variant_id"] : 0;
-
-                        if ($cart_2_variant_id == $variant_id) {
-                            $variant_discount_quantity += (float)$cart_2["quantity"];
-                        }
-                    }
-
-                    if (isset($variant_discount_map[$variant_id])) {
-                        foreach ($variant_discount_map[$variant_id] as $vd_row) {
-                            if ((float) $vd_row["quantity"] <= $variant_discount_quantity) {
-                                // Apply only when it beats the current price
-                                // (special / group price), mirroring the plain
-                                // product flow below.
-                                if ((float) $vd_row["price"] < (float) $price) {
-                                    $price = (float) $vd_row["price"];
-                                }
-                                break;
-                            }
-                        }
-                    }
-
-                    // DockerCart: variant-level customer group price override
-                    if (isset($variant_cg_price_map[$variant_id]) && $variant_cg_price_map[$variant_id] > 0) {
-                        $has_variant_group_price = true;
-                    }
-
-                    // Global % customer group discount/markup applies to variants
-                    // the same way it applies to plain products below (and on
-                    // the product page), unless a per-variant group price is set.
-                    if ($has_variant_group_price) {
-                        // Per-variant group price set — skip global % discount/markup
-                    } elseif ($customer_group_discount > 0) {
-                        $price *= (100 - $customer_group_discount) / 100;
-                    } elseif ($customer_group_markup > 0) {
-                        $price *= (100 + $customer_group_markup) / 100;
-                    }
-                }
-
-                if (!$variant_id) {
-                    // DockerCart: Per-product customer group price override
-                    $has_customer_group_price = isset($cg_price_map[(int) $cart["product_id"]]) && $cg_price_map[(int) $cart["product_id"]] > 0;
-
-                    if ($has_customer_group_price) {
-                        $price = $cg_price_map[(int) $cart["product_id"]];
-                    }
-
-                    // Product Discounts
-                    $discount_quantity = 0;
-
-                    foreach ($cart_query->rows as $cart_2) {
-                        if ($cart_2["product_id"] == $cart["product_id"]) {
-                            $discount_quantity += $cart_2["quantity"];
-                        }
-                    }
-
-                    if (isset($product_discount_map[(int) $cart["product_id"]])) {
-                        foreach ($product_discount_map[(int) $cart["product_id"]] as $pd_row) {
-                            if ((float) $pd_row["quantity"] <= $discount_quantity) {
-                                $price = (float) $pd_row["price"];
-                                break;
-                            }
-                        }
-                    }
-
-                    // Product Specials
-                    if (isset($product_special_map[(int) $cart["product_id"]])) {
-                        $best_special_price = (float) $product_special_map[(int) $cart["product_id"]][0]["price"];
-
-                        if ($best_special_price < (float) $price) {
-                            $price = $best_special_price;
-                        }
-                    }
-
-                    if ($has_customer_group_price) {
-                        // Per-product group price set — skip global % discount/markup
-                    } elseif ($has_variant_group_price) {
-                        // Variant-level group price set — skip global % discount/markup
-                    } elseif ($customer_group_discount > 0) {
-                        $price *= (100 - $customer_group_discount) / 100;
-                    } elseif ($customer_group_markup > 0) {
-                        $price *= (100 + $customer_group_markup) / 100;
-                    }
+                if ($line_pricing !== null) {
+                    $price = (float) $line_pricing["price"];
+                } else {
+                    $price = (float) $product_query["row"]["price"];
                 }
 
                 // Reward Points

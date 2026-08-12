@@ -2621,16 +2621,14 @@ class ControllerCatalogProduct extends Controller {
 					$display_price = (float)$result['price'];
 
 					if (!$is_configurable && $customer_group_id > 0) {
-						$this->load->model('sale/order');
+						// Единый калькулятор цены (та же формула, что в корзине
+						// и админке заказов) — цена для группы заказа.
+						$calculator = new \ProductPricingCalculator($this->registry, array(
+							'customer_group_id' => $customer_group_id
+						));
 
-						$raw_price_query = $this->db->query("SELECT price FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "'");
-						$raw_price = $raw_price_query->num_rows ? (float)$raw_price_query->row['price'] : $display_price;
-
-						$catalog_pricing = $this->model_sale_order->applyCatalogPricingToPrice($product_id, 0, 1, $customer_group_id, $raw_price);
-
-						if ($catalog_pricing['applied']) {
-							$display_price = $catalog_pricing['price'];
-						}
+						$pricing = $calculator->calculate((int)$product_id, 0, 1);
+						$display_price = (float)$pricing['price'];
 					}
 
 					$price_text = $this->currency->format($display_price, $format_currency, $currency_value);
