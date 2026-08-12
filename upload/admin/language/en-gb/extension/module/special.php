@@ -6,6 +6,8 @@ $_['heading_title']    = 'Specials';
 $_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified module specials!';
 $_['text_edit']        = 'Edit Specials Module';
+$_['text_add'] = 'Add Specials Module';
+$_['text_add_subtitle'] = 'Configure settings and options for the new module';
 $_['text_default_module_name'] = 'Specials';
 // Subtitle
 

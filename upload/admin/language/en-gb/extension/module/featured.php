@@ -6,6 +6,8 @@ $_['heading_title']    = 'Featured';
 $_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified featured module!';
 $_['text_edit']        = 'Edit Featured Module';
+$_['text_add'] = 'Add Featured Module';
+$_['text_add_subtitle'] = 'Configure settings and options for the new module';
 $_['text_default_module_name'] = 'Featured';
 // Subtitle
 

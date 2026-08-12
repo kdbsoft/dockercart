@@ -6,6 +6,8 @@ $_['heading_title']     = 'HTML Content';
 $_['text_extension']    = 'Add-ons';
 $_['text_success']      = 'Success: You have modified HTML Content module!';
 $_['text_edit']         = 'Edit HTML Content Module';
+$_['text_add'] = 'Add HTML Content Module';
+$_['text_add_subtitle'] = 'Configure settings and options for the new module';
 $_['text_default_module_name'] = 'HTML Content';
 // Subtitle
 

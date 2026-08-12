@@ -6,6 +6,8 @@ $_['heading_title']    = 'Banner';
 $_['text_extension']   = 'Add-ons';
 $_['text_success']     = 'Success: You have modified banner module!';
 $_['text_edit']        = 'Edit Banner Module';
+$_['text_add'] = 'Add Banner Module';
+$_['text_add_subtitle'] = 'Configure settings and options for the new module';
 $_['text_default_module_name'] = 'Banner';
 
 // Entry
