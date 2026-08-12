@@ -360,16 +360,15 @@
 
 			if (stockBadgeEl) {
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
+				var stockIcon = stockBadgeEl.querySelector('.dc-stock-icon');
 				if (isPreorder) {
 					if (stockText) stockText.textContent = stockBadgeEl.dataset.textPreorder || '';
-					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-amber-700';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600';
+					if (stockIcon) stockIcon.classList.remove('hidden');
 				} else {
 					if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
-					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-red-600';
-				}
-				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
-				if (dot) {
-					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 ' + (isPreorder ? 'bg-amber-500 border-amber-500' : 'bg-red-500 border-red-500');
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-sm font-semibold text-red-500';
+					if (stockIcon) stockIcon.classList.add('hidden');
 				}
 			}
 		} else if (variant && variant.quantity <= 0) {
@@ -382,16 +381,15 @@
 			// Update stock badge
 			if (stockBadgeEl) {
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
+				var stockIcon = stockBadgeEl.querySelector('.dc-stock-icon');
 				if (isPreorder) {
 					if (stockText) stockText.textContent = stockBadgeEl.dataset.textPreorder || '';
-					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-amber-700';
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600';
+					if (stockIcon) stockIcon.classList.remove('hidden');
 				} else {
 					if (stockText) stockText.textContent = stockBadgeEl.dataset.textOutOfStock || '';
-					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-red-600';
-				}
-				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
-				if (dot) {
-					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 ' + (isPreorder ? 'bg-amber-500 border-amber-500' : 'bg-red-500 border-red-500');
+					stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-sm font-semibold text-red-500';
+					if (stockIcon) stockIcon.classList.add('hidden');
 				}
 			}
 		} else {
@@ -404,13 +402,11 @@
 				var qty = variant ? parseFloat(variant.quantity) : 0;
 				var showQty = stockBadgeEl.dataset.stockDisplay === '1' && qty > 0;
 				var stockText = stockBadgeEl.querySelector('.dc-stock-text');
+				var stockIcon = stockBadgeEl.querySelector('.dc-stock-icon');
 				var instockLabel = stockBadgeEl.dataset.stockInstock || stockBadgeEl.dataset.textInstock || '';
 				if (stockText) stockText.textContent = showQty ? String(Math.floor(qty)) : instockLabel;
-				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-[14px] font-bold text-emerald-700';
-				var dot = stockBadgeEl.querySelector('.dc-stock-dot');
-				if (dot) {
-					dot.className = 'dc-stock-dot w-2.5 h-2.5 rounded-full border-2 bg-emerald-500 border-emerald-500';
-				}
+				stockBadgeEl.className = 'inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600';
+				if (stockIcon) stockIcon.classList.remove('hidden');
 			}
 		}
 
@@ -514,6 +510,51 @@
 		return axes ? resolveVariant(axes) : null;
 	}
 
+	/* ── Current selection as {option_id: option_value_id} ── */
+	function getCurrentSelectionMap() {
+		var map = {};
+
+		matrix.axes.forEach(function(axis) {
+			if (!axis.po_id) return;
+			var input = productEl.querySelector('input[name="option[' + axis.po_id + ']"]:checked');
+			if (!input) input = productEl.querySelector('select[name="option[' + axis.po_id + ']"]');
+			if (input && input.value) {
+				var ovId = getOvIdForPov(axis, input.value);
+				if (ovId) map[axis.option_id] = ovId;
+			}
+		});
+
+		return map;
+	}
+
+	/* ── Nearest in-stock variant containing the clicked value ──
+	   Maximises how many axes match the current selection; on ties keeps
+	   the first variant in matrix order (server sorts by sort_order ASC,
+	   variant_id ASC). */
+	function findNearestAvailableVariant(clickedOvId) {
+		var sel = getCurrentSelectionMap();
+		var best = null;
+		var bestScore = -1;
+
+		matrix.variants.forEach(function(v) {
+			if (!variantInStock(v)) return;
+
+			var contains = false;
+			var score = 0;
+
+			(v.values || []).forEach(function(vv) {
+				if (vv.option_value_id == clickedOvId) contains = true;
+				if (sel[vv.option_id] !== undefined && sel[vv.option_id] == vv.option_value_id) score++;
+			});
+
+			if (!contains || score <= bestScore) return;
+			bestScore = score;
+			best = v;
+		});
+
+		return best;
+	}
+
 	document.addEventListener('change', function(e) {
 		var target = e.target;
 		var name = target.name || '';
@@ -528,6 +569,27 @@
 		if (!isAxis) return;
 
 		var variant = getCurrentVariant();
+
+		// Click on an unavailable value (struck through / out of stock, or an
+		// incomplete selection): instead of falling into "out of stock" and
+		// dropping the variant from the URL, switch to the nearest in-stock
+		// combination containing the clicked value.
+		var clickedOvId = null;
+		for (var a = 0; a < matrix.axes.length; a++) {
+			if (matrix.axes[a].po_id === poId) {
+				clickedOvId = getOvIdForPov(matrix.axes[a], target.value);
+				break;
+			}
+		}
+
+		if ((!variant || !variantInStock(variant)) && clickedOvId) {
+			var nearest = findNearestAvailableVariant(clickedOvId);
+			if (nearest) {
+				applyVariantAxes(nearest);
+				variant = getCurrentVariant();
+			}
+		}
+
 		updateVariantUI(variant);
 		syncAxisActiveClasses();
 		if (!isInitPhase) {

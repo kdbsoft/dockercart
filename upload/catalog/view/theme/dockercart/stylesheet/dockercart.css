@@ -7,16 +7,6 @@
 html { scroll-behavior: smooth; }
 body, button, input, select, textarea { font-family: 'Manrope', sans-serif; }
 
-/* ── Stock status dot pulse ──────────────────────────────── */
-.dc-stock-dot {
-  animation: dcStockDotPulse 2s ease-in-out infinite;
-  transform-origin: center;
-}
-@keyframes dcStockDotPulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(0.72); }
-}
-
 select:not(.dc-toolbar-select):not([multiple]):not([size]):not([style*="background-image"]) {
   -webkit-appearance: none;
   -moz-appearance: none;
