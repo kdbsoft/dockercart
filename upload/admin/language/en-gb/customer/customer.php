@@ -50,6 +50,23 @@ $_['text_history_card']       = 'Order History';
 $_['text_transaction_card']   = 'Transactions';
 $_['text_reward_card']        = 'Reward Points';
 $_['text_ip_card']            = 'IP Addresses';
+$_['text_notes']              = 'Notes';
+$_['text_notes_subtitle']     = 'Internal context for this customer';
+$_['text_add_note']           = 'Add note';
+$_['text_saved_notes']        = 'Saved notes';
+$_['text_financials']         = 'Financials';
+$_['text_financials_subtitle']= 'Store credit and reward point activity';
+$_['text_store_credit']       = 'Store credit';
+$_['text_reward_points']      = 'Reward points';
+$_['text_add_transaction']    = 'Add store credit adjustment';
+$_['text_add_reward']         = 'Add reward point adjustment';
+$_['text_security']           = 'Security';
+$_['text_security_subtitle']  = 'Known access signals for this customer';
+$_['text_known_ips']          = 'Known IP addresses';
+$_['text_security_signals']   = 'Security signals';
+$_['text_current_balance']    = 'Current balance';
+$_['text_loading_customer']   = 'Loading customer data...';
+$_['text_activity_error']     = 'Unable to load this section.';
 
 // Column
 $_['column_name']               = 'Customer Name';

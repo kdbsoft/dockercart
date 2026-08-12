@@ -1711,6 +1711,166 @@ div.dcx-field.required > .dcx-label:before {
   .dc-attr-row { position: relative; }
 }
 
+/* Customer detail workspace */
+.dcx-customer-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 0 16px;
+}
+.dcx-customer-summary .dcx-stat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    padding: 14px;
+}
+.dcx-customer-summary__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dc-radius-lg);
+    background: rgba(255, 255, 255, .7);
+    color: var(--dc-text-muted);
+}
+.dcx-customer-summary__content { min-width: 0; }
+.dcx-customer-summary__label {
+    overflow: hidden;
+    color: var(--dc-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.dcx-customer-summary__value {
+    margin-top: 4px;
+    overflow: hidden;
+    color: var(--dc-text-dark);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dcx-customer-summary__meta {
+    margin-top: 3px;
+    color: var(--dc-text-muted);
+    font-size: 11px;
+}
+.dcx-customer-activity { margin-bottom: 16px; }
+.dcx-customer-activity:last-child { margin-bottom: 0; }
+.dcx-customer-activity .dcx-panel-body { gap: 16px; }
+.dcx-customer-add-form {
+    padding: 14px;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-surface-alt);
+}
+.dcx-customer-add-form__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    color: var(--dc-text-dark);
+    font-size: 12px;
+    font-weight: 600;
+}
+.dcx-customer-add-form .dcx-fields { gap: 12px; }
+.dcx-customer-add-form .dcx-fields--row { margin-top: 0; }
+.dcx-customer-add-form .text-right { margin-top: 12px; }
+.dcx-customer-financials {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.dcx-customer-financials__section {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-surface);
+}
+.dcx-customer-financials__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.dcx-customer-financials__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--dc-text-dark);
+    font-size: 13px;
+    font-weight: 600;
+}
+.dcx-customer-financials__title i,
+.dcx-customer-financials__title svg { color: var(--dc-primary); }
+.dcx-customer-financials__balance {
+    margin-top: 5px;
+    color: var(--dc-text-dark);
+    font-size: 18px;
+    font-weight: 700;
+}
+.dcx-customer-financials__caption {
+    flex: 0 0 auto;
+    color: var(--dc-text-muted);
+    font-size: 11px;
+    text-align: right;
+}
+.dcx-customer-financials__section .dcx-customer-add-form {
+    margin-top: 14px;
+    padding: 12px;
+}
+.dcx-customer-financials__section .dcx-fields--row .dcx-field--amount {
+    flex: 0 0 120px;
+}
+.dcx-async-container { min-width: 0; }
+.dcx-async-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 54px;
+    padding: 14px;
+    color: var(--dc-text-muted);
+    font-size: 12px;
+    text-align: center;
+}
+.dcx-async-state--error {
+    color: var(--dc-danger-text);
+    background: var(--dc-danger-light);
+    border-radius: var(--dc-radius-md);
+}
+.dcx-async-state--loading svg { animation: dcx-customer-spin 1s linear infinite; }
+.dcx-fragment-meta { display: none; }
+.dcx-customer-financials .table,
+.dcx-customer-activity .table { margin-bottom: 0; }
+.dcx-customer-financials .row,
+.dcx-customer-activity .row { margin-top: 12px; }
+
+@keyframes dcx-customer-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1199px) {
+    .dcx-customer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+    .dcx-customer-summary,
+    .dcx-customer-financials { grid-template-columns: 1fr; }
+    .dcx-customer-financials__head { flex-direction: column; gap: 4px; }
+    .dcx-customer-financials__caption { text-align: left; }
+    .dcx-customer-financials__section .dcx-fields--row .dcx-field--amount { flex-basis: 100%; }
+}
+
 /* ── Promo cards ── */
 .dc-promo-card { position: relative; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-lg); padding: 36px 18px 14px; margin-bottom: 10px; background: var(--dc-surface-alt); }
 .dc-promo-card--reward { background: transparent; padding-top: 14px; }
