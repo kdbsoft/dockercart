@@ -54,6 +54,7 @@
       '<form id="dc-cfp-form" novalidate>' +
         '<input type="hidden" name="product_id" value="0">' +
         '<input type="hidden" name="variant_id" value="0">' +
+        '<input type="hidden" name="quantity" value="1">' +
         '<div class="mb-3">' +
           '<label for="dc-cfp-name" class="block text-sm font-semibold text-gray-700 mb-1">' + t('cfp_request_name', 'Name') + ' *</label>' +
           '<input type="text" name="name" id="dc-cfp-name" autocomplete="name" class="dc-cfp-input w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />' +
@@ -65,10 +66,6 @@
         '<div class="mb-3">' +
           '<label for="dc-cfp-email" class="block text-sm font-semibold text-gray-700 mb-1">' + t('cfp_request_email', 'E-mail') + '</label>' +
           '<input type="email" name="email" id="dc-cfp-email" autocomplete="email" class="dc-cfp-input w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />' +
-        '</div>' +
-        '<div class="mb-3">' +
-          '<label for="dc-cfp-quantity" class="block text-sm font-semibold text-gray-700 mb-1">' + t('cfp_request_quantity', 'Quantity') + '</label>' +
-          '<input type="number" name="quantity" id="dc-cfp-quantity" value="1" min="1" step="1" class="dc-cfp-input w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />' +
         '</div>' +
         '<div class="mb-4">' +
           '<label for="dc-cfp-comment" class="block text-sm font-semibold text-gray-700 mb-1">' + t('cfp_request_comment', 'Comment') + '</label>' +
@@ -255,9 +252,17 @@
     modal.querySelector('#dc-cfp-title').textContent = t('cfp_request_title', 'Price request');
     modal.querySelector('#dc-cfp-product').textContent = productName;
 
-    // Reset quantity to 1 for every new request.
+    // Qty source: when the trigger points at an external qty input
+    // (product page), read it and store as hidden field. Otherwise keep
+    // the hidden field default (1) — the modal no longer asks for qty.
+    var qtySource = btn.getAttribute('data-dc-cfp-qty-source');
     var qtyInput = form.elements['quantity'];
-    if (qtyInput) qtyInput.value = 1;
+    if (qtySource && qtyInput) {
+      var src = document.querySelector(qtySource);
+      var qty = src ? parseInt(src.value, 10) : 0;
+      if (isNaN(qty) || qty < 1) qty = 1;
+      qtyInput.value = qty;
+    }
 
     prefillCustomer();
     initPhoneMask();
