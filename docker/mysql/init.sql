@@ -21776,7 +21776,8 @@ LOCK TABLES `oc_tax_rule` WRITE;
 INSERT INTO `oc_tax_rule` VALUES
 (120,10,87,'store',0),
 (121,10,86,'payment',1),
-(99823,9,88,'shipping',1);
+(99823,9,86,'shipping',1),
+(99824,9,87,'shipping',2);
 /*!40000 ALTER TABLE `oc_tax_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
