@@ -341,26 +341,6 @@ find upload -type f -name "*.php" ! -path 'storage/vendor/*' -print0 | xargs -0 
 - **Apply:** `make migrate` (runs against running MariaDB container)
 - **Regenerate base schema:** `make dump-init`
 
-### Testing
-
-Tests use PHPUnit. The bootstrap loads the Composer autoloader — minimal setup.
-
-**Install all dev tools (first time after clone):**
-
-```bash
-composer install
-```
-
-**Run all tests:**
-
-```bash
-./storage/vendor/bin/phpunit
-```
-
-Tests live in `tests/`. Smoke tests are in `tests/Unit/`.
-
-**CI:** PHPUnit runs on every push to `main` and every PR, in parallel with PHPStan, CS-Fixer, and syntax checks.
-
 ### Custom Files & Upgrade Safety
 
 To keep `make update` working smoothly, your git repo must stay clean. For your own files (controllers, models, templates, language files, etc.) use prefixes that are already ignored by `.gitignore`:
