@@ -861,6 +861,7 @@ select[disabled] {
   </button>
 </div>
 
+<script src="catalog/view/javascript/lucide.min.js"></script>
 <script src="catalog/view/javascript/common/phone-mask.js"></script>
 <script>
 const CONFIG = {
@@ -2364,6 +2365,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const extContainer = $('#payment-extension-container');
                     if (extContainer) {
                       extContainer.innerHTML = json.payment;
+                      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                        lucide.createIcons();
+                      }
                       // Don't show it yet - it stays hidden until confirm is clicked
                       log('Payment extension loaded into hidden container');
 
@@ -2398,6 +2402,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   const extContainer = $('#payment-extension-container');
                   if (extContainer) {
                     extContainer.innerHTML = json.payment;
+                    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                      lucide.createIcons();
+                    }
                     setupPaymentButtonHandler(extContainer);
                     log('Payment extension auto-loaded for pre-selected method');
                   }
@@ -4241,6 +4248,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (phoneInput && DEFAULT_PHONE_FORMAT) {
     phoneFormatCache.set(DEFAULT_SHIPPING_COUNTRY_ID, DEFAULT_PHONE_FORMAT);
     applyPhoneMask(phoneInput, DEFAULT_PHONE_FORMAT);
+  }
+
+  // Render Lucide icons
+  if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+    lucide.createIcons();
   }
 });
 </script>
