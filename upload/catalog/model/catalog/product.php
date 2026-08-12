@@ -764,7 +764,32 @@ class ModelCatalogProduct extends Model {
 				$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_name'])));
 
 				foreach ($words as $word) {
-					$implode[] = "pd.name LIKE '%" . $this->db->escape($word) . "%'";
+					// Skip pure punctuation tokens ("—", "/", "-") — they carry no searchable text.
+					if (!preg_match('/[\p{L}\p{N}]/u', (string)$word)) {
+						continue;
+					}
+
+					// Match the word against the product name OR against any active variant's
+					// option-value names (e.g. "White", "128 GB") so searching by
+					// "name — White / 128 GB" finds configurable products even without Manticore.
+					$implode[] = "(pd.name LIKE '%" . $this->db->escape($word) . "%'
+						OR EXISTS (
+							SELECT 1
+							FROM " . DB_PREFIX . "product_variant pv
+							INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.variant_id = pv.variant_id)
+							INNER JOIN " . DB_PREFIX . "option_value_description ovd
+								ON (ovd.option_value_id = pvv.option_value_id
+									AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "')
+							WHERE pv.product_id = p.product_id
+							AND pv.status = '1'
+							AND ovd.name LIKE '%" . $this->db->escape($word) . "%'
+						))";
+				}
+
+				// All words were pure punctuation ("—", "/") — the name branch is empty;
+				// use a false condition so the surrounding OR branches stay valid SQL.
+				if (!$implode) {
+					$implode[] = '1=0';
 				}
 
 				if ($implode) {
@@ -1400,7 +1425,32 @@ class ModelCatalogProduct extends Model {
 				$words = explode(' ', trim(preg_replace('/\s+/', ' ', $data['filter_name'])));
 
 				foreach ($words as $word) {
-					$implode[] = "pd.name LIKE '%" . $this->db->escape($word) . "%'";
+					// Skip pure punctuation tokens ("—", "/", "-") — they carry no searchable text.
+					if (!preg_match('/[\p{L}\p{N}]/u', (string)$word)) {
+						continue;
+					}
+
+					// Match the word against the product name OR against any active variant's
+					// option-value names (e.g. "White", "128 GB") so searching by
+					// "name — White / 128 GB" finds configurable products even without Manticore.
+					$implode[] = "(pd.name LIKE '%" . $this->db->escape($word) . "%'
+						OR EXISTS (
+							SELECT 1
+							FROM " . DB_PREFIX . "product_variant pv
+							INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.variant_id = pv.variant_id)
+							INNER JOIN " . DB_PREFIX . "option_value_description ovd
+								ON (ovd.option_value_id = pvv.option_value_id
+									AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "')
+							WHERE pv.product_id = p.product_id
+							AND pv.status = '1'
+							AND ovd.name LIKE '%" . $this->db->escape($word) . "%'
+						))";
+				}
+
+				// All words were pure punctuation ("—", "/") — the name branch is empty;
+				// use a false condition so the surrounding OR branches stay valid SQL.
+				if (!$implode) {
+					$implode[] = '1=0';
 				}
 
 				if ($implode) {

@@ -133,13 +133,15 @@ class ModelExtensionModuleDockercartSearch extends Model {
         // `category_ids` MVA are declared in manticore.conf (rt_attr_string / rt_attr_multi)
         // — they are created by the config at table creation time, so they must NOT be
         // re-added via ALTER here (Manticore rejects duplicates: "field already in schema").
-        // Only columns that are NOT part of the static config belong in this migration list.
+        // Columns listed below are declared in manticore.conf (fresh tables) AND in this
+        // ALTER list (pre-existing tables); the DESCRIBE guard above makes the ALTER skip
+        // when the column already exists, so the list is idempotent in both cases.
 
         // Existing product columns (DESCRIBE), so ALTERs below are truly idempotent:
         // Manticore rejects adding a column that already exists, and the error would
         // otherwise bubble up and fail the whole reindex.
         $existing = $manticore->describe('products');
-        $columns  = ['category_ids', 'variant_codes', 'out_of_stock'];
+        $columns  = ['category_ids', 'variant_codes', 'out_of_stock', 'variant_labels'];
 
         foreach ($columns as $column) {
             if (!in_array($column, $existing, true)) {
@@ -311,6 +313,49 @@ class ModelExtensionModuleDockercartSearch extends Model {
         ")->row['n'];
 
         $doc['variant_codes'] = trim(implode(' ', array_filter($variant_codes)));
+
+        // Build variant option-value labels (e.g. "White / 128 GB / 8 GB") for all active
+        // variants, in the same format the storefront renders (name — values joined by ' / ').
+        // Value names live in oc_option_value_description per language; the values are joined
+        // in axis order (option_id), matching ProductConfigurable::getVariantValues() and the
+        // client-side product page. Each label is indexed three ways: the full
+        // "name — values" string (proximity ranking), the bare values, and compact no-space
+        // forms ("128 GB" -> "128GB") so "128GB" typed without spaces still matches.
+        $variant_labels_query = $this->db->query("
+            SELECT pvv.variant_id, pvv.option_id, ovd.name
+            FROM " . DB_PREFIX . "product_variant pv
+            INNER JOIN " . DB_PREFIX . "product_variant_value pvv ON (pvv.variant_id = pv.variant_id)
+            INNER JOIN " . DB_PREFIX . "option_value_description ovd
+                ON (ovd.option_value_id = pvv.option_value_id
+                    AND ovd.language_id = '" . (int)$language_id . "')
+            WHERE pv.product_id = '" . (int)$product_id . "'
+            AND pv.status = '1'
+            ORDER BY pv.sort_order ASC, pv.variant_id ASC, pvv.option_id ASC
+            LIMIT 200
+        ");
+
+        $variant_label_parts = [];
+
+        if ($variant_labels_query->num_rows) {
+            $grouped = [];
+
+            foreach ($variant_labels_query->rows as $row) {
+                $grouped[$row['variant_id']][] = $row['name'];
+            }
+
+            foreach ($grouped as $names) {
+                $full_label = $product['name'] . ' — ' . implode(' / ', $names);
+                $compacts  = array_map(function ($n) {
+                    return preg_replace('/[\s_\/\x{2014}\x{2013}]+/u', '', (string)$n);
+                }, $names);
+
+                $variant_label_parts[] = $full_label;
+                $variant_label_parts[] = implode(' ', $names);
+                $variant_label_parts[] = implode(' ', $compacts);
+            }
+        }
+
+        $doc['variant_labels'] = trim(implode(' ', $variant_label_parts));
 
         // Out-of-stock flag for sorting search results (in-stock first).
         // Mirrors the storefront rule: quantity <= 0, no preorder, and (for
