@@ -749,6 +749,19 @@ class ControllerProductProduct extends Controller {
 				$axes = $pc->getConfigurableOptions($product_id);
 				$default_variant = !empty($configurable['default_variant_id']) ? $pc->getVariant($configurable['default_variant_id']) : array();
 
+				// Единый калькулятор цены вариантов (та же формула, что в
+				// корзине и админке заказов): цена/спеццена варианта.
+				$variant_calculator = new ProductPricingCalculator($this->registry);
+				$variant_pricing = array();
+
+				foreach ($variants as $v) {
+					if (empty($v['status'])) {
+						continue;
+					}
+
+					$variant_pricing[(int)$v['variant_id']] = $variant_calculator->calculate((int)$product_id, (int)$v['variant_id'], 1);
+				}
+
 				// Disabled variants must not be selectable on the storefront:
 				// the cart resolves variants by status=1 and would fall back to
 				// the plain product otherwise.
@@ -827,43 +840,6 @@ class ControllerProductProduct extends Controller {
 			}
 
 			$variant_discounts = $pc->getVariantsDiscounts($product_id);
-			$variant_cg_prices = $pc->getVariantCustomerGroupPrices($product_id);
-			$variant_specials = $pc->getVariantsSpecials($product_id);
-
-			// Build per-variant lookup maps (bulk, no per-variant queries)
-			$cg_price_map = array();
-
-			foreach ($variant_cg_prices as $vid => $rows) {
-				foreach ($rows as $row) {
-					if ((int)$row['customer_group_id'] === $customer_group_id) {
-						$cg_price_map[$vid] = (float)$row['price'];
-					}
-				}
-			}
-
-			$variant_special_map = array();
-
-			foreach ($variant_specials as $vid => $rows) {
-				$best = null;
-
-				foreach ($rows as $vs) {
-					if ((int)$vs['customer_group_id'] !== $customer_group_id) {
-						continue;
-					}
-
-					if (!(($vs['date_start'] === '0000-00-00' || $vs['date_start'] < date('Y-m-d H:i:s')) && ($vs['date_end'] === '0000-00-00' || $vs['date_end'] > date('Y-m-d H:i:s')))) {
-						continue;
-					}
-
-					if ($best === null || (float)$vs['price'] < (float)$best['price']) {
-						$best = $vs;
-					}
-				}
-
-				if ($best !== null) {
-					$variant_special_map[$vid] = (float)$best['price'];
-				}
-			}
 
 			foreach ($variants as &$variant) {
 				$variant['discounts'] = array();
@@ -886,34 +862,19 @@ class ControllerProductProduct extends Controller {
 					}
 				}
 
-				$variant_cg_price = isset($cg_price_map[(int)$variant['variant_id']]) ? $cg_price_map[(int)$variant['variant_id']] : null;
+				// Цена/спеццена варианта — из единого калькулятора (та же
+				// формула, что в корзине и админке заказов).
+				$vp = isset($variant_pricing[(int)$variant['variant_id']]) ? $variant_pricing[(int)$variant['variant_id']] : null;
 
-				$effective_price = (float)$variant['price'];
+				if ($vp !== null) {
+					$variant['price'] = (float)$vp['price'];
+					$variant['special_from'] = (float)$vp['base_price'];
 
-				if ($variant_cg_price !== null) {
-					// Per-variant group price override: the global % discount/
-					// markup does not apply on top of it (mirrors the cart).
-					$effective_price = $variant_cg_price;
-					$variant['price'] = $variant_cg_price;
-				} else {
-					// Apply the global customer group discount/markup so the
-					// product page matches the cart (and plain products).
-					$effective_price = $effective_price * $cg_multiplier;
-					$variant['price'] = $effective_price;
-				}
-
-				$variant_special_price = isset($variant_special_map[(int)$variant['variant_id']]) ? $variant_special_map[(int)$variant['variant_id']] : null;
-
-				if ($variant_special_price !== null && $variant_cg_price === null) {
-					// The global % discount/markup applies to the special only
-					// when no per-variant group price override is set (mirrors
-					// the cart, which skips the % adjustment in that case).
-					$variant_special_price = $variant_special_price * $cg_multiplier;
-				}
-
-				if ($variant_special_price !== null && $variant_special_price < $effective_price) {
-					$variant['special'] = $variant_special_price;
-					$variant['special_from'] = $effective_price;
+					if ($vp['special'] !== null) {
+						$variant['special'] = (float)$vp['special'];
+					} else {
+						unset($variant['special']);
+					}
 				}
 
 				// Variant tax (formatted string for display) — computed from the
@@ -951,37 +912,24 @@ class ControllerProductProduct extends Controller {
 			unset($variant);
 
 			if (!empty($default_variant)) {
-				$default_cg_price = isset($cg_price_map[(int)$default_variant['variant_id']]) ? $cg_price_map[(int)$default_variant['variant_id']] : null;
+				// Цена/спеццена дефолтного варианта — из единого калькулятора
+				// (та же формула, что в корзине и админке заказов).
+				$dvp = isset($variant_pricing[(int)$default_variant['variant_id']]) ? $variant_pricing[(int)$default_variant['variant_id']] : null;
 
-				$default_effective_price = (float)$default_variant['price'];
+				if ($dvp !== null) {
+					$default_variant['price'] = (float)$dvp['price'];
+					$default_variant['special_from'] = (float)$dvp['base_price'];
 
-				if ($default_cg_price !== null) {
-					// Per-variant group price override: the global % discount/
-					// markup does not apply on top of it (mirrors the cart).
-					$default_effective_price = $default_cg_price;
-					$default_variant['price'] = $default_cg_price;
-				} else {
-					$default_effective_price = $default_effective_price * $cg_multiplier;
-					$default_variant['price'] = $default_effective_price;
-				}
-
-				$default_special_price = isset($variant_special_map[(int)$default_variant['variant_id']]) ? $variant_special_map[(int)$default_variant['variant_id']] : null;
-
-				if ($default_special_price !== null && $default_cg_price === null) {
-					// See the variants loop above: the % discount/markup applies
-					// to the special only without a per-variant group price.
-					$default_special_price = $default_special_price * $cg_multiplier;
-				}
-
-				if ($default_special_price !== null && $default_special_price < $default_effective_price) {
-					$default_variant['special'] = $default_special_price;
-					$default_variant['special_from'] = $default_effective_price;
-				} elseif (!is_null($product_info['special']) && (float)$product_info['special'] >= 0
-					&& (float)$product_info['special'] < $default_effective_price) {
+					if ($dvp['special'] !== null) {
+						$default_variant['special'] = (float)$dvp['special'];
+					} else {
+						unset($default_variant['special']);
+					}
+				} elseif (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
 					// The default variant carries the product's own price, so the
 					// product-level special applies to it as well.
 					$default_variant['special'] = (float)$product_info['special'];
-					$default_variant['special_from'] = $default_effective_price;
+					$default_variant['special_from'] = (float)$default_variant['price'];
 				}
 
 				$default_variant['discounts'] = array();

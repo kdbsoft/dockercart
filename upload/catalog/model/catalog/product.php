@@ -62,51 +62,19 @@ class ModelCatalogProduct extends Model {
 	 * @param array $row
 	 * @return array
 	 */
-	private function normalizeProductRow(array $row) {
-		$price = (float)$row['price'];
-
-		// Per-product customer group price override (DockerCart)
-		$customer_group_price = isset($row['customer_group_price']) ? $row['customer_group_price'] : null;
-		$has_customer_group_price = ($customer_group_price !== null && $customer_group_price !== '' && (float)$customer_group_price > 0);
-
-		if ($has_customer_group_price) {
-			$price = (float)$customer_group_price;
+	private function normalizeProductRow(array $row, ?array $pricing = null) {
+		// DockerCart: цена считается единым калькулятором (та же формула,
+		// что в корзине и админке заказов). Количество для количественных
+		// скидок в каталоге — 1 (цена «от»; реальное количество считают
+		// корзина и заказ). В bulk-пути (getProductsByIds) pricing приходит
+		// готовым из одного вызова calculateForLines() — без N+1.
+		if ($pricing === null) {
+			$calculator = new ProductPricingCalculator($this->registry);
+			$pricing = $calculator->calculate((int)$row['product_id'], 0, 1);
 		}
 
-		if ($row['discount'] !== null && $row['discount'] !== '' && (float)$row['discount'] < $price) {
-			$price = (float)$row['discount'];
-		}
-
-		$special = null;
-
-		if ($row['special'] !== null && $row['special'] !== '') {
-			$special = (float)$row['special'];
-		}
-
-		$customer_group_discount = (float)$this->config->get('config_customer_group_discount');
-		$customer_group_markup = (float)$this->config->get('config_customer_group_markup');
-
-		if (!$has_customer_group_price) {
-			if ($customer_group_discount > 0) {
-				$discount_multiplier = (100 - $customer_group_discount) / 100;
-				$price *= $discount_multiplier;
-
-				if ($special !== null) {
-					$special *= $discount_multiplier;
-				}
-			} elseif ($customer_group_markup > 0) {
-				$markup_multiplier = (100 + $customer_group_markup) / 100;
-				$price *= $markup_multiplier;
-
-				if ($special !== null) {
-					$special *= $markup_multiplier;
-				}
-			}
-		}
-
-		if ($special !== null && $special >= $price) {
-			$special = null;
-		}
+		$price = (float)$pricing['price'];
+		$special = $pricing['special'];
 
 		// Sale timer: unix timestamp of the active special's end date (0 = no end date)
 		$special_date_end = 0;
@@ -200,20 +168,6 @@ class ModelCatalogProduct extends Model {
 			$product_data['default_variant'] = $default_variant;
 			$product_data['default_variant_id'] = $default_variant['variant_id'];
 
-			// Global customer group discount/markup (percent), applied to the
-			// default variant price/special exactly like normalizeProductRow()
-			// does for plain products, so listings, the product page and the
-			// cart agree.
-			$cg_multiplier = 1.0;
-			$cg_discount = (float)$this->config->get('config_customer_group_discount');
-			$cg_markup = (float)$this->config->get('config_customer_group_markup');
-
-			if ($cg_discount > 0) {
-				$cg_multiplier = (100 - $cg_discount) / 100;
-			} elseif ($cg_markup > 0) {
-				$cg_multiplier = (100 + $cg_markup) / 100;
-			}
-
 			$product_data['default_option_value_ids'] = array();
 			if (!empty($default_variant['values'])) {
 				foreach ($default_variant['values'] as $dv) {
@@ -225,14 +179,16 @@ class ModelCatalogProduct extends Model {
 			if (isset($default_variant['price']) && $default_variant['price'] !== '' && (float)$default_variant['price'] > 0) {
 				$product_data['base_price'] = $product_data['price'];
 
-				// A per-variant group price override wins over the raw variant
-				// price; otherwise the global % discount/markup applies.
-				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+				// Цена/спеццена дефолтного варианта — единым калькулятором
+				// (та же формула, что в корзине и админке заказов).
+				$calculator = new ProductPricingCalculator($this->registry);
+				$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
 
-				if ($default_cg_price !== null && (float)$default_cg_price > 0) {
-					$product_data['price'] = (float)$default_cg_price;
-				} else {
-					$product_data['price'] = (float)$default_variant['price'] * $cg_multiplier;
+				$product_data['price'] = (float)$default_pricing['price'];
+				$product_data['special'] = $default_pricing['special'];
+
+				if (!empty($default_pricing['special_date_end'])) {
+					$product_data['special_date_end'] = (int)$default_pricing['special_date_end'];
 				}
 			}
 			if (isset($default_variant['quantity'])) {
@@ -265,26 +221,19 @@ class ModelCatalogProduct extends Model {
 				$product_data['weight_class_id'] = (int)$default_variant['weight_class_id'];
 			}
 
-			// Override special price from variant
-			$variant_special = $pc->getVariantSpecialPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
+			// Override price/special from the default variant via the shared
+			// ProductPricingCalculator (same formula as the cart and admin).
+			$calculator = new ProductPricingCalculator($this->registry);
+			$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
 
-			if ($variant_special !== null) {
-				// The % discount/markup applies to the special only when no
-				// per-variant group price override is set (mirrors the cart).
-				$default_cg_price = $pc->getVariantCustomerGroupPrice((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
-
-				if ($default_cg_price === null || (float)$default_cg_price <= 0) {
-					$variant_special = $variant_special * $cg_multiplier;
-				}
+			if (!empty($default_pricing['price'])) {
+				$product_data['price'] = (float)$default_pricing['price'];
 			}
 
-			if ($variant_special !== null && (float)$variant_special < (float)$product_data['price']) {
-				$product_data['special'] = (float)$variant_special;
+			$product_data['special'] = $default_pricing['special'];
 
-				if (!$product_data['special_date_end']) {
-					$variant_special_end = $pc->getVariantSpecialEndDate((int)$default_variant['variant_id'], (int)$this->config->get('config_customer_group_id'));
-					$product_data['special_date_end'] = $variant_special_end !== null ? (int)$variant_special_end : 0;
-				}
+			if (!empty($default_pricing['special_date_end'])) {
+				$product_data['special_date_end'] = (int)$default_pricing['special_date_end'];
 			}
 		}
 
@@ -410,8 +359,29 @@ class ModelCatalogProduct extends Model {
 
 		$product_data = array();
 
+		// DockerCart: единый bulk-расчёт цены для всех товаров списка
+		// (один вызов калькулятора вместо N одиночных — без N+1).
+		$bulk_lines = array();
+
 		foreach ($query->rows as $row) {
-			$product_data[(int)$row['product_id']] = $this->normalizeProductRow($row);
+			$bulk_lines[] = array(
+				'product_id' => (int)$row['product_id'],
+				'variant_id' => 0,
+				'quantity'   => 1
+			);
+		}
+
+		$bulk_pricing = array();
+
+		if (!empty($bulk_lines)) {
+			$calculator = new ProductPricingCalculator($this->registry);
+			$bulk_result = $calculator->calculateForLines($bulk_lines);
+			$bulk_pricing = $bulk_result['pricing'];
+		}
+
+		foreach ($query->rows as $row) {
+			$pricing = isset($bulk_pricing[(int)$row['product_id'] . ':0']) ? $bulk_pricing[(int)$row['product_id'] . ':0'] : null;
+			$product_data[(int)$row['product_id']] = $this->normalizeProductRow($row, $pricing);
 		}
 
 		if (empty($product_data)) {
@@ -447,21 +417,6 @@ class ModelCatalogProduct extends Model {
 					$data['default_variant'] = $default_variant;
 					$data['default_variant_id'] = $default_variant['variant_id'];
 
-					// Global customer group discount/markup (percent), applied to
-					// the default variant price/special exactly like
-					// normalizeProductRow() does for plain products — unless a
-					// per-variant group price override is set (mirrors the
-					// product page and the cart).
-					$cg_multiplier = 1.0;
-					$cg_discount = (float)$this->config->get('config_customer_group_discount');
-					$cg_markup = (float)$this->config->get('config_customer_group_markup');
-
-					if ($cg_discount > 0) {
-						$cg_multiplier = (100 - $cg_discount) / 100;
-					} elseif ($cg_markup > 0) {
-						$cg_multiplier = (100 + $cg_markup) / 100;
-					}
-
 					$data['default_option_value_ids'] = array();
 					if (!empty($default_variant['values'])) {
 						foreach ($default_variant['values'] as $dv) {
@@ -469,17 +424,20 @@ class ModelCatalogProduct extends Model {
 						}
 					}
 
+					// Default variant price/special via the shared
+					// ProductPricingCalculator (same formula as the cart and
+					// admin) — replaces the inline group-%/special re-derivation.
 					if (isset($default_variant['price']) && $default_variant['price'] !== '' && (float)$default_variant['price'] > 0) {
 						$data['base_price'] = $data['price'];
 
-						$default_cg_price = isset($cg_price_map[$pid][(int)$default_variant['variant_id']])
-							? $cg_price_map[$pid][(int)$default_variant['variant_id']]
-							: null;
+						$calculator = new ProductPricingCalculator($this->registry);
+						$default_pricing = $calculator->calculate((int)$pid, (int)$default_variant['variant_id'], 1);
 
-						if ($default_cg_price !== null && (float)$default_cg_price > 0) {
-							$data['price'] = (float)$default_cg_price;
-						} else {
-							$data['price'] = (float)$default_variant['price'] * $cg_multiplier;
+						$data['price'] = (float)$default_pricing['price'];
+						$data['special'] = $default_pricing['special'];
+
+						if (!empty($default_pricing['special_date_end'])) {
+							$data['special_date_end'] = (int)$default_pricing['special_date_end'];
 						}
 					}
 					if (isset($default_variant['quantity'])) {
@@ -510,51 +468,6 @@ class ModelCatalogProduct extends Model {
 					}
 					if (isset($default_variant['weight_class_id']) && (int)$default_variant['weight_class_id'] > 0) {
 						$data['weight_class_id'] = (int)$default_variant['weight_class_id'];
-					}
-
-					// Default variant special (only active special for this customer group)
-					if (isset($specials_map[(int)$default_variant['variant_id']])) {
-						$best_special = null;
-						foreach ($specials_map[(int)$default_variant['variant_id']] as $vs) {
-							if ((int)$vs['customer_group_id'] !== $customer_group_id) {
-								continue;
-							}
-
-							if (!(($vs['date_start'] === '0000-00-00' || $vs['date_start'] < date('Y-m-d H:i:s')) && ($vs['date_end'] === '0000-00-00' || $vs['date_end'] > date('Y-m-d H:i:s')))) {
-								continue;
-							}
-
-							if ($best_special === null || (float)$vs['price'] < (float)$best_special['price']) {
-								$best_special = $vs;
-							}
-						}
-
-						if ($best_special !== null) {
-							$best_special_price = (float)$best_special['price'];
-
-							// The % discount/markup applies to the special only
-							// when no per-variant group price override is set
-							// (mirrors the product page and the cart).
-							$default_cg_price = isset($cg_price_map[$pid][(int)$default_variant['variant_id']])
-								? $cg_price_map[$pid][(int)$default_variant['variant_id']]
-								: null;
-
-							if (($default_cg_price === null || (float)$default_cg_price <= 0) && $cg_multiplier != 1.0) {
-								$best_special_price = $best_special_price * $cg_multiplier;
-							}
-
-							if ($best_special_price < (float)$data['price']) {
-								$data['special'] = $best_special_price;
-
-								if (!$data['special_date_end']) {
-									$date_end = (string)$best_special['date_end'];
-
-									if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
-										$data['special_date_end'] = (int)strtotime($date_end);
-									}
-								}
-							}
-						}
 					}
 				}
 
