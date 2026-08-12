@@ -62,17 +62,25 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                 ? $this->model_tool_image->resize($result['image'], 50, 50)
                 : $this->model_tool_image->resize('placeholder.png', 50, 50);
 
+            // "Price on request" (call-for-price): hide the price in the dropdown —
+            // mirrors the storefront card logic (product flag or global CFP status
+            // with a configured phone and a zero/empty base price).
+            $cfp_status = $this->config->get('dockercart_theme_call_for_price_status');
+            $cfp_phone  = $this->config->get('config_telephone');
+            $is_cfp     = !empty($result['call_for_price'])
+                || ((int)$cfp_status && $cfp_phone && (float)($result['price'] ?? 0) <= 0);
+
             $price   = '';
             $special = '';
 
-            if (isset($result['price'])) {
+            if (!$is_cfp && isset($result['price'])) {
                 $price = $this->currency->format(
                     $this->tax->calculate($result['price'], $result['tax_class_id'] ?? 0, $this->config->get('config_tax')),
                     $this->session->data['currency']
                 );
             }
 
-            if (isset($result['special']) && $result['special'] > 0) {
+            if (!$is_cfp && isset($result['special']) && $result['special'] > 0) {
                 $special = $this->currency->format(
                     $this->tax->calculate($result['special'], $result['tax_class_id'] ?? 0, $this->config->get('config_tax')),
                     $this->session->data['currency']
