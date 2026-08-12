@@ -107,6 +107,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-axis-info-banner" id="dc-note-configurable-identifiers" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_identifiers }}</div>
                   <div class="row">
                     <div class="col-sm-3">
                       <div class="dcx-field required">
@@ -205,6 +206,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-axis-info-banner" id="dc-note-configurable-pricing" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_pricing }}</div>
                   <div class="dcx-fields">
                     <div class="row">
                       <div class="col-sm-12 col-lg-6 col-xl-3">
@@ -274,6 +276,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-axis-info-banner" id="dc-note-configurable-inventory" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_inventory }}</div>
                   <div class="dcx-fields">
                     <div class="row">
                       <div class="col-sm-12 col-lg-6 col-xl-3">
@@ -329,6 +332,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-axis-info-banner" id="dc-note-configurable-dimensions" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_dimensions }}</div>
                   <div class="dcx-fields">
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-length">{{ entry_dimension }}</label>
@@ -862,7 +866,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <p class="text-muted small" id="dc-special-note-configurable" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_specials|default('For configurable products, special prices are managed per variant in the Variants tab.') }}</p>
+                  <div class="dc-axis-info-banner" id="dc-special-note-configurable" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_specials }}</div>
                   <div id="promo-container">
                     {% for promo in all_promotions %}
                       {% if promo.promo_type == 'discount' %}
@@ -1136,21 +1140,25 @@
                       </div>
                     </div>
                   </div>
-                  <div id="rewards-container">
-                    {% for customer_group in customer_groups %}
-                    <div class="dc-promo-card dc-promo-card--reward">
-                      <div class="dc-promo-card__grid dc-promo-card__grid--reward">
-                        <div class="dc-promo-card__field dc-promo-card__field--group">
-                          <label>{{ entry_customer_group }}</label>
-                          <span class="dc-promo-card__group-name">{{ customer_group.name }}</span>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_reward }}</label>
-                          <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
-                        </div>
-                      </div>
-                    </div>
-                    {% endfor %}
+                  <div id="rewards-container" class="table-responsive">
+                    <table class="table table-bordered dcx-table dcx-table--reward">
+                      <thead>
+                        <tr>
+                          <td class="text-left">{{ entry_customer_group }}</td>
+                          <td class="text-left" style="width: 200px;">{{ entry_reward }}</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for customer_group in customer_groups %}
+                        <tr>
+                          <td class="text-left">{{ customer_group.name }}</td>
+                          <td class="text-left">
+                            <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -1626,12 +1634,17 @@
   var dcAxisOptionIds = {{ axis_option_ids|json_encode|raw }};
 
   function dcUpdateSpecialNote() {
-    var note = $('#dc-special-note-configurable');
-    if (dcOptionMode === 'combined') {
-      note.show();
-    } else {
-      note.hide();
-    }
+    var notes = [
+      '#dc-note-configurable-identifiers',
+      '#dc-note-configurable-pricing',
+      '#dc-note-configurable-inventory',
+      '#dc-note-configurable-dimensions',
+      '#dc-special-note-configurable'
+    ];
+    var show = (dcOptionMode === 'combined');
+    $.each(notes, function(i, selector) {
+      $(selector).toggle(show);
+    });
   }
 
   $(document).ready(function() {
