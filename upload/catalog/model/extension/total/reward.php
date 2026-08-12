@@ -74,16 +74,22 @@ class ModelExtensionTotalReward extends Model {
 		// inside the caller's transaction (catalog model checkout/order addOrderHistory).
 		$this->db->query("SELECT customer_id FROM `" . DB_PREFIX . "customer` WHERE customer_id = '" . (int)$order_info['customer_id'] . "' FOR UPDATE");
 
+		$existing_query = $this->db->query("SELECT customer_reward_id FROM " . DB_PREFIX . "customer_reward WHERE order_id = '" . (int)$order_info['order_id'] . "' AND operation_type = 'redeem' LIMIT 1");
+
+		if ($existing_query->num_rows) {
+			return;
+		}
+
 		$reward_query = $this->db->query("SELECT SUM(points) AS total FROM `" . DB_PREFIX . "customer_reward` WHERE customer_id = '" . (int)$order_info['customer_id'] . "' FOR UPDATE");
 
 		if ((float)$reward_query->row['total'] >= $points) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "customer_reward SET customer_id = '" . (int)$order_info['customer_id'] . "', order_id = '" . (int)$order_info['order_id'] . "', description = '" . $this->db->escape(sprintf($this->language->get('text_order_id'), (int)$order_info['order_id'])) . "', points = '" . (float)-$points . "', date_added = NOW()");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "customer_reward SET customer_id = '" . (int)$order_info['customer_id'] . "', order_id = '" . (int)$order_info['order_id'] . "', description = '" . $this->db->escape(sprintf($this->language->get('text_order_id'), (int)$order_info['order_id'])) . "', points = '" . (float)-$points . "', operation_type = 'redeem', date_added = NOW()");
 		} else {
 			return $this->config->get('config_fraud_status_id');
 		}
 	}
 
 	public function unconfirm($order_id) {
-		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_reward WHERE order_id = '" . (int)$order_id . "' AND points < 0");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_reward WHERE order_id = '" . (int)$order_id . "' AND operation_type = 'redeem'");
 	}
 }

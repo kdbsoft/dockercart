@@ -152,8 +152,18 @@ try {
 			continue;
 		}
 
-		$reward->awardOrderReward($order_id);
-		$awarded++;
+		$db->query('START TRANSACTION');
+
+		try {
+			if ($reward->awardOrderReward($order_id) === 1) {
+				$awarded++;
+			}
+
+			$db->query('COMMIT');
+		} catch (\Throwable $e) {
+			$db->query('ROLLBACK');
+			throw $e;
+		}
 	}
 
 	fwrite(STDOUT, "[reward-award] Done. Awarded: " . $awarded . ", skipped: " . $skipped . ".\n");
