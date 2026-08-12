@@ -1,7 +1,7 @@
 <?php
 class ModelAccountReward extends Model {
 	public function getRewards($data = array()) {
-		$sql = "SELECT * FROM `" . DB_PREFIX . "customer_reward` WHERE customer_id = '" . (int)$this->customer->getId() . "'";
+		$sql = "SELECT customer_reward_id, customer_id, order_id, description, points, operation_type, date_added FROM `" . DB_PREFIX . "customer_reward` WHERE customer_id = '" . (int)$this->customer->getId() . "'";
 
 		$sort_data = array(
 			'points',
