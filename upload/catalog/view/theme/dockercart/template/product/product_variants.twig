@@ -293,17 +293,18 @@
 			var vdList = document.getElementById('dc-variant-discounts-list');
 			if (vdList) vdList.innerHTML = '';
 			vd.forEach(function(d) {
-				var row = document.createElement('div');
-				row.className = 'flex items-center justify-between gap-3 px-3 py-2';
 				var label = document.createElement('span');
-				label.className = 'text-sm text-gray-600';
+				label.className = 'text-gray-600 whitespace-nowrap';
 				label.textContent = d.quantity + (discountText || ' ');
+				var dash = document.createElement('span');
+				dash.className = 'text-gray-400';
+				dash.textContent = '\u2014';
 				var price = document.createElement('span');
-				price.className = 'text-sm font-bold text-emerald-700 whitespace-nowrap';
+				price.className = 'font-semibold text-emerald-600 whitespace-nowrap';
 				price.textContent = d.price;
-				row.appendChild(label);
-				row.appendChild(price);
-				discountsEl.appendChild(row);
+				discountsEl.appendChild(label);
+				discountsEl.appendChild(dash);
+				discountsEl.appendChild(price);
 			});
 			discountsEl.classList.toggle('hidden', vd.length === 0);
 		}

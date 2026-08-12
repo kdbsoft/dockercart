@@ -65,6 +65,7 @@ $_['text_gift_minimum'] = 'Минимальное кол-во для получ�
 $_['text_gift_badge'] = 'ПОДАРОК';
 $_['text_bxgy'] = 'Купи X — получи Y';
 $_['text_bxgy_discount'] = 'со скидкой по акции';
+$_['text_bxgy_trigger'] = 'Скидка при покупке %s шт.';
 $_['text_bxgy_free_badge'] = 'BXGY: Бесплатно';
 $_['text_bxgy_percent_badge'] = 'BXGY: -%s%%';
 $_['text_free'] = 'БЕСПЛАТНО';

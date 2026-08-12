@@ -701,6 +701,7 @@ class ControllerProductProduct extends Controller {
 
 			$data['text_bxgy'] = $this->language->get('text_bxgy');
 			$data['text_bxgy_discount'] = $this->language->get('text_bxgy_discount');
+			$data['text_bxgy_trigger'] = $this->language->get('text_bxgy_trigger');
 			$data['text_fbt'] = $this->language->get('text_fbt');
 
 			$data['options'] = array();
