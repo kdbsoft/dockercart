@@ -2079,6 +2079,12 @@ class ControllerProductProduct extends Controller {
 		$data['reviews_url'] = $this->url->link('product/reviews', 'product_id=' . $product_id);
 		$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
 		$data['vote_url'] = $fragment['vote_url'];
+		$data['reply_url'] = $fragment['reply_url'];
+		$data['reply_enabled'] = $fragment['reply_enabled'];
+		$data['reply_min_length'] = $fragment['reply_min_length'];
+		$data['reply_max_length'] = $fragment['reply_max_length'];
+		$data['customer_logged'] = (bool)$this->customer->isLogged();
+		$data['login_url'] = $this->url->link('account/login');
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}
@@ -2317,6 +2323,95 @@ class ControllerProductProduct extends Controller {
 					$json['likes'] = $result['likes'];
 					$json['dislikes'] = $result['dislikes'];
 					$json['my_vote'] = $result['my_vote'];
+				}
+			}
+		} else {
+			$json['error'] = $this->language->get('error_review');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Reply to a review (AJAX JSON endpoint). Registered customers only.
+	 */
+	public function reply() {
+		$this->load->language('product/reviews');
+		$this->load->language('product/product');
+
+		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+			if (!$this->config->get('config_review_replies_enabled')) {
+				$json['error'] = $this->language->get('error_reply_disabled');
+			} elseif (!$this->customer->isLogged()) {
+				$json['error'] = 'login';
+				$json['login_url'] = $this->url->link('account/login');
+			} else {
+				$product_id = isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0;
+				$review_id = isset($this->request->post['review_id']) ? (int)$this->request->post['review_id'] : 0;
+				$text = isset($this->request->post['text']) ? (string)$this->request->post['text'] : '';
+
+				$min_length = (int)$this->config->get('config_review_reply_min_length');
+				$max_length = (int)$this->config->get('config_review_reply_max_length');
+
+				if ($min_length < 1) {
+					$min_length = 2;
+				}
+
+				if ($max_length < $min_length) {
+					$max_length = 1000;
+				}
+
+				if ($product_id <= 0) {
+					$json['error'] = $this->language->get('error_review');
+				} elseif ($review_id <= 0) {
+					$json['error'] = $this->language->get('error_reply_not_found');
+				} elseif (utf8_strlen($text) < $min_length || utf8_strlen($text) > $max_length) {
+					$json['error'] = $this->language->get('error_reply_text');
+				} elseif ($this->config->get('config_review_honeypot') && isset($this->request->post['website']) && ReviewSpam::honeypotFilled($this->request->post['website'])) {
+					$json['error'] = $this->language->get('error_spam');
+				} elseif (ReviewSpam::containsSpamPatterns($text)) {
+					$json['error'] = $this->language->get('error_spam');
+				} else {
+					$this->load->model('catalog/review');
+
+					// Rate limit — shared budget with new reviews.
+					$limit_count = (int)$this->config->get('config_review_rate_limit_count');
+					$limit_minutes = (int)$this->config->get('config_review_rate_limit_minutes');
+
+					if ($limit_count > 0) {
+						$ip = isset($this->request->server['REMOTE_ADDR']) ? (string)$this->request->server['REMOTE_ADDR'] : '';
+						$recent = $this->model_catalog_review->getRecentReviewCount($ip, (int)$this->customer->getId(), $limit_minutes);
+
+						if (ReviewSpam::isRateLimited($recent, $limit_count)) {
+							$json['error'] = $this->language->get('error_rate_limit');
+						}
+					}
+
+					if (!isset($json['error'])) {
+						$name = trim($this->customer->getFirstName() . ' ' . $this->customer->getLastName());
+
+						if ($name === '') {
+							$name = $this->customer->getEmail();
+						}
+
+						$reply_id = $this->model_catalog_review->addReply($product_id, $review_id, array(
+							'name' => $name,
+							'text' => $text,
+						));
+
+						if ($reply_id <= 0) {
+							$json['error'] = $this->language->get('error_reply_not_found');
+						} else {
+							$approved = (int)$this->config->get('config_review_reply_auto_approve') ? 1 : 0;
+
+							$json['success'] = $approved ? $this->language->get('text_reply_added') : $this->language->get('text_reply_awaiting_moderation');
+							$json['approved'] = $approved;
+							$json['reply_id'] = $reply_id;
+						}
+					}
 				}
 			}
 		} else {

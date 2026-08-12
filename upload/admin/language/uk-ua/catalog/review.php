@@ -9,6 +9,7 @@ $_['column_status'] = 'Статус';
 $_['column_verified'] = 'Підтверджено';
 $_['column_media'] = 'Медіа';
 $_['column_votes'] = 'Голоси';
+$_['column_replies'] = 'Відповіді';
 $_['entry_author'] = 'Автор';
 $_['entry_date_added'] = 'Дата створення';
 $_['entry_product'] = 'Товар';
@@ -63,3 +64,19 @@ $_['text_review_setting'] = 'Налаштування відгуків';
 $_['text_expand']         = 'Розгорнути';
 $_['text_loading']        = 'Завантаження...';
 $_['text_loading_error'] = 'Не вдалося завантажити';
+
+// Replies
+$_['text_reply_pending']        = 'на модерації';
+$_['text_reply_admin_badge']    = 'Магазин';
+$_['text_reply_added']          = 'Відповідь додано';
+$_['text_reply_deleted']        = 'Відповідь видалено';
+$_['text_reply_status_updated'] = 'Статус відповіді оновлено';
+$_['text_confirm_delete_reply'] = 'Видалити цю відповідь?';
+$_['filter_replies']            = 'Відповіді';
+$_['text_filter_replies_all']   = 'Усі відповіді';
+$_['text_filter_replies_any']   = 'З відповідями';
+$_['text_filter_replies_pending'] = 'З відповідями на модерації';
+$_['entry_reply_text']          = 'Напишіть відповідь...';
+$_['button_reply']              = 'Відповісти';
+$_['error_reply_text']          = 'Відповідь має містити від %s до %s символів!';
+$_['error_reply_not_found']     = 'Ціль відповіді не знайдено!';

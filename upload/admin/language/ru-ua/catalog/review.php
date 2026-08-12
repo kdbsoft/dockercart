@@ -9,6 +9,7 @@ $_['column_status'] = 'Статус';
 $_['column_verified'] = 'Подтверждён';
 $_['column_media'] = 'Медиа';
 $_['column_votes'] = 'Голоса';
+$_['column_replies'] = 'Ответы';
 $_['entry_author'] = 'Автор';
 $_['entry_date_added'] = 'Дата создания';
 $_['entry_product'] = 'Товар';
@@ -63,3 +64,19 @@ $_['text_review_setting'] = 'Настройки отзывов';
 $_['text_expand']         = 'Развернуть';
 $_['text_loading']        = 'Загрузка...';
 $_['text_loading_error'] = 'Не удалось загрузить';
+
+// Replies
+$_['text_reply_pending']        = 'на модерации';
+$_['text_reply_admin_badge']    = 'Магазин';
+$_['text_reply_added']          = 'Ответ добавлен';
+$_['text_reply_deleted']        = 'Ответ удалён';
+$_['text_reply_status_updated'] = 'Статус ответа обновлён';
+$_['text_confirm_delete_reply'] = 'Удалить этот ответ?';
+$_['filter_replies']            = 'Ответы';
+$_['text_filter_replies_all']   = 'Все ответы';
+$_['text_filter_replies_any']   = 'С ответами';
+$_['text_filter_replies_pending'] = 'С ответами на модерации';
+$_['entry_reply_text']          = 'Напишите ответ...';
+$_['button_reply']              = 'Ответить';
+$_['error_reply_text']          = 'Ответ должен содержать от %s до %s символов!';
+$_['error_reply_not_found']     = 'Цель ответа не найдена!';

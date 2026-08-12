@@ -84,6 +84,51 @@
 
   <div class="text-[15px] text-gray-700 leading-7 mt-4">{{ review.text }}</div>
 
+  {% if reply_enabled|default(false) %}
+  <div class="dc-review-replies mt-4 rounded-xl bg-gray-50/70 border border-gray-100 p-4">
+    {% if review.replies|default([])|length > 0 %}
+    <div class="flex items-center gap-1.5 text-xs font-bold text-gray-500 mb-3">
+      <i data-lucide="message-square" width="13" height="13"></i>
+      {{ review.replies|length }} {{ review.replies|length == 1 ? text_reply_count|default('reply') : text_replies_count|default('replies') }}
+    </div>
+    <div class="space-y-3">
+      {% for reply in review.replies %}
+      <div class="dc-review-reply bg-white border border-gray-100 rounded-xl p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <strong class="text-sm font-bold text-gray-900">{{ reply.author }}</strong>
+          {% if reply.author_is_admin %}
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold tracking-wide text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5">
+            <i data-lucide="store" width="12" height="12"></i>{{ text_reply_admin_badge|default('Store') }}
+          </span>
+          {% endif %}
+          <span class="text-xs text-gray-400 tabular-nums ml-auto">{{ reply.date_added }}</span>
+        </div>
+        <div class="text-sm text-gray-700 leading-6 mt-2">{{ reply.text }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if customer_logged|default(false) %}
+    <form class="dc-review-reply-form mt-3" data-review-id="{{ review.review_id }}" data-reply-url="{{ reply_url|default('') }}" data-min-length="{{ reply_min_length|default(2) }}" data-max-length="{{ reply_max_length|default(1000) }}">
+      <div class="dc-review-reply-alert hidden"></div>
+      <textarea name="text" rows="2" maxlength="{{ reply_max_length|default(1000) }}" placeholder="{{ text_reply_placeholder|default('Write a reply...') }}"
+        class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-y"></textarea>
+      <input type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true" class="dc-hp" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;" />
+      <div class="flex justify-end mt-2">
+        <button type="submit" class="dc-review-reply-submit inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition">
+          <i data-lucide="send" width="13" height="13"></i>{{ text_reply_submit|default('Send reply') }}
+        </button>
+      </div>
+    </form>
+    {% elseif not customer_logged|default(false) %}
+    <p class="text-xs text-gray-400 mt-3">
+      <a href="{{ login_url|default('index.php?route=account/login') }}" class="text-blue-600 hover:text-blue-700 font-semibold">{{ text_reply_login_hint|default('Log in or register to reply to reviews') }}</a>
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
   <div class="dc-review-votes flex items-center gap-2 mt-4" data-review-id="{{ review.review_id }}" data-vote-url="{{ vote_url|default('') }}">
     <button type="button" class="dc-vote-btn dc-vote-like inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition {% if review.my_vote == 'like' %}border-emerald-200 text-emerald-700 bg-emerald-50{% else %}border-gray-200 text-gray-500 bg-gray-50 hover:border-emerald-200 hover:text-emerald-600 hover:bg-emerald-50{% endif %}" data-vote="like" aria-pressed="{% if review.my_vote == 'like' %}true{% else %}false{% endif %}">
       <i data-lucide="thumbs-up" width="14" height="14"></i><span class="dc-vote-count tabular-nums">{{ review.votes.likes }}</span>
