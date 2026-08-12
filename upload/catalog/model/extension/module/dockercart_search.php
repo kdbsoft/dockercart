@@ -83,6 +83,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'offset'   => $options['offset'] ?? 0,
             'ranker'   => 'proximity_bm25',
             'wildcard' => true,
+            // Out-of-stock products go to the end of search results
+            // (uses the out_of_stock attribute on the products index).
+            'stock_last' => true,
         ];
 
         // Add sorting
@@ -135,7 +138,18 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
             foreach ($product_ids as $product_id) {
                 $product = $this->model_catalog_product->getProduct($product_id);
+
                 if ($product) {
+                    // When the query matched a specific variant code, resolve the
+                    // variant and expose it so the product card links straight to
+                    // that variant (instead of the default one).
+                    $variant = $this->resolveVariantByQuery($product_id, $query_text);
+
+                    if ($variant !== null) {
+                        $product['matched_variant_id'] = (int)$variant['variant_id'];
+                        $product['matched_variant_model'] = !empty($variant['model']) ? $variant['model'] : ($variant['sku'] ?? '');
+                    }
+
                     $products[] = $product;
                 }
             }
@@ -149,6 +163,109 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'products' => $products,
             'total'    => $total,
         ];
+    }
+
+    /**
+     * Resolve the matched variant for a list of products in one pass.
+     *
+     * @param int[]  $product_ids
+     * @param string $query
+     * @return array<int, array{variant_id: int, model: string}> Keyed by product_id
+     */
+    public function resolveVariantsForProducts(array $product_ids, $query) {
+        $map = array();
+
+        if (empty($product_ids) || trim((string)$query) === '') {
+            return $map;
+        }
+
+        foreach (array_unique(array_map('intval', $product_ids)) as $product_id) {
+            $variant = $this->resolveVariantByQuery($product_id, $query);
+
+            if ($variant !== null) {
+                $map[$product_id] = array(
+                    'variant_id' => (int)$variant['variant_id'],
+                    'model'      => !empty($variant['model']) ? $variant['model'] : ($variant['sku'] ?? ''),
+                );
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Resolve the variant of a product whose code (model/sku/upc/ean/jan/isbn/mpn)
+     * exactly matches the search query.
+     *
+     * Manticore matches fulltext fields with infix wildcards, so a query like
+     * "DEMO-5021-BLK-L" can match the product while the matched term came from a
+     * variant code. This method finds the exact variant so the product card can
+     * deep-link to it instead of the default one.
+     *
+     * Matching is case-insensitive; when no exact code matches, the compact form
+     * (separators removed, e.g. "DEMO5021BLKL") is compared too, mirroring the
+     * "compact variant" search branch in Manticore.
+     *
+     * @param int    $product_id
+     * @param string $query
+     * @return array|null Variant row (with `variant_id`, `name`, `sku`, ...) or null
+     */
+    private function resolveVariantByQuery($product_id, $query) {
+        $query = trim((string)$query);
+
+        if ($query === '') {
+            return null;
+        }
+
+        $this->load->model('catalog/product');
+
+        $pc = new \ProductConfigurable($this->registry);
+        $configurable = $pc->getConfigurable($product_id);
+
+        if (empty($configurable['is_configurable'])) {
+            return null;
+        }
+
+        $variants = $pc->getVariants($product_id);
+
+        if (empty($variants)) {
+            return null;
+        }
+
+        $needle = mb_strtolower($query, 'UTF-8');
+        $needle_compact = preg_replace('/[\s_-]+/u', '', $needle);
+
+        foreach ($variants as $variant) {
+            if (empty($variant['status'])) {
+                continue;
+            }
+
+            $codes = array(
+                $variant['model'] ?? '',
+                $variant['sku']   ?? '',
+                $variant['upc']   ?? '',
+                $variant['ean']   ?? '',
+                $variant['jan']   ?? '',
+                $variant['isbn']  ?? '',
+                $variant['mpn']   ?? '',
+            );
+
+            foreach ($codes as $code) {
+                $code = trim((string)$code);
+
+                if ($code === '') {
+                    continue;
+                }
+
+                $code_lc = mb_strtolower($code, 'UTF-8');
+
+                if ($code_lc === $needle || preg_replace('/[\s_-]+/u', '', $code_lc) === $needle_compact) {
+                    return $variant;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -314,14 +431,36 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $product = $this->model_catalog_product->getProduct($product_id);
 
             if ($product) {
+                // Resolve the exact variant when the query matches a variant code
+                // so the autocomplete dropdown deep-links to that variant, shows
+                // its code and prices it correctly.
+                $variant = $this->resolveVariantByQuery($product_id, $query_text);
+
+                $price = $product['price'];
+                $special = $product['special'];
+
+                if ($variant !== null) {
+                    // Price/special of the matched variant via the shared
+                    // calculator (same formula as the cart and product page).
+                    $calculator = new \ProductPricingCalculator($this->registry);
+                    $pricing = $calculator->calculate((int)$product_id, (int)$variant['variant_id'], 1);
+
+                    if (!empty($pricing['price'])) {
+                        $price = (float)$pricing['price'];
+                    }
+                    $special = $pricing['special'];
+                }
+
                 $products[] = [
                     'product_id'  => $product['product_id'],
                     'name'        => $product['name'],
                     'model'       => $product['model'],
                     'image'       => $product['image'],
-                    'price'       => $product['price'],
-                    'special'     => $product['special'],
+                    'price'       => $price,
+                    'special'     => $special,
                     'tax_class_id'=> $product['tax_class_id'],
+                    'matched_variant_id' => $variant !== null ? (int)$variant['variant_id'] : 0,
+                    'matched_variant_model' => $variant !== null ? ($variant['model'] ?: $variant['sku']) : '',
                 ];
             }
         }
