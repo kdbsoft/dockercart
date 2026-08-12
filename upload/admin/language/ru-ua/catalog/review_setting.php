@@ -51,6 +51,15 @@ $_['entry_is_default']        = 'Использовать как группу п
 $_['entry_criteria_name']     = 'Название критерия';
 $_['entry_criteria_help']     = 'Подсказка (необязательно)';
 
+// Replies
+$_['entry_replies_enabled']   = 'Разрешить ответы на отзывы';
+$_['entry_reply_auto_approve'] = 'Автопубликация новых ответов';
+$_['entry_reply_min_length']  = 'Мин. длина ответа (символов)';
+$_['entry_reply_max_length']  = 'Макс. длина ответа (символов)';
+$_['entry_reply_author_name'] = 'Имя автора ответов от магазина';
+$_['help_reply_author_name']  = 'Показывается как автор ответов администратора на витрине. Оставьте пустым, чтобы использовать название магазина.';
+$_['text_panel_replies']      = 'Ответы';
+
 $_['text_settings_subtitle'] = 'Настройте, как работают отзывы покупателей в магазине.';
 $_['text_panel_media'] = 'Фото и видео';
 $_['text_panel_moderation'] = 'Модерация и защита';

@@ -140,6 +140,11 @@ class ControllerCatalogReviewSetting extends Controller {
 			'config_review_rate_limit_count',
 			'config_review_rate_limit_minutes',
 			'config_review_honeypot',
+			'config_review_replies_enabled',
+			'config_review_reply_auto_approve',
+			'config_review_reply_min_length',
+			'config_review_reply_max_length',
+			'config_review_reply_author_name',
 		);
 
 		foreach ($keys as $key) {

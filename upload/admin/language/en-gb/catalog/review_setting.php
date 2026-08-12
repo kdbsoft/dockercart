@@ -51,6 +51,15 @@ $_['entry_is_default']        = 'Use as default group';
 $_['entry_criteria_name']     = 'Criteria label';
 $_['entry_criteria_help']     = 'Help text (optional)';
 
+// Replies
+$_['entry_replies_enabled']   = 'Allow replies to reviews';
+$_['entry_reply_auto_approve'] = 'Auto-publish new replies';
+$_['entry_reply_min_length']  = 'Min reply length (chars)';
+$_['entry_reply_max_length']  = 'Max reply length (chars)';
+$_['entry_reply_author_name'] = 'Admin reply author name';
+$_['help_reply_author_name']  = 'Shown as the author of admin replies on the storefront. Leave empty to use the store name.';
+$_['text_panel_replies']      = 'Replies';
+
 $_['text_settings_subtitle'] = 'Configure how customer reviews work on the storefront.';
 $_['text_panel_media'] = 'Photos & Videos';
 $_['text_panel_moderation'] = 'Moderation & Protection';

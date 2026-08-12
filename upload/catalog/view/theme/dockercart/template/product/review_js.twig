@@ -394,6 +394,109 @@
     });
   }
 
+  function initReviewReplies() {
+    document.addEventListener('submit', function (e) {
+      var form = e.target.closest('.dc-review-reply-form');
+      if (!form) return;
+
+      e.preventDefault();
+
+      var replyUrl = form.getAttribute('data-reply-url');
+      if (!replyUrl) return;
+
+      var reviewId = form.getAttribute('data-review-id');
+      var textarea = form.querySelector('textarea[name="text"]');
+      var text = textarea ? textarea.value.trim() : '';
+      var minLength = parseInt(form.getAttribute('data-min-length'), 10) || 2;
+      var maxLength = parseInt(form.getAttribute('data-max-length'), 10) || 1000;
+      var alertBox = form.querySelector('.dc-review-reply-alert');
+      var submitBtn = form.querySelector('.dc-review-reply-submit');
+
+      function showAlert(message, type) {
+        if (!alertBox) return;
+        alertBox.classList.remove('hidden');
+        alertBox.textContent = message;
+        alertBox.className = 'dc-review-reply-alert text-sm rounded-xl p-3 mb-3 ' + (type === 'error' ? 'text-red-600 bg-red-50 border border-red-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200');
+      }
+
+      function clearAlert() {
+        if (alertBox) alertBox.classList.add('hidden');
+      }
+
+      if (text.length < minLength || text.length > maxLength) {
+        showAlert('{{ error_reply_text }}'.replace('%s', minLength).replace('%s', maxLength), 'error');
+        if (textarea) textarea.focus();
+        return;
+      }
+
+      clearAlert();
+      if (submitBtn) submitBtn.disabled = true;
+
+      var params = new FormData(form);
+      params.set('review_id', reviewId);
+
+      fetch(replyUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: params
+      })
+      .then(function (response) { return response.json(); })
+      .then(function (json) {
+        if (json.error === 'login' && json.login_url) {
+          window.location.href = json.login_url;
+          return;
+        }
+
+        if (json.error) {
+          showAlert(json.error, 'error');
+          return;
+        }
+
+        if (json.success) {
+          if (json.approved) {
+            var review = document.getElementById('review');
+            if (review && review.getAttribute('data-ajax-load') === '1') {
+              var ajaxUrl = review.getAttribute('data-ajax-url');
+              if (ajaxUrl) {
+                loadReview(ajaxUrl);
+                return;
+              }
+            }
+            // Full SEO page: reload the fragment with the current page/sort.
+            var sortLink = document.querySelector('.dc-review-sort a.active');
+            var sort = sortLink ? sortLink.getAttribute('href') : null;
+            var url = new URL(ajaxBaseUrl(), window.location.href);
+            if (sort) {
+              var params2 = new URL(sort, window.location.href).searchParams;
+              if (params2.has('page')) url.searchParams.set('page', params2.get('page'));
+              if (params2.has('sort')) url.searchParams.set('sort', params2.get('sort'));
+            }
+            loadReview(url.toString());
+            return;
+          }
+          showAlert(json.success, 'success');
+          if (textarea) textarea.value = '';
+        }
+      })
+      .catch(function (error) {
+        console.error('Review reply error:', error);
+        showAlert('{{ text_loading_error }}', 'error');
+      })
+      .finally(function () {
+        if (submitBtn) submitBtn.disabled = false;
+      });
+    });
+  }
+
+  function ajaxBaseUrl() {
+    var review = document.getElementById('review');
+    if (review && review.getAttribute('data-ajax-load') === '1') {
+      return review.getAttribute('data-ajax-url');
+    }
+    return null;
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('form-review');
     var review = document.getElementById('review');
@@ -418,6 +521,7 @@
     initReviewFragment();
     initReviewLightbox();
     initReviewVotes();
+    initReviewReplies();
     initReviewModal();
     if (typeof window.GLightbox === 'function') {
       window.GLightbox({ touchNavigation: true, loop: false });

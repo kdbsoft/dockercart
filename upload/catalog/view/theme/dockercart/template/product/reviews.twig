@@ -77,7 +77,7 @@
       </aside>
 
       <section class="lg:col-span-2 min-w-0">
-        <div id="review">
+        <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}">
           {% include 'dockercart/template/product/review.twig' with {
             reviews: reviews_list,
             total: review_total,
@@ -93,13 +93,25 @@
             text_be_first_hint: text_be_first_hint,
             text_leave_review: text_leave_review,
             reviews_url: reviews_url,
-            vote_url: vote_url
+            vote_url: vote_url,
+            reply_url: reply_url,
+            reply_enabled: reply_enabled,
+            reply_min_length: reply_min_length,
+            reply_max_length: reply_max_length,
+            text_reply_count: text_reply_count,
+            text_replies_count: text_replies_count,
+            text_reply_admin_badge: text_reply_admin_badge,
+            text_reply_placeholder: text_reply_placeholder,
+            text_reply_submit: text_reply_submit,
+            text_reply_login_hint: text_reply_login_hint,
+            customer_logged: customer_logged,
+            login_url: login_url
           } %}
         </div>
       </section>
     </div>
     {% else %}
-    <div id="review">
+    <div id="review" data-ajax-load="1" data-ajax-url="{{ review_ajax_url }}">
       {% include 'dockercart/template/product/review.twig' with {
         reviews: reviews_list,
         total: review_total,
@@ -115,7 +127,19 @@
         text_be_first_hint: text_be_first_hint,
         text_leave_review: text_leave_review,
         reviews_url: reviews_url,
-        vote_url: vote_url
+        vote_url: vote_url,
+        reply_url: reply_url,
+        reply_enabled: reply_enabled,
+        reply_min_length: reply_min_length,
+        reply_max_length: reply_max_length,
+        text_reply_count: text_reply_count,
+        text_replies_count: text_replies_count,
+        text_reply_admin_badge: text_reply_admin_badge,
+        text_reply_placeholder: text_reply_placeholder,
+        text_reply_submit: text_reply_submit,
+        text_reply_login_hint: text_reply_login_hint,
+        customer_logged: customer_logged,
+        login_url: login_url
       } %}
     </div>
     {% endif %}

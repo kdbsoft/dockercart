@@ -54,6 +54,7 @@ class ReviewList {
 		$votes = $this->model_catalog_review->getVotesForReviews($review_ids);
 		$customer_id = (int)$this->customer->getId();
 		$my_votes = $this->model_catalog_review->getCustomerVotes($review_ids, $customer_id);
+		$replies = $this->model_catalog_review->getRepliesForReviews($review_ids);
 
 		$reviews = array();
 
@@ -117,6 +118,18 @@ class ReviewList {
 
 			$date_format = isset($this->language->data['date_format_review']) ? $this->language->get('date_format_review') : $this->language->get('date_format_short');
 
+			$review_replies = array();
+
+			foreach (isset($replies[$result['review_id']]) ? $replies[$result['review_id']] : array() as $reply) {
+				$review_replies[] = array(
+					'reply_id'        => $reply['reply_id'],
+					'author'          => $reply['author'],
+					'author_is_admin' => $reply['author_is_admin'],
+					'text'            => nl2br($this->clean($reply['text'])),
+					'date_added'      => date($date_format, strtotime($reply['date_added'])),
+				);
+			}
+
 			$reviews[] = array(
 				'review_id'     => (int)$result['review_id'],
 				'author'        => $result['author'],
@@ -134,6 +147,8 @@ class ReviewList {
 				'video'         => $video,
 				'votes'         => isset($votes[$result['review_id']]) ? $votes[$result['review_id']] : array('likes' => 0, 'dislikes' => 0),
 				'my_vote'       => isset($my_votes[$result['review_id']]) ? $my_votes[$result['review_id']] : '',
+				'replies'       => $review_replies,
+				'reply_count'   => count($review_replies),
 			);
 		}
 
@@ -169,6 +184,20 @@ class ReviewList {
 			'text_leave_review'   => $this->language->get('text_leave_review'),
 			'text_write'          => $this->language->get('text_write'),
 			'vote_url'            => $this->url->link('product/product/vote'),
+			'reply_enabled'       => (bool)$this->config->get('config_review_replies_enabled'),
+			'reply_auto_approve'  => (bool)$this->config->get('config_review_reply_auto_approve'),
+			'reply_min_length'    => (int)$this->config->get('config_review_reply_min_length'),
+			'reply_max_length'    => (int)$this->config->get('config_review_reply_max_length'),
+			'reply_url'           => $this->url->link('product/product/reply'),
+			'text_reply'          => $this->language->get('text_reply'),
+			'text_reply_placeholder' => $this->language->get('text_reply_placeholder'),
+			'text_reply_submit'   => $this->language->get('text_reply_submit'),
+			'text_reply_login_hint' => $this->language->get('text_reply_login_hint'),
+			'text_reply_admin_badge' => $this->language->get('text_reply_admin_badge'),
+			'text_reply_count'    => $this->language->get('text_reply_count'),
+			'text_replies_count'  => $this->language->get('text_replies_count'),
+			'text_reply_added'    => $this->language->get('text_reply_added'),
+			'text_reply_awaiting_moderation' => $this->language->get('text_reply_awaiting_moderation'),
 		);
 	}
 

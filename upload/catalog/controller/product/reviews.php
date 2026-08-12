@@ -97,6 +97,18 @@ class ControllerProductReviews extends Controller {
 			$data['review_total'] = $fragment['total'];
 			$data['review_total_label'] = $fragment['total_label'];
 			$data['vote_url'] = $fragment['vote_url'];
+			$data['reply_url'] = $fragment['reply_url'];
+			$data['reply_enabled'] = $fragment['reply_enabled'];
+			$data['reply_min_length'] = $fragment['reply_min_length'];
+			$data['reply_max_length'] = $fragment['reply_max_length'];
+			$data['text_reply_count'] = $fragment['text_reply_count'];
+			$data['text_replies_count'] = $fragment['text_replies_count'];
+			$data['text_reply_admin_badge'] = $fragment['text_reply_admin_badge'];
+			$data['text_reply_placeholder'] = $fragment['text_reply_placeholder'];
+			$data['text_reply_submit'] = $fragment['text_reply_submit'];
+			$data['text_reply_login_hint'] = $fragment['text_reply_login_hint'];
+			$data['customer_logged'] = $this->customer->isLogged();
+			$data['login_url'] = $this->url->link('account/login');
 
 			// Write form data
 			$data['review_status'] = $this->config->get('config_review_status');

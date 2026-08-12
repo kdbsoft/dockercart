@@ -23,6 +23,21 @@ $_['text_vote_success']          = 'Дякуємо за вашу оцінку!';
 $_['error_vote']                 = 'Некоректне значення голосу!';
 $_['error_review']               = 'Відгук не знайдено!';
 
+// Replies
+$_['text_reply']                 = 'Відповісти';
+$_['text_reply_placeholder']     = 'Напишіть відповідь...';
+$_['text_reply_submit']          = 'Надіслати відповідь';
+$_['text_reply_login_hint']      = 'Увійдіть або зареєструйтеся, щоб відповідати на відгуки';
+$_['text_reply_admin_badge']     = 'Магазин';
+$_['text_reply_count']           = 'відповідь';
+$_['text_replies_count']         = 'відповіді';
+$_['text_reply_added']           = 'Вашу відповідь опубліковано.';
+$_['text_reply_awaiting_moderation'] = 'Вашу відповідь надіслано й вона очікує модерації.';
+$_['error_reply_text']           = 'Відповідь має містити від %s до %s символів!';
+$_['error_reply_login']          = 'Необхідно увійти, щоб відповідати!';
+$_['error_reply_disabled']       = 'Відповіді на відгуки вимкнено!';
+$_['error_reply_not_found']      = 'Відгук не знайдено!';
+
 // Section
 $_['text_reviews_section']   = 'Відгуки покупців';
 

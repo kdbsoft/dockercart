@@ -41,6 +41,7 @@
                   <td class="text-left">{{ column_verified }}</td>
                   <td class="text-left">{{ column_media }}</td>
                   <td class="text-left">{{ column_votes }}</td>
+                  <td class="text-left">{{ column_replies }}</td>
                   <td class="text-left">{% if sort == 'r.status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
                   <td class="text-left">{% if sort == 'r.date_added' %}<a href="{{ sort_date_added }}" class="{{ order|lower }} sortable">{{ column_date_added }}</a>{% else %}<a href="{{ sort_date_added }}" class="sortable">{{ column_date_added }}</a>{% endif %}</td>
                 </tr>
@@ -73,6 +74,14 @@
                     <span class="text-success"><i data-lucide="thumbs-up" width="13" height="13"></i> {{ review.likes }}</span>
                     <span class="text-muted">/</span>
                     <span class="text-danger"><i data-lucide="thumbs-down" width="13" height="13"></i> {{ review.dislikes }}</span>
+                  </span>
+                </td>
+                <td class="text-left">
+                  <span class="dc-reply-count text-nowrap" data-review-id="{{ review.review_id }}">
+                    <i data-lucide="message-square" width="13" height="13" class="text-muted"></i> {{ review.reply_count }}
+                    {% if review.reply_pending_count > 0 %}
+                    <span class="badge badge-warning dc-reply-pending-badge">{{ review.reply_pending_count }}</span>
+                    {% endif %}
                   </span>
                 </td>
                 <td class="text-left">
@@ -200,6 +209,28 @@ $(document).on('click', '.btn-expand-review', function() {
 					if (json['likes'] !== undefined && json['dislikes'] !== undefined) {
 						html += '<div class="review-expand-votes"><i data-lucide="thumbs-up" width="14" height="14" class="text-success"></i> ' + json['likes'] + ' <i data-lucide="thumbs-down" width="14" height="14" class="text-danger"></i> ' + json['dislikes'] + '</div>';
 					}
+
+					if (json['replies'] && json['replies'].length) {
+						html += '<div class="review-expand-replies">';
+						html += '<div class="review-expand-replies-title"><i data-lucide="message-square" width="14" height="14"></i> {{ column_replies }}</div>';
+						$.each(json['replies'], function(i, reply) {
+							var statusHtml = '<select class="form-control input-sm dc-reply-status" data-reply-id="' + reply['reply_id'] + '" style="width:auto;display:inline-block;">'
+								+ '<option value="1"' + (reply['status'] == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>'
+								+ '<option value="0"' + (reply['status'] == 0 ? ' selected' : '') + '>{{ text_disabled }}</option></select>';
+							var adminBadge = reply['author_is_admin'] ? ' <span class="label label-primary">{{ text_reply_admin_badge }}</span>' : '';
+							html += '<div class="review-expand-reply" data-reply-id="' + reply['reply_id'] + '">';
+							html += '<div class="review-expand-reply-head"><strong>' + $('<div>').text(reply['author']).html() + '</strong>' + adminBadge + ' <span class="text-muted">' + reply['date_added'] + '</span></div>';
+							html += '<div class="review-expand-reply-text">' + reply['text'] + '</div>';
+							html += '<div class="review-expand-reply-actions">' + statusHtml + ' <button type="button" class="btn btn-danger btn--icon btn-delete-reply" data-reply-id="' + reply['reply_id'] + '" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="13" height="13"></i></button></div>';
+							html += '</div>';
+						});
+						html += '</div>';
+					}
+
+					html += '<div class="review-expand-reply-form">';
+					html += '<textarea class="form-control dc-reply-text" rows="2" placeholder="{{ entry_reply_text }}"></textarea>';
+					html += '<div class="text-right" style="margin-top: 6px;"><button type="button" class="btn btn-primary btn-sm btn-send-reply" data-review-id="' + json['review_id'] + '"><i data-lucide="send" width="13" height="13"></i> {{ button_reply }}</button></div>';
+					html += '</div>';
 
 					if (!html) {
 						html = '<div class="text-muted">—</div>';
@@ -404,12 +435,138 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 			});
 		}
 
-		$input.on('blur', save);
-		$input.on('keydown', function(e) {
-			if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
-			if (e.which === 27) { revert(); }
-		});
+	$input.on('blur', save);
+	$input.on('keydown', function(e) {
+		if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
+		if (e.which === 27) { revert(); }
+	});
+}
+//--></script>
+<script type="text/javascript"><!--
+function dcUpdateReplyCounts(counts, reviewId) {
+	var $cell = $('.dc-reply-count[data-review-id="' + reviewId + '"]');
+	if (!$cell.length) return;
+
+	var html = '<i data-lucide="message-square" width="13" height="13" class="text-muted"></i> ' + counts['reply_count'];
+
+	if (counts['reply_pending_count'] > 0) {
+		html += ' <span class="badge badge-warning dc-reply-pending-badge">' + counts['reply_pending_count'] + '</span>';
 	}
+
+	$cell.html(html);
+	lucide.createIcons({ nodes: [$cell[0]] });
+}
+
+$(document).on('click', '.btn-send-reply', function() {
+	var $btn = $(this);
+	var reviewId = $btn.data('review-id');
+	var $form = $btn.closest('.review-expand-reply-form');
+	var $textarea = $form.find('.dc-reply-text');
+	var text = $.trim($textarea.val());
+
+	if (!text) { $textarea.focus(); return; }
+
+	$btn.prop('disabled', true);
+
+	$.ajax({
+		url: 'index.php?route=catalog/review/reply&user_token={{ user_token }}',
+		type: 'post',
+		dataType: 'json',
+		data: { review_id: reviewId, text: text },
+		success: function(json) {
+			if (json['error']) {
+				alert(json['error']);
+				return;
+			}
+
+			if (json['success'] && json['reply']) {
+				var $replies = $btn.closest('.review-expand-content').find('.review-expand-replies');
+
+				if (!$replies.length) {
+					$form.before('<div class="review-expand-replies"><div class="review-expand-replies-title"><i data-lucide="message-square" width="14" height="14"></i> {{ column_replies }}</div></div>');
+					$replies = $btn.closest('.review-expand-content').find('.review-expand-replies');
+				}
+
+				var reply = json['reply'];
+				var statusHtml = '<select class="form-control input-sm dc-reply-status" data-reply-id="' + reply['reply_id'] + '" style="width:auto;display:inline-block;">'
+					+ '<option value="1"' + (reply['status'] == 1 ? ' selected' : '') + '>{{ text_enabled }}</option>'
+					+ '<option value="0"' + (reply['status'] == 0 ? ' selected' : '') + '>{{ text_disabled }}</option></select>';
+				var adminBadge = reply['author_is_admin'] ? ' <span class="label label-primary">{{ text_reply_admin_badge }}</span>' : '';
+
+				var html = '<div class="review-expand-reply" data-reply-id="' + reply['reply_id'] + '">';
+				html += '<div class="review-expand-reply-head"><strong>' + $('<div>').text(reply['author']).html() + '</strong>' + adminBadge + ' <span class="text-muted">' + reply['date_added'] + '</span></div>';
+				html += '<div class="review-expand-reply-text">' + reply['text'] + '</div>';
+				html += '<div class="review-expand-reply-actions">' + statusHtml + ' <button type="button" class="btn btn-danger btn--icon btn-delete-reply" data-reply-id="' + reply['reply_id'] + '" data-toggle="tooltip" title="{{ button_delete }}"><i data-lucide="trash-2" width="13" height="13"></i></button></div>';
+				html += '</div>';
+
+				$replies.append(html);
+				$textarea.val('');
+				lucide.createIcons({ nodes: [$replies[0]] });
+				dcUpdateReplyCounts(json['counts'], reviewId);
+			}
+		},
+		error: function() {
+			alert('{{ text_loading_error }}');
+		},
+		complete: function() {
+			$btn.prop('disabled', false);
+		}
+	});
+});
+
+$(document).on('change', '.dc-reply-status', function() {
+	var $select = $(this);
+	var replyId = $select.data('reply-id');
+	var status = $select.val();
+	var $row = $select.closest('.review-expand-reply');
+
+	$.ajax({
+		url: 'index.php?route=catalog/review/updateReplyField&user_token={{ user_token }}',
+		type: 'post',
+		dataType: 'json',
+		data: { reply_id: replyId, status: status },
+		success: function(json) {
+			if (json['error']) { alert(json['error']); return; }
+			if (json['counts'] && $row.length) {
+				var reviewId = $row.closest('.review-expand-content').closest('.review-expand-row').data('review-id');
+				dcUpdateReplyCounts(json['counts'], reviewId);
+			}
+		},
+		error: function() {
+			alert('{{ text_loading_error }}');
+		}
+	});
+});
+
+$(document).on('click', '.btn-delete-reply', function() {
+	var $btn = $(this);
+	var replyId = $btn.data('reply-id');
+	var $row = $btn.closest('.review-expand-reply');
+
+	if (!confirm('{{ text_confirm_delete_reply }}')) return;
+
+	$.ajax({
+		url: 'index.php?route=catalog/review/deleteReply&user_token={{ user_token }}',
+		type: 'post',
+		dataType: 'json',
+		data: { reply_id: replyId },
+		success: function(json) {
+			if (json['error']) { alert(json['error']); return; }
+			if ($row.length) {
+				var reviewId = $row.closest('.review-expand-content').closest('.review-expand-row').data('review-id');
+				$row.remove();
+				dcUpdateReplyCounts(json['counts'], reviewId);
+
+				var $list = $row.closest('.review-expand-content').find('.review-expand-replies');
+				if ($list.length && !$list.find('.review-expand-reply').length) {
+					$list.remove();
+				}
+			}
+		},
+		error: function() {
+			alert('{{ text_loading_error }}');
+		}
+	});
 });
 //--></script>
 {{ footer }}

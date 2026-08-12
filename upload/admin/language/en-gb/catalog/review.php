@@ -28,6 +28,7 @@ $_['column_rating']     = 'Rating';
 $_['column_verified']   = 'Verified';
 $_['column_media']      = 'Media';
 $_['column_votes']      = 'Votes';
+$_['column_replies']    = 'Replies';
 $_['column_status']     = 'Status';
 $_['column_date_added'] = 'Date Created';
 $_['column_action']     = 'Action';
@@ -76,3 +77,19 @@ $_['text_review_setting'] = 'Review Settings';
 $_['text_expand']         = 'Expand';
 $_['text_loading']        = 'Loading...';
 $_['text_loading_error'] = 'Failed to load';
+
+// Replies
+$_['text_reply_pending']        = 'pending';
+$_['text_reply_admin_badge']    = 'Store';
+$_['text_reply_added']          = 'Reply added';
+$_['text_reply_deleted']        = 'Reply deleted';
+$_['text_reply_status_updated'] = 'Reply status updated';
+$_['text_confirm_delete_reply'] = 'Delete this reply?';
+$_['filter_replies']            = 'Replies';
+$_['text_filter_replies_all']   = 'All replies';
+$_['text_filter_replies_any']   = 'Has replies';
+$_['text_filter_replies_pending'] = 'Has pending replies';
+$_['entry_reply_text']          = 'Write a reply...';
+$_['button_reply']              = 'Reply';
+$_['error_reply_text']          = 'Reply must be between %s and %s characters!';
+$_['error_reply_not_found']     = 'Reply target not found!';
