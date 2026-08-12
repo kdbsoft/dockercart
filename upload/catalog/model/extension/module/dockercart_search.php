@@ -265,7 +265,138 @@ class ModelExtensionModuleDockercartSearch extends Model {
             }
         }
 
+        // No article-code match: try matching the query against the variant option-value
+        // names (e.g. "White", "128 GB", size "M"). A token matches either the product title
+        // (product-name tokens are ignored) or a variant value name (infix, case-insensitive,
+        // compact-form aware: "128GB" matches "128 GB"). A variant is a candidate only when
+        // EVERY token matches somewhere AND at least one token matched a value name — a bare
+        // product-name query ("Google Pixel 8 Pro") must not deep-link to an arbitrary variant.
+        $this->load->model('catalog/product');
+
+        $title = '';
+
+        $title_query = $this->db->query("
+            SELECT name FROM " . DB_PREFIX . "product_description
+            WHERE product_id = '" . (int)$product_id . "'
+            AND language_id = '" . (int)$this->config->get('config_language_id') . "'
+            LIMIT 1
+        ");
+
+        if ($title_query->num_rows) {
+            $title = mb_strtolower($title_query->row['name'], 'UTF-8');
+        }
+
+        // Token significance: keep tokens of length >= 2 and pure digits (e.g. "128"),
+        // plus single letters that are NOT part of the product title — those are variant
+        // values like the size "M" in "White / M". Single letters that occur in the title
+        // ("a", "и") are noise and are dropped.
+        $value_tokens = array_values(array_filter($this->splitQueryTokens($query), function ($t) use ($title) {
+            $len = mb_strlen($t, 'UTF-8');
+
+            if ($len >= 2 || ctype_digit($t)) {
+                return true;
+            }
+
+            return $len === 1 && ctype_alpha($t) && ($title === '' || mb_strpos($title, mb_strtolower($t, 'UTF-8')) === false);
+        }));
+
+        if (count($value_tokens) > 0) {
+
+            $best_variant   = null;
+            $best_score     = 0;
+
+            foreach ($variants as $variant) {
+                if (empty($variant['status'])) {
+                    continue;
+                }
+
+                $names = [];
+
+                if (!empty($variant['values']) && is_array($variant['values'])) {
+                    foreach ($variant['values'] as $value) {
+                        if (!empty($value['name'])) {
+                            $names[] = (string)$value['name'];
+                        }
+                    }
+                }
+
+                if (empty($names)) {
+                    continue;
+                }
+
+                $score = 0;
+                $all_match = true;
+
+                foreach ($value_tokens as $token) {
+                    $token_lc = mb_strtolower($token, 'UTF-8');
+                    $token_compact = $this->compactLabelToken($token_lc);
+
+                    // Product-name token — always satisfied, never scores (a bare
+                    // product-name query must not deep-link to an arbitrary variant).
+                    if ($title !== '' && mb_strpos($title, $token_lc) !== false) {
+                        continue;
+                    }
+
+                    $token_matched = false;
+
+                    foreach ($names as $name) {
+                        $name_lc = mb_strtolower($name, 'UTF-8');
+
+                        if (mb_strpos($name_lc, $token_lc) !== false || ($token_compact !== '' && mb_strpos($this->compactLabelToken($name_lc), $token_compact) !== false)) {
+                            $token_matched = true;
+                            break;
+                        }
+                    }
+
+                    if ($token_matched) {
+                        $score++;
+                    } else {
+                        $all_match = false;
+                        break;
+                    }
+                }
+
+                // Require at least one non-title token to have matched a value name.
+                if ($all_match && $score > 0 && $score > $best_score) {
+                    $best_score   = $score;
+                    $best_variant = $variant;
+                }
+            }
+
+            if ($best_variant !== null) {
+                return $best_variant;
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Split a query into word tokens, dropping pure-punctuation tokens ("—", "/", "-").
+     *
+     * @param string $query
+     * @return string[]
+     */
+    private function splitQueryTokens($query) {
+        $tokens = preg_split('/\s+/u', trim((string)$query), -1, PREG_SPLIT_NO_EMPTY);
+
+        if (!$tokens) {
+            return [];
+        }
+
+        return array_values(array_filter($tokens, function ($t) {
+            return (bool)preg_match('/[\p{L}\p{N}]/u', (string)$t);
+        }));
+    }
+
+    /**
+     * Compact a label token for separator-insensitive matching ("128 GB" -> "128gb").
+     *
+     * @param string $value
+     * @return string
+     */
+    private function compactLabelToken($value) {
+        return preg_replace('/[\s_\/\x{2014}\x{2013}]+/u', '', (string)$value);
     }
 
     /**
