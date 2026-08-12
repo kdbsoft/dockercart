@@ -15,9 +15,9 @@
  *     repeated partial refunds converge to zero (min(remaining, target)).
  *
  * Unlike spent-point rows written by extension/total/reward::confirm, reversal
- * rows are never deleted by unconfirm() (it only removes points < 0 for the
- * order — reversals are negative). To keep that contract, callers must run
- * revokeOrderReward() AFTER the unconfirm cycle of a status reversal.
+ * rows are never deleted by unconfirm(), which removes only rows marked as
+ * redeem. To keep that contract, callers must run revokeOrderReward() AFTER
+ * the unconfirm cycle of a status reversal.
  *
  * Direct SQL only (no ModelCustomerCustomer::addReward) so the optional
  * admin_mail_reward event is not fired inside the status-change transaction
@@ -51,43 +51,56 @@ class DockercartReward {
 	}
 
 	/**
-	 * Award the order's reward points to the customer. No-op unless
-	 * config_reward_auto_award is enabled and the order is a real customer
-	 * order with reward points that has not been awarded yet.
+	 * Award the order's reward points to the customer.
 	 *
-	 * Runs inside the caller's transaction; throws on failure so the status
-	 * transition rolls back atomically with the award.
+	 * Returns 1 for a new award, 2 when an existing award repaired the order
+	 * flag, and 0 when no award was needed or possible. Runs inside the
+	 * caller's transaction so the write and order flag stay atomic.
 	 */
-	public function awardOrderReward(int $order_id): void {
-		if (!$this->config->get('config_reward_auto_award')) {
-			return;
+	public function awardOrderReward(int $order_id, bool $force = false): int {
+		if (!$force && !$this->config->get('config_reward_auto_award')) {
+			return 0;
 		}
 
 		$order_query = $this->db->query("SELECT customer_id, reward_awarded, date_modified FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' FOR UPDATE");
 
-		if (!$order_query->num_rows || (int)$order_query->row['reward_awarded']) {
-			return;
+		if (!$order_query->num_rows) {
+			return 0;
+		}
+
+		$already_awarded = (int)$order_query->row['reward_awarded'];
+
+		if ($already_awarded && !$force) {
+			return 0;
+		}
+
+		$existing_reward = $this->db->query("SELECT customer_reward_id FROM `" . DB_PREFIX . "customer_reward` WHERE order_id = '" . (int)$order_id . "' AND operation_type = 'award' LIMIT 1");
+
+		if ($existing_reward->num_rows) {
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET reward_awarded = '1' WHERE order_id = '" . (int)$order_id . "'");
+
+			return 2;
 		}
 
 		$customer_id = (int)$order_query->row['customer_id'];
 		$points = $this->getOrderRewardPoints($order_id);
 
 		if ($customer_id <= 0 || $points <= 0) {
-			return;
+			return 0;
 		}
 
-		// Delayed award: when config_reward_delay_days is set (> 0), the order
-		// must have been in its (complete) status for at least that many days
-		// before points are granted. 0/unset = award immediately. date_modified
-		// is bumped by every status change, so it tracks when the order entered
-		// the current status.
-		$delay_days = (int)$this->config->get('config_reward_delay_days');
+		if (!$force) {
+			// Delayed award: when config_reward_delay_days is set (> 0), the order
+			// must have been in its (complete) status for at least that many days
+			// before points are granted. 0/unset = award immediately.
+			$delay_days = (int)$this->config->get('config_reward_delay_days');
 
-		if ($delay_days > 0) {
-			$check = $this->db->query("SELECT order_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' AND date_modified < DATE_SUB(NOW(), INTERVAL " . (int)$delay_days . " DAY)");
+			if ($delay_days > 0) {
+				$check = $this->db->query("SELECT order_id FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' AND date_modified < DATE_SUB(NOW(), INTERVAL " . (int)$delay_days . " DAY)");
 
-			if (!$check->num_rows) {
-				return;
+				if (!$check->num_rows) {
+					return 0;
+				}
 			}
 		}
 
@@ -95,10 +108,13 @@ class DockercartReward {
 			customer_id = '" . (int)$customer_id . "',
 			order_id = '" . (int)$order_id . "',
 			points = '" . (int)$points . "',
+			operation_type = 'award',
 			description = '" . $this->db->escape($this->language->get('text_order_id') . ' #' . $order_id) . "',
 			date_added = NOW()");
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "order` SET reward_awarded = '1', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
+
+		return 1;
 	}
 
 	/**
@@ -126,7 +142,8 @@ class DockercartReward {
 			return;
 		}
 
-		$awarded = $this->getOrderRewardPoints($order_id);
+		$awarded_query = $this->db->query("SELECT COALESCE(SUM(points), 0) AS total FROM `" . DB_PREFIX . "customer_reward` WHERE order_id = '" . (int)$order_id . "' AND operation_type = 'award'");
+		$awarded = (int)$awarded_query->row['total'];
 
 		if ($awarded <= 0) {
 			return;
@@ -145,6 +162,7 @@ class DockercartReward {
 			customer_id = '" . (int)$customer_id . "',
 			order_id = '" . (int)$order_id . "',
 			points = '" . (int)-$revoke . "',
+			operation_type = 'reversal',
 			description = '" . $this->db->escape($this->language->get('text_reward_refunded') . ' #' . $order_id) . "',
 			date_added = NOW()");
 
