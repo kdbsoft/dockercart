@@ -400,6 +400,7 @@ class ControllerProductNewArrivals extends Controller {
 		$data['text_load_more']  = $this->language->get('text_load_more');
 		$data['page']            = $page;
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_sale'] = $this->language->get('text_sale');
 		$data['view_mode']       = $view_mode;
 
 		$this->response->setOutput($this->load->view('product/new_arrivals', $data));
@@ -566,7 +567,7 @@ class ControllerProductNewArrivals extends Controller {
 				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
-				'text_sale'        => '',
+				'text_sale'        => $this->language->get('text_sale'),
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'button_cart'      => $this->language->get('button_cart'),
 				'btn_quick_hover'  => 'hover:bg-teal-600',
