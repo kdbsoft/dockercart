@@ -211,13 +211,29 @@ class ProductPricingCalculator
 
         // Спеццена отбрасывается, если >= цены.
         $special = null;
+        $special_date_end = 0;
 
         if ($variant_id > 0) {
             if ($applied_variant_special) {
                 $special = $price;
+
+                // Спеццена варианта: дата окончания той же активной спеццены
+                // (тот же ORDER BY, что и getVariantSpecialPrice).
+                $pc = new \ProductConfigurable($this->registry);
+                $variant_end = $pc->getVariantSpecialEndDate($variant_id, $this->customer_group_id);
+
+                if ($variant_end !== null && $variant_end > 0) {
+                    $special_date_end = (int) $variant_end;
+                }
+            } elseif ($applied_product_special && $price > 0) {
+                // Спеццена товара применяется к дефолтному варианту — неси её
+                // метаданные (таймер акции на странице товара).
+                $special = $price;
+                $special_date_end = $product_special_date_end;
             }
         } elseif ($applied_product_special && $price > 0) {
             $special = $price;
+            $special_date_end = $product_special_date_end;
         }
 
         $option_price = $this->calculateOptionPrice($product_id, $options);
@@ -236,7 +252,7 @@ class ProductPricingCalculator
             'price'             => round((float) $price, 4),
             'base_price'        => round((float) $base_price, 4),
             'special'           => $special !== null ? round((float) $special, 4) : null,
-            'special_date_end'  => $applied_product_special ? $product_special_date_end : 0,
+            'special_date_end'  => $special_date_end,
             'option_price'      => round((float) $option_price, 4),
             'reward'            => $reward,
             'variant_id'        => $variant_id,
@@ -384,6 +400,15 @@ class ProductPricingCalculator
         $product_special = isset($product_special_map[$product_id][0]) ? $product_special_map[$product_id][0] : null;
         $product_cg_price = isset($product_cg_price_map[$product_id]) ? $product_cg_price_map[$product_id] : null;
         $has_product_cg_price = $product_cg_price !== null && $product_cg_price > 0;
+        $product_special_date_end = 0;
+
+        if ($product_special !== null && !empty($product_special['date_end'])) {
+            $date_end = (string) $product_special['date_end'];
+
+            if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
+                $product_special_date_end = (int) strtotime($date_end);
+            }
+        }
 
         $variant_cg_price = null;
         $variant_special = null;
@@ -468,13 +493,27 @@ class ProductPricingCalculator
         }
 
         $special = null;
+        $special_date_end = 0;
 
         if ($variant_id > 0) {
             if ($applied_variant_special) {
                 $special = $price;
+
+                // Спеццена варианта: дата окончания той же активной спеццены.
+                $variant_end = $this->pickVariantSpecialEnd($variant_pricing, $variant_id);
+
+                if ($variant_end !== null && $variant_end > 0) {
+                    $special_date_end = (int) $variant_end;
+                }
+            } elseif ($applied_product_special && $price > 0) {
+                // Спеццена товара применяется к дефолтному варианту — неси её
+                // метаданные (единая формула со страницей товара).
+                $special = $price;
+                $special_date_end = $product_special_date_end;
             }
         } elseif ($applied_product_special && $price > 0) {
             $special = $price;
+            $special_date_end = $product_special_date_end;
         }
 
         $reward = 0;
@@ -491,7 +530,7 @@ class ProductPricingCalculator
             'price'             => round((float) $price, 4),
             'base_price'        => round((float) $base_price, 4),
             'special'           => $special !== null ? round((float) $special, 4) : null,
-            'special_date_end'  => 0,
+            'special_date_end'  => $special_date_end,
             'option_price'      => 0.0,
             'reward'            => $reward,
             'variant_id'        => $variant_id,
@@ -698,6 +737,47 @@ class ProductPricingCalculator
 
             if ($best !== null) {
                 return $best;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Дата окончания активной спеццены варианта (та же строка, что выбирает
+     * pickVariantSpecial: низшая активная цена для текущей группы).
+     */
+    private function pickVariantSpecialEnd(array $variant_pricing, $variant_id)
+    {
+        foreach ($variant_pricing['specials'] as $vid => $rows) {
+            if ((int) $vid !== (int) $variant_id) {
+                continue;
+            }
+
+            $best = null;
+            $best_end = null;
+
+            foreach ($rows as $row) {
+                if ((int) $row['customer_group_id'] !== $this->customer_group_id) {
+                    continue;
+                }
+
+                if (!(($row['date_start'] === '0000-00-00' || $row['date_start'] < date('Y-m-d H:i:s')) && ($row['date_end'] === '0000-00-00' || $row['date_end'] > date('Y-m-d H:i:s')))) {
+                    continue;
+                }
+
+                if ($best === null || (float) $row['price'] < (float) $best) {
+                    $best = (float) $row['price'];
+                    $best_end = $row['date_end'];
+                }
+            }
+
+            if ($best !== null && $best_end !== null) {
+                $date_end = (string) $best_end;
+
+                if ($date_end !== '' && $date_end !== '0000-00-00' && $date_end !== '0000-00-00 00:00:00') {
+                    return (int) strtotime($date_end);
+                }
             }
         }
 
