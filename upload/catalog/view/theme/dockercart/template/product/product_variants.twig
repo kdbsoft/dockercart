@@ -286,8 +286,7 @@
 		// Quantity discounts
 		if (discountsEl) {
 			var vd = (variant && Array.isArray(variant.discounts)) ? variant.discounts : [];
-			var vdList = document.getElementById('dc-variant-discounts-list');
-			if (vdList) vdList.innerHTML = '';
+			discountsEl.innerHTML = '';
 			vd.forEach(function(d) {
 				var label = document.createElement('span');
 				label.className = 'text-gray-600 whitespace-nowrap';
@@ -310,6 +309,12 @@
 		// price when the variant is on sale).
 		if (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) {
 			var vFullPrice = parseFloat(variant.price);
+			// The matrix price already includes the variant's own special; the
+			// full (strikethrough) price lives in special_from when the variant
+			// is on sale.
+			if (variant.special_from !== undefined && parseFloat(variant.special_from) > vFullPrice) {
+				vFullPrice = parseFloat(variant.special_from);
+			}
 			var vPrice = null;
 			var hasOwnSpecial = variant.special !== undefined && variant.special !== null && parseFloat(variant.special) > 0
 				&& variant.special_from !== undefined && parseFloat(variant.special) < vFullPrice;
