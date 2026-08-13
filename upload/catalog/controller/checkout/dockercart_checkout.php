@@ -2210,33 +2210,14 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 : [],
         ];
 
-        // Add products from cart (apply BXGY per-item discounts to prices)
-        $this->load->library("bxgy");
-        $bxgy_lib = new Bxgy($this->registry);
+        // Add products from cart. BXGY per-item discounts are already applied
+        // to cart line prices by Cart::getProducts(), so the order rows and the
+        // totals pipeline (below) both work off the discounted prices.
         $cart_products = $this->cart->getProducts();
-        $bxgy_discounts = $bxgy_lib->getPerProductDiscountsFor($cart_products);
 
         foreach ($cart_products as $product) {
             $price = (float) $product["price"];
             $tax = $this->tax->getTax($price, (int) ($product["tax_class_id"] ?? 0));
-
-            $bxgy_key = (int) $product["product_id"] . ":" . (int) ($product["variant_id"] ?? 0);
-
-            if (isset($bxgy_discounts[$bxgy_key])) {
-                $per_unit_discount = $bxgy_discounts[$bxgy_key]["per_unit"];
-                $units = (int) $bxgy_discounts[$bxgy_key]["units"];
-                $line_discount = $per_unit_discount * min($units, (int) $product["quantity"]);
-
-                if ($price > 0 && $line_discount > 0) {
-                    $new_price_total = max(0, $price * (int) $product["quantity"] - $line_discount);
-                    $new_price = (int) $product["quantity"] > 0 ? $new_price_total / (int) $product["quantity"] : 0;
-                    // Scale tax proportionally to the price change (pre-tax discount).
-                    if ($price > 0) {
-                        $tax = $tax * ($new_price / $price);
-                    }
-                    $price = $new_price;
-                }
-            }
 
             $order_data["products"][] = [
                 "product_id"  => $product["product_id"],
@@ -2644,45 +2625,24 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     "product/product",
                     "product_id=" . $product["product_id"],
                 ),
+                "bxgy_applied" => !empty($product["bxgy_applied"]),
+                "bxgy_original_price" => isset($product["bxgy_original_price"])
+                    ? $product["bxgy_original_price"]
+                    : false,
+                "bxgy_text" => isset($product["bxgy_text"])
+                    ? $product["bxgy_text"]
+                    : '',
             ];
         }
 
-        // BXGY per-item discounts
-        $this->load->library("bxgy");
-        $bxgy_lib = new Bxgy($this->registry);
-        $bxgy_discounts = $bxgy_lib->getPerProductDiscounts($cart_products);
-
+        // BXGY already applied to cart line prices by Cart::getProducts();
+        // here we only surface the original price / discount text per line.
         foreach ($products as &$product) {
-            $key = (int) $product["product_id"] . ":" . (int) ($product["variant_id"] ?? 0);
-
-            if (isset($bxgy_discounts[$key])) {
-                $per_unit_discount = $bxgy_discounts[$key]["per_unit"];
-                $units = (int) $bxgy_discounts[$key]["units"];
-                $line_discount = $per_unit_discount * min($units, (int) $product["quantity"]);
-                $raw_price = (float) ($product["price_raw"] ?? 0);
-                $discounted_raw = $raw_price * (int) $product["quantity"];
-                $discounted_raw = max(0, $discounted_raw - $line_discount);
-                $discounted_raw = (int) $product["quantity"] > 0 ? $discounted_raw / (int) $product["quantity"] : 0;
-                $product["price_raw"] = $discounted_raw;
-                $product["bxgy_original_price"] = $bxgy_discounts[$key]["original_price_formatted"];
-                $product["bxgy_discount_text"] = $bxgy_discounts[$key]["text"];
-                $product["price"] = $this->currency->format(
-                    $this->tax->calculate(
-                        $discounted_raw,
-                        $product["tax_class_id"] ?? 0,
-                        $this->config->get("config_tax"),
-                    ),
-                    $this->session->data["currency"],
-                );
-                $product["total"] = $this->currency->format(
-                    $this->tax->calculate(
-                        $discounted_raw,
-                        $product["tax_class_id"] ?? 0,
-                        $this->config->get("config_tax"),
-                    ) * $product["quantity"],
-                    $this->session->data["currency"],
-                );
+            if (empty($product["bxgy_applied"])) {
+                continue;
             }
+
+            $product["bxgy_discount_text"] = $product["bxgy_text"];
         }
 
         unset($product);

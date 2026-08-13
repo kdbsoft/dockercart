@@ -63,11 +63,6 @@ class ControllerCheckoutCart extends Controller {
 
 			$products = $this->cart->getProducts();
 
-			// BXGY per-item discounts
-			$this->load->library('bxgy');
-			$bxgy_lib = new Bxgy($this->registry);
-			$bxgy_discounts = $bxgy_lib->getPerProductDiscounts($products);
-
 			$data['products'] = array();
 
 			foreach ($products as $product) {
@@ -114,22 +109,12 @@ class ControllerCheckoutCart extends Controller {
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
 					$unit_price = $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'));
 
-					$bxgy_key = (int) $product['product_id'] . ':' . (int) ($product['variant_id'] ?? 0);
+					// BXGY already applied to the cart line price by Cart::getProducts();
+					// here we only surface the original price / discount text.
 					$original_price = $price = $unit_price;
 					$original_total = $total = $unit_price * $product['quantity'];
-					$bxgy_original_price_fmt = false;
-					$bxgy_discount_text = '';
-
-					if (isset($bxgy_discounts[$bxgy_key])) {
-						$per_unit_discount = $bxgy_discounts[$bxgy_key]['per_unit'];
-						$bxgy_original_price_fmt = $bxgy_discounts[$bxgy_key]['original_price_formatted'];
-						$bxgy_discount_text = $bxgy_discounts[$bxgy_key]['text'];
-						$line_discount = $per_unit_discount * min((int)$bxgy_discounts[$bxgy_key]['units'], (int)$product['quantity']);
-						$discounted_total = max(0, (float)$product['price'] * (int)$product['quantity'] - $line_discount);
-						$discounted = (int)$product['quantity'] > 0 ? $discounted_total / (int)$product['quantity'] : 0;
-						$price = $this->tax->calculate($discounted, $product['tax_class_id'], $this->config->get('config_tax'));
-						$total = $price * $product['quantity'];
-					}
+					$bxgy_original_price_fmt = !empty($product['bxgy_applied']) ? $product['bxgy_original_price'] : false;
+					$bxgy_discount_text = !empty($product['bxgy_applied']) ? $product['bxgy_text'] : '';
 
 					$price = $this->currency->format($price, $this->session->data['currency']);
 					$total = $this->currency->format($total, $this->session->data['currency']);
