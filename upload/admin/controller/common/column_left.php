@@ -590,14 +590,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'localisation/stock_status')) {
-				$localisation[] = array(
-					'name'	   => $this->language->get('text_stock_status'),
-					'href'     => $this->url->link('localisation/stock_status', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'localisation/order_status')) {
 				$localisation[] = array(
 					'name'	   => $this->language->get('text_order_status'),

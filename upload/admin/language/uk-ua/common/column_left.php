@@ -122,7 +122,6 @@ $_['text_setting'] = 'Налаштування';
 $_['text_shipping'] = 'Доставка';
 $_['text_statistics'] = 'Статистика';
 $_['text_sticker'] = 'Промо стікери';
-$_['text_stock_status'] = 'Статуси запасів';
 $_['text_system'] = 'Система';
 $_['text_tax'] = 'Податки';
 $_['text_tax_class'] = 'Податкові класи';
