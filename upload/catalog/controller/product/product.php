@@ -1235,6 +1235,7 @@ class ControllerProductProduct extends Controller {
 				// updateAvailableOptions() does client-side, so the rendered HTML
 				// matches the post-JS state from the first paint.
 				$data['dc_axis_hidden_pov_ids'] = array();
+				$data['dc_axis_oos_pov_ids'] = array();
 
 				if (!empty($product_info['is_configurable']) && !empty($selected_variant)) {
 					$selection_map = array();
@@ -1242,6 +1243,43 @@ class ControllerProductProduct extends Controller {
 					if (!empty($selected_variant['values'])) {
 						foreach ($selected_variant['values'] as $vv) {
 							$selection_map[(int)$vv['option_id']] = (int)$vv['option_value_id'];
+						}
+					}
+
+					// Mirror of the client-side matrix: for each axis value, the set
+					// of (other option_id:option_value_id) pairs that appear together
+					// with it in at least one ENABLED variant. The client checks each
+					// pair independently (not that all pairs live in one variant), so
+					// the server must do the same or the first paint diverges.
+					$compat_map = array();
+
+					foreach ($formatted_axes as $axe) {
+						$oid = (int)$axe['option_id'];
+
+						foreach ($axe['pov_map'] as $ov_id => $pov_id) {
+							$compat_map[$oid][(int)$ov_id] = array();
+						}
+					}
+
+					foreach ($variants as $v) {
+						if (empty($v['values'])) {
+							continue;
+						}
+
+						$vpairs = array();
+
+						foreach ($v['values'] as $vv) {
+							$vpairs[(int)$vv['option_id']] = (int)$vv['option_value_id'];
+						}
+
+						foreach ($vpairs as $v_oid => $v_ov_id) {
+							foreach ($vpairs as $other_oid => $other_ov_id) {
+								if ($other_oid === $v_oid && $other_ov_id === $v_ov_id) {
+									continue;
+								}
+
+								$compat_map[$v_oid][$v_ov_id][$other_oid . ':' . $other_ov_id] = true;
+							}
 						}
 					}
 
@@ -1257,50 +1295,75 @@ class ControllerProductProduct extends Controller {
 								continue;
 							}
 
-							$pairs = array($oid . ':' . $ov_id);
+							// available: every pair of the current selection exists
+							// in the compat set of this value (client isValueAvailable).
+							$available = true;
 
 							foreach ($selection_map as $sel_oid => $sel_ov_id) {
 								if ((int)$sel_oid !== $oid) {
-									$pairs[] = (int)$sel_oid . ':' . (int)$sel_ov_id;
-								}
-							}
+									$pair = (int)$sel_oid . ':' . (int)$sel_ov_id;
 
-							$has_stock = false;
-
-							foreach ($variants as $v) {
-								if ((float)$v['quantity'] <= 0 && empty($product_info['preorder'])) {
-									continue;
-								}
-
-								$vpairs = array();
-
-								if (!empty($v['values'])) {
-									foreach ($v['values'] as $vv) {
-										$vpairs[(int)$vv['option_id']] = (int)$vv['option_value_id'];
-									}
-								}
-
-								$match = true;
-
-								foreach ($pairs as $pair) {
-									$parts = explode(':', $pair);
-									$p_oid = (int)$parts[0];
-									$p_ov_id = (int)$parts[1];
-
-									if (!isset($vpairs[$p_oid]) || $vpairs[$p_oid] !== $p_ov_id) {
-										$match = false;
+									if (!isset($compat_map[$oid][$ov_id][$pair])) {
+										$available = false;
 										break;
 									}
 								}
+							}
 
-								if ($match) {
-									$has_stock = true;
-									break;
+							// has_stock: at least one enabled, in-stock (or preorder)
+							// variant combines this value with the current selection.
+							$has_stock = false;
+
+							if ($available) {
+								$pairs = array($oid . ':' . $ov_id);
+
+								foreach ($selection_map as $sel_oid => $sel_ov_id) {
+									if ((int)$sel_oid !== $oid) {
+										$pairs[] = (int)$sel_oid . ':' . (int)$sel_ov_id;
+									}
+								}
+
+								foreach ($variants as $v) {
+									if ((float)$v['quantity'] <= 0 && empty($product_info['preorder'])) {
+										continue;
+									}
+
+									$vpairs = array();
+
+									if (!empty($v['values'])) {
+										foreach ($v['values'] as $vv) {
+											$vpairs[(int)$vv['option_id']] = (int)$vv['option_value_id'];
+										}
+									}
+
+									$match = true;
+
+									foreach ($pairs as $pair) {
+										$parts = explode(':', $pair);
+										$p_oid = (int)$parts[0];
+										$p_ov_id = (int)$parts[1];
+
+										if (!isset($vpairs[$p_oid]) || $vpairs[$p_oid] !== $p_ov_id) {
+											$match = false;
+											break;
+										}
+									}
+
+									if ($match) {
+										$has_stock = true;
+										break;
+									}
 								}
 							}
 
-							if (!$has_stock) {
+							if (!$available) {
+								// No enabled variant pairs this value with the current
+								// selection — hide it entirely.
 								$data['dc_axis_hidden_pov_ids'][] = $pov_id;
+							} elseif (!$has_stock) {
+								// The combination exists but is out of stock —
+								// render it struck through from the first paint.
+								$data['dc_axis_oos_pov_ids'][] = $pov_id;
 							}
 						}
 					}
