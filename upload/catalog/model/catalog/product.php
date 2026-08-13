@@ -116,7 +116,6 @@ class ModelCatalogProduct extends Model {
 			'mpn'              => $row['mpn'],
 			'location'         => $row['location'],
 			'quantity'         => (float)$row['quantity'],
-			'stock_status_id'  => isset($row['stock_status_id']) ? (int)$row['stock_status_id'] : 0,
 			'preorder'         => (int)$row['preorder'],
 			'image'            => $row['image'],
 			'model_3d'         => $row['model_3d'],
