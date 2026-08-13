@@ -73,6 +73,33 @@
 	var youSaveEl = document.getElementById('dc-you-save');
 	var youSaveAmountEl = document.getElementById('dc-you-save-amount');
 	var saleTimerEl = document.querySelector('.dc-sale-timer');
+	var baseSaleTimerEnd = saleTimerEl ? parseInt(saleTimerEl.getAttribute('data-countdown-until') || '0', 10) : 0;
+
+	function updateSaleTimer(variant, hasSpecial) {
+		if (!saleTimerEl) return;
+
+		// End date of the active special: the variant's own (from the matrix)
+		// when it carries one, otherwise the server-rendered product/default
+		// variant special deadline. 0 = no timer.
+		var end = hasSpecial
+			? (variant && variant.special_date_end ? parseInt(variant.special_date_end, 10) : baseSaleTimerEnd)
+			: 0;
+
+		if (end > 0) {
+			saleTimerEl.setAttribute('data-countdown-until', String(end));
+			saleTimerEl.classList.remove('hidden');
+			// Restart the countdown with the new deadline (re-init even if the
+			// element was previously started or stopped).
+			if (typeof window.dcResetSaleTimer === 'function') {
+				window.dcResetSaleTimer(saleTimerEl);
+			} else if (typeof window.dcInitSaleTimers === 'function') {
+				window.dcInitSaleTimers(saleTimerEl);
+			}
+		} else {
+			saleTimerEl.setAttribute('data-countdown-until', '0');
+			saleTimerEl.classList.add('hidden');
+		}
+	}
 
 	function getOvIdForPov(axis, povId) {
 		if (!axis.pov_map) return null;
@@ -241,7 +268,6 @@
 			if (hasSpecial) {
 				priceRegularContainer.classList.add('hidden');
 				priceSpecialContainer.classList.remove('hidden');
-				if (saleTimerEl) saleTimerEl.classList.remove('hidden');
 
 				var specialPrice = parseFloat(variant.special);
 				var regularPrice = parseFloat(variant.special_from);
@@ -258,7 +284,6 @@
 			} else {
 				priceSpecialContainer.classList.add('hidden');
 				priceRegularContainer.classList.remove('hidden');
-				if (saleTimerEl) saleTimerEl.classList.add('hidden');
 
 				var price = (variant && variant.price !== null && variant.price !== undefined && parseFloat(variant.price) > 0) ? parseFloat(variant.price) : originalBasePrice;
 				if (isNaN(price)) price = originalBasePrice;
@@ -271,6 +296,11 @@
 
 			updateYouSave(variant, hasSpecial);
 		}
+
+		// Sale timer follows the current variant's special (also on init, where
+		// preservePrice keeps the server-rendered price but the timer state must
+		// match the variant loaded from the URL).
+		updateSaleTimer(variant, hasSpecial);
 
 		if (skuEl) {
 			skuEl.textContent = (variant && (variant.model || variant.sku)) ? (variant.model || variant.sku) : originalSku;

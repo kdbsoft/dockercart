@@ -259,7 +259,9 @@
                 {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
             </div>
-            {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default(''), timer_label_days: text_timer_days|default(''), timer_label_hours: text_timer_hours|default(''), timer_label_minutes: text_timer_minutes|default(''), timer_label_seconds: text_timer_seconds|default('') } %}
+          {% endif %}
+          {% if not show_call_for_price %}
+          {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default(''), timer_label_days: text_timer_days|default(''), timer_label_hours: text_timer_hours|default(''), timer_label_minutes: text_timer_minutes|default(''), timer_label_seconds: text_timer_seconds|default('') } %}
           {% endif %}
         {% if not show_call_for_price and (you_save_amount or is_configurable) %}
         <div class="mt-1.5{% if not you_save_amount %} hidden{% endif %}" id="dc-you-save">

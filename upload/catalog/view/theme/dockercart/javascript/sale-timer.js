@@ -104,6 +104,28 @@
     el._timerId = setInterval(tick, 1000, el);
   }
 
+  /**
+   * (Re)start the countdown for an element with a possibly new deadline.
+   * The variant-switching code updates data-countdown-until and calls this so
+   * the timer picks up the current variant's special end date immediately —
+   * the element may have been hidden/stopped before.
+   */
+  function resetTimer(el) {
+    if (!el) {
+      return;
+    }
+
+    if (el._timerId) {
+      clearInterval(el._timerId);
+      el._timerId = null;
+    }
+
+    el._dcTimerStarted = false;
+    el.style.display = '';
+
+    initTimer(el);
+  }
+
   function initTimers(root) {
     var scope = root || document;
 
@@ -115,6 +137,7 @@
   }
 
   window.dcInitSaleTimers = initTimers;
+  window.dcResetSaleTimer = resetTimer;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {

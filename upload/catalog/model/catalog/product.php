@@ -73,8 +73,13 @@ class ModelCatalogProduct extends Model {
 			$pricing = $calculator->calculate((int)$row['product_id'], 0, 1);
 		}
 
-		$price = (float)$pricing['price'];
 		$special = $pricing['special'];
+
+		if ($special !== null) {
+			$price = (float)$pricing['base_price'];
+		} else {
+			$price = (float)$pricing['price'];
+		}
 
 		// Sale timer: unix timestamp of the active special's end date (0 = no end date)
 		$special_date_end = 0;
@@ -184,8 +189,13 @@ class ModelCatalogProduct extends Model {
 				$calculator = new ProductPricingCalculator($this->registry);
 				$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
 
-				$product_data['price'] = (float)$default_pricing['price'];
-				$product_data['special'] = $default_pricing['special'];
+				if ($default_pricing['special'] !== null) {
+					$product_data['price'] = (float)$default_pricing['base_price'];
+					$product_data['special'] = $default_pricing['special'];
+				} else {
+					$product_data['price'] = (float)$default_pricing['price'];
+					$product_data['special'] = null;
+				}
 
 				if (!empty($default_pricing['special_date_end'])) {
 					$product_data['special_date_end'] = (int)$default_pricing['special_date_end'];
@@ -226,11 +236,16 @@ class ModelCatalogProduct extends Model {
 			$calculator = new ProductPricingCalculator($this->registry);
 			$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
 
-			if (!empty($default_pricing['price'])) {
-				$product_data['price'] = (float)$default_pricing['price'];
-			}
+			if ($default_pricing['special'] !== null) {
+				$product_data['price'] = (float)$default_pricing['base_price'];
+				$product_data['special'] = $default_pricing['special'];
+			} else {
+				if (!empty($default_pricing['price'])) {
+					$product_data['price'] = (float)$default_pricing['price'];
+				}
 
-			$product_data['special'] = $default_pricing['special'];
+				$product_data['special'] = null;
+			}
 
 			if (!empty($default_pricing['special_date_end'])) {
 				$product_data['special_date_end'] = (int)$default_pricing['special_date_end'];
@@ -294,10 +309,15 @@ class ModelCatalogProduct extends Model {
 					$calculator = new ProductPricingCalculator($this->registry);
 					$matched_pricing = $calculator->calculate((int)$product_id, (int)$matched_variant['variant_id'], 1);
 
-					if (!empty($matched_pricing['price'])) {
-						$product_data['price'] = (float)$matched_pricing['price'];
+					if ($matched_pricing['special'] !== null) {
+						$product_data['price'] = (float)$matched_pricing['base_price'];
+						$product_data['special'] = $matched_pricing['special'];
+					} else {
+						if (!empty($matched_pricing['price'])) {
+							$product_data['price'] = (float)$matched_pricing['price'];
+						}
+						$product_data['special'] = null;
 					}
-					$product_data['special'] = $matched_pricing['special'];
 				}
 			}
 		}
@@ -492,8 +512,13 @@ class ModelCatalogProduct extends Model {
 						$calculator = new ProductPricingCalculator($this->registry);
 						$default_pricing = $calculator->calculate((int)$pid, (int)$default_variant['variant_id'], 1);
 
-						$data['price'] = (float)$default_pricing['price'];
-						$data['special'] = $default_pricing['special'];
+						if ($default_pricing['special'] !== null) {
+							$data['price'] = (float)$default_pricing['base_price'];
+							$data['special'] = $default_pricing['special'];
+						} else {
+							$data['price'] = (float)$default_pricing['price'];
+							$data['special'] = null;
+						}
 
 						if (!empty($default_pricing['special_date_end'])) {
 							$data['special_date_end'] = (int)$default_pricing['special_date_end'];
@@ -618,10 +643,15 @@ class ModelCatalogProduct extends Model {
 							$calculator = new ProductPricingCalculator($this->registry);
 							$matched_pricing = $calculator->calculate((int)$pid, (int)$matched_variant['variant_id'], 1);
 
-							if (!empty($matched_pricing['price'])) {
-								$data['price'] = (float)$matched_pricing['price'];
+							if ($matched_pricing['special'] !== null) {
+								$data['price'] = (float)$matched_pricing['base_price'];
+								$data['special'] = $matched_pricing['special'];
+							} else {
+								if (!empty($matched_pricing['price'])) {
+									$data['price'] = (float)$matched_pricing['price'];
+								}
+								$data['special'] = null;
 							}
-							$data['special'] = $matched_pricing['special'];
 						}
 					}
 				}
