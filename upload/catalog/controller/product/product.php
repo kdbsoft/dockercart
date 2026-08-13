@@ -1182,15 +1182,22 @@ class ControllerProductProduct extends Controller {
 							$sv_base_price = (float)$selected_variant['special'];
 						}
 
+						// The variant price is already the price the customer pays
+						// (it includes the variant's own special). The full price
+						// shown as the strikethrough base lives in special_from.
+						$sv_full_price = isset($selected_variant['special_from']) && (float)$selected_variant['special_from'] > $sv_base_price
+							? (float)$selected_variant['special_from']
+							: $sv_price;
+
 						$data['dc_base_price_value'] = $sv_base_price;
-						$data['dc_full_price_value'] = $sv_price;
-						$data['price'] = $this->currency->format($sv_price, $this->session->data['currency']);
+						$data['dc_full_price_value'] = $sv_full_price;
+						$data['price'] = $this->currency->format($sv_full_price, $this->session->data['currency']);
 
 						if (isset($selected_variant['special'])) {
 							$sv_special = (float)$selected_variant['special'];
 							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency']);
 							$data['you_save_amount'] = $this->currency->format(
-								$sv_price - $sv_special,
+								$sv_full_price - $sv_special,
 								$this->session->data['currency']
 							);
 						} else {
