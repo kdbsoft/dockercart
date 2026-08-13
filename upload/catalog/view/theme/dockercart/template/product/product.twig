@@ -6,6 +6,7 @@
 <style>
   .dc-thumb.active { border-color: #2563eb !important; box-shadow: 0 0 0 2px #dbeafe inset; }
   .option-btn { transition: border-color .15s, background .15s, color .15s; }
+  .option-btn:hover { border-color: #93c5fd; background: #f0f7ff; color: #1e3a8a; }
   .option-btn.active { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
   .zoom-hint { opacity: 0; transform: translateY(6px); transition: all .25s ease; }
   .zoom-target:hover .zoom-hint { opacity: 1; transform: translateY(0); }
@@ -25,8 +26,11 @@
   .dc-color-swatch--hit { border-color: #f9a825; box-shadow: 0 0 0 2px rgba(249,168,37,0.3); }
   .dc-color-hit { position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; background: #f9a825; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1; }
   .dc-color-option { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 12px; min-height: 88px; border-radius: 12px; border: 1px solid #e5e7eb; cursor: pointer; transition: border-color .15s, background .15s; }
+  .dc-color-option:hover { border-color: #93c5fd; background: #f0f7ff; }
   .dc-color-option.active { border-color: #2563eb; background: #eff6ff; }
   .dc-color-option.oos { cursor: not-allowed; border-color: #f3f4f6; opacity: 0.5; }
+  label.oos .option-btn:hover,
+  label.oos .dc-color-option:hover { border-color: #e5e7eb; background: transparent; }
   /* Out-of-stock option values: struck through with a cross over the whole
      label, not clickable */
   label.oos {
@@ -347,8 +351,9 @@
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               {% set is_hidden = is_configurable and option.is_configurable_axis and dc_axis_hidden_pov_ids is defined and option_value.product_option_value_id in dc_axis_hidden_pov_ids %}
-              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden %} disabled{% endif %} />
+              {% set is_oos = is_configurable and option.is_configurable_axis and dc_axis_oos_pov_ids is defined and option_value.product_option_value_id in dc_axis_oos_pov_ids %}
+              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}{% if is_oos %} oos{% endif %}">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden or is_oos %} disabled{% endif %} />
                 <span class="dc-color-option{{ is_selected ? ' active' : '' }}">
                   <span class="dc-color-swatch{% if option_value.is_hit %} dc-color-swatch--hit{% endif %}" style="background-color: {{ option_value.color_code }}">
                     {% if option_value.is_hit %}<span class="dc-color-hit" title="Hit">&#9733;</span>{% endif %}
@@ -365,8 +370,9 @@
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
               {% set is_hidden = is_configurable and option.is_configurable_axis and dc_axis_hidden_pov_ids is defined and option_value.product_option_value_id in dc_axis_hidden_pov_ids %}
-              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}">
-                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden %} disabled{% endif %} />
+              {% set is_oos = is_configurable and option.is_configurable_axis and dc_axis_oos_pov_ids is defined and option_value.product_option_value_id in dc_axis_oos_pov_ids %}
+              <label class="cursor-pointer{% if is_hidden %} hidden{% endif %}{% if is_oos %} oos{% endif %}">
+                <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}" class="sr-only dc-option-radio"{{ is_selected ? ' checked' : '' }}{% if is_hidden or is_oos %} disabled{% endif %} />
                 <span class="option-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-semibold select-none border-gray-200{{ is_selected ? ' active' : '' }}">
                   {{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}
                 </span>
@@ -379,7 +385,9 @@
               <option value="">{{ text_select }}</option>
               {% for option_value in option.product_option_value %}
               {% set is_selected = is_configurable and variant_selected is defined and option_value.product_option_value_id in variant_selected %}
-              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}"{{ is_selected ? ' selected' : '' }}>{{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
+              {% set is_hidden = is_configurable and option.is_configurable_axis and dc_axis_hidden_pov_ids is defined and option_value.product_option_value_id in dc_axis_hidden_pov_ids %}
+              {% set is_oos = is_configurable and option.is_configurable_axis and dc_axis_oos_pov_ids is defined and option_value.product_option_value_id in dc_axis_oos_pov_ids %}
+              <option value="{{ option_value.product_option_value_id }}" data-option-price="{{ option.is_configurable_axis ? 0 : option_value.price_value|default(0) }}" data-option-prefix="{{ option_value.price_prefix|default('+') }}"{{ is_selected ? ' selected' : '' }}{% if is_hidden or is_oos %} disabled{% endif %}>{{ option_value.name }}{% if not option.is_configurable_axis and option.show_option_price and option_value.price and option_value.price_value != 0 %} ({{ option_value.price_prefix }}{{ option_value.price }}){% endif %}</option>
               {% endfor %}
             </select>
 
