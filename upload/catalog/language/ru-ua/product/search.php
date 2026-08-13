@@ -54,4 +54,5 @@ $_['text_search_results'] = 'Результаты поиска';
 $_['text_refine_categories'] = 'Категории';
 $_['text_all_categories'] = 'Все категории';
 $_['text_gift_badge'] = 'ПОДАРОК';
+$_['text_sale'] = 'РАСПРОДАЖА';
 $_['text_price_from'] = 'от';

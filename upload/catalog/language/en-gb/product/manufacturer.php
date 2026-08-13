@@ -36,6 +36,7 @@ $_['text_model_desc']   = 'Product Code (Z - A)';
 $_['text_limit']        = 'Show:';
 $_['text_load_more']    = 'Show More';
 $_['text_gift_badge']  = 'GIFT';
+$_['text_sale']        = 'SALE';
 $_['text_refine']      = 'Refine Search';
 $_['text_shop_by']     = 'Shop By';
 $_['text_refine_categories'] = 'Categories';

@@ -34,6 +34,7 @@ $_['text_sort'] = 'Сортировать по:';
 $_['text_tax']       = 'Без учета налога:';
 $_['text_load_more'] = 'Показать ещё';
 $_['text_gift_badge'] = 'ПОДАРОК';
+$_['text_sale'] = 'РАСПРОДАЖА';
 $_['text_refine'] = 'Уточнить поиск';
 $_['text_shop_by'] = 'Выбрать из';
 $_['text_refine_categories'] = 'Категории';
