@@ -135,7 +135,6 @@ $_['rule_field_quantity'] = 'Загальна кількість';
 $_['rule_field_shipping_method'] = 'Варіант доставки';
 $_['rule_field_shipping_cost'] = 'Вартість доставки';
 $_['rule_field_sku'] = 'SKU товару';
-$_['rule_field_stock_status'] = 'Статус наявності товару';
 $_['rule_field_store'] = 'Магазин';
 $_['rule_field_total'] = 'Загальна сума';
 $_['rule_field_upc'] = 'UPC товару';

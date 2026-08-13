@@ -66,7 +66,6 @@ $_['text_sale'] = 'Продажи';
 $_['text_seo_url'] = 'SEO URL';
 $_['text_setting'] = 'Настройки';
 $_['text_statistics'] = 'Статистика';
-$_['text_stock_status'] = 'Статус наличия';
 $_['text_system'] = 'Система';
 $_['text_tax'] = 'Налоги';
 $_['text_tax_class'] = 'Налоговые классы';

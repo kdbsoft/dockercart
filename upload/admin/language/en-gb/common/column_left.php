@@ -62,7 +62,6 @@ $_['text_sale']                 = 'Sales';
 $_['text_setting']              = 'Settings';
 $_['text_seo_url']              = 'SEO URL';
 $_['text_statistics']           = 'Statistics';
-$_['text_stock_status']         = 'Stock Statuses';
 $_['text_system']               = 'System';
 $_['text_tax']                  = 'Taxes';
 $_['text_tax_class']            = 'Tax Classes';
