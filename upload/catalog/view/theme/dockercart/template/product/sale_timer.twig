@@ -5,6 +5,11 @@
   (days, hours, minutes, seconds) in a single row. The days unit is hidden
   once it hits 0.
 
+  The element is always rendered when the timer feature is enabled (even with
+  special_date_end = 0) so the variant-switching JS can reveal it dynamically
+  for variants that carry their own special. When no sale is active it is
+  hidden via the `hidden` class and carries data-countdown-until="0".
+
   Required variables:
     special_date_end  — unix timestamp of the special's end date (0 = none)
 
@@ -20,8 +25,8 @@
   The countdown is driven by sale-timer.js via [data-countdown-until]. Each
   unit cell is addressed by [data-timer-cell] / [data-timer-unit].
 #}
-{% if (sale_timer_status is not defined or sale_timer_status == 1) and special_date_end is defined and special_date_end %}
-<div class="dc-sale-timer mt-3 self-start inline-flex flex-col items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 {{ timer_class|default('') }}" data-countdown-until="{{ special_date_end }}" role="timer">
+{% if sale_timer_status is not defined or sale_timer_status == 1 %}
+<div class="dc-sale-timer mt-3 self-start inline-flex flex-col items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 {{ timer_class|default('') }}{% if not (special_date_end is defined and special_date_end) %} hidden{% endif %}" data-countdown-until="{{ special_date_end|default(0) }}" role="timer">
   <span class="flex items-center gap-1.5 shrink-0">
     <i data-lucide="timer" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
     {% if timer_label is defined and timer_label %}<span class="text-[11px] font-bold text-red-500 uppercase tracking-wider whitespace-nowrap">{{ timer_label }}</span>{% endif %}

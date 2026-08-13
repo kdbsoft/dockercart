@@ -907,6 +907,9 @@ class ControllerProductProduct extends Controller {
 				if ($vp !== null) {
 					$variant['price'] = (float)$vp['price'];
 					$variant['special_from'] = (float)$vp['base_price'];
+					// End date of the active special for this variant (0 = none).
+					// Drives the per-variant sale timer on the storefront.
+					$variant['special_date_end'] = (int)($vp['special_date_end'] ?? 0);
 
 					if ($vp['special'] !== null) {
 						$variant['special'] = (float)$vp['special'];
@@ -1484,7 +1487,32 @@ class ControllerProductProduct extends Controller {
 			// Sale timers
 			$sale_timer_raw = $this->config->get('dockercart_theme_sale_timer_status');
 			$data['sale_timer_status'] = ($sale_timer_raw === null) ? 1 : (int)$sale_timer_raw;
-			$data['special_date_end'] = !empty($product_info['special_date_end']) ? (int)$product_info['special_date_end'] : 0;
+
+			// End date of the active special for the SERVER-SELECTED variant.
+			// The sale timer must only show for the price that is actually
+			// displayed: for configurable products the product-level special
+			// applies only to the default variant, so a non-default variant
+			// without its own special shows no timer from the first paint (the
+			// JS reveals it on switching). Plain products keep the product
+			// special's end date as before.
+			if (!empty($product_info['is_configurable'])) {
+				$data['special_date_end'] = 0;
+
+				if (!empty($product_info['special_date_end'])) {
+					$is_default_selected = !empty($selected_variant)
+						&& (int)$selected_variant['variant_id'] === (int)($configurable['default_variant_id'] ?? 0);
+
+					if ($is_default_selected) {
+						$data['special_date_end'] = (int)$product_info['special_date_end'];
+					}
+				}
+
+				if ($data['sale_timer_status'] && !empty($selected_variant) && !empty($selected_variant['special_date_end'])) {
+					$data['special_date_end'] = (int)$selected_variant['special_date_end'];
+				}
+			} else {
+				$data['special_date_end'] = !empty($product_info['special_date_end']) ? (int)$product_info['special_date_end'] : 0;
+			}
 			$data['text_sale_ends_in'] = $this->language->get('text_sale_ends_in');
 			$data['text_timer_days'] = $this->language->get('text_timer_days');
 			$data['text_timer_hours'] = $this->language->get('text_timer_hours');
