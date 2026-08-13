@@ -619,7 +619,17 @@ class ControllerProductProduct extends Controller {
 
 			$data['discounts'] = array();
 
+			// The customer pays the lower of the special price and the tiered
+			// quantity discount. A discount tier that is not cheaper than the
+			// price actually paid (the special beats it) is meaningless —
+			// don't show it on the product page.
+			$effective_unit_price = (float)$product_info['price'];
+
 			foreach ($discounts as $discount) {
+				if ((float)$discount['price'] >= $effective_unit_price) {
+					continue;
+				}
+
 				$data['discounts'][] = array(
 					'quantity' => $discount['quantity'],
 					'price'    => $this->currency->format($this->tax->calculate($discount['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
@@ -861,7 +871,16 @@ class ControllerProductProduct extends Controller {
 			$variant_discounts = $pc->getVariantsDiscounts($product_id);
 
 			foreach ($variants as &$variant) {
+				// Цена/спеццена варианта — из единого калькулятора (та же
+				// формула, что в корзине и админке заказов).
+				$vp = isset($variant_pricing[(int)$variant['variant_id']]) ? $variant_pricing[(int)$variant['variant_id']] : null;
+
 				$variant['discounts'] = array();
+
+				// The customer pays the lower of the special price and the
+				// tiered quantity discount. A tier that is not cheaper than
+				// the price actually paid is meaningless — don't show it.
+				$variant_unit_price = ($vp !== null && (float)$vp['price'] > 0) ? (float)$vp['price'] : null;
 
 				if (isset($variant_discounts[(int)$variant['variant_id']])) {
 					foreach ($variant_discounts[(int)$variant['variant_id']] as $vd) {
@@ -873,6 +892,10 @@ class ControllerProductProduct extends Controller {
 							continue;
 						}
 
+						if ($variant_unit_price !== null && (float)$vd['price'] * $cg_multiplier >= $variant_unit_price) {
+							continue;
+						}
+
 						$variant['discounts'][] = array(
 							'quantity'    => (int)$vd['quantity'],
 							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency']),
@@ -880,10 +903,6 @@ class ControllerProductProduct extends Controller {
 						);
 					}
 				}
-
-				// Цена/спеццена варианта — из единого калькулятора (та же
-				// формула, что в корзине и админке заказов).
-				$vp = isset($variant_pricing[(int)$variant['variant_id']]) ? $variant_pricing[(int)$variant['variant_id']] : null;
 
 				if ($vp !== null) {
 					$variant['price'] = (float)$vp['price'];
@@ -953,6 +972,17 @@ class ControllerProductProduct extends Controller {
 
 				$default_variant['discounts'] = array();
 
+				// A tier not cheaper than the price the customer actually
+				// pays for the default variant (special included) is
+				// meaningless — don't show it.
+				if ($dvp !== null && (float)$dvp['price'] > 0) {
+					$default_unit_price = (float)$dvp['price'];
+				} elseif (isset($default_variant['special']) && (float)$default_variant['special'] > 0) {
+					$default_unit_price = (float)$default_variant['special'];
+				} else {
+					$default_unit_price = null;
+				}
+
 				if (isset($variant_discounts[(int)$default_variant['variant_id']])) {
 					foreach ($variant_discounts[(int)$default_variant['variant_id']] as $vd) {
 						if ((int)$vd['customer_group_id'] !== $customer_group_id) {
@@ -960,6 +990,10 @@ class ControllerProductProduct extends Controller {
 						}
 
 						if (!(($vd['date_start'] === '0000-00-00' || $vd['date_start'] < date('Y-m-d H:i:s')) && ($vd['date_end'] === '0000-00-00' || $vd['date_end'] > date('Y-m-d H:i:s')))) {
+							continue;
+						}
+
+						if ($default_unit_price !== null && (float)$vd['price'] * $cg_multiplier >= $default_unit_price) {
 							continue;
 						}
 
