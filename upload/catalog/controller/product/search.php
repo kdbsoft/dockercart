@@ -926,6 +926,7 @@ class ControllerProductSearch extends Controller {
 		$data['page']            = $page;
 		$data['view_mode']       = $view_mode;
 		$data['text_gift_badge'] = $this->language->get('text_gift_badge');
+		$data['text_sale'] = $this->language->get('text_sale');
 		$data['text_call_for_price'] = $this->language->get('text_call_for_price');
 		$data['text_call_for_price_request'] = $this->language->get('text_call_for_price_request');
 		$data['text_model'] = $this->language->get('text_model');
@@ -1129,7 +1130,7 @@ class ControllerProductSearch extends Controller {
 				'view_mode'        => $view_mode,
 				'text_quick_view'  => $this->language->get('text_quick_view'),
 				'text_reviews'     => $this->language->get('text_reviews_word'),
-				'text_sale'        => '',
+				'text_sale'        => $this->language->get('text_sale'),
 				'text_gift_badge'  => $this->language->get('text_gift_badge'),
 				'text_call_for_price' => $this->language->get('text_call_for_price'),
 				'text_call_for_price_request' => $this->language->get('text_call_for_price_request'),
