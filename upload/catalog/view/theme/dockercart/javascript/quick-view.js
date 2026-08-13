@@ -364,7 +364,7 @@
       <!-- Price -->
       <div id="qv-price-wrap" class="flex items-baseline gap-2">
         <span id="qv-price" class="text-2xl font-extrabold text-gray-900"></span>
-        <span id="qv-old-price" class="text-base text-red-400 line-through" style="display:none;"></span>
+        <span id="qv-old-price" class="text-base text-gray-400 line-through" style="display:none;"></span>
         <span id="qv-badge" class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg" style="display:none;"></span>
       </div>
       <div id="qv-savings" class="text-sm font-semibold text-green-600 mt-1" style="display:none;"></div>
@@ -415,6 +415,15 @@
         el.setAttribute(attrName, content);
       } else {
         el.textContent = content;
+      }
+
+      // Sale price is red, regular price is dark — switch class when a
+      // discounted price (old price present) is shown in the price element.
+      if (elementId === 'qv-price') {
+        const oldPriceEl = document.getElementById('qv-old-price');
+        const onSale = oldPriceEl && oldPriceEl.style.display !== 'none' && oldPriceEl.textContent.trim() !== '';
+        el.classList.toggle('text-red-600', onSale);
+        el.classList.toggle('text-gray-900', !onSale);
       }
     },
 
