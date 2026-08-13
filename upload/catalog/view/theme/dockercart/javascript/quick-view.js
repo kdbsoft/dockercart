@@ -253,6 +253,9 @@
             callBtn.setAttribute('data-product-id', productId);
             var callIcon2 = callBtn.querySelector('i[data-lucide]');
             if (callIcon2) callIcon2.setAttribute('data-lucide', 'message-circle-question');
+            if (typeof window.dcUpdateCfpQtySource === 'function') {
+              window.dcUpdateCfpQtySource(callBtn, minimum);
+            }
           }
         }
       } else {

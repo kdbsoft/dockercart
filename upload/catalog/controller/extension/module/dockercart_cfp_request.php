@@ -35,7 +35,19 @@ class ControllerExtensionModuleDockercartCfpRequest extends Controller {
 		$telephone = trim((string)($this->request->post['telephone'] ?? ''));
 		$email = trim((string)($this->request->post['email'] ?? ''));
 		$comment = trim((string)($this->request->post['comment'] ?? ''));
-		$quantity = max(1, (int)($this->request->post['quantity'] ?? 1));
+		$quantity = max(1, (float)($this->request->post['quantity'] ?? 1));
+
+		// Clamp to the product's allowed step, mirroring the cart rules.
+		if (!isset($json['error'])) {
+			$step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1.0;
+			$step = $step > 0 ? $step : 1.0;
+			$step_units = (int)round($quantity / $step);
+			$quantity = round($step_units * $step, 2);
+
+			if ($quantity < 1) {
+				$quantity = 1;
+			}
+		}
 
 		if (!isset($json['error']) && mb_strlen($firstname) < 1) {
 			$json['error'] = $this->language->get('error_name');
@@ -47,6 +59,10 @@ class ControllerExtensionModuleDockercartCfpRequest extends Controller {
 
 		if (!isset($json['error']) && $email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
 			$json['error'] = $this->language->get('error_email');
+		}
+
+		if (!isset($json['error']) && !$this->validateQuantity($product_info, $quantity)) {
+			$json['error'] = $this->language->get('error_quantity');
 		}
 
 		if (!isset($json['error'])) {
@@ -87,6 +103,33 @@ class ControllerExtensionModuleDockercartCfpRequest extends Controller {
 		$digits = preg_replace('/\D/', '', $telephone);
 
 		return strlen($digits) >= 5;
+	}
+
+	/**
+	 * Validate the requested quantity against the product minimum and step
+	 * (same rules as the cart). Accepts fractional quantities.
+	 */
+	private function validateQuantity($product_info, float $quantity): bool {
+		$minimum = isset($product_info['minimum']) ? (float)$product_info['minimum'] : 1.0;
+
+		if ($minimum <= 0) {
+			$minimum = 1.0;
+		}
+
+		$step = isset($product_info['quantity_step']) ? (float)$product_info['quantity_step'] : 1.0;
+
+		if ($step <= 0) {
+			$step = 1.0;
+		}
+
+		if ($quantity < $minimum) {
+			return false;
+		}
+
+		$quantity_cents = (int)round($quantity * 100);
+		$step_cents = (int)round($step * 100);
+
+		return $step_cents > 0 && ($quantity_cents % $step_cents) === 0;
 	}
 
 	/**
