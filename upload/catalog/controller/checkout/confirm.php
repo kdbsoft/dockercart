@@ -210,11 +210,6 @@ class ControllerCheckoutConfirm extends Controller {
 
 			$cart_products = $this->cart->getProducts();
 
-			// BXGY per-item discounts (pre-tax, applied to product prices)
-			$this->load->library('bxgy');
-			$bxgy_lib = new Bxgy($this->registry);
-			$bxgy_discounts = $bxgy_lib->getPerProductDiscountsFor($cart_products);
-
 			foreach ($cart_products as $product) {
 				$option_data = array();
 
@@ -230,23 +225,11 @@ class ControllerCheckoutConfirm extends Controller {
 					);
 				}
 
+				// BXGY per-item discounts are already applied to cart line
+				// prices by Cart::getProducts(); tax is computed from the
+				// discounted price (same as the admin order pipeline).
 				$price = (float) $product['price'];
-				$tax = $this->tax->getTax($product['price'], $product['tax_class_id']);
-
-				$bxgy_key = (int) $product['product_id'] . ':' . (int) ($product['variant_id'] ?? 0);
-
-				if (isset($bxgy_discounts[$bxgy_key])) {
-					$per_unit_discount = $bxgy_discounts[$bxgy_key]['per_unit'];
-					$units = (int) $bxgy_discounts[$bxgy_key]['units'];
-					$line_discount = $per_unit_discount * min($units, (int) $product['quantity']);
-
-					if ($price > 0 && $line_discount > 0) {
-						$new_price_total = max(0, $price * (int) $product['quantity'] - $line_discount);
-						$new_price = (int) $product['quantity'] > 0 ? $new_price_total / (int) $product['quantity'] : 0;
-						$tax = $tax * ($new_price / $price);
-						$price = $new_price;
-					}
-				}
+				$tax = $this->tax->getTax($price, $product['tax_class_id']);
 
 				$order_data['products'][] = array(
 					'product_id' => $product['product_id'],
