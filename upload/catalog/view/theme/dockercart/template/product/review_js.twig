@@ -313,7 +313,7 @@
     document.addEventListener('click', function (e) {
       var link = e.target.closest('#review a');
       if (!link) return;
-      if (link.classList.contains('dc-review-empty-write')) {
+      if (link.classList.contains('dc-review-empty-write') || link.classList.contains('dc-review-login-link')) {
         return;
       }
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;

@@ -2262,7 +2262,7 @@ class ControllerProductProduct extends Controller {
 		$data['reply_min_length'] = $fragment['reply_min_length'];
 		$data['reply_max_length'] = $fragment['reply_max_length'];
 		$data['customer_logged'] = (bool)$this->customer->isLogged();
-		$data['login_url'] = $this->url->link('account/login');
+		$data['login_url'] = $this->url->link('account/login', '', true);
 
 		$this->response->setOutput($this->load->view('product/review', $data));
 	}
