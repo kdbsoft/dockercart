@@ -59,8 +59,8 @@
       </button>
       {% endif %}
     {% elseif product.special %}
-      <span class="text-sm font-extrabold text-gray-900">{{ product.special }}</span>
-      <span class="text-[11px] text-red-400 line-through">{{ product.price }}</span>
+      <span class="text-sm font-extrabold text-red-600">{{ product.special }}</span>
+      <span class="text-[11px] text-gray-400 line-through">{{ product.price }}</span>
     {% elseif product.price %}
       <span class="text-sm font-extrabold text-gray-900">{{ product.price }}</span>
     {% endif %}
@@ -249,8 +249,8 @@
             </button>
             {% endif %}
           {% elseif product.special %}
-            <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.special }}</span>
-            <span class="text-xs text-red-400 line-through">{{ product.price }}</span>
+            <span class="text-lg sm:text-xl font-extrabold text-red-600">{{ product.special }}</span>
+            <span class="text-xs text-gray-400 line-through">{{ product.price }}</span>
           {% elseif product.price %}
             <span class="text-lg sm:text-xl font-extrabold text-gray-900">{{ product.price }}</span>
           {% endif %}
@@ -378,8 +378,8 @@
           </button>
           {% endif %}
         {% elseif product.special %}
-          <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.special }}</span>
-          <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
+          <span class="text-base sm:text-lg font-extrabold text-red-600">{{ product.special }}</span>
+          <span class="text-xs text-gray-400 line-through ml-1">{{ product.price }}</span>
         {% elseif product.price %}
           <span class="text-base sm:text-lg font-extrabold text-gray-900">{{ product.price }}</span>
         {% endif %}

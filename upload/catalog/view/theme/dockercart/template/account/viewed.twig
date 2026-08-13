@@ -79,8 +79,8 @@
                   {% endif %}
                   {% elseif product.price %}
                   {% if product.special %}
-                  <span class="text-base font-extrabold text-gray-900">{{ product.special }}</span>
-                  <span class="text-xs text-red-400 line-through ml-1">{{ product.price }}</span>
+                  <span class="text-base font-extrabold text-red-600">{{ product.special }}</span>
+                  <span class="text-xs text-gray-400 line-through ml-1">{{ product.price }}</span>
                   {% else %}
                   <span class="text-base font-extrabold text-gray-900">{{ product.price }}</span>
                   {% endif %}
