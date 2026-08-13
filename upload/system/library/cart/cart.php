@@ -700,6 +700,42 @@ class Cart
                     $price = (float) $product_query["row"]["price"];
                 }
 
+                // DockerCart: BXGY per-item discount (pre-tax, в валюте товара).
+                // Скидка применяется к полной цене строки (базовая цена + опции) —
+                // единая формула с промо-слоем ProductPricingCalculator и
+                // админкой заказов (calculateProductPricing). Уменьшенная цена
+                // строки автоматически попадает в getSubTotal()/getTaxes() и в
+                // итоговые суммы корзины/чекаута.
+                $bxgy_applied = false;
+                $bxgy_per_unit = 0.0;
+                $bxgy_units = 0;
+                $bxgy_text = '';
+                $bxgy_original_price = '';
+
+                if (isset($pricing_result["promo"]["bxgy"][$price_key])) {
+                    $bxgy_discount = $pricing_result["promo"]["bxgy"][$price_key];
+                    $per_unit_discount = (float) ($bxgy_discount["per_unit"] ?? 0);
+                    $units = (int) ($bxgy_discount["units"] ?? 0);
+
+                    if ($per_unit_discount > 0 && $units > 0 && $cart["quantity"] > 0) {
+                        $line_discount = $per_unit_discount * min($units, (int) $cart["quantity"]);
+                        $line_total = ($price + $option_price) * $cart["quantity"];
+                        $discounted_total = max(0, $line_total - $line_discount);
+                        $discounted_unit = $discounted_total / $cart["quantity"];
+
+                        // Скидка распределяется на всю строку (как в админке), поэтому
+                        // базовая цена пересчитывается так, чтобы price + option_price
+                        // давали дисконтированную цену строки.
+                        $price = max(0, $discounted_unit - $option_price);
+
+                        $bxgy_applied = true;
+                        $bxgy_per_unit = $per_unit_discount;
+                        $bxgy_units = $units;
+                        $bxgy_text = isset($bxgy_discount["text"]) ? $bxgy_discount["text"] : '';
+                        $bxgy_original_price = isset($bxgy_discount["original_price_formatted"]) ? $bxgy_discount["original_price_formatted"] : '';
+                    }
+                }
+
                 // Reward Points
                 $reward = isset($reward_map[(int) $cart["product_id"]]) ? $reward_map[(int) $cart["product_id"]] : 0;
 
@@ -835,6 +871,11 @@ class Cart
                     "total" =>
                         ($multicurrency_price + $multicurrency_option_price) *
                         $cart["quantity"],
+                    "bxgy_applied" => $bxgy_applied,
+                    "bxgy_per_unit" => $bxgy_per_unit,
+                    "bxgy_units" => $bxgy_units,
+                    "bxgy_text" => $bxgy_text,
+                    "bxgy_original_price" => $bxgy_original_price,
                     "reward" => $reward * $cart["quantity"],
                     "points" => $product_query["row"]["points"]
                         ? ($product_query["row"]["points"] + $option_points) *
