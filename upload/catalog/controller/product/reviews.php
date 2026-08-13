@@ -108,7 +108,7 @@ class ControllerProductReviews extends Controller {
 			$data['text_reply_submit'] = $fragment['text_reply_submit'];
 			$data['text_reply_login_hint'] = $fragment['text_reply_login_hint'];
 			$data['customer_logged'] = $this->customer->isLogged();
-			$data['login_url'] = $this->url->link('account/login');
+			$data['login_url'] = $this->url->link('account/login', '', true);
 
 			// Write form data
 			$data['review_status'] = $this->config->get('config_review_status');

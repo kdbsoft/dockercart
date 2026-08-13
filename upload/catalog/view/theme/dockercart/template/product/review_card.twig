@@ -122,8 +122,8 @@
       </div>
     </form>
     {% elseif not customer_logged|default(false) %}
-    <p class="text-xs text-gray-400 mt-3">
-      <a href="{{ login_url|default('index.php?route=account/login') }}" class="text-blue-600 hover:text-blue-700 font-semibold">{{ text_reply_login_hint|default('Log in or register to reply to reviews') }}</a>
+    <p class="text-xs text-gray-400">
+      <a href="{{ login_url|default('index.php?route=account/login') }}" class="dc-review-login-link inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold"><i data-lucide="log-in" width="12" height="12"></i>{{ text_reply_login_hint|default('Log in or register to reply to reviews') }}</a>
     </p>
     {% endif %}
   </div>
