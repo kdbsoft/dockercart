@@ -61,8 +61,8 @@
                 {% if product.price %}
                 <div class="space-y-1">
                   {% if product.special %}
-                  <span class="text-lg font-bold text-gray-900">{{ product.special }}</span>
-                  <span class="text-sm text-red-500 line-through">{{ product.price }}</span>
+                  <span class="text-lg font-bold text-red-600">{{ product.special }}</span>
+                  <span class="text-sm text-gray-400 line-through">{{ product.price }}</span>
                   {% else %}
                   <span class="text-lg font-bold text-gray-900">{{ product.price }}</span>
                   {% endif %}

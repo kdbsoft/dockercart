@@ -682,7 +682,7 @@ select[disabled] {
                 <div class="text-right">
                   {% if product.bxgy_original_price %}
                   <div>
-                    <span class="text-xs text-red-400 line-through">{{ product.bxgy_original_price }}</span><br/>
+                    <span class="text-xs text-gray-400 line-through">{{ product.bxgy_original_price }}</span><br/>
                     <span class="font-semibold text-emerald-600">{{ product.total }}</span>
                     <span class="text-[10px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
                   </div>
@@ -701,7 +701,7 @@ select[disabled] {
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-text-primary text-xs">{{ gift.name }}</p>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                      <span class="text-[10px] text-red-400 line-through">{{ gift.price }}</span>
+                      <span class="text-[10px] text-gray-400 line-through">{{ gift.price }}</span>
                       <span class="text-[10px] text-emerald-600 font-bold">{{ text_free }}</span>
                     </div>
                   </div>

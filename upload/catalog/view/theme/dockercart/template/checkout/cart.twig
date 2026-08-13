@@ -100,7 +100,7 @@
                   {# Unit price – mobile #}
                   {% if product.bxgy_original_price %}
                   <div class="sm:hidden mt-1">
-                    <span class="text-xs text-red-400 line-through">{{ product.bxgy_original_price }}</span>
+                    <span class="text-xs text-gray-400 line-through">{{ product.bxgy_original_price }}</span>
                     <span class="text-sm font-semibold text-emerald-600">{{ product.price }}</span>
                     <span class="text-[10px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
                   </div>
@@ -113,7 +113,7 @@
                 <div class="hidden sm:block w-24 text-right">
                   {% if product.bxgy_original_price %}
                   <div>
-                    <span class="text-xs text-red-400 line-through">{{ product.bxgy_original_price }}</span><br/>
+                    <span class="text-xs text-gray-400 line-through">{{ product.bxgy_original_price }}</span><br/>
                     <span class="text-sm font-semibold text-emerald-600">{{ product.price }}</span>
                     <span class="text-[10px] text-emerald-500 font-bold">{{ product.bxgy_discount_text }}</span>
                   </div>
@@ -175,7 +175,7 @@
                 <div class="flex-1 min-w-0">
                   <a href="{{ gift.href }}" class="font-semibold text-gray-900 text-sm hover:text-amber-600 transition">{{ gift.name }}</a>
                   <div class="flex items-center gap-1.5 mt-0.5">
-                    <span class="text-xs text-red-400 line-through">{{ gift.price }}</span>
+                    <span class="text-xs text-gray-400 line-through">{{ gift.price }}</span>
                     <span class="text-xs text-emerald-600 font-bold">{{ text_free }}</span>
                   </div>
                 </div>

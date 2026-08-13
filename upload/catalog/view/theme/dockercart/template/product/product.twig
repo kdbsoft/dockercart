@@ -241,8 +241,8 @@
             <div class="flex flex-col gap-1 hidden" id="dc-price-special">
               <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
               <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-gray-900"></span>
-                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-red-400 line-through"></span>
+                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-red-600"></span>
+                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-gray-400 line-through"></span>
                 {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
             </div>
@@ -254,8 +254,8 @@
             <div class="flex flex-col gap-1" id="dc-price-special">
               <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
               <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ special }}</span>
-                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-red-400 line-through">{{ price }}</span>
+                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-red-600">{{ special }}</span>
+                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-gray-400 line-through">{{ price }}</span>
                 {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
               </div>
             </div>
@@ -298,7 +298,7 @@
             <div class="flex-1 min-w-0">
               <a href="{{ gift.href }}" class="text-sm font-medium text-gray-800 hover:text-amber-600 transition line-clamp-2">{{ gift.name }}</a>
               <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-xs text-red-400 line-through">{{ gift.price }}</span>
+                <span class="text-xs text-gray-400 line-through">{{ gift.price }}</span>
                 <span class="text-xs text-emerald-600 font-bold">{{ text_free }}</span>
               </div>
               {% if gift.minimum_quantity > 1 %}
@@ -324,7 +324,7 @@
             <div class="flex-1 min-w-0">
               <a href="{{ rule.href }}" class="text-sm font-medium text-gray-800 hover:text-violet-600 transition line-clamp-2">{{ rule.name }}</a>
               <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-xs text-red-400 line-through">{{ rule.original_price }}</span>
+                <span class="text-xs text-gray-400 line-through">{{ rule.original_price }}</span>
                 <span class="text-xs text-emerald-600 font-bold">{{ rule.discounted_price }}</span>
                 <span class="text-[10px] text-violet-500 font-semibold bg-violet-100 px-1.5 py-0.5 rounded">{{ rule.discount_text }}</span>
               </div>
