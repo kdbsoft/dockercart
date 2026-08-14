@@ -278,23 +278,53 @@ function dcShowToast(message) {
 
 /* ── Wishlist API ───────────────────────────────────────── */
 window.wishlist = window.wishlist || {
-  add: function(productId) {
+  add: function(productId, variantId) {
+    var body = 'product_id=' + encodeURIComponent(productId);
+
+    if (variantId && parseInt(variantId, 10) > 0) {
+      body += '&variant_id=' + encodeURIComponent(variantId);
+    }
+
     fetch('index.php?route=account/wishlist/add', {
       credentials: 'same-origin', method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-      body: 'product_id=' + encodeURIComponent(productId)
+      body: body
     }).then(function(r) { return r.json(); })
       .then(function(json) {
         if (json.success) { dcShowToast(json.success); }
+
+        if (json.total !== undefined) {
+          var badge = document.querySelector('#wishlist-total span');
+          if (badge) { badge.textContent = String(json.total); }
+        }
+
+        // Keep the in-memory key list in sync so variant-state buttons
+        // (dcRefreshWishlistState) reflect the change immediately.
+        if (window.dcWishlistKeys) {
+          var key = variantId && parseInt(variantId, 10) > 0 ? productId + ':' + variantId : String(productId);
+          if (window.dcWishlistKeys.indexOf(key) === -1) {
+            window.dcWishlistKeys.push(key);
+          }
+        }
+
+        if (typeof window.dcRefreshWishlistState === 'function') {
+          window.dcRefreshWishlistState();
+        }
       });
   }
 };
 
 /* Expose OpenCart-compatible cart API (keeps existing integration) */
 window.cart = window.cart || {
-  add: function (productId, quantity) {
+  add: function (productId, quantity, variantId) {
     var qty = quantity || 1;
-    fetch('index.php?route=checkout/cart/add', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'product_id=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty) })
+    var body = 'product_id=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty);
+
+    if (variantId && parseInt(variantId, 10) > 0) {
+      body += '&option[variant_id]=' + encodeURIComponent(variantId);
+    }
+
+    fetch('index.php?route=checkout/cart/add', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body })
       .then(function (response) { return response.json(); })
       .then(function (json) {
         if (json && json.redirect) {

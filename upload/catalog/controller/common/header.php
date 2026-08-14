@@ -222,12 +222,25 @@ class ControllerCommonHeader extends Controller {
 		}
 
 		// Wishlist
+		$data['wishlist_keys'] = array();
+		$data['wishlist_total'] = 0;
+
 		if ($this->customer->isLogged()) {
 			$this->load->model('account/wishlist');
 
-			$data['text_wishlist'] = sprintf($this->language->get('text_wishlist'), $this->model_account_wishlist->getTotalWishlist());
+			$data['wishlist_total'] = (int)$this->model_account_wishlist->getTotalWishlist();
+			$data['text_wishlist'] = sprintf($this->language->get('text_wishlist'), $data['wishlist_total']);
+
+			foreach ($this->model_account_wishlist->getWishlist() as $w) {
+				$data['wishlist_keys'][] = (int)$w['variant_id'] > 0 ? (int)$w['product_id'] . ':' . (int)$w['variant_id'] : (string)(int)$w['product_id'];
+			}
 		} else {
-			$data['text_wishlist'] = sprintf($this->language->get('text_wishlist'), (isset($this->session->data['wishlist']) ? count($this->session->data['wishlist']) : 0));
+			$data['wishlist_total'] = isset($this->session->data['wishlist']) && is_array($this->session->data['wishlist']) ? count($this->session->data['wishlist']) : 0;
+			$data['text_wishlist'] = sprintf($this->language->get('text_wishlist'), $data['wishlist_total']);
+
+			if (isset($this->session->data['wishlist']) && is_array($this->session->data['wishlist'])) {
+				$data['wishlist_keys'] = array_values(array_unique(array_map('strval', $this->session->data['wishlist'])));
+			}
 		}
 
 		// Compare
@@ -236,7 +249,7 @@ class ControllerCommonHeader extends Controller {
 		$data['compare_product_ids'] = array();
 
 		if (isset($this->session->data['compare']) && is_array($this->session->data['compare'])) {
-			$data['compare_product_ids'] = array_values(array_unique(array_map('intval', $this->session->data['compare'])));
+			$data['compare_product_ids'] = array_values(array_unique(array_map('strval', $this->session->data['compare'])));
 		}
 
 		$data['text_logged'] = sprintf($this->language->get('text_logged'), $this->url->link('account/account', '', true), $this->customer->getFirstName(), $this->url->link('account/logout', '', true));

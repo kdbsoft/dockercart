@@ -447,6 +447,15 @@ class ControllerCheckoutCart extends Controller {
 			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
 
 			foreach ($product_options as $product_option) {
+				// Configurable-product axes are required only until a valid
+				// variant_id is supplied — a variant already pins the exact
+				// option combination, so the axis values are implied.
+				$is_axis = !empty($product_option['is_configurable_axis']);
+
+				if ($is_axis && !empty($option['variant_id'])) {
+					continue;
+				}
+
 				if ($product_option['required'] && empty($option[$product_option['product_option_id']])) {
 					$json['error']['option'][$product_option['product_option_id']] = sprintf($this->language->get('error_required'), $product_option['name']);
 				}

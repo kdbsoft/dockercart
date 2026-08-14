@@ -11,11 +11,17 @@ $_['text_wishlist'] = 'Wish List (%s)';
 $_['text_login']    = 'You must <a href="%s">login</a> or <a href="%s">create an account</a> to save <a href="%s">%s</a> to your <a href="%s">wish list</a>!';
 $_['text_success']  = 'Success: You have added <a href="%s">%s</a> to your <a href="%s">wish list</a>!';
 $_['text_remove']   = 'Success: You have modified your wish list!';
+$_['text_remove_wishlist'] = 'Remove from wishlist';
 $_['text_empty']    = 'Your wish list is empty.';
+$_['text_reviews_word'] = 'reviews';
+
+// Button
+$_['button_continue'] = 'Continue';
 
 // Column
 $_['column_image']  = 'Image';
 $_['column_name']   = 'Product Name';
+$_['column_variant'] = 'Variant';
 $_['column_model']  = 'Product Code';
 $_['column_stock']  = 'Stock';
 $_['column_price']  = 'Unit Price';
