@@ -40,8 +40,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 				'theme_dockercart_image_related_height'       => 80,
 				'theme_dockercart_image_compare_width'        => 90,
 				'theme_dockercart_image_compare_height'       => 90,
-				'theme_dockercart_image_wishlist_width'       => 47,
-				'theme_dockercart_image_wishlist_height'      => 47,
 				'theme_dockercart_image_cart_width'           => 47,
 				'theme_dockercart_image_cart_height'          => 47,
 				'theme_dockercart_image_location_width'       => 268,
@@ -116,12 +114,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['error_image_compare'] = $this->error['image_compare'];
 		} else {
 			$data['error_image_compare'] = '';
-		}
-
-		if (isset($this->error['image_wishlist'])) {
-			$data['error_image_wishlist'] = $this->error['image_wishlist'];
-		} else {
-			$data['error_image_wishlist'] = '';
 		}
 
 		if (isset($this->error['image_cart'])) {
@@ -288,22 +280,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['theme_dockercart_image_compare_height'] = 90;
 		}
 
-		if (isset($this->request->post['theme_dockercart_image_wishlist_width'])) {
-			$data['theme_dockercart_image_wishlist_width'] = $this->request->post['theme_dockercart_image_wishlist_width'];
-		} elseif (isset($setting_info['theme_dockercart_image_wishlist_width'])) {
-			$data['theme_dockercart_image_wishlist_width'] = $setting_info['theme_dockercart_image_wishlist_width'];
-		} else {
-			$data['theme_dockercart_image_wishlist_width'] = 47;
-		}
-
-		if (isset($this->request->post['theme_dockercart_image_wishlist_height'])) {
-			$data['theme_dockercart_image_wishlist_height'] = $this->request->post['theme_dockercart_image_wishlist_height'];
-		} elseif (isset($setting_info['theme_dockercart_image_wishlist_height'])) {
-			$data['theme_dockercart_image_wishlist_height'] = $setting_info['theme_dockercart_image_wishlist_height'];
-		} else {
-			$data['theme_dockercart_image_wishlist_height'] = 47;
-		}
-
 		if (isset($this->request->post['theme_dockercart_image_cart_width'])) {
 			$data['theme_dockercart_image_cart_width'] = $this->request->post['theme_dockercart_image_cart_width'];
 		} elseif (isset($setting_info['theme_dockercart_image_cart_width'])) {
@@ -375,10 +351,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 
 		if (!$this->request->post['theme_dockercart_image_compare_width'] || !$this->request->post['theme_dockercart_image_compare_height']) {
 			$this->error['image_compare'] = $this->language->get('error_image_compare');
-		}
-
-		if (!$this->request->post['theme_dockercart_image_wishlist_width'] || !$this->request->post['theme_dockercart_image_wishlist_height']) {
-			$this->error['image_wishlist'] = $this->language->get('error_image_wishlist');
 		}
 
 		if (!$this->request->post['theme_dockercart_image_cart_width'] || !$this->request->post['theme_dockercart_image_cart_height']) {
