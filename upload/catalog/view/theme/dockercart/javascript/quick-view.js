@@ -557,6 +557,83 @@
     }
   }
 
+  function updateWishlistCountInDom(total) {
+    const badge = document.querySelector('#wishlist-total span');
+    if (badge) {
+      badge.textContent = String(total);
+    }
+  }
+
+  // Keep the in-memory wishlist key list in sync with add/remove actions so
+  // dcRefreshWishlistState() reflects the latest state.
+  function syncWishlistKeys(add, key) {
+    const keys = Array.isArray(window.dcWishlistKeys) ? window.dcWishlistKeys.map(String) : [];
+    const idx = keys.indexOf(String(key));
+
+    if (add && idx === -1) {
+      keys.push(String(key));
+    } else if (!add && idx !== -1) {
+      keys.splice(idx, 1);
+    }
+
+    window.dcWishlistKeys = keys;
+  }
+
+  // Line key used by wishlist/compare state: "productId" for the base product,
+  // "productId:variantId" for a specific variant.
+  function lineKey(productId, variantId) {
+    const vid = parseInt(variantId, 10);
+    return vid > 0 ? String(productId) + ':' + vid : String(productId);
+  }
+
+  // Re-render the wishlist button state for the currently open variant.
+  // Reads the full key list from window.dcWishlistKeys (server-provided).
+  window.dcRefreshWishlistState = function() {
+    const btn = document.getElementById('dc-wishlist-btn');
+    if (!btn) {
+      return;
+    }
+
+    const productId = btn.getAttribute('data-product-id');
+    if (!productId) {
+      return;
+    }
+
+    const variantId = (window.dcCurrentVariant && window.dcCurrentVariant.variant_id) ? window.dcCurrentVariant.variant_id : 0;
+    const key = lineKey(productId, variantId);
+    const keys = Array.isArray(window.dcWishlistKeys) ? window.dcWishlistKeys.map(String) : [];
+    const active = keys.indexOf(key) !== -1;
+
+    btn.dataset.inWishlist = active ? '1' : '0';
+    btn.setAttribute('data-variant-id', String(variantId));
+    QuickView._applyWishlistState(btn, active);
+  };
+
+  // Re-render the compare button state for the currently open variant.
+  window.dcRefreshCompareState = function() {
+    const btn = document.getElementById('dc-compare-btn');
+    if (!btn) {
+      return;
+    }
+
+    const productId = btn.getAttribute('data-product-id');
+    if (!productId) {
+      return;
+    }
+
+    const variantId = (window.dcCurrentVariant && window.dcCurrentVariant.variant_id) ? window.dcCurrentVariant.variant_id : 0;
+    const key = lineKey(productId, variantId);
+    const active = compareState.ids.has(String(key));
+
+    btn.dataset.inCompare = active ? '1' : '0';
+    btn.setAttribute('data-variant-id', String(variantId));
+    QuickView._applyCompareState(btn, active);
+
+    if (window.compare && typeof window.compare._setActive === 'function') {
+      window.compare._setActive(productId, active);
+    }
+  };
+
   function showNotice(message) {
     if (!message) {
       return;
@@ -571,22 +648,31 @@
     ids: new Set(Array.isArray(window.dcCompareIds) ? window.dcCompareIds.map(function(id) { return String(id); }) : [])
   };
 
-  function isProductInCompare(productId, card) {
+  function isProductInCompare(key, card) {
     if (card && card.dataset && card.dataset.inCompare === '1') {
       return true;
     }
 
-    return compareState.ids.has(String(productId));
+    return compareState.ids.has(String(key));
   }
 
-  function requestCompare(action, productId) {
+  function requestCompare(action, key) {
+    const pid = String(key).split(':')[0];
+    const vid = String(key).indexOf(':') > -1 ? String(key).split(':')[1] : '';
+
+    let body = 'product_id=' + encodeURIComponent(pid);
+
+    if (vid) {
+      body += '&variant_id=' + encodeURIComponent(vid);
+    }
+
     return fetch('index.php?route=product/compare/' + action, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-Requested-With': 'XMLHttpRequest'
       },
-      body: 'product_id=' + encodeURIComponent(productId)
+      body: body
     }).then(function(response) {
       return response.json();
     }).then(function(json) {
@@ -610,55 +696,17 @@
     }
 
     window.compare = {
-      add: function(productId) {
-        return fetch('index.php?route=product/compare/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: 'product_id=' + encodeURIComponent(productId)
-        }).then(function(response) {
-          return response.json();
-        }).then(function(json) {
-          if (json && typeof json.total !== 'undefined') {
-            updateCompareCountInDom(json.total);
-          }
-          if (json && json.success) {
-            showNotice(json.success);
-          }
-          return json;
-        }).catch(function() {
-          return null;
-        });
+      add: function(key) {
+        return requestCompare('add', key);
       },
-      remove: function(productId) {
-        return fetch('index.php?route=product/compare/remove', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: 'product_id=' + encodeURIComponent(productId)
-        }).then(function(response) {
-          return response.json();
-        }).then(function(json) {
-          if (json && typeof json.total !== 'undefined') {
-            updateCompareCountInDom(json.total);
-          }
-          if (json && json.success) {
-            showNotice(json.success);
-          }
-          return json;
-        }).catch(function() {
-          return null;
-        });
+      remove: function(key) {
+        return requestCompare('remove', key);
       }
     };
   }
 
-  function applyCompareStateForProduct(productId, active) {
-    document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(function(card) {
+  function applyCompareStateForProduct(key, active) {
+    document.querySelectorAll(`.product-card[data-id="${key}"]`).forEach(function(card) {
       card.dataset.inCompare = active ? '1' : '0';
       const compareBtn = card.querySelector('.compare-btn');
       if (compareBtn) {
@@ -668,23 +716,26 @@
     });
   }
 
-  window.dcToggleCompare = function(productId, clickedBtn) {
+  window.dcToggleCompare = function(productId, clickedBtn, variantId) {
+    const key = lineKey(productId, variantId);
     const card = document.querySelector(`.product-card[data-id="${productId}"]`);
     const isInCompare = clickedBtn
       ? (clickedBtn.dataset.inCompare === '1' || clickedBtn.closest('.product-card') && clickedBtn.closest('.product-card').dataset.inCompare === '1')
-      : isProductInCompare(productId, card);
+      : isProductInCompare(key, card);
 
     const fallbackCount = getCompareCountFromDom();
 
     if (isInCompare) {
-      const request = requestCompare('remove', productId);
-      applyCompareStateForProduct(productId, false);
-      compareState.ids.delete(String(productId));
+      const request = requestCompare('remove', key);
+      applyCompareStateForProduct(key, false);
+      compareState.ids.delete(key);
 
       if (clickedBtn) {
         clickedBtn.dataset.inCompare = '0';
         QuickView._applyCompareState(clickedBtn, false);
       }
+
+      if (typeof window.dcRefreshCompareState === 'function') { window.dcRefreshCompareState(); }
 
       if (request && typeof request.then === 'function') {
         request.then(function(json) {
@@ -694,14 +745,16 @@
         });
       }
     } else {
-      const request = requestCompare('add', productId);
-      applyCompareStateForProduct(productId, true);
-      compareState.ids.add(String(productId));
+      const request = requestCompare('add', key);
+      applyCompareStateForProduct(key, true);
+      compareState.ids.add(key);
 
       if (clickedBtn) {
         clickedBtn.dataset.inCompare = '1';
         QuickView._applyCompareState(clickedBtn, true);
       }
+
+      if (typeof window.dcRefreshCompareState === 'function') { window.dcRefreshCompareState(); }
 
       if (request && typeof request.then === 'function') {
         request.then(function(json) {
@@ -713,16 +766,17 @@
     }
   };
 
-  function createCompareButton(productId, isActive) {
+  function createCompareButton(key, isActive) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'compare-btn wishlist-btn block mt-2 w-8 h-8 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center hover:bg-blue-50 transition';
     button.setAttribute('aria-label', 'Add to compare');
     button.dataset.inCompare = isActive ? '1' : '0';
+    button.dataset.key = String(key);
     button.innerHTML = '<i data-lucide="chart-no-axes-column" class="w-3.5 h-3.5 text-gray-400"></i>';
     button.addEventListener('click', function(event) {
       event.stopPropagation();
-      window.dcToggleCompare(productId, button);
+      window.dcToggleCompare(String(key).split(':')[0], button, String(key).split(':')[1] || 0);
     });
 
     QuickView._applyCompareState(button, isActive);
@@ -750,9 +804,10 @@
         return;
       }
 
-      const isActive = isProductInCompare(productId, card);
+      const key = lineKey(productId, 0);
+      const isActive = isProductInCompare(key, card);
       card.dataset.inCompare = isActive ? '1' : '0';
-      actionWrap.appendChild(createCompareButton(productId, isActive));
+      actionWrap.appendChild(createCompareButton(key, isActive));
     });
 
     if (window.lucide) {
@@ -802,21 +857,37 @@
     QuickView.close();
   };
 
-  // Global helper: toggle wishlist state for a product
-  window.dcAddToWishlist = function(productId, clickedBtn) {
+  // Global helper: toggle wishlist state for a product (or a product variant)
+  window.dcAddToWishlist = function(productId, clickedBtn, variantId) {
+    const key = lineKey(productId, variantId);
+
     // Determine current state from the clicked button or any matching card
     const card = document.querySelector(`.product-card[data-id="${productId}"]`);
     const isInWishlist = clickedBtn
       ? (clickedBtn.dataset.inWishlist === '1' || clickedBtn.closest('.product-card') && clickedBtn.closest('.product-card').dataset.inWishlist === '1')
       : (card && card.dataset.inWishlist === '1');
 
+    let body = 'product_id=' + encodeURIComponent(productId);
+
+    if (key.indexOf(':') > -1) {
+      body += '&variant_id=' + encodeURIComponent(key.split(':')[1]);
+    }
+
     if (isInWishlist) {
       // Remove from wishlist
       fetch('index.php?route=account/wishlist/remove', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'product_id=' + encodeURIComponent(productId)
-      }).then(function() {
+        body: body
+      }).then(function(response) {
+        return response.json();
+      }).then(function(json) {
+        syncWishlistKeys(false, key);
+
+        if (json && json.total !== undefined) {
+          updateWishlistCountInDom(json.total);
+        }
+
         // Update all matching card buttons
         document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(function(c) {
           c.dataset.inWishlist = '0';
@@ -826,13 +897,21 @@
         if (clickedBtn) { clickedBtn.dataset.inWishlist = '0'; QuickView._applyWishlistState(clickedBtn, false); }
         const qvBtn = document.getElementById('qv-wishlist-btn');
         if (qvBtn) { qvBtn.dataset.inWishlist = '0'; QuickView._applyWishlistState(qvBtn, false); }
+        if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
+      }).catch(function() {
+        // Keep the UI consistent even if the remove request failed to parse
+        syncWishlistKeys(false, key);
+
+        if (clickedBtn) { clickedBtn.dataset.inWishlist = '0'; QuickView._applyWishlistState(clickedBtn, false); }
+        if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
       });
     } else {
-      // Add to wishlist
+      // Add to wishlist — window.wishlist.add (common/cart) performs the
+      // request and syncs dcWishlistKeys + badge from the server response.
       if (typeof wishlist !== 'undefined' && wishlist.add) {
-        wishlist.add(productId);
+        wishlist.add(productId, key.indexOf(':') > -1 ? key.split(':')[1] : 0);
       } else if (window.wishlist && window.wishlist.add) {
-        window.wishlist.add(productId);
+        window.wishlist.add(productId, key.indexOf(':') > -1 ? key.split(':')[1] : 0);
       }
       // Update all matching card buttons
       document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(function(c) {
@@ -843,6 +922,7 @@
       if (clickedBtn) { clickedBtn.dataset.inWishlist = '1'; QuickView._applyWishlistState(clickedBtn, true); }
       const qvBtn = document.getElementById('qv-wishlist-btn');
       if (qvBtn) { qvBtn.dataset.inWishlist = '1'; QuickView._applyWishlistState(qvBtn, true); }
+      if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
     }
   };
 

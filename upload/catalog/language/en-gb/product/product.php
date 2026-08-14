@@ -33,6 +33,7 @@ $_['text_gift_badge']          = 'GIFT';
 $_['text_bxgy'] = 'Buy X Get Y';
 $_['text_bxgy_discount'] = 'with BXGY discount';
 $_['text_bxgy_trigger'] = 'Discount when buying %s pcs';
+$_['text_bxgy_trigger_pcs'] = 'pcs';
 $_['text_bxgy_free_badge'] = 'BXGY: Free';
 $_['text_bxgy_percent_badge'] = 'BXGY: -%s%%';
 $_['text_free']                = 'FREE';

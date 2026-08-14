@@ -74,6 +74,10 @@
 	var youSaveAmountEl = document.getElementById('dc-you-save-amount');
 	var saleTimerEl = document.querySelector('.dc-sale-timer');
 	var baseSaleTimerEnd = saleTimerEl ? parseInt(saleTimerEl.getAttribute('data-countdown-until') || '0', 10) : 0;
+	var saleBadgeEl = document.getElementById('dc-sale-badge');
+	// Localised "SALE" fallback (the server may render "-N%" on load, so the
+	// fallback cannot be captured from the badge's current text).
+	var saleBadgeFallback = '{{ text_sale|default('')|e('js') }}';
 
 	function updateSaleTimer(variant, hasSpecial) {
 		if (!saleTimerEl) return;
@@ -254,6 +258,27 @@
 		}
 	}
 
+	function updateSaleBadge(variant, hasSpecial) {
+		if (!saleBadgeEl) return;
+
+		// Badge text: "-N%" when the variant is actually on sale, otherwise the
+		// localised "SALE" fallback (same rule as the server-rendered badge).
+		if (hasSpecial && variant) {
+			var full = parseFloat(variant.special_from);
+			var actual = parseFloat(variant.special);
+
+			if (!isNaN(full) && !isNaN(actual) && full > 0) {
+				var pct = Math.round((1 - (actual / full)) * 100);
+				if (pct > 0) {
+					saleBadgeEl.textContent = '-' + pct + '%';
+					return;
+				}
+			}
+		}
+
+		saleBadgeEl.textContent = saleBadgeFallback;
+	}
+
 	function updateVariantUI(variant, preservePrice) {
 		// Expose the current variant so dcUpdateSubtotal can apply tiered
 		// quantity discounts to the subtotal (mirrors the cart).
@@ -301,6 +326,9 @@
 		// preservePrice keeps the server-rendered price but the timer state must
 		// match the variant loaded from the URL).
 		updateSaleTimer(variant, hasSpecial);
+
+		// Sale badge "-N%" / "SALE" follows the current variant's special.
+		updateSaleBadge(variant, hasSpecial);
 
 		if (skuEl) {
 			skuEl.textContent = (variant && (variant.model || variant.sku)) ? (variant.model || variant.sku) : originalSku;
@@ -627,6 +655,8 @@
 
 		updateVariantUI(variant);
 		syncAxisActiveClasses();
+		if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
+		if (typeof window.dcRefreshCompareState === 'function') { window.dcRefreshCompareState(); }
 		if (!isInitPhase) {
 			updateVariantUrl(variant ? variant.variant_id : null);
 		}

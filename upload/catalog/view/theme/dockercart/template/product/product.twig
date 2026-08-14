@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="catalog/view/javascript/glightbox/glightbox.min.css" />
 
 <style>
+  /* Offset anchor targets below the fixed header + sticky tabs */
+  #product-description, #product-attributes, #product-reviews {
+    scroll-margin-top: 140px;
+  }
   .dc-thumb.active { border-color: #2563eb !important; box-shadow: 0 0 0 2px #dbeafe inset; }
   .option-btn { transition: border-color .15s, background .15s, color .15s; }
   .option-btn:hover { border-color: #93c5fd; background: #f0f7ff; color: #1e3a8a; }
@@ -231,37 +235,23 @@
         {% set show_call_for_price = (call_for_price is defined and call_for_price) or ((call_for_price_status is defined and call_for_price_status) and call_for_price_phone is defined and call_for_price_phone and dc_base_price_value is defined and dc_base_price_value <= 0) %}
 
         {% if price %}
-        <div class="mt-5">
+        <div class="dc-price-block mt-5">
           {% if show_call_for_price %}
-          {% elseif not special %}
-            <div class="flex items-baseline gap-3 flex-wrap" id="dc-price-regular">
-              <span id="dc-unit-price" data-base-price="{{ dc_full_price_value|default(dc_base_price_value|default(0)) }}" data-sale-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
-              {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
-            </div>
-            <div class="flex flex-col gap-1 hidden" id="dc-price-special">
-              <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
-              <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-red-600"></span>
-                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-gray-400 line-through"></span>
-                {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
-              </div>
-            </div>
           {% else %}
-            <div class="flex items-baseline gap-3 flex-wrap hidden" id="dc-price-regular">
+          <div class="dc-price-main flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap{% if special %} hidden{% endif %}" id="dc-price-regular">
               <span id="dc-unit-price" data-base-price="{{ dc_full_price_value|default(dc_base_price_value|default(0)) }}" data-sale-price="{{ dc_base_price_value|default(0) }}" data-current-price="{{ dc_base_price_value|default(0) }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ price }}</span>
               {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
             </div>
-            <div class="flex flex-col gap-1" id="dc-price-special">
-              <span class="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg self-start" id="dc-sale-badge">{{ text_sale }}</span>
-              <div class="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-red-600">{{ special }}</span>
-                <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-gray-400 line-through">{{ price }}</span>
-                {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
-              </div>
+            <div class="dc-price-special flex flex-wrap items-center gap-2 sm:gap-3{% if not special %} hidden{% endif %}" id="dc-price-special">
+              <span class="dc-sale-badge text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-lg" id="dc-sale-badge">{% if discount_percent is defined and discount_percent > 0 %}-{{ discount_percent }}%{% else %}{{ text_sale }}{% endif %}</span>
+              <span id="dc-unit-price-special" class="text-2xl sm:text-3xl font-extrabold text-red-600">{{ special }}</span>
+              <span id="dc-unit-price-strikethrough" class="text-sm sm:text-lg text-gray-400 line-through">{{ price }}</span>
+              {% if tax %}<span class="text-xs text-gray-400" id="dc-unit-tax">{{ text_tax }} {{ tax }}</span>{% endif %}
             </div>
-          {% endif %}
+          </div>
           {% if not show_call_for_price %}
-          {% include 'dockercart/template/product/sale_timer.twig' with { special_date_end: special_date_end|default(0), sale_timer_status: sale_timer_status|default(1), timer_label: text_sale_ends_in|default(''), timer_label_days: text_timer_days|default(''), timer_label_hours: text_timer_hours|default(''), timer_label_minutes: text_timer_minutes|default(''), timer_label_seconds: text_timer_seconds|default('') } %}
+          {% endif %}
           {% endif %}
         {% if not show_call_for_price and (you_save_amount or is_configurable) %}
         <div class="mt-1.5{% if not you_save_amount %} hidden{% endif %}" id="dc-you-save">
@@ -287,19 +277,25 @@
         <div id="dc-variant-discounts" class="mt-2 hidden grid grid-cols-[auto_auto_1fr] gap-x-2 gap-y-1.5 text-sm items-baseline"></div>
         {% endif %}
         {% if gifts %}
-        <div class="mt-4 p-4 bg-amber-50 rounded-2xl border border-amber-200">
-          <h3 class="text-sm font-bold text-amber-800 flex items-center gap-1.5 mb-3">
-            <i data-lucide="gift" class="w-4 h-4"></i> {{ text_gift }}
-          </h3>
+        <div class="mt-4 p-4 rounded-2xl bg-gradient-to-b from-amber-50 via-white to-orange-50 border border-amber-200 shadow-sm shadow-amber-100">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h3 class="text-sm font-bold text-amber-900 flex items-center gap-1.5 min-w-0">
+              <span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+              </span>
+              <span class="truncate">{{ text_gift }}</span>
+            </h3>
+            <span class="flex-shrink-0 text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">{{ text_free }}</span>
+          </div>
           <div class="space-y-3">
           {% for gift in gifts %}
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-amber-50/70 transition">
             <img src="{{ gift.image }}" alt="{{ gift.name }}" class="w-16 h-16 rounded-lg object-cover border border-amber-100"/>
             <div class="flex-1 min-w-0">
               <a href="{{ gift.href }}" class="text-sm font-medium text-gray-800 hover:text-amber-600 transition line-clamp-2">{{ gift.name }}</a>
-              <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span class="text-xs text-gray-400 line-through">{{ gift.price }}</span>
-                <span class="text-xs text-emerald-600 font-bold">{{ text_free }}</span>
+                <span class="text-sm font-extrabold text-amber-700">{{ text_free }}</span>
               </div>
               {% if gift.minimum_quantity > 1 %}
               <p class="text-xs text-gray-500 mt-0.5">{{ text_gift_minimum }}: {{ gift.minimum_quantity }}</p>
@@ -311,34 +307,43 @@
         </div>
         {% endif %}
         {% if bxgy_rules %}
-        <div class="mt-4 p-4 bg-violet-50 rounded-2xl border border-violet-200">
-          <h3 class="text-sm font-bold text-violet-800 flex items-center gap-1.5 mb-3">
-            <i data-lucide="zap" class="w-4 h-4"></i> {{ text_bxgy }}
-          </h3>
+        <div class="mt-4 p-4 rounded-2xl bg-gradient-to-b from-violet-50 via-white to-fuchsia-50 border border-violet-200 shadow-sm shadow-violet-100">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h3 class="text-sm font-bold text-violet-900 flex items-center gap-1.5 min-w-0">
+              <span class="w-7 h-7 rounded-lg bg-violet-600 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+              </span>
+              <span class="truncate">{{ text_bxgy }}</span>
+            </h3>
+            <span class="flex-shrink-0 text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">{{ text_bxgy_discount }}</span>
+          </div>
           <div class="space-y-3">
           {% for rule in bxgy_rules %}
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-violet-50/70 transition">
             <a href="{{ rule.href }}" class="flex-shrink-0">
               <img src="{{ rule.image }}" alt="{{ rule.name }}" class="w-16 h-16 rounded-lg object-cover border border-violet-100"/>
             </a>
             <div class="flex-1 min-w-0">
               <a href="{{ rule.href }}" class="text-sm font-medium text-gray-800 hover:text-violet-600 transition line-clamp-2">{{ rule.name }}</a>
-              <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span class="text-xs text-gray-400 line-through">{{ rule.original_price }}</span>
-                <span class="text-xs text-emerald-600 font-bold">{{ rule.discounted_price }}</span>
-                <span class="text-[10px] text-violet-500 font-semibold bg-violet-100 px-1.5 py-0.5 rounded">{{ rule.discount_text }}</span>
+                <span class="text-sm font-extrabold text-violet-700">{{ rule.discounted_price }}</span>
+                <span class="text-[10px] text-white font-bold bg-violet-600 px-1.5 py-0.5 rounded">{{ rule.discount_text }}</span>
               </div>
-              <p class="text-xs text-gray-500 mt-0.5">{{ text_bxgy_trigger|format(rule.trigger_quantity) }}</p>
+              <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-1.5 py-0.5 rounded-full">
+                <i data-lucide="percent" class="w-3 h-3"></i>
+                <span class="text-violet-900 text-sm font-extrabold leading-none">{{ rule.trigger_quantity }}</span>
+                <span class="font-semibold">{{ text_bxgy_trigger_pcs|default('шт.') }}</span>
+              </span>
             </div>
-            <button type="button" onclick="cart.add('{{ rule.reward_product_id }}', 1);" class="flex-shrink-0 p-2 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 hover:text-violet-800 transition" title="{{ button_cart }}">
-              <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            <button type="button" onclick="cart.add('{{ rule.reward_product_id }}', 1);" class="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition bg-transparent hover:bg-violet-600 active:bg-violet-700 text-violet-600 hover:text-white" title="{{ button_cart }}">
+              <i data-lucide="shopping-cart" class="w-4 h-4 pointer-events-none"></i>
             </button>
           </div>
           {% endfor %}
           </div>
         </div>
         {% endif %}
-        <p id="dc-subtotal" class="{% if minimum is defined and minimum > 1 %}text-lg text-blue-700 font-bold mt-2{% else %}hidden text-lg text-blue-700 font-bold mt-2{% endif %}"></p>
         {% endif %}
 
         <!-- Options + Cart form -->
@@ -446,56 +451,12 @@
           <input type="hidden" name="product_id" value="{{ product_id }}" />
           <input type="hidden" name="option[variant_id]" value="{{ is_configurable and variant_id is defined ? variant_id : '' }}" id="dc-variant-id" />
 
-          {% if fbt_products %}
-          <div class="dc-carousel dc-carousel--fbt mt-6 rounded-2xl bg-blue-50/60 p-4 border border-blue-100">
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <div class="flex items-center gap-2 min-w-0">
-                <i data-lucide="sparkles" class="w-4 h-4 text-blue-600 flex-shrink-0"></i>
-                <p class="text-sm font-bold text-blue-600 truncate">{{ text_fbt }}</p>
-              </div>
-              <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="dc-carousel-page text-[10px] font-bold text-blue-700 bg-blue-100 rounded-full px-2 py-0.5">1 / 1</span>
-                <button type="button" class="dc-carousel-prev w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 flex items-center justify-center transition shadow-sm" aria-label="{{ text_fbt_prev|default('Previous') }}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                </button>
-                <button type="button" class="dc-carousel-next w-7 h-7 rounded-full bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 flex items-center justify-center transition shadow-sm" aria-label="{{ text_fbt_next|default('Next') }}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                </button>
-              </div>
-            </div>
-            <div id="dc-fbt-track" class="dc-carousel-track dc-carousel-track--fbt">
-              {% for product in fbt_products %}
-              {% set fbt_can_add = product.is_in_stock and not product.call_for_price %}
-              <div class="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-blue-100 overflow-hidden" data-id="{{ product.product_id }}">
-                <a href="{{ product.href }}" class="flex-shrink-0">
-                  <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-16 h-16 rounded-lg object-cover" loading="lazy" />
-                </a>
-                <div class="flex-1 min-w-0 flex flex-col">
-                  <a href="{{ product.href }}" class="text-xs font-semibold text-gray-900 hover:text-blue-700 leading-snug line-clamp-2 transition" title="{{ product.name }}">{{ product.name }}</a>
-                  <div class="mt-1.5 flex items-center justify-between gap-1.5">
-                    <div class="flex flex-col min-w-0 leading-tight">
-                      {% if product.special %}
-                      <span class="text-sm font-extrabold text-rose-600 truncate">{{ product.special }}</span>
-                      <span class="text-[10px] text-gray-400 line-through truncate">{{ product.price }}</span>
-                      {% elseif product.price %}
-                      <span class="text-sm font-extrabold text-gray-900 truncate">{{ product.price }}</span>
-                      {% endif %}
-                    </div>
-                    <button type="button" {% if fbt_can_add %}onclick="cart.add('{{ product.product_id }}', {{ product.minimum }});"{% else %}disabled{% endif %}
-                      title="{% if product.is_in_stock %}{{ button_cart }}{% else %}{{ text_out_of_stock }}{% endif %}"
-                      class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition {% if fbt_can_add %}bg-transparent hover:bg-blue-50 active:bg-blue-100 text-blue-600{% else %}text-gray-300 cursor-not-allowed{% endif %}">
-                      <i data-lucide="shopping-cart" class="w-4 h-4 pointer-events-none"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
+          {% if not show_call_for_price %}
+          <p id="dc-subtotal" class="text-lg text-blue-700 font-bold mt-6"></p>
           {% endif %}
 
           <!-- Qty + Cart + Wishlist -->
-          <div class="mt-6 flex flex-wrap items-center gap-3">
+          <div class="mt-3 flex flex-wrap items-center gap-3">
             {% if show_call_for_price %}
             <div class="flex-1 min-w-0 flex flex-wrap items-center gap-3">
               {% if call_for_price_mode is defined and call_for_price_mode == 'call' %}
@@ -533,13 +494,13 @@
             {% endif %}
 
             <div class="flex items-center gap-3 w-full sm:w-auto sm:flex-shrink-0">
-              <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"
+              <button type="button" id="dc-wishlist-btn" data-product-id="{{ product_id }}" data-variant-id="0" data-in-wishlist="{{ in_wishlist|default(0) }}" title="{{ button_wishlist }}"
                 class="flex-1 sm:flex-none rounded-xl border {% if in_wishlist|default(0) %}border-rose-300 bg-rose-50{% else %}border-gray-200 hover:border-rose-300 hover:bg-rose-50{% endif %} flex items-center justify-center gap-2 transition flex-shrink-0 px-3 py-2.5">
                 <i data-lucide="heart" class="w-5 h-5 pointer-events-none {% if in_wishlist|default(0) %}text-rose-500 fill-rose-400{% else %}text-gray-500{% endif %}"></i>
                 <span class="inline sm:hidden text-sm font-semibold text-gray-600">{{ button_wishlist }}</span>
               </button>
 
-              <button type="button" onclick="{% if in_compare|default(0) %}compare.remove('{{ product_id }}'){% else %}compare.add('{{ product_id }}'){% endif %};" title="{{ button_compare }}"
+              <button type="button" id="dc-compare-btn" data-product-id="{{ product_id }}" data-variant-id="0" data-in-compare="{{ in_compare|default(0) }}" title="{{ button_compare }}"
                 class="flex-1 sm:flex-none rounded-xl border {% if in_compare|default(0) %}border-blue-300 bg-blue-50{% else %}border-gray-200 hover:border-blue-200 hover:bg-blue-50{% endif %} flex items-center justify-center gap-2 transition flex-shrink-0 px-3 py-2.5">
                 <i data-lucide="chart-no-axes-column" class="w-5 h-5 {% if in_compare|default(0) %}text-blue-500 fill-blue-400{% else %}text-gray-500{% endif %}"></i>
                 <span class="inline sm:hidden text-sm font-semibold text-gray-600">{{ button_compare }}</span>
@@ -592,6 +553,55 @@
     </section>
 
     {% set _desc_text = description|striptags|trim %}
+
+    {% set _tabs = [] %}
+    {% if _desc_text is not empty %}
+      {% set _tabs = _tabs|merge([{ key: 'description', label: tab_description, target: 'product-description' }]) %}
+    {% endif %}
+    {% if attribute_groups %}
+      {% set _tabs = _tabs|merge([{ key: 'attributes', label: tab_attribute, target: 'product-attributes' }]) %}
+    {% endif %}
+    {% if review_status %}
+      {% set _tabs = _tabs|merge([{ key: 'reviews', label: tab_review, target: 'product-reviews' }]) %}
+    {% endif %}
+
+    {% if _tabs|length > 1 %}
+    <!-- Sticky product section tabs (scrollspy) -->
+    <nav id="dc-product-tabs" class="sticky top-0 lg:top-[132px] z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mt-12 bg-white/95 backdrop-blur-md shadow-sm" aria-label="{{ heading_title }}">
+      <div class="dc-hnav-scroll max-w-7xl mx-auto flex overflow-x-auto gap-1">
+        {% for tab in _tabs %}
+        <button type="button" class="dc-product-tab shrink-0 relative px-4 py-3 text-sm font-semibold whitespace-nowrap transition-colors {% if loop.first %}text-blue-600{% else %}text-gray-500 hover:text-gray-800{% endif %}" data-target="#{{ tab.target }}" role="tab" aria-selected="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="{{ tab.target }}" id="dc-tab-{{ tab.key }}">
+          {{ tab.label }}
+          <span class="dc-product-tab-indicator absolute inset-x-4 -bottom-px h-0.5 rounded-full bg-blue-600 transition-opacity duration-200{% if not loop.first %} invisible opacity-0{% endif %}"></span>
+        </button>
+        {% endfor %}
+      </div>
+    </nav>
+    <script>
+    // Set the active tab immediately from the URL hash, before first paint,
+    // so the highlighted tab matches the section the page opens on.
+    (function() {
+      var hash = window.location.hash;
+      if (!hash) return;
+      var nav = document.getElementById('dc-product-tabs');
+      if (!nav) return;
+      var tab = nav.querySelector('.dc-product-tab[data-target="' + hash + '"]');
+      if (!tab) return;
+      nav.querySelectorAll('.dc-product-tab').forEach(function(t) {
+        var on = t === tab;
+        t.classList.toggle('text-blue-600', on);
+        t.classList.toggle('text-gray-500', !on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        var indicator = t.querySelector('.dc-product-tab-indicator');
+        if (indicator) {
+          indicator.classList.toggle('invisible', !on);
+          indicator.classList.toggle('opacity-0', !on);
+        }
+      });
+    })();
+    </script>
+    {% endif %}
+
     <section id="product-description" class="mt-8" aria-labelledby="product-description-heading">
       <div class="mb-3">
         <h2 id="product-description-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ tab_description }}</h2>
@@ -605,25 +615,54 @@
       </div>
     </section>
 
+    {% if fbt_products %}
+    <section class="mt-12" aria-labelledby="fbt-heading">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <h2 id="fbt-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ text_fbt }}</h2>
+        </div>
+      </div>
+      <div class="dc-carousel">
+        <button type="button" class="dc-carousel-btn dc-carousel-prev" aria-label="Previous">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div id="dc-fbt-grid" class="dc-carousel-track">
+          {% for product in fbt_products %}
+          {% include 'dockercart/template/product/product_card_widget.twig' with {
+            product: product,
+            accent_color: 'blue-600',
+            btn_cart_classes: 'bg-blue-600 text-white hover:bg-blue-700',
+            btn_quick_hover: 'hover:bg-blue-600'
+          } %}
+          {% endfor %}
+        </div>
+        <button type="button" class="dc-carousel-btn dc-carousel-next" aria-label="Next">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </section>
+    {% endif %}
+
     {% if attribute_groups %}
     {% set _attribute_items = attribute_groups|reduce((carry, group) => carry + group.attribute|length, 0) %}
-    <section id="product-attributes" class="mt-8 border-t border-gray-100 pt-6" aria-labelledby="product-attributes-heading">
+    <section id="product-attributes" class="mt-8 border-t border-gray-200 pt-6" aria-labelledby="product-attributes-heading">
       <div class="mb-4">
         <h2 id="product-attributes-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ tab_attribute }}</h2>
       </div>
-      <div id="product-attributes-list">
+      <div id="product-attributes-list" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
         {% set _attribute_index = 0 %}
         {% for attribute_group in attribute_groups %}
         {% set _group_start = _attribute_index %}
         {% set _attribute_index = _attribute_index + attribute_group.attribute|length %}
         {% set _group_visible_count = (6 - _group_start) > 0 ? min(attribute_group.attribute|length, 6 - _group_start) : 0 %}
-        <div class="product-attribute-group mb-4 last:mb-0{% if _group_visible_count == 0 %} hidden{% endif %}">
-          <p class="text-xs font-bold tracking-wider text-gray-500 mb-2">{{ attribute_group.name }}</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1.5">
+        <div class="product-attribute-group{% if _group_visible_count == 0 %} hidden{% endif %}">
+          <h3 class="text-sm font-bold text-gray-900 mb-3">{{ attribute_group.name }}</h3>
+          <div class="space-y-2.5">
             {% for attribute in attribute_group.attribute %}
             {% set _position = _group_start + loop.index0 + 1 %}
-            <div class="product-attribute-item rounded-lg border border-gray-100 px-3 py-2.5 text-sm leading-6{% if _position > 6 %} hidden{% endif %}">
-              <span class="text-gray-400">{{ attribute.name }}:</span> <span class="font-semibold text-gray-800">{{ attribute.text }}</span>
+            <div class="product-attribute-item grid grid-cols-[minmax(0,140px)_minmax(0,1fr)] gap-x-4 text-sm leading-6{% if _position > 6 %} hidden{% endif %}">
+              <span class="text-gray-500">{{ attribute.name }}</span>
+              <span class="text-gray-900">{{ attribute.text }}</span>
             </div>
             {% endfor %}
           </div>
@@ -631,7 +670,7 @@
         {% endfor %}
       </div>
       {% if _attribute_items > 6 %}
-      <button id="product-attributes-toggle" type="button" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700" aria-expanded="false" aria-controls="product-attributes-list">
+      <button id="product-attributes-toggle" type="button" class="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700" aria-expanded="false" aria-controls="product-attributes-list">
         <span data-show-more-label>{{ text_attributes_show_more }}</span>
         <i data-lucide="chevron-down" class="w-4 h-4" aria-hidden="true"></i>
       </button>
@@ -648,7 +687,7 @@
     {% endif %}
 
     {% if review_status %}
-    <section id="product-reviews" class="mt-8 border-t border-gray-100 pt-6" aria-labelledby="product-reviews-heading">
+    <section id="product-reviews" class="mt-8 border-t border-gray-200 pt-6" aria-labelledby="product-reviews-heading">
       <div class="mb-4">
         <h2 id="product-reviews-heading" class="text-xl sm:text-2xl font-bold text-gray-900 inline-flex items-center gap-2">
           {{ tab_review }}
@@ -922,14 +961,16 @@ function dcFormatMoney(value) {
   // Server-provided symbols (may be empty strings)
   var left = {{ currency_symbol_left ? '"' ~ currency_symbol_left|e('js') ~ '"' : '""' }};
   var right = {{ currency_symbol_right ? '"' ~ currency_symbol_right|e('js') ~ '"' : '""' }};
+  // config_symbol_right_space is stored inverted in the DB: 0 = space, 1 = no space
   var leftSpace = {{ config_symbol_left_space ? 'true' : 'false' }};
+  var rightSpace = {{ config_symbol_right_space ? 'false' : 'true' }};
 
   if (left) {
     return left + (leftSpace ? ' ' : '') + formatted;
   }
 
   if (right) {
-    return formatted + ' ' + right;
+    return formatted + (rightSpace ? ' ' : '') + right;
   }
 
   return formatted;
@@ -1030,9 +1071,6 @@ function dcUpdateSubtotal() {
   if (!priceEl || !subEl || !qtyEl) return;
   var qty = dcNormalizeQty(qtyEl.value, dcMinQty);
   qtyEl.value = dcFormatQty(qty);
-  // If the product minimum is 1, hide subtotal when quantity is at minimum.
-  // If minimum > 1 we want to always show the subtotal (even at the minimum quantity).
-  if (qty <= dcMinQty && dcMinQty == 1) { subEl.classList.add('hidden'); return; }
   var unit = parseFloat(priceEl.dataset.currentPrice || priceEl.dataset.basePrice || '0');
   if (isNaN(unit)) { subEl.classList.add('hidden'); return; }
 
@@ -1230,6 +1268,126 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (typeof lucide !== 'undefined') lucide.createIcons();
 });
+
+/* ── Sticky section tabs (scrollspy) ───────────────────── */
+(function() {
+  var tabsNav = document.getElementById('dc-product-tabs');
+  if (!tabsNav) return;
+
+  var tabs = Array.prototype.slice.call(tabsNav.querySelectorAll('.dc-product-tab'));
+  if (tabs.length < 2) return;
+
+  var sections = tabs.map(function(tab) {
+    return document.querySelector(tab.getAttribute('data-target'));
+  }).filter(Boolean);
+
+  if (!sections.length) return;
+
+  var header = document.getElementById('navbar');
+
+  // On mobile the fixed header collapses/expands, so measure its real height
+  // and pin the sticky bar right below it. On lg+ the CSS top-[132px] wins.
+  function headerHeight() {
+    if (!header) return 0;
+    var r = header.getBoundingClientRect();
+    return Math.max(0, Math.min(r.height, r.bottom));
+  }
+
+  function tabOffset() {
+    var h = tabsNav.offsetHeight || 0;
+    h += headerHeight();
+    return h + 8;
+  }
+
+  function applyStickyTop() {
+    if (window.matchMedia('(min-width: 1024px)').matches) return; // CSS handles it
+    tabsNav.style.top = headerHeight() + 'px';
+  }
+
+  applyStickyTop();
+  window.addEventListener('resize', applyStickyTop);
+  window.addEventListener('scroll', applyStickyTop, { passive: true });
+
+  // When the page is opened with a section hash (e.g. #product-attributes),
+  // scroll precisely so the section sits below header + sticky tabs.
+  var pinnedTab = null; // set while a programmatic scroll is in flight
+
+  function scrollToHashSection() {
+    var hash = window.location.hash;
+    if (!hash) return;
+    var section = document.querySelector(hash);
+    if (!section || sections.indexOf(section) === -1) return;
+    var idx = sections.indexOf(section);
+    pinnedTab = tabs[idx];
+    setActive(tabs[idx]);
+    var top = section.getBoundingClientRect().top + window.pageYOffset - tabOffset();
+    window.scrollTo(0, Math.max(0, top));
+    // Keep the tab pinned until the user scrolls on their own; the hash
+    // target can rest below the scrollspy offset (scroll-margin-top), which
+    // would otherwise flip the active tab back to the first one.
+    window.setTimeout(function() { pinnedTab = null; }, 600);
+  }
+
+  if (window.location.hash) {
+    window.setTimeout(scrollToHashSection, 0);
+    // Images shift layout after first paint, so re-sync once everything is loaded.
+    window.addEventListener('load', function() {
+      window.setTimeout(scrollToHashSection, 0);
+    });
+  }
+
+  function setActive(tab) {
+    tabs.forEach(function(t) {
+      var on = t === tab;
+      t.classList.toggle('text-blue-600', on);
+      t.classList.toggle('text-gray-500', !on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+
+      var indicator = t.querySelector('.dc-product-tab-indicator');
+      if (indicator) {
+        indicator.classList.toggle('invisible', !on);
+        indicator.classList.toggle('opacity-0', !on);
+      }
+    });
+  }
+
+  function onScroll() {
+    if (pinnedTab) return; // programmatic scroll in flight — keep hash/click choice
+    var offset = tabOffset();
+    var last = sections[sections.length - 1];
+    // Past the last section — no tab is active.
+    if (last && last.getBoundingClientRect().bottom < offset) {
+      setActive(null);
+      return;
+    }
+    var current = null;
+    sections.forEach(function(section, i) {
+      if (section.getBoundingClientRect().top <= offset) current = section;
+    });
+    var idx = current ? sections.indexOf(current) : -1;
+    setActive(idx >= 0 ? tabs[idx] : null);
+  }
+
+  tabs.forEach(function(tab, i) {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      var section = sections[i];
+      if (!section) return;
+      var top = section.getBoundingClientRect().top + window.pageYOffset - tabOffset();
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      // Keep the full path: with <base href> in OpenCart 3, a bare "#hash" URL
+      // would resolve against the store root and lose the product page path.
+      history.replaceState(null, '', window.location.pathname + window.location.search + '#' + section.id);
+      pinnedTab = tab;
+      setActive(tab);
+      window.setTimeout(function() { pinnedTab = null; }, 600);
+    });
+  });
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
 
 function toggleProductVideo() {
   var player = document.getElementById('dc-video-player');
@@ -1482,17 +1640,52 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   window.compare = {
-    add: function(product_id) {
-      fetch('index.php?route=product/compare/add', {
+    _request: function(action, product_id, variant_id) {
+      var body = 'product_id=' + encodeURIComponent(product_id);
+
+      if (variant_id && parseInt(variant_id, 10) > 0) {
+        body += '&variant_id=' + encodeURIComponent(variant_id);
+      }
+
+      return fetch('index.php?route=product/compare/' + action, {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
           'X-Requested-With': 'XMLHttpRequest'
         },
-        body: 'product_id=' + product_id
-      })
-      .then(function(response) { return response.json(); })
+        body: body
+      }).then(function(response) { return response.json(); });
+    },
+    _setActive: function(product_id, active) {
+      var compareBtn = document.getElementById('dc-compare-btn');
+      if (!compareBtn) {
+        return;
+      }
+
+      compareBtn.dataset.inCompare = active ? '1' : '0';
+
+      if (active) {
+        compareBtn.classList.remove('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
+        compareBtn.classList.add('border-blue-300', 'bg-blue-50');
+      } else {
+        compareBtn.classList.remove('border-blue-300', 'bg-blue-50');
+        compareBtn.classList.add('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
+      }
+
+      var icon = compareBtn.querySelector('i[data-lucide="chart-no-axes-column"]');
+      if (icon) {
+        if (active) {
+          icon.classList.remove('text-gray-500');
+          icon.classList.add('text-blue-500', 'fill-blue-400');
+        } else {
+          icon.classList.remove('text-blue-500', 'fill-blue-400');
+          icon.classList.add('text-gray-500');
+        }
+      }
+    },
+    add: function(product_id, variant_id) {
+      this._request('add', product_id, variant_id)
       .then(function(json) {
         if (json.success) {
           if (typeof dcShowToast === 'function') dcShowToast(json.success);
@@ -1502,35 +1695,15 @@ document.addEventListener('DOMContentLoaded', function() {
             compareTotal.textContent = json.total;
           }
 
-          // Update button style
-          var compareBtn = document.querySelector('button[onclick*="compare.add"]');
-          if (compareBtn) {
-            compareBtn.setAttribute('onclick', "compare.remove('" + product_id + "');");
-            compareBtn.classList.remove('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
-            compareBtn.classList.add('border-blue-300', 'bg-blue-50');
-            var icon = compareBtn.querySelector('i[data-lucide="chart-no-axes-column"]');
-            if (icon) {
-              icon.classList.remove('text-gray-500');
-              icon.classList.add('text-blue-500', 'fill-blue-400');
-            }
-          }
+          window.compare._setActive(product_id, true);
         }
       })
       .catch(function(error) {
         console.error('Compare add error:', error);
       });
     },
-    remove: function(product_id) {
-      fetch('index.php?route=product/compare/remove', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: 'product_id=' + product_id
-      })
-      .then(function(response) { return response.json(); })
+    remove: function(product_id, variant_id) {
+      this._request('remove', product_id, variant_id)
       .then(function(json) {
         if (json.success) {
           if (typeof dcShowToast === 'function') dcShowToast(json.success);
@@ -1540,18 +1713,7 @@ document.addEventListener('DOMContentLoaded', function() {
             compareTotal.textContent = json.total;
           }
 
-          // Update button style
-          var compareBtn = document.querySelector('button[onclick*="compare.remove"]');
-          if (compareBtn) {
-            compareBtn.setAttribute('onclick', "compare.add('" + product_id + "');");
-            compareBtn.classList.remove('border-blue-300', 'bg-blue-50');
-            compareBtn.classList.add('border-gray-200', 'hover:border-blue-200', 'hover:bg-blue-50');
-            var icon = compareBtn.querySelector('i[data-lucide="chart-no-axes-column"]');
-            if (icon) {
-              icon.classList.remove('text-blue-500', 'fill-blue-400');
-              icon.classList.add('text-gray-500');
-            }
-          }
+          window.compare._setActive(product_id, false);
         }
       })
       .catch(function(error) {
@@ -1631,9 +1793,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (typeof window.dcAddToWishlist !== 'function') {
-    window.dcAddToWishlist = function(productId, clickedBtn) {
+    window.dcAddToWishlist = function(productId, clickedBtn, variantId) {
       var button = clickedBtn || document.getElementById('dc-wishlist-btn');
       var active = button && button.getAttribute('data-in-wishlist') === '1';
+
+      var body = 'product_id=' + encodeURIComponent(productId);
+
+      if (variantId && parseInt(variantId, 10) > 0) {
+        body += '&variant_id=' + encodeURIComponent(variantId);
+      }
 
       if (active) {
         fetch('index.php?route=account/wishlist/remove', {
@@ -1643,7 +1811,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             'X-Requested-With': 'XMLHttpRequest'
           },
-          body: 'product_id=' + encodeURIComponent(productId)
+          body: body
         })
         .then(function() {
           setWishlistButtonState(button, false);
@@ -1656,7 +1824,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (window.wishlist && typeof window.wishlist.add === 'function') {
-        window.wishlist.add(productId);
+        window.wishlist.add(productId, variantId || 0);
       }
 
       setWishlistButtonState(button, true);
@@ -1667,13 +1835,25 @@ document.addEventListener('DOMContentLoaded', function() {
     var quantityInput = document.getElementById('input-quantity');
     var cartButton = document.getElementById('button-cart');
     var wishlistButton = document.getElementById('dc-wishlist-btn');
+    var compareButton = document.getElementById('dc-compare-btn');
 
     if (wishlistButton) {
       wishlistButton.addEventListener('click', function(e) {
         e.preventDefault();
         var productId = wishlistButton.getAttribute('data-product-id');
         if (!productId) return;
-        window.dcAddToWishlist(productId, wishlistButton);
+        var variantId = window.dcCurrentVariant ? window.dcCurrentVariant.variant_id : 0;
+        window.dcAddToWishlist(productId, wishlistButton, variantId);
+      });
+    }
+
+    if (compareButton) {
+      compareButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        var productId = compareButton.getAttribute('data-product-id');
+        if (!productId) return;
+        var variantId = window.dcCurrentVariant ? window.dcCurrentVariant.variant_id : 0;
+        window.dcToggleCompare(productId, compareButton, variantId);
       });
     }
 
