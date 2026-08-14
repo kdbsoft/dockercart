@@ -26,8 +26,8 @@
         <table class="table table-bordered table-hover">
           <thead>
             <tr>
-              <th>{{ column_source }}</th>
               <th>{{ column_name }}</th>
+              <th>{{ column_key }}</th>
               <th>{{ column_schedule }}</th>
               <th>{{ column_last_run }}</th>
               <th>{{ column_status }}</th>
@@ -37,8 +37,13 @@
             {% if tasks is not empty %}
             {% for task in tasks %}
             <tr>
+              <td>
+                {{ task.task_name }}
+                {% if task.is_system == 0 %}
+                <span data-toggle="tooltip" title="{{ help_edit_name }}"><a href="javascript:void(0);" class="scheduler-edit-name" data-task_id="{{ task.task_id }}" data-task_name="{{ task.task_name }}" data-translations="{{ task.translations|json_encode }}"><i data-lucide="pencil" width="14" height="14" class="text-muted"></i></a></span>
+                {% endif %}
+              </td>
               <td><span class="label label-info">{{ task.task_type }}</span></td>
-              <td>{{ task.task_name }}</td>
               <td>
                 <select class="form-control scheduler-schedule-select" data-task_id="{{ task.task_id }}" style="width:auto;display:inline-block;">
                   <option value="" {% if task.cron_schedule == '' %}selected{% endif %}>{{ text_cron_disabled }}</option>
@@ -48,6 +53,8 @@
                   <option value="every_6h" {% if task.cron_schedule == 'every_6h' %}selected{% endif %}>{{ text_every_6h }}</option>
                   <option value="every_12h" {% if task.cron_schedule == 'every_12h' %}selected{% endif %}>{{ text_every_12h }}</option>
                   <option value="daily" {% if task.cron_schedule == 'daily' %}selected{% endif %}>{{ text_daily }}</option>
+                  <option value="weekly" {% if task.cron_schedule == 'weekly' %}selected{% endif %}>{{ text_every_week }}</option>
+                  <option value="monthly" {% if task.cron_schedule == 'monthly' %}selected{% endif %}>{{ text_every_month }}</option>
                 </select>
               </td>
               <td>{{ task.last_run ? task.last_run : text_never }}</td>
@@ -69,7 +76,74 @@
       </div>
     </div>
   </div>
+<div id="scheduler-edit-name-modal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ text_edit_name }}</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="scheduler-edit-task-id" value="0">
+        {% for language in languages %}
+        <div class="form-group">
+          <label class="control-label" for="scheduler-name-{{ language.language_id }}">{{ language.name }}</label>
+          <input type="text" class="form-control scheduler-name-input" id="scheduler-name-{{ language.language_id }}" data-language_id="{{ language.language_id }}" value="">
+        </div>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="scheduler-save-name">{{ button_save }}</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
+$('.scheduler-edit-name').on('click', function() {
+	var $link = $(this);
+
+	$('#scheduler-edit-task-id').val($link.data('task_id'));
+
+	$('.scheduler-name-input').each(function() {
+		var $input = $(this);
+		var translations = $link.data('translations') || {};
+
+		$input.val(translations[$input.data('language_id')] || $link.data('task_name') || '');
+	});
+
+	$('#scheduler-edit-name-modal').modal('show');
+});
+
+$('#scheduler-save-name').on('click', function() {
+	var taskId = $('#scheduler-edit-task-id').val();
+	var translations = {};
+
+	$('.scheduler-name-input').each(function() {
+		translations[$(this).data('language_id')] = $(this).val();
+	});
+
+	$.ajax({
+		url: 'index.php?route=tool/dockercart_scheduler/updateName&user_token={{ user_token }}',
+		type: 'POST',
+		dataType: 'json',
+		data: {
+			task_id: taskId,
+			translations: translations
+		},
+		success: function(json) {
+			if (json.success) {
+				location.reload();
+			} else {
+				alert(json.error || 'Update failed');
+			}
+		},
+		error: function() {
+			alert('Request failed');
+		}
+	});
+});
+
 $('.toggle-scheduler-task').on('change', function() {
 	var $select = $(this);
 	$.ajax({

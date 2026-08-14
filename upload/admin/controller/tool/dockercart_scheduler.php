@@ -42,6 +42,42 @@ class ControllerToolDockercartScheduler extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function updateName(): void {
+		$this->load->language('tool/dockercart_scheduler');
+		$this->load->model('tool/dockercart_scheduler');
+
+		if (!$this->user->hasPermission('modify', 'tool/dockercart_scheduler')) {
+			$json = ['success' => false, 'error' => $this->language->get('error_permission')];
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+			return;
+		}
+
+		$json = ['success' => false, 'error' => ''];
+
+		$taskId      = isset($this->request->post['task_id']) ? (int)$this->request->post['task_id'] : 0;
+		$translations = isset($this->request->post['translations']) && is_array($this->request->post['translations'])
+			? $this->request->post['translations'] : [];
+
+		if ($taskId <= 0 || !$translations) {
+			$json['error'] = 'Missing task_id or translations';
+		} else {
+			$task = $this->model_tool_dockercart_scheduler->getTask($taskId);
+
+			if ($task === null) {
+				$json['error'] = 'Task not found';
+			} elseif (!empty($task['is_system'])) {
+				$json['error'] = 'System tasks cannot be renamed';
+			} else {
+				$result = $this->model_tool_dockercart_scheduler->saveTaskNames($taskId, $translations);
+				$json = $result ? ['success' => true] : ['success' => false, 'error' => 'Update failed'];
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function index(): void {
 		$this->load->language('tool/dockercart_scheduler');
 
@@ -56,7 +92,43 @@ class ControllerToolDockercartScheduler extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-		$data['tasks'] = $this->model_tool_dockercart_scheduler->getAllScheduledTasks();
+		$this->load->model('localisation/language');
+
+		$languages = $this->model_localisation_language->getLanguages();
+
+		$currentLanguageCode = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_admin_language');
+		$currentLanguageId = 0;
+
+		foreach ($languages as $language) {
+			if ($language['code'] === $currentLanguageCode) {
+				$currentLanguageId = (int)$language['language_id'];
+				break;
+			}
+		}
+
+		$tasks = $this->model_tool_dockercart_scheduler->getAllScheduledTasks();
+
+		foreach ($tasks as &$task) {
+			$translations = $this->model_tool_dockercart_scheduler->getTaskNames((int)$task['task_id']);
+			$task['translations'] = $translations;
+			$task['task_name'] = isset($translations[$currentLanguageId]) && $translations[$currentLanguageId] !== ''
+				? $translations[$currentLanguageId]
+				: $task['task_name_fallback'];
+		}
+
+		unset($task);
+
+		$data['tasks'] = $tasks;
+
+		$data['languages'] = [];
+
+		foreach ($languages as $language) {
+			$data['languages'][] = [
+				'language_id' => $language['language_id'],
+				'name'        => $language['name'],
+				'code'        => $language['code'],
+			];
+		}
 
 		$data['schedule_labels'] = [
 			''             => $this->language->get('text_cron_disabled'),
@@ -66,6 +138,8 @@ class ControllerToolDockercartScheduler extends Controller {
 			'every_6h'     => $this->language->get('text_every_6h'),
 			'every_12h'    => $this->language->get('text_every_12h'),
 			'daily'        => $this->language->get('text_daily'),
+			'weekly'       => $this->language->get('text_every_week'),
+			'monthly'      => $this->language->get('text_every_month'),
 			'custom'       => $this->language->get('text_custom'),
 		];
 
