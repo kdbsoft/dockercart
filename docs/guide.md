@@ -236,9 +236,9 @@ All settings are defined in `.env` (copy from `.env.example`).
 
 | Command | Action |
 |---|---|
-| `make up` / `make dev` | Start standalone HTTP |
-| `make ssl` / `make dev-ssl` | Start standalone + self-signed HTTPS |
-| `make le` / `make prod` | Start standalone + Let's Encrypt HTTPS |
+| `make up` | Start standalone HTTP |
+| `make ssl` | Start standalone + self-signed HTTPS |
+| `make le` | Start standalone + Let's Encrypt HTTPS |
 | `make traefik` | Start with Traefik reverse proxy |
 | `make traefik-ssl` | Traefik + self-signed HTTPS |
 | `make traefik-le` | Traefik + Let's Encrypt HTTPS |
