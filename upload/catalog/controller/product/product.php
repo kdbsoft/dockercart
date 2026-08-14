@@ -180,10 +180,10 @@ class ControllerProductProduct extends Controller {
 			if ($this->customer->isLogged()) {
 				$this->load->model('account/wishlist');
 				foreach ($this->model_account_wishlist->getWishlist() as $w) {
-					$wishlist_ids[] = (int)$w['product_id'];
+					$wishlist_ids[] = (int)$w['variant_id'] > 0 ? (int)$w['product_id'] . ':' . (int)$w['variant_id'] : (string)(int)$w['product_id'];
 				}
 			} elseif (isset($this->session->data['wishlist'])) {
-				$wishlist_ids = array_map('intval', $this->session->data['wishlist']);
+				$wishlist_ids = array_map('strval', $this->session->data['wishlist']);
 			}
 
 			$url = '';
@@ -344,8 +344,14 @@ class ControllerProductProduct extends Controller {
 
 			$data['product_id'] = $product_id;
 			$data['schema_product_url'] = $this->url->link('product/product', 'product_id=' . $product_id);
-			$data['in_wishlist'] = in_array($product_id, $wishlist_ids) ? 1 : 0;
-			$data['in_compare'] = isset($this->session->data['compare']) && in_array($product_id, $this->session->data['compare']) ? 1 : 0;
+			// Wishlist/compare state for the currently open variant (base = 0)
+			$current_variant_id = isset($this->request->get['variant_id']) ? (int)$this->request->get['variant_id'] : 0;
+			$wishlist_key = $current_variant_id > 0 ? $product_id . ':' . $current_variant_id : (string)$product_id;
+
+			$data['in_wishlist'] = in_array($wishlist_key, $wishlist_ids) ? 1 : 0;
+
+			$compare_keys = isset($this->session->data['compare']) ? array_map('strval', $this->session->data['compare']) : array();
+			$data['in_compare'] = in_array($wishlist_key, $compare_keys) ? 1 : 0;
 
 			// Build schema category from main_category_id or first assigned category
 			$schema_category = '';
@@ -394,6 +400,7 @@ class ControllerProductProduct extends Controller {
 			$data['currency_code'] = $display_currency;
 			$data['currency_decimal_place'] = $this->currency->getDecimalPlace($display_currency);
 			$data['config_symbol_left_space'] = (int)$this->config->get('config_symbol_left_space');
+			$data['config_symbol_right_space'] = (int)$this->config->get('config_symbol_right_space');
 			$data['manufacturer'] = $product_info['manufacturer'];
 			$data['manufacturers'] = $this->url->link('product/manufacturer/info', 'manufacturer_id=' . $product_info['manufacturer_id']);
 			$data['model'] = $product_info['model'];
@@ -556,6 +563,7 @@ class ControllerProductProduct extends Controller {
 			}
 
 			$data['you_save_amount'] = false;
+			$data['discount_percent'] = 0;
 
 			if (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
 				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
@@ -569,6 +577,13 @@ class ControllerProductProduct extends Controller {
 						$this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')),
 						$this->session->data['currency']
 					);
+
+					if ((float)$product_info['price'] > 0) {
+						$data['discount_percent'] = (int)round((1 - ((float)$product_info['special'] / (float)$product_info['price'])) * 100);
+						if ($data['discount_percent'] < 0) {
+							$data['discount_percent'] = 0;
+						}
+					}
 				}
 			} else {
 				$data['special'] = false;
@@ -699,6 +714,7 @@ class ControllerProductProduct extends Controller {
 			$data['text_bxgy'] = $this->language->get('text_bxgy');
 			$data['text_bxgy_discount'] = $this->language->get('text_bxgy_discount');
 			$data['text_bxgy_trigger'] = $this->language->get('text_bxgy_trigger');
+			$data['text_bxgy_trigger_pcs'] = $this->language->get('text_bxgy_trigger_pcs');
 			$data['text_fbt'] = $this->language->get('text_fbt');
 
 			$data['options'] = array();
@@ -1190,6 +1206,20 @@ class ControllerProductProduct extends Controller {
 								$sv_full_price - $sv_special,
 								$this->session->data['currency']
 							);
+
+							// Скидка выбранного варианта (спеццена против полной
+							// цены) — тот же процент, что показывают карточки.
+							// Оба значения уже с налогом, поэтому соотношение
+							// совпадает с расчётом по базовым ценам.
+							$data['discount_percent'] = 0;
+
+							if ($sv_full_price > 0) {
+								$data['discount_percent'] = (int)round((1 - ($sv_special / $sv_full_price)) * 100);
+
+								if ($data['discount_percent'] < 0) {
+									$data['discount_percent'] = 0;
+								}
+							}
 						} else {
 							// Variant without its own special: keep the product-level
 							// special only for the default variant (the product's own
@@ -1505,10 +1535,6 @@ class ControllerProductProduct extends Controller {
 			$data['text_timer_hours'] = $this->language->get('text_timer_hours');
 			$data['text_timer_minutes'] = $this->language->get('text_timer_minutes');
 			$data['text_timer_seconds'] = $this->language->get('text_timer_seconds');
-
-			if ($data['sale_timer_status']) {
-				$this->document->addScript('catalog/view/theme/dockercart/javascript/sale-timer.js', 'footer');
-			}
 
 			$data['text_write_in_messenger'] = $this->language->get('text_write_in_messenger');
 			$data['text_we_are_in_messengers'] = $this->language->get('text_we_are_in_messengers');
@@ -1846,6 +1872,12 @@ class ControllerProductProduct extends Controller {
 
 			$results = $this->model_catalog_product->getProductFbt($product_id);
 
+			$fbt_category_map = array();
+
+			if ($results) {
+				$fbt_category_map = $this->model_catalog_category->getProductCategoryNames(array_keys($results));
+			}
+
 			foreach ($results as $result) {
 				if ($result['image']) {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
@@ -1893,10 +1925,34 @@ class ControllerProductProduct extends Controller {
 					$tax = false;
 				}
 
+				$category_name = '';
+				$fbt_main_cat = !empty($result['main_category_id']) ? (int)$result['main_category_id'] : 0;
+				if ($fbt_main_cat > 0) {
+					$category_info = $this->model_catalog_category->getCategory($fbt_main_cat);
+					if ($category_info && !empty($category_info['name'])) {
+						$category_name = $category_info['name'];
+					}
+				}
+				if (empty($category_name)) {
+					if (isset($fbt_category_map[(int)$result['product_id']])) {
+						$category_name = $fbt_category_map[(int)$result['product_id']]['name'];
+					}
+				}
+
+				if ($this->config->get('config_review_status')) {
+					$rating = (float)$result['rating'];
+				} else {
+					$rating = false;
+				}
+
 				$data['fbt_products'][] = array(
 					'product_id'    => $result['product_id'],
 					'thumb'         => $image,
 					'name'          => $result['name'],
+					'model'         => $result['model'],
+					'manufacturer'  => isset($result['manufacturer']) ? $result['manufacturer'] : '',
+					'category'      => $category_name,
+					'description'   => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'         => $price,
 					'price_raw'     => (float)$result['price'],
 					'special'       => $special,
@@ -1907,6 +1963,9 @@ class ControllerProductProduct extends Controller {
 					'stock'         => $stock,
 					'is_in_stock'   => ($stock_quantity > 0) || !empty($result['preorder']),
 					'is_preorder'   => empty($stock_quantity) && !empty($result['preorder']),
+					'rating'        => $rating,
+					'reviews'       => isset($result['reviews']) ? (int)$result['reviews'] : 0,
+					'in_wishlist'   => in_array((int)$result['product_id'], $wishlist_ids) ? 1 : 0,
 					'call_for_price'=> !empty($result['call_for_price']),
 					'href'          => $this->url->link('product/product', 'product_id=' . $result['product_id'])
 				);
