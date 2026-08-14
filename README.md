@@ -34,7 +34,7 @@
 
 [DockerCart](https://dockercart.net) is a **[full-stack e-commerce platform](https://dockercart.net/capabilities)** wrapped in a Docker infrastructure. One command spins up the complete stack — Nginx reverse proxy, PHP 8.5 application server, MariaDB database, Redis cache, Manticore Search full-text engine, and a scheduler daemon — pre-configured and ready to handle real traffic.
 
-No web installer. No `/install` directory. No manual config. Just `make up` and a [production-grade store](https://demo.dockercart.net) is live.
+No web installer. No `/install` directory. No manual config. Just `make start` (or `make up`) and a [production-grade store](https://demo.dockercart.net) is live.
 
 **Built for developers** who are tired of wrestling with fragile setups and want to focus on building features, not fighting infrastructure. See the [full capabilities list](https://dockercart.net/capabilities) or [try the live demo](https://demo.dockercart.net).
 
@@ -46,8 +46,10 @@ No web installer. No `/install` directory. No manual config. Just `make up` and 
 git clone https://github.com/kdbsoft/dockercart.git
 cd dockercart
 cp .env.example .env
-make up
+make start
 ```
+
+`make start` asks which mode to run in (standalone HTTP, self-signed HTTPS, Let's Encrypt, or Traefik variants) and remembers your choice — just press Enter next time. Use `make up` to skip the prompt and start in standalone HTTP mode.
 
 Done. First boot handles **everything**:
 
@@ -110,6 +112,8 @@ Everything communicates over a shared `dockercart-network` bridge. See the [full
 ## 📦 Deployment Modes
 
 All modes invoked via `make`. Container names prefixed `dockercart_`. Full details in the [deployment guide](docs/guide.md#4-deployment).
+
+**`make start`** shows an interactive menu of all modes below and remembers the last choice in `.env` (`DOCKERCART_RUN_MODE`) — a bare `make start` restarts in the same mode. **`make stop`** stops all containers regardless of the mode they were started in.
 
 ### 🏠 Standalone (default)
 
