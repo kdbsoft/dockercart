@@ -295,7 +295,10 @@ window.wishlist = window.wishlist || {
 
         if (json.total !== undefined) {
           var badge = document.querySelector('#wishlist-total span');
-          if (badge) { badge.textContent = String(json.total); }
+          if (badge) {
+            badge.textContent = String(json.total);
+            badge.classList.toggle('hidden', json.total <= 0);
+          }
         }
 
         // Keep the in-memory key list in sync so variant-state buttons

@@ -554,6 +554,7 @@
     const badge = document.querySelector('#compare-total span');
     if (badge) {
       badge.textContent = String(total);
+      badge.classList.toggle('hidden', total <= 0);
     }
   }
 
@@ -561,6 +562,7 @@
     const badge = document.querySelector('#wishlist-total span');
     if (badge) {
       badge.textContent = String(total);
+      badge.classList.toggle('hidden', total <= 0);
     }
   }
 
@@ -874,6 +876,10 @@
     }
 
     if (isInWishlist) {
+      // Reflect the change immediately: drop the key before any re-render so
+      // dcRefreshWishlistState() (variant switch / card state) sees it gone.
+      syncWishlistKeys(false, key);
+
       // Remove from wishlist
       fetch('index.php?route=account/wishlist/remove', {
         method: 'POST',
@@ -882,12 +888,9 @@
       }).then(function(response) {
         return response.json();
       }).then(function(json) {
-        syncWishlistKeys(false, key);
-
         if (json && json.total !== undefined) {
           updateWishlistCountInDom(json.total);
         }
-
         // Update all matching card buttons
         document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(function(c) {
           c.dataset.inWishlist = '0';
@@ -900,8 +903,6 @@
         if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
       }).catch(function() {
         // Keep the UI consistent even if the remove request failed to parse
-        syncWishlistKeys(false, key);
-
         if (clickedBtn) { clickedBtn.dataset.inWishlist = '0'; QuickView._applyWishlistState(clickedBtn, false); }
         if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
       });
@@ -913,6 +914,11 @@
       } else if (window.wishlist && window.wishlist.add) {
         window.wishlist.add(productId, key.indexOf(':') > -1 ? key.split(':')[1] : 0);
       }
+
+      // Reflect the change immediately: add the key before any re-render so
+      // dcRefreshWishlistState() (variant switch / card state) sees it active.
+      syncWishlistKeys(true, key);
+
       // Update all matching card buttons
       document.querySelectorAll(`.product-card[data-id="${productId}"]`).forEach(function(c) {
         c.dataset.inWishlist = '1';
@@ -935,11 +941,20 @@
       QuickView.init();
       ensureCompareButtons(document);
       observeProductCardChanges();
+      // The variant matrix runs before this script's DOMContentLoaded
+      // handler, so dcCurrentVariant is already set: re-apply the wishlist /
+      // compare button state from the server-provided key lists. The server
+      // only knows the variant from ?variant_id, so on a plain reload of a
+      // variant page it renders the button inactive.
+      if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
+      if (typeof window.dcRefreshCompareState === 'function') { window.dcRefreshCompareState(); }
     });
   } else {
     QuickView.init();
     ensureCompareButtons(document);
     observeProductCardChanges();
+    if (typeof window.dcRefreshWishlistState === 'function') { window.dcRefreshWishlistState(); }
+    if (typeof window.dcRefreshCompareState === 'function') { window.dcRefreshCompareState(); }
   }
 
   // Close on Escape key

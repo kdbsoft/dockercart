@@ -1693,6 +1693,7 @@ document.addEventListener('DOMContentLoaded', function() {
           var compareTotal = document.querySelector('#compare-total span');
           if (compareTotal && json.total !== undefined) {
             compareTotal.textContent = json.total;
+            compareTotal.classList.toggle('hidden', json.total <= 0);
           }
 
           window.compare._setActive(product_id, true);
@@ -1711,6 +1712,7 @@ document.addEventListener('DOMContentLoaded', function() {
           var compareTotal = document.querySelector('#compare-total span');
           if (compareTotal && json.total !== undefined) {
             compareTotal.textContent = json.total;
+            compareTotal.classList.toggle('hidden', json.total <= 0);
           }
 
           window.compare._setActive(product_id, false);
