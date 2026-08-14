@@ -45,11 +45,10 @@ No web installer. No `/install` directory. No manual config. Just `make start` (
 ```bash
 git clone https://github.com/kdbsoft/dockercart.git
 cd dockercart
-cp .env.example .env
 make start
 ```
 
-`make start` asks which mode to run in (standalone HTTP, self-signed HTTPS, Let's Encrypt, or Traefik variants) and remembers your choice — just press Enter next time. Use `make up` to skip the prompt and start in standalone HTTP mode.
+On the first run `make start` asks for the critical settings — store domain, timezone, database and admin passwords (press Enter to generate random ones), admin account, and whether to install demo data — then writes them to `.env`. Later runs only ask for missing keys, never repeat answered ones. Use `make up` to skip the prompt and start in standalone HTTP mode.
 
 Done. First boot handles **everything**:
 
@@ -60,7 +59,7 @@ Done. First boot handles **everything**:
 - No web installer — no human in the loop
 
 **Admin panel:** `http://dockercart.local/admin`  
-**Default credentials** (change in `.env`): `admin` / `admin123`
+**Admin credentials:** the ones you set during setup (or generated — see `.env` `ADMIN_USERNAME` / `ADMIN_PASSWORD`)
 
 ---
 
@@ -141,7 +140,7 @@ make ftp   # Attach to any running mode — chrooted to ./upload/image
 
 ## ⚙️ Configuration
 
-All settings live in **`.env`** (copy from `.env.example`).  
+All settings live in **`.env`**. The first `make start` generates it interactively (domain, timezone, passwords, admin account); afterwards missing keys are asked for on startup and `.env.example` remains the full reference template.  
 Config files are **generated at container start** — never edit them manually.
 
 | Variable | Purpose |
