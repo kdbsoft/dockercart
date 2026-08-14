@@ -13,7 +13,7 @@ $_['text_scheduler_running'] = 'Планувальник працює в Docker-
 $_['text_no_tasks']         = 'Заплановані завдання не знайдено. Увімкніть планування в налаштуваннях модуля.';
 
 // Column
-$_['column_source']         = 'Тип завдання';
+$_['column_key']            = 'Ключ';
 $_['column_name']           = 'Назва';
 $_['column_schedule']       = 'Розклад';
 $_['column_last_run']       = 'Останній запуск';
@@ -27,7 +27,15 @@ $_['text_hourly']           = 'Щогодинно';
 $_['text_every_6h']         = 'Кожні 6 годин';
 $_['text_every_12h']        = 'Кожні 12 годин';
 $_['text_daily']            = 'Щоденно';
+$_['text_every_week']       = 'Щотижня';
+$_['text_every_month']      = 'Щомісяця';
 $_['text_custom']           = 'Користувацький cron';
+
+// Name editing
+$_['text_edit_name']        = 'Редагування назви завдання';
+$_['help_edit_name']        = 'Редагувати назву';
+$_['button_save']           = 'Зберегти';
+$_['button_cancel']         = 'Скасувати';
 
 // Error
 $_['error_permission']      = 'Увага: У вас немає прав для зміни планувальника!';
