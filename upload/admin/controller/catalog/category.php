@@ -601,37 +601,20 @@ class ControllerCatalogCategory extends Controller {
 			$data['background_thumb'] = $this->model_tool_image->resize('no_image.png', 140, 140);
 		}
 
-		$data['category_banner'] = array();
-
-		if (isset($this->request->post['category_banner'])) {
-			$data['category_banner'] = $this->request->post['category_banner'];
-		} elseif (isset($this->request->get['category_id'])) {
-			$data['category_banner'] = $this->model_catalog_category->getCategoryBanners($this->request->get['category_id']);
+		if (isset($this->request->post['banner_id'])) {
+			$data['banner_id'] = (int)$this->request->post['banner_id'];
+		} elseif (!empty($category_info)) {
+			$data['banner_id'] = (int)$category_info['banner_id'];
+		} else {
+			$data['banner_id'] = 0;
 		}
 
-		$this->load->model('tool/image');
+		$this->load->model('design/banner');
 
-		$data['banner_links'] = array();
+		$data['banners'] = $this->model_design_banner->getBanners();
 
-		foreach ($data['languages'] as $language) {
-			$language_id = (int)$language['language_id'];
-			$banner_image = isset($data['category_banner'][$language_id]['banner_image']) ? $data['category_banner'][$language_id]['banner_image'] : '';
-			$banner_link = isset($data['category_banner'][$language_id]['banner_link']) ? $data['category_banner'][$language_id]['banner_link'] : '';
-
-			$parsed_link = $this->parseBannerLink($banner_link);
-
-			$data['banner_links'][$language_id] = array(
-				'banner_enabled'        => !empty($banner_image),
-				'banner_image'          => $banner_image,
-				'banner_thumb'          => ($banner_image && is_file(DIR_IMAGE . $banner_image))
-					? $this->model_tool_image->resize($banner_image, 360, 360)
-					: $this->model_tool_image->resize('no_image.png', 360, 360),
-				'banner_link_type'      => $parsed_link['type'],
-				'banner_link_value'     => $parsed_link['value'],
-				'banner_link_entity_name' => $parsed_link['entity_name'],
-				'banner_link_raw'       => $banner_link
-			);
-		}
+		$data['banner_edit_base'] = $this->url->link('design/banner/edit', 'user_token=' . $this->session->data['user_token'] . '&banner_id=');
+		$data['banner_list_url'] = $this->url->link('design/banner', 'user_token=' . $this->session->data['user_token']);
 
 		// Review criteria group (per-category "what is rated" override)
 		if (isset($this->request->post['review_criteria_group_id'])) {
@@ -777,100 +760,6 @@ class ControllerCatalogCategory extends Controller {
 		}
 
 		return $decoded;
-	}
-
-	private function parseBannerLink($link) {
-		$result = array(
-			'type'        => 'custom',
-			'value'       => $link,
-			'entity_name' => ''
-		);
-
-		if (empty($link)) {
-			return $result;
-		}
-
-		$clean = html_entity_decode($link, ENT_QUOTES, 'UTF-8');
-
-		if (preg_match('/^https?:\/\/[^\/]+\/?(?:index\.php)?\?(.*)$/', $clean, $urlMatch)) {
-			$clean = $urlMatch[1];
-		} elseif (preg_match('/^\/?(?:index\.php)?\?(.*)$/', $clean, $pathMatch)) {
-			$clean = $pathMatch[1];
-		} elseif (strpos($clean, '?') === 0) {
-			$clean = substr($clean, 1);
-		}
-
-		if (preg_match('/^route=([^&]+)&(.+)$/', $clean, $m)) {
-			$route = urldecode($m[1]);
-			$params = array();
-			parse_str($m[2], $params);
-
-			$map = array(
-				'product/product'             => array('type' => 'product', 'key' => 'product_id'),
-				'product/category'            => array('type' => 'category', 'key' => 'path'),
-				'product/manufacturer/info'   => array('type' => 'manufacturer', 'key' => 'manufacturer_id'),
-				'information/information'     => array('type' => 'information', 'key' => 'information_id'),
-				'blog/post'                   => array('type' => 'blog', 'key' => 'blog_post_id'),
-			);
-
-			if (isset($map[$route]) && isset($params[$map[$route]['key']])) {
-				$result['type'] = $map[$route]['type'];
-				$result['value'] = $params[$map[$route]['key']];
-				$result['entity_name'] = $this->getBannerLinkEntityName($result['type'], $result['value']);
-			}
-		}
-
-		return $result;
-	}
-
-	private function getBannerLinkEntityName($type, $value) {
-		if (empty($value)) {
-			return '';
-		}
-
-		switch ($type) {
-			case 'product':
-				$this->load->model('catalog/product');
-				$info = $this->model_catalog_product->getProduct((int)$value);
-				return $info ? $info['name'] : '';
-
-			case 'category':
-				$this->load->model('catalog/category');
-				$descriptions = $this->model_catalog_category->getCategoryDescriptions((int)$value);
-				if ($descriptions) {
-					$lang_id = (int)$this->config->get('config_language_id');
-					if (isset($descriptions[$lang_id])) {
-						return $descriptions[$lang_id]['name'];
-					}
-					return reset($descriptions)['name'];
-				}
-				return '';
-
-			case 'manufacturer':
-				$this->load->model('catalog/manufacturer');
-				$info = $this->model_catalog_manufacturer->getManufacturer((int)$value);
-				return $info ? $info['name'] : '';
-
-			case 'information':
-				$this->load->model('catalog/information');
-				$descriptions = $this->model_catalog_information->getInformationDescriptions((int)$value);
-				if ($descriptions) {
-					$first = reset($descriptions);
-					return isset($first['title']) ? $first['title'] : '';
-				}
-				return '';
-
-			case 'blog':
-				$this->load->model('extension/module/dockercart_blog_post');
-				$descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions((int)$value);
-				if ($descriptions) {
-					$first = reset($descriptions);
-					return isset($first['title']) ? $first['title'] : '';
-				}
-				return '';
-		}
-
-		return '';
 	}
 
 	protected function validateForm() {

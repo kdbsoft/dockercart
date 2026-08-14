@@ -35,20 +35,15 @@
           {% if show_shop_all %}<a href="{{ shop_all_href }}" class="text-sm font-semibold text-blue-600 hover:underline">{{ text_shop_all|format(original_category_name) }}</a>{% endif %}
         </div>
 
-        {% set palette_bg = [ 'rgba(59,130,246,0.07)', 'rgba(99,102,241,0.07)', 'rgba(16,185,129,0.07)', 'rgba(236,72,153,0.07)', 'rgba(249,115,22,0.07)', 'rgba(234,179,8,0.07)' ] %}
-        {% set palette_accent = [ 'rgba(59,130,246,0.18)', 'rgba(99,102,241,0.18)', 'rgba(16,185,129,0.18)', 'rgba(236,72,153,0.18)', 'rgba(249,115,22,0.18)', 'rgba(234,179,8,0.18)' ] %}
-
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {% for category in categories %}
-          {% set bg = palette_bg[loop.index0 % palette_bg|length] %}
-          {% set accent = palette_accent[loop.index0 % palette_accent|length] %}
-          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 transition-transform hover:scale-[1.02]" style="background: {{ bg }}; border: 1px solid rgba(15,23,42,0.04);">
+          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 bg-white border border-gray-200 hover:border-blue-200 hover:shadow-md transition">
             <div class="flex items-center gap-3">
-              <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ accent }}; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);">
+              <div class="w-14 h-14 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                 {% if category.thumb %}
-                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md shadow-sm" loading="lazy" />
+                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md" loading="lazy" />
                 {% else %}
-                <i data-lucide="layers" class="w-6 h-6 text-gray-700"></i>
+                <i data-lucide="layers" class="w-6 h-6 text-blue-500"></i>
                 {% endif %}
               </div>
               <div class="flex-1 min-w-0">
@@ -148,10 +143,37 @@
               text_all_reviews: text_all_reviews|default('')
             } %}
             {% if category_banner and banner_position == loop.index %}
-            <div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
-              {% if category_banner.link %}<a href="{{ category_banner.link }}" class="block w-full h-full">{% endif %}
-                <img src="{{ category_banner.image }}" alt="" class="w-full h-full object-cover" loading="lazy" />
-              {% if category_banner.link %}</a>{% endif %}
+            <div class="category-banner category-banner--{{ category_banner.content_position|default('left') }} category-banner__stretched" style="--category-banner-accent: {{ category_banner.accent_color|default('transparent')|e('html_attr') }}; --category-banner-button-text: {{ category_banner.badge_text_color|default('#ffffff')|e('html_attr') }};">
+              <div class="category-banner__media">
+                {% if category_banner.image_portrait %}
+                <picture>
+                  <source media="(orientation: portrait)" srcset="{{ category_banner.image_portrait }}" />
+                  <img src="{{ category_banner.image }}" alt="{{ category_banner.title|e('html_attr') }}" loading="lazy" />
+                </picture>
+                {% elseif category_banner.image %}
+                <img src="{{ category_banner.image }}" alt="{{ category_banner.title|e('html_attr') }}" loading="lazy" />
+                {% endif %}
+                {% if category_banner.title_html or category_banner.subtitle or category_banner.accent_text or category_banner.primary_btn_text %}
+                <div class="category-banner__overlay category-banner__overlay--{{ category_banner.content_position|default('left') }}">
+                  <div class="category-banner__content">
+                    {% if category_banner.accent_text %}
+                    <span class="category-banner__badge"{% if category_banner.accent_color or category_banner.accent_bg %} style="{% if category_banner.accent_color %}background-color: {{ category_banner.accent_color }};{% endif %}{% if category_banner.accent_bg %} --accent-bg: {{ category_banner.accent_bg }};{% endif %} color: {{ category_banner.badge_text_color }};"{% endif %}>{{ category_banner.accent_text }}</span>
+                    {% endif %}
+                    {% if category_banner.title_html %}
+                    <h2 class="category-banner__title">{{ category_banner.title_html|raw }}</h2>
+                    {% endif %}
+                    {% if category_banner.subtitle %}
+                    <p class="category-banner__subtitle">{{ category_banner.subtitle }}</p>
+                    {% endif %}
+                    {% if category_banner.primary_btn_text %}
+                    {% set banner_btn_style = category_banner.accent_color ? ' style="--category-banner-accent: ' ~ category_banner.accent_color ~ '; color: ' ~ category_banner.badge_text_color ~ ';"' : '' %}
+                    {% if category_banner.link %}<a href="{{ category_banner.link }}" class="category-banner__btn category-banner__btn--primary"{{ banner_btn_style|raw }}>{{ category_banner.primary_btn_text }}</a>{% else %}<span class="category-banner__btn category-banner__btn--primary"{{ banner_btn_style|raw }}>{{ category_banner.primary_btn_text }}</span>{% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+              {% if category_banner.link %}<a href="{{ category_banner.link }}" class="category-banner__stretched-link" aria-label="{{ category_banner.title|default('')|e('html_attr') }}"></a>{% endif %}
             </div>
             {% endif %}
             {% endfor %}
@@ -234,6 +256,24 @@
 </main>
 
 <style>
+  .category-banner { position: relative; min-width: 0; overflow: hidden; border-radius: 24px; background: #111827; }
+  .category-banner__media, .category-banner__link, .category-banner__media picture { position: relative; display: block; width: 100%; height: 100%; }
+  .category-banner__media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .category-banner__stretched-link { position: absolute; inset: 0; z-index: 2; display: block; text-decoration: none; }
+  .category-banner__btn { position: relative; z-index: 3; }
+  .category-banner__link { color: inherit; text-decoration: none; }
+  .category-banner__overlay { position: absolute !important; inset: 0 !important; display: flex !important; align-items: center; pointer-events: none; background: linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.46) 38%, rgba(0,0,0,.12) 72%, transparent 100%) !important; }
+  .category-banner__overlay--left { justify-content: flex-start; }
+  .category-banner__overlay--center { justify-content: center; background: linear-gradient(to right, rgba(0,0,0,.18), rgba(0,0,0,.52), rgba(0,0,0,.18)); }
+  .category-banner__overlay--right { justify-content: flex-end; background: linear-gradient(to left, rgba(0,0,0,.82) 0%, rgba(0,0,0,.46) 38%, rgba(0,0,0,.12) 72%, transparent 100%); }
+  .category-banner__content { width: 100%; padding: 1.25rem 1rem; box-sizing: border-box; color: #fff; text-align: left; pointer-events: auto; }
+  .category-banner__overlay--center .category-banner__content { text-align: center; }
+  .category-banner__overlay--right .category-banner__content { text-align: right; }
+  .category-banner__badge { display: inline-block; margin-bottom: .625rem; padding: .25rem .5rem; border-radius: .5rem; font-size: .6875rem; font-weight: 700; }
+  .category-banner__title { margin: 0 0 .5rem; color: #fff !important; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+  .category-banner__subtitle { margin: 0 0 .75rem; color: #fff !important; font-size: .875rem; line-height: 1.45; opacity: .95; }
+  .category-banner__btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--category-banner-accent, transparent) !important; border-radius: .75rem; padding: .5rem .85rem; background: var(--category-banner-accent, transparent) !important; color: var(--category-banner-button-text, #fff) !important; font-size: .8125rem; font-weight: 700; line-height: 1.2; }
+  .category-banner__link:focus-visible { outline: 3px solid color-mix(in srgb, var(--category-banner-accent, transparent) 55%, #fff); outline-offset: -3px; }
   .wishlist-btn { opacity: 0; transform: translateY(-4px) scale(.92); transition: opacity .18s ease, transform .18s ease, box-shadow .18s ease; }
   .product-card:hover .wishlist-btn { opacity: 1; transform: translateY(0) scale(1); }
   .wishlist-btn:focus-visible, .wishlist-btn.bg-rose-50 { opacity: 1; transform: translateY(0) scale(1); }

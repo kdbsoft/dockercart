@@ -249,24 +249,7 @@ class ControllerProductCategory extends Controller {
 				);
 			}
 
-			$data['category_banner'] = array();
-
-			if (!empty($category_info['banner_image'])) {
-				$banner_link = '';
-
-				if (!empty($category_info['banner_link'])) {
-					if (preg_match('/^route=([^&]+)&(.+)$/', $category_info['banner_link'], $m)) {
-						$banner_link = $this->url->link($m[1], $m[2], true);
-					} else {
-						$banner_link = $category_info['banner_link'];
-					}
-				}
-
-				$data['category_banner'] = array(
-					'image' => $this->model_tool_image->resize($category_info['banner_image'], 600, 600),
-					'link'  => $banner_link
-				);
-			}
+			$data['category_banner'] = $this->getCategoryBannerCard($category_info);
 
 			$data['banner_position'] = $page === 1 ? 5 : 3;
 
@@ -914,26 +897,7 @@ class ControllerProductCategory extends Controller {
 
 		$has_subcategories = !empty($this->getCachedCategorySubcategories($category_id));
 
-		$category_banner_html = '';
-
-		if (!empty($category_info['banner_image'])) {
-			$banner_link = '';
-
-			if (!empty($category_info['banner_link'])) {
-				if (preg_match('/^route=([^&]+)&(.+)$/', $category_info['banner_link'], $m)) {
-					$banner_link = $this->url->link($m[1], $m[2], true);
-				} else {
-					$banner_link = $category_info['banner_link'];
-				}
-			}
-
-			$banner_image = $this->model_tool_image->resize($category_info['banner_image'], 600, 600);
-
-			$banner_tag_open = $banner_link ? '<a href="' . $banner_link . '">' : '';
-			$banner_tag_close = $banner_link ? '</a>' : '';
-
-			$category_banner_html = '<div class="product-card bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">' . $banner_tag_open . '<img src="' . $banner_image . '" alt="" class="w-full h-full object-cover" loading="lazy" />' . $banner_tag_close . '</div>';
-		}
+		$category_banner_html = $this->buildCategoryBannerCardHtml($category_info);
 
 		$filter_data = array(
 			'filter_category_id'  => $category_id,
@@ -1090,5 +1054,179 @@ class ControllerProductCategory extends Controller {
 			'count' => count($products),
 			'total' => $product_total,
 		)));
+	}
+
+	/**
+	 * Build the listing banner card data from the first slide of the category's
+	 * selected banner. Returns an empty array when no banner is set or the
+	 * banner is inactive/missing for the current language.
+	 */
+	private function getCategoryBannerCard($category_info) {
+		if (empty($category_info['banner_id'])) {
+			return array();
+		}
+
+		$this->load->model('design/banner');
+		$this->load->model('tool/image');
+
+		$results = $this->model_design_banner->getBanner((int)$category_info['banner_id']);
+
+		if (empty($results)) {
+			return array();
+		}
+
+		$result = $results[0];
+
+		$image_landscape = '';
+		$image_portrait = '';
+
+		if (is_file(DIR_IMAGE . $result['image'])) {
+			$image_landscape = $this->model_tool_image->resize($result['image'], 600, 900);
+		}
+
+		if (!empty($result['image_portrait']) && is_file(DIR_IMAGE . $result['image_portrait'])) {
+			$image_portrait = $this->model_tool_image->resize($result['image_portrait'], 600, 900);
+		}
+
+		$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
+
+		$accent_bg = '';
+		$badge_text_color = $accent_color ? $this->badgeTextColor($accent_color) : '#ffffff';
+
+		if ($accent_color) {
+			$hex = ltrim($accent_color, '#');
+
+			if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
+				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+			}
+
+			if (preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+				$r = hexdec(substr($hex, 0, 2));
+				$g = hexdec(substr($hex, 2, 2));
+				$b = hexdec(substr($hex, 4, 2));
+				$accent_bg = 'rgba(' . $r . ',' . $g . ',' . $b . ',0.5)';
+			}
+		}
+
+		$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		if ($accent_color) {
+			$title_html = preg_replace(
+				'/\[(.+?)\]/',
+				'<span style="color:' . htmlspecialchars($accent_color, ENT_QUOTES) . '">$1</span>',
+				htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8')
+			);
+		} else {
+			$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
+		}
+
+		return array(
+			'title'              => $raw_title,
+			'title_html'         => $title_html,
+			'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
+			'accent_text'        => isset($result['accent_text']) ? html_entity_decode((string)$result['accent_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
+			'accent_color'       => $accent_color,
+			'accent_bg'          => $accent_bg,
+			'badge_text_color'   => $badge_text_color,
+			'primary_btn_text'   => isset($result['primary_btn_text']) ? html_entity_decode((string)$result['primary_btn_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
+			'link'               => $this->resolveBannerLink(isset($result['link']) ? $result['link'] : ''),
+			'image'              => $image_landscape,
+			'image_portrait'     => $image_portrait,
+			'content_position'   => isset($result['content_position']) ? $result['content_position'] : 'left'
+		);
+	}
+
+	/**
+	 * Build the listing banner card HTML for the AJAX load-more response.
+	 */
+	private function buildCategoryBannerCardHtml($category_info) {
+		$card = $this->getCategoryBannerCard($category_info);
+
+		if (!$card) {
+			return '';
+		}
+
+		$image = $card['image_portrait'] ? $card['image_portrait'] : $card['image'];
+		$position = in_array($card['content_position'], array('left', 'center', 'right'), true) ? $card['content_position'] : 'left';
+		$style = ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'] ? $card['accent_color'] : 'transparent', ENT_QUOTES, 'UTF-8') . '; --category-banner-button-text: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
+
+		$html = '<div class="category-banner category-banner--' . $position . ' category-banner__stretched"' . $style . '><div class="category-banner__media">';
+
+		if ($image) {
+			$html .= '<img src="' . $image . '" alt="' . htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') . '" loading="lazy" />';
+		}
+
+		if ($card['title_html'] || $card['subtitle'] || $card['accent_text'] || $card['primary_btn_text']) {
+			$html .= '<div class="category-banner__overlay category-banner__overlay--' . $position . '"><div class="category-banner__content">';
+
+			if ($card['accent_text']) {
+				$badge_style = '';
+				if ($card['accent_color']) {
+					$badge_style .= 'background-color: ' . htmlspecialchars($card['accent_color'], ENT_QUOTES, 'UTF-8') . ';';
+				}
+				if ($card['accent_bg']) {
+					$badge_style .= '--accent-bg: ' . htmlspecialchars($card['accent_bg'], ENT_QUOTES, 'UTF-8') . ';';
+				}
+				if ($card['accent_color'] || $card['accent_bg']) {
+					$badge_style .= 'color: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';';
+				}
+				$html .= '<span class="category-banner__badge"' . ($badge_style ? ' style="' . $badge_style . '"' : '') . '>' . $card['accent_text'] . '</span>';
+			}
+
+			if ($card['title_html']) {
+				$html .= '<h2 class="category-banner__title">' . $card['title_html'] . '</h2>';
+			}
+
+			if ($card['subtitle']) {
+				$html .= '<p class="category-banner__subtitle">' . $card['subtitle'] . '</p>';
+			}
+
+			if ($card['primary_btn_text']) {
+				$button_style = $card['accent_color'] ? ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'], ENT_QUOTES, 'UTF-8') . '; color: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';"' : '';
+				if ($card['link']) {
+					$html .= '<a href="' . $card['link'] . '" class="category-banner__btn category-banner__btn--primary"' . $button_style . '>' . $card['primary_btn_text'] . '</a>';
+				} else {
+					$html .= '<span class="category-banner__btn category-banner__btn--primary"' . $button_style . '>' . $card['primary_btn_text'] . '</span>';
+				}
+			}
+
+			$html .= '</div></div>';
+		}
+
+		$html .= '</div>';
+
+		if ($card['link']) {
+			$html .= '<a href="' . $card['link'] . '" class="category-banner__stretched-link" aria-label="' . htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') . '"></a>';
+		}
+
+		$html .= '</div>';
+
+		return $html;
+	}
+
+	private function resolveBannerLink($link) {
+		if (preg_match('/^route=([^&]+)&(.+)$/', $link, $m)) {
+			return $this->url->link($m[1], $m[2], true);
+		}
+
+		return $link;
+	}
+
+	private function badgeTextColor($hex) {
+		$hex = ltrim($hex, '#');
+
+		if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+
+		if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+			return '#ffffff';
+		}
+
+		$r = hexdec(substr($hex, 0, 2));
+		$g = hexdec(substr($hex, 2, 2));
+		$b = hexdec(substr($hex, 4, 2));
+
+		return ((0.299 * $r + 0.587 * $g + 0.114 * $b) / 255) > 0.5 ? '#000000' : '#ffffff';
 	}
 }

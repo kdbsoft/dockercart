@@ -55,6 +55,9 @@ $_['tab_images_group']       = 'Images';
 $_['entry_image']            = 'Image';
 $_['entry_icon']             = 'Icon';
 $_['entry_background_image'] = 'Background Image';
+$_['entry_banner_select']    = 'Category Banner';
+$_['text_banner_none']       = '— No banner —';
+$_['text_banner_inactive']   = 'inactive';
 $_['entry_top']              = 'Top';
 $_['entry_column']           = 'Columns';
 $_['entry_sort_order']       = 'Sort Order';
@@ -63,26 +66,14 @@ $_['entry_layout']           = 'Layout Override';
 $_['entry_related']           = 'Related Categories';
 $_['text_select_related']     = 'Select Related Categories';
 $_['text_selected']            = 'selected';
- $_['entry_banner_image']      = 'Listing Banner Image';
- $_['entry_banner_link']       = 'Banner Link';
- $_['entry_review_criteria_group'] = 'Review Criteria Group';
+$_['entry_review_criteria_group'] = 'Review Criteria Group';
  $_['help_review_criteria_group']  = 'Which "what is rated" group applies to product reviews in this category. Leave on "Inherit" to use the default group.';
  $_['text_review_criteria_inherit'] = 'Inherit default';
  $_['text_default']            = 'default';
-$_['text_link_custom']        = 'Custom URL';
-$_['text_link_product']       = 'Product';
-$_['text_link_category']      = 'Category';
-$_['text_link_manufacturer']  = 'Manufacturer';
-$_['text_link_information']   = 'Information Page';
-$_['text_link_blog']          = 'Blog Post';
-$_['entry_link']              = 'Link';
-$_['entry_link_search']       = 'Search by name...';
 
 // Help
 $_['help_top']               = 'Display in the top menu bar. Only works for the top parent categories.';
 $_['help_column']            = 'Number of columns to use for the bottom 3 categories. Only works for the top parent categories.';
-$_['help_banner_image']      = 'Display a promotional banner in the product listing.';
-$_['text_banner_ratio']      = '2:3';
 $_['help_icon']              = 'Small icon displayed next to the category name in the header navigation. Recommended: SVG or PNG, 24×24 px.';
 $_['help_related']           = 'Complementary categories to visit alongside this one. E.g., "Light Bulbs" for "Lamps".';
 
