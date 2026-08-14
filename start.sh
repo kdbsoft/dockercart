@@ -82,9 +82,17 @@ echo ""
 # SETUP
 # ============================================================================
 
-if [ ! -f .env ]; then
-    echo -e "${YELLOW}Creating .env${NC}"
-    cp .env.example .env
+# Interactive wizard: creates .env from .env.example on first run and asks for
+# critical settings (domain, timezone, passwords, admin, seed mode). Existing
+# .env files are only completed with missing keys. Non-interactive runs (CI)
+# silently copy the template, exactly like before.
+if [ ! -f .env ] || [ "${DOCKERCART_ENV_FORCE_WIZARD:-0}" = "1" ]; then
+    . ./scripts/configure-env.sh
+    # When launched via --menu, select-mode.sh ran before .env existed, so the
+    # chosen mode wasn't persisted. Remember it now that the wizard created .env.
+    if [ -n "${MENU:-}" ] && [ -f .env ] && ! grep -qE '^DOCKERCART_RUN_MODE=' .env; then
+        printf '\n# Last run mode selected via make start\nDOCKERCART_RUN_MODE=%s\n' "$MENU" >> .env
+    fi
 fi
 
 if [ -f .env ]; then

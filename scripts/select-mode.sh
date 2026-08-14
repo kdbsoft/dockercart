@@ -73,9 +73,7 @@ case "$MENU" in
 esac
 
 # --- Remember the choice in .env ---
-if [ ! -f "$ENV_FILE" ] && [ -f .env.example ]; then
-    cp .env.example "$ENV_FILE"
-fi
+# (.env is created later by the setup wizard in start.sh's SETUP block.)
 if [ -f "$ENV_FILE" ]; then
     if grep -qE '^DOCKERCART_RUN_MODE=' "$ENV_FILE"; then
         sed -i "s/^DOCKERCART_RUN_MODE=.*/DOCKERCART_RUN_MODE=${MENU}/" "$ENV_FILE"

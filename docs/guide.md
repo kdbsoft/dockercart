@@ -35,10 +35,10 @@
 ```bash
 git clone https://github.com/kdbsoft/dockercart.git
 cd dockercart
-cp .env.example .env
+make start
 ```
 
-Edit `.env` to match your environment — at minimum set `DOCKERCART_URL`, `DB_PASSWORD`, and `ADMIN_PASSWORD`.
+On the first run `make start` interactively generates `.env` — it asks for the store domain, timezone, database and admin passwords (press Enter to generate random ones), the admin account, and whether to install demo data. Existing `.env` files are only completed with missing keys, never overwritten; `.env.example` remains the full reference template for manual tuning. For fully automated installs, set `DOCKERCART_NONINTERACTIVE=1` to fall back to a plain copy of `.env.example`.
 
 ### First Boot
 
@@ -136,7 +136,7 @@ All runtime data lives outside the webroot:
 
 ### Environment Variables
 
-All settings are defined in `.env` (copy from `.env.example`).  
+All settings are defined in `.env` — generated interactively on the first `make start` (domain, timezone, passwords, admin account); missing keys are asked for on subsequent startups. `.env.example` is the full reference template for manual configuration.  
 `upload/config.php` and `upload/admin/config.php` are **generated at container start** by `docker/entrypoint.sh` — never edit them directly.
 
 #### Database
