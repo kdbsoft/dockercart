@@ -294,7 +294,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         $data['pagination'] = $pagination->render();
 
-        $data['results'] = sprintf($this->language->get('text_pagination'), ($total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($total - $limit)) ? $total : ((($page - 1) * $limit) + $limit), $total, ceil($total / $limit));
+        $data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
         $data['add'] = $this->url->link('extension/module/dockercart_search/mapping', 'user_token=' . $this->session->data['user_token'], true);
         $data['cancel'] = $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true);

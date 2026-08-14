@@ -227,13 +227,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
         $pagination->url = $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . '&filter_email=' . urlencode($filter_email) . '&page={page}' . ($selected_module_id > 0 ? '&module_id=' . $selected_module_id : ''), true);
 
         $data['pagination'] = $pagination->render();
-        $data['results'] = sprintf(
-            $this->language->get('text_pagination'),
-            ($subscriber_total) ? (($page - 1) * $limit) + 1 : 0,
-            ((($page - 1) * $limit) > ($subscriber_total - $limit)) ? $subscriber_total : ((($page - 1) * $limit) + $limit),
-            $subscriber_total,
-            ceil($subscriber_total / $limit)
-        );
+        $data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
         $data['filter_email'] = $filter_email;
         $data['filter_action'] = $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . ($selected_module_id > 0 ? '&module_id=' . $selected_module_id : ''), true);

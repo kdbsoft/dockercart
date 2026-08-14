@@ -103,4 +103,37 @@ class Pagination {
 			return '';
 		}
 	}
+
+	/**
+	 * Build the "Showing X to Y of Z" summary string.
+	 * Returns an empty string when there are no records at all.
+	 *
+	 * @param	string	$text	sprintf format, e.g. "Showing %d to %d of %d (%d Pages)"
+	 *
+	 * @return	string
+	 */
+	public function renderResults($text) {
+		$total = (int)$this->total;
+
+		if ($total == 0) {
+			return '';
+		}
+
+		if ($this->page < 1) {
+			$page = 1;
+		} else {
+			$page = $this->page;
+		}
+
+		if (!(int)$this->limit) {
+			$limit = 10;
+		} else {
+			$limit = $this->limit;
+		}
+
+		$start = ($page - 1) * $limit + 1;
+		$end = ($start - 1 > $total - $limit) ? $total : (($page - 1) * $limit + $limit);
+
+		return sprintf($text, $start, $end, $total, ceil($total / $limit));
+	}
 }
