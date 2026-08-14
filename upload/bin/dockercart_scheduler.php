@@ -128,10 +128,15 @@ function isDue(string $cronSchedule, ?string $lastRun): bool {
 		return $now >= $nextRun;
 	}
 
-	// ── Preset: daily (once per calendar day) ──
-	if ($cronSchedule === 'daily') {
-		$todayMidnight = new \DateTime('today midnight');
-		return $lastRunDt < $todayMidnight;
+	// ── Preset: daily / weekly / monthly (once per calendar period) ──
+	if ($cronSchedule === 'daily' || $cronSchedule === 'weekly' || $cronSchedule === 'monthly') {
+		$periodStart = match ($cronSchedule) {
+			'daily'   => new \DateTime('today midnight'),
+			'weekly'  => (new \DateTime('monday this week'))->setTime(0, 0),
+			'monthly' => (new \DateTime('first day of this month'))->setTime(0, 0),
+		};
+
+		return $lastRunDt < $periodStart;
 	}
 
 	// ── 5-field cron expression ──
@@ -253,10 +258,21 @@ function calculateNextDueTimestamp(string $cronSchedule, ?string $lastRun): ?int
 		return time();
 	}
 
-	if ($cronSchedule === 'daily') {
+	if ($cronSchedule === 'daily' || $cronSchedule === 'weekly' || $cronSchedule === 'monthly') {
 		if ($lastRun !== null) {
-			return strtotime('today midnight') + 86400;
+			$periodStart = match ($cronSchedule) {
+				'daily'   => strtotime('today midnight'),
+				'weekly'  => strtotime('monday this week 00:00:00'),
+				'monthly' => strtotime('first day of this month 00:00:00'),
+			};
+
+			return $periodStart + match ($cronSchedule) {
+				'daily'   => 86400,
+				'weekly'  => 604800,
+				'monthly' => 2592000,
+			};
 		}
+
 		return time();
 	}
 

@@ -13,7 +13,7 @@ $_['text_scheduler_running'] = 'The scheduler runs inside the dockercart_schedul
 $_['text_no_tasks']         = 'No scheduled tasks found. Enable scheduling in module settings.';
 
 // Column
-$_['column_source']         = 'Task Type';
+$_['column_key']            = 'Key';
 $_['column_name']           = 'Name';
 $_['column_schedule']       = 'Schedule';
 $_['column_last_run']       = 'Last Run';
@@ -27,7 +27,15 @@ $_['text_hourly']           = 'Hourly';
 $_['text_every_6h']         = 'Every 6 hours';
 $_['text_every_12h']        = 'Every 12 hours';
 $_['text_daily']            = 'Daily';
+$_['text_every_week']       = 'Weekly';
+$_['text_every_month']      = 'Monthly';
 $_['text_custom']           = 'Custom cron';
+
+// Name editing
+$_['text_edit_name']        = 'Edit Task Name';
+$_['help_edit_name']        = 'Edit name';
+$_['button_save']           = 'Save';
+$_['button_cancel']         = 'Cancel';
 
 // Error
 $_['error_permission']      = 'Warning: You do not have permission to modify scheduler!';

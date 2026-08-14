@@ -13,7 +13,7 @@ $_['text_scheduler_running'] = 'Планировщик работает в Docke
 $_['text_no_tasks']         = 'Запланированные задачи не найдены. Включите планирование в настройках модуля.';
 
 // Column
-$_['column_source']         = 'Тип задачи';
+$_['column_key']            = 'Ключ';
 $_['column_name']           = 'Название';
 $_['column_schedule']       = 'Расписание';
 $_['column_last_run']       = 'Последний запуск';
@@ -27,7 +27,15 @@ $_['text_hourly']           = 'Ежечасно';
 $_['text_every_6h']         = 'Каждые 6 часов';
 $_['text_every_12h']        = 'Каждые 12 часов';
 $_['text_daily']            = 'Ежедневно';
+$_['text_every_week']       = 'Еженедельно';
+$_['text_every_month']      = 'Ежемесячно';
 $_['text_custom']           = 'Пользовательский cron';
+
+// Name editing
+$_['text_edit_name']        = 'Редактирование названия задачи';
+$_['help_edit_name']        = 'Редактировать название';
+$_['button_save']           = 'Сохранить';
+$_['button_cancel']         = 'Отмена';
 
 // Error
 $_['error_permission']      = 'Внимание: У вас нет прав для изменения планировщика!';
