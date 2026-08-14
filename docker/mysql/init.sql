@@ -1453,7 +1453,7 @@ CREATE TABLE `oc_cart` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `cart_id` (`customer_id`,`session_id`,`product_id`,`recurring_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14708 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14722 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1526,8 +1526,6 @@ INSERT INTO `oc_cart` VALUES
 (4271,0,'5bc535b0176426c2ef7a9b4721',5030,0,'{\"9075\":\"10022\",\"9074\":\"10021\",\"variant_id\":\"744\"}',1.00,'2026-08-11 12:32:47'),
 (4353,0,'ccadmintest',5006,0,'{\"variant_id\":651}',1.00,'2026-08-11 12:47:03'),
 (14678,0,'b4d2aac9be240c1f9aa8a1d563',5041,0,'{\"variant_id\":\"787\",\"9146\":\"28\"}',1.00,'2026-08-12 16:17:39'),
-(14695,0,'7b110438d8473a6e2b90c1ad5a',5064,0,'{\"9159\":\"10190\",\"variant_id\":\"833\"}',1.00,'2026-08-13 07:24:15'),
-(14696,0,'7b110438d8473a6e2b90c1ad5a',5010,0,'{\"9034\":\"9932\",\"9035\":\"9934\",\"variant_id\":\"667\"}',1.00,'2026-08-13 07:24:20'),
 (14700,0,'4a3b7c7b6d733bebe7c9d7ae78',5010,0,'{\"9034\":\"9932\",\"9035\":\"9934\",\"variant_id\":\"667\"}',1.00,'2026-08-13 07:58:34'),
 (14701,0,'4a3b7c7b6d733bebe7c9d7ae78',5064,0,'{\"9159\":\"10190\",\"variant_id\":\"833\"}',1.00,'2026-08-13 07:58:44'),
 (14705,0,'d6da9c341dad59ed2e647cb933',5006,0,'{\"9025\":\"9915\",\"9024\":\"9913\",\"variant_id\":\"651\"}',1.00,'2026-08-13 09:55:59');
@@ -1548,6 +1546,7 @@ CREATE TABLE `oc_category` (
   `image` varchar(255) DEFAULT NULL,
   `icon` varchar(255) DEFAULT NULL,
   `background_image` varchar(255) DEFAULT NULL,
+  `banner_id` int(11) DEFAULT NULL,
   `parent_id` int(11) NOT NULL DEFAULT 0,
   `top` tinyint(1) NOT NULL,
   `column` int(11) NOT NULL,
@@ -1569,75 +1568,43 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_category` WRITE;
 /*!40000 ALTER TABLE `oc_category` DISABLE KEYS */;
 INSERT INTO `oc_category` VALUES
-(101,'catalog/demo/demo-seed/categories/electronics.jpg','','catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',0,1,0,1,1,'2026-03-03 08:51:04','2026-07-23 13:53:46',NULL),
-(103,'catalog/demo/demo-seed/categories/fashion.jpg',NULL,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg',0,1,1,3,1,'2026-03-03 08:51:05','2026-05-28 08:38:53',NULL),
-(104,'catalog/demo/demo-seed/categories/sports-outdoors.jpg',NULL,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg',0,1,1,4,1,'2026-03-03 08:51:05','2026-05-28 08:39:26',NULL),
-(105,'catalog/demo/demo-seed/categories/beauty-health.jpg',NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',0,1,1,5,1,'2026-03-03 08:51:06','2026-05-30 16:39:49',NULL),
-(106,'catalog/demo/demo-seed/categories/toys-games.jpg',NULL,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg',0,1,1,6,1,'2026-03-03 08:51:07','2026-05-28 08:39:54',NULL),
-(107,'catalog/demo/demo-seed/categories/books-media.jpg',NULL,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg',0,1,1,7,1,'2026-03-03 08:51:07','2026-05-28 08:40:14',NULL),
-(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',0,1,0,8,1,'2026-03-03 08:51:08','2026-08-08 10:05:15',0),
-(109,'catalog/demo/demo-seed/categories/pet-supplies.jpg',NULL,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg',0,1,1,9,1,'2026-03-03 08:51:09','2026-05-28 08:40:50',NULL),
-(1101,'catalog/demo/demo-seed/categories/electronics-smartphones.jpg',NULL,NULL,101,0,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
-(1102,'catalog/demo/demo-seed/categories/electronics-laptops.jpg',NULL,NULL,101,0,1,2,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
-(1103,'catalog/demo/demo-seed/categories/electronics-audio.jpg',NULL,NULL,101,0,1,3,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
-(1301,'catalog/demo/demo-seed/categories/fashion-womens-clothing.jpg',NULL,NULL,103,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
-(1302,'catalog/demo/demo-seed/categories/fashion-mens-clothing.jpg',NULL,NULL,103,0,1,2,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
-(1303,'catalog/demo/demo-seed/categories/fashion-shoes-accessories.jpg',NULL,NULL,103,0,1,3,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
-(1401,'catalog/demo/demo-seed/categories/sports-outdoors-fitness.jpg',NULL,NULL,104,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
-(1402,'catalog/demo/demo-seed/categories/sports-outdoors-camping.jpg',NULL,NULL,104,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
-(1403,'catalog/demo/demo-seed/categories/sports-outdoors-cycling.jpg',NULL,NULL,104,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
-(1501,'catalog/demo/demo-seed/categories/beauty-health-skincare.jpg',NULL,NULL,105,0,1,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
-(1502,'catalog/demo/demo-seed/categories/beauty-health-haircare.jpg',NULL,NULL,105,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
-(1503,'catalog/demo/demo-seed/categories/beauty-health-wellness.jpg',NULL,NULL,105,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
-(1601,'catalog/demo/demo-seed/categories/toys-games-board-games.jpg',NULL,NULL,106,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1602,'catalog/demo/demo-seed/categories/toys-games-construction-toys.jpg',NULL,NULL,106,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1603,'catalog/demo/demo-seed/categories/toys-games-gaming-consoles.jpg',NULL,NULL,106,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1701,'catalog/demo/demo-seed/categories/books-media-fiction.jpg',NULL,NULL,107,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1702,'catalog/demo/demo-seed/categories/books-media-business.jpg',NULL,NULL,107,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1703,'catalog/demo/demo-seed/categories/books-media-kids-books.jpg',NULL,NULL,107,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
-(1801,'catalog/demo/demo-seed/categories/automotive-car-electronics.jpg','catalog/cart.png','',108,0,1,1,1,'2026-03-03 08:51:08','2026-06-07 09:02:42',NULL),
-(1802,'catalog/demo/demo-seed/categories/automotive-car-care.jpg',NULL,NULL,108,0,1,2,1,'2026-03-03 08:51:08','2026-03-03 08:51:08',NULL),
-(1803,'catalog/demo/demo-seed/categories/automotive-interior-accessories.jpg',NULL,NULL,108,0,1,3,1,'2026-03-03 08:51:08','2026-03-03 08:51:08',NULL),
-(1901,'catalog/demo/demo-seed/categories/pet-supplies-dog-care.jpg',NULL,NULL,109,0,1,1,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
-(1902,'catalog/demo/demo-seed/categories/pet-supplies-cat-care.jpg',NULL,NULL,109,0,1,2,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
-(1903,'catalog/demo/demo-seed/categories/pet-supplies-pet-tech.jpg',NULL,NULL,109,0,1,3,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
-(1971,'catalog/demo/demo-seed/categories/home-kitchen.jpg',NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg',0,1,1,2,1,'2026-06-03 13:44:48','2026-06-03 18:02:14',NULL),
-(1972,'catalog/demo/demo-seed/categories/home-kitchen-cookware.jpg',NULL,NULL,1971,0,1,1,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
-(1973,'catalog/demo/demo-seed/categories/home-kitchen-small-appliances.jpg',NULL,NULL,1971,0,1,2,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
-(1974,'catalog/demo/demo-seed/categories/home-kitchen-home-decor.jpg',NULL,NULL,1971,0,1,3,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL);
+(101,'catalog/demo/demo-seed/categories/electronics.jpg','','catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',6,0,1,0,1,1,'2026-03-03 08:51:04','2026-08-13 11:30:39',0),
+(103,'catalog/demo/demo-seed/categories/fashion.jpg',NULL,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg',NULL,0,1,1,3,1,'2026-03-03 08:51:05','2026-05-28 08:38:53',NULL),
+(104,'catalog/demo/demo-seed/categories/sports-outdoors.jpg',NULL,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg',NULL,0,1,1,4,1,'2026-03-03 08:51:05','2026-05-28 08:39:26',NULL),
+(105,'catalog/demo/demo-seed/categories/beauty-health.jpg',NULL,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg',NULL,0,1,1,5,1,'2026-03-03 08:51:06','2026-05-30 16:39:49',NULL),
+(106,'catalog/demo/demo-seed/categories/toys-games.jpg',NULL,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg',NULL,0,1,1,6,1,'2026-03-03 08:51:07','2026-05-28 08:39:54',NULL),
+(107,'catalog/demo/demo-seed/categories/books-media.jpg','','catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg',NULL,0,1,0,7,1,'2026-03-03 08:51:07','2026-08-13 11:50:10',0),
+(108,'catalog/demo/demo-seed/categories/automotive.jpg','catalog/cart.png','catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',NULL,0,1,0,8,1,'2026-03-03 08:51:08','2026-08-08 10:05:15',0),
+(109,'catalog/demo/demo-seed/categories/pet-supplies.jpg',NULL,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg',NULL,0,1,1,9,1,'2026-03-03 08:51:09','2026-05-28 08:40:50',NULL),
+(1101,'catalog/demo/demo-seed/categories/electronics-smartphones.jpg',NULL,NULL,NULL,101,0,1,1,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1102,'catalog/demo/demo-seed/categories/electronics-laptops.jpg',NULL,NULL,NULL,101,0,1,2,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1103,'catalog/demo/demo-seed/categories/electronics-audio.jpg',NULL,NULL,NULL,101,0,1,3,1,'2026-03-03 08:51:04','2026-03-03 08:51:04',NULL),
+(1301,'catalog/demo/demo-seed/categories/fashion-womens-clothing.jpg',NULL,NULL,NULL,103,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1302,'catalog/demo/demo-seed/categories/fashion-mens-clothing.jpg',NULL,NULL,NULL,103,0,1,2,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1303,'catalog/demo/demo-seed/categories/fashion-shoes-accessories.jpg',NULL,NULL,NULL,103,0,1,3,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1401,'catalog/demo/demo-seed/categories/sports-outdoors-fitness.jpg',NULL,NULL,NULL,104,0,1,1,1,'2026-03-03 08:51:05','2026-03-03 08:51:05',NULL),
+(1402,'catalog/demo/demo-seed/categories/sports-outdoors-camping.jpg',NULL,NULL,NULL,104,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1403,'catalog/demo/demo-seed/categories/sports-outdoors-cycling.jpg',NULL,NULL,NULL,104,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1501,'catalog/demo/demo-seed/categories/beauty-health-skincare.jpg',NULL,NULL,NULL,105,0,1,1,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1502,'catalog/demo/demo-seed/categories/beauty-health-haircare.jpg',NULL,NULL,NULL,105,0,1,2,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1503,'catalog/demo/demo-seed/categories/beauty-health-wellness.jpg',NULL,NULL,NULL,105,0,1,3,1,'2026-03-03 08:51:06','2026-03-03 08:51:06',NULL),
+(1601,'catalog/demo/demo-seed/categories/toys-games-board-games.jpg',NULL,NULL,NULL,106,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1602,'catalog/demo/demo-seed/categories/toys-games-construction-toys.jpg',NULL,NULL,NULL,106,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1603,'catalog/demo/demo-seed/categories/toys-games-gaming-consoles.jpg',NULL,NULL,NULL,106,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1701,'catalog/demo/demo-seed/categories/books-media-fiction.jpg',NULL,NULL,NULL,107,0,1,1,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1702,'catalog/demo/demo-seed/categories/books-media-business.jpg',NULL,NULL,NULL,107,0,1,2,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1703,'catalog/demo/demo-seed/categories/books-media-kids-books.jpg',NULL,NULL,NULL,107,0,1,3,1,'2026-03-03 08:51:07','2026-03-03 08:51:07',NULL),
+(1801,'catalog/demo/demo-seed/categories/automotive-car-electronics.jpg','catalog/cart.png','',NULL,108,0,1,1,1,'2026-03-03 08:51:08','2026-06-07 09:02:42',NULL),
+(1802,'catalog/demo/demo-seed/categories/automotive-car-care.jpg',NULL,NULL,NULL,108,0,1,2,1,'2026-03-03 08:51:08','2026-03-03 08:51:08',NULL),
+(1803,'catalog/demo/demo-seed/categories/automotive-interior-accessories.jpg','','',NULL,108,0,0,3,1,'2026-03-03 08:51:08','2026-08-13 11:31:12',0),
+(1901,'catalog/demo/demo-seed/categories/pet-supplies-dog-care.jpg',NULL,NULL,NULL,109,0,1,1,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1902,'catalog/demo/demo-seed/categories/pet-supplies-cat-care.jpg',NULL,NULL,NULL,109,0,1,2,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1903,'catalog/demo/demo-seed/categories/pet-supplies-pet-tech.jpg',NULL,NULL,NULL,109,0,1,3,1,'2026-03-03 08:51:09','2026-03-03 08:51:09',NULL),
+(1971,'catalog/demo/demo-seed/categories/home-kitchen.jpg',NULL,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg',NULL,0,1,1,2,1,'2026-06-03 13:44:48','2026-06-03 18:02:14',NULL),
+(1972,'catalog/demo/demo-seed/categories/home-kitchen-cookware.jpg',NULL,NULL,NULL,1971,0,1,1,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
+(1973,'catalog/demo/demo-seed/categories/home-kitchen-small-appliances.jpg',NULL,NULL,NULL,1971,0,1,2,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
+(1974,'catalog/demo/demo-seed/categories/home-kitchen-home-decor.jpg',NULL,NULL,NULL,1971,0,1,3,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL);
 /*!40000 ALTER TABLE `oc_category` ENABLE KEYS */;
-UNLOCK TABLES;
-COMMIT;
-SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
-
---
--- Table structure for table `oc_category_banner`
---
-
-DROP TABLE IF EXISTS `oc_category_banner`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_category_banner` (
-  `category_id` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL,
-  `banner_image` varchar(255) DEFAULT NULL,
-  `banner_link` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`category_id`,`language_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `oc_category_banner`
---
-
-SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_category_banner` WRITE;
-/*!40000 ALTER TABLE `oc_category_banner` DISABLE KEYS */;
-INSERT INTO `oc_category_banner` VALUES
-(108,1,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&amp;path=103'),
-(108,2,'','route=product/category&amp;path=103'),
-(108,3,'catalog/demo/demo-seed/banners/hp-products-2.jpg','route=product/category&amp;path=103');
-/*!40000 ALTER TABLE `oc_category_banner` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -1754,9 +1721,9 @@ INSERT INTO `oc_category_description` VALUES
 (1802,1,'Car Care','Car Care in the Automotive department.','Car Care','Car Care in the Automotive department.','car-care'),
 (1802,2,'Догляд за автомобілем','Догляд за автомобілем у відділі автомобілів.','Догляд за автомобілем','Догляд за автомобілем у відділі автомобілів.','догляд за автомобілем'),
 (1802,3,'Уход за автомобилем','Уход за автомобилем в автомобильном отделе.','Уход за автомобилем','Уход за автомобилем в автомобильном отделе.','уход за автомобилем'),
-(1803,1,'Interior Accessories','Interior Accessories in the Automotive department.','Interior Accessories','Interior Accessories in the Automotive department.','interior-accessories'),
-(1803,2,'Аксесуари для інтер\'єру','Аксесуари для салону в автомобільному відділі.','Аксесуари для інтер\'єру','Аксесуари для салону в автомобільному відділі.','аксесуари для інтер\'єру'),
-(1803,3,'Аксессуары для интерьера','Аксессуары для салона автомобиля.','Аксессуары для интерьера','Аксессуары для салона автомобиля.','аксессуары для интерьера'),
+(1803,1,'Interior Accessories','&lt;p&gt;Interior Accessories in the Automotive department.&lt;/p&gt;','Interior Accessories','Interior Accessories in the Automotive department.','interior-accessories'),
+(1803,2,'Аксесуари для інтер\'єру','&lt;p&gt;Аксесуари для салону в автомобільному відділі.&lt;/p&gt;','Аксесуари для інтер\'єру','Аксесуари для салону в автомобільному відділі.','аксесуари для інтер\'єру'),
+(1803,3,'Аксессуары для интерьера','&lt;p&gt;Аксессуары для салона автомобиля.&lt;/p&gt;','Аксессуары для интерьера','Аксессуары для салона автомобиля.','аксессуары для интерьера'),
 (1901,1,'Dog Care','Dog Care in the Pet Supplies department.','Dog Care','Dog Care in the Pet Supplies department.','dog-care'),
 (1901,2,'Догляд за собаками','Догляд за собаками у відділі зоотоварів.','Догляд за собаками','Догляд за собаками у відділі зоотоварів.','догляд за собаками'),
 (1901,3,'Уход за собаками','Уход за собаками в отделе товаров для животных.','Уход за собаками','Уход за собаками в отделе товаров для животных.','уход за собаками'),
@@ -2008,6 +1975,7 @@ INSERT INTO `oc_category_to_layout` VALUES
 (108,0,0),
 (109,0,0),
 (1801,0,0),
+(1803,0,0),
 (1971,0,0);
 /*!40000 ALTER TABLE `oc_category_to_layout` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2858,10 +2826,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_currency` WRITE;
 /*!40000 ALTER TABLE `oc_currency` DISABLE KEYS */;
 INSERT INTO `oc_currency` VALUES
-(1,'Pound Sterling','GBP','£','','2',0.01653613,1,'2026-08-13 06:31:14'),
-(2,'US Dollar','USD','$','','2',0.02236575,1,'2026-08-13 06:31:14'),
-(3,'Euro','EUR','','€','2',0.01937267,1,'2026-08-13 06:31:14'),
-(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-08-13 06:31:14');
+(1,'Pound Sterling','GBP','£','','2',0.01658252,1,'2026-08-14 10:33:06'),
+(2,'US Dollar','USD','$','','2',0.02237253,1,'2026-08-14 10:33:06'),
+(3,'Euro','EUR','','€','2',0.01939702,1,'2026-08-14 10:33:06'),
+(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-08-14 10:33:06');
 /*!40000 ALTER TABLE `oc_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3054,7 +3022,7 @@ LOCK TABLES `oc_customer` WRITE;
 /*!40000 ALTER TABLE `oc_customer` DISABLE KEYS */;
 INSERT INTO `oc_customer` VALUES
 (99850,1,0,1,'Reward','Customer','reward-customer@example.com','','','','','x','',NULL,NULL,0,0,'','',1,0,'','','2026-08-12 12:51:33',''),
-(99851,2,0,1,'Demo','Retail','retail@demo.local','','','','','$2y$12$0VpmG/0ceC.pUvVwTb0zfO4c0.ttpsk4uoM7UYEWW6EmrwpfoZBSq','',NULL,NULL,0,0,'','10.89.1.7',1,1,'','b18285ef598db17ed277804531a9477eb302c89e','2026-08-10 12:06:30','ec2d801642f2057314a905b54d38b58912ee66646cfa17e5c29969e1fd67246e'),
+(99851,2,0,1,'Demo','Retail','retail@demo.local','','','','','$2y$12$0VpmG/0ceC.pUvVwTb0zfO4c0.ttpsk4uoM7UYEWW6EmrwpfoZBSq','',NULL,NULL,0,0,'','::1',1,1,'','b18285ef598db17ed277804531a9477eb302c89e','2026-08-10 12:06:30','d8ff95de37b09b8e2820c8c6f8ece8c60e76b761dec8aab2c1e61758e090851a'),
 (99852,3,0,3,'Demo','Wholesale','wholesale@demo.local','','','','','$argon2id$v=19$m=65536,t=4,p=1$Y0xNRTNoMENyTzVxSlRzeQ$x4zF8mZvqji52FbPIY736I8d7mHsFh1ZA9Hi6iuaduM','demo',NULL,NULL,0,0,'','10.89.1.7',1,1,'','34821c09003412e4746c89d105ba1cbeb95b23b9','2026-08-10 12:06:30','07f5211e738c337310dfe912a1137ea30427b5b6560df44252b7cc7e69008301'),
 (99853,4,0,3,'Demo','VIP','vip@demo.local','','','','','$argon2id$v=19$m=65536,t=4,p=1$cWVSY3FtQk9sYVhMbHpZbw$UCaYlRPszGk0Kvk2XTC9Pd66vhQlXJ/1g8FE0OeFeXI','demo',NULL,NULL,0,0,'','10.89.1.7',1,1,'','7395360f03f0abe589e0483c3ac85dd6fa1729d5','2026-08-10 12:06:30',''),
 (99854,5,0,1,'Demo','Guest','guest@demo.local','','','','','5e83556d92af913a4cec70be628d4e71448087ea','demo',NULL,NULL,0,0,'','127.0.0.1',1,1,'','e68338df9737c68a5757dddfb869ae7cc9046739','2026-08-10 12:06:30','');
@@ -3078,7 +3046,7 @@ CREATE TABLE `oc_customer_activity` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_activity_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3221,7 +3189,9 @@ INSERT INTO `oc_customer_activity` VALUES
 (131,99852,'login','{\"customer_id\":\"99852\",\"name\":\"Demo Wholesale\"}','10.89.1.7','2026-08-12 08:37:03'),
 (132,0,'order_guest','{\"name\":\"\\u0422\\u0435\\u0441\\u0442 \\u0422\\u0435\\u0441\\u0442\\u043e\\u0432\",\"order_id\":99612}','10.89.1.7','2026-08-13 07:55:16'),
 (133,0,'order_guest','{\"name\":\"Test Name \",\"order_id\":99613}','10.89.1.7','2026-08-13 10:20:21'),
-(134,0,'order_guest','{\"name\":\"Test2 \",\"order_id\":99614}','10.89.1.7','2026-08-13 10:21:25');
+(134,0,'order_guest','{\"name\":\"Test2 \",\"order_id\":99614}','10.89.1.7','2026-08-13 10:21:25'),
+(135,99851,'login','{\"customer_id\":\"99851\",\"name\":\"Demo Retail\"}','::1','2026-08-14 10:47:47'),
+(136,99851,'login','{\"customer_id\":\"99851\",\"name\":\"Demo Retail\"}','::1','2026-08-14 11:24:42');
 /*!40000 ALTER TABLE `oc_customer_activity` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3417,7 +3387,7 @@ CREATE TABLE `oc_customer_ip` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_ip_id`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3437,7 +3407,8 @@ INSERT INTO `oc_customer_ip` VALUES
 (24,99852,'10.89.1.7','2026-08-10 18:22:58'),
 (25,99851,'','2026-08-10 19:20:38'),
 (26,99852,'','2026-08-10 19:29:27'),
-(27,99852,'127.0.0.1','2026-08-11 11:13:12');
+(27,99852,'127.0.0.1','2026-08-11 11:13:12'),
+(28,99851,'::1','2026-08-14 10:47:52');
 /*!40000 ALTER TABLE `oc_customer_ip` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3461,7 +3432,7 @@ CREATE TABLE `oc_customer_login` (
   UNIQUE KEY `ux_email` (`email`),
   KEY `email` (`email`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=129 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3531,7 +3502,7 @@ CREATE TABLE `oc_customer_search` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_search_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=527 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=528 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4067,7 +4038,8 @@ INSERT INTO `oc_customer_search` VALUES
 (523,0,3,0,'JBL Charge 5',0,0,0,1,'10.89.1.7','2026-08-13 07:52:40'),
 (524,0,3,0,'JBL Charge 5',0,0,0,1,'10.89.1.7','2026-08-13 07:53:15'),
 (525,0,3,0,'Sapiens Харари',0,0,0,1,'10.89.1.7','2026-08-13 07:53:52'),
-(526,0,3,0,'Sapiens',0,0,0,1,'10.89.1.7','2026-08-13 07:57:57');
+(526,0,3,0,'Sapiens',0,0,0,1,'10.89.1.7','2026-08-13 07:57:57'),
+(527,0,1,0,'iphone',0,0,0,1,'10.89.1.7','2026-08-13 13:07:56');
 /*!40000 ALTER TABLE `oc_customer_search` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4113,8 +4085,9 @@ DROP TABLE IF EXISTS `oc_customer_wishlist`;
 CREATE TABLE `oc_customer_wishlist` (
   `customer_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
+  `variant_id` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL,
-  PRIMARY KEY (`customer_id`,`product_id`)
+  PRIMARY KEY (`customer_id`,`product_id`,`variant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5858,15 +5831,15 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-13 06:31:13',NULL,'2026-07-02 11:00:50','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
-(41,'license_check','License Verification',1,'every_3d','2026-08-11 09:30:51',NULL,'2026-07-03 18:33:04','2026-08-11 11:59:30',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-13 06:31:13',NULL,'2026-07-24 18:51:04','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-13 06:31:13',NULL,'2026-07-29 10:46:20','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-13 10:31:25',NULL,'2026-08-01 18:17:04','2026-08-13 10:31:25',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
-(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-13 06:31:13',NULL,'2026-08-06 08:09:03','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-13 06:31:13',NULL,'2026-08-06 15:36:09','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
-(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-13 06:31:13',NULL,'2026-08-09 15:39:28','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
-(158,'promo_renew','Renew auto-renewable promotions',1,'23 3 * * *','2026-08-13 06:31:13',NULL,'2026-08-10 13:33:35','2026-08-13 06:31:13',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0);
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-14 10:33:05',NULL,'2026-07-02 11:00:50','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(41,'license_check','License Verification',1,'every_3d','2026-08-14 10:33:05',NULL,'2026-07-03 18:33:04','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-14 10:33:05',NULL,'2026-07-24 18:51:04','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-14 10:33:05',NULL,'2026-07-29 10:46:20','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-14 15:03:05',NULL,'2026-08-01 18:17:04','2026-08-14 15:03:05',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-14 10:33:05',NULL,'2026-08-06 08:09:03','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-14 10:33:05',NULL,'2026-08-06 15:36:09','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-14 10:33:05',NULL,'2026-08-09 15:39:28','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
+(158,'promo_renew','Renew auto-renewable promotions',1,'23 3 * * *','2026-08-14 10:33:05',NULL,'2026-08-10 13:33:35','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6584,7 +6557,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=1327 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1569 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7881,7 +7854,246 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (1323,'ecd1f7d56160e1fc55b14fb99d','','none','','2026-08-13 10:19:49'),
 (1324,'3e776c519757c3c5ba2e51bba4','','none','','2026-08-13 10:23:12'),
 (1325,'04069fe500e9b10c1f4cc7ca85','','none','','2026-08-13 10:33:26'),
-(1326,'c2c7755fb536de02ccdb745601','','none','','2026-08-13 10:33:30');
+(1326,'c2c7755fb536de02ccdb745601','','none','','2026-08-13 10:33:30'),
+(1327,'e95aa817ae8de78fc9700d17a4','','none','','2026-08-13 11:12:59'),
+(1328,'14b47ad05a68bf22fa4e7840e2','','none','','2026-08-13 11:24:40'),
+(1329,'164f1eca9da38313246a954ac0','','none','','2026-08-13 11:31:26'),
+(1330,'f90f4df4296ae3b3e10ced9b36','','none','','2026-08-13 11:39:32'),
+(1331,'a1044189c6465ee9ebb7356f63','','none','','2026-08-13 11:51:15'),
+(1332,'6fc5ca5cb3d4851d2aabbd1bf7','','none','','2026-08-13 12:15:29'),
+(1333,'bf024fb2674b4eb3fbd1c50719','','none','','2026-08-13 12:20:43'),
+(1334,'3bba214f032b727478def9704e','','none','','2026-08-13 12:21:26'),
+(1335,'415decf8e788679a074a326630','','none','','2026-08-13 12:24:04'),
+(1336,'c4f9ade2417dd32b2377ee38c4','','none','','2026-08-13 12:24:52'),
+(1337,'2389582726f1b128a61b53a962','','none','','2026-08-13 12:40:10'),
+(1338,'3d8eccf6c0635fdd300127db64','','none','','2026-08-13 12:54:33'),
+(1339,'e256ed97e4ff4fd73f80a4fbbb','','none','','2026-08-13 12:54:57'),
+(1340,'606c1486e75ab49d11c67fade1','','none','','2026-08-13 12:55:00'),
+(1341,'7d16981ef40487fd938a24fa19','','none','','2026-08-13 12:55:00'),
+(1342,'d6769f6e580f87ba28550b2e44','','none','','2026-08-13 12:55:04'),
+(1343,'e0238ae4409c1780467897414f','','none','','2026-08-13 12:57:36'),
+(1344,'6cb9025fdbf910d83c1442681b','','none','','2026-08-13 12:57:36'),
+(1345,'8daa9dbd9233b198e78dd848a6','','none','','2026-08-13 12:57:43'),
+(1346,'0656253aeda05bca11168f1eaf','','none','','2026-08-13 12:57:43'),
+(1347,'451240daf167a33bf73e0dee0e','','none','','2026-08-13 12:57:43'),
+(1348,'42251f8b1bb581d7d98a52a788','','none','','2026-08-13 12:57:43'),
+(1349,'39df314a65efb62af0bc0158f5','','none','','2026-08-13 12:57:51'),
+(1350,'581df5a840a595b1c39d616877','','none','','2026-08-13 12:57:51'),
+(1351,'6a0917b8b801f5c21182dfa9f9','','none','','2026-08-13 12:57:51'),
+(1352,'471ee1eb1f880c7d170ea01fb6','','none','','2026-08-13 12:57:51'),
+(1353,'b0cd8dfedb62b1372d68672f05','','none','','2026-08-13 12:57:51'),
+(1354,'1f8112455acb208698e71cb40d','','none','','2026-08-13 12:57:51'),
+(1355,'9933e1cc53dc8898b8211854c4','','none','','2026-08-13 12:57:51'),
+(1356,'e8eff0c6d8660b2bd007ff2316','','none','','2026-08-13 12:57:51'),
+(1357,'c2d987cf4929c5744103814a4b','','none','','2026-08-13 12:57:51'),
+(1358,'96b0aa776a4e0239dc1d04de51','','none','','2026-08-13 12:57:51'),
+(1359,'c16d78ea8ae6b95e06e04eef10','','none','','2026-08-13 12:57:51'),
+(1360,'3408f0b850212086c5f82a881c','','none','','2026-08-13 12:57:51'),
+(1361,'12c7b1692973a64dd92fb82a45','','none','','2026-08-13 12:57:51'),
+(1362,'99d37149b768403597f5f8c480','','none','','2026-08-13 12:57:51'),
+(1363,'298ff0f14d1d06b094af72fbc4','','none','','2026-08-13 12:57:51'),
+(1364,'a966b8980de278bc6a8829a23a','','none','','2026-08-13 12:57:51'),
+(1365,'56fbafb75f16977e367a913ffa','','none','','2026-08-13 12:58:48'),
+(1366,'ffa9bf02f1081ea3d7d9a034ec','','none','','2026-08-13 12:58:51'),
+(1367,'67346acdb807e2afec5aebc6fa','','none','','2026-08-13 12:58:52'),
+(1368,'8ad1033c5353e5a3ae0cff0b1b','','none','','2026-08-13 12:58:52'),
+(1369,'a39b13612fcf2ead8c84bec646','','none','','2026-08-13 12:58:55'),
+(1370,'5751400cc424d3f146b0c0c02f','','none','','2026-08-13 12:58:55'),
+(1371,'33ac06a1343e690a0433430224','','none','','2026-08-13 12:59:03'),
+(1372,'e5893951030ea1f35cec188f10','','none','','2026-08-13 12:59:03'),
+(1373,'29bbe69b4a4f1d84db1f67f01d','','none','','2026-08-13 13:04:22'),
+(1374,'3be9d18219bb978e0a613717d2','','none','','2026-08-13 13:04:26'),
+(1375,'02dda5c4fa89d7768d5594d5c0','','none','','2026-08-13 13:04:26'),
+(1376,'75269a26401d686f244d49dce6','','none','','2026-08-13 13:04:26'),
+(1377,'32c016a16cc2fb547fb2fc6349','','none','','2026-08-13 13:04:26'),
+(1378,'0bed1ab10dc460e6b05843dde7','','none','','2026-08-13 13:04:26'),
+(1379,'d1aec52a3c9b6ec8d9bb0db3b3','','none','','2026-08-13 13:04:26'),
+(1380,'d56ed7f5405b4da5f74b78ee3b','','none','','2026-08-13 13:04:26'),
+(1381,'de5f41764c9b863b9f915dc67a','','none','','2026-08-13 13:04:26'),
+(1382,'64be6b549de71aa918419e5e55','','none','','2026-08-13 13:04:26'),
+(1383,'798f79664bd3aa0bdd48f898a9','','none','','2026-08-13 13:04:26'),
+(1384,'8c5ac73c745d899ebc41ca89ae','','none','','2026-08-13 13:04:26'),
+(1385,'67ebc3c394f5113b38fd4fbecf','','none','','2026-08-13 13:04:26'),
+(1386,'4bcc2e0ca65513153e1ee6d7e7','','none','','2026-08-13 13:04:26'),
+(1387,'d1cbe8b45d5d0bfcb89991b7c1','','none','','2026-08-13 13:04:26'),
+(1388,'5e0c42a853d9c53864784d3e0f','','none','','2026-08-13 13:04:26'),
+(1389,'0d320690b902c404792d2112a3','','none','','2026-08-13 13:04:26'),
+(1390,'cb585a02cdcf57759ed5dc0b56','','none','','2026-08-13 13:04:26'),
+(1391,'35dddc916f029abc651e26c2e7','','none','','2026-08-13 13:04:26'),
+(1392,'6ba11290ef7ef4beb0e0eada94','','none','','2026-08-13 13:04:26'),
+(1393,'6a88d96f64751e9a9f3f8e213a','','none','','2026-08-13 13:04:26'),
+(1394,'0ec21dd90d99b8e852cf1500b4','','none','','2026-08-13 13:04:26'),
+(1395,'a114660e5280e400999296a3fc','','none','','2026-08-13 13:05:35'),
+(1396,'00ad818466e606e7dbf1968b0e','','none','','2026-08-13 13:05:35'),
+(1397,'ce15e8561e3df86c4055e59ef4','','none','','2026-08-13 13:05:35'),
+(1398,'e9e66fabcfd900b903bc54bc43','','none','','2026-08-13 13:05:35'),
+(1399,'8cc9dc3d8984350ffe2b2ea932','','none','','2026-08-13 13:05:35'),
+(1400,'95d44d60dec056cbdda4dbb423','','none','','2026-08-13 13:05:35'),
+(1401,'dacb7a88d33ddfdb9b65edefb9','','none','','2026-08-13 13:05:35'),
+(1402,'d8ff5c812d8a8b8e871ddd6ce1','','none','','2026-08-13 13:05:35'),
+(1403,'6373d5ca525cc131c8090f80a9','','none','','2026-08-13 13:05:38'),
+(1404,'a18bccf348178aaf130ec371ca','','none','','2026-08-13 13:05:38'),
+(1405,'619edb4e826972627b51aa66d0','','none','','2026-08-13 13:05:38'),
+(1406,'b1e4d4900085c4d99cbc82c472','','none','','2026-08-13 13:05:38'),
+(1407,'d0652d34d4e77d8a9c24cf791b','','none','','2026-08-13 13:05:38'),
+(1408,'2bd32b997fe5a4e0a85b83d5e2','','none','','2026-08-13 13:05:38'),
+(1409,'3e97470f691cd5d805b307745b','','none','','2026-08-13 13:05:38'),
+(1410,'65c8cbb6bcdf327e08c097d9da','','none','','2026-08-13 13:05:38'),
+(1411,'9852c6320d6965d48013ee8f87','','none','','2026-08-13 13:05:38'),
+(1412,'3b16aec464beb5f4af3c5bb146','','none','','2026-08-13 13:05:38'),
+(1413,'e96da70af3468f5dcec92e17ab','','none','','2026-08-13 13:05:38'),
+(1414,'f564a7399acfb88dfdf1f769aa','','none','','2026-08-13 13:05:39'),
+(1415,'16dcaeada637b18b54aa31d4fb','','none','','2026-08-13 13:05:39'),
+(1416,'9ccacf66ba0610af05404dc6c0','','none','','2026-08-13 13:05:39'),
+(1417,'4f4a89a13cf42b9b167cca43de','','none','','2026-08-13 13:05:39'),
+(1418,'910da694af976dc058deea56e1','','none','','2026-08-13 13:05:39'),
+(1419,'324907bb75dae5f454a755d3ab','','none','','2026-08-13 13:05:42'),
+(1420,'d9d9764562ea9385cec2a929a2','','none','','2026-08-13 13:06:01'),
+(1421,'801988f03c157f24ea1400320b','','none','','2026-08-13 13:07:34'),
+(1422,'aaa3da3010427a71d47fc7aedc','','none','','2026-08-13 13:07:34'),
+(1423,'decdb14fa99d691c94d99bbdb2','','none','','2026-08-13 13:07:34'),
+(1424,'3eb5489882ce97f5e81cfe9534','','none','','2026-08-13 13:07:34'),
+(1425,'f4bd8d3277cee1021553554465','','none','','2026-08-13 13:07:34'),
+(1426,'3afa8c57aea7a7f061f3162a38','','none','','2026-08-13 13:07:34'),
+(1427,'d016bab69350348f6bc69667ad','','none','','2026-08-13 13:07:34'),
+(1428,'3f31ac0df6158e476a47c13ac4','','none','','2026-08-13 13:07:56'),
+(1429,'f5d607f352294dcef94c1c3560','','none','','2026-08-13 13:07:56'),
+(1430,'960337936a3e45c13cd7e4a971','','none','','2026-08-13 13:07:56'),
+(1431,'7624b1f6282b5b8fe98f438851','','none','','2026-08-13 13:07:56'),
+(1432,'0f4c6841b6e7eb998e72ab33ad','','none','','2026-08-13 13:07:56'),
+(1433,'bac18d377d67fc72673666062c','','none','','2026-08-13 13:07:56'),
+(1434,'72e523054ef577672b1845d9d9','','none','','2026-08-13 13:07:56'),
+(1435,'dbc1105d9f0e1aa0a60ae92063','','none','','2026-08-13 13:07:56'),
+(1436,'ef662f0e4ed4d6ecd01128f6bf','','none','','2026-08-13 13:07:56'),
+(1437,'60f42c26403728811c818a829e','','none','','2026-08-13 13:07:56'),
+(1438,'b90b1ddb5f759f5b218e75a157','','none','','2026-08-13 13:07:56'),
+(1439,'e6afff90acb398382cb64d1ed0','','none','','2026-08-13 13:07:56'),
+(1440,'9bf34ad936f436e3df77de022c','','none','','2026-08-13 13:08:02'),
+(1441,'08d9d50fe6411490f51bd2d211','','none','','2026-08-13 13:08:07'),
+(1442,'abe802fae7dc00ae104e077747','','none','','2026-08-13 13:08:07'),
+(1443,'96f42dfdf35626214482814253','','none','','2026-08-13 13:08:12'),
+(1444,'403e18ab31e4a0d9498920f928','','none','','2026-08-13 13:09:08'),
+(1445,'006f28d8527363bf906a7e666e','','none','','2026-08-13 13:09:13'),
+(1446,'baef1d47b813ed22b61740d84c','','none','','2026-08-13 13:09:30'),
+(1447,'056d9c9b97be5b9e3161318b33','','none','','2026-08-13 13:09:43'),
+(1448,'d3ff8ef6563e1d8ff76a3b53aa','','none','','2026-08-13 13:09:47'),
+(1449,'85c80fd314097d946360510241','','none','','2026-08-13 13:09:52'),
+(1450,'b89276a1be637b34d866dfe036','','none','','2026-08-13 13:09:58'),
+(1451,'3abbd53dae86c3fd8a6451c1b9','','none','','2026-08-13 13:09:58'),
+(1452,'311449a7e971e2288fa3da367e','','none','','2026-08-13 13:09:58'),
+(1453,'2d78431ac9e2fc6ed23182b646','','none','','2026-08-13 13:09:58'),
+(1454,'0fb62181d79fc3e89e8d46b68d','','none','','2026-08-13 13:09:58'),
+(1455,'63977083ce3401009ba820fcd1','','none','','2026-08-13 13:09:58'),
+(1456,'223f632e4e9a4ea9acbdd1ee8d','','none','','2026-08-13 13:10:38'),
+(1457,'0af709acb9783076bc220dbdf8','','none','','2026-08-13 13:10:38'),
+(1458,'6a553d00fa34b15253e06e3084','','none','','2026-08-13 13:10:38'),
+(1459,'a913e74feb3d59f961e7f60bd1','','none','','2026-08-13 13:10:38'),
+(1460,'8b88de00efce21253b2dc13ba4','','none','','2026-08-13 13:10:51'),
+(1461,'2509d0bb0a6c380daf570be5c0','','none','','2026-08-13 13:11:07'),
+(1462,'86ae84395b3a4db23322c9c42d','','none','','2026-08-13 13:11:07'),
+(1463,'af21e80c60d66a197cbbde2897','','none','','2026-08-13 13:11:49'),
+(1464,'b826c84fbf7ac9e6a338ed0b50','','none','','2026-08-13 13:12:01'),
+(1465,'d818f66d5db52cbcb13649247d','','none','','2026-08-13 13:13:00'),
+(1466,'711b7c1f044d9cba46754e5b0e','','none','','2026-08-13 13:13:00'),
+(1467,'65df5e730e2b831ce083d3574d','','none','','2026-08-13 13:13:00'),
+(1468,'a06d35fff1ba1cc5796fb019fd','','none','','2026-08-13 13:13:00'),
+(1469,'31f4454b07466806974d1289f6','','none','','2026-08-13 13:13:04'),
+(1470,'005ee695e1f4984a2049a7e9e1','','none','','2026-08-13 13:13:16'),
+(1471,'49e4a9d40903405102e4f59b48','','none','','2026-08-13 13:13:16'),
+(1472,'94715cbc21ec4b8a148d6ae02d','','none','','2026-08-13 13:13:21'),
+(1473,'04f06fa5e8a03c16adca52600d','','none','','2026-08-13 13:13:21'),
+(1474,'7000cfc597b7e58fc994f40e62','','none','','2026-08-13 13:13:21'),
+(1475,'bac431172160165bc693783973','','none','','2026-08-13 13:13:21'),
+(1476,'95fa2226127ccc4e96fff4c852','','none','','2026-08-13 13:13:37'),
+(1477,'f32beac58160fcb60bac3c80e9','','none','','2026-08-13 13:13:37'),
+(1478,'21c6928d83d89eb021172ddfe7','','none','','2026-08-13 13:13:37'),
+(1479,'f0e23a90907b4c6314cb634f29','','none','','2026-08-13 13:13:37'),
+(1480,'a34e14a198a21108cab38644d4','','none','','2026-08-13 13:13:37'),
+(1481,'7fff8b9ac77cc5192c803a83a9','','none','','2026-08-13 13:15:37'),
+(1482,'0c0fc3b1d8fa625368c2e458bd','','none','','2026-08-13 13:16:00'),
+(1483,'8b6da4904f6c42cddcb0584b9e','','none','','2026-08-13 13:17:04'),
+(1484,'8c2e28aadcb8d38d1494f814fa','','none','','2026-08-13 13:17:16'),
+(1485,'738271a22f2d7179fd0e3009c5','','none','','2026-08-13 13:17:47'),
+(1486,'a136c3d94ac6d696aa01e53b98','','none','','2026-08-13 13:17:53'),
+(1487,'68eb531baa1f69e9dbcbd749c8','','none','','2026-08-13 13:17:53'),
+(1488,'f9a6db9ef28637856ae6ec8e48','','none','','2026-08-13 13:17:53'),
+(1489,'5c0a4463e9a89f275a4ad0b77e','','none','','2026-08-13 13:17:53'),
+(1490,'b5399e729a03b391c079fec5fc','','none','','2026-08-13 13:34:16'),
+(1491,'e54fba1bb9194911d08e4599c2','','none','','2026-08-13 13:34:56'),
+(1492,'b6a00b657626750dffddb5370a','','none','','2026-08-13 13:41:13'),
+(1493,'2dde3403598f1173b6954d89e4','','none','','2026-08-13 13:47:18'),
+(1494,'48b764a312d84cf3a04ae0ccfa','','none','','2026-08-13 13:52:04'),
+(1495,'b34e20862bedd2c3f46187187a','','none','','2026-08-13 13:54:52'),
+(1496,'14bb686756bf61446108a88b23','','none','','2026-08-13 13:57:40'),
+(1497,'250ed5d245531d76a9c00b3713','','none','','2026-08-13 14:01:44'),
+(1498,'734da1971ed935104991f89d71','','none','','2026-08-13 14:02:02'),
+(1499,'8b7313826a75799ce00cab14dd','','none','','2026-08-13 14:03:50'),
+(1500,'84ec29b9ecb008054fd1605083','','none','','2026-08-13 14:04:22'),
+(1501,'beee9d967081afe62d4c538440','','none','','2026-08-13 14:04:23'),
+(1502,'a50939d0f0a030613df92f941e','','none','','2026-08-13 14:04:27'),
+(1503,'9bf7cfe5aaa6bdd60995ff16c2','','none','','2026-08-13 14:04:27'),
+(1504,'eec5986bdd099fefa15f7fe85a','','none','','2026-08-13 14:04:30'),
+(1505,'ce1ac0d9a96a07336e74fff325','','none','','2026-08-13 14:04:44'),
+(1506,'82d73b2a7626b08b65c4fd5958','','none','','2026-08-13 14:12:42'),
+(1507,'41fd6a10c96be9b3c5a6346555','','none','','2026-08-13 14:19:44'),
+(1508,'cfe851efd7f57baff4f68fd469','','none','','2026-08-13 14:19:48'),
+(1509,'d4514704d2b1111d445552e2e9','','none','','2026-08-13 14:23:32'),
+(1510,'d757682725339ff00d02abf63b','','none','','2026-08-13 14:23:39'),
+(1511,'b4a36eede3046d8afd8de89c8d','','none','','2026-08-13 14:23:48'),
+(1512,'37447154cd4eb0aeafb439134e','','none','','2026-08-13 14:23:53'),
+(1513,'94f129f5e988f01ddef1a61b23','','none','','2026-08-13 14:24:02'),
+(1514,'c9c74742b43792d090d6edbc11','','none','','2026-08-13 14:24:06'),
+(1515,'49b61fd6d3ee0a9b040a1e895f','','none','','2026-08-13 14:24:11'),
+(1516,'1643fbd93963adcf9d2b5b7546','','none','','2026-08-13 14:24:16'),
+(1517,'cd7b4d6b1bb89d424b16f1cdf4','','none','','2026-08-13 14:24:16'),
+(1518,'dbcb32704da5e9bfee9e8c4e38','','none','','2026-08-13 14:24:21'),
+(1519,'2c70aeb2fdcc5dc32f03093d6c','','none','','2026-08-13 14:24:21'),
+(1520,'36006fa6aa0aeb5e35558d3ec0','','none','','2026-08-13 14:24:55'),
+(1522,'27a707e3b730eb531cfcc4d5ca','','none','','2026-08-13 17:48:07'),
+(1523,'8973edae847d890f83fd0d8360','','none','','2026-08-13 17:59:57'),
+(1524,'04efb4adbc922f64d1dff2e4b4','','none','','2026-08-13 18:04:30'),
+(1525,'ce664f6bbbd477fe6e2626ac17','','none','','2026-08-13 18:13:51'),
+(1526,'ae6951251efec99dc595005be6','','none','','2026-08-13 18:13:54'),
+(1527,'70533eef7e987810dbe339182b','','none','','2026-08-13 18:13:54'),
+(1528,'4559802c87a95d1482a0938d55','','none','','2026-08-13 18:13:54'),
+(1529,'f941116739345ce6a964f5ccba','','none','','2026-08-13 18:13:54'),
+(1530,'87c5799aa102fb6ba50e8e4516','','none','','2026-08-13 18:13:59'),
+(1531,'e01042ebab3c71e96d443f9db6','','none','','2026-08-13 18:13:59'),
+(1532,'4319ba33d94006a21388cec003','','none','','2026-08-13 18:13:59'),
+(1533,'1346370301cbd35ff82a2b5b32','','none','','2026-08-13 18:14:02'),
+(1534,'6c23b735a330557b05d0e1e440','','none','','2026-08-13 18:14:05'),
+(1535,'e5b1d7b497a47823ce050d1e32','','none','','2026-08-13 18:14:08'),
+(1536,'a5ad7edadda5b0434306788e2b','','none','','2026-08-13 18:14:16'),
+(1537,'186a38266d691c6de2b68ee8bb','','none','','2026-08-13 18:47:53'),
+(1538,'eb259e8d2f397127478595322d','','none','','2026-08-13 18:54:57'),
+(1540,'67f940b156511eb2d167380e73','','none','','2026-08-14 10:44:01'),
+(1541,'0c5ffc3b7ba89e4fc4ba6278d0','','none','','2026-08-14 10:44:01'),
+(1542,'3ebc9e6a2fdac403348db59f90','','none','','2026-08-14 10:44:05'),
+(1543,'8a77ffc2f60cbbb4b0b15508e4','','none','','2026-08-14 10:44:06'),
+(1544,'5a6121ef1c89a1f47fe39de4c0','','none','','2026-08-14 10:44:10'),
+(1545,'af03c8b7cf457d7911717f8afa','','none','','2026-08-14 10:44:10'),
+(1546,'8764af60eb9e0bc20342b2960e','','none','','2026-08-14 10:44:13'),
+(1547,'bbf29a0077437096348a806b38','','none','','2026-08-14 10:44:13'),
+(1548,'53d6482bf0ed478190d8a75d22','','none','','2026-08-14 10:44:13'),
+(1549,'09943eb662c186f964ae814c36','','none','','2026-08-14 10:44:18'),
+(1550,'7f2639a502562e37ca2e23ab11','','none','','2026-08-14 10:44:27'),
+(1551,'d3c07d865374a999ed52dbeae3','','none','','2026-08-14 10:44:27'),
+(1552,'5fb95e75fcf3c1cd3ac29a4e68','','none','','2026-08-14 10:44:31'),
+(1553,'e4c24e492844dc4f283ec7d9d7','','none','','2026-08-14 10:44:31'),
+(1554,'baf776026bc4bbf64feb575636','','none','','2026-08-14 10:44:38'),
+(1555,'ec84a3a26d3b917cb8e9e91c4f','','none','','2026-08-14 10:44:38'),
+(1556,'a8298c2b395c66f0bdd9f2d662','','none','','2026-08-14 10:44:43'),
+(1557,'6dcfb031236cfc58003742c417','','none','','2026-08-14 10:44:54'),
+(1558,'0c98467de08419f4fc233effb8','','none','','2026-08-14 10:47:47'),
+(1559,'6dd4b3abc4acd2d4e2d746e5fc','','none','','2026-08-14 11:17:13'),
+(1560,'b67455d686635c5221a8c2dd00','','none','','2026-08-14 11:24:29'),
+(1561,'3b11a9589245b6f3b0a94dd4ba','','none','','2026-08-14 11:24:42'),
+(1562,'1c2789bd00886e9b6bbc33ee5b','','none','','2026-08-14 11:28:23'),
+(1563,'b6138f5fb55658f504d0caeaca','','none','','2026-08-14 11:36:32'),
+(1564,'5f8282fb6dab57688ee00eb70d','','none','','2026-08-14 11:38:51'),
+(1565,'17460cb7d0ca5520da1c2e8a77','','none','','2026-08-14 11:44:08'),
+(1566,'014b7a6e6f6ce7fa012410cad6','','none','','2026-08-14 11:51:10'),
+(1567,'2a58ada6c665b82f9882476dbd','','none','','2026-08-14 11:52:03');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8069,7 +8281,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5636 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6337 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8347,16 +8559,16 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (5281,99852,NULL,5087,'2026-08-12 20:08:20','2026-08-12 20:08:20'),
 (5283,99852,NULL,5085,'2026-08-12 20:08:34','2026-08-12 20:08:34'),
 (5334,NULL,'0f1cdb9b25516260df953a6731',5033,'2026-08-13 07:10:00','2026-08-13 07:10:00'),
-(5592,NULL,'7b110438d8473a6e2b90c1ad5a',5071,'2026-08-13 09:57:55','2026-08-13 09:57:55'),
-(5602,NULL,'7b110438d8473a6e2b90c1ad5a',5011,'2026-08-13 10:13:19','2026-08-13 10:13:19'),
-(5620,NULL,'7b110438d8473a6e2b90c1ad5a',5001,'2026-08-13 10:23:29','2026-08-13 10:23:29'),
-(5625,NULL,'7b110438d8473a6e2b90c1ad5a',5006,'2026-08-13 10:26:06','2026-08-13 10:26:06'),
-(5626,NULL,'7b110438d8473a6e2b90c1ad5a',5062,'2026-08-13 10:27:06','2026-08-13 10:27:06'),
-(5628,NULL,'7b110438d8473a6e2b90c1ad5a',5023,'2026-08-13 10:40:00','2026-08-13 10:40:00'),
-(5629,NULL,'7b110438d8473a6e2b90c1ad5a',5028,'2026-08-13 10:40:02','2026-08-13 10:40:02'),
-(5633,NULL,'7b110438d8473a6e2b90c1ad5a',5048,'2026-08-13 10:40:12','2026-08-13 10:40:12'),
-(5634,NULL,'7b110438d8473a6e2b90c1ad5a',5046,'2026-08-13 10:40:13','2026-08-13 10:40:13'),
-(5635,NULL,'7b110438d8473a6e2b90c1ad5a',5042,'2026-08-13 10:40:29','2026-08-13 10:40:29');
+(6276,NULL,'7b110438d8473a6e2b90c1ad5a',5012,'2026-08-14 11:25:09','2026-08-14 11:25:09'),
+(6286,NULL,'7b110438d8473a6e2b90c1ad5a',5002,'2026-08-14 11:28:34','2026-08-14 11:28:34'),
+(6287,NULL,'7b110438d8473a6e2b90c1ad5a',5003,'2026-08-14 11:43:20','2026-08-14 11:43:20'),
+(6291,NULL,'7b110438d8473a6e2b90c1ad5a',5043,'2026-08-14 12:04:23','2026-08-14 12:04:23'),
+(6295,NULL,'7b110438d8473a6e2b90c1ad5a',5001,'2026-08-14 12:25:56','2026-08-14 12:25:56'),
+(6296,NULL,'7b110438d8473a6e2b90c1ad5a',5054,'2026-08-14 12:27:48','2026-08-14 12:27:48'),
+(6299,NULL,'7b110438d8473a6e2b90c1ad5a',5008,'2026-08-14 12:29:12','2026-08-14 12:29:12'),
+(6331,NULL,'7b110438d8473a6e2b90c1ad5a',5023,'2026-08-14 15:01:57','2026-08-14 15:01:57'),
+(6334,NULL,'7b110438d8473a6e2b90c1ad5a',5063,'2026-08-14 15:02:21','2026-08-14 15:02:21'),
+(6336,NULL,'7b110438d8473a6e2b90c1ad5a',5011,'2026-08-14 15:03:09','2026-08-14 15:03:09');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8522,7 +8734,7 @@ CREATE TABLE `oc_extension` (
   `type` varchar(32) NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`extension_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=496 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=498 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10692,29 +10904,29 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,489,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',25.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,283,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
-(5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,229,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',39.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,46,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5005,'DEMO-5005',1102,'SKU-5005','','','','','','A1',46.00,0,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','catalog/Aero_Airship_01.glb','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,98,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5006,'DEMO-5006',1102,'SKU-5006','','','','','','A1',53.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_chair.jpg',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,0,331,'2026-03-03 08:51:04','2026-08-11 12:38:26'),
-(5007,'DEMO-5007',1102,'SKU-5007','','','','','','A1',60.00,0,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,6,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5008,'DEMO-5008',1103,'SKU-5008','','','','','','A1',67.00,0,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,9,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5009,'DEMO-5009',1103,'SKU-5009','','','','','','A1',74.00,0,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,8,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5010,'DEMO-5010',1103,'SKU-5010','','','','','','A1',81.00,0,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','','',304,1,7623.8700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,18,'2026-03-03 08:51:04','2026-08-12 16:02:38'),
-(5011,'DEMO-5011',1973,'SKU-5011','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','catalog/test_360_lounge_chair.jpg',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,109,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5012,'DEMO-5012',1973,'SKU-5012','','','','','','A1',28.00,0,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','catalog/test_360_lounge_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,123,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,566,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',25.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,309,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
+(5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,316,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',39.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,56,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5005,'DEMO-5005',1102,'SKU-5005','','','','','','A1',46.00,0,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','catalog/Aero_Airship_01.glb','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,125,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5006,'DEMO-5006',1102,'SKU-5006','','','','','','A1',53.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_chair.jpg',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,0,364,'2026-03-03 08:51:04','2026-08-11 12:38:26'),
+(5007,'DEMO-5007',1102,'SKU-5007','','','','','','A1',60.00,0,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5008,'DEMO-5008',1103,'SKU-5008','','','','','','A1',67.00,0,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,25,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5009,'DEMO-5009',1103,'SKU-5009','','','','','','A1',74.00,0,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,11,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5010,'DEMO-5010',1103,'SKU-5010','','','','','','A1',81.00,0,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','','',304,1,7623.8700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,19,'2026-03-03 08:51:04','2026-08-12 16:02:38'),
+(5011,'DEMO-5011',1973,'SKU-5011','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','catalog/test_360_lounge_chair.jpg',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,123,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5012,'DEMO-5012',1973,'SKU-5012','','','','','','A1',28.00,0,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','catalog/test_360_lounge_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,125,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5013,'DEMO-5013',1973,'SKU-5013','','','','','','A1',35.00,0,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,23,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5014,'DEMO-5014',1972,'SKU-5014','','','','','','A1',42.00,0,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,381,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5015,'DEMO-5015',1972,'SKU-5015','','','','','','A1',48.00,0,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,12,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,17,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,21,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5017,'DEMO-5017',1974,'SKU-5017','','','','','','A1',63.00,0,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','','catalog/test_360_lounge_chair.jpg',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,8,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5018,'DEMO-5018',1974,'SKU-5018','','','','','','A1',70.00,0,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,5,'2026-03-03 08:51:05','2026-08-10 12:03:57'),
-(5019,'DEMO-5019',1973,'SKU-5019','','','','','','A1',77.00,0,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','catalog/test_360_lounge_chair.jpg',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5019,'DEMO-5019',1973,'SKU-5019','','','','','','A1',77.00,0,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','catalog/test_360_lounge_chair.jpg',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5020,'DEMO-5020',1973,'SKU-5020','','','','','','A1',84.00,0,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,16,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',24.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,132,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',24.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,159,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5022,'DEMO-5022',1302,'SKU-5022','','','','','','A1',31.00,0,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,11,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,1951,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
+(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2058,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
 (5024,'DEMO-5024',1301,'SKU-5024','','','','','','A1',45.00,0,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5025,'DEMO-5025',1302,'SKU-5025','','','','','','A1',52.00,0,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5026,'DEMO-5026',1302,'SKU-5026','','','','','','A1',59.00,0,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,5,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
@@ -10722,46 +10934,46 @@ INSERT INTO `oc_product` VALUES
 (5028,'DEMO-5028',1303,'SKU-5028','','','','','','A1',73.00,0,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,9,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5029,'DEMO-5029',1303,'SKU-5029','','','','','','A1',80.00,0,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5030,'DEMO-5030',1301,'SKU-5030','','','','','','A1',87.00,0,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,25,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',27.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,84,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',27.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,148,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5032,'DEMO-5032',1402,'SKU-5032','','','','','','A1',34.00,0,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,26,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5033,'DEMO-5033',1403,'SKU-5033','','','','','','A1',41.00,0,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,34,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5034,'DEMO-5034',1401,'SKU-5034','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg','','',310,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,1,58,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5035,'DEMO-5035',1402,'SKU-5035','','','','','','A1',55.00,0,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg','','catalog/test_360_chair.jpg',312,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5036,'DEMO-5036',1403,'SKU-5036','','','','','','A1',62.00,0,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,12,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5036,'DEMO-5036',1403,'SKU-5036','','','','','','A1',62.00,0,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,29,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5037,'DEMO-5037',1401,'SKU-5037','','','','','','A1',68.00,0,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg','','',304,1,2507.1787,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,33,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5038,'DEMO-5038',1402,'SKU-5038','','','','','','A1',76.00,0,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg','','',306,1,22973.9438,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5039,'DEMO-5039',1403,'SKU-5039','','','','','','A1',83.00,0,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg','','',308,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5040,'DEMO-5040',1401,'SKU-5040','','','','','','A1',90.00,0,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg','','catalog/test_360_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5041,'DEMO-5041',1501,'SKU-5041','','','','','','A1',30.00,0,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','','',302,1,716.3400,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,182,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5042,'DEMO-5042',1502,'SKU-5042','','','','','','A1',37.00,0,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,47,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5043,'DEMO-5043',1503,'SKU-5043','','','','','','A1',43.00,0,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,8,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5041,'DEMO-5041',1501,'SKU-5041','','','','','','A1',30.00,0,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','','',302,1,716.3400,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,183,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5042,'DEMO-5042',1502,'SKU-5042','','','','','','A1',37.00,0,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,70,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5043,'DEMO-5043',1503,'SKU-5043','','','','','','A1',43.00,0,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,16,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5044,'DEMO-5044',1501,'SKU-5044','','','','','','A1',51.00,0,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel.jpg','','',308,1,1228.0059,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5045,'DEMO-5045',1502,'SKU-5045','','','','','','A1',58.00,0,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5045,'DEMO-5045',1502,'SKU-5045','','','','','','A1',58.00,0,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5046,'DEMO-5046',1503,'SKU-5046','','','','','','A1',65.00,0,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean.jpg','','',312,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5047,'DEMO-5047',1501,'SKU-5047','','','','','','A1',72.00,0,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6.jpg','','',302,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,2,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5048,'DEMO-5048',1502,'SKU-5048','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro.jpg','','',304,1,15298.9069,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,45,'2026-03-03 08:51:07','2026-08-12 16:03:24'),
 (5049,'DEMO-5049',1503,'SKU-5049','','','','','','A1',86.00,0,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,5,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5050,'DEMO-5050',1501,'SKU-5050','','','','','','A1',0.00,1,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale.jpg','','',308,1,1483.8405,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,65,'2026-03-03 08:51:07','2026-08-10 15:05:51'),
+(5050,'DEMO-5050',1501,'SKU-5050','','','','','','A1',0.00,1,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale.jpg','','',308,1,1483.8405,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,73,'2026-03-03 08:51:07','2026-08-10 15:05:51'),
 (5051,'DEMO-5051',1601,'SKU-5051','','','','','','A1',33.00,0,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,75,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5052,'DEMO-5052',1602,'SKU-5052','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,21,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5052,'DEMO-5052',1602,'SKU-5052','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,22,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5053,'DEMO-5053',1603,'SKU-5053','','','','','','A1',47.00,0,'catalog/demo/demo-seed/products/toys-games/xbox-series-x.jpg','','',304,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,32,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5054,'DEMO-5054',1601,'SKU-5054','','','','','','A1',54.00,0,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,19,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5054,'DEMO-5054',1601,'SKU-5054','','','','','','A1',54.00,0,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,20,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5055,'DEMO-5055',1602,'SKU-5055','','','','','','A1',61.00,0,'catalog/demo/demo-seed/products/toys-games/lego-technic-mclaren-formula-1.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,2,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5056,'DEMO-5056',1603,'SKU-5056','','','','','','A1',68.00,0,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg','','',310,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,11,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5057,'DEMO-5057',1601,'SKU-5057','','','','','','A1',75.00,0,'catalog/demo/demo-seed/products/toys-games/ravensburger-disney-villainous.jpg','','catalog/test_360_cube.jpg',312,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,15,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5058,'DEMO-5058',1602,'SKU-5058','','','','','','A1',82.00,0,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5059,'DEMO-5059',1603,'SKU-5059','','','','','','A1',89.00,0,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,7,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5060,'DEMO-5060',1601,'SKU-5060','','','','','','A1',96.00,0,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','','catalog/test_360_cube.jpg',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,20,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5061,'DEMO-5061',1701,'SKU-5061','','','','','','A1',36.00,0,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,32,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5062,'DEMO-5062',1702,'SKU-5062','','','','','','A1',43.00,0,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,52,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5063,'DEMO-5063',1703,'SKU-5063','','','','','','A1',47.00,0,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,26,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5059,'DEMO-5059',1603,'SKU-5059','','','','','','A1',89.00,0,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,8,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5060,'DEMO-5060',1601,'SKU-5060','','','','','','A1',96.00,0,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','','catalog/test_360_cube.jpg',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,26,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5061,'DEMO-5061',1701,'SKU-5061','','','','','','A1',36.00,0,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,131,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5062,'DEMO-5062',1702,'SKU-5062','','','','','','A1',43.00,0,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,60,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5063,'DEMO-5063',1703,'SKU-5063','','','','','','A1',47.00,0,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,47,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5064,'DEMO-5064',1701,'SKU-5064','','','','','','A1',55.00,0,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,130,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5065,'DEMO-5065',1702,'SKU-5065','','','','','','A1',64.00,0,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg','','',306,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5066,'DEMO-5066',1703,'SKU-5066','','','','','','A1',71.00,0,'catalog/demo/demo-seed/products/books-media/dune-by-frank-herbert.jpg','','',308,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5067,'DEMO-5067',1701,'SKU-5067','','','','','','A1',78.00,0,'catalog/demo/demo-seed/products/books-media/harry-potter-and-the-sorcerers-stone.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5068,'DEMO-5068',1702,'SKU-5068','','','','','','A1',85.00,0,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,3,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5068,'DEMO-5068',1702,'SKU-5068','','','','','','A1',85.00,0,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,6,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5069,'DEMO-5069',1703,'SKU-5069','','','','','','A1',92.00,0,'catalog/demo/demo-seed/products/books-media/rich-dad-poor-dad.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5070,'DEMO-5070',1701,'SKU-5070','','','','','','A1',0.00,1,'catalog/demo/demo-seed/products/books-media/the-lean-startup.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,1,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5070,'DEMO-5070',1701,'SKU-5070','','','','','','A1',0.00,1,'catalog/demo/demo-seed/products/books-media/the-lean-startup.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,1,5,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5071,'DEMO-5071',1801,'SKU-5071','','','','','','A1',39.00,0,'catalog/demo/demo-seed/products/automotive/garmin-dash-cam-67w.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,62,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5072,'DEMO-5072',1802,'SKU-5072','','','','','','A1',46.00,0,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg','','',310,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,35,'2026-03-03 08:51:08','2026-08-12 16:05:50'),
 (5073,'DEMO-5073',1803,'SKU-5073','','','','','','A1',53.00,0,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg','','',312,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,9,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
@@ -10775,11 +10987,11 @@ INSERT INTO `oc_product` VALUES
 (5081,'DEMO-5081',1901,'SKU-5081','','','','','','A1',42.00,0,'catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg','','catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg',306,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,2,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5082,'DEMO-5082',1902,'SKU-5082','','','','','','A1',49.00,0,'catalog/demo/demo-seed/products/pet-supplies/petsafe-drinkwell-fountain.jpg','','',308,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5083,'DEMO-5083',1901,'SKU-5083','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/pet-supplies/kong-classic-dog-toy.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,3,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5085,'DEMO-5085',1902,'SKU-5085','','','','','','A1',70.00,0,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,3,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5085,'DEMO-5085',1902,'SKU-5085','','','','','','A1',70.00,0,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5086,'DEMO-5086',1903,'SKU-5086','','','','','','A1',77.00,0,'catalog/demo/demo-seed/products/pet-supplies/purina-pro-plan-adult.jpg','','',304,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5087,'DEMO-5087',1901,'SKU-5087','','','','','','A1',84.00,0,'catalog/demo/demo-seed/products/pet-supplies/catit-senses-2.0-digger.jpg','','',306,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5088,'DEMO-5088',1902,'SKU-5088','','','','','','A1',91.00,0,'catalog/demo/demo-seed/products/pet-supplies/surefeed-microchip-feeder.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5089,'DEMO-5089',1903,'SKU-5089','','','','','','A1',98.00,0,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5089,'DEMO-5089',1903,'SKU-5089','','','','','','A1',98.00,0,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5090,'DEMO-5090',1901,'SKU-5090','','','','','','A1',20.00,0,'catalog/demo/demo-seed/products/pet-supplies/hartz-groomers-brush.jpg','','',312,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09');
 /*!40000 ALTER TABLE `oc_product` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -16733,82 +16945,84 @@ INSERT INTO `oc_product_rating` VALUES
 (5004,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5005,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5006,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5007,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 17:42:41'),
+(5007,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:24:22'),
 (5008,4.00,1,'{\"5\":0,\"4\":1,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 17:36:01'),
-(5009,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:34:45'),
+(5009,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:24:38'),
 (5010,2.00,1,'{\"5\":0,\"4\":0,\"3\":0,\"2\":1,\"1\":0}','2026-08-11 17:35:59'),
 (5011,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5012,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5013,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:35:44'),
 (5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:30:07'),
 (5015,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 07:24:50'),
-(5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-10 18:13:42'),
+(5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:09:55'),
 (5017,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5018,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 13:52:14'),
+(5019,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 11:12:23'),
 (5020,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:28:05'),
 (5021,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5022,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5023,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-08 11:08:26'),
 (5024,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:49:55'),
 (5025,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:15:59'),
-(5026,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 13:58:38'),
+(5026,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 14:19:28'),
 (5027,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:41:19'),
 (5028,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:02'),
-(5029,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 07:53:27'),
+(5029,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 14:19:22'),
 (5030,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 08:21:28'),
 (5031,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5032,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 20:01:37'),
 (5033,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:13:34'),
 (5034,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:05:45'),
 (5035,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 10:51:21'),
-(5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-10 18:14:05'),
+(5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 10:36:36'),
 (5037,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:57:21'),
 (5038,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5040,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 17:34:11'),
 (5041,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5042,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:29'),
-(5043,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:29:41'),
+(5042,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:23:57'),
+(5043,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 12:04:22'),
 (5044,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 11:02:19'),
 (5045,2.00,1,'{\"5\":0,\"4\":0,\"3\":0,\"2\":1,\"1\":0}','2026-08-11 17:36:07'),
-(5046,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:13'),
+(5046,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:13:37'),
 (5047,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 13:21:54'),
 (5048,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:12'),
 (5049,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 12:44:36'),
-(5050,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 18:30:59'),
+(5050,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:05:39'),
 (5051,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5052,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5053,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 09:18:37'),
 (5054,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5055,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 12:41:19'),
 (5056,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5059,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 09:18:41'),
-(5060,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 09:57:09'),
+(5059,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:42:23'),
+(5060,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 11:40:04'),
 (5061,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5062,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:27:06'),
+(5062,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 11:31:21'),
 (5063,3.00,1,'{\"5\":0,\"4\":0,\"3\":1,\"2\":0,\"1\":0}','2026-08-11 17:35:54'),
 (5064,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:11:36'),
 (5065,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:48:23'),
-(5066,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 14:34:15'),
+(5066,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:42:37'),
 (5067,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5068,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:49:51'),
+(5068,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:49:02'),
 (5069,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 12:54:55'),
-(5070,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:35:12'),
+(5070,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:39:41'),
 (5071,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
 (5072,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:00:14'),
-(5073,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 17:34:55'),
+(5073,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:05:39'),
 (5074,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 10:58:33'),
 (5075,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 09:48:53'),
 (5076,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:23:24'),
-(5077,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:20:57'),
+(5077,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:05:38'),
 (5078,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 08:42:59'),
 (5079,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-06 11:40:30'),
 (5080,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:32:51'),
 (5081,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 08:42:10'),
-(5083,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-10 18:50:32'),
+(5083,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:24:52'),
 (5085,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5086,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:17:53'),
 (5087,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 20:08:20'),
 (5088,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5089,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-10 12:13:37'),
+(5089,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 19:56:01'),
 (100001,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:20:45');
 /*!40000 ALTER TABLE `oc_product_rating` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -21361,6 +21575,7 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20260804_add_dashboard_analytics_widgets.sql','2026-08-01 13:48:49'),
 ('20260804_dashboard_widget_layout.sql','2026-08-01 14:00:30'),
 ('20260812_reward_operation_type.sql','2026-08-12 16:53:21'),
+('20260813_category_banner_select.sql','2026-08-13 08:29:02'),
 ('20260813_remove_stock_status.sql','2026-08-13 07:37:46');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -21414,7 +21629,7 @@ CREATE TABLE `oc_seo_url` (
   KEY `idx_store_id` (`store_id`),
   KEY `idx_store_language_query` (`store_id`,`language_id`,`query`(191)),
   KEY `idx_store_keyword` (`store_id`,`keyword`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=6650 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=6660 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -21747,8 +21962,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5561,0,2,'product_id=5069','books-media-rich-dad-poor-dad-2'),
 (5568,0,1,'category_id=1802','automotive-car-care-1'),
 (5569,0,2,'category_id=1802','automotive-car-care-2'),
-(5570,0,1,'category_id=1803','automotive-interior-accessories-1'),
-(5571,0,2,'category_id=1803','automotive-interior-accessories-2'),
 (5572,0,1,'product_id=5071','automotive-garmin-dash-cam-67w-1'),
 (5573,0,2,'product_id=5071','automotive-garmin-dash-cam-67w-2'),
 (5574,0,1,'product_id=5072','automotive-noco-boost-plus-gb40-1'),
@@ -21814,8 +22027,6 @@ INSERT INTO `oc_seo_url` VALUES
 (5852,0,2,'category_id=104','sports-outdoors-2'),
 (5853,0,1,'category_id=106','toys-games-1'),
 (5854,0,2,'category_id=106','toys-games-2'),
-(5855,0,1,'category_id=107','books-media-1'),
-(5856,0,2,'category_id=107','books-media-2'),
 (5857,0,1,'category_id=109','pet-supplies-1'),
 (5858,0,2,'category_id=109','pet-supplies-2'),
 (5859,0,1,'manufacturer_id=305','brand-adidas-1'),
@@ -21859,8 +22070,6 @@ INSERT INTO `oc_seo_url` VALUES
 (6317,0,3,'product_id=5077','bluetooth-priemnik-anker-roav'),
 (6348,0,1,'product_id=5037','sports-outdoors-black-diamond-spot-400-1'),
 (6349,0,2,'product_id=5037','sports-outdoors-black-diamond-spot-400-2'),
-(6421,0,1,'category_id=101','electronics'),
-(6422,0,2,'category_id=101','elektronika'),
 (6536,0,1,'manufacturer_id=310','brand-lego-1'),
 (6537,0,2,'manufacturer_id=310','brand-lego-2'),
 (6593,0,1,'product_id=5006','electronics-apple-macbook-air-m3-1'),
@@ -21891,7 +22100,13 @@ INSERT INTO `oc_seo_url` VALUES
 (6643,0,2,'product_id=5002','electronics-samsung-galaxy-s24-ultra-2'),
 (6647,0,1,'product_id=5050','beauty-health-renpho-smart-body-scale-1'),
 (6648,0,2,'product_id=5050','beauty-health-renpho-smart-body-scale-2'),
-(6649,0,3,'product_id=5050','umnye-vesy-renpho');
+(6649,0,3,'product_id=5050','umnye-vesy-renpho'),
+(6654,0,1,'category_id=101','electronics'),
+(6655,0,2,'category_id=101','elektronika'),
+(6656,0,1,'category_id=1803','automotive-interior-accessories-1'),
+(6657,0,2,'category_id=1803','automotive-interior-accessories-2'),
+(6658,0,1,'category_id=107','books-media-1'),
+(6659,0,2,'category_id=107','books-media-2');
 /*!40000 ALTER TABLE `oc_seo_url` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -21920,36 +22135,12 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('04069fe500e9b10c1f4cc7ca85','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 08:33:26'),
-('07ff21c225c0d862563cd8428e','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:29'),
-('3e776c519757c3c5ba2e51bba4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 08:23:13'),
-('475f53bcf83028dabf5a75f92b','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:47:28'),
-('483cd22c27d05b78bddacadad4','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:54:41'),
-('4d7d59c36cd72b55d996bd5f99','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:42:47'),
-('4f6a7a3678bad079e0d5649d8c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:59'),
-('51408666675a2e3b18db3ba50d','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:45:35'),
-('584df0564f321cdb96e0cff2d7','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:44:11'),
-('5db34e4146c55cd725b595f587','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:47:32'),
-('61a8ed98687e1e12ed7faa3f59','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:42:48'),
-('72b6894c2f119110b78601abd8','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:40'),
-('74110bfd0c79e7ba20a2cd4d7c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:07'),
-('7b110438d8473a6e2b90c1ad5a','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"shipping_methods\":{\"dockercart_universal\":{\"title\":\"\\u0414\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430\",\"quote\":{\"dockercart_universal_3\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430\\u044f \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0435\\u0439)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u042d\\u043a\\u0441\\u043f\\u0440\\u0435\\u0441\\u0441-\\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (2-3 \\u0434\\u043d\\u044f)\",\"cost\":20,\"tax_class_id\":\"0\",\"text\":\"20 \\u20b4\",\"description\":\"\"},\"dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0421\\u0430\\u043c\\u043e\\u0432\\u044b\\u0432\\u043e\\u0437\",\"cost\":0,\"tax_class_id\":\"0\",\"text\":\"\\u0411\\u0435\\u0441\\u043f\\u043b\\u0430\\u0442\\u043d\\u043e\",\"description\":\"\"}},\"sort_order\":\"\",\"error\":false}},\"shipping_method\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430\\u044f \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0435\\u0439)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"payment_methods\":{\"dockercart_universal.dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041d\\u0430\\u043b\\u043e\\u0436\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043f\\u043b\\u0430\\u0442\\u0435\\u0436\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"},\"dockercart_universal.dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0411\\u0430\\u043d\\u043a\\u043e\\u0432\\u0441\\u043a\\u0438\\u0439 \\u043f\\u0435\\u0440\\u0435\\u0432\\u043e\\u0434\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":5,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"}},\"payment_method\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041d\\u0430\\u043b\\u043e\\u0436\\u0435\\u043d\\u043d\\u044b\\u0439 \\u043f\\u043b\\u0430\\u0442\\u0435\\u0436\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"}}','2026-08-13 08:40:50'),
-('7c31f04c4d5ce1579e134dc04a','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:42:29'),
-('81055063ae526878364da4822a','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:55'),
-('ac4d764a81a9b8f2440100b8ba','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:51:40'),
-('ad89aeaa2dfabb28aca5b59fee','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:45:35'),
-('b9676a4ffbe058554853b403a3','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:40:46'),
-('c2c7755fb536de02ccdb745601','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 08:35:43'),
-('c78fccfcd83df83469e9618628','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:47:24'),
-('c943b4107925bf5abdec45b40c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:50'),
-('cfc7e26783d1db1b39083be36c','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:47:15'),
-('d07ee1a3076e8300fabe452da5','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:46'),
-('d6da9c341dad59ed2e647cb933','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:56:04'),
-('d96ecc07d321b3654e315fae5b','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:47:28'),
-('ecd1f7d56160e1fc55b14fb99d','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 08:21:25'),
-('ef4a96ad1dd31e0e410c4ced42','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:40:46'),
-('efc0e389e91b913e6ef820d681','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:42:29'),
-('fa300b6829b8dc645f96c54b19','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-13 07:43:11');
+('014b7a6e6f6ce7fa012410cad6','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-14 09:51:10'),
+('17460cb7d0ca5520da1c2e8a77','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-14 09:49:47'),
+('2a58ada6c665b82f9882476dbd','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-14 09:52:31'),
+('5f8282fb6dab57688ee00eb70d','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-14 09:42:27'),
+('7b110438d8473a6e2b90c1ad5a','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[],\"wishlist\":[]}','2026-08-14 13:03:09'),
+('b6138f5fb55658f504d0caeaca','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[]}','2026-08-14 09:37:04');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -21970,7 +22161,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=30177 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22192,7 +22383,6 @@ INSERT INTO `oc_setting` VALUES
 (29268,0,'dockercart_theme','dockercart_theme_menu_type','horizontal',0),
 (29269,0,'dockercart_theme','dockercart_theme_call_for_price_status','1',0),
 (29270,0,'dockercart_theme','dockercart_theme_call_for_price_mode','request',0),
-(29271,0,'dockercart_theme','dockercart_theme_sale_timer_status','1',0),
 (29272,0,'dockercart_theme','dockercart_theme_messenger_fab_status','0',0),
 (29273,0,'dockercart_theme','dockercart_theme_product_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Shipping\",\"2\":\"Доставка\",\"3\":\"Доставка\"},\"text\":{\"1\":\"Free Shipping\",\"2\":\"Швидка доставка\",\"3\":\"Быстрая доставка\"}},{\"icon\":\"shield-check\",\"sort_order\":1,\"title\":{\"1\":\"Warranty\",\"2\":\"Гарантия\",\"3\":\"Гарантия\"},\"text\":{\"1\":\"Official warranty\",\"2\":\"Офіційна гарантія\",\"3\":\"Официальная гарантия\"}},{\"icon\":\"refresh-ccw\",\"sort_order\":2,\"title\":{\"1\":\"Return\",\"2\":\"Возврат\",\"3\":\"Возврат\"},\"text\":{\"1\":\"30-days return\",\"2\":\"14 днів на повернення\",\"3\":\"14 дней на возврат\"}}]',0),
 (29274,0,'dockercart_theme','dockercart_theme_category_features','[{\"icon\":\"truck\",\"sort_order\":0,\"title\":{\"1\":\"Catalog depth\",\"2\":\"Глибина каталогу\",\"3\":\"Глубина каталога\"},\"text\":{\"1\":\"%s+ products\",\"2\":\"%s+ товарів\",\"3\":\"%s+ товаров\"}},{\"icon\":\"badge-check\",\"sort_order\":1,\"title\":{\"1\":\"Brand coverage\",\"2\":\"Покриття брендів\",\"3\":\"Покрытие брендов\"},\"text\":{\"1\":\"%s famous brands\",\"2\":\"%s відомих брендів\",\"3\":\"%s известных брендов\"}},{\"icon\":\"headset\",\"sort_order\":2,\"title\":{\"1\":\"Support\",\"2\":\"Підтримка\",\"3\":\"Поддержка\"},\"text\":{\"1\":\"Expert assistance before and after purchase\",\"2\":\"Експертна підтримка до і після покупки\",\"3\":\"Экспертная помощь до и после покупки\"}}]',0),
@@ -22412,7 +22602,11 @@ INSERT INTO `oc_setting` VALUES
 (30165,0,'config','config_owner','DockerCart',0),
 (30166,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
 (30167,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
-(30168,0,'config','config_comment','',0);
+(30168,0,'config','config_comment','',0),
+(30169,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
+(30170,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
+(30173,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
+(30174,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22696,7 +22890,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_user` WRITE;
 /*!40000 ALTER TABLE `oc_user` DISABLE KEYS */;
 INSERT INTO `oc_user` VALUES
-(1,1,'admin','$argon2id$v=19$m=65536,t=4,p=1$OUpOMGxNVFN3aVRlNnlZMA$aTj8wOaEyGcUvo4c6UaDJUJAzmuODpYyRFi2o4ihf94','','DockerCart','Admin','admin@example.com','','','10.89.1.7',1,'2026-04-29 15:01:43');
+(1,1,'admin','$argon2id$v=19$m=65536,t=4,p=1$OUpOMGxNVFN3aVRlNnlZMA$aTj8wOaEyGcUvo4c6UaDJUJAzmuODpYyRFi2o4ihf94','','DockerCart','Admin','admin@example.com','','','10.89.1.9',1,'2026-04-29 15:01:43');
 /*!40000 ALTER TABLE `oc_user` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -31376,4 +31570,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-08-13 10:41:12
+-- Dump completed on 2026-08-14 15:06:58
