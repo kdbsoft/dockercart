@@ -1,36 +1,23 @@
 <div class="dcx-fragment-meta" data-balance="{{ balance|e('html_attr') }}" hidden></div>
-<div class="table-responsive">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <td class="text-left">{{ column_date_added }}</td>
-        <td class="text-left">{{ column_description }}</td>
-        <td class="text-right">{{ column_amount }}</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if transactions %}
-      {% for transaction in transactions %}
-      <tr>
-        <td class="text-left">{{ transaction.date_added }}</td>
-        <td class="text-left">{{ transaction.description }}</td>
-        <td class="text-right">{{ transaction.amount }}</td>
-      </tr>
-      {% endfor %}
-      <tr>
-        <td>&nbsp;</td>
-        <td class="text-right"><b>{{ text_balance }}</b></td>
-        <td class="text-right">{{ balance }}</td>
-      </tr>
-      {% else %}
-      <tr>
-        <td class="text-center" colspan="3">{{ text_no_results }}</td>
-      </tr>
-      {% endif %}
-    </tbody>
-  </table>
+<div class="dc-record-list">
+  {% if transactions %}
+  {% for transaction in transactions %}
+  <div class="dc-record-item">
+    <div class="dc-record-item__icon dc-record-item__icon--money"><i data-lucide="wallet" width="16" height="16"></i></div>
+    <div class="dc-record-item__body">
+      <div class="dc-record-item__title">{{ transaction.description }}</div>
+      <div class="dc-record-item__subtitle">{{ transaction.date_added }}</div>
+    </div>
+    <div class="dc-record-item__value {{ transaction.positive ? 'dc-record-item__value--positive' : 'dc-record-item__value--negative' }}">{{ transaction.amount }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="dc-record-empty">{{ text_no_results }}</div>
+  {% endif %}
 </div>
+{% if results %}
 <div class="row">
   <div class="col-sm-6 text-left">{{ pagination }}</div>
   <div class="col-sm-6 text-right">{{ results }}</div>
 </div>
+{% endif %}

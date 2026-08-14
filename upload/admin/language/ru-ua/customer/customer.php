@@ -119,6 +119,7 @@ $_['text_edit_customer_subtitle'] = 'Редактировать данные у�
 $_['text_account_card']       = 'Аккаунт';
 $_['text_password_card']      = 'Пароль';
 $_['text_other_card']         = 'Прочее';
+$_['text_status_card']        = 'Статус';
 $_['text_address_card']       = 'Адрес';
 $_['text_addresses']          = 'Адреса';
 $_['text_no_addresses']       = 'Адреса ещё не добавлены. Нажмите «Добавить адрес», чтобы создать.';

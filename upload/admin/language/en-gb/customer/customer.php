@@ -41,6 +41,7 @@ $_['text_edit_customer_subtitle'] = 'Edit customer account details';
 $_['text_account_card']       = 'Account';
 $_['text_password_card']      = 'Password';
 $_['text_other_card']         = 'Other';
+$_['text_status_card']        = 'Status';
 $_['text_address_card']       = 'Address';
 $_['text_addresses']          = 'Addresses';
 $_['text_no_addresses']       = 'No addresses added yet. Click "Add Address" to create one.';

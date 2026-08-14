@@ -1,26 +1,28 @@
 <div class="dcx-fragment-meta" data-ip-total="{{ ip_total }}" hidden></div>
-<div class="dc-ip-list">
+<div class="dc-record-list">
   {% if ips %}
   {% for ip in ips %}
-  <div class="dc-ip-item">
-    <div class="dc-ip-item__icon"><i data-lucide="shield" width="16" height="16"></i></div>
-    <div class="dc-ip-item__body">
-      <div class="dc-ip-item__title"><a href="https://whatismyipaddress.com/ip/{{ ip.ip }}" target="_blank">{{ ip.ip }}</a></div>
-      <div class="dc-ip-item__subtitle">{{ column_date_added }}: {{ ip.date_added }}</div>
+  <div class="dc-record-item">
+    <div class="dc-record-item__icon dc-record-item__icon--shield"><i data-lucide="shield" width="16" height="16"></i></div>
+    <div class="dc-record-item__body">
+      <div class="dc-record-item__title"><a href="https://whatismyipaddress.com/ip/{{ ip.ip }}" target="_blank">{{ ip.ip }}</a></div>
+      <div class="dc-record-item__subtitle">{{ column_date_added }}: {{ ip.date_added }}</div>
     </div>
-    <div class="dc-ip-item__actions">
+    <div class="dc-record-item__actions">
       <a href="{{ ip.filter_ip }}" target="_blank" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ column_total }}: {{ ip.total }}"><i data-lucide="filter" width="14" height="14"></i> {{ ip.total }}</a>
     </div>
   </div>
   {% endfor %}
   {% else %}
-  <div class="dc-ip-empty">{{ text_no_results }}</div>
+  <div class="dc-record-empty">{{ text_no_results }}</div>
   {% endif %}
 </div>
+{% if results %}
 <div class="row">
   <div class="col-sm-6 text-left">{{ pagination }}</div>
   <div class="col-sm-6 text-right">{{ results }}</div>
 </div>
+{% endif %}
 <script type="text/javascript"><!--
 if (window.lucide && typeof window.lucide.createIcons === 'function') {
   lucide.createIcons();

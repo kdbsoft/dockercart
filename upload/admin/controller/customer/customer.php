@@ -536,7 +536,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($customer_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($customer_total - $this->config->get('config_limit_admin'))) ? $customer_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $customer_total, ceil($customer_total / $this->config->get('config_limit_admin')));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$data['filter_name'] = $filter_name;
 		$data['filter_email'] = $filter_email;
@@ -568,6 +568,7 @@ class ControllerCustomerCustomer extends Controller {
 		$data['text_account_card'] = $this->language->get('text_account_card');
 		$data['text_password_card'] = $this->language->get('text_password_card');
 		$data['text_other_card'] = $this->language->get('text_other_card');
+		$data['text_status_card'] = $this->language->get('text_status_card');
 		$data['text_address_card'] = $this->language->get('text_address_card');
 		$data['text_affiliate_card'] = $this->language->get('text_affiliate_card');
 		$data['text_payment_card'] = $this->language->get('text_payment_card');
@@ -1320,7 +1321,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($history_total - $limit)) ? $history_total : ((($page - 1) * $limit) + $limit), $history_total, ceil($history_total / $limit));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 		$data['history_total'] = $history_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_history', $data));
@@ -1366,7 +1367,8 @@ class ControllerCustomerCustomer extends Controller {
 			$data['transactions'][] = array(
 				'amount'      => $this->currency->format($result['amount'], $this->config->get('config_currency')),
 				'description' => $result['description'],
-				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'positive'    => ($result['amount'] >= 0)
 			);
 		}
 
@@ -1382,7 +1384,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($transaction_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($transaction_total - $limit)) ? $transaction_total : ((($page - 1) * $limit) + $limit), $transaction_total, ceil($transaction_total / $limit));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 		$data['transaction_total'] = $transaction_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_transaction', $data));
@@ -1428,11 +1430,12 @@ class ControllerCustomerCustomer extends Controller {
 			$data['rewards'][] = array(
 				'points'      => $result['points'],
 				'description' => $result['description'],
-				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added']))
+				'date_added'  => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+				'positive'    => ($result['points'] > 0)
 			);
 		}
 
-		$data['balance'] = $this->model_customer_customer->getRewardTotal($this->request->get['customer_id']);
+		$data['balance'] = (int)$this->model_customer_customer->getRewardTotal($this->request->get['customer_id']);
 
 		$reward_total = $this->model_customer_customer->getTotalRewards($this->request->get['customer_id']);
 
@@ -1444,7 +1447,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($reward_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($reward_total - $limit)) ? $reward_total : ((($page - 1) * $limit) + $limit), $reward_total, ceil($reward_total / $limit));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 		$data['reward_total'] = $reward_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_reward', $data));
@@ -1505,7 +1508,7 @@ class ControllerCustomerCustomer extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($ip_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($ip_total - $limit)) ? $ip_total : ((($page - 1) * $limit) + $limit), $ip_total, ceil($ip_total / $limit));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 		$data['ip_total'] = $ip_total;
 
 		$this->response->setOutput($this->load->view('customer/customer_ip', $data));
