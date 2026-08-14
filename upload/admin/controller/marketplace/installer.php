@@ -49,7 +49,7 @@ class ControllerMarketplaceInstaller extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * 10) + 1 : 0, ((($page - 1) * 10) > ($history_total - 10)) ? $history_total : ((($page - 1) * 10) + 10), $history_total, ceil($history_total / 10));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 				
 		$this->response->setOutput($this->load->view('marketplace/installer_history', $data));
 	}	

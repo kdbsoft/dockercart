@@ -347,7 +347,7 @@ class ControllerCatalogCategory extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($category_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($category_total - $limit)) ? $category_total : ((($page - 1) * $limit) + $limit), $category_total, ceil($category_total / $limit));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
