@@ -3,13 +3,11 @@ include .env
 export
 endif
 
-.PHONY: help migrate up update ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status prod prod-ftp dev dev-ssl
+.PHONY: help migrate up update start stop ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status
 
 ### Convenience variables
+# Base compose file only: down/stop must work regardless of the mode the stack was started in.
 COMPOSE := docker compose -f docker-compose.yml
-ifeq ($(TRAEFIK),1)
-COMPOSE := docker compose -f docker-compose.traefik.yml
-endif
 
 help: ## Show this help
 	@echo ""
@@ -18,6 +16,7 @@ help: ## Show this help
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Modes (default: standalone, no Traefik needed):"
+	@echo "  make start       Interactive mode selection (remembers last choice)"
 	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
 	@echo "  make ssl         HTTPS SSL       - https://$${DOCKERCART_DOMAIN:-dockercart.local} (self-signed, local testing)"
 	@echo "  make le          HTTPS + LE      - Production with real domain SSL (requires SSL_DOMAIN in .env)"
@@ -28,7 +27,8 @@ help: ## Show this help
 	@echo "  make traefik-le       HTTPS       - Traefik + Let's Encrypt"
 	@echo ""
 	@echo "Other commands:"
-	@echo "  make down         Stop containers"
+	@echo "  make down         Stop containers (base compose only)"
+	@echo "  make stop         Stop all containers, regardless of start mode"
 	@echo "  make restart      Restart containers"
 	@echo "  make logs         Show logs"
 	@echo "  make shell        Bash into app container"
@@ -50,17 +50,14 @@ migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb cont
 	done; \
 	echo "Migrations applied."
 
-migrate-blog: ## Run Journal Blog migration (scrapes donor site)
-	@cd migrate/journal_blog && $(COMPOSE) run --rm migrate $(ARGS)
-
-migrate-opencart: ## Run OpenCart-to-DockerCart migration
-	@cd migrate/opencart && $(COMPOSE) run --rm migrate $(ARGS)
-
 update: ## Pull code changes and apply migrations via update.sh
 	@./update.sh
 
 up: ## Start in standalone mode, HTTP by default (use make ssl or make le for HTTPS)
 	@./start.sh
+
+start: ## Start the stack — interactive mode selection (choice is remembered in .env)
+	@./start.sh --menu
 
 ssl: ## Start standalone with self-signed SSL (HTTPS, local testing)
 	@./start.sh --ssl
@@ -89,8 +86,12 @@ traefik-ssl: ## Start Traefik mode with self-signed SSL (HTTPS)
 traefik-le: ## Start Traefik mode with Let's Encrypt SSL (production)
 	@./start.sh --traefik --le
 
-down: ## Stop containers
+down: ## Stop containers (base compose file only)
 	@$(COMPOSE) down || true
+
+stop: ## Stop all containers, regardless of the mode the stack was started in
+	@docker compose down || true
+	@echo "Containers stopped"
 
 restart: ## Restart containers (down + up)
 	@$(COMPOSE) down --remove-orphans 2>/dev/null || true
@@ -164,9 +165,3 @@ clean: ## DESTRUCTIVE: Stop containers and remove all volumes
 	@read -p "Continue? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	@$(COMPOSE) down -v
 	@echo "Cleaned"
-
-# Aliases
-prod: le ## Alias for production-ready Let's Encrypt mode
-prod-ftp: le-ftp ## Alias for LE + FTP
-dev: up ## Alias for development mode (HTTP, no SSL)
-dev-ssl: ssl ## Alias for development mode with self-signed SSL (HTTPS)
