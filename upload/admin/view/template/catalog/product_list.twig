@@ -46,8 +46,8 @@ small.text-muted svg { vertical-align: middle; }
                       <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }} sortable">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}" class="sortable">{{ column_model }}</a> {% endif %}</td>
                       <td class="text-left">{{ column_category }}</td>
                       <td class="text-left">{% if sort == 'm.name' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }} sortable">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}" class="sortable">{{ column_manufacturer }}</a> {% endif %}</td>
-                      <td class="text-center">{{ column_store }}</td>
                       <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
+                      <td class="text-center">{{ column_store }}</td>
                       <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
                     </tr>
                   </thead>
@@ -86,9 +86,6 @@ small.text-muted svg { vertical-align: middle; }
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
-                    <td class="text-center">
-                      <span class="badge">{{ product.store_count }}</span>
-                    </td>
                     <td class="text-right">
                       {% if product.has_options %}
                         {% set qty_val = product.option_qty_sum %}
@@ -114,6 +111,9 @@ small.text-muted svg { vertical-align: middle; }
                           <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                         </span>
                       {% endif %}
+                    </td>
+                    <td class="text-center">
+                      <span class="badge">{{ product.store_count }}</span>
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="status" data-value="{{ product.status_raw }}">
