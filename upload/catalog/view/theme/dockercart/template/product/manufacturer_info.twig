@@ -42,20 +42,15 @@
           </div>
         </div>
 
-        {% set palette_bg = [ 'rgba(59,130,246,0.07)', 'rgba(99,102,241,0.07)', 'rgba(16,185,129,0.07)', 'rgba(236,72,153,0.07)', 'rgba(249,115,22,0.07)', 'rgba(234,179,8,0.07)' ] %}
-        {% set palette_accent = [ 'rgba(59,130,246,0.18)', 'rgba(99,102,241,0.18)', 'rgba(16,185,129,0.18)', 'rgba(236,72,153,0.18)', 'rgba(249,115,22,0.18)', 'rgba(234,179,8,0.18)' ] %}
-
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {% for category in refine_categories %}
-          {% set bg = palette_bg[loop.index0 % palette_bg|length] %}
-          {% set accent = palette_accent[loop.index0 % palette_accent|length] %}
-          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 transition-transform hover:scale-[1.02]" style="background: {{ bg }}; border: 1px solid rgba(15,23,42,0.04);">
+          <a href="{{ category.href }}" class="group subcategory-card rounded-2xl p-4 bg-white border border-gray-200 hover:border-blue-200 hover:shadow-md transition">
             <div class="flex items-center gap-3">
-              <div class="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0" style="background: {{ accent }}; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);">
+              <div class="w-14 h-14 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                 {% if category.thumb %}
-                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md shadow-sm" loading="lazy" />
+                <img src="{{ category.thumb }}" alt="{{ category.name }}" class="w-10 h-10 object-cover rounded-md" loading="lazy" />
                 {% else %}
-                <i data-lucide="layers" class="w-6 h-6 text-gray-700"></i>
+                <i data-lucide="layers" class="w-6 h-6 text-blue-500"></i>
                 {% endif %}
               </div>
               <div class="flex-1 min-w-0">
