@@ -215,12 +215,14 @@
           <!-- Wishlist -->
           <a href="{{ wishlist }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_wishlist }}" id="wishlist-total">
             <i data-lucide="heart" class="w-5 h-5 text-gray-600 group-hover:text-rose-500 transition"></i>
-            <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ wishlist_total|default(0) }}</span>
+            <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none{% if wishlist_total|default(0) <= 0 %} hidden{% endif %}">{{ wishlist_total|default(0) }}</span>
           </a>
 
           <!-- Compare -->
           <a href="{{ compare }}" class="p-2 rounded-lg hover:bg-gray-100 transition relative group" title="{{ text_compare|default('Compare') }}" id="compare-total">
-            <i data-lucide="chart-no-axes-column" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none">{{ compare_total|default(0) }}</span>          </a>
+            <i data-lucide="chart-no-axes-column" class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition"></i>
+            <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none{% if compare_total|default(0) <= 0 %} hidden{% endif %}">{{ compare_total|default(0) }}</span>
+          </a>
 
           <!-- Cart -->
           {{ cart }}
