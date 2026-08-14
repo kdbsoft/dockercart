@@ -120,6 +120,7 @@ $_['text_edit_customer_subtitle'] = 'Редагувати дані обліко�
 $_['text_account_card']       = 'Обліковий запис';
 $_['text_password_card']      = 'Пароль';
 $_['text_other_card']         = 'Інше';
+$_['text_status_card']        = 'Статус';
 $_['text_address_card']       = 'Адреса';
 $_['text_addresses']          = 'Адреси';
 $_['text_no_addresses']       = 'Адреси ще не додані. Натисніть «Додати адресу», щоб створити.';

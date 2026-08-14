@@ -1850,8 +1850,6 @@ div.dcx-field.required > .dcx-label:before {
 }
 .dcx-async-state--loading svg { animation: dcx-customer-spin 1s linear infinite; }
 .dcx-fragment-meta { display: none; }
-.dcx-customer-financials .table,
-.dcx-customer-activity .table { margin-bottom: 0; }
 .dcx-customer-financials .row,
 .dcx-customer-activity .row { margin-top: 12px; }
 
@@ -2665,13 +2663,13 @@ div.dcx-field.required > .dcx-label:before {
     margin: 0;
 }
 
-/* IP section (replaces table) */
-.dc-ip-list {
+/* Customer records (notes / transactions / rewards / IP) */
+.dc-record-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
-.dc-ip-item {
+.dc-record-item {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -2681,11 +2679,11 @@ div.dcx-field.required > .dcx-label:before {
     background: var(--dc-surface);
     transition: border-color var(--dc-transition-fast), box-shadow var(--dc-transition-fast);
 }
-.dc-ip-item:hover {
+.dc-record-item:hover {
     border-color: var(--dc-primary);
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
 }
-.dc-ip-item__icon {
+.dc-record-item__icon {
     width: 32px;
     height: 32px;
     border-radius: var(--dc-radius-lg);
@@ -2696,14 +2694,30 @@ div.dcx-field.required > .dcx-label:before {
     justify-content: center;
     flex-shrink: 0;
 }
-.dc-ip-item__body {
+.dc-record-item__icon--note {
+    background: var(--dc-amber-100);
+    color: var(--dc-amber-600);
+}
+.dc-record-item__icon--money {
+    background: var(--dc-green-100);
+    color: var(--dc-green-700);
+}
+.dc-record-item__icon--reward {
+    background: var(--dc-purple-100);
+    color: var(--dc-purple-600);
+}
+.dc-record-item__icon--shield {
+    background: var(--dc-blue-100);
+    color: var(--dc-primary);
+}
+.dc-record-item__body {
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
     flex: 1;
 }
-.dc-ip-item__title {
+.dc-record-item__title {
     font-size: 13px;
     font-weight: 600;
     color: var(--dc-text-dark);
@@ -2711,26 +2725,44 @@ div.dcx-field.required > .dcx-label:before {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.dc-ip-item__title a {
+.dc-record-item__title a {
     color: inherit;
 }
-.dc-ip-item__title a:hover {
+.dc-record-item__title a:hover {
     color: var(--dc-primary);
 }
-.dc-ip-item__subtitle {
+.dc-record-item__subtitle {
     font-size: 12px;
     color: var(--dc-text-muted);
     font-weight: 400;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.dc-ip-item__actions {
+.dc-record-item__subtitle--multiline {
+    white-space: pre-wrap;
+    overflow: visible;
+    text-overflow: clip;
+}
+.dc-record-item__value {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.dc-record-item__value--positive {
+    color: var(--dc-green-700);
+}
+.dc-record-item__value--negative {
+    color: var(--dc-red-600);
+}
+.dc-record-item__actions {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 4px;
 }
-.dc-ip-empty {
+.dc-record-empty {
     padding: 24px;
     text-align: center;
     color: var(--dc-text-muted);

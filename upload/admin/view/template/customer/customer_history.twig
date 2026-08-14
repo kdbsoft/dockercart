@@ -1,29 +1,22 @@
 <div class="dcx-fragment-meta" data-history-total="{{ history_total }}" hidden></div>
-<div class="table-responsive">
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <td class="text-left">{{ column_date_added }}</td>
-        <td class="text-left">{{ column_comment }}</td>
-      </tr>
-    </thead>
-    <tbody>
-      {% if histories %}
-      {% for history in histories %}
-      <tr>
-        <td class="text-left">{{ history.date_added }}</td>
-        <td class="text-left">{{ history.comment }}</td>
-      </tr>
-      {% endfor %}
-      {% else %}
-      <tr>
-        <td class="text-center" colspan="2">{{ text_no_results }}</td>
-      </tr>
-      {% endif %}
-    </tbody>
-  </table>
+<div class="dc-record-list">
+  {% if histories %}
+  {% for history in histories %}
+  <div class="dc-record-item">
+    <div class="dc-record-item__icon dc-record-item__icon--note"><i data-lucide="sticky-note" width="16" height="16"></i></div>
+    <div class="dc-record-item__body">
+      <div class="dc-record-item__title">{{ history.date_added }}</div>
+      <div class="dc-record-item__subtitle dc-record-item__subtitle--multiline">{{ history.comment }}</div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="dc-record-empty">{{ text_no_results }}</div>
+  {% endif %}
 </div>
+{% if results %}
 <div class="row">
   <div class="col-sm-6 text-left">{{ pagination }}</div>
   <div class="col-sm-6 text-right">{{ results }}</div>
 </div>
+{% endif %}
