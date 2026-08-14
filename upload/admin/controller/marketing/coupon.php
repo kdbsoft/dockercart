@@ -230,7 +230,7 @@ class ControllerMarketingCoupon extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($coupon_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($coupon_total - $this->config->get('config_limit_admin'))) ? $coupon_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $coupon_total, ceil($coupon_total / $this->config->get('config_limit_admin')));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;
@@ -559,7 +559,7 @@ class ControllerMarketingCoupon extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * 10) + 1 : 0, ((($page - 1) * 10) > ($history_total - 10)) ? $history_total : ((($page - 1) * 10) + 10), $history_total, ceil($history_total / 10));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$this->response->setOutput($this->load->view('marketing/coupon_history', $data));
 	}

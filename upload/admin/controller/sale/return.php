@@ -673,7 +673,7 @@ class ControllerSaleReturn extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($return_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($return_total - $this->config->get('config_limit_admin'))) ? $return_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $return_total, ceil($return_total / $this->config->get('config_limit_admin')));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$data['filter_return_id'] = $filter_return_id;
 		$data['filter_order_id'] = $filter_order_id;
@@ -1205,7 +1205,7 @@ class ControllerSaleReturn extends Controller {
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($history_total) ? (($page - 1) * 10) + 1 : 0, ((($page - 1) * 10) > ($history_total - 10)) ? $history_total : ((($page - 1) * 10) + 10), $history_total, ceil($history_total / 10));
+		$data['results'] = $pagination->renderResults($this->language->get('text_pagination'));
 
 		$this->response->setOutput($this->load->view('sale/return_history', $data));
 	}
