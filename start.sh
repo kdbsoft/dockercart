@@ -7,6 +7,7 @@
 #   ./start.sh --traefik          - Traefik HTTP
 #   ./start.sh --traefik --ssl    - Traefik HTTPS (self-signed)
 #   ./start.sh --traefik --le     - Traefik HTTPS (Let's Encrypt)
+#   ./start.sh --menu             - Interactive mode selection (remembers last choice)
 
 set -e
 
@@ -35,6 +36,12 @@ SSL_MODE="none"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --menu)
+            # Interactive mode selection; sets TRAEFIK_MODE / SSL_MODE
+            # in this shell and remembers the choice in .env
+            . ./scripts/select-mode.sh
+            shift
+            ;;
         --traefik)
             TRAEFIK_MODE=true
             shift
