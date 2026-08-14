@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="pull-right">
             <button type="submit" form="form-customer" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
             <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
@@ -27,7 +27,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -39,9 +39,45 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel-body" style="padding-top:16px;">
+                {% if customer_id %}
+                <div class="dcx-customer-summary">
+                  <div class="dcx-stat-card dcx-stat-card--info">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="wallet" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_store_credit }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-transaction-balance">{{ customer_metrics.transaction_balance }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-stat-card dcx-stat-card--purple">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_reward_points }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-reward-balance">{{ customer_metrics.reward_balance }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-stat-card dcx-stat-card--primary">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_notes }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-history-total">{{ customer_metrics.history_total }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_saved_notes }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-stat-card dcx-stat-card--warning">
+                    <div class="dcx-customer-summary__icon"><i data-lucide="shield" width="18" height="18"></i></div>
+                    <div class="dcx-customer-summary__content">
+                      <div class="dcx-customer-summary__label">{{ text_known_ips }}</div>
+                      <div class="dcx-customer-summary__value" id="customer-metric-ip-total">{{ customer_metrics.ip_total }}</div>
+                      <div class="dcx-customer-summary__meta">{{ text_security_signals }}</div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
                 {# ── GENERAL ── #}
                 <div id="tab-general">
                   <div class="dcx-panel" style="margin-bottom:16px;">
@@ -222,55 +258,6 @@
                                   <label class="dcx-label" for="input-confirm">{{ entry_confirm }}</label>
                                   <input type="password" name="confirm" value="{{ confirm }}" placeholder="{{ entry_confirm }}" autocomplete="off" id="input-confirm" class="form-control" />
                                   {% if error_confirm %}<div class="text-danger">{{ error_confirm }}</div>{% endif %}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          {# ── OTHER PANEL ── #}
-                          <div class="dcx-panel" style="margin-bottom:16px;">
-                            <div class="dcx-panel-head">
-                              <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
-                              <div><div class="dcx-panel-title">{{ text_other_card }}</div></div>
-                            </div>
-                            <div class="dcx-panel-body">
-                              <div class="dcx-fields dcx-fields--row">
-                                <div class="dcx-field">
-                                  <label class="dcx-label" for="input-newsletter">{{ entry_newsletter }}</label>
-                                  <select name="newsletter" id="input-newsletter" class="form-control">
-                                    {% if newsletter %}
-                                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                                    <option value="0">{{ text_disabled }}</option>
-                                    {% else %}
-                                    <option value="1">{{ text_enabled }}</option>
-                                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                                    {% endif %}
-                                  </select>
-                                </div>
-                                <div class="dcx-field">
-                                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                                  <select name="status" id="input-status" class="form-control">
-                                    {% if status %}
-                                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                                    <option value="0">{{ text_disabled }}</option>
-                                    {% else %}
-                                    <option value="1">{{ text_enabled }}</option>
-                                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                                    {% endif %}
-                                  </select>
-                                </div>
-                                <div class="dcx-field">
-                                  <label class="dcx-label" for="input-safe">
-                                    <span data-toggle="tooltip" title="{{ help_safe }}">{{ entry_safe }}</span>
-                                  </label>
-                                  <select name="safe" id="input-safe" class="form-control">
-                                    {% if safe %}
-                                    <option value="1" selected="selected">{{ text_yes }}</option>
-                                    <option value="0">{{ text_no }}</option>
-                                    {% else %}
-                                    <option value="1">{{ text_yes }}</option>
-                                    <option value="0" selected="selected">{{ text_no }}</option>
-                                    {% endif %}
-                                  </select>
                                 </div>
                               </div>
                             </div>
@@ -481,258 +468,7 @@
                             </div>
                           </div>
                         </div>
-                        {# ── AFFILIATE ── #}
-                <div id="tab-affiliate">
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="users" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_affiliate_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div class="dcx-fields">
-                        <div class="dcx-fields dcx-fields--row">
-                          <div class="dcx-field">
-                            <label class="dcx-label" for="input-company">{{ entry_company }}</label>
-                            <input type="text" name="affiliate_company" value="{{ affiliate_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control" />
-                          </div>
-                          <div class="dcx-field">
-                            <label class="dcx-label" for="input-website">{{ entry_website }}</label>
-                            <input type="text" name="website" value="{{ website }}" placeholder="{{ entry_website }}" id="input-website" class="form-control" />
-                          </div>
-                        </div>
-                        <div class="dcx-fields dcx-fields--row">
-                          <div class="dcx-field required">
-                            <label class="dcx-label" for="input-tracking">
-                              <span data-toggle="tooltip" title="{{ help_tracking }}">{{ entry_tracking }}</span>
-                            </label>
-                            <input type="text" name="tracking" value="{{ tracking }}" placeholder="{{ entry_tracking }}" id="input-tracking" class="form-control" />
-                            {% if error_tracking %}<div class="text-danger">{{ error_tracking }}</div>{% endif %}
-                          </div>
-                          <div class="dcx-field">
-                            <label class="dcx-label" for="input-commission">
-                              <span data-toggle="tooltip" title="{{ help_commission }}">{{ entry_commission }}</span>
-                            </label>
-                            <input type="text" name="commission" value="{{ commission }}" placeholder="{{ entry_commission }}" id="input-commission" class="form-control" />
-                          </div>
-                        </div>
-                        {% for custom_field in custom_fields %}
-                        {% if custom_field.location == 'affiliate' %}
-                        {% if custom_field.type == 'select' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <select name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control">
-                            <option value="">{{ text_select }}</option>
-                            {% for custom_field_value in custom_field.custom_field_value %}
-                            {% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == affiliate_custom_field[custom_field.custom_field_id] %}
-                            <option value="{{ custom_field_value.custom_field_value_id }}" selected="selected">{{ custom_field_value.name }}</option>
-                            {% else %}
-                            <option value="{{ custom_field_value.custom_field_value_id }}">{{ custom_field_value.name }}</option>
-                            {% endif %}
-                            {% endfor %}
-                          </select>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'radio' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label">{{ custom_field.name }}</label>
-                          <div>
-                            {% for custom_field_value in custom_field.custom_field_value %}
-                            <div class="radio">{% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == affiliate_custom_field[custom_field.custom_field_id] %}
-                              <label><input type="radio" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" checked="checked" /> {{ custom_field_value.name }}</label>
-                              {% else %}
-                              <label><input type="radio" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" /> {{ custom_field_value.name }}</label>
-                              {% endif %}</div>
-                            {% endfor %}
-                          </div>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'checkbox' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label">{{ custom_field.name }}</label>
-                          <div>
-                            {% for custom_field_value in custom_field.custom_field_value %}
-                            <div class="checkbox">{% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id in affiliate_custom_field[custom_field.custom_field_id] %}
-                              <label><input type="checkbox" name="custom_field[affiliate][{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" checked="checked" /> {{ custom_field_value.name }}</label>
-                              {% else %}
-                              <label><input type="checkbox" name="custom_field[affiliate][{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" /> {{ custom_field_value.name }}</label>
-                              {% endif %}</div>
-                            {% endfor %}
-                          </div>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'text' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'textarea' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <textarea name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" rows="5" placeholder="{{ custom_field.name }}" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control">{{ affiliate_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}</textarea>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'file' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label">{{ custom_field.name }}</label>
-                          <button type="button" id="button-custom-field{{ custom_field.custom_field_id }}" data-loading-text="{{ text_loading }}" class="btn btn-default"><i data-lucide="upload" width="14" height="14"></i> {{ button_upload }}</button>
-                          <input type="hidden" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] }}" id="input-custom-field{{ custom_field.custom_field_id }}" />
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'date' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="YYYY-MM-DD" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
-                            <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'time' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <div class="input-group time">
-                            <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="HH:mm" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
-                            <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if custom_field.type == 'datetime' %}
-                        <div class="dcx-field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
-                          <label class="dcx-label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
-                          <div class="input-group datetime">
-                            <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="YYYY-MM-DD HH:mm" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
-                            <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                          {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
-                        </div>
-                        {% endif %}
-                        {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="dcx-panel" style="margin-bottom:16px;">
-                    <div class="dcx-panel-head">
-                      <div class="dcx-panel-head__icon"><i data-lucide="credit-card" width="18" height="18"></i></div>
-                      <div><div class="dcx-panel-title">{{ text_payment_card }}</div></div>
-                    </div>
-                    <div class="dcx-panel-body">
-                      <div class="dcx-fields">
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-tax">{{ entry_tax }}</label>
-                          <input type="text" name="tax" value="{{ tax }}" placeholder="{{ entry_tax }}" id="input-tax" class="form-control" />
-                        </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label">{{ entry_payment }}</label>
-                          <div>
-                            <div class="radio"><label>{% if payment == 'cheque' %}<input type="radio" name="payment" value="cheque" checked="checked" />{% else %}<input type="radio" name="payment" value="cheque" />{% endif %} {{ text_cheque }}</label></div>
-                            <div class="radio"><label>{% if payment == 'paypal' %}<input type="radio" name="payment" value="paypal" checked="checked" />{% else %}<input type="radio" name="payment" value="paypal" />{% endif %} {{ text_paypal }}</label></div>
-                            <div class="radio"><label>{% if payment == 'bank' %}<input type="radio" name="payment" value="bank" checked="checked" />{% else %}<input type="radio" name="payment" value="bank" />{% endif %} {{ text_bank }}</label></div>
-                          </div>
-                        </div>
-                        <div id="payment-cheque" class="payment">
-                          <div class="dcx-field required">
-                            <label class="dcx-label" for="input-cheque">{{ entry_cheque }}</label>
-                            <input type="text" name="cheque" value="{{ cheque }}" placeholder="{{ entry_cheque }}" id="input-cheque" class="form-control" />
-                            {% if error_cheque %}<div class="text-danger">{{ error_cheque }}</div>{% endif %}
-                          </div>
-                        </div>
-                        <div id="payment-paypal" class="payment">
-                          <div class="dcx-field required">
-                            <label class="dcx-label" for="input-paypal">{{ entry_paypal }}</label>
-                            <input type="text" name="paypal" value="{{ paypal }}" placeholder="{{ entry_paypal }}" id="input-paypal" class="form-control" />
-                            {% if error_paypal %}<div class="text-danger">{{ error_paypal }}</div>{% endif %}
-                          </div>
-                        </div>
-                        <div id="payment-bank" class="payment">
-                          <div class="dcx-fields dcx-fields--row">
-                            <div class="dcx-field">
-                              <label class="dcx-label" for="input-bank-name">{{ entry_bank_name }}</label>
-                              <input type="text" name="bank_name" value="{{ bank_name }}" placeholder="{{ entry_bank_name }}" id="input-bank-name" class="form-control" />
-                            </div>
-                            <div class="dcx-field">
-                              <label class="dcx-label" for="input-bank-branch-number">{{ entry_bank_branch_number }}</label>
-                              <input type="text" name="bank_branch_number" value="{{ bank_branch_number }}" placeholder="{{ entry_bank_branch_number }}" id="input-bank-branch-number" class="form-control" />
-                            </div>
-                          </div>
-                          <div class="dcx-field">
-                            <label class="dcx-label" for="input-bank-swift-code">{{ entry_bank_swift_code }}</label>
-                            <input type="text" name="bank_swift_code" value="{{ bank_swift_code }}" placeholder="{{ entry_bank_swift_code }}" id="input-bank-swift-code" class="form-control" />
-                          </div>
-                          <div class="dcx-fields dcx-fields--row">
-                            <div class="dcx-field required">
-                              <label class="dcx-label" for="input-bank-account-name">{{ entry_bank_account_name }}</label>
-                              <input type="text" name="bank_account_name" value="{{ bank_account_name }}" placeholder="{{ entry_bank_account_name }}" id="input-bank-account-name" class="form-control" />
-                              {% if error_bank_account_name %}<div class="text-danger">{{ error_bank_account_name }}</div>{% endif %}
-                            </div>
-                            <div class="dcx-field required">
-                              <label class="dcx-label" for="input-bank-account-number">{{ entry_bank_account_number }}</label>
-                              <input type="text" name="bank_account_number" value="{{ bank_account_number }}" placeholder="{{ entry_bank_account_number }}" id="input-bank-account-number" class="form-control" />
-                              {% if error_bank_account_number %}<div class="text-danger">{{ error_bank_account_number }}</div>{% endif %}
-                            </div>
-                          </div>
-                        </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-affiliate">{{ entry_status }}</label>
-                          <select name="affiliate" id="input-affiliate" class="form-control">
-                            {% if affiliate %}
-                            <option value="1" selected="selected">{{ text_enabled }}</option>
-                            <option value="0">{{ text_disabled }}</option>
-                            {% else %}
-                            <option value="1">{{ text_enabled }}</option>
-                            <option value="0" selected="selected">{{ text_disabled }}</option>
-                            {% endif %}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 {% if customer_id %}
-                <div class="dcx-customer-summary">
-                  <div class="dcx-stat-card dcx-stat-card--info">
-                    <div class="dcx-customer-summary__icon"><i data-lucide="wallet" width="18" height="18"></i></div>
-                    <div class="dcx-customer-summary__content">
-                      <div class="dcx-customer-summary__label">{{ text_store_credit }}</div>
-                      <div class="dcx-customer-summary__value" id="customer-metric-transaction-balance">{{ customer_metrics.transaction_balance }}</div>
-                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
-                    </div>
-                  </div>
-                  <div class="dcx-stat-card dcx-stat-card--purple">
-                    <div class="dcx-customer-summary__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
-                    <div class="dcx-customer-summary__content">
-                      <div class="dcx-customer-summary__label">{{ text_reward_points }}</div>
-                      <div class="dcx-customer-summary__value" id="customer-metric-reward-balance">{{ customer_metrics.reward_balance }}</div>
-                      <div class="dcx-customer-summary__meta">{{ text_current_balance }}</div>
-                    </div>
-                  </div>
-                  <div class="dcx-stat-card dcx-stat-card--primary">
-                    <div class="dcx-customer-summary__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
-                    <div class="dcx-customer-summary__content">
-                      <div class="dcx-customer-summary__label">{{ text_notes }}</div>
-                      <div class="dcx-customer-summary__value" id="customer-metric-history-total">{{ customer_metrics.history_total }}</div>
-                      <div class="dcx-customer-summary__meta">{{ text_saved_notes }}</div>
-                    </div>
-                  </div>
-                  <div class="dcx-stat-card dcx-stat-card--warning">
-                    <div class="dcx-customer-summary__icon"><i data-lucide="shield" width="18" height="18"></i></div>
-                    <div class="dcx-customer-summary__content">
-                      <div class="dcx-customer-summary__label">{{ text_known_ips }}</div>
-                      <div class="dcx-customer-summary__value" id="customer-metric-ip-total">{{ customer_metrics.ip_total }}</div>
-                      <div class="dcx-customer-summary__meta">{{ text_security_signals }}</div>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="dcx-panel dcx-customer-activity">
                   <div class="dcx-panel-head">
                     <div class="dcx-panel-head__icon"><i data-lucide="message-square" width="18" height="18"></i></div>
@@ -840,20 +576,274 @@
               </div>
             </div>
           </div>
-        </div>
+
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-newsletter">{{ entry_newsletter }}</label>
+                <select name="newsletter" id="input-newsletter" class="form-control">
+                  {% if newsletter %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-safe">
+                  <span data-toggle="tooltip" title="{{ help_safe }}">{{ entry_safe }}</span>
+                </label>
+                <select name="safe" id="input-safe" class="form-control">
+                  {% if safe %}
+                  <option value="1" selected="selected">{{ text_yes }}</option>
+                  <option value="0">{{ text_no }}</option>
+                  {% else %}
+                  <option value="1">{{ text_yes }}</option>
+                  <option value="0" selected="selected">{{ text_no }}</option>
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="users" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_affiliate_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-affiliate">{{ entry_affiliate }}</label>
+                <select name="affiliate" id="input-affiliate" class="form-control">
+                  {% if affiliate %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div id="affiliate-fields">
+                <div class="dcx-sidebar-card__divider"></div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-company">{{ entry_company }}</label>
+                  <input type="text" name="affiliate_company" value="{{ affiliate_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control" />
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-website">{{ entry_website }}</label>
+                  <input type="text" name="website" value="{{ website }}" placeholder="{{ entry_website }}" id="input-website" class="form-control" />
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-tracking">
+                    <span data-toggle="tooltip" title="{{ help_tracking }}">{{ entry_tracking }}</span>
+                  </label>
+                  <input type="text" name="tracking" value="{{ tracking }}" placeholder="{{ entry_tracking }}" id="input-tracking" class="form-control" />
+                  {% if error_tracking %}<div class="text-danger">{{ error_tracking }}</div>{% endif %}
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-commission">
+                    <span data-toggle="tooltip" title="{{ help_commission }}">{{ entry_commission }}</span>
+                  </label>
+                  <input type="text" name="commission" value="{{ commission }}" placeholder="{{ entry_commission }}" id="input-commission" class="form-control" />
+                </div>
+                {% for custom_field in custom_fields %}
+                {% if custom_field.location == 'affiliate' %}
+                {% if custom_field.type == 'select' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <select name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control">
+                    <option value="">{{ text_select }}</option>
+                    {% for custom_field_value in custom_field.custom_field_value %}
+                    {% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == affiliate_custom_field[custom_field.custom_field_id] %}
+                    <option value="{{ custom_field_value.custom_field_value_id }}" selected="selected">{{ custom_field_value.name }}</option>
+                    {% else %}
+                    <option value="{{ custom_field_value.custom_field_value_id }}">{{ custom_field_value.name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'radio' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label">{{ custom_field.name }}</label>
+                  <div>
+                    {% for custom_field_value in custom_field.custom_field_value %}
+                    <div class="radio">{% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id == affiliate_custom_field[custom_field.custom_field_id] %}
+                      <label><input type="radio" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" checked="checked" /> {{ custom_field_value.name }}</label>
+                      {% else %}
+                      <label><input type="radio" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" /> {{ custom_field_value.name }}</label>
+                      {% endif %}</div>
+                    {% endfor %}
+                  </div>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'checkbox' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label">{{ custom_field.name }}</label>
+                  <div>
+                    {% for custom_field_value in custom_field.custom_field_value %}
+                    <div class="checkbox">{% if affiliate_custom_field[custom_field.custom_field_id] and custom_field_value.custom_field_value_id in affiliate_custom_field[custom_field.custom_field_id] %}
+                      <label><input type="checkbox" name="custom_field[affiliate][{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" checked="checked" /> {{ custom_field_value.name }}</label>
+                      {% else %}
+                      <label><input type="checkbox" name="custom_field[affiliate][{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" /> {{ custom_field_value.name }}</label>
+                      {% endif %}</div>
+                    {% endfor %}
+                  </div>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'text' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'textarea' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <textarea name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" rows="5" placeholder="{{ custom_field.name }}" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control">{{ affiliate_custom_field[custom_field.custom_field_id] ? account_custom_field[custom_field.custom_field_id] : custom_field.value }}</textarea>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'file' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label">{{ custom_field.name }}</label>
+                  <button type="button" id="button-custom-field{{ custom_field.custom_field_id }}" data-loading-text="{{ text_loading }}" class="btn btn-default"><i data-lucide="upload" width="14" height="14"></i> {{ button_upload }}</button>
+                  <input type="hidden" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] }}" id="input-custom-field{{ custom_field.custom_field_id }}" />
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'date' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <div class="input-group date">
+                    <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="YYYY-MM-DD" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
+                    <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                  </div>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'time' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <div class="input-group time">
+                    <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="HH:mm" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
+                    <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                  </div>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if custom_field.type == 'datetime' %}
+                <div class="dcx-sidebar-card__field custom-field custom-field{{ custom_field.custom_field_id }}" data-sort="{{ custom_field.sort_order }}">
+                  <label class="dcx-sidebar-card__label" for="input-custom-field{{ custom_field.custom_field_id }}">{{ custom_field.name }}</label>
+                  <div class="input-group datetime">
+                    <input type="text" name="custom_field[affiliate][{{ custom_field.custom_field_id }}]" value="{{ affiliate_custom_field[custom_field.custom_field_id] ? affiliate_custom_field[custom_field.custom_field_id] : custom_field.value }}" placeholder="{{ custom_field.name }}" data-date-format="YYYY-MM-DD HH:mm" id="input-custom-field{{ custom_field.custom_field_id }}" class="form-control" />
+                    <span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                  </div>
+                  {% if error_custom_field[custom_field.custom_field_id] %}<div class="text-danger">{{ error_custom_field[custom_field.custom_field_id] }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="dcx-sidebar-card" id="payment-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="credit-card" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_payment_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-tax">{{ entry_tax }}</label>
+                <input type="text" name="tax" value="{{ tax }}" placeholder="{{ entry_tax }}" id="input-tax" class="form-control" />
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label">{{ entry_payment }}</label>
+                <div>
+                  <div class="radio"><label>{% if payment == 'cheque' %}<input type="radio" name="payment" value="cheque" checked="checked" />{% else %}<input type="radio" name="payment" value="cheque" />{% endif %} {{ text_cheque }}</label></div>
+                  <div class="radio"><label>{% if payment == 'paypal' %}<input type="radio" name="payment" value="paypal" checked="checked" />{% else %}<input type="radio" name="payment" value="paypal" />{% endif %} {{ text_paypal }}</label></div>
+                  <div class="radio"><label>{% if payment == 'bank' %}<input type="radio" name="payment" value="bank" checked="checked" />{% else %}<input type="radio" name="payment" value="bank" />{% endif %} {{ text_bank }}</label></div>
+                </div>
+              </div>
+              <div id="payment-cheque" class="payment">
+                <div class="dcx-sidebar-card__field required">
+                  <label class="dcx-sidebar-card__label" for="input-cheque">{{ entry_cheque }}</label>
+                  <input type="text" name="cheque" value="{{ cheque }}" placeholder="{{ entry_cheque }}" id="input-cheque" class="form-control" />
+                  {% if error_cheque %}<div class="text-danger">{{ error_cheque }}</div>{% endif %}
+                </div>
+              </div>
+              <div id="payment-paypal" class="payment">
+                <div class="dcx-sidebar-card__field required">
+                  <label class="dcx-sidebar-card__label" for="input-paypal">{{ entry_paypal }}</label>
+                  <input type="text" name="paypal" value="{{ paypal }}" placeholder="{{ entry_paypal }}" id="input-paypal" class="form-control" />
+                  {% if error_paypal %}<div class="text-danger">{{ error_paypal }}</div>{% endif %}
+                </div>
+              </div>
+              <div id="payment-bank" class="payment">
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-bank-name">{{ entry_bank_name }}</label>
+                  <input type="text" name="bank_name" value="{{ bank_name }}" placeholder="{{ entry_bank_name }}" id="input-bank-name" class="form-control" />
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-bank-branch-number">{{ entry_bank_branch_number }}</label>
+                  <input type="text" name="bank_branch_number" value="{{ bank_branch_number }}" placeholder="{{ entry_bank_branch_number }}" id="input-bank-branch-number" class="form-control" />
+                </div>
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-bank-swift-code">{{ entry_bank_swift_code }}</label>
+                  <input type="text" name="bank_swift_code" value="{{ bank_swift_code }}" placeholder="{{ entry_bank_swift_code }}" id="input-bank-swift-code" class="form-control" />
+                </div>
+                <div class="dcx-sidebar-card__field required">
+                  <label class="dcx-sidebar-card__label" for="input-bank-account-name">{{ entry_bank_account_name }}</label>
+                  <input type="text" name="bank_account_name" value="{{ bank_account_name }}" placeholder="{{ entry_bank_account_name }}" id="input-bank-account-name" class="form-control" />
+                  {% if error_bank_account_name %}<div class="text-danger">{{ error_bank_account_name }}</div>{% endif %}
+                </div>
+                <div class="dcx-sidebar-card__field required">
+                  <label class="dcx-sidebar-card__label" for="input-bank-account-number">{{ entry_bank_account_number }}</label>
+                  <input type="text" name="bank_account_number" value="{{ bank_account_number }}" placeholder="{{ entry_bank_account_number }}" id="input-bank-account-number" class="form-control" />
+                  {% if error_bank_account_number %}<div class="text-danger">{{ error_bank_account_number }}</div>{% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
     </form>
   </div>
+
+</div>
   <script type="text/javascript"><!--
-  $('input[name="affiliate"]').on('change', function() {
-    if ($(this).val() == '1') {
-      $('#tab-affiliate :input').not('input[name="affiliate"]').prop('disabled', false);
-    } else {
-      $('#tab-affiliate :input').not('input[name="affiliate"]').prop('disabled', true);
-    }
-  });
-  $('input[name=\'affiliate\']:checked').trigger('change');
+  function toggleAffiliate() {
+    var enabled = $('select[name="affiliate"]').val() == '1';
+
+    $('#affiliate-fields, #payment-card').toggle(enabled);
+    $('#affiliate-fields :input, #payment-card :input').prop('disabled', !enabled);
+  }
+
+  $('select[name="affiliate"]').on('change', toggleAffiliate);
+  toggleAffiliate();
   //--></script>
   <script type="text/javascript"><!--
   $('select[name=\'customer_group_id\']').on('change', function() {
@@ -1335,8 +1325,8 @@
       $list.prepend(this);
     }
   });
-  $('#tab-affiliate .dcx-field[data-sort]').detach().each(function() {
-    var $list = $('#tab-affiliate .dcx-fields').first();
+  $('#affiliate-fields .dcx-sidebar-card__field[data-sort]').detach().each(function() {
+    var $list = $('#affiliate-fields');
     var sort = $(this).attr('data-sort');
     var $items = $list.children();
     if (sort >= 0 && sort <= $items.length) {
