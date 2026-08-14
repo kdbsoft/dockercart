@@ -24,129 +24,185 @@
       {% endif %}
 
       {% if products %}
-      <div class="overflow-x-auto">
-        <table class="w-full border-collapse border border-gray-200 rounded-xl overflow-hidden">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">{{ text_product }}</th>
-              {% for product in products %}
-              <th class="px-4 py-3 text-center text-sm font-semibold text-gray-900 border-b border-gray-200 min-w-[200px]">
-                <div class="flex flex-col items-center">
-                  <a href="{{ product.remove }}" class="text-red-500 hover:text-red-700 mb-2" title="{{ button_remove }}">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                  </a>
-                  <a href="{{ product.href }}" class="text-blue-600 hover:text-blue-700 font-medium">{{ product.name }}</a>
-                </div>
-              </th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_image }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center">
-                {% if product.thumb %}
-                <a href="{{ product.href }}">
-                  <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-24 h-24 object-cover rounded-lg mx-auto" />
-                </a>
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_price }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center">
-                {% if product.price %}
-                <div class="space-y-1">
-                  {% if product.special %}
-                  <span class="text-lg font-bold text-red-600">{{ product.special }}</span>
-                  <span class="text-sm text-gray-400 line-through">{{ product.price }}</span>
-                  {% else %}
-                  <span class="text-lg font-bold text-gray-900">{{ product.price }}</span>
-                  {% endif %}
-                </div>
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_model }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.model }}</td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_manufacturer }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.manufacturer }}</td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_availability }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center">
-                <span class="px-2 py-1 rounded-full text-xs font-medium {% if product.availability == text_instock %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                  {{ product.availability }}
-                </span>
-              </td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_rating }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center">
-                {% if product.rating %}
-                <div class="flex items-center justify-center gap-1">
-                  <div class="flex text-amber-500">
-                    {% for i in 1..5 %}
-                    {% set diff = product.rating - (i - 1) %}
-                    {% if diff >= 1 %}★{% elseif diff > 0 %}<span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: {{ (diff * 100) | round }}%">★</span></span>{% else %}<span class="text-gray-300">★</span>{% endif %}
-                    {% endfor %}
-                  </div>
-                  <span class="text-xs text-gray-500 ml-1">({{ product.reviews }})</span>
-                </div>
-                {% else %}
-                <span class="text-xs text-gray-400">{{ text_no_reviews }}</span>
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-            <tr class="border-b border-gray-200">
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_summary }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-sm text-gray-600">{{ product.description|striptags }}</td>
-              {% endfor %}
-            </tr>
-            <tr>
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_weight }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.weight }}</td>
-              {% endfor %}
-            </tr>
-            <tr>
-              <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_dimension }}</td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.length }} x {{ product.width }} x {{ product.height }}</td>
-              {% endfor %}
-            </tr>
-            <tr>
-              <td class="px-4 py-3 bg-gray-50"></td>
-              {% for product in products %}
-              <td class="px-4 py-3 text-center">
-                {% if product.is_in_stock %}
-                <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}');" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-                  {{ button_cart }}
-                </button>
-                {% else %}
-                <span class="text-xs text-gray-400">{{ text_out_of_stock|default('Out of Stock') }}</span>
-                {% endif %}
-              </td>
-              {% endfor %}
-            </tr>
-          </tbody>
-        </table>
+      {% if compare_sections|length > 1 %}
+      <div class="mb-8">
+        <p class="text-sm font-semibold text-gray-700 mb-2">{{ text_category_nav|default('Categories') }}</p>
+        <div class="flex flex-wrap gap-2" role="tablist" aria-label="{{ text_category_nav|default('Categories') }}">
+          {% for section in compare_sections %}
+          <button type="button" role="tab" data-compare-tab="{{ section.category_id }}" data-target="compare-section-{{ section.category_id }}"
+            class="dc-compare-tab inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition border {% if loop.first %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-700 border-gray-200 hover:bg-blue-50 hover:text-blue-700{% endif %}">
+            <i data-lucide="folder" class="w-3.5 h-3.5"></i>
+            {{ section.category_name ? section.category_name : text_products_fallback|default('Products') }}
+            <span class="text-xs opacity-70">({{ section.products|length }})</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="space-y-10">
+        {% for section in compare_sections %}
+        <div id="compare-section-{{ section.category_id }}" class="scroll-mt-24 {% if compare_sections|length > 1 and not loop.first %}hidden{% endif %}">
+          {% if section.category_name %}
+          <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="folder" class="w-5 h-5 text-gray-400"></i>
+            {{ section.category_name }}
+          </h2>
+          {% else %}
+          <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="folder" class="w-5 h-5 text-gray-400"></i>
+            {{ text_products_fallback|default('Products') }}
+          </h2>
+          {% endif %}
+
+          {% set section_products = section.products %}
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse border border-gray-200 rounded-xl overflow-hidden">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 border-b border-gray-200">{{ text_product }}</th>
+                  {% for product in section_products %}
+                  <th class="px-4 py-3 text-center text-sm font-semibold text-gray-900 border-b border-gray-200 min-w-[200px]">
+                    <div class="flex flex-col items-center">
+                      <a href="{{ product.remove }}" class="text-red-500 hover:text-red-700 mb-2" title="{{ button_remove }}">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                      </a>
+                      <a href="{{ product.href }}" class="text-blue-600 hover:text-blue-700 font-medium">{{ product.name }}</a>
+                      {% if product.variant_name %}
+                      <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">{{ product.variant_name }}</span>
+                      {% endif %}
+                    </div>
+                  </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_image }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center">
+                    {% if product.thumb %}
+                    <a href="{{ product.href }}">
+                      <img src="{{ product.thumb }}" alt="{{ product.name }}" class="w-24 h-24 object-cover rounded-lg mx-auto" />
+                    </a>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_price }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center">
+                    {% if product.price %}
+                    <div class="space-y-1">
+                      {% if product.special %}
+                      <span class="text-lg font-bold text-red-600">{{ product.special }}</span>
+                      <span class="text-sm text-gray-400 line-through">{{ product.price }}</span>
+                      {% else %}
+                      <span class="text-lg font-bold text-gray-900">{{ product.price }}</span>
+                      {% endif %}
+                    </div>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_model }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.model }}</td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_manufacturer }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.manufacturer }}</td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_availability }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium {% if product.availability == text_instock %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                      {{ product.availability }}
+                    </span>
+                  </td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_rating }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center">
+                    {% if product.rating %}
+                    <div class="flex items-center justify-center gap-1">
+                      <div class="flex text-amber-500">
+                        {% for i in 1..5 %}
+                        {% set diff = product.rating - (i - 1) %}
+                        {% if diff >= 1 %}★{% elseif diff > 0 %}<span class="relative inline-block"><span class="text-gray-300">★</span><span class="absolute inset-0 overflow-hidden text-amber-500" style="width: {{ (diff * 100) | round }}%">★</span></span>{% else %}<span class="text-gray-300">★</span>{% endif %}
+                        {% endfor %}
+                      </div>
+                      <span class="text-xs text-gray-500 ml-1">({{ product.reviews }})</span>
+                    </div>
+                    {% else %}
+                    <span class="text-xs text-gray-400">{{ text_no_reviews }}</span>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_summary }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-sm text-gray-600">{{ product.description|striptags }}</td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_weight }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.weight }}</td>
+                  {% endfor %}
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ text_dimension }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center text-sm text-gray-600">{{ product.length }} x {{ product.width }} x {{ product.height }}</td>
+                  {% endfor %}
+                </tr>
+
+                {# Attributes: pre-built in the controller (per section, deduped,
+                   empty-for-all excluded, brand/model/weight removed) #}
+                {% for attribute in section.attributes %}
+                <tr class="border-b border-gray-200">
+                  <td class="px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50">{{ attribute.name }}</td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center text-sm text-gray-600">
+                    {% if attribute.values[product.product_id] is defined and attribute.values[product.product_id] %}
+                      {{ attribute.values[product.product_id] }}
+                    {% else %}
+                      <span class="text-gray-300">—</span>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+
+                <tr>
+                  <td class="px-4 py-3 bg-gray-50"></td>
+                  {% for product in section_products %}
+                  <td class="px-4 py-3 text-center">
+                    {% if product.is_in_stock %}
+                    <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum|default(1) }}', '{{ product.variant_id|default(0) }}');" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
+                      {{ button_cart }}
+                    </button>
+                    {% else %}
+                    <span class="text-xs text-gray-400">{{ text_out_of_stock|default('Out of Stock') }}</span>
+                    {% endif %}
+                  </td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endfor %}
       </div>
       {% else %}
       <div class="text-center py-12">
@@ -167,6 +223,42 @@
 <script src="catalog/view/javascript/lucide.min.js"></script>
 <script>
   lucide.createIcons();
+
+  (function() {
+    var tabs = document.querySelectorAll('.dc-compare-tab');
+    var sections = document.querySelectorAll('[id^="compare-section-"]');
+
+    function activateTab(targetId) {
+      tabs.forEach(function(tab) {
+        var active = tab.getAttribute('data-target') === targetId;
+        tab.classList.toggle('bg-blue-600', active);
+        tab.classList.toggle('text-white', active);
+        tab.classList.toggle('border-blue-600', active);
+        tab.classList.toggle('bg-white', !active);
+        tab.classList.toggle('text-gray-700', !active);
+        tab.classList.toggle('border-gray-200', !active);
+        tab.classList.toggle('hover:bg-blue-50', !active);
+        tab.classList.toggle('hover:text-blue-700', !active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      sections.forEach(function(sec) {
+        sec.classList.toggle('hidden', sec.id !== targetId);
+      });
+    }
+
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        activateTab(tab.getAttribute('data-target'));
+      });
+    });
+
+    // Support deep links: open the section referenced by the hash
+    var hash = window.location.hash.replace('#', '');
+    if (hash.indexOf('compare-section-') === 0 && document.getElementById(hash)) {
+      activateTab(hash);
+    }
+  })();
 </script>
 
 {{ footer }}
