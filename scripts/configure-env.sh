@@ -120,6 +120,10 @@ validate_email() { # must contain '@'
     printf '%s' "$1" | grep -q '@'
 }
 
+validate_port() { # integer 1..65535, no whitespace
+    printf '%s' "$1" | grep -qE '^[0-9]+$' && [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
+}
+
 # --- Wizard ----------------------------------------------------------------
 
 configure_env() {
@@ -213,9 +217,45 @@ configure_env() {
             ask_value domain "Store domain" "$domain" || return $?
         done
         set_env_key "$ENV_FILE" DOCKERCART_DOMAIN "$domain"
-        set_env_key "$ENV_FILE" DOCKERCART_URL "http://${domain}"
-        set_env_key "$ENV_FILE" DOCKERCART_HTTPS_URL "http://${domain}"
         echo -e "${GREEN}✓ Domain: ${domain}${NC}"
+    fi
+
+    # --- 1b. Listen port (HTTP) ----------------------------------------------
+    # Nginx binds DOCKERCART_HTTP_PORT on the host; the app URL is derived from
+    # it so internal links / config_url / robots.txt stay consistent. 80 is the
+    # default and is omitted from the URL; :443 is likewise omitted for HTTPS.
+    local http_port
+    http_port="$(get_env_key "$ENV_FILE" DOCKERCART_HTTP_PORT)"
+    if [ "$FIRST_RUN" = true ] || [ -z "$http_port" ]; then
+        ask_value http_port "HTTP listen port (host; 80 = default, omit from URL)" "80" || return $?
+        while ! validate_port "$http_port"; do
+            echo -e "${RED}Port must be an integer between 1 and 65535.${NC}"
+            ask_value http_port "HTTP listen port (host; 80 = default, omit from URL)" "80" || return $?
+        done
+        set_env_key "$ENV_FILE" DOCKERCART_HTTP_PORT "$http_port"
+
+        local https_port
+        https_port="$(get_env_key "$ENV_FILE" DOCKERCART_HTTPS_PORT)"
+        if [ -z "$https_port" ]; then
+            https_port="443"
+        fi
+        set_env_key "$ENV_FILE" DOCKERCART_HTTPS_PORT "$https_port"
+
+        # Derive DOCKERCART_URL / DOCKERCART_HTTPS_URL with the port embedded
+        # (omit :80 / :443). start.sh re-derives these on every run, but we keep
+        # the stored values correct here for non-start.sh consumers.
+        local url_suffix=""
+        if [ "$http_port" != "80" ]; then
+            url_suffix=":${http_port}"
+        fi
+        set_env_key "$ENV_FILE" DOCKERCART_URL "http://${domain}${url_suffix}"
+
+        local https_suffix=""
+        if [ "$https_port" != "443" ]; then
+            https_suffix=":${https_port}"
+        fi
+        set_env_key "$ENV_FILE" DOCKERCART_HTTPS_URL "https://${domain}${https_suffix}"
+        echo -e "${GREEN}✓ Store URL: http://${domain}${url_suffix}${NC}"
     fi
 
     # --- 2. Timezone ---------------------------------------------------------
