@@ -1,3 +1,14 @@
+## [3.2.0](https://github.com/kdbsoft/dockercart/compare/v3.1.2...v3.2.0) (2026-08-15)
+
+### Features
+
+* **tool/update:** add db backup, atomic writes, warnings and reconnect handling to gui updater ([7b7eff8](https://github.com/kdbsoft/dockercart/commit/7b7eff853bb054bdfea58e79f0bd08183670df4a))
+
+### Bug Fixes
+
+* apply migrations from apache entrypoint after base schema ([ffa7e83](https://github.com/kdbsoft/dockercart/commit/ffa7e83600389d52e1b9a5588fb8febb331982db))
+* derive store url from domain and listen port for consistent links ([9bd88a6](https://github.com/kdbsoft/dockercart/commit/9bd88a65fb238aedc3821ac403866a8a05345902))
+
 ## [3.1.2](https://github.com/kdbsoft/dockercart/compare/v3.1.1...v3.1.2) (2026-08-15)
 
 ### Bug Fixes
