@@ -71,10 +71,10 @@ fix_permissions() {
         fi
 
         # Make VERSION writable by www-data so the GUI "System Update" worker can
-        # rewrite it in place (the bind mount must be rw, see docker-compose.yml).
-        if [ -f "/var/www/VERSION" ]; then
-            chown www-data:staff /var/www/VERSION 2>/dev/null || true
-            chmod 664 /var/www/VERSION 2>/dev/null || true
+        # rewrite it in place (it lives in the rw ./upload bind mount).
+        if [ -f "/var/www/html/VERSION" ]; then
+            chown www-data:staff /var/www/html/VERSION 2>/dev/null || true
+            chmod 664 /var/www/html/VERSION 2>/dev/null || true
         fi
 
         # Diagnostic write test

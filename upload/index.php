@@ -3,6 +3,7 @@
 // Version
 $version = '1.0.0';
 $version_files = [
+	__DIR__ . '/VERSION',
 	dirname(__DIR__) . '/VERSION',
 	dirname(__DIR__, 2) . '/VERSION'
 ];

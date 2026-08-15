@@ -499,13 +499,13 @@ make update
 
 1. **Lock** — prevents concurrent updates via `.update.lock`
 2. **Git fetch + fast-forward pull** — pulls changes from `origin` into your current branch
-3. **Apache recreation** — recreates the container to refresh bind mounts (`VERSION`, configs)
+3. **Apache recreation** — recreates the container to refresh bind mounts (single-file mounts such as configs, and to pick up the new image when the Dockerfile changed)
 4. **OCMOD refresh** — rebuilds modification cache for the new code
 5. **SQL migrations** — applies any pending migrations from `docker/mysql/migrations/`
 
 ### Safety Checks
 
-- **Clean repo required (with one exception):** modified tracked files outside `upload/` and `VERSION` block the update. Commit or stash them first, or use `ALLOW_DIRTY=1 make update` to skip the check. The GUI updater (`admin/cli/dockercart_update.php`) copies `upload/` + `VERSION` directly into the bind mount without advancing git HEAD, which leaves those paths "dirty" — `make update` automatically reconciles (resets) exactly those GUI-managed paths before pulling, so **running the GUI updater and then `make update` works without manual cleanup**.
+- **Clean repo required (with one exception):** modified tracked files outside `upload/` block the update. Commit or stash them first, or use `ALLOW_DIRTY=1 make update` to skip the check. The GUI updater (`admin/cli/dockercart_update.php`) copies `upload/` directly into the bind mount without advancing git HEAD, which leaves those paths "dirty" — `make update` automatically reconciles (resets) exactly those GUI-managed paths before pulling, so **running the GUI updater and then `make update` works without manual cleanup**.
 - **Detached HEAD:** not supported — you must be on a branch.
 - **Diverged branches:** if local and remote have diverged, manual intervention is required.
 
@@ -519,7 +519,7 @@ SKIP_MIGRATIONS=1 make update
 
 ### What to Check After Update
 
-1. Review `VERSION` to confirm the new version
+1. Review `upload/VERSION` to confirm the new version
 2. Check the [changelog](https://dockercart.net/changelog) for breaking changes
 3. Verify the storefront and admin panel load correctly
 

@@ -32,13 +32,13 @@ module.exports = {
       '@semantic-release/exec',
       {
         prepareCmd:
-          "npm version ${nextRelease.version} --no-git-tag-version && printf '%s\\n' ${nextRelease.version} > VERSION"
+          "npm version ${nextRelease.version} --no-git-tag-version && printf '%s\\n' ${nextRelease.version} > upload/VERSION"
       }
     ],
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', 'VERSION', 'package.json', 'package-lock.json'],
+        assets: ['CHANGELOG.md', 'upload/VERSION', 'package.json', 'package-lock.json'],
         message:
           'chore(release): ${nextRelease.version} [skip ci]\\n\\n${nextRelease.notes}'
       }
