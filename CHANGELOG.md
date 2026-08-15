@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/kdbsoft/dockercart/compare/v3.1.1...v3.1.2) (2026-08-15)
+
+### Bug Fixes
+
+* **docker:** make VERSION bind mount writable for GUI update worker ([ae4eb1b](https://github.com/kdbsoft/dockercart/commit/ae4eb1b193f968c95ce5c5de183780f29b444e70))
+* **entrypoint:** ensure writable storage subdirs exist and re-own after OCMOD refresh ([3f956f6](https://github.com/kdbsoft/dockercart/commit/3f956f6ef095b8835f5a9e60ff5160cb4b5cd451))
+
 ## [3.1.1](https://github.com/kdbsoft/dockercart/compare/v3.1.0...v3.1.1) (2026-08-15)
 
 ### Bug Fixes
