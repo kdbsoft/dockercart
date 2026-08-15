@@ -130,8 +130,8 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	# happened) — if any differ, rebuild.
 	BUILD_REQUIRED=0
 	BUILD_PATHSPEC="Dockerfile docker/ docker-compose*.yml composer.lock"
+	# shellcheck disable=SC2086
 	if git diff --quiet "$BASE" "$REMOTE" -- $BUILD_PATHSPEC 2>/dev/null; then
-		# shellcheck disable=SC2086
 		log "No Dockerfile/docker/compose changes detected — skipping image rebuild."
 	else
 		log "Dockerfile, docker/ or compose changes detected — rebuilding image."
