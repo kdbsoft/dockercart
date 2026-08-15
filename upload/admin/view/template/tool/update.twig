@@ -21,6 +21,27 @@
     <div class="alert alert-warning" style="margin:20px 0;"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_trust_warning }}</div>
     <div class="alert alert-info" style="margin:20px 0;"><i data-lucide="info" width="16" height="16"></i> {{ text_limitations }}</div>
 
+    <div class="panel panel-default" id="progress-panel" style="margin:20px 0;display:none;">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i data-lucide="activity" width="16" height="16"></i> {{ text_progress }} <span id="progress-percent" class="label label-default" style="display:none;"></span></h3>
+      </div>
+      <div class="panel-body">
+        <div class="alert alert-success" id="complete-alert" style="display:none;"><i data-lucide="check" width="16" height="16"></i> <span id="complete-alert-text"></span></div>
+        <div class="alert alert-warning" id="warning-alert" style="display:none;"><i data-lucide="alert-triangle" width="16" height="16"></i> <strong>{{ text_warnings }}:</strong>
+          <ul id="warning-list" style="margin:8px 0 0 18px;"></ul>
+        </div>
+        <div class="progress">
+          <div id="progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;"></div>
+        </div>
+        <p id="progress-message" class="text-muted"></p>
+        <pre id="progress-log" style="max-height:300px;overflow:auto;background:#f7f7f7;padding:10px;"></pre>
+        <div class="alert alert-danger" id="stale-alert" style="display:none;margin-top:15px;">
+          <i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_stale }}
+          <button type="button" id="button-reset" class="btn btn-danger btn-xs">{{ button_reset }}</button>
+        </div>
+      </div>
+    </div>
+
     <div class="panel panel-default" style="margin:20px 0;">
       <div class="panel-heading">
         <h3 class="panel-title"><i data-lucide="settings" width="16" height="16"></i> {{ text_current_version }}</h3>
@@ -84,23 +105,6 @@
         </form>
       </div>
     </div>
-
-    <div class="panel panel-default" id="progress-panel" style="margin:20px 0;display:none;">
-      <div class="panel-heading">
-        <h3 class="panel-title"><i data-lucide="activity" width="16" height="16"></i> {{ text_progress }}</h3>
-      </div>
-      <div class="panel-body">
-        <div class="progress">
-          <div id="progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;"></div>
-        </div>
-        <p id="progress-message" class="text-muted"></p>
-        <pre id="progress-log" style="max-height:300px;overflow:auto;background:#f7f7f7;padding:10px;"></pre>
-        <div class="alert alert-danger" id="stale-alert" style="display:none;margin-top:15px;">
-          <i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_stale }}
-          <button type="button" id="button-reset" class="btn btn-danger btn-xs">{{ button_reset }}</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 <script>
@@ -151,10 +155,20 @@ $('#button-check').on('click', function() {
 });
 
 var updateTimer = null;
+var pollFailures = 0;
+var POLL_INTERVAL = 1500;
+var MAX_POLL_FAILURES = 10;
 
 function renderProgress(status) {
 	$('#progress-panel').show();
 	$('#progress-bar').css('width', (status.percent || 0) + '%');
+
+	if (status.percent !== undefined && status.percent > 0 && status.percent < 100) {
+		$('#progress-percent').text(status.percent + '%').show();
+	} else {
+		$('#progress-percent').hide();
+	}
+
 	$('#progress-message').text(status.message || '');
 
 	if (status.log && status.log.length) {
@@ -162,8 +176,23 @@ function renderProgress(status) {
 		$('#progress-log').scrollTop($('#progress-log')[0].scrollHeight);
 	}
 
-	if (status.stale) {
+	if (status.warning && status.warning.length) {
+		var $list = $('#warning-list').empty();
+		status.warning.forEach(function(w) {
+			$list.append($('<li>').text(w));
+		});
+		$('#warning-alert').show();
+	} else {
+		$('#warning-alert').hide();
+	}
+
+	if (status.running) {
+		$('#maintenance-note').show();
+	} else {
 		$('#maintenance-note').hide();
+	}
+
+	if (status.stale) {
 		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-danger');
 		$('#button-update').prop('disabled', false);
 		$('#button-check').prop('disabled', false);
@@ -172,23 +201,82 @@ function renderProgress(status) {
 	}
 
 	if (status.error) {
-		$('#maintenance-note').hide();
 		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-danger');
 		$('#button-update').prop('disabled', false);
 		$('#button-check').prop('disabled', false);
+		$('#stale-alert').hide();
 		return false;
 	}
 
 	if (status.done) {
-		$('#maintenance-note').hide();
 		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-success');
 		$('#button-update').prop('disabled', false);
 		$('#button-check').prop('disabled', false);
-		location.reload();
+		$('#stale-alert').hide();
+
+		var version = status.local_version || '';
+		$('#complete-alert-text').text('{{ text_update_complete|escape('js') }}'.replace('%s', version));
+		$('#complete-alert').show();
+
+		if (version) {
+			$('#local-version').text(version);
+		}
+
+		// Refresh the version comparison in place (no page reload, so the
+		// progress panel with the final log stays visible).
+		$('#button-check').trigger('click');
 		return false;
 	}
 
 	return true;
+}
+
+function startPolling() {
+	if (updateTimer) {
+		return;
+	}
+
+	updateTimer = setInterval(function() {
+		pollStatus();
+	}, POLL_INTERVAL);
+}
+
+function stopPolling() {
+	if (updateTimer) {
+		clearInterval(updateTimer);
+		updateTimer = null;
+	}
+}
+
+function pollStatus() {
+	$.ajax({
+		url: '{{ status_url }}',
+		dataType: 'json',
+		success: function(status) {
+			pollFailures = 0;
+
+			var cont = renderProgress(status);
+
+			if (!cont) {
+				stopPolling();
+			}
+		},
+		error: function() {
+			pollFailures++;
+
+			// Transient failures (file overwrites, OCMOD refresh) must not kill
+			// the progress view — keep polling and only give up after a streak.
+			$('#progress-panel').show();
+			$('#progress-message').text('{{ text_reconnecting|escape('js') }} (' + pollFailures + '/' + MAX_POLL_FAILURES + ')');
+
+			if (pollFailures >= MAX_POLL_FAILURES) {
+				stopPolling();
+				$('#progress-message').text('{{ text_reload_hint|escape('js') }}');
+				$('#button-update').prop('disabled', false);
+				$('#button-check').prop('disabled', false);
+			}
+		}
+	});
 }
 
 $('#button-reset').on('click', function() {
@@ -234,31 +322,14 @@ $('#button-update').on('click', function() {
 				return;
 			}
 
-			if (updateTimer) {
-				clearInterval(updateTimer);
-			}
+			pollFailures = 0;
+			$('#complete-alert').hide();
+			$('#warning-alert').hide();
+			$('#progress-log').text('');
+			$('#stale-alert').hide();
 
-			updateTimer = setInterval(function() {
-				$.ajax({
-					url: '{{ status_url }}',
-					dataType: 'json',
-					success: function(status) {
-						var cont = renderProgress(status);
-						if (!cont && updateTimer) {
-							clearInterval(updateTimer);
-							updateTimer = null;
-						}
-					},
-					error: function() {
-						if (updateTimer) {
-							clearInterval(updateTimer);
-							updateTimer = null;
-						}
-						$('#button-update').prop('disabled', false);
-						$('#button-check').prop('disabled', false);
-					}
-				});
-			}, 1500);
+			startPolling();
+			pollStatus();
 		},
 		error: function() {
 			$('#maintenance-note').hide();
@@ -267,6 +338,19 @@ $('#button-update').on('click', function() {
 			alert('{{ text_request_failed|escape('js') }}');
 		}
 	});
+});
+
+// If an update is already running (page opened mid-run), show its progress
+// instead of waiting for the user to click the button.
+$.ajax({
+	url: '{{ status_url }}',
+	dataType: 'json',
+	success: function(status) {
+		if (status && status.running) {
+			renderProgress(status);
+			startPolling();
+		}
+	}
 });
 
 // Auto-check on load

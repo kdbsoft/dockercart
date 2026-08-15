@@ -197,8 +197,23 @@ class ModelToolUpdate extends Model {
 			return ['running' => false, 'done' => false, 'error' => null, 'pid' => null];
 		}
 
-		$content = file_get_contents($file);
-		$status = json_decode($content, true);
+		$content = @file_get_contents($file);
+		$status = null;
+
+		// The worker writes status.json atomically (tmp + rename), but a
+		// transient read (or a leftover from a non-atomic writer) can still
+		// yield invalid JSON — retry briefly before declaring corruption so a
+		// single bad read never kills the progress polling in the admin.
+		for ($i = 0; $i < 5; $i++) {
+			$status = json_decode((string)$content, true);
+
+			if (is_array($status)) {
+				break;
+			}
+
+			usleep(100000);
+			$content = @file_get_contents($file);
+		}
 
 		if (!is_array($status)) {
 			return ['running' => false, 'done' => false, 'error' => 'Corrupted status file', 'pid' => null];
@@ -216,6 +231,14 @@ class ModelToolUpdate extends Model {
 			if ($started > 0 && (time() - $started) > self::STALE_GRACE) {
 				$status['stale'] = true;
 			}
+		}
+
+		// Once a run is done, drop the cached remote-version check so the next
+		// page view re-fetches from the network instead of serving the stale
+		// pre-update comparison for the remainder of the TTL.
+		if (!empty($status['done'])) {
+			$this->load->model('setting/setting');
+			$this->model_setting_setting->updateSetting('dockercart_update', ['dockercart_update_last_check' => '0']);
 		}
 
 		return $status;
