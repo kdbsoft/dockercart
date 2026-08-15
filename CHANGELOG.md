@@ -1,3 +1,9 @@
+## [3.1.1](https://github.com/kdbsoft/dockercart/compare/v3.1.0...v3.1.1) (2026-08-15)
+
+### Bug Fixes
+
+* **admin:** only show update bell when an update is available ([4b41ed5](https://github.com/kdbsoft/dockercart/commit/4b41ed58a8060034d55a45880ba3c7244049f565))
+
 ## [3.1.0](https://github.com/kdbsoft/dockercart/compare/v3.0.2...v3.1.0) (2026-08-15)
 
 ### Features
