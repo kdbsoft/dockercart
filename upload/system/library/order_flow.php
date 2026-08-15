@@ -146,6 +146,21 @@ class OrderFlow {
 	}
 
 	/**
+	 * Whether the status is the final step of the chain. Reaching it means the
+	 * order has successfully completed the flow — distinct from isTerminal(),
+	 * which means no further transition is allowed (e.g. Cancelled/Refunded).
+	 * The last step may still allow exceptional transitions (Refunded), so a
+	 * completed flow is not necessarily a terminal one.
+	 */
+	public function isFinalStep($status_id): bool {
+		if (!$this->steps) {
+			return false;
+		}
+
+		return (int)$status_id === (int)end($this->steps);
+	}
+
+	/**
 	 * Whether the status belongs to the configured chain.
 	 */
 	public function isStep($status_id): bool {

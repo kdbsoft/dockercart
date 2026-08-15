@@ -801,6 +801,7 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .of-step--done + .of-step__connector { background:#86efac; }
 .of-step--current + .of-step__connector { background:#93c5fd; }
 .order-flow-bar__terminal { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid #fca5a5; border-radius:999px; background:#fef2f2; color:#b91c1c; font-size:11px; font-weight:600; }
+.order-flow-bar__completed { display:flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid #86efac; border-radius:999px; background:#f0fdf4; color:#15803d; font-size:11px; font-weight:600; }
 .order-flow-bar__actions { display:flex; flex-wrap:wrap; gap:4px; margin-left:auto; }
 
 .dcx-shipment-item__tracking { font-weight:600; color:#2563eb; display:inline-flex; align-items:center; gap:5px; }
@@ -823,6 +824,7 @@ const SHIPPING_STATUS_ID = {{ shipping_status_id }};
 const EDIT_MODE = {{ edit_mode ? 'true' : 'false' }};
 const SHIPPING_ZONE_ID = {{ shipping_zone_id }};
 const PAYMENT_ZONE_ID = {{ payment_zone_id }};
+const PAID_AMOUNT = {{ paid_amount_raw }};
 let isEditing = false;
 
 function duplicateOrder() {
@@ -1513,6 +1515,139 @@ function openFlowTransition(statusId, name, terminal) {
 function closeFlowTransition() {
 	const modal = document.getElementById('flow-transition-modal');
 	if (modal) modal.style.display = 'none';
+}
+
+function openRefundModal() {
+	const modal = document.getElementById('refund-modal');
+	if (!modal) return;
+	document.getElementById('refund-comment').value = '';
+	const reason = document.getElementById('refund-reason');
+	if (reason) reason.value = '0';
+	setRefundType('full');
+	recalcRefundAmount();
+	['refund-items-error', 'refund-amount-error', 'refund-reason-error'].forEach(id => {
+		const el = document.getElementById(id);
+		if (el) el.style.display = 'none';
+	});
+	modal.style.display = 'flex';
+	lucide.createIcons();
+}
+
+function closeRefundModal() {
+	const modal = document.getElementById('refund-modal');
+	if (modal) modal.style.display = 'none';
+}
+
+function setRefundType(type) {
+	document.querySelectorAll('input[name="refund_type"]').forEach(r => { r.checked = (r.value === type); });
+}
+
+function refundItemChanged(input) {
+	const row = input.closest('.return-item-row');
+	const check = row.querySelector('.return-item-check');
+	const qty = row.querySelector('.refund-item-qty');
+	if (qty) qty.disabled = !check.checked;
+	const type = document.querySelector('input[name="refund_type"]:checked');
+	if (type && type.value === 'full') {
+		document.querySelectorAll('.return-item-row').forEach(r => {
+			const c = r.querySelector('.return-item-check');
+			const q = r.querySelector('.refund-item-qty');
+			if (c && q) { c.checked = true; q.disabled = false; }
+		});
+	}
+	recalcRefundAmount();
+}
+
+function refundTypeChanged(input) {
+	const type = input.value;
+	const rows = document.querySelectorAll('#refund-items .return-item-row');
+	if (type === 'full') {
+		rows.forEach(r => {
+			const c = r.querySelector('.return-item-check');
+			const q = r.querySelector('.refund-item-qty');
+			if (c && q) { c.checked = true; q.disabled = false; }
+		});
+	}
+	recalcRefundAmount();
+}
+
+function refundAmountChanged(input) {
+	const type = document.querySelector('input[name="refund_type"]:checked');
+	if (type && type.value !== 'exchange') return;
+	const el = document.getElementById('refund-amount');
+	if (el) el.value = '0';
+}
+
+function recalcRefundAmount() {
+	const type = document.querySelector('input[name="refund_type"]:checked');
+	const amount = document.getElementById('refund-amount');
+	if (!type || !amount) return;
+	if (type.value === 'exchange') {
+		amount.value = '0';
+		amount.disabled = true;
+		return;
+	}
+	amount.disabled = false;
+	if (type.value === 'full' && PAID_AMOUNT > 0) {
+		amount.value = PAID_AMOUNT.toFixed(2);
+		return;
+	}
+	let sum = 0;
+	document.querySelectorAll('#refund-items .return-item-row').forEach(row => {
+		const check = row.querySelector('.return-item-check');
+		const qty = row.querySelector('.refund-item-qty');
+		if (check && check.checked && qty) {
+			sum += (parseFloat(qty.value) || 0) * parseFloat(row.dataset.price || 0);
+		}
+	});
+	amount.value = PAID_AMOUNT > 0 ? Math.min(sum, PAID_AMOUNT).toFixed(2) : sum.toFixed(2);
+}
+
+function confirmRefund() {
+	const items = [];
+	document.querySelectorAll('#refund-items .return-item-row').forEach(row => {
+		const check = row.querySelector('.return-item-check');
+		const qty = row.querySelector('.refund-item-qty');
+		if (check && check.checked && qty) {
+			const quantity = parseInt(qty.value, 10) || 0;
+			if (quantity > 0) {
+				const item = {};
+				row.querySelectorAll('input[data-rp]').forEach(h => { item[h.dataset.rp] = h.value; });
+				item.quantity = quantity;
+				items.push(item);
+			}
+		}
+	});
+	const type = document.querySelector('input[name="refund_type"]:checked');
+	const amount = parseFloat(document.getElementById('refund-amount').value) || 0;
+	const reason = document.getElementById('refund-reason');
+	const reasonId = reason ? parseInt(reason.value, 10) || 0 : 0;
+
+	document.getElementById('refund-items-error').style.display = items.length ? 'none' : 'block';
+	document.getElementById('refund-reason-error').style.display = reasonId > 0 ? 'none' : 'block';
+	const amountError = document.getElementById('refund-amount-error');
+	if (type && type.value !== 'exchange') {
+		amountError.style.display = amount > 0 ? 'none' : 'block';
+	} else {
+		amountError.style.display = 'none';
+	}
+
+	if (!items.length || reasonId <= 0 || (type && type.value !== 'exchange' && amount <= 0)) {
+		return;
+	}
+
+	const comment = document.getElementById('refund-comment').value;
+	const notify = document.getElementById('refund-notify').checked;
+	const restock = document.getElementById('refund-restock').checked;
+
+	api('index.php?route=sale/order_detail/processRefund&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ items: JSON.stringify(items), type: type ? type.value : 'full', amount: amount, return_reason_id: reasonId, comment: comment, notify: notify ? '1' : '0', restock: restock ? '1' : '0' })
+		.then(j => {
+			if (j.error) { showAlert(j.error, 'danger'); return; }
+			closeRefundModal();
+			if (j.payments_html) refreshPaymentsCard(j.payments_html);
+			showAlertAndReload(j.success || '{{ text_success }}');
+		});
 }
 
 function confirmFlowTransition() {
@@ -2713,6 +2848,85 @@ document.addEventListener('click', function(e) {
     <div class="pcm-section" style="display:flex;gap:8px;justify-content:flex-end;border-top:none;padding-top:0">
       <button type="button" class="btn btn-default" onclick="closeFlowTransition()">{{ button_cancel }}</button>
       <button type="button" class="btn btn-primary" onclick="confirmFlowTransition()">{{ button_flow_apply }}</button>
+    </div>
+  </div>
+</div>
+<div id="refund-modal" class="pcm-overlay" style="display:none">
+  <div class="pcm-modal" style="max-width:520px">
+    <button type="button" class="pcm-close" onclick="closeRefundModal()"><i data-lucide="x" width="16" height="16"></i></button>
+    <div class="pcm-header">
+      <div>
+        <div class="pcm-name">{{ text_refund_modal_title }}</div>
+        <div class="pcm-sub">{{ text_refund_modal_sub }}</div>
+      </div>
+    </div>
+    <div class="pcm-section">
+      <div class="dcx-fields">
+        <div class="dcx-field">
+          <label class="dcx-label">{{ text_refund_items }}</label>
+          <div id="refund-items">
+            {% for product in refund_products %}
+            <div class="return-item-row" data-opid="{{ product.order_product_id }}" data-price="{{ product.price }}">
+              <input type="hidden" data-rp="order_product_id" value="{{ product.order_product_id }}" />
+              <input type="hidden" data-rp="product_id" value="{{ product.product_id }}" />
+              <input type="hidden" data-rp="variant_id" value="{{ product.variant_id }}" />
+              <input type="hidden" data-rp="name" value="{{ product.name }}" />
+              <input type="hidden" data-rp="model" value="{{ product.model }}" />
+              <label class="return-item-row__check">
+                <input type="checkbox" class="return-item-check" onchange="refundItemChanged(this)" />
+              </label>
+              <span class="return-item-row__name">{{ product.name }}{% if product.model %} <span class="text-muted">({{ product.model }})</span>{% endif %}</span>
+              <input type="number" class="form-control refund-item-qty" min="0" max="{{ product.quantity }}" value="{{ product.quantity }}" disabled onchange="refundItemChanged(this)" oninput="refundItemChanged(this)" />
+              <span class="return-item-row__ordered">/ {{ product.quantity }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="text-danger" id="refund-items-error" style="display:none">{{ error_refund_no_items }}</div>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-label">{{ entry_return_type }}</label>
+          <div class="return-type-row">
+            {% for t in ['full', 'partial', 'exchange'] %}
+            <label class="dcx-sidebar-card__checkbox">
+              <input type="radio" name="refund_type" value="{{ t }}" {% if t == 'full' %}checked{% endif %} onchange="refundTypeChanged(this)" /> {{ attribute(_context, 'text_type_' ~ t) }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-label">{{ text_refund_amount }}</label>
+          <input type="text" id="refund-amount" class="form-control" style="max-width:200px" placeholder="{{ entry_refund_amount }}" oninput="refundAmountChanged(this)" />
+          <div class="text-danger" id="refund-amount-error" style="display:none">{{ error_refund_amount }}</div>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-label" for="refund-reason">{{ entry_return_reason }}</label>
+          <select id="refund-reason" class="form-control" style="max-width:320px">
+            <option value="0">{{ text_select }}</option>
+            {% for reason in return_reasons %}
+            <option value="{{ reason.return_reason_id }}">{{ reason.name }}</option>
+            {% endfor %}
+          </select>
+          <div class="text-danger" id="refund-reason-error" style="display:none">{{ error_refund_reason }}</div>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-sidebar-card__checkbox">
+            <input type="checkbox" id="refund-restock" checked /> {{ text_refund_restock }}
+          </label>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-sidebar-card__checkbox">
+            <input type="checkbox" id="refund-notify" checked /> {{ text_refund_notify }}
+          </label>
+        </div>
+        <div class="dcx-field">
+          <label class="dcx-label">{{ entry_comment }}</label>
+          <textarea id="refund-comment" class="form-control" rows="3" placeholder="{{ text_comment_optional }}"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="pcm-section" style="display:flex;gap:8px;justify-content:flex-end;border-top:none;padding-top:0">
+      <button type="button" class="btn btn-default" onclick="closeRefundModal()">{{ button_cancel }}</button>
+      <button type="button" class="btn btn-danger" onclick="confirmRefund()">{{ button_refund_confirm }}</button>
     </div>
   </div>
 </div>

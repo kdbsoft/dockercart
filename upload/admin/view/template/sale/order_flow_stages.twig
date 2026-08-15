@@ -1,5 +1,5 @@
 {# Order flow stepper — horizontal bar rendered under the page header.
-   Expects: flow_enabled, flow_steps, flow_transitions, flow_terminal #}
+   Expects: flow_enabled, flow_steps, flow_transitions, flow_terminal, flow_completed #}
 <div class="order-flow-bar">
   <div class="order-flow-steps">
     {% for step in flow_steps %}
@@ -10,6 +10,11 @@
     {% if not loop.last %}<span class="of-step__connector"></span>{% endif %}
     {% endfor %}
   </div>
+  {% if flow_completed %}
+  <div class="order-flow-bar__completed">
+    <i data-lucide="check-circle" width="13" height="13"></i> {{ text_flow_completed_state }}
+  </div>
+  {% endif %}
   {% if flow_terminal %}
   <div class="order-flow-bar__terminal">
     <i data-lucide="flag" width="13" height="13"></i> {{ text_flow_terminal_state }}
@@ -18,9 +23,15 @@
   {% if flow_transitions %}
   <div class="order-flow-bar__actions">
     {% for transition in flow_transitions %}
+    {% if transition.is_refund %}
+    <button type="button" class="btn btn-xs btn--icon btn-danger" onclick="openRefundModal()">
+      {{ transition.name }}
+    </button>
+    {% else %}
     <button type="button" class="btn btn-xs btn--icon {{ transition.terminal ? 'btn-danger' : 'btn-primary' }}" onclick="openFlowTransition({{ transition.order_status_id }}, '{{ transition.name|escape('js') }}', {{ transition.terminal ? 'true' : 'false' }})">
       {{ transition.name }}
     </button>
+    {% endif %}
     {% endfor %}
   </div>
   {% endif %}
