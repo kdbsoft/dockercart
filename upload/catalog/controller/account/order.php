@@ -131,6 +131,7 @@ class ControllerAccountOrder extends Controller {
 		$products_count = $order_ids ? $this->model_account_order->getTotalOrderProductsByOrderIds($order_ids) : array();
 		$vouchers_count = $order_ids ? $this->model_account_order->getTotalOrderVouchersByOrderIds($order_ids) : array();
 		$images_map = $order_ids ? $this->model_account_order->getOrderProductsImagesByOrderIds($order_ids) : array();
+		$returns_map = $order_ids ? $this->model_account_order->getReturnStatusByOrderIds($order_ids) : array();
 		$this->load->model('tool/image');
 
 		foreach ($results as $result) {
@@ -166,6 +167,8 @@ class ControllerAccountOrder extends Controller {
 				'flow_progress' => $flow['enabled'] ? $this->flowProgress($flow['steps'], (int)$result['order_status_id']) : 0,
 				'thumbs'     => $display_thumbs,
 				'thumbs_more' => $thumbs_more,
+				'return_count' => isset($returns_map[(int)$result['order_id']]) ? $returns_map[(int)$result['order_id']]['count'] : 0,
+				'return_status' => isset($returns_map[(int)$result['order_id']]) ? $returns_map[(int)$result['order_id']]['status'] : '',
 				'view'       => $this->url->link('account/order/info', 'order_id=' . $result['order_id'], true),
 			);
 		}
@@ -269,6 +272,10 @@ class ControllerAccountOrder extends Controller {
 			$data['invoice_url'] = $data['invoice_generated'] ? $this->url->link('account/order/invoice', 'order_id=' . (int)$order_info['order_id'], true) : '';
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 			$data['tracking_number'] = $order_info['tracking_number'];
+
+			$return_query = $this->db->query("SELECT COUNT(*) AS total, (SELECT rs.name FROM `" . DB_PREFIX . "return` r2 LEFT JOIN `" . DB_PREFIX . "return_status` rs ON (rs.return_status_id = r2.return_status_id AND rs.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE r2.order_id = '" . (int)$order_info['order_id'] . "' ORDER BY r2.return_id DESC LIMIT 1) AS status FROM `" . DB_PREFIX . "return` WHERE order_id = '" . (int)$order_info['order_id'] . "'");
+			$data['return_count'] = (int)$return_query->row['total'];
+			$data['return_status'] = $return_query->num_rows ? (string)$return_query->row['status'] : '';
 
 			if ($order_info['payment_address_format']) {
 				$format = $order_info['payment_address_format'];

@@ -65,6 +65,11 @@
                   {% set payment_badge = 'bg-gray-100 text-gray-600' %}
                 {% endif %}
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_badge }}" title="{{ text_payment_status }}">{{ order.payment_status_text }}</span>
+                {% if order.return_count %}
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700" title="{{ text_returned_status|format(order.return_status) }}">
+                  <i data-lucide="rotate-ccw" class="w-3 h-3"></i>{{ text_returned }}{% if order.return_count > 1 %} ({{ order.return_count }}){% endif %}
+                </span>
+                {% endif %}
               </div>
               <span class="text-sm text-gray-400 whitespace-nowrap">{{ order.date_added }}</span>
             </div>

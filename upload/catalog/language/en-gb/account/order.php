@@ -55,3 +55,7 @@ $_['column_payment_amount']        = 'Amount';
 // Order flow
 $_['text_order_flow']    = 'Order Progress';
 $_['text_flow_terminal'] = 'Order completed';
+
+// Returns
+$_['text_returned']          = 'Return';
+$_['text_returned_status']   = 'Return: %s';

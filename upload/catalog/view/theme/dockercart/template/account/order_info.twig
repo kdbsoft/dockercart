@@ -38,6 +38,12 @@
       {# Order Details #}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
         <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_order_detail }}</p>
+        {% if return_count %}
+        <div class="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-purple-50 text-purple-700 border border-purple-200" title="{{ text_returned_status|format(return_status) }}">
+          <i data-lucide="rotate-ccw" width="16" height="16"></i>
+          {{ text_returned }}{% if return_count > 1 %} ({{ return_count }}){% endif %}{% if return_status %} · {{ return_status }}{% endif %}
+        </div>
+        {% endif %}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div class="space-y-1.5">
             <p><span class="font-semibold text-gray-500">{{ text_order_id }}</span> <span class="text-gray-800 font-mono">#{{ order_id }}</span></p>
