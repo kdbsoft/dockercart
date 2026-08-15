@@ -28,7 +28,7 @@ class ModelCheckoutOrder extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$session_id = (string)session_id();
+			$session_id = (string)$this->session->getId();
 
 			// Exactly-once guard against duplicate orders from double-submits or
 			// concurrent checkout POSTs. The claim row is keyed by session_id;
