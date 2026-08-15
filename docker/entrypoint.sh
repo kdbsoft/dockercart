@@ -40,8 +40,12 @@ fix_permissions() {
         # Files: group write so www-data and host users can edit
         find /var/www/html -type f -exec chmod 664 {} \; || true
 
-        # Ensure webroot group is staff so www-data can write via group permissions
-        chgrp -R staff /var/www/html/ 2>/dev/null || true
+        # Webroot owner root + group staff. Under rootless podman the container
+        # root maps to the host user, so chowning keeps every file editable from
+        # the host; www-data (member of staff) keeps group-write for the GUI
+        # updater and image uploads. chgrp alone would only shift the group into
+        # the host subgid range and lock the host user out of the webroot.
+        chown -R root:staff /var/www/html/ 2>/dev/null || true
 
         # Storage dirs: SGID + group write (www-data через staff group)
         if ! chgrp -R staff /var/www/storage/ 2>/dev/null; then
@@ -73,7 +77,7 @@ fix_permissions() {
         # Make VERSION writable by www-data so the GUI "System Update" worker can
         # rewrite it in place (it lives in the rw ./upload bind mount).
         if [ -f "/var/www/html/VERSION" ]; then
-            chown www-data:staff /var/www/html/VERSION 2>/dev/null || true
+            chown root:staff /var/www/html/VERSION 2>/dev/null || true
             chmod 664 /var/www/html/VERSION 2>/dev/null || true
         fi
 
@@ -214,7 +218,7 @@ ensure_robots_txt() {
     fi
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:staff "$robots_file" 2>/dev/null || true
+        chown root:staff "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 
