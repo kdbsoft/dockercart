@@ -279,6 +279,35 @@ class ModelAccountOrder extends Model {
 	}
 
 	/**
+	 * Bulk return lookup for many orders (N+1 killer).
+	 * Returns [order_id => ['count' => int, 'status' => string]] using the
+	 * most recent return's status name for that order.
+	 *
+	 * @param int[] $order_ids
+	 * @return array<int, array{count: int, status: string}>
+	 */
+	public function getReturnStatusByOrderIds(array $order_ids) {
+		if (empty($order_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_ids)));
+
+		$query = $this->db->query("SELECT r.order_id, COUNT(*) AS total, (SELECT rs.name FROM `" . DB_PREFIX . "return` r2 LEFT JOIN `" . DB_PREFIX . "return_status` rs ON (rs.return_status_id = r2.return_status_id AND rs.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE r2.order_id = r.order_id ORDER BY r2.return_id DESC LIMIT 1) AS status FROM `" . DB_PREFIX . "return` r WHERE r.order_id IN (" . implode(',', $ids) . ") GROUP BY r.order_id");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_id']] = array(
+				'count'  => (int)$row['total'],
+				'status' => (string)$row['status'],
+			);
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Bulk product images for order list (N+1 killer).
 	 * Returns [order_id => [image filename, ...]] ordered by order_product_id.
 	 * Prefers variant image when variant_id is set and variant has an image.
