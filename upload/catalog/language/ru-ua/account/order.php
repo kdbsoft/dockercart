@@ -50,3 +50,7 @@ $_['column_payment_amount'] = 'Сумма';
 // Order flow
 $_['text_order_flow']    = 'Статус заказа';
 $_['text_flow_terminal'] = 'Заказ завершён';
+
+// Returns
+$_['text_returned']          = 'Возврат';
+$_['text_returned_status']   = 'Возврат: %s';

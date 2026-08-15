@@ -51,3 +51,7 @@ $_['column_payment_amount'] = 'Сума';
 // Order flow
 $_['text_order_flow']    = 'Статус замовлення';
 $_['text_flow_terminal'] = 'Замовлення завершено';
+
+// Returns
+$_['text_returned']          = 'Повернення';
+$_['text_returned_status']   = 'Повернення: %s';
