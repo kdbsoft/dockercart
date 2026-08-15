@@ -757,6 +757,16 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			if ($this->user->hasPermission('access', 'tool/update')) {
+				$system[] = array(
+					'id'       => 'menu-update',
+					'icon'	   => 'download',
+					'name'	   => $this->language->get('text_update'),
+					'href'     => $this->url->link('tool/update', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($system) {
 				$data['menus'][] = array(
 					'id'       => 'menu-system',

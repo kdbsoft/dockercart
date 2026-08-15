@@ -1,0 +1,275 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if success %}
+    <div class="alert alert-success"><i data-lucide="check" width="16" height="16"></i> {{ success }}</div>
+    {% endif %}
+    {% if error_warning %}
+    <div class="alert alert-danger"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ error_warning }}</div>
+    {% endif %}
+
+    <div class="alert alert-warning" style="margin:20px 0;"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_trust_warning }}</div>
+    <div class="alert alert-info" style="margin:20px 0;"><i data-lucide="info" width="16" height="16"></i> {{ text_limitations }}</div>
+
+    <div class="panel panel-default" style="margin:20px 0;">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i data-lucide="settings" width="16" height="16"></i> {{ text_current_version }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <p><strong>{{ text_current_version }}:</strong> <span id="local-version">{{ local_version|escape('html') }}</span></p>
+            <p><strong>{{ text_remote_version }}:</strong> <span id="remote-version">—</span></p>
+            <p><span id="update-badge" class="label label-default">{{ text_checking }}</span></p>
+          </div>
+          <div class="col-sm-6 text-right">
+            <button type="button" id="button-check" class="btn btn-default"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_check }}</button>
+            <button type="button" id="button-update" class="btn btn-primary" disabled><i data-lucide="download" width="16" height="16"></i> {{ button_update }}</button>
+          </div>
+        </div>
+        <div id="maintenance-note" class="alert alert-warning" style="display:none;margin-top:15px;">
+          <i data-lucide="shield" width="16" height="16"></i> {{ text_maintenance_on }}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default" id="changelog-panel" style="margin:20px 0;{% if not update_available %}display:none;{% endif %}">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i data-lucide="list" width="16" height="16"></i> {{ text_changelog }}</h3>
+      </div>
+      <div class="panel-body">
+        <pre id="changelog-content" style="white-space:pre-wrap;word-break:break-word;background:#f7f7f7;padding:12px;max-height:320px;overflow:auto;">{{ changelog|escape('html') }}</pre>
+      </div>
+    </div>
+
+    <div class="panel panel-default" style="margin:20px 0;">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i data-lucide="git-branch" width="16" height="16"></i> {{ entry_remote }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-remote">
+              {{ entry_remote }}
+              <span data-toggle="tooltip" title="{{ help_remote }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" name="remote" value="{{ config_remote|escape('html') }}" placeholder="https://github.com/owner/repo" id="input-remote" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-branch">
+              {{ entry_branch }}
+              <span data-toggle="tooltip" title="{{ help_branch }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
+            </label>
+            <div class="col-sm-10">
+              <input type="text" name="branch" value="{{ config_branch|escape('html') }}" placeholder="main" id="input-branch" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+              <button type="submit" class="btn btn-default"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel panel-default" id="progress-panel" style="margin:20px 0;display:none;">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i data-lucide="activity" width="16" height="16"></i> {{ text_progress }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="progress">
+          <div id="progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width:0%;"></div>
+        </div>
+        <p id="progress-message" class="text-muted"></p>
+        <pre id="progress-log" style="max-height:300px;overflow:auto;background:#f7f7f7;padding:10px;"></pre>
+        <div class="alert alert-danger" id="stale-alert" style="display:none;margin-top:15px;">
+          <i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_stale }}
+          <button type="button" id="button-reset" class="btn btn-danger btn-xs">{{ button_reset }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$('#button-check').on('click', function() {
+	var $btn = $(this);
+	$btn.prop('disabled', true);
+	$('#update-badge').removeClass('label-success label-danger').addClass('label-default').text('{{ text_checking|escape('js') }}');
+	$('#remote-version').text('…');
+
+	$.ajax({
+		url: '{{ check_url }}',
+		dataType: 'json',
+		success: function(json) {
+			$btn.prop('disabled', false);
+
+			if (!json.success) {
+				$('#update-badge').removeClass('label-default').addClass('label-danger').text(json.error || '{{ text_request_failed|escape('js') }}');
+				$('#button-update').prop('disabled', true);
+				return;
+			}
+
+			$('#remote-version').text(json.remote_version);
+
+			var $changelogPanel = $('#changelog-panel');
+			var $changelogContent = $('#changelog-content');
+
+			if (json.update_available) {
+				$('#update-badge').removeClass('label-default').addClass('label-success').text('{{ text_update_available|escape('js') }}');
+				$('#button-update').prop('disabled', false);
+				$changelogPanel.show();
+			} else {
+				$('#update-badge').removeClass('label-default').addClass('label-info').text('{{ text_up_to_date|escape('js') }}');
+				$('#button-update').prop('disabled', true);
+				$changelogPanel.hide();
+			}
+
+			if (json.changelog) {
+				$changelogContent.text(json.changelog);
+			} else {
+				$changelogContent.text('{{ text_no_changelog|escape('js') }}');
+			}
+		},
+		error: function() {
+			$btn.prop('disabled', false);
+			$('#update-badge').removeClass('label-default').addClass('label-danger').text('{{ text_request_failed|escape('js') }}');
+		}
+	});
+});
+
+var updateTimer = null;
+
+function renderProgress(status) {
+	$('#progress-panel').show();
+	$('#progress-bar').css('width', (status.percent || 0) + '%');
+	$('#progress-message').text(status.message || '');
+
+	if (status.log && status.log.length) {
+		$('#progress-log').text(status.log.join("\n"));
+		$('#progress-log').scrollTop($('#progress-log')[0].scrollHeight);
+	}
+
+	if (status.stale) {
+		$('#maintenance-note').hide();
+		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-danger');
+		$('#button-update').prop('disabled', false);
+		$('#button-check').prop('disabled', false);
+		$('#stale-alert').show();
+		return false;
+	}
+
+	if (status.error) {
+		$('#maintenance-note').hide();
+		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-danger');
+		$('#button-update').prop('disabled', false);
+		$('#button-check').prop('disabled', false);
+		return false;
+	}
+
+	if (status.done) {
+		$('#maintenance-note').hide();
+		$('#progress-bar').removeClass('progress-bar-striped active').addClass('progress-bar-success');
+		$('#button-update').prop('disabled', false);
+		$('#button-check').prop('disabled', false);
+		location.reload();
+		return false;
+	}
+
+	return true;
+}
+
+$('#button-reset').on('click', function() {
+	var $btn = $(this);
+	$btn.prop('disabled', true);
+
+	$.ajax({
+		url: '{{ reset_url }}',
+		type: 'POST',
+		dataType: 'json',
+		success: function(json) {
+			if (json.success) {
+				location.reload();
+				return;
+			}
+
+			alert(json.error || '{{ text_request_failed|escape('js') }}');
+			$btn.prop('disabled', false);
+		},
+		error: function() {
+			alert('{{ text_request_failed|escape('js') }}');
+			$btn.prop('disabled', false);
+		}
+	});
+});
+
+$('#button-update').on('click', function() {
+	var $btn = $(this);
+	$btn.prop('disabled', true);
+	$('#button-check').prop('disabled', true);
+	$('#maintenance-note').show();
+
+	$.ajax({
+		url: '{{ start_url }}',
+		type: 'POST',
+		dataType: 'json',
+		success: function(json) {
+			if (!json.success) {
+				$('#maintenance-note').hide();
+				$('#button-update').prop('disabled', false);
+				$('#button-check').prop('disabled', false);
+				alert(json.error || '{{ text_update_failed|escape('js') }}');
+				return;
+			}
+
+			if (updateTimer) {
+				clearInterval(updateTimer);
+			}
+
+			updateTimer = setInterval(function() {
+				$.ajax({
+					url: '{{ status_url }}',
+					dataType: 'json',
+					success: function(status) {
+						var cont = renderProgress(status);
+						if (!cont && updateTimer) {
+							clearInterval(updateTimer);
+							updateTimer = null;
+						}
+					},
+					error: function() {
+						if (updateTimer) {
+							clearInterval(updateTimer);
+							updateTimer = null;
+						}
+						$('#button-update').prop('disabled', false);
+						$('#button-check').prop('disabled', false);
+					}
+				});
+			}, 1500);
+		},
+		error: function() {
+			$('#maintenance-note').hide();
+			$('#button-update').prop('disabled', false);
+			$('#button-check').prop('disabled', false);
+			alert('{{ text_request_failed|escape('js') }}');
+		}
+	});
+});
+
+// Auto-check on load
+$('#button-check').trigger('click');
+</script>
+{{ footer }}

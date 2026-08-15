@@ -52,6 +52,17 @@
           {% endfor %}
         </ul>
       </li>
+      {% if show_update_bell %}
+      <li id="update-notify">
+        <a href="{{ update_url }}" class="update-button{% if update_available %} update-available{% endif %}" data-toggle="tooltip" title="{% if update_available %}{{ text_update_available }}: {{ update_remote_version }}{% else %}{{ text_system_update }}{% endif %}">
+          <i data-lucide="download" width="16" height="16"></i>
+          <span class="hidden-xs hidden-sm hidden-md">{{ text_system_update }}</span>
+          {% if update_available %}
+          <span class="label label-danger update-badge">{{ update_remote_version }}</span>
+          {% endif %}
+        </a>
+      </li>
+      {% endif %}
       <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><img src="{{ image }}" alt="{{ firstname }} {{ lastname }}" title="{{ username }}" id="user-profile" class="img-circle" />{{ firstname }} {{ lastname }} <i data-lucide="chevron-down" width="12" height="12"></i></a>
         <ul class="dropdown-menu dropdown-menu-right">
           <li><a href="{{ profile }}"><i data-lucide="circle-user" width="16" height="16"></i> {{ text_profile }}</a></li>
