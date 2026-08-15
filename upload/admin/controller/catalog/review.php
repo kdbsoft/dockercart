@@ -379,8 +379,8 @@ class ControllerCatalogReview extends Controller {
 				'dislikes'        => (int)$result['dislikes'],
 				'reply_count'     => (int)$result['reply_count'],
 				'reply_pending_count' => (int)$result['reply_pending_count'],
-				'status'          => ($result['status']) ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
-				'status_raw'      => $result['status'],
+				'status'          => (int)$result['status'],
+				'status_raw'      => (int)$result['status'],
 				'date_added'      => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
 				'date_added_raw'  => $result['date_added'],
 				'edit'            => $this->url->link('catalog/review/edit', 'user_token=' . $this->session->data['user_token'] . '&review_id=' . $result['review_id'] . $url, true),
@@ -843,6 +843,8 @@ class ControllerCatalogReview extends Controller {
 			$field = $this->request->post['field'];
 			$value = $this->request->post['value'];
 
+			$this->load->language('catalog/review');
+
 			$this->load->model('catalog/review');
 
 			if ($field === 'author') {
@@ -883,7 +885,9 @@ class ControllerCatalogReview extends Controller {
 				} else {
 					$this->model_catalog_review->updateReviewField($review_id, array('status' => $val));
 					$json['success'] = true;
-					$json['value_html'] = $val ? $this->language->get('text_enabled') : $this->language->get('text_disabled');
+					$json['value_html'] = $val
+					? '<span class="label label-success">' . $this->language->get('text_enabled') . '</span>'
+					: '<span class="label label-danger">' . $this->language->get('text_disabled') . '</span>';
 				}
 			} elseif ($field === 'date_added') {
 				$val = trim((string)$value);
