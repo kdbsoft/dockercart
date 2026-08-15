@@ -13,6 +13,12 @@ fix_permissions() {
     fi
 
     if [ -d "/var/www/storage" ]; then
+        # Ensure writable storage subdirs exist even when the host bind mount
+        # was auto-created empty by docker (fresh clone / first server install),
+        # which would otherwise shadow the dirs pre-built into the image.
+        for d in cache logs download upload modification session backup documents/invoices logs/scheduler; do
+            mkdir -p "/var/www/storage/$d" 2>/dev/null || true
+        done
         chmod -R 775 /var/www/storage 2>/dev/null || true
         mkdir -p /var/www/storage/documents/invoices 2>/dev/null || true
         chmod 2775 /var/www/storage/documents /var/www/storage/documents/invoices 2>/dev/null || true
@@ -38,9 +44,15 @@ fix_permissions() {
         chgrp -R staff /var/www/html/ 2>/dev/null || true
 
         # Storage dirs: SGID + group write (www-data через staff group)
-        chgrp -R staff /var/www/storage/ || true
-        chmod -R 2775 /var/www/storage/ || true
-        chmod -R 2775 /var/www/html/image/cache/ || true
+        if ! chgrp -R staff /var/www/storage/ 2>/dev/null; then
+            echo "WARNING: failed to chgrp -R staff /var/www/storage/ (check host bind-mount ownership/ACL)"
+        fi
+        if ! chmod -R 2775 /var/www/storage/ 2>/dev/null; then
+            echo "WARNING: failed to chmod -R 2775 /var/www/storage/ (check host bind-mount ownership/ACL)"
+        fi
+        if ! chmod -R 2775 /var/www/html/image/cache/ 2>/dev/null; then
+            echo "WARNING: failed to chmod -R 2775 /var/www/html/image/cache/"
+        fi
 
         # Ensure modification cache is owned by www-data (refresh runs as root)
         chown -R www-data:staff /var/www/storage/modification/ || true
@@ -719,6 +731,20 @@ ensure_rclone_config
 echo "Refreshing OCMOD modifications..."
 php /var/www/html/admin/cli/dockercart_modification_refresh.php || echo "WARNING: OCMOD modification refresh failed (non-fatal)"
 chown -R www-data:staff /var/www/storage/modification/ || true
+
+# Re-apply ownership/permissions to writable storage subdirs. The OCMOD refresh
+# (writes ocmod.log) and any startup error run as root and create root:root files
+# (e.g. error.log) that www-data then cannot append to -> "Permission denied" on
+# fopen(..., 'a'). Re-own only the writable subdirs (NOT storage/vendor or
+# storage/.rclone.conf, which keep their own stricter permissions).
+if [ "$(id -u)" -eq 0 ]; then
+	for d in logs cache download upload session backup documents modification; do
+		if [ -d "/var/www/storage/$d" ]; then
+			chown -R www-data:staff "/var/www/storage/$d" 2>/dev/null || true
+			chmod -R 2775 "/var/www/storage/$d" 2>/dev/null || true
+		fi
+	done
+fi
 
 # Запускаем фоновую индексацию Manticore (не блокирует Apache)
 initialize_manticore_index
