@@ -16,7 +16,7 @@ services:
 
   certbot:
     image: certbot/certbot:2.7.4
-    container_name: ${CERTBOT_CONTAINER_NAME:-dockercart_certbot}
+    container_name: ${CERTBOT_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_certbot}
     restart: ${RESTART_POLICY:-unless-stopped}
     depends_on:
       - nginx

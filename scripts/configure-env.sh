@@ -179,6 +179,28 @@ configure_env() {
 
     local answer=""
 
+    # --- 0. Instance / project name ------------------------------------------
+    # Namespaces containers, network and volumes so multiple instances can run
+    # on one host. Defaults to the directory basename (already used by Compose
+    # for the project name), so a clone in a new folder is isolated with no
+    # manual .env edits. Must be unique per instance.
+    local project
+    project="$(get_env_key "$ENV_FILE" COMPOSE_PROJECT_NAME)"
+    if [ -z "$project" ]; then
+        project="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
+    fi
+    if [ "$FIRST_RUN" = true ]; then
+        ask_value project "Instance/project name (namespaces containers, network and volumes)" "$project" || return $?
+        while ! validate_no_ws "$project"; do
+            echo -e "${RED}Name must not contain spaces or '/'.${NC}"
+            ask_value project "Instance/project name (namespaces containers, network and volumes)" "$project" || return $?
+        done
+        set_env_key "$ENV_FILE" COMPOSE_PROJECT_NAME "$project"
+        set_env_key "$ENV_FILE" DOCKERCART_NETWORK "${project}-network"
+        set_env_key "$ENV_FILE" DOCKERCART_ROUTER_NAME "$project"
+        echo -e "${GREEN}✓ Project: ${project} (network ${project}-network, router ${project})${NC}"
+    fi
+
     # --- 1. Store domain -----------------------------------------------------
     local domain
     domain="$(get_env_key "$ENV_FILE" DOCKERCART_DOMAIN)"

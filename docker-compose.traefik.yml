@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:1.31-alpine
-    container_name: ${NGINX_CONTAINER_NAME:-dockercart_nginx}
+    container_name: ${NGINX_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_nginx}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -55,8 +55,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: dockercart_apache:latest
-    container_name: ${APACHE_CONTAINER_NAME:-dockercart_apache}
+    image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
+    container_name: ${APACHE_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_apache}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -148,8 +148,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: dockercart_apache:latest
-    container_name: ${SCHEDULER_CONTAINER_NAME:-dockercart_scheduler}
+    image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
+    container_name: ${SCHEDULER_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_scheduler}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -213,7 +213,7 @@ services:
 
   mariadb:
     image: mariadb:12.3.2
-    container_name: ${MARIADB_CONTAINER_NAME:-dockercart_mariadb}
+    container_name: ${MARIADB_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_mariadb}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -258,7 +258,7 @@ services:
 
   manticore:
     image: manticoresearch/manticore:6.3.8
-    container_name: ${MANTICORE_CONTAINER_NAME:-dockercart_manticore}
+    container_name: ${MANTICORE_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_manticore}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -294,7 +294,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: ${REDIS_CONTAINER_NAME:-dockercart_redis}
+    container_name: ${REDIS_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_redis}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
@@ -318,7 +318,7 @@ services:
 
   ftp:
     image: docker.io/fauria/vsftpd:latest
-    container_name: ${FTP_CONTAINER_NAME:-dockercart_ftp}
+    container_name: ${FTP_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_ftp}
     profiles:
       - ftp
     restart: ${RESTART_POLICY:-unless-stopped}
@@ -369,8 +369,8 @@ services:
   backup-worker:
     profiles:
       - backup
-    image: dockercart_apache:latest
-    container_name: dockercart_backup_worker
+    image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-dockercart}_backup_worker
     environment:
       - DOCKERCART_ROLE=backup
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
@@ -404,7 +404,7 @@ volumes:
 
 networks:
   dockercart-network:
-    name: ${DOCKERCART_NETWORK:-dockercart-network}
+    name: ${DOCKERCART_NETWORK:-${COMPOSE_PROJECT_NAME:-dockercart}-network}
     driver: bridge
   traefik:
     external: true

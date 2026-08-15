@@ -66,12 +66,12 @@ echo ""
 # standalone and Traefik modes regardless of which compose files started the
 # stack)
 echo -e "${YELLOW}📦 Container Check${NC}"
-check "nginx" "docker ps --filter name=^/${NGINX_CONTAINER_NAME:-dockercart_nginx}\$ --format '{{.Status}}' | grep -q 'Up'"
-check "apache" "docker ps --filter name=^/${APACHE_CONTAINER_NAME:-dockercart_apache}\$ --format '{{.Status}}' | grep -q 'Up'"
-check "mariadb" "docker ps --filter name=^/${MARIADB_CONTAINER_NAME:-dockercart_mariadb}\$ --format '{{.Status}}' | grep -q 'Up'"
-check "redis" "docker ps --filter name=^/${REDIS_CONTAINER_NAME:-dockercart_redis}\$ --format '{{.Status}}' | grep -q 'Up'"
-check "manticore" "docker ps --filter name=^/${MANTICORE_CONTAINER_NAME:-dockercart_manticore}\$ --format '{{.Status}}' | grep -q 'Up'"
-check "scheduler" "docker ps --filter name=^/${SCHEDULER_CONTAINER_NAME:-dockercart_scheduler}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "nginx" "docker ps --filter name=^/${NGINX_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_nginx}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "apache" "docker ps --filter name=^/${APACHE_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_apache}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "mariadb" "docker ps --filter name=^/${MARIADB_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_mariadb}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "redis" "docker ps --filter name=^/${REDIS_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_redis}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "manticore" "docker ps --filter name=^/${MANTICORE_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_manticore}\$ --format '{{.Status}}' | grep -q 'Up'"
+check "scheduler" "docker ps --filter name=^/${SCHEDULER_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_scheduler}\$ --format '{{.Status}}' | grep -q 'Up'"
 echo ""
 
 # Check HTTP health endpoint (proxies to apache's healthcheck.php)
