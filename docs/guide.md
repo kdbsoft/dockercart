@@ -256,7 +256,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 ### Standalone Mode
 
-The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443).
+The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443). On a clean install the setup wizard (`make start`) prompts for the HTTP listen port and derives `DOCKERCART_URL` from the domain + port automatically, so a non-default port (e.g. `8080`) just works — internal links, `config_url`, `robots.txt` and `config.php` all include the port. On an existing install, simply set `DOCKERCART_HTTP_PORT` in `.env` and run `make restart`; `start.sh` re-derives `DOCKERCART_URL` so everything stays consistent.
 
 ```bash
 make up     # HTTP on port 80

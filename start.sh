@@ -110,6 +110,50 @@ if [ -f .env ]; then
     set +o allexport
 fi
 
+# ============================================================================
+# DERIVE STORE URL(S) FROM DOMAIN + LISTEN PORT
+# ============================================================================
+# Nginx binds DOCKERCART_HTTP_PORT / DOCKERCART_HTTPS_PORT on the host. The
+# app URL (DOCKERCART_URL / DOCKERCART_HTTPS_URL) MUST carry the same port so
+# internal links, config_url/config_ssl in the DB, robots.txt and the generated
+# config.php all stay consistent. We re-derive these on every run so a manually
+# edited DOCKERCART_HTTP_PORT (e.g. 8080) in .env retroactively fixes an
+# existing install whose stored DOCKERCART_URL lacks the port. Port 80/443 are
+# the defaults and are omitted from the URL.
+if [ -n "${DOCKERCART_DOMAIN:-}" ]; then
+    if [ -z "${DOCKERCART_HTTP_PORT:-}" ]; then
+        DOCKERCART_HTTP_PORT=80
+    fi
+    if [ -z "${DOCKERCART_HTTPS_PORT:-}" ]; then
+        DOCKERCART_HTTPS_PORT=443
+    fi
+    DOCKERCART_URL_PORT_SUFFIX=""
+    if [ "${DOCKERCART_HTTP_PORT}" != "80" ]; then
+        DOCKERCART_URL_PORT_SUFFIX=":${DOCKERCART_HTTP_PORT}"
+    fi
+    DOCKERCART_HTTPS_URL_PORT_SUFFIX=""
+    if [ "${DOCKERCART_HTTPS_PORT}" != "443" ]; then
+        DOCKERCART_HTTPS_URL_PORT_SUFFIX=":${DOCKERCART_HTTPS_PORT}"
+    fi
+    export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX}"
+    export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX}"
+    # Persist the derived URLs back into .env so non-start.sh consumers (backup
+    # worker, install-cli.sh, health-check.sh) and the setup wizard memory see
+    # the canonical values.
+    if [ -f .env ]; then
+        set_env_key() {
+            local file="$1" key="$2" value="$3"
+            if grep -qE "^${key}=" "$file"; then
+                sed -i "s|^${key}=.*|${key}=${value}|" "$file"
+            else
+                printf '\n# Derived by start.sh\n%s=%s\n' "$key" "$value" >> "$file"
+            fi
+        }
+        set_env_key .env DOCKERCART_URL "$DOCKERCART_URL"
+        set_env_key .env DOCKERCART_HTTPS_URL "$DOCKERCART_HTTPS_URL"
+    fi
+fi
+
 echo ""
 
 # ============================================================================
