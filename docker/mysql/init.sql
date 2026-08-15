@@ -1455,7 +1455,7 @@ CREATE TABLE `oc_cart` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `cart_id` (`customer_id`,`session_id`,`product_id`,`recurring_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14735 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14739 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1530,7 +1530,9 @@ INSERT INTO `oc_cart` VALUES
 (14678,0,'b4d2aac9be240c1f9aa8a1d563',5041,0,'{\"variant_id\":\"787\",\"9146\":\"28\"}',1.00,'2026-08-12 16:17:39'),
 (14700,0,'4a3b7c7b6d733bebe7c9d7ae78',5010,0,'{\"9034\":\"9932\",\"9035\":\"9934\",\"variant_id\":\"667\"}',1.00,'2026-08-13 07:58:34'),
 (14701,0,'4a3b7c7b6d733bebe7c9d7ae78',5064,0,'{\"9159\":\"10190\",\"variant_id\":\"833\"}',1.00,'2026-08-13 07:58:44'),
-(14705,0,'d6da9c341dad59ed2e647cb933',5006,0,'{\"9025\":\"9915\",\"9024\":\"9913\",\"variant_id\":\"651\"}',1.00,'2026-08-13 09:55:59');
+(14705,0,'d6da9c341dad59ed2e647cb933',5006,0,'{\"9025\":\"9915\",\"9024\":\"9913\",\"variant_id\":\"651\"}',1.00,'2026-08-13 09:55:59'),
+(14737,99853,'cfa28a08cc9be1c897e9803e9a',5023,0,'{\"9061\":\"9989\",\"9060\":\"9987\",\"variant_id\":\"704\"}',1.00,'2026-08-15 12:42:45'),
+(14738,99853,'cfa28a08cc9be1c897e9803e9a',5023,0,'{\"9061\":\"9989\",\"9060\":\"9986\",\"variant_id\":\"703\"}',1.00,'2026-08-15 12:43:39');
 /*!40000 ALTER TABLE `oc_cart` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -1607,6 +1609,34 @@ INSERT INTO `oc_category` VALUES
 (1973,'catalog/demo/demo-seed/categories/home-kitchen-small-appliances.jpg',NULL,NULL,NULL,1971,0,1,2,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL),
 (1974,'catalog/demo/demo-seed/categories/home-kitchen-home-decor.jpg',NULL,NULL,NULL,1971,0,1,3,1,'2026-06-03 13:44:48','2026-06-03 13:44:48',NULL);
 /*!40000 ALTER TABLE `oc_category` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_category_banner`
+--
+
+DROP TABLE IF EXISTS `oc_category_banner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_category_banner` (
+  `category_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `banner_image` varchar(255) DEFAULT NULL,
+  `banner_link` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`category_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_category_banner`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_category_banner` WRITE;
+/*!40000 ALTER TABLE `oc_category_banner` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_category_banner` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -3026,7 +3056,7 @@ INSERT INTO `oc_customer` VALUES
 (99850,1,0,1,'Reward','Customer','reward-customer@example.com','','','','','x','',NULL,NULL,0,0,'','',1,0,'','','2026-08-12 12:51:33',''),
 (99851,2,0,1,'Demo','Retail','retail@demo.local','','','','','$2y$12$0VpmG/0ceC.pUvVwTb0zfO4c0.ttpsk4uoM7UYEWW6EmrwpfoZBSq','',NULL,NULL,0,0,'','::1',1,1,'','b18285ef598db17ed277804531a9477eb302c89e','2026-08-10 12:06:30','d8ff95de37b09b8e2820c8c6f8ece8c60e76b761dec8aab2c1e61758e090851a'),
 (99852,3,0,3,'Demo','Wholesale','wholesale@demo.local','','','','','$argon2id$v=19$m=65536,t=4,p=1$Y0xNRTNoMENyTzVxSlRzeQ$x4zF8mZvqji52FbPIY736I8d7mHsFh1ZA9Hi6iuaduM','demo',NULL,NULL,0,0,'','10.89.1.7',1,1,'','34821c09003412e4746c89d105ba1cbeb95b23b9','2026-08-10 12:06:30','07f5211e738c337310dfe912a1137ea30427b5b6560df44252b7cc7e69008301'),
-(99853,4,0,3,'Demo','VIP','vip@demo.local','','','','','$argon2id$v=19$m=65536,t=4,p=1$cWVSY3FtQk9sYVhMbHpZbw$UCaYlRPszGk0Kvk2XTC9Pd66vhQlXJ/1g8FE0OeFeXI','demo',NULL,NULL,0,20,'','10.89.1.7',1,1,'','7395360f03f0abe589e0483c3ac85dd6fa1729d5','2026-08-10 12:06:30','5b1b9f2092952e757d4e6c61f22b31551b8561be0d4d3374b4a4af7734d87c4c'),
+(99853,4,0,3,'Demo','VIP','vip@demo.local','','','','','$argon2id$v=19$m=65536,t=4,p=1$cWVSY3FtQk9sYVhMbHpZbw$UCaYlRPszGk0Kvk2XTC9Pd66vhQlXJ/1g8FE0OeFeXI','demo',NULL,NULL,0,20,'','10.89.1.7',1,1,'','7395360f03f0abe589e0483c3ac85dd6fa1729d5','2026-08-10 12:06:30','16059084a45fd25e0a296b60dc2aec832592caa681628ff1769fbc0e0ddcb2e1'),
 (99854,5,0,1,'Demo','Guest','guest@demo.local','','','','','5e83556d92af913a4cec70be628d4e71448087ea','demo',NULL,NULL,0,0,'','127.0.0.1',1,1,'','e68338df9737c68a5757dddfb869ae7cc9046739','2026-08-10 12:06:30','');
 /*!40000 ALTER TABLE `oc_customer` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -3392,7 +3422,7 @@ CREATE TABLE `oc_customer_ip` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_ip_id`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3413,7 +3443,9 @@ INSERT INTO `oc_customer_ip` VALUES
 (25,99851,'','2026-08-10 19:20:38'),
 (26,99852,'','2026-08-10 19:29:27'),
 (27,99852,'127.0.0.1','2026-08-11 11:13:12'),
-(28,99851,'::1','2026-08-14 10:47:52');
+(28,99851,'::1','2026-08-14 10:47:52'),
+(29,99853,'10.89.1.199','2026-08-15 14:51:06'),
+(30,99853,'10.89.1.17','2026-08-15 15:12:26');
 /*!40000 ALTER TABLE `oc_customer_ip` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4140,7 +4172,7 @@ CREATE TABLE `oc_dockercart_checkout_abandoned` (
   KEY `customer_id` (`customer_id`),
   KEY `email` (`email`),
   KEY `recovered` (`recovered`)
-) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4168,7 +4200,8 @@ INSERT INTO `oc_dockercart_checkout_abandoned` VALUES
 (255,'4a3b7c7b6d733bebe7c9d7ae78',0,'test@example.com','+380 (38) 050-12-34','[{\"cart_id\":\"14697\",\"product_id\":\"5010\",\"variant_id\":667,\"variant_sku\":\"DEMO-5010-BLK-W12\",\"name\":\"JBL Charge 5\",\"model\":\"DEMO-5010-BLK-W12\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/jbl-charge-5.jpg\",\"option\":[{\"product_option_id\":\"9034\",\"product_option_value_id\":\"9932\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9035\",\"product_option_value_id\":\"9934\",\"option_id\":\"5\",\"option_value_id\":\"19\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"12 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0435\\u0432\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":2313.767788,\"total\":2313.767788,\"bxgy_applied\":true,\"bxgy_per_unit\":3775.0948120000003,\"bxgy_units\":1,\"bxgy_text\":\"BXGY: -62%\",\"bxgy_original_price\":\"6 089 \\u20b4\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14698\",\"product_id\":\"5064\",\"variant_id\":833,\"variant_sku\":\"DEMO-5064-STD\",\"name\":\"Sapiens, \\u042e\\u0432\\u0430\\u043b\\u044c \\u041d\\u043e\\u0430 \\u0425\\u0430\\u0440\\u0430\\u0440\\u0438\",\"model\":\"DEMO-5064-STD\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/sapiens-by-yuval-noah-harari.jpg\",\"option\":[{\"product_option_id\":\"9159\",\"product_option_value_id\":\"10190\",\"option_id\":\"7\",\"option_value_id\":\"23\",\"name\":\"\\u0418\\u0437\\u0434\\u0430\\u043d\\u0438\\u0435\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u043e\\u0435\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":594.56,\"total\":594.56,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\\u0422\\u0435\\u0441\\u0442\",\"lastname\":\"\\u0422\\u0435\\u0441\\u0442\\u043e\\u0432\",\"company\":\"\",\"address_1\":\"\\u0443\\u043b. \\u0422\\u0435\\u0441\\u0442\\u043e\\u0432\\u0430\\u044f 1\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\\u041a\\u0438\\u0435\\u0432\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','confirm',NULL,NULL,0,NULL,0,NULL,1,'2026-08-13 07:54:26','2026-08-13 07:55:16'),
 (266,'4a3b7c7b6d733bebe7c9d7ae78',0,'','','[{\"cart_id\":\"14700\",\"product_id\":\"5010\",\"variant_id\":667,\"variant_sku\":\"DEMO-5010-BLK-W12\",\"name\":\"JBL Charge 5\",\"model\":\"DEMO-5010-BLK-W12\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/jbl-charge-5.jpg\",\"option\":[{\"product_option_id\":\"9034\",\"product_option_value_id\":\"9932\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9035\",\"product_option_value_id\":\"9934\",\"option_id\":\"5\",\"option_value_id\":\"19\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"12 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0435\\u0432\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":2313.767788,\"total\":2313.767788,\"bxgy_applied\":true,\"bxgy_per_unit\":3775.0948120000003,\"bxgy_units\":1,\"bxgy_text\":\"BXGY: -62%\",\"bxgy_original_price\":\"6 089 \\u20b4\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14701\",\"product_id\":\"5064\",\"variant_id\":833,\"variant_sku\":\"DEMO-5064-STD\",\"name\":\"Sapiens, \\u042e\\u0432\\u0430\\u043b\\u044c \\u041d\\u043e\\u0430 \\u0425\\u0430\\u0440\\u0430\\u0440\\u0438\",\"model\":\"DEMO-5064-STD\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/sapiens-by-yuval-noah-harari.jpg\",\"option\":[{\"product_option_id\":\"9159\",\"product_option_value_id\":\"10190\",\"option_id\":\"7\",\"option_value_id\":\"23\",\"name\":\"\\u0418\\u0437\\u0434\\u0430\\u043d\\u0438\\u0435\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u043e\\u0435\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":594.56,\"total\":594.56,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-13 07:58:51','2026-08-13 07:58:51'),
 (276,'b4426aad1600a8cd2eb3586744',0,'','','[{\"cart_id\":\"14702\",\"product_id\":\"5010\",\"variant_id\":667,\"variant_sku\":\"DEMO-5010-BLK-W12\",\"name\":\"JBL Charge 5\",\"model\":\"DEMO-5010-BLK-W12\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/jbl-charge-5.jpg\",\"option\":[{\"product_option_id\":\"9034\",\"product_option_value_id\":\"9932\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9035\",\"product_option_value_id\":\"9934\",\"option_id\":\"5\",\"option_value_id\":\"19\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"12 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0435\\u0432\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":2313.767788,\"total\":2313.767788,\"bxgy_applied\":true,\"bxgy_per_unit\":3775.0948120000003,\"bxgy_units\":1,\"bxgy_text\":\"BXGY: -62%\",\"bxgy_original_price\":\"6 089 \\u20b4\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14703\",\"product_id\":\"5064\",\"variant_id\":833,\"variant_sku\":\"DEMO-5064-STD\",\"name\":\"Sapiens, \\u042e\\u0432\\u0430\\u043b\\u044c \\u041d\\u043e\\u0430 \\u0425\\u0430\\u0440\\u0430\\u0440\\u0438\",\"model\":\"DEMO-5064-STD\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/sapiens-by-yuval-noah-harari.jpg\",\"option\":[{\"product_option_id\":\"9159\",\"product_option_value_id\":\"10190\",\"option_id\":\"7\",\"option_value_id\":\"23\",\"name\":\"\\u0418\\u0437\\u0434\\u0430\\u043d\\u0438\\u0435\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u043e\\u0435\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":594.56,\"total\":594.56,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-13 08:11:43','2026-08-13 08:11:43'),
-(296,'cfa28a08cc9be1c897e9803e9a',99853,'vip@demo.local','+380 (38) 111-11-11','[{\"cart_id\":\"14734\",\"product_id\":\"5004\",\"variant_id\":639,\"variant_sku\":\"DEMO-5004-BLK-256-12G\",\"name\":\"OnePlus 12\",\"model\":\"DEMO-5004-BLK-256-12G\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/oneplus-12.jpg\",\"option\":[{\"product_option_id\":\"9016\",\"product_option_value_id\":\"9898\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9017\",\"product_option_value_id\":\"9900\",\"option_id\":\"3\",\"option_value_id\":\"14\",\"name\":\"\\u041f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"256 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9018\",\"product_option_value_id\":\"9902\",\"option_id\":\"4\",\"option_value_id\":\"17\",\"name\":\"\\u041e\\u043f\\u0435\\u0440\\u0430\\u0442\\u0438\\u0432\\u043d\\u0430\\u044f \\u043f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"12 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9019\",\"product_option_value_id\":\"9904\",\"option_id\":\"5\",\"option_value_id\":\"20\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"24 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0430\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":36794.1269,\"total\":36794.1269,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','confirm',NULL,NULL,0,NULL,0,NULL,1,'2026-08-15 11:56:04','2026-08-15 12:01:27');
+(296,'cfa28a08cc9be1c897e9803e9a',99853,'vip@demo.local','+380 (38) 111-11-11','[{\"cart_id\":\"14734\",\"product_id\":\"5004\",\"variant_id\":639,\"variant_sku\":\"DEMO-5004-BLK-256-12G\",\"name\":\"OnePlus 12\",\"model\":\"DEMO-5004-BLK-256-12G\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/oneplus-12.jpg\",\"option\":[{\"product_option_id\":\"9016\",\"product_option_value_id\":\"9898\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9017\",\"product_option_value_id\":\"9900\",\"option_id\":\"3\",\"option_value_id\":\"14\",\"name\":\"\\u041f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"256 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9018\",\"product_option_value_id\":\"9902\",\"option_id\":\"4\",\"option_value_id\":\"17\",\"name\":\"\\u041e\\u043f\\u0435\\u0440\\u0430\\u0442\\u0438\\u0432\\u043d\\u0430\\u044f \\u043f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"12 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9019\",\"product_option_value_id\":\"9904\",\"option_id\":\"5\",\"option_value_id\":\"20\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"24 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0430\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":36794.1269,\"total\":36794.1269,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','confirm',NULL,NULL,0,NULL,0,NULL,1,'2026-08-15 11:56:04','2026-08-15 12:01:27'),
+(307,'cfa28a08cc9be1c897e9803e9a',99853,'vip@demo.local','+380 (38) 111-11-11','[{\"cart_id\":\"14737\",\"product_id\":\"5023\",\"variant_id\":704,\"variant_sku\":\"DEMO-5023-WHT-M\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"DEMO-5023-WHT-M\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9061\",\"product_option_value_id\":\"9989\",\"option_id\":\"1\",\"option_value_id\":\"2\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0411\\u0435\\u043b\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9060\",\"product_option_value_id\":\"9987\",\"option_id\":\"2\",\"option_value_id\":\"9\",\"name\":\"\\u0420\\u0430\\u0437\\u043c\\u0435\\u0440\",\"value\":\"M\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":55214.217,\"total\":55214.217,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14738\",\"product_id\":\"5023\",\"variant_id\":703,\"variant_sku\":\"DEMO-5023-WHT-S\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"DEMO-5023-WHT-S\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9061\",\"product_option_value_id\":\"9989\",\"option_id\":\"1\",\"option_value_id\":\"2\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0411\\u0435\\u043b\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9060\",\"product_option_value_id\":\"9986\",\"option_id\":\"2\",\"option_value_id\":\"8\",\"name\":\"\\u0420\\u0430\\u0437\\u043c\\u0435\\u0440\",\"value\":\"S\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":55214.217,\"total\":55214.217,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-15 12:26:37','2026-08-15 13:11:46');
 /*!40000 ALTER TABLE `oc_dockercart_checkout_abandoned` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4192,7 +4225,7 @@ CREATE TABLE `oc_dockercart_checkout_analytics` (
   KEY `session_id` (`session_id`),
   KEY `step` (`step`),
   KEY `date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=505 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=560 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4695,7 +4728,62 @@ INSERT INTO `oc_dockercart_checkout_analytics` VALUES
 (501,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:01:27'),
 (502,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:01:27'),
 (503,'cfa28a08cc9be1c897e9803e9a',99853,'confirm','[]','2026-08-15 12:01:27'),
-(504,'cfa28a08cc9be1c897e9803e9a',99853,'completed','[]','2026-08-15 12:01:27');
+(504,'cfa28a08cc9be1c897e9803e9a',99853,'completed','[]','2026-08-15 12:01:27'),
+(505,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:26:37'),
+(506,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:26:37'),
+(507,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:26:37'),
+(508,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:26:37'),
+(509,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:26:37'),
+(510,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:35:29'),
+(511,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:35:30'),
+(512,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:35:30'),
+(513,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:35:30'),
+(514,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:35:30'),
+(515,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:42:33'),
+(516,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:42:33'),
+(517,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:42:33'),
+(518,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:42:33'),
+(519,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:42:33'),
+(520,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:42:46'),
+(521,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:42:47'),
+(522,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:42:47'),
+(523,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:42:47'),
+(524,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:42:47'),
+(525,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:43:29'),
+(526,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:43:29'),
+(527,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:43:29'),
+(528,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:43:29'),
+(529,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:43:29'),
+(530,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:43:40'),
+(531,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:43:41'),
+(532,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:43:41'),
+(533,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:43:41'),
+(534,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:43:41'),
+(535,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:45:01'),
+(536,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:45:02'),
+(537,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:45:02'),
+(538,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:45:02'),
+(539,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:45:02'),
+(540,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:46:01'),
+(541,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:46:02'),
+(542,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:46:02'),
+(543,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:46:02'),
+(544,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:46:02'),
+(545,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:48:38'),
+(546,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:48:39'),
+(547,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:48:39'),
+(548,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:48:39'),
+(549,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:48:39'),
+(550,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 12:53:51'),
+(551,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 12:53:52'),
+(552,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 12:53:52'),
+(553,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 12:53:52'),
+(554,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 12:53:52'),
+(555,'cfa28a08cc9be1c897e9803e9a',99853,'cart','[]','2026-08-15 13:11:46'),
+(556,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_address','[]','2026-08-15 13:11:46'),
+(557,'cfa28a08cc9be1c897e9803e9a',99853,'shipping_method','[]','2026-08-15 13:11:46'),
+(558,'cfa28a08cc9be1c897e9803e9a',99853,'payment_address','[]','2026-08-15 13:11:46'),
+(559,'cfa28a08cc9be1c897e9803e9a',99853,'payment_method','[]','2026-08-15 13:11:46');
 /*!40000 ALTER TABLE `oc_dockercart_checkout_analytics` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5876,7 +5964,7 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
   `is_system` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_type` (`task_type`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=168 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5888,10 +5976,10 @@ LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
 (29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-15 08:51:37',NULL,'2026-07-02 11:00:50','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
-(41,'license_check','License Verification',1,'every_3d','2026-08-14 10:33:05',NULL,'2026-07-03 18:33:04','2026-08-14 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-15 08:51:37',NULL,'2026-07-24 18:51:04','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(41,'license_check','License Verification',1,'every_3d','2026-08-14 10:33:05',NULL,'2026-07-03 18:33:04','2026-08-15 15:03:47',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-15 08:51:37',NULL,'2026-07-24 18:51:04','2026-08-15 15:03:48',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
 (96,'currency_refresh','Currency Refresh',1,'daily','2026-08-15 08:51:37',NULL,'2026-07-29 10:46:20','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-15 12:06:37',NULL,'2026-08-01 18:17:04','2026-08-15 12:06:37',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-15 16:03:10',NULL,'2026-08-01 18:17:04','2026-08-15 16:03:10',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
 (140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-15 08:51:37',NULL,'2026-08-06 08:09:03','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
 (141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'30 4 * * *','2026-08-15 08:51:37',NULL,'2026-08-06 15:36:09','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
 (154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-15 08:51:37',NULL,'2026-08-09 15:39:28','2026-08-15 08:51:37',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
@@ -6660,7 +6748,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=1579 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1583 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8204,7 +8292,11 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (1575,'004ee52ba8061a02738a360a39','','none','','2026-08-15 09:39:18'),
 (1576,'c4f51791b1cda02b566bdf58a3','','none','','2026-08-15 09:39:26'),
 (1577,'eec875323695f3f8dd0765abe6','','none','','2026-08-15 09:39:29'),
-(1578,'930f4932ea145994101d86cbd7','','none','','2026-08-15 09:39:39');
+(1578,'930f4932ea145994101d86cbd7','','none','','2026-08-15 09:39:39'),
+(1579,'e8cd4e2820f10c4b6751d330cb','','none','','2026-08-15 12:39:37'),
+(1580,'cfa28a08cc9be1c897e9803e9a','dockercart','referral','','2026-08-15 14:23:11'),
+(1581,'04e5c830f5cb62ac50f90466a9','','none','','2026-08-15 14:45:27'),
+(1582,'5b27fbea35f71393051e4b9a49','','none','','2026-08-15 14:46:52');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8392,7 +8484,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6457 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6490 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8568,7 +8660,6 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (3758,88,NULL,5041,'2026-08-10 12:03:41','2026-08-10 12:03:41'),
 (3762,88,NULL,5004,'2026-08-10 12:04:22','2026-08-10 12:04:22'),
 (3763,88,NULL,5002,'2026-08-10 12:04:28','2026-08-10 12:04:28'),
-(3771,99853,NULL,5023,'2026-08-10 12:09:31','2026-08-10 12:09:31'),
 (3772,99853,NULL,5077,'2026-08-10 12:09:35','2026-08-10 12:09:35'),
 (3774,99853,NULL,5009,'2026-08-10 12:09:55','2026-08-10 12:09:55'),
 (3777,99853,NULL,5081,'2026-08-10 12:10:27','2026-08-10 12:10:27'),
@@ -8576,12 +8667,10 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (3794,99853,NULL,5003,'2026-08-10 12:22:15','2026-08-10 12:22:15'),
 (3795,99853,NULL,5036,'2026-08-10 12:41:59','2026-08-10 12:41:59'),
 (3806,99853,NULL,5042,'2026-08-10 14:18:41','2026-08-10 14:18:41'),
-(3831,99853,NULL,5014,'2026-08-10 14:29:32','2026-08-10 14:29:32'),
 (3832,99853,NULL,5032,'2026-08-10 14:29:38','2026-08-10 14:29:38'),
 (3844,99853,NULL,5031,'2026-08-10 14:36:16','2026-08-10 14:36:16'),
 (3845,99853,NULL,5063,'2026-08-10 14:36:27','2026-08-10 14:36:27'),
 (3847,99853,NULL,5068,'2026-08-10 14:36:37','2026-08-10 14:36:37'),
-(3869,99853,NULL,5016,'2026-08-10 14:47:36','2026-08-10 14:47:36'),
 (3871,99853,NULL,5005,'2026-08-10 14:51:18','2026-08-10 14:51:18'),
 (3872,99853,NULL,5041,'2026-08-10 14:51:34','2026-08-10 14:51:34'),
 (3880,99853,NULL,5021,'2026-08-10 15:06:04','2026-08-10 15:06:04'),
@@ -8690,9 +8779,12 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (6448,NULL,'cfa28a08cc9be1c897e9803e9a',5021,'2026-08-15 10:43:26','2026-08-15 10:43:26'),
 (6449,NULL,'cfa28a08cc9be1c897e9803e9a',5063,'2026-08-15 10:43:30','2026-08-15 10:43:30'),
 (6450,99853,NULL,5051,'2026-08-15 10:44:29','2026-08-15 10:44:29'),
-(6454,99853,NULL,5001,'2026-08-15 11:33:12','2026-08-15 11:33:12'),
-(6455,99853,NULL,5002,'2026-08-15 11:33:14','2026-08-15 11:33:14'),
-(6456,99853,NULL,5004,'2026-08-15 11:56:00','2026-08-15 11:56:00');
+(6456,99853,NULL,5004,'2026-08-15 11:56:00','2026-08-15 11:56:00'),
+(6459,99853,NULL,5016,'2026-08-15 12:29:16','2026-08-15 12:29:16'),
+(6473,99853,NULL,5023,'2026-08-15 15:14:38','2026-08-15 15:14:38'),
+(6486,99853,NULL,5014,'2026-08-15 15:18:34','2026-08-15 15:18:34'),
+(6487,99853,NULL,5001,'2026-08-15 15:22:15','2026-08-15 15:22:15'),
+(6489,99853,NULL,5002,'2026-08-15 15:23:03','2026-08-15 15:23:03');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8858,7 +8950,7 @@ CREATE TABLE `oc_extension` (
   `type` varchar(32) NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`extension_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=500 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=501 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8931,7 +9023,7 @@ INSERT INTO `oc_extension` VALUES
 (442,'currency','ecb'),
 (462,'dashboard','dockercart_top_products'),
 (463,'dashboard','dockercart_category_revenue'),
-(499,'total','product_bundle');
+(500,'total','bxgy');
 /*!40000 ALTER TABLE `oc_extension` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -11109,8 +11201,8 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,585,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',25.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,358,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
+(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,588,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',25.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,372,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
 (5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,316,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',40.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,57,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5005,'DEMO-5005',1102,'SKU-5005','','','','','','A1',46.00,0,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','catalog/Aero_Airship_01.glb','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,125,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
@@ -11122,16 +11214,16 @@ INSERT INTO `oc_product` VALUES
 (5011,'DEMO-5011',1973,'SKU-5011','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','catalog/test_360_lounge_chair.jpg',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,124,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5012,'DEMO-5012',1973,'SKU-5012','','','','','','A1',28.00,0,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','catalog/test_360_lounge_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,126,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5013,'DEMO-5013',1973,'SKU-5013','','','','','','A1',35.00,0,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,23,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5014,'DEMO-5014',1972,'SKU-5014','','','','','','A1',42.00,0,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,381,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5014,'DEMO-5014',1972,'SKU-5014','','','','','','A1',42.00,0,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,383,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5015,'DEMO-5015',1972,'SKU-5015','','','','','','A1',48.00,0,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,12,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,21,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,22,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5017,'DEMO-5017',1974,'SKU-5017','','','','','','A1',63.00,0,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','','catalog/test_360_lounge_chair.jpg',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,8,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5018,'DEMO-5018',1974,'SKU-5018','','','','','','A1',70.00,0,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,5,'2026-03-03 08:51:05','2026-08-10 12:03:57'),
 (5019,'DEMO-5019',1973,'SKU-5019','','','','','','A1',77.00,0,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','catalog/test_360_lounge_chair.jpg',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5020,'DEMO-5020',1973,'SKU-5020','','','','','','A1',84.00,0,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,16,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',24.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,162,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5022,'DEMO-5022',1302,'SKU-5022','','','','','','A1',31.00,0,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,11,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2068,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
+(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2081,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
 (5024,'DEMO-5024',1301,'SKU-5024','','','','','','A1',45.00,0,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5025,'DEMO-5025',1302,'SKU-5025','','','','','','A1',52.00,0,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5026,'DEMO-5026',1302,'SKU-5026','','','','','','A1',59.00,0,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,5,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
@@ -16744,7 +16836,7 @@ CREATE TABLE `oc_product_option_value` (
   `product_id` int(11) NOT NULL,
   `option_id` int(11) NOT NULL,
   `option_value_id` int(11) NOT NULL,
-  `quantity` decimal(15,2) NOT NULL,
+  `quantity` decimal(15,2) DEFAULT 0.00,
   `subtract` tinyint(1) DEFAULT 0,
   `price` decimal(15,4) NOT NULL,
   `price_prefix` varchar(1) NOT NULL,
@@ -17144,28 +17236,28 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_rating` WRITE;
 /*!40000 ALTER TABLE `oc_product_rating` DISABLE KEYS */;
 INSERT INTO `oc_product_rating` VALUES
-(5001,5.00,2,'{\"5\":2,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:25:10'),
-(5002,4.50,2,'{\"5\": 1, \"4\": 1, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5003,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5004,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5005,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5006,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5001,5.00,2,'{\"5\": 2, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5002,4.50,2,'{\"5\": 1, \"4\": 1, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5003,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5004,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5005,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5006,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5007,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:24:22'),
-(5008,4.00,1,'{\"5\":0,\"4\":1,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 17:36:01'),
+(5008,4.00,1,'{\"5\": 0, \"4\": 1, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5009,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:24:38'),
-(5010,2.00,1,'{\"5\":0,\"4\":0,\"3\":0,\"2\":1,\"1\":0}','2026-08-11 17:35:59'),
-(5011,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5012,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5010,2.00,1,'{\"5\": 0, \"4\": 0, \"3\": 0, \"2\": 1, \"1\": 0}','2026-08-15 15:06:25'),
+(5011,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5012,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5013,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:35:44'),
-(5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:30:07'),
+(5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 15:18:34'),
 (5015,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 07:24:50'),
-(5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:09:55'),
-(5017,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 12:29:16'),
+(5017,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5018,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 13:52:14'),
 (5019,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:06:46'),
 (5020,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:28:05'),
-(5021,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5022,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5021,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5022,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5023,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-08 11:08:26'),
 (5024,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:49:55'),
 (5025,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-05 17:15:59'),
@@ -17174,44 +17266,44 @@ INSERT INTO `oc_product_rating` VALUES
 (5028,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:02'),
 (5029,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 14:19:22'),
 (5030,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:13:11'),
-(5031,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5031,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5032,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 20:01:37'),
 (5033,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:13:34'),
 (5034,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:05:45'),
 (5035,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 10:51:21'),
 (5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 10:36:36'),
 (5037,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:57:21'),
-(5038,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5038,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5040,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 17:34:11'),
-(5041,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5041,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5042,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 11:23:57'),
 (5043,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:48:36'),
 (5044,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 11:02:19'),
-(5045,2.00,1,'{\"5\":0,\"4\":0,\"3\":0,\"2\":1,\"1\":0}','2026-08-11 17:36:07'),
+(5045,2.00,1,'{\"5\": 0, \"4\": 0, \"3\": 0, \"2\": 1, \"1\": 0}','2026-08-15 15:06:25'),
 (5046,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:13:37'),
 (5047,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 13:21:54'),
 (5048,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 10:40:12'),
 (5049,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 12:44:36'),
 (5050,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:05:39'),
-(5051,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
-(5052,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5051,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
+(5052,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5053,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 09:18:37'),
-(5054,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5054,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5055,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 12:41:19'),
-(5056,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5056,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5059,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:42:23'),
 (5060,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 11:40:04'),
-(5061,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5061,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5062,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 11:31:21'),
-(5063,3.00,1,'{\"5\":0,\"4\":0,\"3\":1,\"2\":0,\"1\":0}','2026-08-11 17:35:54'),
+(5063,3.00,1,'{\"5\": 0, \"4\": 0, \"3\": 1, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5064,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:11:36'),
 (5065,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 20:48:23'),
 (5066,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:42:37'),
-(5067,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5067,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5068,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:49:02'),
 (5069,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-11 12:54:55'),
 (5070,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:39:41'),
-(5071,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5071,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5072,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:00:14'),
 (5073,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:04:01'),
 (5074,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 10:58:33'),
@@ -17223,10 +17315,10 @@ INSERT INTO `oc_product_rating` VALUES
 (5080,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:32:51'),
 (5081,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 08:42:10'),
 (5083,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 12:24:52'),
-(5085,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5085,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5086,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 13:17:53'),
 (5087,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 20:08:20'),
-(5088,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-11 12:00:27'),
+(5088,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5089,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 19:56:01'),
 (100001,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-09 10:20:45');
 /*!40000 ALTER TABLE `oc_product_rating` ENABLE KEYS */;
@@ -21371,7 +21463,7 @@ CREATE TABLE `oc_review` (
   PRIMARY KEY (`review_id`),
   KEY `product_id` (`product_id`),
   KEY `parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -21409,9 +21501,10 @@ INSERT INTO `oc_review` VALUES
 (28,5012,0,'Володимир','Аерофритюрниця Philips — хіт нашої кухні. Картопля фрі без олії — це магія! Готує швидко, миється легко.',5,1,'2026-08-06 18:50:00','2026-08-06 18:50:00',1,'192.168.1.37',1,NULL,0),
 (29,5056,0,'Марія','UNO — ідеальна гра для вечірок. Картки якісні, правила прості, весело всій компанії.',5,1,'2026-08-07 14:11:00','2026-08-07 14:11:00',1,'192.168.1.38',1,NULL,0),
 (30,5063,0,'Богдан','«Психологія грошей» — легко і зрозуміло про фінанси. Рекомендую всім друзям.',3,1,'2026-08-07 19:26:00','2026-08-11 17:35:54',1,'192.168.1.39',1,NULL,0),
-(64,5001,0,'Олександр','Купил iPhone 15 Pro, всё работает отлично. Камера шикарная, экран яркий, батарея держит весь день при активном использовании. Доставка быстрая, упаковано хорошо.',5,1,'2026-08-11 20:05:40','2026-08-11 20:05:40',1,'127.0.0.1',NULL,NULL,0),
-(65,5001,0,'Марина','Телефон отличный, но за такие деньги хотелось бы зарядку в комплекте. Сам аппарат — топ, шустрый, приятный на ощупь.',5,1,'2026-08-11 20:05:40','2026-08-11 20:05:40',1,'127.0.0.1',NULL,NULL,0),
-(66,5001,0,'Тетяна','Отзыв на модерации для админки',5,0,'2026-08-11 20:05:52','2026-08-15 09:25:10',0,'127.0.0.1',NULL,NULL,0);
+(64,5001,0,'Олександр','Купил iPhone 15 Pro, всё работает отлично. Камера шикарная, экран яркий, батарея держит весь день при активном использовании. Доставка быстрая, упаковано хорошо.',5,1,'2026-08-11 20:05:40','2026-08-11 20:05:40',1,'127.0.0.1',1,NULL,0),
+(65,5001,0,'Марина','Телефон отличный, но за такие деньги хотелось бы зарядку в комплекте. Сам аппарат — топ, шустрый, приятный на ощупь.',5,1,'2026-08-11 20:05:40','2026-08-11 20:05:40',1,'127.0.0.1',1,NULL,0),
+(66,5001,0,'Тетяна','Отзыв на модерации для админки',5,0,'2026-08-11 20:05:52','2026-08-15 09:25:10',0,'127.0.0.1',1,NULL,0),
+(67,5002,99853,'Demo VIP','Да',0,1,'2026-08-15 15:17:02','0000-00-00 00:00:00',0,'10.89.1.7',NULL,4,0);
 /*!40000 ALTER TABLE `oc_review` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -21844,15 +21937,129 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20260529_remove_core_filter_tables.sql','2026-06-02 16:17:50'),
 ('20260530_add_preorder_to_product.sql','2026-06-02 16:17:51'),
 ('20260531_remove_banner_image_link.sql','2026-06-02 16:17:52'),
+('20260603_banner_description.sql','2026-08-15 12:03:46'),
+('20260603_banner_image_link.sql','2026-08-15 12:03:47'),
+('20260603_drop_banner_button_columns.sql','2026-08-15 12:03:47'),
+('20260603_layout_description.sql','2026-08-15 12:03:47'),
+('20260603_update_config_robots.sql','2026-08-15 12:03:47'),
+('20260607_add_blog_post_recommendations.sql','2026-08-15 12:03:47'),
+('20260607_add_category_icon.sql','2026-08-15 12:03:47'),
+('20260607_add_option_value_hit.sql','2026-08-15 12:03:47'),
+('20260609_add_option_value_color_columns.sql','2026-08-15 12:03:47'),
+('20260617_widen_password_columns_for_bcrypt.sql','2026-08-15 12:03:47'),
+('20260629_scheduler_task_registry.sql','2026-08-15 12:03:47'),
+('20260630_remove_dashboard_online_map.sql','2026-08-15 12:03:47'),
+('20260630_remove_fixer_currency.sql','2026-08-15 12:03:47'),
+('20260630_remove_google_hangouts.sql','2026-08-15 12:03:47'),
+('20260630_remove_pp_braintree_button.sql','2026-08-15 12:03:47'),
+('20260630_rename_wayforpay_to_dockercart_wayforpay.sql','2026-08-15 12:03:47'),
+('20260703_add_extension_store_permissions.sql','2026-08-15 12:03:47'),
+('20260703_remove_php_mail.sql','2026-08-15 12:03:47'),
+('20260704_01_add_is_system.sql','2026-08-15 12:03:47'),
+('20260704_02_register_license_check.sql','2026-08-15 12:03:47'),
+('20260704_cleanup_legacy_license_settings.sql','2026-08-15 12:03:47'),
+('20260704_dockercart_extension_meta.sql','2026-08-15 12:03:47'),
+('20260704_dockercart_license.sql','2026-08-15 12:03:47'),
+('20260705_add_dockercart_store_indexes.sql','2026-08-15 12:03:47'),
+('20260705_extend_extension_meta.sql','2026-08-15 12:03:47'),
+('20260705_frontend_blocked_columns.sql','2026-08-15 12:03:47'),
+('20260715_add_product_option_value_color_image.sql','2026-08-15 12:03:47'),
+('20260715_remove_configurable_product_events.sql','2026-08-15 12:03:47'),
 ('20260716_add_configurable_product_catalog_view.sql','2026-07-15 09:21:59'),
 ('20260716_add_configurable_product_pricefrom_copy.sql','2026-07-15 09:54:58'),
 ('20260716_add_configurable_product_view_event.sql','2026-07-15 09:04:50'),
+('20260716_add_configurable_products.sql','2026-08-15 12:03:47'),
 ('20260716_add_product_variant_customer_group_price.sql','2026-07-15 09:57:36'),
+('20260717_add_tax_multilingual.sql','2026-08-15 12:03:48'),
+('20260718_add_multilingual_product_images.sql','2026-08-15 12:03:48'),
+('20260718_add_product_video_model3d.sql','2026-08-15 12:03:48'),
+('20260719_remove_option_quantity_subtract.sql','2026-08-15 12:03:48'),
+('20260720_add_product_option_value_sort_order.sql','2026-08-15 12:03:48'),
+('20260720_drop_option_value_image.sql','2026-08-15 12:03:48'),
+('20260720_remove_product_option_value_color_image.sql','2026-08-15 12:03:48'),
+('20260721_add_product_variant_fk.sql','2026-08-15 12:03:48'),
+('20260721_add_variant_hash.sql','2026-08-15 12:03:48'),
+('20260721_drop_is_default.sql','2026-08-15 12:03:48'),
+('20260721_unique_variant_value.sql','2026-08-15 12:03:48'),
+('20260721_zero_axis_pov_prices.sql','2026-08-15 12:03:48'),
+('20260722_add_product_variant_special.sql','2026-08-15 12:03:48'),
+('20260722_alter_decimal_precision.sql','2026-08-15 12:03:48'),
+('20260723_add_main_category.sql','2026-08-15 12:03:48'),
+('20260724_add_category_banner.sql','2026-08-15 12:03:48'),
+('20260724_add_category_related.sql','2026-08-15 12:03:48'),
+('20260724_add_product_accessory.sql','2026-08-15 12:03:48'),
+('20260724_add_product_bxgy.sql','2026-08-15 12:03:48'),
+('20260724_add_product_upsell.sql','2026-08-15 12:03:48'),
+('20260724_add_traffic_source.sql','2026-08-15 12:03:48'),
+('20260724_dockercart_analytics_extension.sql','2026-08-15 12:03:48'),
+('20260726_add_attribute_status.sql','2026-08-15 12:03:49'),
+('20260726_add_download_status.sql','2026-08-15 12:03:49'),
+('20260726_add_manufacturer_status.sql','2026-08-15 12:03:49'),
+('20260726_add_option_status.sql','2026-08-15 12:03:49'),
+('20260726_add_promo_date_added.sql','2026-08-15 12:03:49'),
+('20260727_blog_post_background_image.sql','2026-08-15 12:03:49'),
+('20260727_remove_theme_translation_tables.sql','2026-08-15 12:03:49'),
+('20260730_add_variant_discount.sql','2026-08-15 12:03:49'),
+('20260730_add_variant_model.sql','2026-08-15 12:03:49'),
+('20260730_remove_api.sql','2026-08-15 12:03:49'),
+('20260731_add_order_payments.sql','2026-08-15 12:03:49'),
+('20260731_order_tracking_multiple.sql','2026-08-15 12:03:49'),
+('20260801_add_order_flow.sql','2026-08-15 12:06:24'),
+('20260801_add_variant_jan_isbn.sql','2026-08-15 12:06:24'),
+('20260801_admin_order_mail_event.sql','2026-08-15 12:06:24'),
+('20260801_checkout_abandoned_unique_session.sql','2026-08-15 12:06:24'),
+('20260801_customer_login_unique_email.sql','2026-08-15 12:06:24'),
+('20260801_order_claim_table.sql','2026-08-15 12:06:24'),
+('20260801_order_history_i18n.sql','2026-08-15 12:06:24'),
+('20260801_product_variant_search_events.sql','2026-08-15 12:06:24'),
+('20260801_search_min_chars.sql','2026-08-15 12:06:24'),
+('20260802_add_attribute_sets.sql','2026-08-15 12:06:24'),
+('20260802_add_option_sets.sql','2026-08-15 12:06:24'),
+('20260802_add_order_shipments.sql','2026-08-15 12:06:24'),
+('20260802_add_product_fbt.sql','2026-08-15 12:06:24'),
+('20260802_coupon_description.sql','2026-08-15 12:06:24'),
+('20260802_search_query_mapping.sql','2026-08-15 12:06:24'),
+('20260803_add_return_products.sql','2026-08-15 12:06:24'),
 ('20260804_add_dashboard_analytics_widgets.sql','2026-08-01 13:48:49'),
+('20260804_admin_order_filters.sql','2026-08-15 12:06:24'),
 ('20260804_dashboard_widget_layout.sql','2026-08-01 14:00:30'),
+('20260804_report_utm_order_columns.sql','2026-08-15 12:06:24'),
+('20260804_stock_reservation.sql','2026-08-15 12:06:24'),
+('20260805_force_system_extension_status.sql','2026-08-15 12:06:25'),
+('20260805_review_criteria.sql','2026-08-15 12:06:25'),
+('20260805_review_extended.sql','2026-08-15 12:06:25'),
+('20260806_abandoned_cart_recovery.sql','2026-08-15 12:06:25'),
+('20260806_abandoned_restore_seo_url.sql','2026-08-15 12:06:25'),
+('20260806_abandoned_waves.sql','2026-08-15 12:06:25'),
+('20260806_add_option_show_price.sql','2026-08-15 12:06:25'),
+('20260806_add_product_discontinued.sql','2026-08-15 12:06:25'),
+('20260806_add_product_similar.sql','2026-08-15 12:06:25'),
+('20260806_auto_reward_points.sql','2026-08-15 12:06:25'),
+('20260806_invoice_public_token.sql','2026-08-15 12:06:25'),
+('20260806_invoice_render_version.sql','2026-08-15 12:06:25'),
+('20260806_invoice_settings_in_config.sql','2026-08-15 12:06:25'),
+('20260806_order_documents.sql','2026-08-15 12:06:25'),
+('20260806_review_votes.sql','2026-08-15 12:06:25'),
+('20260807_add_product_image_360.sql','2026-08-15 12:06:25'),
+('20260808_category_banner_multilingual.sql','2026-08-15 12:06:25'),
+('20260808_cfp_request_order_status.sql','2026-08-15 12:06:25'),
+('20260808_order_product_price_override.sql','2026-08-15 12:06:25'),
+('20260809_admin_search_fallback.sql','2026-08-15 12:06:25'),
+('20260809_manticore_reindex_task.sql','2026-08-15 12:06:25'),
+('20260810_promo_renew_task.sql','2026-08-15 12:06:25'),
+('20260810_vat_zone_ukraine.sql','2026-08-15 12:06:25'),
+('20260811_apply_vat5_to_taxable_goods.sql','2026-08-15 12:06:25'),
+('20260811_review_rating_tinyint.sql','2026-08-15 12:06:25'),
+('20260811_review_replies.sql','2026-08-15 12:06:25'),
+('20260812_restore_vat20_taxable_goods.sql','2026-08-15 12:06:25'),
 ('20260812_reward_operation_type.sql','2026-08-12 16:53:21'),
 ('20260813_category_banner_select.sql','2026-08-13 08:29:02'),
-('20260813_remove_stock_status.sql','2026-08-13 07:37:46');
+('20260813_remove_stock_status.sql','2026-08-13 07:37:46'),
+('20260813_wishlist_variant_id.sql','2026-08-15 12:06:25'),
+('20260814_remove_wishlist_image_settings.sql','2026-08-15 12:06:25'),
+('20260814_scheduler_task_name_and_presets.sql','2026-08-15 12:06:26'),
+('20260814_seed_scheduler_task_names_ru_uk.sql','2026-08-15 12:06:26'),
+('20260815_add_tool_update_permission.sql','2026-08-15 12:07:37');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22411,7 +22618,9 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('cfa28a08cc9be1c897e9803e9a','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"compare\":[],\"customer_id\":\"99853\",\"shipping_address\":{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"dockercart_temp_customer\":{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"email\":\"vip@demo.local\",\"telephone\":\"+380 (38) 111-11-11\"},\"payment_address\":{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"last_order_id\":99618}','2026-08-15 10:01:32');
+('04e5c830f5cb62ac50f90466a9','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-15 12:45:27'),
+('5b27fbea35f71393051e4b9a49','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-16 11:46:52'),
+('cfa28a08cc9be1c897e9803e9a','{\"language\":\"ru-ua\",\"customer_id\":\"99853\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-16 12:33:57');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22432,7 +22641,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30427 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=30950 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22529,8 +22738,6 @@ INSERT INTO `oc_setting` VALUES
 (22635,0,'theme_dockercart','theme_dockercart_image_related_height','300',0),
 (22636,0,'theme_dockercart','theme_dockercart_image_compare_width','90',0),
 (22637,0,'theme_dockercart','theme_dockercart_image_compare_height','90',0),
-(22638,0,'theme_dockercart','theme_dockercart_image_wishlist_width','64',0),
-(22639,0,'theme_dockercart','theme_dockercart_image_wishlist_height','64',0),
 (22640,0,'theme_dockercart','theme_dockercart_image_cart_width','64',0),
 (22641,0,'theme_dockercart','theme_dockercart_image_cart_height','64',0),
 (22642,0,'theme_dockercart','theme_dockercart_image_location_width','268',0),
@@ -22630,8 +22837,6 @@ INSERT INTO `oc_setting` VALUES
 (27121,0,'dashboard_dockercart_category_revenue','dashboard_dockercart_category_revenue_sort_order','9',0),
 (27122,0,'dashboard_dockercart_top_products','dashboard_dockercart_top_products_stack','traffic_source',0),
 (27171,0,'dockercart_sitemap','dockercart_sitemap_reviews','1',0),
-(29076,0,'config','config_url','http://dockercart.local:8080/',0),
-(29077,0,'config','config_ssl','http://dockercart.local:8080/',0),
 (29108,0,'config','config_order_flow_shipping_status','128',0),
 (29109,0,'config','config_reward_auto_award','1',0),
 (29110,0,'config','config_order_flow_steps','[1,132,133,128,129,136]',1),
@@ -22733,8 +22938,6 @@ INSERT INTO `oc_setting` VALUES
 (29348,0,'dockercart_theme','dockercart_theme_header_links','[]',0),
 (29349,0,'dockercart_theme','dockercart_theme_footer_links','[]',0),
 (29372,0,'module_dockercart_search','module_dockercart_search_admin_fallback','1',0),
-(30021,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
-(30022,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
 (30030,0,'config','config_review_images_enabled','1',0),
 (30031,0,'config','config_review_video_enabled','1',0),
 (30032,0,'config','config_review_max_images','3',0),
@@ -22753,137 +22956,137 @@ INSERT INTO `oc_setting` VALUES
 (30045,0,'config','config_review_reply_author_name','',0),
 (30046,0,'config','config_review_show_distribution','1',0),
 (30047,0,'config','config_review_per_page','10',0),
-(30169,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
-(30170,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
-(30173,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
-(30174,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
-(30177,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
-(30178,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
-(30302,0,'config','config_name_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
-(30303,0,'config','config_owner_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart\",\"3\":\"DockerCart\"}',1),
-(30304,0,'config','config_address_i18n','{\"1\":\"1 Main Street, Kyiv, Ukraine\",\"2\":\"\\u0432\\u0443\\u043b. \\u0413\\u043e\\u043b\\u043e\\u0432\\u043d\\u0430, 1, \\u041a\\u0438\\u0457\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0457\\u043d\\u0430\",\"3\":\"\\u0413\\u043b\\u0430\\u0432\\u043d\\u0430\\u044f \\u0443\\u043b\\u0438\\u0446\\u0430, 1, \\u041a\\u0438\\u0435\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\"}',1),
-(30305,0,'config','config_open_i18n','{\"1\":\"Mon\\u2013Fri: 9 AM \\u2013 6 PM\",\"2\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00 \\u2013 18:00\",\"3\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00\\u201318:00\"}',1),
-(30306,0,'config','config_comment_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(30307,0,'config','config_theme','dockercart',0),
-(30308,0,'config','config_layout_id','4',0),
-(30309,0,'config','config_contact_form_status','0',0),
-(30310,0,'config','config_geocode','',0),
-(30311,0,'config','config_email','admin@example.com',0),
-(30312,0,'config','config_telephone','+1 555-555-1234',0),
-(30313,0,'config','config_fax','+1 555-111-1232',0),
-(30314,0,'config','config_images','[]',1),
-(30315,0,'config','config_meta_title_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
-(30316,0,'config','config_meta_description_i18n','{\"1\":\"DockerCart Store\",\"2\":\"\\u041c\\u0430\\u0433\\u0430\\u0437\\u0438\\u043d DockerCart\",\"3\":\"\"}',1),
-(30317,0,'config','config_meta_keyword_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(30318,0,'config','config_country_id','220',0),
-(30319,0,'config','config_zone_id','3490',0),
-(30320,0,'config','config_timezone','Europe/Kyiv',0),
-(30321,0,'config','config_language','en-gb',0),
-(30322,0,'config','config_admin_language','en-gb',0),
-(30323,0,'config','config_currency','UAH',0),
-(30324,0,'config','config_currency_engine','ecb',0),
-(30325,0,'config','config_currency_auto','1',0),
-(30326,0,'config','config_symbol_left_space','0',0),
-(30327,0,'config','config_symbol_right_space','0',0),
-(30328,0,'config','config_length_class_id','1',0),
-(30329,0,'config','config_weight_class_id','1',0),
-(30330,0,'config','config_product_count','1',0),
-(30331,0,'config','config_limit_admin','20',0),
-(30332,0,'config','config_review_status','1',0),
-(30333,0,'config','config_review_guest','1',0),
-(30334,0,'config','config_voucher_min','1',0),
-(30335,0,'config','config_voucher_max','1000',0),
-(30336,0,'config','config_tax','0',0),
-(30337,0,'config','config_tax_default','shipping',0),
-(30338,0,'config','config_tax_customer','shipping',0),
-(30339,0,'config','config_customer_activity','1',0),
-(30340,0,'config','config_customer_search','1',0),
-(30341,0,'config','config_customer_price','0',0),
-(30342,0,'config','config_account_download_status','0',0),
-(30343,0,'config','config_customer_group_id','1',0),
-(30344,0,'config','config_login_attempts','5',0),
-(30345,0,'config','config_customer_group_display','[\"1\"]',1),
-(30346,0,'config','config_account_id','3',0),
-(30347,0,'config','config_cart_weight','1',0),
-(30348,0,'config','config_checkout_guest','1',0),
-(30349,0,'config','config_checkout_id','5',0),
-(30350,0,'config','config_order_status_id','1',0),
-(30351,0,'config','config_fraud_status_id','130',0),
-(30352,0,'config','config_processing_status','[\"127\",\"128\",\"133\"]',1),
-(30353,0,'config','config_complete_status','[\"129\"]',1),
-(30354,0,'config','config_stock_display','0',0),
-(30355,0,'config','config_stock_warning','1',0),
-(30356,0,'config','config_stock_checkout','0',0),
-(30357,0,'config','config_stock_reserve_enabled','1',0),
-(30358,0,'config','config_stock_reserve_minutes','30',0),
-(30359,0,'config','config_affiliate_status','0',0),
-(30360,0,'config','config_affiliate_approval','0',0),
-(30361,0,'config','config_affiliate_auto','0',0),
-(30362,0,'config','config_affiliate_group_id','1',0),
-(30363,0,'config','config_affiliate_commission','5',0),
-(30364,0,'config','config_affiliate_id','4',0),
-(30365,0,'config','config_return_id','0',0),
-(30366,0,'config','config_return_status_id','2',0),
-(30367,0,'config','config_captcha','',0),
-(30368,0,'config','config_captcha_page','[\"register\",\"guest\",\"review\",\"return\",\"contact\"]',1),
-(30369,0,'config','config_logo','catalog/demo/dockercart_logo.png',0),
-(30370,0,'config','config_icon','catalog/cart.png',0),
-(30371,0,'config','config_image_max_dimension','',0),
-(30372,0,'config','config_mail_engine','smtp',0),
-(30373,0,'config','config_mail_smtp_hostname','',0),
-(30374,0,'config','config_mail_smtp_auth_method','login',0),
-(30375,0,'config','config_mail_smtp_oauth_client_id','',0),
-(30376,0,'config','config_mail_smtp_oauth_client_secret','',0),
-(30377,0,'config','config_mail_smtp_oauth_refresh_token','',0),
-(30378,0,'config','config_mail_smtp_oauth_token','',0),
-(30379,0,'config','config_mail_smtp_username','',0),
-(30380,0,'config','config_mail_smtp_password','',0),
-(30381,0,'config','config_mail_smtp_port','25',0),
-(30382,0,'config','config_mail_smtp_timeout','5',0),
-(30383,0,'config','config_mail_alert_email','',0),
-(30384,0,'config','config_maintenance','0',0),
-(30385,0,'config','config_seo_url','1',0),
-(30386,0,'config','config_product_cache_status','0',0),
-(30387,0,'config','config_robots','abot\r\ndbot\r\nebot\r\nhbot\r\nkbot\r\nlbot\r\nmbot\r\nnbot\r\nobot\r\npbot\r\nrbot\r\nsbot\r\ntbot\r\nvbot\r\nybot\r\nzbot\r\nbot.\r\nbot/\r\n_bot\r\n.bot\r\n/bot\r\n-bot\r\n:bot\r\n(bot\r\ncrawl\r\nslurp\r\nspider\r\nseek\r\naccoona\r\nacoon\r\nadressendeutschland\r\nah-ha.com\r\nahoy\r\naltavista\r\nananzi\r\nanthill\r\nappie\r\narachnophilia\r\narale\r\naraneo\r\naranha\r\narchitext\r\naretha\r\narks\r\nasterias\r\natlocal\r\natn\r\natomz\r\naugurfind\r\nbackrub\r\nbannana_bot\r\nbaypup\r\nbdfetch\r\nbig brother\r\nbiglotron\r\nbjaaland\r\nblackwidow\r\nblaiz\r\nblog\r\nblo.\r\nbloodhound\r\nboitho\r\nbooch\r\nbradley\r\nbutterfly\r\ncalif\r\ncassandra\r\nccubee\r\ncfetch\r\ncharlotte\r\nchurl\r\ncienciaficcion\r\ncmc\r\ncollective\r\ncomagent\r\ncombine\r\ncomputingsite\r\ncsci\r\ncurl\r\ncusco\r\ndaumoa\r\ndeepindex\r\ndelorie\r\ndepspid\r\ndeweb\r\ndie blinde kuh\r\ndigger\r\nditto\r\ndmoz\r\ndocomo\r\ndownload express\r\ndtaagent\r\ndwcp\r\nebiness\r\nebingbong\r\ne-collector\r\nejupiter\r\nemacs-w3 search engine\r\nesther\r\nevliya celebi\r\nezresult\r\nfalcon\r\nfelix ide\r\nferret\r\nfetchrover\r\nfido\r\nfindlinks\r\nfireball\r\nfish search\r\nfouineur\r\nfunnelweb\r\ngazz\r\ngcreep\r\ngenieknows\r\ngetterroboplus\r\ngeturl\r\nglx\r\ngoforit\r\ngolem\r\ngrabber\r\ngrapnel\r\ngralon\r\ngriffon\r\ngromit\r\ngrub\r\ngulliver\r\nhamahakki\r\nharvest\r\nhavindex\r\nhelix\r\nheritrix\r\nhku www octopus\r\nhomerweb\r\nhtdig\r\nhtml index\r\nhtml_analyzer\r\nhtmlgobble\r\nhubater\r\nhyper-decontextualizer\r\nia_archiver\r\nibm_planetwide\r\nichiro\r\niconsurf\r\niltrovatore\r\nimage.kapsi.net\r\nimagelock\r\nincywincy\r\nindexer\r\ninfobee\r\ninformant\r\ningrid\r\ninktomisearch.com\r\ninspector web\r\nintelliagent\r\ninternet shinchakubin\r\nip3000\r\niron33\r\nisraeli-search\r\nivia\r\njack\r\njakarta\r\njavabee\r\njetbot\r\njumpstation\r\nkatipo\r\nkdd-explorer\r\nkilroy\r\nknowledge\r\nkototoi\r\nkretrieve\r\nlabelgrabber\r\nlachesis\r\nlarbin\r\nlegs\r\nlibwww\r\nlinkalarm\r\nlink validator\r\nlinkscan\r\nlockon\r\nlwp\r\nlycos\r\nmagpie\r\nmantraagent\r\nmapoftheinternet\r\nmarvin/\r\nmattie\r\nmediafox\r\nmediapartners\r\nmercator\r\nmerzscope\r\nmicrosoft url control\r\nminirank\r\nmiva\r\nmj12\r\nmnogosearch\r\nmoget\r\nmonster\r\nmoose\r\nmotor\r\nmultitext\r\nmuncher\r\nmuscatferret\r\nmwd.search\r\nmyweb\r\nnajdi\r\nnameprotect\r\nnationaldirectory\r\nnazilla\r\nncsa beta\r\nnec-meshexplorer\r\nnederland.zoek\r\nnetcarta webmap engine\r\nnetmechanic\r\nnetresearchserver\r\nnetscoop\r\nnewscan-online\r\nnhse\r\nnokia6682/\r\nnomad\r\nnoyona\r\nnutch\r\nnzexplorer\r\nobjectssearch\r\noccam\r\nomni\r\nopen text\r\nopenfind\r\nopenintelligencedata\r\norb search\r\nosis-project\r\npack rat\r\npageboy\r\npagebull\r\npage_verifier\r\npanscient\r\nparasite\r\npartnersite\r\npatric\r\npear.\r\npegasus\r\nperegrinator\r\npgp key agent\r\nphantom\r\nphpdig\r\npicosearch\r\npiltdownman\r\npimptrain\r\npinpoint\r\npioneer\r\npiranha\r\nplumtreewebaccessor\r\npogodak\r\npoirot\r\npompos\r\npoppelsdorf\r\npoppi\r\npopular iconoclast\r\npsycheclone\r\npublisher\r\npython\r\nrambler\r\nraven search\r\nroach\r\nroad runner\r\nroadhouse\r\nrobbie\r\nrobofox\r\nrobozilla\r\nrules\r\nsalty\r\nsbider\r\nscooter\r\nscoutjet\r\nscrubby\r\nsearch.\r\nsearchprocess\r\nsemanticdiscovery\r\nsenrigan\r\nsg-scout\r\nshai\'hulud\r\nshark\r\nshopwiki\r\nsidewinder\r\nsift\r\nsilk\r\nsimmany\r\nsite searcher\r\nsite valet\r\nsitetech-rover\r\nskymob.com\r\nsleek\r\nsmartwit\r\nsna-\r\nsnappy\r\nsnooper\r\nsohu\r\nspeedfind\r\nsphere\r\nsphider\r\nspinner\r\nspyder\r\nsteeler/\r\nsuke\r\nsuntek\r\nsupersnooper\r\nsurfnomore\r\nsven\r\nsygol\r\nszukacz\r\ntach black widow\r\ntarantula\r\ntempleton\r\n/teoma\r\nt-h-u-n-d-e-r-s-t-o-n-e\r\ntheophrastus\r\ntitan\r\ntitin\r\ntkwww\r\ntoutatis\r\nt-rex\r\ntutorgig\r\ntwiceler\r\ntwisted\r\nucsd\r\nudmsearch\r\nurl check\r\nupdated\r\nvagabondo\r\nvalkyrie\r\nverticrawl\r\nvictoria\r\nvision-search\r\nvolcano\r\nvoyager/\r\nvoyager-hc\r\nw3c_validator\r\nw3m2\r\nw3mir\r\nwalker\r\nwallpaper\r\nwanderer\r\nwauuu\r\nwavefire\r\nweb core\r\nweb hopper\r\nweb wombat\r\nwebbandit\r\nwebcatcher\r\nwebcopy\r\nwebfoot\r\nweblayers\r\nweblinker\r\nweblog monitor\r\nwebmirror\r\nwebmonkey\r\nwebquest\r\nwebreaper\r\nwebsitepulse\r\nwebsnarf\r\nwebstolperer\r\nwebvac\r\nwebwalk\r\nwebwatch\r\nwebwombat\r\nwebzinger\r\nwhizbang\r\nwhowhere\r\nwild ferret\r\nworldlight\r\nwwwc\r\nwwwster\r\nxenu\r\nxget\r\nxift\r\nxirq\r\nyandex\r\nyanga\r\nyeti\r\nyodao\r\nzao\r\nzippp\r\nzyborg\r\nGooglebot\r\nBingbot\r\nBingPreview\r\nDuckDuckBot\r\nBaiduspider\r\nYandexBot\r\nYandexMobileBot\r\nfacebookexternalhit\r\nTwitterbot\r\nLinkedInBot\r\nSlackbot\r\nTelegramBot\r\nWhatsApp\r\nGPTBot\r\nChatGPT-User\r\nGoogle-Extended\r\nClaude-Web\r\nPerplexityBot\r\nBytespider\r\nAmazonbot\r\nApplebot-Extended\r\ncohere-ai\r\nDiffbot\r\nImagesift\r\nYouBot\r\nMeta-ExternalAgent\r\nCCBot\r\nOAI-SearchBot\r\nSemrushBot\r\nAhrefsBot\r\nDotBot\r\nDataForSeoBot\r\nPetalBot\r\nZoominfoBot\r\nScreaming Frog\r\nGo-http-client\r\nokhttp\r\naxios\r\nWget\r\nHeadlessChrome\r\nPhantomJS\r\nJava/\r\nPingdom\r\nUptimeRobot\r\nGTmetrix\r\nWebPageTest\r\nNewRelicPinger\r\nDatadogAgent\r\nSite24x7\r\nzgrab\r\nmasscan\r\nnmap\r\nNessus\r\nNikto\r\nwpscan',0),
-(30388,0,'config','config_compression','4',0),
-(30389,0,'config','config_secure','1',0),
-(30390,0,'config','config_password','1',0),
-(30391,0,'config','config_shared','0',0),
-(30392,0,'config','config_encryption','',0),
-(30393,0,'config','config_file_max_size','10485760',0),
-(30394,0,'config','config_file_ext_allowed','zip\r\ntxt\r\npng\r\njpe\r\njpeg\r\njpg\r\ngif\r\nbmp\r\nico\r\ntiff\r\ntif\r\nsvg\r\nsvgz\r\nwebp\r\nzip\r\nrar\r\nmsi\r\ncab\r\nmp3\r\nqt\r\nmov\r\npdf\r\npsd\r\nai\r\neps\r\nps\r\ndoc',0),
-(30395,0,'config','config_file_mime_allowed','text/plain\r\nimage/png\r\nimage/jpeg\r\nimage/gif\r\nimage/bmp\r\nimage/tiff\r\nimage/svg+xml\r\nimage/webp\r\napplication/zip\r\n&quot;application/zip&quot;\r\napplication/x-zip\r\n&quot;application/x-zip&quot;\r\napplication/x-zip-compressed\r\n&quot;application/x-zip-compressed&quot;\r\napplication/rar\r\n&quot;application/rar&quot;\r\napplication/x-rar\r\n&quot;application/x-rar&quot;\r\napplication/x-rar-compressed\r\n&quot;application/x-rar-compressed&quot;\r\napplication/octet-stream\r\n&quot;application/octet-stream&quot;\r\naudio/mpeg\r\nvideo/quicktime\r\napplication/pdf',0),
-(30396,0,'config','config_error_display','0',0),
-(30397,0,'config','config_error_log','1',0),
-(30398,0,'config','config_error_filename','error.log',0),
-(30399,0,'config','config_invoice_prefix','DC-',0),
-(30400,0,'config','config_invoice_valid_days','0',0),
-(30401,0,'config','config_invoice_language','',0),
-(30402,0,'config','config_seller_name_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(30403,0,'config','config_seller_address_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
-(30404,0,'config','config_seller_email','',0),
-(30405,0,'config','config_seller_telephone','',0),
-(30406,0,'config','config_seller_bank_name','',0),
-(30407,0,'config','config_seller_bank_swift','',0),
-(30408,0,'config','config_seller_bank_account','',0),
-(30409,0,'config','config_seller_invoice_logo','',0),
-(30410,0,'config','config_seller_officer','',0),
-(30411,0,'config','config_seller_officer_role','',0),
-(30412,0,'config','config_seller_signature_image','',0),
-(30413,0,'config','config_seller_stamp_image','',0),
-(30414,0,'config','config_image','',0),
-(30415,0,'config','config_meta_title','DockerCart',0),
-(30416,0,'config','config_meta_description','',0),
-(30417,0,'config','config_meta_keyword','',0),
-(30418,0,'config','config_name','DockerCart',0),
-(30419,0,'config','config_owner','DockerCart',0),
-(30420,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
-(30421,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
-(30422,0,'config','config_comment','',0),
-(30423,0,'module_dockercart_checkout','module_dockercart_checkout_default_country_id','',0),
-(30424,0,'module_dockercart_checkout','module_dockercart_checkout_default_zone_id','',0),
-(30425,0,'total_product_bundle','total_product_bundle_status','1',0),
-(30426,0,'total_product_bundle','total_product_bundle_sort_order','3',0);
+(30540,0,'dockercart_update','dockercart_update_remote','https://github.com/kdbsoft/dockercart',0),
+(30541,0,'dockercart_update','dockercart_update_branch','main',0),
+(30567,0,'total_bxgy','total_bxgy_status','1',0),
+(30568,0,'total_bxgy','total_bxgy_sort_order','2',0),
+(30569,0,'config','config_url','http://dockercart.local:8080/',0),
+(30570,0,'config','config_ssl','http://dockercart.local:8080/',0),
+(30583,0,'config','config_onboarding_enabled','1',0),
+(30705,0,'dockercart_update','dockercart_update_last_check','1786799054',0),
+(30706,0,'dockercart_update','dockercart_update_remote_version','2.5.0',0),
+(30707,0,'dockercart_update','dockercart_update_changelog','### Features\n\n* **analytics:** add day-of-week labels to analytics report ([01c84b0](https://github.com/kdbsoft/dockercart/commit/01c84b0237f2c4fbba8bfa4270731a9633c76c94))\n* **order:** add inline editable panels with payment/shipping ([682e76a](https://github.com/kdbsoft/dockercart/commit/682e76a6bf46b84d237d3729029722984b2388b4))\n* **order:** add multiple tracking numbers with modal editor ([96efa01](https://github.com/kdbsoft/dockercart/commit/96efa01fd3f97fa84496747cc14d0d1e7d8bf1ec))\n* **order:** add payment tracking with order_payments table ([de5acb3](https://github.com/kdbsoft/dockercart/commit/de5acb35955215c1ecab3a48b85baf34144b4e0f))\n* **order:** improve payment reference labeling and add hint ([1a89e9f](https://github.com/kdbsoft/dockercart/commit/1a89e9f0eb46722677cf260a7f85ec613738c0bc))\n\n### Bug Fixes\n\n* **manufacturer:** reposition status field above stores in manufacturer form ([d9d19ce](https://github.com/kdbsoft/dockercart/commit/d9d19ceb6d0f6724ecedbcb923afbbed46b206e4))\n* **return:** exclude completed returns from pending count ([71822f4](https://github.com/kdbsoft/dockercart/commit/71822f443f4c0796ac559b7595638ed6ccca2a39))',0),
+(30829,0,'config','config_name_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
+(30830,0,'config','config_owner_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart\",\"3\":\"DockerCart\"}',1),
+(30831,0,'config','config_address_i18n','{\"1\":\"1 Main Street, Kyiv, Ukraine\",\"2\":\"\\u0432\\u0443\\u043b. \\u0413\\u043e\\u043b\\u043e\\u0432\\u043d\\u0430, 1, \\u041a\\u0438\\u0457\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0457\\u043d\\u0430\",\"3\":\"\\u0413\\u043b\\u0430\\u0432\\u043d\\u0430\\u044f \\u0443\\u043b\\u0438\\u0446\\u0430, 1, \\u041a\\u0438\\u0435\\u0432, \\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\"}',1),
+(30832,0,'config','config_open_i18n','{\"1\":\"Mon\\u2013Fri: 9 AM \\u2013 6 PM\",\"2\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00 \\u2013 18:00\",\"3\":\"\\u041f\\u043d\\u2013\\u041f\\u0442: 9:00\\u201318:00\"}',1),
+(30833,0,'config','config_comment_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(30834,0,'config','config_theme','dockercart',0),
+(30835,0,'config','config_layout_id','4',0),
+(30836,0,'config','config_contact_form_status','0',0),
+(30837,0,'config','config_geocode','',0),
+(30838,0,'config','config_email','admin@dockercart.net',0),
+(30839,0,'config','config_telephone','+1 555-555-1234',0),
+(30840,0,'config','config_fax','+1 555-111-1232',0),
+(30841,0,'config','config_images','[]',1),
+(30842,0,'config','config_meta_title_i18n','{\"1\":\"DockerCart\",\"2\":\"DockerCart UA\",\"3\":\"DockerCart\"}',1),
+(30843,0,'config','config_meta_description_i18n','{\"1\":\"DockerCart Store\",\"2\":\"\\u041c\\u0430\\u0433\\u0430\\u0437\\u0438\\u043d DockerCart\",\"3\":\"\\u041c\\u0430\\u0433\\u0430\\u0437\\u0438\\u043d DockerCart\"}',1),
+(30844,0,'config','config_meta_keyword_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(30845,0,'config','config_country_id','220',0),
+(30846,0,'config','config_zone_id','3490',0),
+(30847,0,'config','config_timezone','Europe/Kyiv',0),
+(30848,0,'config','config_language','en-gb',0),
+(30849,0,'config','config_admin_language','en-gb',0),
+(30850,0,'config','config_currency','UAH',0),
+(30851,0,'config','config_currency_engine','ecb',0),
+(30852,0,'config','config_currency_auto','1',0),
+(30853,0,'config','config_symbol_left_space','0',0),
+(30854,0,'config','config_symbol_right_space','0',0),
+(30855,0,'config','config_length_class_id','1',0),
+(30856,0,'config','config_weight_class_id','1',0),
+(30857,0,'config','config_product_count','1',0),
+(30858,0,'config','config_limit_admin','20',0),
+(30859,0,'config','config_review_status','1',0),
+(30860,0,'config','config_review_guest','1',0),
+(30861,0,'config','config_voucher_min','1',0),
+(30862,0,'config','config_voucher_max','1000',0),
+(30863,0,'config','config_tax','0',0),
+(30864,0,'config','config_tax_default','shipping',0),
+(30865,0,'config','config_tax_customer','shipping',0),
+(30866,0,'config','config_customer_activity','1',0),
+(30867,0,'config','config_customer_search','1',0),
+(30868,0,'config','config_customer_price','0',0),
+(30869,0,'config','config_account_download_status','0',0),
+(30870,0,'config','config_customer_group_id','1',0),
+(30871,0,'config','config_login_attempts','5',0),
+(30872,0,'config','config_customer_group_display','[\"1\"]',1),
+(30873,0,'config','config_account_id','3',0),
+(30874,0,'config','config_cart_weight','1',0),
+(30875,0,'config','config_checkout_guest','1',0),
+(30876,0,'config','config_checkout_id','5',0),
+(30877,0,'config','config_order_status_id','1',0),
+(30878,0,'config','config_fraud_status_id','130',0),
+(30879,0,'config','config_processing_status','[\"127\",\"128\",\"133\"]',1),
+(30880,0,'config','config_complete_status','[\"129\"]',1),
+(30881,0,'config','config_stock_display','0',0),
+(30882,0,'config','config_stock_warning','1',0),
+(30883,0,'config','config_stock_checkout','0',0),
+(30884,0,'config','config_stock_reserve_enabled','1',0),
+(30885,0,'config','config_stock_reserve_minutes','30',0),
+(30886,0,'config','config_affiliate_status','0',0),
+(30887,0,'config','config_affiliate_approval','0',0),
+(30888,0,'config','config_affiliate_auto','0',0),
+(30889,0,'config','config_affiliate_group_id','1',0),
+(30890,0,'config','config_affiliate_commission','5',0),
+(30891,0,'config','config_affiliate_id','4',0),
+(30892,0,'config','config_return_id','0',0),
+(30893,0,'config','config_return_status_id','2',0),
+(30894,0,'config','config_captcha','',0),
+(30895,0,'config','config_captcha_page','[\"register\",\"guest\",\"review\",\"return\",\"contact\"]',1),
+(30896,0,'config','config_logo','catalog/demo/dockercart_logo.png',0),
+(30897,0,'config','config_icon','catalog/cart.png',0),
+(30898,0,'config','config_image_max_dimension','',0),
+(30899,0,'config','config_mail_engine','smtp',0),
+(30900,0,'config','config_mail_smtp_hostname','',0),
+(30901,0,'config','config_mail_smtp_auth_method','login',0),
+(30902,0,'config','config_mail_smtp_oauth_client_id','',0),
+(30903,0,'config','config_mail_smtp_oauth_client_secret','',0),
+(30904,0,'config','config_mail_smtp_oauth_refresh_token','',0),
+(30905,0,'config','config_mail_smtp_oauth_token','',0),
+(30906,0,'config','config_mail_smtp_username','',0),
+(30907,0,'config','config_mail_smtp_password','',0),
+(30908,0,'config','config_mail_smtp_port','25',0),
+(30909,0,'config','config_mail_smtp_timeout','5',0),
+(30910,0,'config','config_mail_alert_email','',0),
+(30911,0,'config','config_maintenance','0',0),
+(30912,0,'config','config_seo_url','1',0),
+(30913,0,'config','config_product_cache_status','0',0),
+(30914,0,'config','config_robots','abot\r\ndbot\r\nebot\r\nhbot\r\nkbot\r\nlbot\r\nmbot\r\nnbot\r\nobot\r\npbot\r\nrbot\r\nsbot\r\ntbot\r\nvbot\r\nybot\r\nzbot\r\nbot.\r\nbot/\r\n_bot\r\n.bot\r\n/bot\r\n-bot\r\n:bot\r\n(bot\r\ncrawl\r\nslurp\r\nspider\r\nseek\r\naccoona\r\nacoon\r\nadressendeutschland\r\nah-ha.com\r\nahoy\r\naltavista\r\nananzi\r\nanthill\r\nappie\r\narachnophilia\r\narale\r\naraneo\r\naranha\r\narchitext\r\naretha\r\narks\r\nasterias\r\natlocal\r\natn\r\natomz\r\naugurfind\r\nbackrub\r\nbannana_bot\r\nbaypup\r\nbdfetch\r\nbig brother\r\nbiglotron\r\nbjaaland\r\nblackwidow\r\nblaiz\r\nblog\r\nblo.\r\nbloodhound\r\nboitho\r\nbooch\r\nbradley\r\nbutterfly\r\ncalif\r\ncassandra\r\nccubee\r\ncfetch\r\ncharlotte\r\nchurl\r\ncienciaficcion\r\ncmc\r\ncollective\r\ncomagent\r\ncombine\r\ncomputingsite\r\ncsci\r\ncurl\r\ncusco\r\ndaumoa\r\ndeepindex\r\ndelorie\r\ndepspid\r\ndeweb\r\ndie blinde kuh\r\ndigger\r\nditto\r\ndmoz\r\ndocomo\r\ndownload express\r\ndtaagent\r\ndwcp\r\nebiness\r\nebingbong\r\ne-collector\r\nejupiter\r\nemacs-w3 search engine\r\nesther\r\nevliya celebi\r\nezresult\r\nfalcon\r\nfelix ide\r\nferret\r\nfetchrover\r\nfido\r\nfindlinks\r\nfireball\r\nfish search\r\nfouineur\r\nfunnelweb\r\ngazz\r\ngcreep\r\ngenieknows\r\ngetterroboplus\r\ngeturl\r\nglx\r\ngoforit\r\ngolem\r\ngrabber\r\ngrapnel\r\ngralon\r\ngriffon\r\ngromit\r\ngrub\r\ngulliver\r\nhamahakki\r\nharvest\r\nhavindex\r\nhelix\r\nheritrix\r\nhku www octopus\r\nhomerweb\r\nhtdig\r\nhtml index\r\nhtml_analyzer\r\nhtmlgobble\r\nhubater\r\nhyper-decontextualizer\r\nia_archiver\r\nibm_planetwide\r\nichiro\r\niconsurf\r\niltrovatore\r\nimage.kapsi.net\r\nimagelock\r\nincywincy\r\nindexer\r\ninfobee\r\ninformant\r\ningrid\r\ninktomisearch.com\r\ninspector web\r\nintelliagent\r\ninternet shinchakubin\r\nip3000\r\niron33\r\nisraeli-search\r\nivia\r\njack\r\njakarta\r\njavabee\r\njetbot\r\njumpstation\r\nkatipo\r\nkdd-explorer\r\nkilroy\r\nknowledge\r\nkototoi\r\nkretrieve\r\nlabelgrabber\r\nlachesis\r\nlarbin\r\nlegs\r\nlibwww\r\nlinkalarm\r\nlink validator\r\nlinkscan\r\nlockon\r\nlwp\r\nlycos\r\nmagpie\r\nmantraagent\r\nmapoftheinternet\r\nmarvin/\r\nmattie\r\nmediafox\r\nmediapartners\r\nmercator\r\nmerzscope\r\nmicrosoft url control\r\nminirank\r\nmiva\r\nmj12\r\nmnogosearch\r\nmoget\r\nmonster\r\nmoose\r\nmotor\r\nmultitext\r\nmuncher\r\nmuscatferret\r\nmwd.search\r\nmyweb\r\nnajdi\r\nnameprotect\r\nnationaldirectory\r\nnazilla\r\nncsa beta\r\nnec-meshexplorer\r\nnederland.zoek\r\nnetcarta webmap engine\r\nnetmechanic\r\nnetresearchserver\r\nnetscoop\r\nnewscan-online\r\nnhse\r\nnokia6682/\r\nnomad\r\nnoyona\r\nnutch\r\nnzexplorer\r\nobjectssearch\r\noccam\r\nomni\r\nopen text\r\nopenfind\r\nopenintelligencedata\r\norb search\r\nosis-project\r\npack rat\r\npageboy\r\npagebull\r\npage_verifier\r\npanscient\r\nparasite\r\npartnersite\r\npatric\r\npear.\r\npegasus\r\nperegrinator\r\npgp key agent\r\nphantom\r\nphpdig\r\npicosearch\r\npiltdownman\r\npimptrain\r\npinpoint\r\npioneer\r\npiranha\r\nplumtreewebaccessor\r\npogodak\r\npoirot\r\npompos\r\npoppelsdorf\r\npoppi\r\npopular iconoclast\r\npsycheclone\r\npublisher\r\npython\r\nrambler\r\nraven search\r\nroach\r\nroad runner\r\nroadhouse\r\nrobbie\r\nrobofox\r\nrobozilla\r\nrules\r\nsalty\r\nsbider\r\nscooter\r\nscoutjet\r\nscrubby\r\nsearch.\r\nsearchprocess\r\nsemanticdiscovery\r\nsenrigan\r\nsg-scout\r\nshai\'hulud\r\nshark\r\nshopwiki\r\nsidewinder\r\nsift\r\nsilk\r\nsimmany\r\nsite searcher\r\nsite valet\r\nsitetech-rover\r\nskymob.com\r\nsleek\r\nsmartwit\r\nsna-\r\nsnappy\r\nsnooper\r\nsohu\r\nspeedfind\r\nsphere\r\nsphider\r\nspinner\r\nspyder\r\nsteeler/\r\nsuke\r\nsuntek\r\nsupersnooper\r\nsurfnomore\r\nsven\r\nsygol\r\nszukacz\r\ntach black widow\r\ntarantula\r\ntempleton\r\n/teoma\r\nt-h-u-n-d-e-r-s-t-o-n-e\r\ntheophrastus\r\ntitan\r\ntitin\r\ntkwww\r\ntoutatis\r\nt-rex\r\ntutorgig\r\ntwiceler\r\ntwisted\r\nucsd\r\nudmsearch\r\nurl check\r\nupdated\r\nvagabondo\r\nvalkyrie\r\nverticrawl\r\nvictoria\r\nvision-search\r\nvolcano\r\nvoyager/\r\nvoyager-hc\r\nw3c_validator\r\nw3m2\r\nw3mir\r\nwalker\r\nwallpaper\r\nwanderer\r\nwauuu\r\nwavefire\r\nweb core\r\nweb hopper\r\nweb wombat\r\nwebbandit\r\nwebcatcher\r\nwebcopy\r\nwebfoot\r\nweblayers\r\nweblinker\r\nweblog monitor\r\nwebmirror\r\nwebmonkey\r\nwebquest\r\nwebreaper\r\nwebsitepulse\r\nwebsnarf\r\nwebstolperer\r\nwebvac\r\nwebwalk\r\nwebwatch\r\nwebwombat\r\nwebzinger\r\nwhizbang\r\nwhowhere\r\nwild ferret\r\nworldlight\r\nwwwc\r\nwwwster\r\nxenu\r\nxget\r\nxift\r\nxirq\r\nyandex\r\nyanga\r\nyeti\r\nyodao\r\nzao\r\nzippp\r\nzyborg\r\nGooglebot\r\nBingbot\r\nBingPreview\r\nDuckDuckBot\r\nBaiduspider\r\nYandexBot\r\nYandexMobileBot\r\nfacebookexternalhit\r\nTwitterbot\r\nLinkedInBot\r\nSlackbot\r\nTelegramBot\r\nWhatsApp\r\nGPTBot\r\nChatGPT-User\r\nGoogle-Extended\r\nClaude-Web\r\nPerplexityBot\r\nBytespider\r\nAmazonbot\r\nApplebot-Extended\r\ncohere-ai\r\nDiffbot\r\nImagesift\r\nYouBot\r\nMeta-ExternalAgent\r\nCCBot\r\nOAI-SearchBot\r\nSemrushBot\r\nAhrefsBot\r\nDotBot\r\nDataForSeoBot\r\nPetalBot\r\nZoominfoBot\r\nScreaming Frog\r\nGo-http-client\r\nokhttp\r\naxios\r\nWget\r\nHeadlessChrome\r\nPhantomJS\r\nJava/\r\nPingdom\r\nUptimeRobot\r\nGTmetrix\r\nWebPageTest\r\nNewRelicPinger\r\nDatadogAgent\r\nSite24x7\r\nzgrab\r\nmasscan\r\nnmap\r\nNessus\r\nNikto\r\nwpscan',0),
+(30915,0,'config','config_compression','4',0),
+(30916,0,'config','config_secure','1',0),
+(30917,0,'config','config_password','1',0),
+(30918,0,'config','config_shared','0',0),
+(30919,0,'config','config_encryption','',0),
+(30920,0,'config','config_file_max_size','10485760',0),
+(30921,0,'config','config_file_ext_allowed','zip\r\ntxt\r\npng\r\njpe\r\njpeg\r\njpg\r\ngif\r\nbmp\r\nico\r\ntiff\r\ntif\r\nsvg\r\nsvgz\r\nwebp\r\nzip\r\nrar\r\nmsi\r\ncab\r\nmp3\r\nqt\r\nmov\r\npdf\r\npsd\r\nai\r\neps\r\nps\r\ndoc',0),
+(30922,0,'config','config_file_mime_allowed','text/plain\r\nimage/png\r\nimage/jpeg\r\nimage/gif\r\nimage/bmp\r\nimage/tiff\r\nimage/svg+xml\r\nimage/webp\r\napplication/zip\r\n&quot;application/zip&quot;\r\napplication/x-zip\r\n&quot;application/x-zip&quot;\r\napplication/x-zip-compressed\r\n&quot;application/x-zip-compressed&quot;\r\napplication/rar\r\n&quot;application/rar&quot;\r\napplication/x-rar\r\n&quot;application/x-rar&quot;\r\napplication/x-rar-compressed\r\n&quot;application/x-rar-compressed&quot;\r\napplication/octet-stream\r\n&quot;application/octet-stream&quot;\r\naudio/mpeg\r\nvideo/quicktime\r\napplication/pdf',0),
+(30923,0,'config','config_error_display','0',0),
+(30924,0,'config','config_error_log','1',0),
+(30925,0,'config','config_error_filename','error.log',0),
+(30926,0,'config','config_invoice_prefix','DC-',0),
+(30927,0,'config','config_invoice_valid_days','0',0),
+(30928,0,'config','config_invoice_language','',0),
+(30929,0,'config','config_seller_name_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(30930,0,'config','config_seller_address_i18n','{\"1\":\"\",\"2\":\"\",\"3\":\"\"}',1),
+(30931,0,'config','config_seller_email','',0),
+(30932,0,'config','config_seller_telephone','',0),
+(30933,0,'config','config_seller_bank_name','',0),
+(30934,0,'config','config_seller_bank_swift','',0),
+(30935,0,'config','config_seller_bank_account','',0),
+(30936,0,'config','config_seller_invoice_logo','',0),
+(30937,0,'config','config_seller_officer','',0),
+(30938,0,'config','config_seller_officer_role','',0),
+(30939,0,'config','config_seller_signature_image','',0),
+(30940,0,'config','config_seller_stamp_image','',0),
+(30941,0,'config','config_image','',0),
+(30942,0,'config','config_meta_title','DockerCart',0),
+(30943,0,'config','config_meta_description','Магазин DockerCart',0),
+(30944,0,'config','config_meta_keyword','',0),
+(30945,0,'config','config_name','DockerCart',0),
+(30946,0,'config','config_owner','DockerCart',0),
+(30947,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
+(30948,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
+(30949,0,'config','config_comment','',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22910,7 +23113,7 @@ CREATE TABLE `oc_stock_reservation` (
   KEY `idx_reservation_product` (`product_id`,`variant_id`),
   KEY `idx_reservation_expiry` (`expires_at`),
   KEY `idx_reservation_order` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=340 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=363 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22920,8 +23123,6 @@ CREATE TABLE `oc_stock_reservation` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_stock_reservation` WRITE;
 /*!40000 ALTER TABLE `oc_stock_reservation` DISABLE KEYS */;
-INSERT INTO `oc_stock_reservation` VALUES
-(339,'cfa28a08cc9be1c897e9803e9a',5004,639,1.0000,NULL,'2026-08-15 12:31:27','2026-08-15 12:01:27');
 /*!40000 ALTER TABLE `oc_stock_reservation` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22970,7 +23171,7 @@ CREATE TABLE `oc_tax_class` (
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`tax_class_id`,`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99821 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23009,7 +23210,7 @@ CREATE TABLE `oc_tax_rate` (
   `date_added` datetime NOT NULL,
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`tax_rate_id`,`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99822 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23087,7 +23288,7 @@ CREATE TABLE `oc_tax_rule` (
   `based` varchar(10) NOT NULL,
   `priority` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`tax_rule_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99832 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=99835 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23100,8 +23301,8 @@ LOCK TABLES `oc_tax_rule` WRITE;
 INSERT INTO `oc_tax_rule` VALUES
 (99825,10,87,'store',0),
 (99826,10,86,'payment',1),
-(99830,9,86,'shipping',1),
-(99831,9,87,'shipping',2);
+(99833,9,86,'shipping',1),
+(99834,9,87,'shipping',2);
 /*!40000 ALTER TABLE `oc_tax_rule` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23198,7 +23399,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_user_group` WRITE;
 /*!40000 ALTER TABLE `oc_user_group` DISABLE KEYS */;
 INSERT INTO `oc_user_group` VALUES
-(1,'Administrator','{\"access\": [\"catalog/attribute\", \"catalog/attribute_group\", \"catalog/attribute_set\", \"catalog/category\", \"catalog/download\", \"catalog/information\", \"catalog/manufacturer\", \"catalog/option\", \"catalog/option_set\", \"catalog/product\", \"catalog/product_bundle\", \"catalog/product_configurable\", \"catalog/review\", \"catalog/review_setting\", \"common/admin_search\", \"common/column_left\", \"common/developer\", \"common/filemanager\", \"common/profile\", \"common/security\", \"common/user_filter\", \"customer/custom_field\", \"customer/customer\", \"customer/customer_approval\", \"customer/customer_group\", \"design/banner\", \"design/layout\", \"design/seo_url\", \"event/dockercart_about_tab\", \"event/dockercart_license_admin\", \"event/language\", \"event/theme\", \"extension/analytics/clarity\", \"extension/analytics/facebook\", \"extension/analytics/google\", \"extension/captcha/dockercart\", \"extension/currency/ecb\", \"extension/dashboard/activity\", \"extension/dashboard/chart\", \"extension/dashboard/customer\", \"extension/dashboard/dockercart_aov\", \"extension/dashboard/dockercart_category_revenue\", \"extension/dashboard/dockercart_conversion\", \"extension/dashboard/dockercart_repeat\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/order\", \"extension/dashboard/recent\", \"extension/dashboard/sale\", \"extension/dashboard/traffic_source\", \"extension/dashboard/viewed_product\", \"extension/extension/advertise\", \"extension/extension/analytics\", \"extension/extension/captcha\", \"extension/extension/currency\", \"extension/extension/dashboard\", \"extension/extension/feed\", \"extension/extension/fraud\", \"extension/extension/menu\", \"extension/extension/module\", \"extension/extension/payment\", \"extension/extension/promotion\", \"extension/extension/report\", \"extension/extension/shipping\", \"extension/extension/theme\", \"extension/extension/total\", \"extension/feed/dockercart_sitemap\", \"extension/module/account\", \"extension/module/banner\", \"extension/module/bestseller\", \"extension/module/carousel\", \"extension/module/category\", \"extension/module/dockercart_blog\", \"extension/module/dockercart_blog_author\", \"extension/module/dockercart_blog_category\", \"extension/module/dockercart_blog_comment\", \"extension/module/dockercart_blog_install\", \"extension/module/dockercart_blog_latest\", \"extension/module/dockercart_blog_post\", \"extension/module/dockercart_brand_carousel\", \"extension/module/dockercart_category_tree\", \"extension/module/dockercart_checkout\", \"extension/module/dockercart_newsletter\", \"extension/module/dockercart_search\", \"extension/module/dockercart_seo_description\", \"extension/module/dockercart_shop_features\", \"extension/module/dockercart_theme\", \"extension/module/dockercart_viewed\", \"extension/module/featured\", \"extension/module/html\", \"extension/module/latest\", \"extension/module/slideshow\", \"extension/module/special\", \"extension/module/store\", \"extension/payment/dockercart_universal\", \"extension/report/customer_activity\", \"extension/report/customer_order\", \"extension/report/customer_reward\", \"extension/report/customer_search\", \"extension/report/customer_transaction\", \"extension/report/dockercart_analytics\", \"extension/report/marketing\", \"extension/report/product_purchased\", \"extension/report/product_viewed\", \"extension/report/sale_coupon\", \"extension/report/sale_order\", \"extension/report/sale_return\", \"extension/report/sale_shipping\", \"extension/report/sale_tax\", \"extension/shipping/dockercart_universal\", \"extension/store\", \"extension/theme/dockercart\", \"extension/total/coupon\", \"extension/total/credit\", \"extension/total/handling\", \"extension/total/low_order_fee\", \"extension/total/reward\", \"extension/total/shipping\", \"extension/total/sub_total\", \"extension/total/tax\", \"extension/total/total\", \"extension/total/voucher\", \"localisation/country\", \"localisation/currency\", \"localisation/geo_zone\", \"localisation/language\", \"localisation/length_class\", \"localisation/location\", \"localisation/order_status\", \"localisation/return_action\", \"localisation/return_reason\", \"localisation/return_status\",  \"localisation/tax_class\", \"localisation/tax_rate\", \"localisation/weight_class\", \"localisation/zone\", \"mail/affiliate\", \"mail/customer\", \"mail/forgotten\", \"mail/order\", \"mail/return\", \"mail/reward\", \"mail/transaction\", \"marketing/abandoned_stats\", \"marketing/contact\", \"marketing/coupon\", \"marketing/marketing\", \"marketplace/event\", \"marketplace/extension\", \"marketplace/install\", \"marketplace/installer\", \"marketplace/modification\", \"report/report\", \"sale/order\", \"sale/order_abandoned\", \"sale/order_detail\", \"sale/order_flow\", \"sale/return\", \"sale/voucher\", \"sale/voucher_theme\", \"setting/setting\", \"setting/store\", \"startup/error\", \"startup/event\", \"startup/login\", \"startup/permission\", \"startup/router\", \"startup/sass\", \"startup/startup\", \"tool/backup\", \"tool/dockercart_scheduler\", \"tool/log\", \"tool/upload\", \"tool/update\", \"user/user\", \"user/user_permission\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/dockercart_category_revenue\", \"catalog/question\"], \"modify\": [\"catalog/attribute\", \"catalog/attribute_group\", \"catalog/attribute_set\", \"catalog/category\", \"catalog/download\", \"catalog/information\", \"catalog/manufacturer\", \"catalog/option\", \"catalog/option_set\", \"catalog/product\", \"catalog/product_bundle\", \"catalog/product_configurable\", \"catalog/review\", \"catalog/review_setting\", \"common/admin_search\", \"common/column_left\", \"common/developer\", \"common/filemanager\", \"common/profile\", \"common/security\", \"common/user_filter\", \"customer/custom_field\", \"customer/customer\", \"customer/customer_approval\", \"customer/customer_group\", \"design/banner\", \"design/layout\", \"design/seo_url\", \"event/dockercart_about_tab\", \"event/dockercart_license_admin\", \"event/language\", \"event/theme\", \"extension/analytics/clarity\", \"extension/analytics/facebook\", \"extension/analytics/google\", \"extension/captcha/dockercart\", \"extension/currency/ecb\", \"extension/dashboard/activity\", \"extension/dashboard/chart\", \"extension/dashboard/customer\", \"extension/dashboard/dockercart_aov\", \"extension/dashboard/dockercart_category_revenue\", \"extension/dashboard/dockercart_conversion\", \"extension/dashboard/dockercart_repeat\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/order\", \"extension/dashboard/recent\", \"extension/dashboard/sale\", \"extension/dashboard/traffic_source\", \"extension/dashboard/viewed_product\", \"extension/extension/advertise\", \"extension/extension/analytics\", \"extension/extension/captcha\", \"extension/extension/currency\", \"extension/extension/dashboard\", \"extension/extension/feed\", \"extension/extension/fraud\", \"extension/extension/menu\", \"extension/extension/module\", \"extension/extension/payment\", \"extension/extension/promotion\", \"extension/extension/report\", \"extension/extension/shipping\", \"extension/extension/theme\", \"extension/extension/total\", \"extension/feed/dockercart_sitemap\", \"extension/module/account\", \"extension/module/banner\", \"extension/module/bestseller\", \"extension/module/carousel\", \"extension/module/category\", \"extension/module/dockercart_blog\", \"extension/module/dockercart_blog_author\", \"extension/module/dockercart_blog_category\", \"extension/module/dockercart_blog_comment\", \"extension/module/dockercart_blog_install\", \"extension/module/dockercart_blog_latest\", \"extension/module/dockercart_blog_post\", \"extension/module/dockercart_brand_carousel\", \"extension/module/dockercart_category_tree\", \"extension/module/dockercart_checkout\", \"extension/module/dockercart_newsletter\", \"extension/module/dockercart_search\", \"extension/module/dockercart_seo_description\", \"extension/module/dockercart_shop_features\", \"extension/module/dockercart_theme\", \"extension/module/dockercart_viewed\", \"extension/module/featured\", \"extension/module/html\", \"extension/module/latest\", \"extension/module/slideshow\", \"extension/module/special\", \"extension/module/store\", \"extension/payment/dockercart_universal\", \"extension/report/customer_activity\", \"extension/report/customer_order\", \"extension/report/customer_reward\", \"extension/report/customer_search\", \"extension/report/customer_transaction\", \"extension/report/dockercart_analytics\", \"extension/report/marketing\", \"extension/report/product_purchased\", \"extension/report/product_viewed\", \"extension/report/sale_coupon\", \"extension/report/sale_order\", \"extension/report/sale_return\", \"extension/report/sale_shipping\", \"extension/report/sale_tax\", \"extension/shipping/dockercart_universal\", \"extension/store\", \"extension/theme/dockercart\", \"extension/total/coupon\", \"extension/total/credit\", \"extension/total/handling\", \"extension/total/low_order_fee\", \"extension/total/reward\", \"extension/total/shipping\", \"extension/total/sub_total\", \"extension/total/tax\", \"extension/total/total\", \"extension/total/voucher\", \"localisation/country\", \"localisation/currency\", \"localisation/geo_zone\", \"localisation/language\", \"localisation/length_class\", \"localisation/location\", \"localisation/order_status\", \"localisation/return_action\", \"localisation/return_reason\", \"localisation/return_status\",  \"localisation/tax_class\", \"localisation/tax_rate\", \"localisation/weight_class\", \"localisation/zone\", \"mail/affiliate\", \"mail/customer\", \"mail/forgotten\", \"mail/order\", \"mail/return\", \"mail/reward\", \"mail/transaction\", \"marketing/abandoned_stats\", \"marketing/contact\", \"marketing/coupon\", \"marketing/marketing\", \"marketplace/event\", \"marketplace/extension\", \"marketplace/install\", \"marketplace/installer\", \"marketplace/modification\", \"report/report\", \"sale/order\", \"sale/order_abandoned\", \"sale/order_detail\", \"sale/order_flow\", \"sale/return\", \"sale/voucher\", \"sale/voucher_theme\", \"setting/setting\", \"setting/store\", \"startup/error\", \"startup/event\", \"startup/login\", \"startup/permission\", \"startup/router\", \"startup/sass\", \"startup/startup\", \"tool/backup\", \"tool/dockercart_scheduler\", \"tool/log\", \"tool/upload\", \"tool/update\", \"user/user\", \"user/user_permission\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/dockercart_category_revenue\", \"catalog/question\"]}');
+(1,'Administrator','{\"access\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/update\"], \"modify\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/update\"]}');
 /*!40000 ALTER TABLE `oc_user_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -31849,4 +32050,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-08-15 12:08:26
+-- Dump completed on 2026-08-15 16:08:53
