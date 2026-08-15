@@ -41,15 +41,25 @@
   .dc-review-card { position: relative; transition: border-color .2s; }
   .dc-review-card-divider { height: 1px; background: #f3f4f6; }
 
-  .dc-review-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .dc-review-thumb { width: 64px; height: 64px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; cursor: pointer; background: #f9fafb; transition: border-color .2s, box-shadow .2s; }
-  .dc-review-thumb:hover { border-color: #93c5fd; box-shadow: 0 0 0 3px #dbeafe; }
+  .dc-review-media { display: flex; flex-direction: column; gap: 14px; }
+  .dc-review-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .dc-review-thumb { position: relative; aspect-ratio: 1; max-width: 220px; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; cursor: zoom-in; background: #f9fafb; transition: border-color .2s, box-shadow .2s, transform .2s; }
+  .dc-review-thumb:hover { border-color: #93c5fd; box-shadow: 0 0 0 3px #dbeafe; transform: translateY(-2px); }
   .dc-review-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dc-review-thumb-zoom { position: absolute; right: 9px; bottom: 9px; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: #fff; background: rgba(15,23,42,.7); border-radius: 9999px; opacity: 0; transition: opacity .2s; }
+  .dc-review-thumb:hover .dc-review-thumb-zoom, .dc-review-thumb:focus-visible .dc-review-thumb-zoom { opacity: 1; }
+  .dc-review-video { width: min(100%, 640px); }
 
-  .dc-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.88); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .dc-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; padding: 56px 72px; }
   .dc-lightbox.dc-hidden { display: none; }
-  .dc-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 12px; }
-  .dc-lightbox-close { position: absolute; top: 18px; right: 22px; background: rgba(255,255,255,.12); border: none; color: #fff; width: 42px; height: 42px; border-radius: 9999px; font-size: 22px; cursor: pointer; }
+  .dc-lightbox img { max-width: min(92vw, 1600px); max-height: 86vh; border-radius: 12px; object-fit: contain; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+  .dc-lightbox-close, .dc-lightbox-nav { position: absolute; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); color: #fff; cursor: pointer; transition: background .15s; }
+  .dc-lightbox-close:hover, .dc-lightbox-nav:hover { background: rgba(255,255,255,.28); }
+  .dc-lightbox-close { top: 18px; right: 22px; width: 42px; height: 42px; border-radius: 9999px; font-size: 22px; }
+  .dc-lightbox-nav { top: 50%; width: 48px; height: 64px; margin-top: -32px; border-radius: 14px; font-size: 28px; }
+  .dc-lightbox-prev { left: 18px; }
+  .dc-lightbox-next { right: 18px; }
+  .dc-lightbox-counter { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); color: rgba(255,255,255,.85); font-size: 13px; font-variant-numeric: tabular-nums; }
 
   .dc-review-upload-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   .dc-review-upload-preview .item { position: relative; width: 76px; height: 76px; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
@@ -82,7 +92,14 @@
   .pagination li { margin: 0; }
 
   @media (max-width: 639px) {
-    .dc-review-thumb { width: 56px; height: 56px; }
+    .dc-review-thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dc-review-thumb { max-width: none; }
+    .dc-review-thumb-zoom { opacity: 1; width: 28px; height: 28px; }
+    .dc-lightbox { padding: 52px 14px; }
+    .dc-lightbox img { max-width: 96vw; max-height: 80vh; }
+    .dc-lightbox-nav { width: 38px; height: 52px; margin-top: -26px; }
+    .dc-lightbox-prev { left: 8px; }
+    .dc-lightbox-next { right: 8px; }
     .dc-review-modal { padding: 12px; }
     .dc-review-modal-card { border-radius: 16px 16px 0 0; }
     .dc-review-sort { width: 100%; overflow-x: auto; }

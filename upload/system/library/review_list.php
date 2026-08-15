@@ -90,8 +90,8 @@ class ReviewList {
 
 			foreach ($result['images'] as $image) {
 				$images[] = array(
-					'thumb' => $this->model_tool_image->resize($image['image'], 160, 160),
-					'popup' => $this->model_tool_image->resize($image['image'], 900, 900),
+					'thumb' => $this->model_tool_image->resize($image['image'], 360, 360),
+					'popup' => $this->model_tool_image->resize($image['image'], 1600, 1600),
 				);
 			}
 
@@ -198,6 +198,12 @@ class ReviewList {
 			'text_replies_count'  => $this->language->get('text_replies_count'),
 			'text_reply_added'    => $this->language->get('text_reply_added'),
 			'text_reply_awaiting_moderation' => $this->language->get('text_reply_awaiting_moderation'),
+			'text_review_media'   => $this->language->get('text_review_media'),
+			'text_review_video'   => $this->language->get('text_review_video'),
+			'text_view_image'     => $this->language->get('text_view_image'),
+			'text_close'          => $this->language->get('text_close'),
+			'text_previous_image' => $this->language->get('text_previous_image'),
+			'text_next_image'     => $this->language->get('text_next_image'),
 		);
 	}
 

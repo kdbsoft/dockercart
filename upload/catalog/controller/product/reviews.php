@@ -94,6 +94,12 @@ class ControllerProductReviews extends Controller {
 			$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
 			$data['text_leave_review'] = $fragment['text_leave_review'];
 			$data['text_write'] = $fragment['text_write'];
+			$data['text_review_media'] = $fragment['text_review_media'];
+			$data['text_review_video'] = $fragment['text_review_video'];
+			$data['text_view_image'] = $fragment['text_view_image'];
+			$data['text_close'] = $fragment['text_close'];
+			$data['text_previous_image'] = $fragment['text_previous_image'];
+			$data['text_next_image'] = $fragment['text_next_image'];
 			$data['review_total'] = $fragment['total'];
 			$data['review_total_label'] = $fragment['total_label'];
 			$data['vote_url'] = $fragment['vote_url'];

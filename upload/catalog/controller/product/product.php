@@ -1428,6 +1428,12 @@ class ControllerProductProduct extends Controller {
 			$data['review_ajax_url'] = $this->url->link('product/product/review', 'product_id=' . $product_id);
 			$data['review_write_url'] = $this->url->link('product/product/write', 'product_id=' . $product_id);
 			$data['text_no_reviews'] = $this->language->get('text_no_reviews');
+			$data['text_review_media'] = $this->language->get('text_review_media');
+			$data['text_review_video'] = $this->language->get('text_review_video');
+			$data['text_view_image'] = $this->language->get('text_view_image');
+			$data['text_close'] = $this->language->get('text_close');
+			$data['text_previous_image'] = $this->language->get('text_previous_image');
+			$data['text_next_image'] = $this->language->get('text_next_image');
 
 			// Real reviews for schema.org markup
 			$data['schema_reviews'] = $this->model_catalog_review->getReviewsForSchema($product_id, 5);
@@ -2310,6 +2316,12 @@ class ControllerProductProduct extends Controller {
 		$data['text_be_first_hint'] = $fragment['text_be_first_hint'];
 		$data['text_leave_review'] = $fragment['text_leave_review'];
 		$data['text_write'] = $fragment['text_write'];
+		$data['text_review_media'] = $fragment['text_review_media'];
+		$data['text_review_video'] = $fragment['text_review_video'];
+		$data['text_view_image'] = $fragment['text_view_image'];
+		$data['text_close'] = $fragment['text_close'];
+		$data['text_previous_image'] = $fragment['text_previous_image'];
+		$data['text_next_image'] = $fragment['text_next_image'];
 		$data['text_reviews_section'] = $this->language->get('text_reviews_section');
 		$data['total'] = $fragment['total'];
 		$data['total_label'] = $fragment['total_label'];
