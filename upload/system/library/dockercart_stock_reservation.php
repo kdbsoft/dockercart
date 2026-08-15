@@ -232,8 +232,10 @@ class DockercartStockReservation {
 
 		$product_query = $this->db->query("SELECT quantity, subtract, preorder FROM `" . DB_PREFIX . "product` WHERE product_id = '" . (int)$product_id . "' FOR UPDATE");
 
+		// Product gone (deleted after being added to cart) — nothing to hold.
+		// The cart's stock gate already blocks such lines before we get here.
 		if (!$product_query->num_rows) {
-			return false;
+			return true;
 		}
 
 		$preorder = (int)$product_query->row['preorder'];
@@ -249,8 +251,10 @@ class DockercartStockReservation {
 		if ($variant_id > 0) {
 			$variant_query = $this->db->query("SELECT quantity, subtract FROM `" . DB_PREFIX . "product_variant` WHERE variant_id = '" . (int)$variant_id . "' AND product_id = '" . (int)$product_id . "' AND status = '1' FOR UPDATE");
 
+			// Variant removed or disabled since it was added to the cart:
+			// it cannot be held, so skip it (do not fail the whole batch).
 			if (!$variant_query->num_rows) {
-				return false;
+				return true;
 			}
 
 			$stock_quantity = (float)$variant_query->row['quantity'];
