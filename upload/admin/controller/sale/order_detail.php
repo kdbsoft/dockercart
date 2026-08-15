@@ -337,6 +337,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('customer/customer');
 
 		$reward_points = max(0, (int)$order_info['reward']);
+		$data['reward_has_points'] = $reward_points > 0;
 		$reward_record_exists = $this->model_customer_customer->getTotalCustomerRewardsByOrderId($order_id) > 0;
 		$reward_awarded_flag = (bool)$order_info['reward_awarded'];
 		$reward_awarded = $reward_points > 0 && $reward_record_exists;
