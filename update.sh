@@ -53,6 +53,33 @@ compose() {
     fi
 }
 
+reconcile_working_tree() {
+    # The GUI updater (admin/cli/dockercart_update.php) copies upload/ and
+    # VERSION straight into the bind mount but never advances git HEAD, so the
+    # working tree ends up dirty on exactly the files upstream will also touch.
+    # A fast-forward pull refuses to overwrite locally-modified files, so before
+    # pulling we reset only those GUI-managed paths (upload/* and VERSION) that
+    # the upstream commit also changes. Real local edits outside upload/ are
+    # left untouched (they are blocked earlier by the dirty check below).
+    upstream_changed=$(git diff --name-only "$BASE" "$REMOTE" 2>/dev/null)
+    [ -z "$upstream_changed" ] && return 0
+
+    local_dirty=$(git diff --name-only HEAD 2>/dev/null)
+    [ -z "$local_dirty" ] && return 0
+
+    echo "$local_dirty" | while read -r f; do
+        case "$f" in
+            VERSION|upload/*) ;;
+            *) continue ;;
+        esac
+
+        if echo "$upstream_changed" | grep -qx "$f"; then
+            git checkout -- "$f"
+            log "Reconciled (GUI sync) before pull: $f"
+        fi
+    done
+}
+
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     log "Error: $SCRIPT_DIR is not a git repository."
     exit 1
@@ -61,11 +88,6 @@ fi
 BRANCH=$(git symbolic-ref --quiet --short HEAD || true)
 if [ -z "$BRANCH" ]; then
     log "Error: detached HEAD is not supported for automated updates."
-    exit 1
-fi
-
-if [ "${ALLOW_DIRTY:-0}" != "1" ] && [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-    log "Error: repository has local tracked changes. Commit/stash them or set ALLOW_DIRTY=1."
     exit 1
 fi
 
@@ -81,6 +103,26 @@ if [ "$LOCAL" = "$REMOTE" ]; then
     log "Code is already up to date."
 elif [ "$LOCAL" = "$BASE" ]; then
 	log "Pulling updates (fast-forward only)..."
+	reconcile_working_tree
+
+	# After reconciling GUI-applied paths (upload/* and VERSION), any remaining
+	# tracked changes are real local edits. GUI-managed paths that upstream did
+	# NOT touch are harmless for a fast-forward pull (kept as-is), so only edits
+	# outside upload/ and VERSION block the update.
+	if [ "${ALLOW_DIRTY:-0}" != "1" ]; then
+		blocking=""
+		for f in $(git diff --name-only HEAD 2>/dev/null); do
+			case "$f" in
+				VERSION|upload/*) ;;
+				*) blocking="$blocking $f" ;;
+			esac
+		done
+		if [ -n "$blocking" ]; then
+			log "Error: repository has local tracked changes outside upload/ and VERSION:$blocking. Commit/stash them or set ALLOW_DIRTY=1."
+			exit 1
+		fi
+	fi
+
 	git pull --ff-only origin "$BRANCH"
 	log "Code updated successfully."
 
