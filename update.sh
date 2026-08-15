@@ -2,7 +2,7 @@
 
 set -eu
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 cd "$SCRIPT_DIR"
 
 log() {
@@ -33,24 +33,21 @@ compose() {
     # start.sh records the active -f file set in .env as
     # DOCKERCART_COMPOSE_FILES; use it when present so updates in Traefik/SSL
     # modes keep the same overrides instead of falling back to the base file.
+    FILES=""
     if [ -n "${DOCKERCART_COMPOSE_FILES:-}" ]; then
-        FILES=""
         for f in $DOCKERCART_COMPOSE_FILES; do
             FILES="$FILES -f $f"
         done
-        docker compose $FILES "$@"
-        return
-    fi
-    if [ "${TRAEFIK:-0}" = "1" ]; then
+    elif [ "${TRAEFIK:-0}" = "1" ]; then
         FILES="-f docker-compose.traefik.yml"
-        docker compose $FILES "$@"
     else
         FILES="-f docker-compose.yml"
         if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qFx "${CERTBOT_CONTAINER_NAME:-dockercart_certbot}"; then
             FILES="$FILES -f docker-compose.le.yml"
         fi
-        docker compose $FILES "$@"
     fi
+    # shellcheck disable=SC2086
+    docker compose $FILES "$@"
 }
 
 reconcile_working_tree() {
@@ -134,6 +131,7 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	BUILD_REQUIRED=0
 	BUILD_PATHSPEC="Dockerfile docker/ docker-compose*.yml composer.lock"
 	if git diff --quiet "$BASE" "$REMOTE" -- $BUILD_PATHSPEC 2>/dev/null; then
+		# shellcheck disable=SC2086
 		log "No Dockerfile/docker/compose changes detected — skipping image rebuild."
 	else
 		log "Dockerfile, docker/ or compose changes detected — rebuilding image."
