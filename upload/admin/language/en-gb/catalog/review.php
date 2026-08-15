@@ -51,6 +51,8 @@ $_['text_not_verified']     = 'No';
 $_['text_has_media']        = 'Has media';
 $_['text_no_criteria']      = 'No criteria configured for this group.';
 $_['text_votes_tooltip']    = 'Likes / Dislikes';
+$_['text_video_youtube']    = 'YouTube';
+$_['text_video_mp4']        = 'MP4';
 
 // Tabs
 $_['tab_review']            = 'Review';
