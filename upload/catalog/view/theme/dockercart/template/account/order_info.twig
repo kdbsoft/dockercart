@@ -197,8 +197,8 @@
                 </td>
                 <td class="text-left text-gray-500 px-4 py-3">{{ product.model }}</td>
                 <td class="text-right text-gray-700 px-4 py-3">{{ product.quantity }}</td>
-                <td class="text-right text-gray-700 px-4 py-3">{{ product.price }}</td>
-                <td class="text-right font-semibold text-gray-800 px-4 py-3">{{ product.total }}</td>
+                <td class="text-right text-gray-700 px-4 py-3 whitespace-nowrap">{{ product.price }}</td>
+                <td class="text-right font-semibold text-gray-800 px-4 py-3 whitespace-nowrap">{{ product.total }}</td>
                 <td class="text-right px-4 py-3 whitespace-nowrap">
                   {% if product.reorder %}
                   <a href="{{ product.reorder }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition text-xs mr-1">
@@ -217,8 +217,8 @@
                 <td class="text-left text-gray-800 px-4 py-3">{{ voucher.description }}</td>
                 <td class="px-4 py-3"></td>
                 <td class="text-right text-gray-700 px-4 py-3">1</td>
-                <td class="text-right text-gray-700 px-4 py-3">{{ voucher.amount }}</td>
-                <td class="text-right font-semibold text-gray-800 px-4 py-3">{{ voucher.amount }}</td>
+                <td class="text-right text-gray-700 px-4 py-3 whitespace-nowrap">{{ voucher.amount }}</td>
+                <td class="text-right font-semibold text-gray-800 px-4 py-3 whitespace-nowrap">{{ voucher.amount }}</td>
                 {% if products %}<td class="px-4 py-3"></td>{% endif %}
               </tr>
               {% endfor %}
@@ -229,7 +229,7 @@
                 <td class="px-4 py-2"></td>
                 <td colspan="3" class="px-4 py-2"></td>
                 <td class="text-right font-semibold text-gray-600 px-4 py-2 text-sm">{{ total.title }}</td>
-                <td class="text-right font-bold text-gray-900 px-4 py-2 text-sm">{{ total.text }}</td>
+                <td class="text-right font-bold text-gray-900 px-4 py-2 text-sm whitespace-nowrap">{{ total.text }}</td>
                 {% if products %}<td class="px-4 py-2"></td>{% endif %}
               </tr>
               {% endfor %}
