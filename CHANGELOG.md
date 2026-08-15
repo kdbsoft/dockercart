@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/kdbsoft/dockercart/compare/v3.0.0...v3.0.1) (2026-08-15)
+
+### Bug Fixes
+
+* **infra:** harden letsencrypt cert handling in start.sh ([35231f0](https://github.com/kdbsoft/dockercart/commit/35231f08ef8793acb5c8ee9d3a882558c79e97b7))
+* **infra:** quote CDPATH and simplify compose file selection ([fb014c2](https://github.com/kdbsoft/dockercart/commit/fb014c2a60e8d08ea8ab03fead41634840385bac))
+
 ## [3.0.0](https://github.com/kdbsoft/dockercart/compare/v2.5.0...v3.0.0) (2026-08-15)
 
 ### ⚠ BREAKING CHANGES
