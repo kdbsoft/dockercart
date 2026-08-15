@@ -21,6 +21,57 @@
       </div>
     </div>
     {% endif %}
+    {% if onboarding_enabled %}
+    {% set onboarding_done = 0 %}
+    {% for step in onboarding_steps %}{% if step.done %}{% set onboarding_done = onboarding_done + 1 %}{% endif %}{% endfor %}
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="dcx-onboarding panel panel-default" style="margin:0 0 20px;">
+          <div class="dcx-onboarding__head">
+            <div class="dcx-onboarding__art hidden-xs hidden-sm">
+              <img src="view/image/onboarding.svg" alt="" />
+            </div>
+            <div class="dcx-onboarding__head-main">
+              <div class="dcx-onboarding__head-row">
+                <div class="dcx-panel-head__icon"><i data-lucide="rocket" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_onboarding }}</div>
+                  <div class="dcx-panel-heading__subtitle">{{ text_onboarding_subtitle }}</div>
+                </div>
+                <div class="pull-right">
+                  <a href="{{ onboarding_dismiss }}" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ text_onboarding_dismiss_help }}"><i data-lucide="x" width="14" height="14"></i> {{ text_onboarding_dismiss }}</a>
+                </div>
+              </div>
+              <div class="dcx-onboarding__progress">
+                <div class="dcx-onboarding__progress-bar" style="width: {% if onboarding_steps|length %}{{ (onboarding_done * 100 / onboarding_steps|length)|round }}{% else %}0{% endif %}%;"></div>
+              </div>
+              <div class="dcx-onboarding__progress-label">{{ onboarding_done }} / {{ onboarding_steps|length }} — {{ text_onboarding_progress }}</div>
+            </div>
+          </div>
+          <div class="dcx-onboarding__steps">
+            {% for step in onboarding_steps %}
+            <a href="{{ step.href }}" class="dcx-onboarding__step{% if step.done %} dcx-onboarding__step--done{% endif %}">
+              <div class="dcx-onboarding__step-icon">
+                {% if step.done %}<i data-lucide="check" width="20" height="20"></i>{% else %}<i data-lucide="{{ step.icon }}" width="20" height="20"></i>{% endif %}
+              </div>
+              <div class="dcx-onboarding__step-text">
+                <div class="dcx-onboarding__step-title">{{ step.title }}</div>
+                <div class="dcx-onboarding__step-desc">{{ step.desc }}</div>
+              </div>
+              <div class="dcx-onboarding__step-badge">
+                {% if step.done %}
+                <span class="label label-success" data-toggle="tooltip" title="{{ text_onboarding_done }}">{{ text_onboarding_done }}</span>
+                {% else %}
+                <span class="label label-default">{{ loop.index }}</span>
+                {% endif %}
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
     {% for row in rows %}
     <div class="row">{% for column in row.columns %}
       {% if row.md_full %}
