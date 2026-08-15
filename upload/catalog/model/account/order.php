@@ -211,7 +211,7 @@ class ModelAccountOrder extends Model {
 	}
 
 	public function getOrderHistories($order_id) {
-		$query = $this->db->query("SELECT date_added, os.name AS status, oh.comment, oh.comment_key, oh.comment_params, oh.notify FROM " . DB_PREFIX . "order_history oh LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id WHERE oh.order_id = '" . (int)$order_id . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY oh.date_added");
+		$query = $this->db->query("SELECT date_added, os.name AS status, oh.comment, oh.comment_key, oh.comment_params, oh.notify FROM " . DB_PREFIX . "order_history oh LEFT JOIN " . DB_PREFIX . "order_status os ON oh.order_status_id = os.order_status_id WHERE oh.order_id = '" . (int)$order_id . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY oh.date_added DESC");
 
 		return $query->rows;
 	}
@@ -273,6 +273,32 @@ class ModelAccountOrder extends Model {
 
 		foreach ($query->rows as $row) {
 			$result[(int)$row['order_id']] = (int)$row['total'];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Bulk product images for order list (N+1 killer).
+	 * Returns [order_id => [image filename, ...]] ordered by order_product_id.
+	 * Prefers variant image when variant_id is set and variant has an image.
+	 *
+	 * @param int[] $order_ids
+	 * @return array<int, string[]>
+	 */
+	public function getOrderProductsImagesByOrderIds(array $order_ids) {
+		if (empty($order_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_ids)));
+
+		$query = $this->db->query("SELECT op.order_id, COALESCE(NULLIF(pv.image, ''), p.image) AS image FROM `" . DB_PREFIX . "order_product` op LEFT JOIN `" . DB_PREFIX . "product` p ON p.product_id = op.product_id LEFT JOIN `" . DB_PREFIX . "product_variant` pv ON pv.variant_id = op.variant_id AND pv.product_id = op.product_id WHERE op.order_id IN (" . implode(',', $ids) . ") ORDER BY op.order_id ASC, op.order_product_id ASC");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_id']][] = (string)$row['image'];
 		}
 
 		return $result;
