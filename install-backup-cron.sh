@@ -70,13 +70,17 @@ echo "  log file    : $LOG_FILE"
 # --- Write cron entry ---
 # COMPOSE_PROFILES=backup activates the backup-worker service profile
 # (Compose spec standard — works with docker compose v2 and podman-compose).
+# flock -n prevents overlapping runs when a backup takes longer than the
+# schedule interval (a second run exits immediately instead of colliding on
+# the fixed container name).
+LOCK_FILE="$PROJECT_DIR/.backup.lock"
 cat > "$CRON_FILE" <<EOF
 # DockerCart S3 backup — managed by install-backup-cron.sh
 # Do not edit manually; re-run: sudo ./install-backup-cron.sh
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-$SCHEDULE $CRON_USER cd "$PROJECT_DIR" && COMPOSE_PROFILES=backup $COMPOSE_CMD run --rm --no-deps backup-worker >> "$LOG_FILE" 2>&1
+$SCHEDULE $CRON_USER flock -n "$LOCK_FILE" bash -c 'cd "$PROJECT_DIR" && COMPOSE_PROFILES=backup $COMPOSE_CMD run --rm --no-deps backup-worker' >> "$LOG_FILE" 2>&1
 EOF
 
 chmod 644 "$CRON_FILE"

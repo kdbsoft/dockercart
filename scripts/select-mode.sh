@@ -2,6 +2,11 @@
 # Interactive run-mode selection for DockerCart.
 # Sourced by start.sh (--menu): sets TRAEFIK_MODE / SSL_MODE in the current shell
 # and remembers the last choice in .env as DOCKERCART_RUN_MODE.
+#
+# Two-step wizard:
+#   Step 1 — launch mode:  Standalone (Default) or Traefik
+#   Step 2 — SSL submenu:  HTTP / HTTPS self-signed / HTTPS Let's Encrypt
+#                          (options depend on the chosen launch mode)
 
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -9,54 +14,84 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# --- Resolve the current mode from command-line state (default: standalone HTTP) ---
-LAST_MODE="http"
-case "${SSL_MODE:-none}" in
-    self-signed)  LAST_MODE="ssl" ;;
-    letsencrypt)  LAST_MODE="le" ;;
-esac
-if [ "${TRAEFIK_MODE:-false}" = true ]; then
-    case "$LAST_MODE" in
-        http) LAST_MODE="traefik" ;;
-        ssl)  LAST_MODE="traefik-ssl" ;;
-        le)   LAST_MODE="traefik-le" ;;
-    esac
-fi
-
-# --- Remembered mode from .env (overrides defaults) ---
+# --- Resolve the last used mode from .env (overrides defaults) ----------------
 ENV_FILE=".env"
+REMEMBERED_MODE=""
 if [ -f "$ENV_FILE" ]; then
     REMEMBERED_MODE="$(grep -E '^DOCKERCART_RUN_MODE=' "$ENV_FILE" | tail -1 | cut -d= -f2- | tr -d '[:space:]')"
-    if [ -n "$REMEMBERED_MODE" ]; then
-        LAST_MODE="$REMEMBERED_MODE"
-    fi
 fi
 
-# --- Interactive menu ---
-echo -e "${BLUE}Select start mode:${NC}"
-echo ""
-echo "  1) Standalone HTTP              (dockercart.local)"
-echo "  2) Standalone HTTPS self-signed (local testing)"
-echo "  3) Standalone HTTPS Let's Encrypt (production, needs SSL_DOMAIN)"
-echo "  4) Traefik HTTP                 (external reverse proxy)"
-echo "  5) Traefik HTTPS self-signed"
-echo "  6) Traefik HTTPS Let's Encrypt  (production)"
-echo ""
-echo -e "${YELLOW}Last used: ${LAST_MODE}${NC}"
-read -r -p "Enter choice [1-6] (Enter = last used): " MENU_INPUT
+# Default launch mode + SSL, derived from the remembered mode (fallback: standalone HTTP).
+LAST_LAUNCH="standalone"
+LAST_SSL="http"
+case "${REMEMBERED_MODE:-http}" in
+    http)        LAST_LAUNCH="standalone"; LAST_SSL="http" ;;
+    ssl)         LAST_LAUNCH="standalone"; LAST_SSL="ssl" ;;
+    le)          LAST_LAUNCH="standalone"; LAST_SSL="le" ;;
+    traefik)     LAST_LAUNCH="traefik";    LAST_SSL="http" ;;
+    traefik-ssl) LAST_LAUNCH="traefik";    LAST_SSL="ssl" ;;
+    traefik-le)  LAST_LAUNCH="traefik";    LAST_SSL="le" ;;
+esac
 
-MENU_INPUT="${MENU_INPUT:-$LAST_MODE}"
-case "$MENU_INPUT" in
-    1|http)            MENU="http" ;;
-    2|ssl)             MENU="ssl" ;;
-    3|le|letsencrypt)  MENU="le" ;;
-    4|traefik)         MENU="traefik" ;;
-    5|traefik-ssl)     MENU="traefik-ssl" ;;
-    6|traefik-le)      MENU="traefik-le" ;;
+# ============================================================================
+# STEP 1 — LAUNCH MODE
+# ============================================================================
+echo -e "${BLUE}Step 1/2 — Select launch mode:${NC}"
+echo ""
+echo "  1) Standalone (Default)"
+echo "  2) Traefik (external reverse proxy)"
+echo ""
+echo -e "${YELLOW}Last used: ${LAST_LAUNCH}${NC}"
+read -r -p "Enter choice [1-2] (Enter = last used): " LAUNCH_INPUT
+
+LAUNCH_INPUT="${LAUNCH_INPUT:-$LAST_LAUNCH}"
+case "$LAUNCH_INPUT" in
+    1|standalone) LAUNCH="standalone" ;;
+    2|traefik)    LAUNCH="traefik" ;;
     *)
-        echo -e "${RED}Invalid choice: $MENU_INPUT${NC}"
+        echo -e "${RED}Invalid choice: $LAUNCH_INPUT${NC}"
         exit 1
         ;;
+esac
+
+# ============================================================================
+# STEP 2 — SSL SUBMENU (depends on step 1)
+# ============================================================================
+echo ""
+echo -e "${BLUE}Step 2/2 — Select SSL mode (${LAUNCH}):${NC}"
+echo ""
+if [ "$LAUNCH" = "standalone" ]; then
+    echo "  1) HTTP                      (dockercart.local)"
+    echo "  2) HTTPS self-signed         (local testing)"
+    echo "  3) HTTPS Let's Encrypt       (production, needs SSL_DOMAIN)"
+else
+    echo "  1) HTTP                      (Traefik, no SSL)"
+    echo "  2) HTTPS self-signed         (Traefik + self-signed)"
+    echo "  3) HTTPS Let's Encrypt       (Traefik + Let's Encrypt, production)"
+fi
+echo ""
+echo -e "${YELLOW}Last used: ${LAST_SSL}${NC}"
+read -r -p "Enter choice [1-3] (Enter = last used): " SSL_INPUT
+
+SSL_INPUT="${SSL_INPUT:-$LAST_SSL}"
+case "$SSL_INPUT" in
+    1|http)       SSL="http" ;;
+    2|ssl)        SSL="ssl" ;;
+    3|le|letsencrypt) SSL="le" ;;
+    *)
+        echo -e "${RED}Invalid choice: $SSL_INPUT${NC}"
+        exit 1
+        ;;
+esac
+
+# --- Map launch + SSL into the legacy MENU token (consumed by start.sh) -------
+case "$LAUNCH:$SSL" in
+    standalone:http) MENU="http" ;;
+    standalone:ssl)  MENU="ssl" ;;
+    standalone:le)   MENU="le" ;;
+    traefik:http)    MENU="traefik" ;;
+    traefik:ssl)     MENU="traefik-ssl" ;;
+    traefik:le)      MENU="traefik-le" ;;
 esac
 
 echo -e "${GREEN}✓ Selected mode: ${MENU}${NC}"

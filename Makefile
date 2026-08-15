@@ -6,8 +6,21 @@ endif
 .PHONY: help migrate up update start stop ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status
 
 ### Convenience variables
-# Base compose file only: down/stop must work regardless of the mode the stack was started in.
+# Base compose file used by commands that don't need to match the running mode
+# (e.g. migrate, mariadb, shell — single service, base file is always present).
 COMPOSE := docker compose -f docker-compose.yml
+
+# Active compose file set: when the stack was started via start.sh (or a `make`
+# mode target), the chosen -f files are recorded in .env as
+# DOCKERCART_COMPOSE_FILES (space-separated filenames). If present, restart/stop/down
+# reconstruct the exact same mode (Traefik + SSL overrides) instead of falling
+# back to standalone HTTP.
+ifeq ($(DOCKERCART_COMPOSE_FILES),)
+ACTIVE_COMPOSE := $(COMPOSE)
+else
+ACTIVE_COMPOSE_FILES := $(foreach f,$(DOCKERCART_COMPOSE_FILES),-f $(f))
+ACTIVE_COMPOSE := docker compose $(ACTIVE_COMPOSE_FILES)
+endif
 
 help: ## Show this help
 	@echo ""
@@ -16,7 +29,7 @@ help: ## Show this help
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Modes (default: standalone, no Traefik needed):"
-	@echo "  make start       Interactive mode selection (remembers last choice)"
+	@echo "  make start       Two-step interactive setup (1: Standalone/Traefik, 2: SSL; remembers last choice)"
 	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
 	@echo "  make ssl         HTTPS SSL       - https://$${DOCKERCART_DOMAIN:-dockercart.local} (self-signed, local testing)"
 	@echo "  make le          HTTPS + LE      - Production with real domain SSL (requires SSL_DOMAIN in .env)"
@@ -37,18 +50,10 @@ help: ## Show this help
 	@echo ""
 	@echo "See README.md for full documentation."
 
-migrate: ## Apply SQL migrations from docker/mysql/migrations (uses mariadb container)
-	@echo "Applying all SQL migrations from docker/mysql/migrations/..."
-	@set -e; \
-	if [ -z "$(wildcard docker/mysql/migrations/*.sql)" ]; then \
-		echo "No migration files found in docker/mysql/migrations/"; \
-		exit 0; \
-	fi; \
-	for f in docker/mysql/migrations/*.sql; do \
-		echo "-> Applying $$f"; \
-		$(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} < "$$f" || { echo "Failed applying $$f"; exit 1; }; \
-	done; \
-	echo "Migrations applied."
+migrate: ## Apply tracked SQL migrations from docker/mysql/migrations (idempotent)
+	@echo "Applying tracked SQL migrations from docker/mysql/migrations/..."
+	@$(ACTIVE_COMPOSE) exec -T apache bash /var/www/dc-scripts/run-migrations.sh || { \
+		echo "Migration runner failed (DB not ready or apache not running?)."; exit 1; }
 
 update: ## Pull code changes and apply migrations via update.sh
 	@./update.sh
@@ -86,41 +91,40 @@ traefik-ssl: ## Start Traefik mode with self-signed SSL (HTTPS)
 traefik-le: ## Start Traefik mode with Let's Encrypt SSL (production)
 	@./start.sh --traefik --le
 
-down: ## Stop containers (base compose file only)
-	@$(COMPOSE) down || true
+down: ## Stop containers (uses the active mode's compose files when recorded)
+	@$(ACTIVE_COMPOSE) down || true
 
 stop: ## Stop all containers, regardless of the mode the stack was started in
-	@docker compose down || true
+	@$(ACTIVE_COMPOSE) down || true
 	@echo "Containers stopped"
 
-restart: ## Restart containers (down + up)
-	@$(COMPOSE) down --remove-orphans 2>/dev/null || true
-	@$(COMPOSE) up -d --build
+restart: ## Restart containers (rebuild + recreate) in the active mode
+	@$(ACTIVE_COMPOSE) up -d --build --force-recreate --remove-orphans
 
 logs: ## Show last 100 log lines
-	@$(COMPOSE) logs --tail=100
+	@$(ACTIVE_COMPOSE) logs --tail=100
 
 logs-follow: ## Follow logs in real time
-	@$(COMPOSE) logs -f
+	@$(ACTIVE_COMPOSE) logs -f
 
 shell: ## Open bash shell in the app container
-	@$(COMPOSE) exec apache bash
+	@$(ACTIVE_COMPOSE) exec apache bash
 
 scheduler-logs: ## Show scheduler container logs
-	@$(COMPOSE) logs -f scheduler
+	@$(ACTIVE_COMPOSE) logs -f scheduler
 
 scheduler-restart: ## Restart scheduler container
-	@$(COMPOSE) restart scheduler
+	@$(ACTIVE_COMPOSE) restart scheduler
 
 scheduler-reload: ## Reload scheduler code without restart (SIGHUP)
 	@echo "Sending SIGHUP to scheduler (code reload)..."
-	@$(COMPOSE) kill -s HUP scheduler
+	@$(ACTIVE_COMPOSE) kill -s HUP scheduler
 
 scheduler-shell: ## Open bash in scheduler container
-	@$(COMPOSE) exec scheduler bash
+	@$(ACTIVE_COMPOSE) exec scheduler bash
 
 scheduler-status: ## Check scheduler health
-	@$(COMPOSE) exec scheduler pgrep -f dockercart_scheduler.php && echo "Scheduler: RUNNING" || echo "Scheduler: NOT RUNNING"
+	@$(ACTIVE_COMPOSE) exec scheduler pgrep -f dockercart_scheduler.php && echo "Scheduler: RUNNING" || echo "Scheduler: NOT RUNNING"
 
 mariadb: ## Open MariaDB CLI
 	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart}

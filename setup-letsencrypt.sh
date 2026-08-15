@@ -23,7 +23,7 @@ if [ ! -f .env ]; then
 fi
 
 # Load environment variables
-set -a; . ./.env; set +a
+set +e; set -a; . ./.env; set +a; set -e
 
 if [ -z "$SSL_DOMAIN" ] || [ -z "$SSL_EMAIL" ]; then
     echo "❌ Error: SSL_DOMAIN or SSL_EMAIL not set in .env"

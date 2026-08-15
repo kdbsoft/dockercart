@@ -17,8 +17,9 @@ Documentation and resources are available at [dockercart.net](https://dockercart
 | Application | PHP 8.5 + Apache 2.4 |
 | Reverse proxy | Nginx (alpine) |
 | Database | MariaDB 11 |
-| Cache & sessions | Redis 7 |
-| Full-text search | Manticore Search 15 |
+| Cache | Redis 7 |
+| Sessions | Persistent (file, `storage/session`) |
+| Full-text search | Manticore Search 6 |
 | Reverse proxy (alternative) | Traefik v3 (optional, for existing infrastructure) |
 | SSL | Let's Encrypt / self-signed (auto-renewal via certbot) |
 | Frontend | ES6+ · Tailwind CSS 3 · Lucide |
@@ -72,7 +73,7 @@ Six containers, one network, no exposed ports except Nginx.
     Optional: FTP (vsftpd — chrooted to ./upload/image)
 ```
 
-Nginx is the sole entry point. It handles TLS termination, gzip compression, and static asset caching. Apache runs the PHP application behind Nginx with no exposed ports. MariaDB stores data, Redis handles caching and sessions, and Manticore powers full-text search. The scheduler daemon runs background tasks (cron, syncs, feeds).
+Nginx is the sole entry point. It handles TLS termination, gzip compression, and static asset caching. Apache runs the PHP application behind Nginx with no exposed ports. MariaDB stores data, Redis handles caching, sessions are stored persistently on disk (survive Redis restarts), and Manticore powers full-text search. The scheduler daemon runs background tasks (cron, syncs, feeds).
 
 All services communicate over a shared `dockercart-network` bridge. See `docs/guide.md#2-architecture` for the directory layout and storage paths.
 
@@ -105,6 +106,28 @@ All modes are invoked via `make`. Container names are prefixed `dockercart_`. Fu
 ```bash
 make ftp   # Attach to any running mode — chrooted to ./upload/image
 ```
+
+### External Traefik (pre-existing reverse proxy)
+
+The `make traefik*` targets assume a **separate, already-running Traefik** on the
+host, connected to the stack via the external `traefik` Docker network. DockerCart
+does **not** start Traefik for you.
+
+Prerequisites on the host:
+
+- A Docker network named `traefik` (`docker network create traefik`, or match the
+  name to `DOCKERCART_NETWORK`).
+- Traefik v3 with an entrypoint named `web` (HTTP) and/or `websecure` (HTTPS), and
+  certificate resolvers named `le` (Let's Encrypt) and `selfsigned`.
+- For `make traefik-le`: a public DNS record pointing `DOCKERCART_DOMAIN` at the
+  host, with inbound ports 80/443 open.
+
+The repository ships reference Traefik configs under `docker/traefik/` — these are
+**example host configurations**, not consumed by any compose file. Copy/adapt them
+to your host Traefik instance as needed.
+
+The nginx service still runs inside the stack (Traefik → nginx → apache) and carries
+the `traefik.*` labels that register it with your external Traefik.
 
 ---
 

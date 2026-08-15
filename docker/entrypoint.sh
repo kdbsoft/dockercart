@@ -40,14 +40,15 @@ fix_permissions() {
         # Storage dirs: SGID + group write (www-data через staff group)
         chgrp -R staff /var/www/storage/ || true
         chmod -R 2775 /var/www/storage/ || true
-        chmod -R 2777 /var/www/html/image/cache/ || true
+        chmod -R 2775 /var/www/html/image/cache/ || true
 
         # Ensure modification cache is owned by www-data (refresh runs as root)
         chown -R www-data:staff /var/www/storage/modification/ || true
 
         # Final safety net for restrictive host FS mappings
-        find /var/www/html/image/cache -type d -exec chmod 2777 {} \; || true
-        find /var/www/html/image/cache -type f -exec chmod 666 {} \; || true
+        # (group-writable only — never world-writable inside the webroot)
+        find /var/www/html/image/cache -type d -exec chmod 2775 {} \; || true
+        find /var/www/html/image/cache -type f -exec chmod 664 {} \; || true
 
         # Git exclude file for extension installer (mounted from host .git/info/exclude)
         if [ -f "/var/www/git-exclude" ]; then
@@ -55,6 +56,13 @@ fix_permissions() {
         else
             touch /var/www/git-exclude 2>/dev/null || true
             chmod 666 /var/www/git-exclude 2>/dev/null || true
+        fi
+
+        # Make VERSION writable by www-data so the GUI "System Update" worker can
+        # rewrite it in place (the bind mount must be rw, see docker-compose.yml).
+        if [ -f "/var/www/VERSION" ]; then
+            chown www-data:staff /var/www/VERSION 2>/dev/null || true
+            chmod 664 /var/www/VERSION 2>/dev/null || true
         fi
 
         # Diagnostic write test
@@ -84,18 +92,30 @@ install_composer_deps() {
 		STORED_HASH=$(cat "$HASH_FILE")
 	fi
 
-	if [ "$LOCK_HASH" != "$STORED_HASH" ]; then
-		echo "composer.lock changed — installing dependencies..."
-		cd /var/www && composer install --no-dev --optimize-autoloader --no-interaction || {
-			echo "ERROR: Composer install failed!"
-			exit 1
-		}
-		echo "$LOCK_HASH" > "$HASH_FILE"
-		chmod 664 "$HASH_FILE" 2>/dev/null || true
-		echo "Composer dependencies installed."
-	else
+	if [ "$LOCK_HASH" = "$STORED_HASH" ]; then
 		echo "Composer dependencies up to date."
+		return
 	fi
+
+	# Serialize concurrent installs: apache, scheduler and backup-worker share
+	# the same storage/vendor bind mount and could run composer install at the
+	# same time right after a lock file change. The lock is held for the whole
+	# install; the hash is re-checked inside it so a second container that
+	# waited its turn does not install again.
+	LOCK_FILE="/var/www/storage/.composer-install.lock"
+	if ! (
+		flock -x 9
+		if [ "$(md5sum /var/www/composer.lock | cut -d' ' -f1)" != "$(cat "$HASH_FILE" 2>/dev/null || echo '')" ]; then
+			echo "composer.lock changed — installing dependencies..."
+			cd /var/www && composer install --no-dev --optimize-autoloader --no-interaction
+		fi
+	) 9>"$LOCK_FILE"; then
+		echo "ERROR: Composer install failed!"
+		exit 1
+	fi
+	echo "$LOCK_HASH" > "$HASH_FILE"
+	chmod 664 "$HASH_FILE" 2>/dev/null || true
+	echo "Composer dependencies installed."
 }
 
 # Функция для ожидания MariaDB
@@ -255,7 +275,9 @@ define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
 // Session
-define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
+// Sessions live in /var/www/storage/session (persistent bind mount) by
+// default — Redis is cache-only and loses all data on restart (no AOF).
+define('SESSION_ENGINE', $env('SESSION_ENGINE', 'file'));
 PHP
 
     echo "Regenerating $admin_config ..."
@@ -323,7 +345,9 @@ define('CACHE_PREFIX', $env('CACHE_PREFIX', 'oc_'));
 define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 
 // Session
-define('SESSION_ENGINE', $env('SESSION_ENGINE', 'redis'));
+// Sessions live in /var/www/storage/session (persistent bind mount) by
+// default — Redis is cache-only and loses all data on restart (no AOF).
+define('SESSION_ENGINE', $env('SESSION_ENGINE', 'file'));
 PHP
 
     if [ "$(id -u)" -eq 0 ]; then
@@ -590,6 +614,36 @@ setup_logrotate() {
     fi
 }
 
+# Emit a loud warning when the stack runs on publicly known default secrets
+# (typical when .env is missing and compose fallbacks kick in). The setup
+# wizard (make start) generates random passwords; unattended first boot keeps
+# defaults by design, hence warn-only, never abort.
+warn_default_secrets() {
+	local warned=0
+
+	if [ "${DB_PASSWORD:-dockercart_password}" = "dockercart_password" ]; then
+		warned=1
+	fi
+	if [ "${ADMIN_PASSWORD:-admin123}" = "admin123" ]; then
+		warned=1
+	fi
+	if [ "${REDIS_PASSWORD:-dockercart_redis_pass}" = "dockercart_redis_pass" ]; then
+		warned=1
+	fi
+
+	if [ "$warned" -eq 1 ]; then
+		echo "============================================================"
+		echo "WARNING: default secrets detected (no .env with custom values)."
+		echo "  The stack is running with publicly known credentials:"
+		[ "${DB_PASSWORD:-dockercart_password}" = "dockercart_password" ] && echo "    DB_PASSWORD=dockercart_password"
+		[ "${ADMIN_PASSWORD:-admin123}" = "admin123" ] && echo "    ADMIN_PASSWORD=admin123"
+		[ "${REDIS_PASSWORD:-dockercart_redis_pass}" = "dockercart_redis_pass" ] && echo "    REDIS_PASSWORD=dockercart_redis_pass"
+		echo "  DO NOT use this on a public server. Generate random secrets:"
+		echo "    rm .env && make start"
+		echo "============================================================"
+	fi
+}
+
 # Основная логика
 # Emit a small diagnostic header so logs show which entrypoint version ran.
 # We print the script modification time (as embedded in the image at build time)
@@ -600,6 +654,9 @@ echo "Entrypoint: $0 (modified: ${script_mtime})"
 echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
 
 echo "Starting DockerCart container..."
+
+# Warn about publicly known default secrets before anything else
+warn_default_secrets
 
 # Исправляем права на смонтированные volume'ы (первое действие!)
 fix_permissions

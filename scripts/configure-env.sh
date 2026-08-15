@@ -144,10 +144,36 @@ configure_env() {
         cp .env.example "$ENV_FILE"
         FIRST_RUN=true
         echo -e "${GREEN}✓ Created .env from .env.example${NC}"
+
+        # Existing database volume predates this .env: MariaDB bakes
+        # user/password at first volume init and ignores new MARIADB_* values,
+        # so fresh wizard passwords would not match it ('Access denied').
+        local project="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
+        local db_volume="${project}_mariadb-data"
+        if command -v docker >/dev/null 2>&1 && docker volume inspect "$db_volume" >/dev/null 2>&1; then
+            echo ""
+            echo -e "${YELLOW}⚠ Existing database volume '${db_volume}' found.${NC}"
+            echo -e "   Its passwords were set when the volume was first created; the"
+            echo -e "   new passwords from this wizard will NOT be applied to it and"
+            echo -e "   the store would fail with 'Access denied'. Restore the old"
+            echo -e "   .env (if you have a backup) or reset the database volume."
+            local reset_db
+            confirm_yes reset_db "Reset the database volume now (ALL its data will be lost)?" "n" || return $?
+            if [ "$reset_db" = "y" ]; then
+                if docker volume rm "$db_volume"; then
+                    echo -e "${GREEN}✓ Database volume removed — it will be recreated fresh.${NC}"
+                else
+                    echo -e "${RED}✗ Could not remove the volume (is a container using it?).${NC}"
+                    echo -e "   Stop the stack (make down) and run 'make start' again."
+                fi
+            else
+                echo -e "${YELLOW}Keeping the volume. If the old .env is lost, run 'make down -v' to reset the database.${NC}"
+            fi
+        fi
         echo ""
     fi
 
-    echo -e "${BLUE}Let's configure your DockerCart environment.${NC}"
+    echo -e "${BLUE}Step 3 — Configure your DockerCart environment${NC}"
     echo -e "${YELLOW}Press Enter to accept the suggested value (passwords are generated randomly).${NC}"
     echo ""
 
@@ -206,6 +232,32 @@ configure_env() {
         ask_value root_pass "MariaDB root password (Enter = generated)" "$gen_root" || return $?
         set_env_key "$ENV_FILE" MARIADB_ROOT_PASSWORD "$root_pass"
         echo -e "${GREEN}✓ MariaDB root password set${NC}"
+    fi
+
+    # --- 4b. Redis password -------------------------------------------------
+    local redis_pass
+    redis_pass="$(get_env_key "$ENV_FILE" REDIS_PASSWORD)"
+    if [ -z "$redis_pass" ] || [ "$redis_pass" = "dockercart_redis_pass" ]; then
+        local gen_redis
+        gen_redis="$(gen_password)"
+        ask_value redis_pass "Redis password (Enter = generated)" "$gen_redis" || return $?
+        set_env_key "$ENV_FILE" REDIS_PASSWORD "$redis_pass"
+        echo -e "${GREEN}✓ Redis password set${NC}"
+    fi
+
+    # --- 4c. FTP password (only when ftp profile is enabled) ---------------
+    local ftp_profile
+    ftp_profile="$(get_env_key "$ENV_FILE" FTP_PROFILE)"
+    if [ "${ftp_profile:-ftp}" = "ftp" ]; then
+        local ftp_pass
+        ftp_pass="$(get_env_key "$ENV_FILE" FTP_PASS)"
+        if [ -z "$ftp_pass" ] || [ "$ftp_pass" = "change_me_please" ]; then
+            local gen_ftp
+            gen_ftp="$(gen_password)"
+            ask_value ftp_pass "FTP password (Enter = generated)" "$gen_ftp" || return $?
+            set_env_key "$ENV_FILE" FTP_PASS "$ftp_pass"
+            echo -e "${GREEN}✓ FTP password set${NC}"
+        fi
     fi
 
     # --- 5. Admin account ----------------------------------------------------

@@ -13,11 +13,14 @@
 
 services:
   nginx:
-    image: nginx:alpine
+    image: nginx:1.31-alpine
     container_name: ${NGINX_CONTAINER_NAME:-dockercart_nginx}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
+    mem_limit: ${NGINX_MEM_LIMIT:-256m}
+    memswap_limit: ${NGINX_MEMSWAP_LIMIT:-384m}
+    cpus: ${NGINX_CPUS:-1.0}
     cap_drop:
       - ALL
     cap_add:
@@ -35,6 +38,7 @@ services:
       - "${DOCKERCART_HTTP_PORT:-80}:80"
     environment:
       - TZ=${TZ:-UTC}
+      - HEALTHCHECK_TOKEN=${HEALTHCHECK_TOKEN:-}
     volumes:
       - ./upload:/var/www/html:ro
       - ./storage:/var/www/storage:ro
@@ -51,8 +55,9 @@ services:
     networks:
       - dockercart-network
     healthcheck:
-      test:
-        ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      # /health is proxied to apache's healthcheck.php, so this also verifies
+      # the upstream application (DB/storage/cache), not just nginx itself.
+      test: ["CMD-SHELL", "wget -q --spider --header=\"X-Healthcheck-Token: ${HEALTHCHECK_TOKEN:-}\" http://localhost/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -66,6 +71,9 @@ services:
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
+    mem_limit: ${APACHE_MEM_LIMIT:-512M}
+    memswap_limit: ${APACHE_MEMSWAP_LIMIT:-768M}
+    cpus: ${APACHE_CPUS:-2.0}
     cap_drop:
       - ALL
     cap_add:
@@ -84,11 +92,12 @@ services:
     volumes:
       - ./upload:/var/www/html:z
       - ./storage:/var/www/storage:z
-      - ./VERSION:/var/www/VERSION:ro,z
+      - ./VERSION:/var/www/VERSION:z
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro,z
       - ./docker/mysql/clean_demo.sql:/opt/dockercart-seed/clean_demo.sql:ro,z
       - ./.git/info/exclude:/var/www/git-exclude:z
-
+      - ./docker/mysql/migrations:/var/www/dc-migrations:ro,z
+      - ./scripts:/var/www/dc-scripts:ro,z
     environment:
       - DB_HOSTNAME=${DB_HOSTNAME:-mariadb}
       - DB_USERNAME=${DB_USERNAME:-dockercart}
@@ -136,6 +145,13 @@ services:
         condition: service_started
     networks:
       - dockercart-network
+    healthcheck:
+      # Full application health: PHP + DB + storage + cache via healthcheck.php.
+      test: ["CMD-SHELL", "curl -fsS -H \"X-Healthcheck-Token: ${HEALTHCHECK_TOKEN:-}\" http://localhost/healthcheck.php >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   scheduler:
     build:
@@ -164,7 +180,7 @@ services:
     volumes:
       - ./upload:/var/www/html:z
       - ./storage:/var/www/storage:z
-      - ./VERSION:/var/www/VERSION:ro,z
+      - ./VERSION:/var/www/VERSION:z
       - ./docker/mysql/init.sql:/opt/dockercart-seed/init.sql:ro,z
       - ./composer.json:/var/www/composer.json:ro,z
       - ./composer.lock:/var/www/composer.lock:ro,z
@@ -210,6 +226,8 @@ services:
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
+    mem_limit: ${MARIADB_MEM_LIMIT:-1g}
+    cpus: ${MARIADB_CPUS:-2.0}
     logging:
       driver: "json-file"
       options:
@@ -262,8 +280,11 @@ services:
     volumes:
       - ./docker/manticore/manticore.conf:/etc/manticoresearch/manticore.conf:ro,z
       - ./docker/manticore/entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro,z
-    tmpfs:
-      - /var/lib/manticore:mode=0755,size=256M
+      # Persistent volume (was tmpfs): RT indexes + binlog survive manticore
+      # crashes/restarts, so search keeps working without an apache restart.
+      # Apache's entrypoint still runs a full reindex (truncate + rebuild) on
+      # every apache start, keeping the index in sync with the DB.
+      - manticore-data:/var/lib/manticore
     command:
       ["searchd", "-c", "/etc/manticoresearch/manticore.conf", "--nodetach"]
     depends_on:
@@ -279,11 +300,16 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: ${REDIS_CONTAINER_NAME:-dockercart_redis}
     restart: ${RESTART_POLICY:-unless-stopped}
     security_opt:
       - no-new-privileges:true
+    mem_limit: ${REDIS_MEM_LIMIT:-384m}
+    memswap_limit: ${REDIS_MEMSWAP_LIMIT:-512m}
+    cpus: ${REDIS_CPUS:-1.0}
+    # Cache-only instance: sessions live in /var/www/storage/session (file
+    # driver, persistent bind mount), so losing Redis on restart is harmless.
     command: ["redis-server", "--appendonly", "no", "--save", "", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "allkeys-lru", "--requirepass", "${REDIS_PASSWORD:-dockercart_redis_pass}"]
     environment:
       - TZ=${TZ:-UTC}
@@ -292,13 +318,13 @@ services:
     networks:
       - dockercart-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"${REDIS_PASSWORD:-dockercart_redis_pass}\" ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   ftp:
-    image: fauria/vsftpd
+    image: docker.io/fauria/vsftpd:latest
     container_name: ${FTP_CONTAINER_NAME:-dockercart_ftp}
     profiles:
       - ftp
@@ -315,8 +341,10 @@ services:
       FTP_USER_HOME: /home/vsftpd/${FTP_USER:-images}
       WRITE_ENABLE: ${FTP_WRITE_ENABLE:-YES}
       ALLOW_WRITEABLE_CHROOT: ${FTP_ALLOW_WRITEABLE_CHROOT:-YES}
-      LOCAL_UMASK: ${FTP_LOCAL_UMASK:-000}
-      FILE_OPEN_MODE: ${FTP_FILE_OPEN_MODE:-0777}
+      # Group-writable files/dirs only — never world-writable (webroot area).
+      # The FTP user is added to the staff group by the entrypoint below.
+      LOCAL_UMASK: ${FTP_LOCAL_UMASK:-002}
+      FILE_OPEN_MODE: ${FTP_FILE_OPEN_MODE:-0664}
       PASV_ADDRESS: ${FTP_PASV_ADDRESS:-127.0.0.1}
       PASV_ADDR_RESOLVE: ${FTP_PASV_ADDR_RESOLVE:-YES}
       PASV_MIN_PORT: ${FTP_PASV_MIN_PORT:-21100}
@@ -328,11 +356,16 @@ services:
       - "${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}:${FTP_PASV_MIN_PORT:-21100}-${FTP_PASV_MAX_PORT:-21110}"
     volumes:
       - ./upload/image:/home/vsftpd/${FTP_USER:-images}:rw
+    # NOTE: FTP is plaintext — use it only on trusted networks or via VPN.
+    # The vsftpd 'ftp' user's primary GID is 50 (same GID as the 'staff'
+    # group on the apache side), so chgrp'ing the webroot to GID 50 keeps
+    # uploads group-writable (0664) instead of world-writable; PHP execution
+    # under /image is blocked in nginx + apache regardless.
     entrypoint:
       [
         "/bin/bash",
         "-c",
-        "chmod 777 /home/vsftpd/${FTP_USER:-images} && exec /usr/sbin/run-vsftpd.sh",
+        "chgrp -R 50 /home/vsftpd/${FTP_USER:-images} && chmod 2775 /home/vsftpd/${FTP_USER:-images} && exec /usr/sbin/run-vsftpd.sh",
       ]
     networks:
       - dockercart-network
@@ -374,6 +407,7 @@ services:
 
 volumes:
   mariadb-data:
+  manticore-data:
 
 networks:
   dockercart-network:
