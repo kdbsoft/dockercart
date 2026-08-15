@@ -1672,6 +1672,14 @@ class ControllerSaleOrderDetail extends Controller {
 						$json['stock'] = (float)$pricing['stock'];
 						$json['subtract'] = (bool)$pricing['subtract'];
 						$json['available'] = !$pricing['subtract'] || $pricing['stock'] > 0;
+
+						// Reserved quantity held by active checkouts for this
+						// specific product/variant, so the admin sees how much
+						// is still actually sellable.
+						$stock_reservation = new \DockercartStockReservation($this->registry);
+						$reserved_map = $stock_reservation->getReservedByProductIds([$product_id], null, false);
+						$reserved_key = (int)$product_id . ':' . (int)($pricing['variant_id'] ?? 0);
+						$json['reserved'] = $reserved_map[$reserved_key] ?? 0.0;
 						$json['variant'] = $pricing['variant_id'] ? [
 							'variant_id' => (int)$pricing['variant_id'],
 							'sku'        => $pricing['variant_sku'],
@@ -2717,6 +2725,15 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$stock = ($variant_data && isset($variant_data['stock'])) ? $variant_data['stock'] : ($product_info['quantity'] ?? 0);
 
+					// Reserved quantity held by active checkouts for this
+					// product/variant, shown in the product card modal.
+					$reserved_variant_id = ($variant_data && isset($variant_data['stock']) && $order_product && !empty($order_product['variant_id']))
+						? (int)$order_product['variant_id']
+						: 0;
+					$stock_reservation = new \DockercartStockReservation($this->registry);
+					$reserved_map = $stock_reservation->getReservedByProductIds([$product_id], null, false);
+					$reserved = $reserved_map[(int)$product_id . ':' . $reserved_variant_id] ?? 0.0;
+
 					$display_model = ($order_product && !empty($order_product['model'])) ? $order_product['model'] : ($product_info['model'] ?? '');
 
 					$unit_tax = $order_quantity > 0 ? $order_tax / $order_quantity : 0;
@@ -2729,6 +2746,7 @@ class ControllerSaleOrderDetail extends Controller {
 						'total'       => $this->currency->format($order_total + ($this->config->get('config_tax') ? $order_tax : 0), $currency_code, $currency_value),
 						'quantity'    => $order_quantity,
 						'stock'       => $stock,
+						'reserved'    => $reserved,
 						'status'      => $product_info['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 						'image'       => $image,
 						'gallery'     => $gallery,
