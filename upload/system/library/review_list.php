@@ -188,7 +188,7 @@ class ReviewList {
 			'reply_auto_approve'  => (bool)$this->config->get('config_review_reply_auto_approve'),
 			'reply_min_length'    => (int)$this->config->get('config_review_reply_min_length'),
 			'reply_max_length'    => (int)$this->config->get('config_review_reply_max_length'),
-			'reply_url'           => $this->url->link('product/product/reply'),
+			'reply_url'           => $this->url->link('product/product/reply', 'product_id=' . $product_id),
 			'text_reply'          => $this->language->get('text_reply'),
 			'text_reply_placeholder' => $this->language->get('text_reply_placeholder'),
 			'text_reply_submit'   => $this->language->get('text_reply_submit'),
