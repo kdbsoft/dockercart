@@ -111,32 +111,89 @@
   }
 
   function initReviewLightbox() {
-    if (typeof window.GLightbox === 'function') return;
+    if (document.querySelector('.dc-lightbox')) return;
+
+    var activeLinks = [];
+    var activeIndex = 0;
+    var box = document.createElement('div');
+    box.className = 'dc-lightbox dc-hidden';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', '{{ text_view_image|e('js') }}');
+
+    var img = document.createElement('img');
+    img.alt = '';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'dc-lightbox-close';
+    close.setAttribute('aria-label', '{{ text_close|e('js') }}');
+    close.textContent = '×';
+    var prev = document.createElement('button');
+    prev.type = 'button';
+    prev.className = 'dc-lightbox-nav dc-lightbox-prev';
+    prev.setAttribute('aria-label', '{{ text_previous_image|e('js') }}');
+    prev.textContent = '‹';
+    var next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'dc-lightbox-nav dc-lightbox-next';
+    next.setAttribute('aria-label', '{{ text_next_image|e('js') }}');
+    next.textContent = '›';
+    var counter = document.createElement('div');
+    counter.className = 'dc-lightbox-counter';
+
+    box.appendChild(img);
+    box.appendChild(close);
+    box.appendChild(prev);
+    box.appendChild(next);
+    box.appendChild(counter);
+    document.body.appendChild(box);
+
+    function refresh() {
+      if (!activeLinks.length) return;
+      var link = activeLinks[activeIndex];
+      img.src = link.getAttribute('data-popup') || link.getAttribute('href');
+      img.alt = link.querySelector('img') ? link.querySelector('img').getAttribute('alt') || '' : '';
+      counter.textContent = activeLinks.length > 1 ? (activeIndex + 1) + ' / ' + activeLinks.length : '';
+      prev.style.display = activeLinks.length > 1 ? '' : 'none';
+      next.style.display = activeLinks.length > 1 ? '' : 'none';
+    }
+
+    function closeLightbox() {
+      box.classList.add('dc-hidden');
+      document.body.style.overflow = '';
+      activeLinks = [];
+    }
+
+    function openLightbox(opener) {
+      activeLinks = Array.prototype.slice.call(opener.closest('.dc-review-media').querySelectorAll('.dc-review-thumb'));
+      activeIndex = Math.max(0, activeLinks.indexOf(opener));
+      refresh();
+      box.classList.remove('dc-hidden');
+      document.body.style.overflow = 'hidden';
+      close.focus();
+    }
+
     document.addEventListener('click', function (e) {
       var opener = e.target.closest('.dc-review-thumb');
       if (!opener) return;
-      var popup = opener.getAttribute('data-popup') || opener.getAttribute('href');
-      if (!popup) return;
       e.preventDefault();
-      var box = document.createElement('div');
-      box.className = 'dc-lightbox';
-      var img = document.createElement('img');
-      img.src = popup;
-      img.alt = '';
-      var close = document.createElement('button');
-      close.type = 'button';
-      close.className = 'dc-lightbox-close';
-      close.textContent = '×';
-      close.addEventListener('click', function () { box.remove(); });
-      box.addEventListener('click', function (ev) { if (ev.target === box) box.remove(); });
-      box.appendChild(img);
-      box.appendChild(close);
-      document.body.appendChild(box);
+      openLightbox(opener);
     });
-    document.addEventListener('click', function (e) {
-      if (e.target.classList && e.target.classList.contains('dc-lightbox-close')) {
-        e.target.parentElement.remove();
-      }
+    close.addEventListener('click', closeLightbox);
+    prev.addEventListener('click', function () {
+      activeIndex = (activeIndex - 1 + activeLinks.length) % activeLinks.length;
+      refresh();
+    });
+    next.addEventListener('click', function () {
+      activeIndex = (activeIndex + 1) % activeLinks.length;
+      refresh();
+    });
+    box.addEventListener('click', function (e) { if (e.target === box) closeLightbox(); });
+    document.addEventListener('keydown', function (e) {
+      if (box.classList.contains('dc-hidden')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft' && activeLinks.length > 1) prev.click();
+      if (e.key === 'ArrowRight' && activeLinks.length > 1) next.click();
     });
   }
 
@@ -313,7 +370,7 @@
     document.addEventListener('click', function (e) {
       var link = e.target.closest('#review a');
       if (!link) return;
-      if (link.classList.contains('dc-review-empty-write') || link.classList.contains('dc-review-login-link')) {
+      if (link.classList.contains('dc-review-thumb') || link.classList.contains('dc-review-empty-write') || link.classList.contains('dc-review-login-link')) {
         return;
       }
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
