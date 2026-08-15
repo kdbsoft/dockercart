@@ -157,6 +157,7 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-gray-100 bg-gray-50">
+                <th class="w-[72px] px-2 py-3"></th>
                 <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_name }}</th>
                 <th class="text-left font-semibold text-gray-500 px-4 py-3">{{ column_model }}</th>
                 <th class="text-right font-semibold text-gray-500 px-4 py-3">{{ column_quantity }}</th>
@@ -170,6 +171,13 @@
             <tbody>
               {% for product in products %}
               <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
+                <td class="px-2 py-2">
+                  {% if product.href %}
+                  <a href="{{ product.href }}"><img src="{{ product.image }}" alt="{{ product.name }}" width="64" height="64" class="w-14 h-14 rounded-lg object-cover border border-gray-100 bg-white" loading="lazy"></a>
+                  {% else %}
+                  <img src="{{ product.image }}" alt="{{ product.name }}" width="64" height="64" class="w-14 h-14 rounded-lg object-cover border border-gray-100 bg-white" loading="lazy">
+                  {% endif %}
+                </td>
                 <td class="text-left text-gray-800 px-4 py-3">
                   {{ product.name }}
                   {% if product.is_gift %}
@@ -199,6 +207,7 @@
               {% endfor %}
               {% for voucher in vouchers %}
               <tr class="border-b border-gray-50">
+                <td class="px-2 py-2"></td>
                 <td class="text-left text-gray-800 px-4 py-3">{{ voucher.description }}</td>
                 <td class="px-4 py-3"></td>
                 <td class="text-right text-gray-700 px-4 py-3">1</td>
@@ -211,6 +220,7 @@
             <tfoot>
               {% for total in totals %}
               <tr class="border-t border-gray-100 bg-gray-50">
+                <td class="px-4 py-2"></td>
                 <td colspan="3" class="px-4 py-2"></td>
                 <td class="text-right font-semibold text-gray-600 px-4 py-2 text-sm">{{ total.title }}</td>
                 <td class="text-right font-bold text-gray-900 px-4 py-2 text-sm">{{ total.text }}</td>
