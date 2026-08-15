@@ -33,39 +33,26 @@ class ModelToolUpdate extends Model {
 	}
 
 	public function getRemoteVersion(string $remote, string $branch, int $timeout = 30): ?string {
-		$url = rtrim($remote, '/') . '/raw/' . $branch . '/VERSION';
+		// VERSION lives in upload/ since the bind-mount refactor; fall back to
+		// the repo root for backwards compatibility with older releases/forks.
+		$paths = ['/upload/VERSION', '/VERSION'];
 
-		$ch = curl_init($url);
+		foreach ($paths as $path) {
+			$version = $this->fetchRemoteFile(rtrim($remote, '/') . '/raw/' . $branch . $path, $timeout);
 
-		if ($ch === false) {
-			return null;
+			if ($version !== null) {
+				return $version;
+			}
 		}
 
-		curl_setopt_array($ch, [
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_TIMEOUT        => $timeout,
-			CURLOPT_SSL_VERIFYPEER => true,
-			CURLOPT_USERAGENT      => 'DockerCart-SystemUpdate'
-		]);
-
-		$response = curl_exec($ch);
-		$http_code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		curl_close($ch);
-
-		if ($response === false || $http_code < 200 || $http_code >= 300) {
-			return null;
-		}
-
-		$version = trim((string)$response);
-
-		return $version === '' ? null : $version;
+		return null;
 	}
 
 	public function getRemoteChangelog(string $remote, string $branch, int $timeout = 5): ?string {
-		$url = rtrim($remote, '/') . '/raw/' . $branch . '/CHANGELOG.md';
+		return $this->fetchRemoteFile(rtrim($remote, '/') . '/raw/' . $branch . '/CHANGELOG.md', $timeout);
+	}
 
+	private function fetchRemoteFile(string $url, int $timeout): ?string {
 		$ch = curl_init($url);
 
 		if ($ch === false) {
