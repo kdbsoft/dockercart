@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck shell=bash
+# shellcheck source=./scripts/select-mode.sh
+# shellcheck source=./scripts/configure-env.sh
 # DockerCart - Simple Start Script
 # Usage: ./start.sh [options]
 #   ./start.sh                    - Standalone HTTP (default)
@@ -119,7 +122,7 @@ echo ""
 # Re-run the wizard with DOCKERCART_ENV_FORCE_WIZARD=1 to change the choice.
 
 SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
-DB_VOLUME_NAME="${DB_VOLUME_NAME:-dockercart_mariadb-data}"
+DB_VOLUME_NAME="${DB_VOLUME_NAME:-${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}_mariadb-data}"
 
 # Detect whether a database volume already exists (i.e. this is NOT a first run)
 if docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
