@@ -52,14 +52,12 @@
           {% endfor %}
         </ul>
       </li>
-      {% if show_update_bell %}
+      {% if show_update_bell and update_available %}
       <li id="update-notify">
-        <a href="{{ update_url }}" class="update-button{% if update_available %} update-available{% endif %}" data-toggle="tooltip" title="{% if update_available %}{{ text_update_available }}: {{ update_remote_version }}{% else %}{{ text_system_update }}{% endif %}">
+        <a href="{{ update_url }}" class="update-button update-available" data-toggle="tooltip" title="{{ text_update_available }}: {{ update_remote_version }}">
           <i data-lucide="download" width="16" height="16"></i>
           <span class="hidden-xs hidden-sm hidden-md">{{ text_system_update }}</span>
-          {% if update_available %}
           <span class="label label-danger update-badge">{{ update_remote_version }}</span>
-          {% endif %}
         </a>
       </li>
       {% endif %}
