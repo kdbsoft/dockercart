@@ -44,46 +44,20 @@ PRODUCT_TABLE_EXISTS="$(MYSQL_PWD="${DB_PASSWORD}" mariadb -N -B -u"${DB_USER}" 
 
 if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ]; then
   echo "[dockercart-init] WARNING: Required OpenCart tables are missing after seed import."
-  echo "[dockercart-init] WARNING: Skipping admin/settings bootstrap. Fill docker/mysql/init.sql with a full dump and reinitialize DB volume."
+  echo "[dockercart-init] WARNING: Skipping clean step. Fill docker/mysql/init.sql with a full dump and reinitialize DB volume."
   exit 0
 fi
 
-echo "[dockercart-init] Applying DockerCart bootstrap settings and admin account..."
-SALT=$(head -c 16 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 16)
-MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" <<SQL
-SET NAMES utf8mb4;
-
-DELETE FROM \`${DB_PREFIX}user\`
-WHERE user_id = 1;
-
-INSERT INTO \`${DB_PREFIX}user\`
-  (user_id, user_group_id, username, salt, password, firstname, lastname, email, image, code, ip, status, date_added)
-VALUES
-  (
-    1,
-    1,
-    '${ADMIN_USERNAME_ESCAPED}',
-    '${SALT}',
-    SHA1(CONCAT('${SALT}', SHA1(CONCAT('${SALT}', SHA1('${ADMIN_PASSWORD_ESCAPED}'))))),
-    'DockerCart',
-    'Admin',
-    '${ADMIN_EMAIL_ESCAPED}',
-    '',
-    '',
-    '',
-    1,
-    NOW()
-  );
-
-DELETE FROM \`${DB_PREFIX}setting\`
-WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption');
-
-INSERT INTO \`${DB_PREFIX}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
-  (0, 'config', 'config_email', '${ADMIN_EMAIL_ESCAPED}', 0),
-  (0, 'config', 'config_url', '${DOCKERCART_URL_ESCAPED}', 0),
-  (0, 'config', 'config_ssl', '${DOCKERCART_URL_ESCAPED}', 0),
-  (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0);
-SQL
+# NOTE: Admin account and store settings are NOT written here. The seed dump
+# (init.sql) already contains the admin user with an Argon2ID password hash,
+# and the runtime entrypoint's initialize_database() is the single source of
+# truth for bootstrap settings (store URL, encryption key, seed marker). This
+# avoids a duplicate SHA1 vs Argon2ID bootstrap that previously caused admin
+# login to break on first-run race conditions.
+#
+# For custom admin credentials at first install, edit the admin row inside
+# docker/mysql/init.sql (hashed with password_hash(..., PASSWORD_ARGON2ID)) or
+# set ADMIN_USERNAME/ADMIN_PASSWORD and let the entrypoint bootstrap an empty DB.
 
 if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
   MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "UPDATE \`${DB_PREFIX}product\` SET viewed = 0;" || true

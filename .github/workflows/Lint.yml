@@ -89,3 +89,42 @@ jobs:
           ./storage/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > /tmp/cs-report.xml || true
           cs2pr --graceful-warnings /tmp/cs-report.xml
 
+  deploy-config:
+    name: Deploy Config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax check
+        run: |
+          set -e
+          for f in docker/entrypoint.sh docker/manticore/entrypoint.sh docker/mysql/init.sh \
+                   docker/mysql/install-indexes.sh scripts/*.sh start.sh update.sh health-check.sh \
+                   install-backup-cron.sh install-cli.sh setup-letsencrypt.sh; do
+            if [ -f "$f" ]; then
+              bash -n "$f" && echo "OK: $f"
+            fi
+          done
+
+      - name: Shellcheck
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck >/dev/null
+          shellcheck -x docker/entrypoint.sh docker/manticore/entrypoint.sh \
+            docker/mysql/init.sh scripts/run-migrations.sh start.sh update.sh \
+            health-check.sh install-backup-cron.sh
+
+      - name: Compose validation (base mode)
+        run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Compose validation (traefik modes)
+        run: |
+          docker compose -f docker-compose.traefik.yml config --quiet
+          docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.ssl.yml config --quiet
+          docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.le.yml config --quiet
+
+      - name: Compose validation (standalone SSL modes)
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ssl.yml config --quiet
+          docker compose -f docker-compose.yml -f docker-compose.le.yml config --quiet
+          docker compose -f docker-compose.yml -f docker-compose.mariadb-port.yml config --quiet
+

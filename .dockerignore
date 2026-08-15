@@ -4,7 +4,9 @@ dist
 
 # Ignore editor files
 .vscode
-node_modules# Git files
+node_modules
+
+# Git files
 .git
 .gitignore
 .gitattributes

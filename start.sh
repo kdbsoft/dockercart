@@ -7,7 +7,9 @@
 #   ./start.sh --traefik          - Traefik HTTP
 #   ./start.sh --traefik --ssl    - Traefik HTTPS (self-signed)
 #   ./start.sh --traefik --le     - Traefik HTTPS (Let's Encrypt)
-#   ./start.sh --menu             - Interactive mode selection (remembers last choice)
+#   ./start.sh --menu             - Two-step interactive mode selection
+#                                     (1: Standalone/Traefik, 2: SSL submenu);
+#                                     remembers last choice in .env
 
 set -e
 
@@ -98,7 +100,10 @@ fi
 if [ -f .env ]; then
     echo -e "${YELLOW}Loading .env variables...${NC}"
     set -o allexport
+    set +e
+    # shellcheck disable=SC1091
     source .env
+    set -e
     set +o allexport
 fi
 
@@ -107,36 +112,22 @@ echo ""
 # ============================================================================
 # SEED MODE (only on fresh install: no existing DB volume)
 # ============================================================================
+# The seed choice is owned exclusively by the setup wizard (Step 3,
+# configure-env.sh) which writes DOCKERCART_SEED_MODE into .env. Here we only
+# read that value back; no interactive prompt. On a fresh database volume with
+# no seed key recorded, default to demo data.
+# Re-run the wizard with DOCKERCART_ENV_FORCE_WIZARD=1 to change the choice.
 
 SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
 DB_VOLUME_NAME="${DB_VOLUME_NAME:-dockercart_mariadb-data}"
 
 # Detect whether a database volume already exists (i.e. this is NOT a first run)
-if ! docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
-    if [ -z "${DOCKERCART_SEED_MODE:-}" ]; then
-        echo -e "${YELLOW}First run detected — no existing database volume.${NC}"
-        echo -e "Do you want to install with demo data? [Y/n]"
-        read -r -p "> " SEED_ANSWER
-        case "${SEED_ANSWER:-}" in
-            [Nn]|[Nn][Oo])
-                SEED_MODE="clean"
-                echo -e "${GREEN}✓ Installing WITHOUT demo data (clean store)${NC}"
-                ;;
-            *)
-                SEED_MODE="demo"
-                echo -e "${GREEN}✓ Installing WITH demo data${NC}"
-                ;;
-        esac
-        echo ""
-    fi
-    # If DOCKERCART_SEED_MODE was already provided in the environment,
-    # respect it without prompting.
-    if [ -n "${DOCKERCART_SEED_MODE:-}" ]; then
-        SEED_MODE="${DOCKERCART_SEED_MODE}"
-        echo -e "${YELLOW}Using DOCKERCART_SEED_MODE=${SEED_MODE} from environment${NC}"
-    fi
-else
+if docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
     echo -e "${GREEN}✓ Database volume exists — skipping install prompt${NC}"
+elif [ -n "${DOCKERCART_SEED_MODE:-}" ]; then
+    echo -e "${YELLOW}Using DOCKERCART_SEED_MODE=${SEED_MODE} from environment${NC}"
+else
+    echo -e "${YELLOW}No seed mode recorded — defaulting to demo data${NC}"
 fi
 
 echo ""
@@ -211,6 +202,30 @@ if [ -n "${MARIADB_EXTERNAL_PORT:-}" ]; then
     echo -e "${YELLOW}MariaDB external port enabled: ${MARIADB_EXTERNAL_PORT}${NC}"
 fi
 echo ""
+
+# ============================================================================
+# PERSIST ACTIVE COMPOSE FILE SET
+# ============================================================================
+# Record the exact -f file list used to start the stack so that subsequent
+# `make restart` / `make stop` / `make down` reconstruct the same mode (Traefik
+# + SSL overrides) without an explicit mode argument. Without this, a traefik
+# stack restarted via the base-only Makefile target silently falls back to
+# standalone HTTP and loses Traefik labels / SSL.
+if [ -f .env ]; then
+    persist_compose_files() {
+        local key="DOCKERCART_COMPOSE_FILES" files="" i
+        for ((i = 1; i < ${#COMPOSE_FILES[@]}; i += 2)); do
+            files="${files}${COMPOSE_FILES[$i]} "
+        done
+        files="$(printf '%s' "$files" | sed 's/[[:space:]]*$//')"
+        if grep -qE "^${key}=" .env; then
+            sed -i "s|^${key}=.*|${key}=${files}|" .env
+        else
+            printf '\n# Active compose file set (written by start.sh; read by make restart/stop/down)\n%s=%s\n' "$key" "$files" >> .env
+        fi
+    }
+    persist_compose_files
+fi
 
 # ============================================================================
 # LET'S ENCRYPT — CERTBOT SETUP (standalone mode only)
@@ -358,15 +373,28 @@ fi
 echo -e "${BLUE}Starting containers...${NC}"
 echo ""
 
-docker compose "${COMPOSE_FILES[@]}" down 2>/dev/null || true
-docker compose "${COMPOSE_FILES[@]}" build
-# Pass the chosen seed mode for this run only — nothing is written to .env.
-DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d
+# No `down` here: up --build recreates only the services whose config/image
+# changed, so already-running services (mariadb, redis) stay up and the store
+# does not experience a full-stack outage on every start/deploy.
+# The chosen seed mode is passed for this run only — nothing is written to .env.
+DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d --build --remove-orphans
 
 echo -e "${YELLOW}Waiting for services to be ready...${NC}"
 sleep 10
 
 echo -e "${GREEN}✓ Containers started${NC}"
+
+# Apply tracked SQL migrations so a fresh install also gets schema changes that
+# live outside init.sql (see AGENTS.md: migrations/). The migration files and
+# runner are bind-mounted into the apache container, which already carries the
+# mariadb client and DB_* env vars.
+echo -e "${BLUE}Applying database migrations...${NC}"
+if docker compose "${COMPOSE_FILES[@]}" exec -T apache bash /var/www/dc-scripts/run-migrations.sh; then
+    echo -e "${GREEN}✓ Migrations applied${NC}"
+else
+    echo -e "${YELLOW}⚠ Migration step failed or skipped (DB not ready yet).${NC}"
+    echo -e "${YELLOW}  Run 'make migrate' once the stack is up to apply pending migrations.${NC}"
+fi
 echo ""
 
 # ============================================================================
@@ -391,13 +419,11 @@ else
     echo ""
     SITE_URL="${DOCKERCART_URL:-http://dockercart.local}"
     SITE_HOST="${DOCKERCART_DOMAIN:-dockercart.local}"
-    PHPMYADMIN_PORT="${PHPMYADMIN_PORT:-8085}"
     DB_HOST_PRINT="${DB_HOSTNAME:-mariadb}"
     DB_PORT_PRINT="${DB_PORT:-3306}"
 
     echo "  Site:      ${GREEN}${SITE_URL}${NC}"
     echo "  Admin:     ${GREEN}${SITE_URL%/}/admin${NC}"
-    echo "  phpMyAdmin: ${GREEN}http://${SITE_HOST}:${PHPMYADMIN_PORT}${NC}"
     echo "  MariaDB:   ${GREEN}${DB_HOST_PRINT}:${DB_PORT_PRINT}${NC}"
     if [ "$SSL_MODE" = "self-signed" ]; then
         echo "  HTTPS:     ${GREEN}https://${SITE_HOST} (warning: self-signed)${NC}"

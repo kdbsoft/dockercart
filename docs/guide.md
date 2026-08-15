@@ -174,7 +174,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | Variable | Default | Description |
 |---|---|---|
 | `CACHE_ENGINE` | `redis` | `redis` or `file` |
-| `SESSION_ENGINE` | `redis` | `redis` or `file` |
+| `SESSION_ENGINE` | `file` | `file` (default, persistent in `storage/session`) or `redis` (cache-only Redis loses sessions on restart) |
 | `REDIS_HOSTNAME` | `redis` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_PASSWORD` | — | Redis password |
