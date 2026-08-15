@@ -505,7 +505,7 @@ make update
 
 ### Safety Checks
 
-- **Clean repo required:** modified tracked files block the update. Commit or stash your changes first, or use `ALLOW_DIRTY=1 make update` to skip the check.
+- **Clean repo required (with one exception):** modified tracked files outside `upload/` and `VERSION` block the update. Commit or stash them first, or use `ALLOW_DIRTY=1 make update` to skip the check. The GUI updater (`admin/cli/dockercart_update.php`) copies `upload/` + `VERSION` directly into the bind mount without advancing git HEAD, which leaves those paths "dirty" — `make update` automatically reconciles (resets) exactly those GUI-managed paths before pulling, so **running the GUI updater and then `make update` works without manual cleanup**.
 - **Detached HEAD:** not supported — you must be on a branch.
 - **Diverged branches:** if local and remote have diverged, manual intervention is required.
 
