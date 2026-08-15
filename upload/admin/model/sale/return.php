@@ -310,7 +310,7 @@ class ModelSaleReturn extends Model {
 		return $query->row['total'];
 	}
 
-	public function addReturnHistory($return_id, $return_status_id, $comment, $notify) {
+	public function addReturnHistory($return_id, $return_status_id, $comment, $notify, $restock = true) {
 		$return_info = $this->getReturn($return_id);
 		$previous_status = $return_info ? (int)$return_info['return_status_id'] : 0;
 
@@ -321,22 +321,24 @@ class ModelSaleReturn extends Model {
 		// items, refund the money when requested, and move a full return's
 		// order to the Refunded order status.
 		if ((int)$return_status_id == 3 && $previous_status != 3 && $return_info) {
-			$this->completeReturn($return_info);
+			$this->completeReturn($return_info, $restock);
 		}
 	}
 
-	protected function completeReturn($return_info) {
+	protected function completeReturn($return_info, $restock = true) {
 		$return_id = (int)$return_info['return_id'];
 		$order_id = (int)$return_info['order_id'];
 		$products = $this->getReturnProducts($return_id);
 
 		// Restock
+		if ($restock) {
 		foreach ($products as $product) {
 			$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE product_id = '" . (int)$product['product_id'] . "' AND subtract = '1'");
 
 			if ((int)$product['variant_id'] > 0) {
 				$this->db->query("UPDATE `" . DB_PREFIX . "product_variant` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE variant_id = '" . (int)$product['variant_id'] . "' AND subtract = '1'");
 			}
+		}
 		}
 
 		$this->cache->delete('product');

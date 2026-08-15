@@ -62,6 +62,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 	public function index(): void {
 		$this->load->language('sale/order');
+		$this->load->language('sale/return');
 
 		if (isset($this->session->data['success'])) {
 			$data['success'] = $this->session->data['success'];
@@ -213,11 +214,17 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['flow_steps'] = [];
 
+		$completed = $order_flow->isFinalStep((int)$order_info['order_status_id']);
+
 		foreach ($order_flow->getSteps() as $step) {
 			$index = $order_flow->getStepIndex($step);
 
 			if ($current_index >= 0) {
-				$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+				if ($completed && $index === $current_index) {
+					$state = 'done';
+				} else {
+					$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+				}
 			} else {
 				$state = 'upcoming';
 			}
@@ -232,6 +239,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$data['flow_current_index'] = $current_index;
 		$data['flow_terminal'] = $order_flow->isTerminal((int)$order_info['order_status_id']);
+		$data['flow_completed'] = $order_flow->isFinalStep((int)$order_info['order_status_id']);
 
 		$data['flow_transitions'] = [];
 
@@ -240,6 +248,7 @@ class ControllerSaleOrderDetail extends Controller {
 				'order_status_id' => $target,
 				'name'            => $status_names[$target] ?? '',
 				'terminal'        => $order_flow->isTerminal($target),
+				'is_refund'       => $target === 134,
 			];
 		}
 
@@ -292,6 +301,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$data['products'][] = [
 				'order_product_id' => $product['order_product_id'],
 				'product_id'       => $product['product_id'],
+				'variant_id'       => (int)($product['variant_id'] ?? 0),
 				'name'             => $order_localizer->productName($product),
 				'model'            => $product['model'],
 				'variant_sku'      => $product['variant_sku'] ?? '',
@@ -342,6 +352,23 @@ class ControllerSaleOrderDetail extends Controller {
 		$coupon_row = $this->model_sale_order->hasCoupon($order_id);
 		$data['coupon_applied'] = (bool)$coupon_row;
 		$data['coupon_title'] = $coupon_row ? $coupon_row['title'] : '';
+
+		// Refund modal data
+		$this->load->model('localisation/return_reason');
+		$data['return_reasons'] = $this->model_localisation_return_reason->getReturnReasons();
+
+		$data['refund_products'] = [];
+		foreach ($products as $product) {
+			$data['refund_products'][] = [
+				'order_product_id' => (int)$product['order_product_id'],
+				'product_id'       => (int)$product['product_id'],
+				'variant_id'       => (int)($product['variant_id'] ?? 0),
+				'name'             => $order_localizer->productName($product),
+				'model'            => $product['model'],
+				'quantity'         => (int)$product['quantity'],
+				'price'            => (float)$product['price'],
+			];
+		}
 
 		$data = array_merge($data, $this->getPaymentsPartialData($order_id));
 		$data = array_merge($data, $this->getShipmentsPartialData($order_id));
@@ -1076,13 +1103,17 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$order_info = $this->model_sale_order->getOrder($order_id);
 
+			$decimal_place = (int)$this->currency->getDecimalPlace($order_info['currency_code'] ?? '');
+			$paid_amount = round((float)($order_info['paid_amount'] ?? 0), $decimal_place);
+			$amount = round($amount, $decimal_place);
+
 			if (!$order_info) {
 				$json['error'] = $this->language->get('error_action');
 			} elseif ($amount <= 0) {
 				$json['error'] = $this->language->get('error_refund_amount');
-			} elseif ((float)$order_info['paid_amount'] <= 0) {
+			} elseif ($paid_amount <= 0) {
 				$json['error'] = $this->language->get('error_refund_no_paid');
-			} elseif ($amount > (float)$order_info['paid_amount']) {
+			} elseif ($amount > $paid_amount) {
 				$json['error'] = $this->language->get('error_refund_too_large');
 			} else {
 				$amount_text = $this->currency->format($amount, $order_info['currency_code'], $order_info['currency_value']);
@@ -1092,6 +1123,112 @@ class ControllerSaleOrderDetail extends Controller {
 					$json['error'] = $this->language->get('error_action');
 				} else {
 					$json['success'] = $this->language->get('text_refund_added');
+					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function processRefund(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order') || !$this->user->hasPermission('modify', 'sale/return')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+			$items_raw = $this->request->post['items'] ?? [];
+			if (is_string($items_raw)) {
+				$items_raw = json_decode(html_entity_decode($items_raw, ENT_QUOTES, 'UTF-8'), true);
+			}
+			$items = array_values((array)($items_raw ?? []));
+			$type = (string)($this->request->post['type'] ?? 'full');
+			$amount = (float)($this->request->post['amount'] ?? 0);
+			$return_reason_id = (int)($this->request->post['return_reason_id'] ?? 0);
+			$comment = trim((string)($this->request->post['comment'] ?? ''));
+			$notify = !empty($this->request->post['notify']);
+
+			$this->load->model('sale/order');
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			$decimal_place = (int)$this->currency->getDecimalPlace($order_info['currency_code'] ?? '');
+			$paid_amount = round((float)($order_info['paid_amount'] ?? 0), $decimal_place);
+			$amount = round($amount, $decimal_place);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif (!in_array($type, ['full', 'partial', 'exchange'])) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif ($return_reason_id <= 0) {
+				$json['error'] = $this->language->get('error_refund_reason');
+			} elseif (empty($items)) {
+				$json['error'] = $this->language->get('error_refund_no_items');
+			} elseif ($type !== 'exchange' && $amount <= 0) {
+				$json['error'] = $this->language->get('error_refund_amount');
+			} elseif ($type !== 'exchange' && $paid_amount <= 0) {
+				$json['error'] = $this->language->get('error_refund_no_paid');
+			} elseif ($type !== 'exchange' && $amount > $paid_amount) {
+				$json['error'] = $this->language->get('error_refund_too_large');
+			} else {
+				$order_products = $this->model_sale_order->getOrderProducts($order_id);
+				$product_lookup = [];
+
+				foreach ($order_products as $op) {
+					$product_lookup[(int)$op['order_product_id']] = $op;
+				}
+
+				$return_products = [];
+
+				foreach ($items as $item) {
+					$order_product_id = (int)($item['order_product_id'] ?? 0);
+					$quantity = (int)($item['quantity'] ?? 0);
+
+					if (!isset($product_lookup[$order_product_id]) || $quantity < 1) {
+						continue;
+					}
+
+					$op = $product_lookup[$order_product_id];
+					$return_products[] = [
+						'order_product_id' => $order_product_id,
+						'product_id'       => (int)$op['product_id'],
+						'variant_id'       => (int)($op['variant_id'] ?? 0),
+						'name'             => $op['name'],
+						'model'            => $op['model'],
+						'quantity'         => $quantity,
+						'price'            => (float)$op['price'],
+						'total'            => (float)$op['price'] * $quantity,
+					];
+				}
+
+				if (!$return_products) {
+					$json['error'] = $this->language->get('error_refund_no_items');
+				} else {
+					$this->load->model('sale/return');
+
+					$return_id = $this->model_sale_return->addReturn([
+						'order_id'         => $order_id,
+						'type'             => $type,
+						'customer_id'      => (int)$order_info['customer_id'],
+						'firstname'        => $order_info['firstname'],
+						'lastname'         => $order_info['lastname'],
+						'email'            => $order_info['email'],
+						'telephone'        => $order_info['telephone'],
+						'amount'           => $type === 'exchange' ? 0 : $amount,
+						'opened'           => 0,
+						'return_reason_id' => $return_reason_id,
+						'return_status_id' => 1,
+						'comment'          => $comment,
+						'date_ordered'     => $order_info['date_added'],
+						'products'         => $return_products,
+					]);
+
+					$this->model_sale_return->addReturnHistory($return_id, 3, $comment, $notify, !empty($this->request->post['restock']));
+
+					$json['success'] = $this->language->get('text_refund_processed');
 					$json['payments_html'] = $this->load->view('sale/order_payments', $this->getPaymentsPartialData($order_id));
 				}
 			}

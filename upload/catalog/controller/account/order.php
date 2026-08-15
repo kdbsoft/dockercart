@@ -507,11 +507,17 @@ class ControllerAccountOrder extends Controller {
 				$status_names[(int)$status['order_status_id']] = $status['name'];
 			}
 
+			$completed = $order_flow->isFinalStep($order_status_id);
+
 			foreach ($order_flow->getSteps() as $step) {
 				$index = $order_flow->getStepIndex($step);
 
 				if ($current_index >= 0) {
-					$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+					if ($completed && $index === $current_index) {
+						$state = 'done';
+					} else {
+						$state = $index < $current_index ? 'done' : ($index === $current_index ? 'current' : 'upcoming');
+					}
 				} else {
 					$state = 'upcoming';
 				}
