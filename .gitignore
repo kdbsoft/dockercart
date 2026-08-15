@@ -76,6 +76,9 @@ export-yml-[0-9]*-*.xml
 !/tools/phpstan/
 !/tools/phpstan/*.php
 .env
+# Ignore secret env variants (keep the tracked .env.example template)
+.env.*
+!.env.example
 
 /storage
 build-extension.sh
@@ -123,6 +126,29 @@ build-extension.sh
 **/dockercart_custom_*
 **/dc_custom_*
 **/custom_*
+
+# AI agent / coding-assistant local artifacts (defensive — covers tools not yet used)
+.claude/
+.cursor/
+.cursorrules
+.codeium/
+.windsurf/
+.windsurf
+.gemini/
+.aider
+.aider/
+.roo/
+.continue/
+.continue
+.cline/
+.qwen/
+.trae/
+.kiro/
+.codebuddy/
+.cody/
+.tabnine/
+.sourcegraph/
+.warp/
 
 backups/
 sitemap.xml
