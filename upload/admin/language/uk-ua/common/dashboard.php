@@ -18,3 +18,19 @@ $_['text_sale_total'] = 'Продажів';
 $_['text_view'] = 'Детальніше...';
 $_['text_week'] = 'Тиждень';
 $_['text_year'] = 'Рік';
+
+// Onboarding
+$_['text_onboarding']             = 'Початок роботи';
+$_['text_onboarding_subtitle']    = 'Виконайте ці кроки, щоб запустити магазин';
+$_['text_step_settings']          = 'Налаштувати магазин';
+$_['text_step_settings_desc']     = 'Вкажіть назву, email та регіональні налаштування';
+$_['text_step_category']          = 'Створити категорію';
+$_['text_step_category_desc']      = 'Організуйте каталог хоча б однією категорією';
+$_['text_step_product']           = 'Додати перший товар';
+$_['text_step_product_desc']       = 'Створіть товар і прив’яжіть його до категорії';
+$_['text_step_manufacturer']      = 'Додати виробника';
+$_['text_step_manufacturer_desc']  = 'Зареєструйте бренд або постачальника';
+$_['text_onboarding_done']         = 'Готово';
+$_['text_onboarding_dismiss']      = 'Приховати';
+$_['text_onboarding_dismiss_help'] = 'Приховати цей список назавжди';
+$_['text_onboarding_progress']     = 'кроків виконано';

@@ -7,6 +7,46 @@ class ControllerCommonDashboard extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
+		// Onboarding checklist
+		$this->load->model('catalog/category');
+		$this->load->model('catalog/product');
+		$this->load->model('catalog/manufacturer');
+
+		$data['onboarding_enabled'] = (bool)$this->config->get('config_onboarding_enabled');
+
+		$data['onboarding_steps'] = array(
+			array(
+				'title' => $this->language->get('text_step_settings'),
+				'desc'  => $this->language->get('text_step_settings_desc'),
+				'href'  => $this->url->link('setting/setting', 'user_token=' . $this->session->data['user_token'], true),
+				'done'  => ($this->config->get('config_email') !== 'admin@example.com'),
+				'icon'  => 'settings'
+			),
+			array(
+				'title' => $this->language->get('text_step_category'),
+				'desc'  => $this->language->get('text_step_category_desc'),
+				'href'  => $this->url->link('catalog/category', 'user_token=' . $this->session->data['user_token'], true),
+				'done'  => $this->model_catalog_category->getTotalCategories() > 0,
+				'icon'  => 'folder-plus'
+			),
+			array(
+				'title' => $this->language->get('text_step_product'),
+				'desc'  => $this->language->get('text_step_product_desc'),
+				'href'  => $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'], true),
+				'done'  => $this->model_catalog_product->getTotalProducts() > 0,
+				'icon'  => 'package-plus'
+			),
+			array(
+				'title' => $this->language->get('text_step_manufacturer'),
+				'desc'  => $this->language->get('text_step_manufacturer_desc'),
+				'href'  => $this->url->link('catalog/manufacturer', 'user_token=' . $this->session->data['user_token'], true),
+				'done'  => $this->model_catalog_manufacturer->getTotalManufacturers() > 0,
+				'icon'  => 'factory'
+			)
+		);
+
+		$data['onboarding_dismiss'] = $this->url->link('common/dashboard/dismiss', 'user_token=' . $this->session->data['user_token'], true);
+
 		// Check install directory exists
 		if (is_dir(DIR_CATALOG . '../install')) {
 			$data['error_install'] = $this->language->get('error_install');
@@ -59,6 +99,14 @@ class ControllerCommonDashboard extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('common/dashboard', $data));
+	}
+
+	public function dismiss() {
+		$this->load->model('setting/setting');
+
+		$this->model_setting_setting->editSettingValue('config', 'config_onboarding_enabled', '0');
+
+		$this->response->redirect($this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true));
 	}
 
 	public function currency() {
