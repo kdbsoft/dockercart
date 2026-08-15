@@ -27,8 +27,8 @@
                 <i data-lucide="more-vertical" width="16" height="16"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
-                <li><a href="#" onclick="event.preventDefault();addReward();return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
-                <li><a href="#" onclick="event.preventDefault();removeReward();return false"><i data-lucide="star-off" width="14" height="14"></i> {{ button_reward_remove }}</a></li>
+                <li class="{% if not reward_has_points %}disabled{% endif %}"><a href="#" onclick="event.preventDefault();{% if reward_has_points %}addReward();{% endif %}return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
+                <li class="{% if not reward_has_points %}disabled{% endif %}"><a href="#" onclick="event.preventDefault();{% if reward_has_points %}removeReward();{% endif %}return false"><i data-lucide="star-off" width="14" height="14"></i> {{ button_reward_remove }}</a></li>
                 {% if affiliate_id %}
                 <li class="divider"></li>
                 {% if not commission_total %}
@@ -496,10 +496,10 @@
                   {% endif %}
                 </div>
                 <div class="dcx-sidebar-card__actions dcx-reward-actions">
-                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" data-toggle="tooltip" title="{{ button_reward_add }}">
+                  <button type="button" class="btn btn-xs btn-success btn--icon" onclick="addReward()" data-toggle="tooltip" title="{{ button_reward_add }}" {% if not reward_has_points %}disabled aria-disabled="true"{% endif %}>
                     <i data-lucide="plus" width="11" height="11"></i>
                   </button>
-                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeReward()" data-toggle="tooltip" title="{{ button_reward_remove }}">
+                  <button type="button" class="btn btn-xs btn-danger btn--icon" onclick="removeReward()" data-toggle="tooltip" title="{{ button_reward_remove }}" {% if not reward_has_points %}disabled aria-disabled="true"{% endif %}>
                     <i data-lucide="minus" width="11" height="11"></i>
                   </button>
                 </div>
