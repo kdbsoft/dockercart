@@ -11,8 +11,10 @@ log() {
 
 if [ -f "$SCRIPT_DIR/.env" ]; then
     set -a
+    set +e
     # shellcheck disable=SC1091
     . "$SCRIPT_DIR/.env"
+    set -e
     set +a
 fi
 
@@ -28,6 +30,17 @@ else
 fi
 
 compose() {
+    # start.sh records the active -f file set in .env as
+    # DOCKERCART_COMPOSE_FILES; use it when present so updates in Traefik/SSL
+    # modes keep the same overrides instead of falling back to the base file.
+    if [ -n "${DOCKERCART_COMPOSE_FILES:-}" ]; then
+        FILES=""
+        for f in $DOCKERCART_COMPOSE_FILES; do
+            FILES="$FILES -f $f"
+        done
+        docker compose $FILES "$@"
+        return
+    fi
     if [ "${TRAEFIK:-0}" = "1" ]; then
         FILES="-f docker-compose.traefik.yml"
         docker compose $FILES "$@"
@@ -70,12 +83,32 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	log "Pulling updates (fast-forward only)..."
 	git pull --ff-only origin "$BRANCH"
 	log "Code updated successfully."
-	# Single-file bind mounts (e.g. VERSION) are bound by inode at container creation time.
-	# git pull replaces files with new inodes, so the running container keeps reading the
-	# old content.  Force-recreate apache to re-bind all single-file mounts to their
-	# current inodes.  --no-deps avoids touching mariadb unnecessarily.
-	log "Recreating apache container to refresh bind mounts (VERSION and config files)..."
-	compose up --force-recreate --no-deps -d apache
+
+	# Decide whether the container image itself needs a rebuild. Changes to the
+	# Dockerfile, PHP config, Apache config, or docker/ scripts change what is
+	# baked into the image; bind mounts alone will NOT pick those up. Compare the
+	# relevant paths between the previous and new commit (or HEAD when no fetch
+	# happened) — if any differ, rebuild.
+	BUILD_REQUIRED=0
+	BUILD_PATHSPEC="Dockerfile docker/ docker-compose*.yml composer.lock"
+	if git diff --quiet "$BASE" "$REMOTE" -- $BUILD_PATHSPEC 2>/dev/null; then
+		log "No Dockerfile/docker/compose changes detected — skipping image rebuild."
+	else
+		log "Dockerfile, docker/ or compose changes detected — rebuilding image."
+		BUILD_REQUIRED=1
+	fi
+
+	if [ "$BUILD_REQUIRED" -eq 1 ]; then
+		compose build apache scheduler
+		compose up -d --force-recreate apache scheduler
+	else
+		# Single-file bind mounts (e.g. VERSION) are bound by inode at container
+		# creation time. git pull replaces files with new inodes, so the running
+		# container keeps reading the old content. Force-recreate apache AND
+		# scheduler to re-bind all single-file mounts and pick up code changes.
+		log "Recreating apache + scheduler containers to refresh bind mounts..."
+		compose up --force-recreate --no-deps -d apache scheduler
+	fi
 
 	# Refresh OCMOD modifications to match new code
 	log "Refreshing OCMOD modifications..."
