@@ -685,16 +685,24 @@ class ModelSaleOrder extends Model {
 		return $query->row['total'];
 	}
 
-	public function getTotalOrdersExcludingStatuses($exclude_status_ids = array()) {
-		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id > '0'";
+	public function getTotalOrdersExcludingStatuses($exclude_status_ids = array(), $exclude_returned = false) {
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order`";
+
+		$conditions = array("order_status_id > '0'");
 
 		if ($exclude_status_ids) {
 			$implode = array();
 			foreach ($exclude_status_ids as $status_id) {
 				$implode[] = (int)$status_id;
 			}
-			$sql .= " AND order_status_id NOT IN (" . implode(',', $implode) . ")";
+			$conditions[] = "order_status_id NOT IN (" . implode(',', $implode) . ")";
 		}
+
+		if ($exclude_returned) {
+			$conditions[] = "order_id NOT IN (SELECT order_id FROM `" . DB_PREFIX . "return` WHERE return_status_id = '3')";
+		}
+
+		$sql .= " WHERE " . implode(' AND ', $conditions);
 
 		$query = $this->db->query($sql);
 
