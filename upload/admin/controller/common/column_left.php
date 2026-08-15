@@ -29,7 +29,7 @@ class ControllerCommonColumnLeft extends Controller {
 				if ($fraud_status) {
 					$exclude_statuses[] = $fraud_status;
 				}
-				$pending_orders = (int)$this->model_sale_order->getTotalOrdersExcludingStatuses($exclude_statuses);
+				$pending_orders = (int)$this->model_sale_order->getTotalOrdersExcludingStatuses($exclude_statuses, true);
 			}
 
 			// Abandoned carts count (unrecovered checkout carts)
