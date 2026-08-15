@@ -21,11 +21,6 @@ sql_escape() {
   printf "%s" "$1" | sed "s/'/''/g"
 }
 
-ADMIN_USERNAME_ESCAPED="$(sql_escape "${ADMIN_USERNAME}")"
-ADMIN_PASSWORD_ESCAPED="$(sql_escape "${ADMIN_PASSWORD}")"
-ADMIN_EMAIL_ESCAPED="$(sql_escape "${ADMIN_EMAIL}")"
-DOCKERCART_URL_ESCAPED="$(sql_escape "${DOCKERCART_URL}")"
-
 if [ ! -f "${SEED_SQL}" ]; then
   echo "[dockercart-init] ERROR: Seed SQL not found at ${SEED_SQL}" >&2
   exit 1
