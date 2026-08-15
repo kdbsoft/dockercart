@@ -33,7 +33,11 @@
         <span class="pcm-sep">=</span>
         <span class="pcm-total">{{ total }}</span>
       </div>
-      <div class="pcm-sub">{{ text_stock }}: {{ stock }} &middot; {{ text_status }}: {{ status }}</div>
+      <div class="pcm-sub">
+        <span class="pcm-stock{% if stock > 0 %} pcm-stock--in{% else %} pcm-stock--out{% endif %}">{{ text_stock }}: {{ stock }}</span>
+        {% if reserved > 0 %}<span class="pcm-stock pcm-stock--reserved">{{ text_stock_reserved }}: {{ reserved }}</span>{% endif %}
+        &middot; {{ text_status }}: {{ status }}
+      </div>
 
       {% if variant %}
       <div class="pcm-variant">

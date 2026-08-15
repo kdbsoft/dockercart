@@ -2658,17 +2658,23 @@ class ControllerCatalogProduct extends Controller {
 						}
 					}
 
-					$stock = array(
-						'total'  => (float)$result['quantity'],
-						'not_tracked' => !(bool)$result['subtract']
-					);
+				$stock = array(
+					'total'  => (float)$result['quantity'],
+					'not_tracked' => !(bool)$result['subtract']
+				);
 
-					if ($is_configurable) {
-						$aggregated = $pc->getAggregatedStock($product_id);
-						$stock['total'] = $aggregated['total_stock'];
-						$stock['variants_in_stock'] = $aggregated['variants_in_stock'];
-						$stock['total_variants'] = $aggregated['total_variants'];
-					}
+				if ($is_configurable) {
+					$aggregated = $pc->getAggregatedStock($product_id);
+					$stock['total'] = $aggregated['total_stock'];
+					$stock['variants_in_stock'] = $aggregated['variants_in_stock'];
+					$stock['total_variants'] = $aggregated['total_variants'];
+				}
+
+				// Reservations held by active checkouts (counted against the
+				// product's stock so the admin sees what is still sellable).
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$reserved_total_map = $stock_reservation->getReservedTotalByProductIds([$product_id]);
+				$stock['reserved'] = $reserved_total_map[$product_id] ?? 0.0;
 
 					if ($result['image'] && is_file(DIR_IMAGE . $result['image'])) {
 						$thumb = $this->model_tool_image->resize($result['image'], 40, 40);
