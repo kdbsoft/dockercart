@@ -260,7 +260,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
 
     for cert_path in "$LE_DATA_DIR"/live/*/fullchain.pem; do
         [ -f "$cert_path" ] || continue
-        cert_name="${cert_path#$LE_DATA_DIR/live/}"
+        cert_name="${cert_path#"$LE_DATA_DIR"/live/}"
         cert_name="${cert_name%/fullchain.pem}"
         if command -v openssl >/dev/null 2>&1; then
             if ! openssl x509 -noout -ext subjectAltName -in "$cert_path" 2>/dev/null | tr -d ' ' | grep -Fq "DNS:${SSL_DOMAIN}"; then
@@ -330,7 +330,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
         echo "Using certbot cert-name: $CERTBOT_CERT_NAME"
         if ! docker compose -f docker-compose.yml -f docker-compose.le.yml run --rm --no-deps --entrypoint certbot certbot certonly \
             --webroot -w /var/www/certbot \
-            --email "${SSL_EMAIL}" \
+            --email "${SSL_EMAIL:?SSL_EMAIL is not set}" \
             --agree-tos \
             --no-eff-email \
             --non-interactive \
