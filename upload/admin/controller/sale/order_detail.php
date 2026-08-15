@@ -2013,9 +2013,9 @@ class ControllerSaleOrderDetail extends Controller {
 				} else {
 					$paid_amount = (float)$order_info['paid_amount'] + $amount;
 					$total = (float)$order_info['total'];
-					$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount);
 					$currency_code = $order_info['currency_code'];
 					$currency_value = $order_info['currency_value'];
+					$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
 
 					$note_params = [
 						$this->currency->format($amount, $currency_code, $currency_value),
@@ -2120,8 +2120,9 @@ class ControllerSaleOrderDetail extends Controller {
 				$json['error'] = $this->language->get('error_action');
 			} else {
 				$overpaid = (float)$order_info['paid_amount'] - (float)$order_info['total'];
+				$overpaid_rounded = round($overpaid * (float)$order_info['currency_value'], (int)$this->currency->getDecimalPlace($order_info['currency_code']));
 
-				if ($overpaid <= 0) {
+				if ($overpaid_rounded <= 0) {
 					$json['error'] = $this->language->get('error_no_overpayment');
 				} else {
 					$reversal_id = $this->model_sale_order->removeOrderOverpayment($order_id, $this->language->get('text_overpayment_reversal_comment'));
@@ -2224,11 +2225,11 @@ class ControllerSaleOrderDetail extends Controller {
 	private function getPaymentsPartialData(int $order_id): array {
 		$order_info = $this->model_sale_order->getOrder($order_id);
 
-		$status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
 		$total = (float)$order_info['total'];
 		$paid_amount = (float)$order_info['paid_amount'];
 		$currency_code = $order_info['currency_code'];
 		$currency_value = $order_info['currency_value'];
+		$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
 
 		return [
 			'payment_status'             => $status,
@@ -2327,9 +2328,11 @@ class ControllerSaleOrderDetail extends Controller {
 			$total_changed_params
 		);
 
-		if ((float)$order_info['paid_amount'] > $new_total) {
+		$overpaid = (float)$order_info['paid_amount'] - $new_total;
+
+		if (round($overpaid * (float)$currency_value, (int)$this->currency->getDecimalPlace($currency_code)) > 0) {
 			$overpaid_params = [
-				$this->currency->format((float)$order_info['paid_amount'] - $new_total, $currency_code, $currency_value),
+				$this->currency->format($overpaid, $currency_code, $currency_value),
 			];
 
 			$this->model_sale_order->addOrderNote(

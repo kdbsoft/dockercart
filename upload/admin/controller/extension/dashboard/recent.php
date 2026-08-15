@@ -128,7 +128,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
-			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount']);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
 
 			// Products summary
 			$products = isset($order_products[$order_id]) ? $order_products[$order_id] : array();
