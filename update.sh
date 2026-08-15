@@ -51,13 +51,13 @@ compose() {
 }
 
 reconcile_working_tree() {
-    # The GUI updater (admin/cli/dockercart_update.php) copies upload/ and
-    # VERSION straight into the bind mount but never advances git HEAD, so the
-    # working tree ends up dirty on exactly the files upstream will also touch.
-    # A fast-forward pull refuses to overwrite locally-modified files, so before
-    # pulling we reset only those GUI-managed paths (upload/* and VERSION) that
-    # the upstream commit also changes. Real local edits outside upload/ are
-    # left untouched (they are blocked earlier by the dirty check below).
+    # The GUI updater (admin/cli/dockercart_update.php) copies upload/ straight
+    # into the bind mount but never advances git HEAD, so the working tree ends
+    # up dirty on exactly the files upstream will also touch. A fast-forward
+    # pull refuses to overwrite locally-modified files, so before pulling we
+    # reset only those GUI-managed paths (upload/*) that the upstream commit
+    # also changes. Real local edits outside upload/ are left untouched (they
+    # are blocked earlier by the dirty check below).
     upstream_changed=$(git diff --name-only "$BASE" "$REMOTE" 2>/dev/null)
     [ -z "$upstream_changed" ] && return 0
 
@@ -66,7 +66,7 @@ reconcile_working_tree() {
 
     echo "$local_dirty" | while read -r f; do
         case "$f" in
-            VERSION|upload/*) ;;
+            upload/*) ;;
             *) continue ;;
         esac
 
@@ -102,20 +102,20 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	log "Pulling updates (fast-forward only)..."
 	reconcile_working_tree
 
-	# After reconciling GUI-applied paths (upload/* and VERSION), any remaining
+	# After reconciling GUI-applied paths (upload/*), any remaining
 	# tracked changes are real local edits. GUI-managed paths that upstream did
 	# NOT touch are harmless for a fast-forward pull (kept as-is), so only edits
-	# outside upload/ and VERSION block the update.
+	# outside upload/ block the update.
 	if [ "${ALLOW_DIRTY:-0}" != "1" ]; then
 		blocking=""
 		for f in $(git diff --name-only HEAD 2>/dev/null); do
 			case "$f" in
-				VERSION|upload/*) ;;
+				upload/*) ;;
 				*) blocking="$blocking $f" ;;
 			esac
 		done
 		if [ -n "$blocking" ]; then
-			log "Error: repository has local tracked changes outside upload/ and VERSION:$blocking. Commit/stash them or set ALLOW_DIRTY=1."
+			log "Error: repository has local tracked changes outside upload/:$blocking. Commit/stash them or set ALLOW_DIRTY=1."
 			exit 1
 		fi
 	fi

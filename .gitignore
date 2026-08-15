@@ -19,10 +19,6 @@ AGENTS.md
 /upload/config.php
 /upload/admin/config.php
 
-# Version file rewritten by the GUI "System Update" worker (into the rw
-# ./upload bind mount); the canonical VERSION lives at the repo root.
-/upload/VERSION
-
 # Backup htaccess files
 .htaccess.bak*
 /upload/.htaccess.bak*
