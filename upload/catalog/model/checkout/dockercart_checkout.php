@@ -82,6 +82,13 @@ class ModelCheckoutDockerCartCheckout extends Model {
     public function markRecovered() {
         $sessionId = $this->session->getId();
 
+        // Remove any previously-recovered row for this session so a repeat order
+        // in the same session does not collide on the (session_id, recovered)
+        // unique index.
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "dockercart_checkout_abandoned`
+                          WHERE session_id = '" . $this->db->escape($sessionId) . "'
+                          AND recovered = " . self::STATUS_RECOVERED);
+
         $this->db->query("UPDATE `" . DB_PREFIX . "dockercart_checkout_abandoned`
                           SET recovered = " . self::STATUS_RECOVERED . ",
                               restore_token = NULL,
