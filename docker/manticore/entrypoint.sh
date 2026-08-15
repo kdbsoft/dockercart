@@ -9,9 +9,10 @@
 #   2. Fixes ownership of Manticore directories (chown to 'manticore' user).
 #   3. Drops privileges to 'manticore' via gosu before launching searchd.
 #
-# In DockerCart the entire /var/lib/manticore is backed by a tmpfs mount,
-# so this init is minimal — just ensure the data/ subdirectory exists and
-# correct permissions are set.
+# In DockerCart /var/lib/manticore is a persistent named volume, so RT index
+# files and the binlog survive restarts (searchd replays the binlog on boot).
+# This init is minimal — just ensure the data/ subdirectory exists and correct
+# permissions are set.
 
 set -e
 
