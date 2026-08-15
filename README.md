@@ -1,46 +1,31 @@
-# 🛒 DockerCart
+# DockerCart
 
-> ### ⚡ Production-ready store in 15 minutes
+![DockerCart Preview](upload/image/dockercart_preview.png)
 
-<p align="center">
-  <img src="upload/image/dockercart_preview.png" alt="DockerCart Preview" width="800">
-</p>
+DockerCart is a full-stack e-commerce platform built on a Docker infrastructure. A single command brings up the complete stack — Nginx reverse proxy, PHP 8.5 application server, MariaDB database, Redis cache, Manticore Search full-text engine, and a scheduler daemon — pre-configured and ready to serve production traffic.
 
-<p align="center">
-  <a href="https://dockercart.net"><img src="https://img.shields.io/badge/dockercart.net-6366f1?style=flat-square&logo=globe&logoColor=white" alt="DockerCart"></a>
-  &nbsp;
-  <a href="https://dockercart.net/capabilities"><img src="https://img.shields.io/badge/Capabilities-6366f1?style=flat-square&logo=bookstack&logoColor=white" alt="Capabilities"></a>
-  &nbsp;
-  <a href="https://dockercart.net/changelog"><img src="https://img.shields.io/badge/Changelog-6366f1?style=flat-square&logo=git&logoColor=white" alt="Changelog"></a>
-  &nbsp;
-  <a href="https://demo.dockercart.net"><img src="https://img.shields.io/badge/Live%20Demo-6366f1?style=flat-square&logo=google-chrome&logoColor=white" alt="Live Demo"></a>
-  &nbsp;
-  <a href="https://github.com/kdbsoft/dockercart/issues"><img src="https://img.shields.io/badge/Issues-6366f1?style=flat-square&logo=github&logoColor=white" alt="Issues"></a>
-</p>
+There is no web installer and no `/install` directory. Run `make start` (or `make up`) and a production-grade store is live.
 
-<p align="center">
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square" alt="License: GPL v3"></a>
-  &nbsp;
-  <a href="https://www.php.net/"><img src="https://img.shields.io/badge/PHP-8.5-777BB4?style=flat-square&logo=php" alt="PHP"></a>
-  &nbsp;
-  <a href="https://mariadb.org/"><img src="https://img.shields.io/badge/MariaDB-11.4-003545?style=flat-square&logo=mariadb" alt="MariaDB"></a>
-  &nbsp;
-  <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7.0-DC3821?style=flat-square&logo=redis" alt="Redis"></a>
-  &nbsp;
-  <a href="https://docs.docker.com/compose/"><img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker" alt="Docker"></a>
-</p>
+Documentation and resources are available at [dockercart.net](https://dockercart.net), including the [capabilities list](https://dockercart.net/capabilities) and a [live demo](https://demo.dockercart.net).
 
 ---
 
-[DockerCart](https://dockercart.net) is a **[full-stack e-commerce platform](https://dockercart.net/capabilities)** wrapped in a Docker infrastructure. One command spins up the complete stack — Nginx reverse proxy, PHP 8.5 application server, MariaDB database, Redis cache, Manticore Search full-text engine, and a scheduler daemon — pre-configured and ready to handle real traffic.
+## Technology
 
-No web installer. No `/install` directory. No manual config. Just `make start` (or `make up`) and a [production-grade store](https://demo.dockercart.net) is live.
-
-**Built for developers** who are tired of wrestling with fragile setups and want to focus on building features, not fighting infrastructure. See the [full capabilities list](https://dockercart.net/capabilities) or [try the live demo](https://demo.dockercart.net).
+| Layer | Technology |
+|---|---|
+| Application | PHP 8.5 + Apache 2.4 |
+| Reverse proxy | Nginx (alpine) |
+| Database | MariaDB 11 |
+| Cache & sessions | Redis 7 |
+| Full-text search | Manticore Search 15 |
+| Reverse proxy (alternative) | Traefik v3 (optional, for existing infrastructure) |
+| SSL | Let's Encrypt / self-signed (auto-renewal via certbot) |
+| Frontend | ES6+ · Tailwind CSS 3 · Lucide |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 git clone https://github.com/kdbsoft/dockercart.git
@@ -48,24 +33,24 @@ cd dockercart
 make start
 ```
 
-On the first run `make start` asks for the critical settings — store domain, timezone, database and admin passwords (press Enter to generate random ones), admin account, and whether to install demo data — then writes them to `.env`. Later runs only ask for missing keys, never repeat answered ones. Use `make up` to skip the prompt and start in standalone HTTP mode.
+On first run, `make start` prompts for the critical settings — store domain, timezone, database and admin passwords (press Enter to generate random ones), admin account, and whether to install demo data — and writes them to `.env`. Subsequent runs only prompt for missing keys. Use `make up` to skip the prompt and start in standalone HTTP mode.
 
-Done. First boot handles **everything**:
+First boot performs the following automatically:
 
 - Generates `config.php` from environment variables
 - Seeds the database and applies migrations
 - Builds the full-text search index
 - Sets correct file permissions
-- No web installer — no human in the loop
+- Requires no manual intervention
 
 **Admin panel:** `http://dockercart.local/admin`  
-**Admin credentials:** the ones you set during setup (or generated — see `.env` `ADMIN_USERNAME` / `ADMIN_PASSWORD`)
+**Admin credentials:** the values set during setup (or generated — see `.env` `ADMIN_USERNAME` / `ADMIN_PASSWORD`)
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-Six containers. One network. Zero exposed ports (except Nginx).
+Six containers, one network, no exposed ports except Nginx.
 
 ```
                                Internet
@@ -87,42 +72,27 @@ Six containers. One network. Zero exposed ports (except Nginx).
     Optional: FTP (vsftpd — chrooted to ./upload/image)
 ```
 
-**How traffic flows:** Nginx is the sole entry point — it handles TLS termination, gzip compression, and static asset caching. Apache runs the PHP application behind it with no exposed ports. MariaDB stores your data, Redis handles caching and sessions, Manticore powers full-text search. The scheduler daemon runs background tasks (cron, syncs, feeds).
+Nginx is the sole entry point. It handles TLS termination, gzip compression, and static asset caching. Apache runs the PHP application behind Nginx with no exposed ports. MariaDB stores data, Redis handles caching and sessions, and Manticore powers full-text search. The scheduler daemon runs background tasks (cron, syncs, feeds).
 
-Everything communicates over a shared `dockercart-network` bridge. See the [full architecture docs](docs/guide.md#2-architecture) for directory layout and storage paths.
-
----
-
-## 🖥️ Tech Stack
-
-| Layer | Technology | Why |
-|---|---|---|
-| Application | [PHP 8.5](https://www.php.net/) + [Apache 2.4](https://httpd.apache.org/) | Battle-tested PHP runtime |
-| Reverse proxy | [Nginx](https://nginx.org/) (alpine) | Blazing fast, tiny footprint |
-| Database | [MariaDB 11](https://mariadb.org/) | MySQL-compatible, rock solid |
-| Cache & sessions | [Redis 7](https://redis.io/) | Sub-millisecond reads |
-| Full-text search | [Manticore Search 15](https://manticoresearch.com/) | SQL-compatible, fast indexing |
-| Reverse proxy (alt) | [Traefik v3](https://traefik.io/) | *Optional* — for existing infra |
-| SSL | [Let's Encrypt](https://letsencrypt.org/) / self-signed | Auto-renewal via certbot |
-| Frontend | ES6+ · [Tailwind CSS 3](https://tailwindcss.com/) · [Lucide](https://lucide.dev/) | Modern, zero jQuery |
+All services communicate over a shared `dockercart-network` bridge. See `docs/guide.md#2-architecture` for the directory layout and storage paths.
 
 ---
 
-## 📦 Deployment Modes
+## Deployment Modes
 
-All modes invoked via `make`. Container names prefixed `dockercart_`. Full details in the [deployment guide](docs/guide.md#4-deployment).
+All modes are invoked via `make`. Container names are prefixed `dockercart_`. Full details are in `docs/guide.md#4-deployment`.
 
-**`make start`** shows an interactive menu of all modes below and remembers the last choice in `.env` (`DOCKERCART_RUN_MODE`) — a bare `make start` restarts in the same mode. **`make stop`** stops all containers regardless of the mode they were started in.
+`make start` shows an interactive menu of all modes and remembers the last choice in `.env` (`DOCKERCART_RUN_MODE`). A bare `make start` restarts in the same mode. `make stop` stops all containers regardless of the mode they were started in.
 
-### 🏠 Standalone (default)
+### Standalone (default)
 
-| Mode | Command | What you get |
+| Mode | Command | Description |
 |---|---|---|
 | HTTP | `make up` | Plain HTTP on port 80 |
-| HTTPS (self-signed) | `make ssl` | Quick HTTPS for dev/staging |
-| HTTPS (Let's Encrypt) | `make le` | Production SSL with auto-renew |
+| HTTPS (self-signed) | `make ssl` | HTTPS for development and staging |
+| HTTPS (Let's Encrypt) | `make le` | Production SSL with auto-renewal |
 
-### 🔀 Traefik (external reverse proxy)
+### Traefik (external reverse proxy)
 
 | Mode | Command |
 |---|---|
@@ -130,7 +100,7 @@ All modes invoked via `make`. Container names prefixed `dockercart_`. Full detai
 | HTTPS (self-signed) | `make traefik-ssl` |
 | HTTPS (Let's Encrypt) | `make traefik-le` |
 
-### 📁 FTP (optional add-on)
+### FTP (optional add-on)
 
 ```bash
 make ftp   # Attach to any running mode — chrooted to ./upload/image
@@ -138,10 +108,11 @@ make ftp   # Attach to any running mode — chrooted to ./upload/image
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-All settings live in **`.env`**. The first `make start` generates it interactively (domain, timezone, passwords, admin account); afterwards missing keys are asked for on startup and `.env.example` remains the full reference template.  
-Config files are **generated at container start** — never edit them manually.
+All settings live in `.env`. The first `make start` generates it interactively (domain, timezone, passwords, admin account). Missing keys are subsequently requested at startup. `.env.example` is the full reference template.
+
+Config files are generated at container start — they should never be edited manually.
 
 | Variable | Purpose |
 |---|---|
@@ -153,36 +124,36 @@ Config files are **generated at container start** — never edit them manually.
 | `PHP_MEMORY_LIMIT` | PHP memory limit |
 | `MARIADB_CONFIG_SIZE` | InnoDB profile: `s` · `m` · `l` |
 
-Full reference → [`docs/guide.md`](docs/guide.md#3-configuration)
+Full reference: `docs/guide.md#3-configuration`
 
 ---
 
-## 📚 Resources
+## Resources
 
 | Resource | Link |
 |---|---|
-| Developer guide | [`docs/guide.md`](docs/guide.md) |
+| Developer guide | `docs/guide.md` |
 | Capabilities | [dockercart.net/capabilities](https://dockercart.net/capabilities) |
 | Changelog | [dockercart.net/changelog](https://dockercart.net/changelog) |
 | Live demo | [demo.dockercart.net](https://demo.dockercart.net) |
 | Add-ons store | [store.dockercart.net](https://store.dockercart.net) |
-| Core updates (`make update`) | [`docs/guide.md`](docs/guide.md#9-core-updates) |
+| Core updates (`make update`) | `docs/guide.md#9-core-updates` |
 | Issues | [GitHub Issues](https://github.com/kdbsoft/dockercart/issues) |
-| Security policy | [`SECURITY.md`](SECURITY.md) |
+| Security policy | `SECURITY.md` |
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-1. Fork & create a feature branch
+1. Fork the repository and create a feature branch
 2. Write focused commits following [Conventional Commits](https://www.conventionalcommits.org/)
 3. Test with `make up`
 4. Submit a pull request
 
 ---
 
-## 📄 License
+## License
 
-DockerCart is released under **[GNU General Public License v3.0 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html)**.
+DockerCart is released under the [GNU General Public License v3.0 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html).
 
-The project originated from a [fork of OpenCart](https://github.com/opencart/opencart) (also GPL-licensed) and has since evolved into an independent platform with its own architecture. All original attributions are preserved. See [`LICENSE.md`](LICENSE.md).
+The project originates from a fork of [OpenCart](https://github.com/opencart/opencart) (also GPL-licensed) and has since evolved into an independent platform with its own architecture. All original attributions are preserved. See `LICENSE.md`.
