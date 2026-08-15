@@ -26,6 +26,9 @@ class ControllerCommonMaintenance extends Controller {
 		);
 
 		$data['message'] = $this->language->get('text_message');
+		$data['text_status'] = $this->language->get('text_status');
+		$data['text_contact'] = $this->language->get('text_contact');
+		$data['contact'] = $this->config->get('config_email');
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['footer'] = $this->load->controller('common/footer');
