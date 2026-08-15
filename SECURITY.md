@@ -4,9 +4,9 @@
 
 | Version | Supported |
 |---|---|
-| 2.x.x (current) | ✅ Yes |
+| 3.x.x (current) | ✅ Yes |
 
-Only the latest `2.x.x` release line receives security fixes.
+Only the latest `3.x.x` release line receives security fixes.
 
 ---
 
