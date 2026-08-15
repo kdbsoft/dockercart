@@ -130,11 +130,28 @@ class ControllerAccountOrder extends Controller {
 		$order_ids = array_map('intval', array_column($results, 'order_id'));
 		$products_count = $order_ids ? $this->model_account_order->getTotalOrderProductsByOrderIds($order_ids) : array();
 		$vouchers_count = $order_ids ? $this->model_account_order->getTotalOrderVouchersByOrderIds($order_ids) : array();
+		$images_map = $order_ids ? $this->model_account_order->getOrderProductsImagesByOrderIds($order_ids) : array();
+		$this->load->model('tool/image');
 
 		foreach ($results as $result) {
 			$product_total = isset($products_count[(int)$result['order_id']]) ? $products_count[(int)$result['order_id']] : 0;
 			$voucher_total = isset($vouchers_count[(int)$result['order_id']]) ? $vouchers_count[(int)$result['order_id']] : 0;
-			$payment_status = $this->model_account_order->getPaymentStatus($result['total'], $result['paid_amount']);
+			$payment_status = $this->model_account_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+
+			$thumbs = array();
+			$raw_images = isset($images_map[(int)$result['order_id']]) ? $images_map[(int)$result['order_id']] : array();
+			foreach ($raw_images as $raw_image) {
+				$image = $raw_image ?: 'placeholder.png';
+				$thumb = $this->model_tool_image->resize($image, 56, 56);
+				if (!$thumb) {
+					$thumb = $this->model_tool_image->resize('placeholder.png', 56, 56);
+				}
+				if ($thumb) {
+					$thumbs[] = $thumb;
+				}
+			}
+			$display_thumbs = array_slice($thumbs, 0, 4);
+			$thumbs_more = count($thumbs) > 4 ? count($thumbs) - 4 : 0;
 
 			$data['orders'][] = array(
 				'order_id'   => $result['order_id'],
@@ -147,6 +164,8 @@ class ControllerAccountOrder extends Controller {
 				'products'   => ($product_total + $voucher_total),
 				'total'      => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'flow_progress' => $flow['enabled'] ? $this->flowProgress($flow['steps'], (int)$result['order_status_id']) : 0,
+				'thumbs'     => $display_thumbs,
+				'thumbs_more' => $thumbs_more,
 				'view'       => $this->url->link('account/order/info', 'order_id=' . $result['order_id'], true),
 			);
 		}
@@ -344,6 +363,7 @@ class ControllerAccountOrder extends Controller {
 
 			$this->load->model('catalog/product');
 			$this->load->model('tool/upload');
+			$this->load->model('tool/image');
 
 			// Products
 			$data['products'] = array();
@@ -356,6 +376,17 @@ class ControllerAccountOrder extends Controller {
 
 			if ($products) {
 				$product_info_map = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($products, 'product_id')));
+			}
+
+			// Variant images for per-line image override (bulk, one query)
+			$variant_image_map = array();
+			$variant_ids = array_filter(array_map('intval', array_column($products, 'variant_id')));
+			if ($variant_ids) {
+				$variant_ids = array_values(array_unique($variant_ids));
+				$variant_query = $this->db->query("SELECT variant_id, image FROM `" . DB_PREFIX . "product_variant` WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
+				foreach ($variant_query->rows as $variant_row) {
+					$variant_image_map[(int)$variant_row['variant_id']] = (string)$variant_row['image'];
+				}
 			}
 
 			foreach ($products as $product) {
@@ -394,6 +425,27 @@ class ControllerAccountOrder extends Controller {
 				// "call for price" (also zero price) from the gift badge.
 				$is_gift = (float)$product['price'] == 0 && (float)$product['total'] == 0 && (int)$product['reward'] == 0 && !empty($product_info) && empty($product_info['call_for_price']);
 
+				// Prefer variant image when variant specifies one, fall back to catalog product image, then placeholder.
+				$raw_image = '';
+				$variant_id = (int)($product['variant_id'] ?? 0);
+				if ($variant_id && !empty($variant_image_map[$variant_id])) {
+					$raw_image = $variant_image_map[$variant_id];
+				} elseif (!empty($product_info) && !empty($product_info['image'])) {
+					$raw_image = $product_info['image'];
+				}
+				if (!$raw_image) {
+					$raw_image = 'placeholder.png';
+				}
+				$image = $this->model_tool_image->resize($raw_image, 64, 64);
+				if (!$image) {
+					$image = $this->model_tool_image->resize('placeholder.png', 64, 64);
+				}
+				if ($product_info) {
+					$product_href = $this->url->link('product/product', 'product_id=' . $product['product_id'], true);
+				} else {
+					$product_href = '';
+				}
+
 				$data['products'][] = array(
 					'name'     => $this->orderLocalizer()->productName($product),
 					'model'    => $product['model'],
@@ -402,6 +454,8 @@ class ControllerAccountOrder extends Controller {
 					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'is_gift'  => $is_gift,
+					'image'    => $image,
+					'href'     => $product_href,
 					'reorder'  => $reorder,
 					'return'   => $this->url->link('account/return/add', 'order_id=' . $order_info['order_id'] . '&product_id=' . $product['product_id'], true)
 				);

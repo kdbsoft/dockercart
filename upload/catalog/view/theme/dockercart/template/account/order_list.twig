@@ -38,6 +38,18 @@
           {% set badge = 'bg-gray-100 text-gray-600' %}
         {% endif %}
         <a href="{{ order.view }}" class="flex items-center gap-4 bg-white border border-gray-100 hover:border-blue-200 rounded-2xl px-5 py-4 transition-all group shadow-sm hover:shadow-md">
+          {% if order.thumbs %}
+          <div class="flex items-center flex-shrink-0">
+            <div class="flex -space-x-2">
+              {% for thumb in order.thumbs %}
+              <img src="{{ thumb }}" alt="" width="40" height="40" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover border-2 border-white shadow-sm bg-gray-50" loading="lazy">
+              {% endfor %}
+              {% if order.thumbs_more %}
+              <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-900 text-white text-[11px] font-bold flex items-center justify-center border-2 border-white shadow-sm">+{{ order.thumbs_more }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-3 mb-2">
               <div class="flex items-center gap-2">
