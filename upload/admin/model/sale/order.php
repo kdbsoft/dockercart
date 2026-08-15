@@ -2793,6 +2793,59 @@ class ModelSaleOrder extends Model {
 		return $new_order_id;
 	}
 
+	/**
+	 * Load a catalog total model (extension/total/*) and return its proxy/instance.
+	 *
+	 * The confirm()/unconfirm() implementations for order totals (coupon, credit,
+	 * reward, voucher, ...) live under catalog/model/extension/total/. The admin
+	 * Loader resolves routes against DIR_APPLICATION (/var/www/html/admin/), where
+	 * these models do not exist, so loading them the normal way throws. Resolve the
+	 * class from DIR_CATALOG instead and reuse the registry-backed model object.
+	 *
+	 * @param	string	$code	Total code (e.g. 'sub_total', 'coupon')
+	 * @return	object|null		The loaded model instance or null if unavailable
+	 */
+	private function loadCatalogTotalModel(string $code) {
+		$route = 'extension/total/' . $code;
+		$key = 'model_' . str_replace('/', '_', $route);
+
+		if ($this->registry->has($key)) {
+			return $this->registry->get($key);
+		}
+
+		$file = DIR_CATALOG . 'model/' . $route . '.php';
+
+		if (!is_file($file)) {
+			return null;
+		}
+
+		include_once(modification($file));
+
+		$class = 'Model' . preg_replace('/[^a-zA-Z0-9]/', '', $route);
+
+		if (!class_exists($class, false)) {
+			return null;
+		}
+
+		$proxy = new Proxy();
+
+		foreach (get_class_methods($class) as $method) {
+			$proxy->{$method} = function (...$args) use ($class, $method) {
+				static $instance;
+
+				if (!isset($instance)) {
+					$instance = new $class($this->registry);
+				}
+
+				return $instance->{$method}(...$args);
+			};
+		}
+
+		$this->registry->set($key, $proxy);
+
+		return $proxy;
+	}
+
 	public function addOrderHistory($order_id, $order_status_id, $comment = '', $notify = false, $override = false) {
 		$this->db->query("START TRANSACTION");
 
@@ -2832,10 +2885,10 @@ class ModelSaleOrder extends Model {
 				$order_totals = $this->getOrderTotals($order_id);
 
 				foreach ($order_totals as $order_total) {
-					$this->load->model('extension/total/' . $order_total['code']);
+					$total_model = $this->loadCatalogTotalModel((string)$order_total['code']);
 
-					if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'confirm')) {
-						$fraud_status_id = $this->{'model_extension_total_' . $order_total['code']}->confirm($this->getOrder($order_id), $order_total);
+					if ($total_model && property_exists($total_model, 'confirm')) {
+						$fraud_status_id = $total_model->confirm($this->getOrder($order_id), $order_total);
 
 						if ($fraud_status_id) {
 							$this->db->query("ROLLBACK");
@@ -2893,10 +2946,10 @@ class ModelSaleOrder extends Model {
 				$order_totals = $this->getOrderTotals($order_id);
 
 				foreach ($order_totals as $order_total) {
-					$this->load->model('extension/total/' . $order_total['code']);
+					$total_model = $this->loadCatalogTotalModel((string)$order_total['code']);
 
-					if (property_exists($this->{'model_extension_total_' . $order_total['code']}, 'unconfirm')) {
-						$this->{'model_extension_total_' . $order_total['code']}->unconfirm($order_id);
+					if ($total_model && property_exists($total_model, 'unconfirm')) {
+						$total_model->unconfirm($order_id);
 					}
 				}
 
