@@ -1,3 +1,9 @@
+## [3.1.0](https://github.com/kdbsoft/dockercart/compare/v3.0.2...v3.1.0) (2026-08-15)
+
+### Features
+
+* **docker:** namespace containers and network by COMPOSE_PROJECT_NAME ([e18f08f](https://github.com/kdbsoft/dockercart/commit/e18f08fc76d5979d0bc9361b02aa8cd53772cc82))
+
 ## [3.0.2](https://github.com/kdbsoft/dockercart/compare/v3.0.1...v3.0.2) (2026-08-15)
 
 ### Bug Fixes
