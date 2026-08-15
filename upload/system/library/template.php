@@ -12,7 +12,7 @@
 */
 class Template {
 	private $adaptor;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -28,25 +28,25 @@ class Template {
 			throw new \Exception('Error: Could not load template adaptor ' . $adaptor . '!');
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 *
 	 * @param	string	$key
 	 * @param	mixed	$value
- 	*/	
+ 	*/
 	public function set($key, $value) {
 		$this->adaptor->set($key, $value);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 *
 	 * @param	string	$template
 	 * @param	bool	$cache
 	 *
 	 * @return	string
- 	*/	
+ 	*/
 	public function render($template, $cache = false) {
 		return $this->adaptor->render($template, $cache);
 	}
