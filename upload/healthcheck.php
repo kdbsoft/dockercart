@@ -1,16 +1,16 @@
 <?php
-// Simple health check endpoint for DockerCart
+// Health check endpoint for DockerCart
 // Usage: curl -H "X-Healthcheck-Token: <token>" /healthcheck.php
+// When HEALTHCHECK_TOKEN is set, requests without a matching header get 403;
+// when it is empty, the endpoint is open but only reports status (no secrets).
 
 $healthcheckToken = getenv('HEALTHCHECK_TOKEN');
-if ($healthcheckToken === false || $healthcheckToken === '') {
-    return;
-}
-
-$headerToken = $_SERVER['HTTP_X_HEALTHCHECK_TOKEN'] ?? '';
-if ($headerToken !== $healthcheckToken) {
-    http_response_code(403);
-    return;
+if ($healthcheckToken !== false && $healthcheckToken !== '') {
+    $headerToken = $_SERVER['HTTP_X_HEALTHCHECK_TOKEN'] ?? '';
+    if ($headerToken !== $healthcheckToken) {
+        http_response_code(403);
+        return;
+    }
 }
 
 header('Content-Type: application/json; charset=utf-8');
@@ -80,11 +80,14 @@ if ($cache_engine === 'redis' && defined('REDIS_HOSTNAME') && defined('REDIS_POR
 	try {
 		$redis = new Redis();
 		$redis_ok = $redis->connect(REDIS_HOSTNAME, (int) REDIS_PORT, 2);
+		if ($redis_ok && defined('REDIS_PASSWORD') && REDIS_PASSWORD) {
+			$redis_ok = $redis->auth(REDIS_PASSWORD);
+		}
 		if ($redis_ok) {
 			$result['cache'] = ['engine' => 'redis', 'ok' => true];
 		} else {
 			$ok = false;
-			$result['cache'] = ['engine' => 'redis', 'ok' => false, 'error' => 'connection failed'];
+			$result['cache'] = ['engine' => 'redis', 'ok' => false, 'error' => 'auth failed'];
 		}
 	} catch (Throwable $e) {
 		$ok = false;
