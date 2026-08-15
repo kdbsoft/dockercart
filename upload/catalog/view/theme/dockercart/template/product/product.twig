@@ -295,7 +295,7 @@
               <a href="{{ gift.href }}" class="text-sm font-medium text-gray-800 hover:text-amber-600 transition line-clamp-2">{{ gift.name }}</a>
               <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span class="text-xs text-gray-400 line-through">{{ gift.price }}</span>
-                <span class="text-sm font-extrabold text-amber-700">{{ text_free }}</span>
+                <span class="text-sm font-extrabold text-amber-700">{{ gift.price_zero }}</span>
               </div>
               {% if gift.minimum_quantity > 1 %}
               <p class="text-xs text-gray-500 mt-0.5">{{ text_gift_minimum }}: {{ gift.minimum_quantity }}</p>
