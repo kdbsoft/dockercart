@@ -135,7 +135,7 @@ class ModelAccountOrder extends Model {
 		return $query->rows;
 	}
 
-	public function getPaymentStatus($total, $paid_amount) {
+	public function getPaymentStatus($total, $paid_amount, $decimal_place = 4, $currency_value = 1) {
 		$total = (float)$total;
 		$paid_amount = (float)$paid_amount;
 
@@ -147,7 +147,7 @@ class ModelAccountOrder extends Model {
 			return 'unpaid';
 		}
 
-		if ($paid_amount > $total) {
+		if (round(($paid_amount - $total) * (float)$currency_value, (int)$decimal_place) > 0) {
 			return 'overpaid';
 		}
 
