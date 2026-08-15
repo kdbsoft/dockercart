@@ -62,6 +62,10 @@ class ControllerToolUpdate extends Controller {
 		$data['text_stale'] = $this->language->get('text_stale');
 		$data['text_request_failed'] = $this->language->get('text_request_failed');
 		$data['text_update_failed'] = $this->language->get('text_update_failed');
+		$data['text_update_complete'] = $this->language->get('text_update_complete');
+		$data['text_reconnecting'] = $this->language->get('text_reconnecting');
+		$data['text_reload_hint'] = $this->language->get('text_reload_hint');
+		$data['text_warnings'] = $this->language->get('text_warnings');
 
 		$data['entry_remote'] = $this->language->get('entry_remote');
 		$data['entry_branch'] = $this->language->get('entry_branch');
@@ -157,6 +161,7 @@ class ControllerToolUpdate extends Controller {
 				'percent'    => 0,
 				'message'    => $this->language->get('text_running'),
 				'log'        => [],
+				'warning'    => [],
 				'done'       => false,
 				'error'      => null,
 				'pid'        => null,
@@ -190,6 +195,7 @@ class ControllerToolUpdate extends Controller {
 		} else {
 			$json = $this->model_tool_update->getStatus();
 			$json['success'] = true;
+			$json['local_version'] = $this->model_tool_update->getLocalVersion();
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

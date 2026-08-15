@@ -20,6 +20,10 @@ $_['text_limitations']       = 'The GUI updater synchronizes application files (
 $_['text_stale']             = 'A previous update run was interrupted. Maintenance mode may still be enabled. Use the button below to restore maintenance mode and clear the update state, then try again.';
 $_['text_request_failed']    = 'Request failed';
 $_['text_update_failed']     = 'Update failed';
+$_['text_update_complete']   = 'Update complete — now running version %s.';
+$_['text_reconnecting']      = 'Connection to the server was lost — reconnecting…';
+$_['text_reload_hint']       = 'Could not reach the server. Reload the page to see the current status.';
+$_['text_warnings']          = 'Warnings';
 
 // Entry
 $_['entry_remote']           = 'Repository URL';
