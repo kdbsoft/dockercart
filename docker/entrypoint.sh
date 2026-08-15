@@ -716,6 +716,17 @@ wait_for_mysql
 # Инициализация БД (если MariaDB пропустила init из-за существующего volume)
 initialize_database || echo "WARNING: Database initialization failed — continuing anyway"
 
+# Apply tracked SQL migrations now that the base schema from init.sql is in
+# place. Running them here (inside the apache entrypoint, after initialize_database)
+# guarantees the base tables exist before any ALTER/ADD COLUMN migration runs —
+# fixing the start.sh race where run-migrations fired a fixed sleep before the
+# seed import finished. Idempotent + recorded in oc_schema_migrations, so re-runs
+# and the host-side `make migrate` are both no-ops once applied.
+if [ -f /var/www/dc-scripts/run-migrations.sh ]; then
+	echo "Applying database migrations..."
+	/var/www/dc-scripts/run-migrations.sh || echo "WARNING: migrations failed — run 'make migrate' later"
+fi
+
 apply_php_settings
 
 ensure_encryption_key

@@ -430,18 +430,10 @@ echo -e "${YELLOW}Waiting for services to be ready...${NC}"
 sleep 10
 
 echo -e "${GREEN}✓ Containers started${NC}"
-
-# Apply tracked SQL migrations so a fresh install also gets schema changes that
-# live outside init.sql (see AGENTS.md: migrations/). The migration files and
-# runner are bind-mounted into the apache container, which already carries the
-# mariadb client and DB_* env vars.
-echo -e "${BLUE}Applying database migrations...${NC}"
-if docker compose "${COMPOSE_FILES[@]}" exec -T apache bash /var/www/dc-scripts/run-migrations.sh; then
-    echo -e "${GREEN}✓ Migrations applied${NC}"
-else
-    echo -e "${YELLOW}⚠ Migration step failed or skipped (DB not ready yet).${NC}"
-    echo -e "${YELLOW}  Run 'make migrate' once the stack is up to apply pending migrations.${NC}"
-fi
+echo ""
+echo -e "${BLUE}ℹ Migrations are applied automatically by the apache entrypoint${NC}"
+echo -e "${BLUE}  (after the base schema from init.sql is imported). No separate${NC}"
+echo -e "${BLUE}  step needed here — run 'make migrate' only to re-apply manually.${NC}"
 echo ""
 
 # ============================================================================

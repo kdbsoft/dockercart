@@ -63,6 +63,25 @@ until MYSQL_PWD="$DB_PASS" mariadb -h"$DB_HOST" -u"$DB_USER" --skip-ssl -e "SELE
 done
 echo "run-migrations: MariaDB is up."
 
+# Migrations assume the base schema from init.sql already exists (e.g. they
+# ALTER oc_customer_group). Guard against running before the seed/import has
+# created the core tables — otherwise the first migration fails with
+# "Table ... doesn't exist" and the whole run aborts. Wait for a sentinel table.
+SENTINEL_TABLE="${DB_PREFIX_VALUE}setting"
+echo "run-migrations: waiting for base schema (table \`${SENTINEL_TABLE}\`)..."
+sentinel_attempts=60
+sentinel_i=0
+until db_exec -Nse "SELECT 1 FROM \`${SENTINEL_TABLE}\` LIMIT 1" >/dev/null 2>&1; do
+	sentinel_i=$((sentinel_i + 1))
+	if [ "$sentinel_i" -ge "$sentinel_attempts" ]; then
+		echo "run-migrations: ERROR: base schema never appeared (gave up after ${sentinel_attempts} attempts). Was init.sql imported?" >&2
+		exit 1
+	fi
+	echo "run-migrations: base schema not ready yet (attempt ${sentinel_i}/${sentinel_attempts}) - sleeping"
+	sleep 2
+done
+echo "run-migrations: base schema present."
+
 echo "run-migrations: ensuring tracking table ${MIGRATION_TABLE} exists..."
 db_exec -e "CREATE TABLE IF NOT EXISTS \`$MIGRATION_TABLE\` (filename VARCHAR(255) NOT NULL, applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (filename)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
 
