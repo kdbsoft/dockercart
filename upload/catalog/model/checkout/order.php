@@ -201,6 +201,11 @@ class ModelCheckoutOrder extends Model {
 		$this->db->query("DELETE `or`, ort FROM `" . DB_PREFIX . "order_recurring` `or`, `" . DB_PREFIX . "order_recurring_transaction` `ort` WHERE order_id = '" . (int)$order_id . "' AND ort.order_recurring_id = `or`.order_recurring_id");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "customer_transaction` WHERE order_id = '" . (int)$order_id . "'");
 
+		// Release any checkout holds bound to the deleted order so the stock
+		// frees up for other buyers.
+		$stock_reservation = new \DockercartStockReservation($this->registry);
+		$stock_reservation->releaseOrder((int)$order_id);
+
 		// Gift Voucher
 		$this->load->model('extension/total/voucher');
 
@@ -458,6 +463,18 @@ class ModelCheckoutOrder extends Model {
 			if (!$was_complete && $is_complete) {
 				$dockercart_reward = new \DockercartReward($this->registry);
 				$dockercart_reward->awardOrderReward((int)$order_id);
+			}
+
+			// Cancelled (or any non-fulfilled status) → release the checkout
+			// holds bound to this order. This must run even when the order never
+			// entered processing/complete, otherwise the holds stay attached
+			// forever and the stock never frees up for other buyers.
+			$cancelled_statuses = (array)$this->config->get('config_cancelled_status');
+			$is_cancelled = $cancelled_statuses && in_array((int)$order_status_id, $cancelled_statuses, true);
+
+			if ($is_cancelled) {
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
 			}
 
 			// Update the DB with the new statuses

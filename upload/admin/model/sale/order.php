@@ -2648,6 +2648,11 @@ class ModelSaleOrder extends Model {
 				$this->db->query("UPDATE `" . DB_PREFIX . "voucher` SET `status` = '0' WHERE voucher_id = '" . (int)$order_voucher['voucher_id'] . "'");
 			}
 
+			// Release any checkout holds bound to the deleted order so the stock
+			// frees up for other buyers.
+			$stock_reservation = new \DockercartStockReservation($this->registry);
+			$stock_reservation->releaseOrder((int)$order_id);
+
 			$this->db->query("COMMIT");
 		} catch (\Exception $e) {
 			$this->db->query("ROLLBACK");
@@ -2929,6 +2934,18 @@ class ModelSaleOrder extends Model {
 			if (!$was_complete && $is_complete) {
 				$dockercart_reward = new \DockercartReward($this->registry);
 				$dockercart_reward->awardOrderReward((int)$order_id);
+			}
+
+			// Cancelled (or any non-fulfilled status) → release the checkout
+			// holds bound to this order. Must run even when the order never
+			// entered processing/complete, otherwise the holds stay attached
+			// forever and the stock never frees up for other buyers.
+			$cancelled_statuses = (array)$this->config->get('config_cancelled_status');
+			$is_cancelled = $cancelled_statuses && in_array((int)$order_status_id, $cancelled_statuses, true);
+
+			if ($is_cancelled) {
+				$stock_reservation = new \DockercartStockReservation($this->registry);
+				$stock_reservation->releaseOrder((int)$order_id);
 			}
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
