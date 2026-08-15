@@ -1,3 +1,9 @@
+## [3.0.2](https://github.com/kdbsoft/dockercart/compare/v3.0.1...v3.0.2) (2026-08-15)
+
+### Bug Fixes
+
+* **scripts:** move shellcheck disable to the line it applies to ([249c30c](https://github.com/kdbsoft/dockercart/commit/249c30c001033261e45251dbf1be789512d55464))
+
 ## [3.0.1](https://github.com/kdbsoft/dockercart/compare/v3.0.0...v3.0.1) (2026-08-15)
 
 ### Bug Fixes
