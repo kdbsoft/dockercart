@@ -134,6 +134,26 @@ class ControllerCommonHeader extends Controller {
 
 			$data['admin_search_url'] = $this->url->link('common/admin_search', 'user_token=' . $this->session->data['user_token'], true);
 			$data['admin_search_suggest_url'] = $this->url->link('common/admin_search/suggest', 'user_token=' . $this->session->data['user_token'], true);
+
+			// System Update availability bell
+			$data['show_update_bell'] = false;
+
+			if ($this->user->hasPermission('access', 'tool/update')) {
+				$this->load->language('tool/update');
+				$this->load->model('tool/update');
+
+				$update_info = $this->model_tool_update->getUpdateInfo(false);
+
+				$data['show_update_bell'] = true;
+				$data['update_available'] = $update_info['update_available'];
+				$data['update_remote_version'] = $update_info['remote'];
+				$data['update_changelog'] = $update_info['changelog'];
+				$data['update_url'] = $this->url->link('tool/update', 'user_token=' . $this->session->data['user_token'], true);
+				$data['text_update_available'] = $this->language->get('text_update_available');
+				$data['text_no_changelog'] = $this->language->get('text_no_changelog');
+				$data['text_system_update'] = $this->language->get('text_system_update');
+				$data['button_update'] = $this->language->get('button_update');
+			}
 		}
 
 		$store_language_id = (int)$this->config->get('config_language_id');
