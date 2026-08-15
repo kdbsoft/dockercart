@@ -353,6 +353,7 @@ $_['text_price_from']            = 'от';
 $_['text_stock_in']              = 'В наличии';
 $_['text_stock_out']             = 'Нет в наличии';
 $_['text_stock_not_tracked']     = 'Учет остатков не ведется';
+$_['text_stock_reserved']        = 'В резерве';
 $_['text_configurable']          = 'Конфигурируемый';
 $_['text_variant']               = 'Вариант';
 $_['text_unit_price']            = 'Цена за ед.';

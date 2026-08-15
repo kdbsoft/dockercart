@@ -769,7 +769,11 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .pcm-meta { font-size:12px; color:#666; display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap; }
 .pcm-price { font-weight:600; color:#2563eb; }
 .pcm-total { font-weight:700; color:#2563eb; font-size:14px; }
-.pcm-sub { font-size:11px; color:#999; margin-top:2px; }
+ .pcm-sub { font-size:11px; color:#999; margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+ .pcm-stock { font-weight:600; padding:1px 7px; border-radius:8px; }
+ .pcm-stock--in { color:#15803d; background:#dcfce7; }
+ .pcm-stock--out { color:#b91c1c; background:#fee2e2; }
+ .pcm-stock--reserved { color:#6d28d9; background:#ede9fe; }
 .pcm-sep { color:#ddd; }
 .pcm-variant { font-size:11px; color:#555; background:#fff7ed; border:1px solid #fed7aa; border-radius:6px; padding:4px 8px; display:inline-flex; align-items:center; gap:6px; margin-top:4px; }
 .pcm-variant__from { text-decoration:line-through; color:#999; }
@@ -1948,7 +1952,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			b.textContent = '{{ text_stock_not_tracked }}';
 		} else if (p.stock && p.stock.total > 0) {
 			b.className = 'dcx-picker__stock dcx-picker__stock--in';
-			b.textContent = '{{ text_stock_in }}: ' + p.stock.total;
+			let label = '{{ text_stock_in }}: ' + p.stock.total;
+			if (p.stock.reserved > 0) {
+				label += ' · {{ text_stock_reserved }}: ' + p.stock.reserved;
+			}
+			b.textContent = label;
 		} else {
 			b.className = 'dcx-picker__stock dcx-picker__stock--out';
 			b.textContent = '{{ text_stock_out }}';
@@ -2301,7 +2309,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			if (j.stock > 0) {
 				stockItem.className = 'order-product-preview__stock-ok';
 				stockItem.innerHTML = '<i data-lucide="circle-check" width="12" height="12"></i><span></span>';
-				stockItem.querySelector('span').textContent = '{{ text_stock_in }}: ' + j.stock;
+				let stockLabel = '{{ text_stock_in }}: ' + j.stock;
+				if (j.reserved > 0) {
+					stockLabel += ' · {{ text_stock_reserved }}: ' + j.reserved;
+				}
+				stockItem.querySelector('span').textContent = stockLabel;
 			} else {
 				stockItem.className = 'order-product-preview__stock-warn';
 				stockItem.innerHTML = '<i data-lucide="alert-triangle" width="12" height="12"></i><span></span>';

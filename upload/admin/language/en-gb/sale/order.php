@@ -356,6 +356,7 @@ $_['text_price_from']            = 'from';
 $_['text_stock_in']              = 'In stock';
 $_['text_stock_out']             = 'Out of stock';
 $_['text_stock_not_tracked']     = 'Stock not tracked';
+$_['text_stock_reserved']        = 'Reserved';
 $_['text_configurable']          = 'Configurable';
 $_['text_variant']               = 'Variant';
 $_['text_unit_price']            = 'Unit price';

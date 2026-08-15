@@ -98,14 +98,18 @@ class DockercartStockReservation {
 
 	/**
 	 * Reserved quantities keyed by "product_id:variant_id" for the given
-	 * product ids (all variants of those products are included). Own unbound
-	 * rows are excluded (they do not block the own cart); order-bound rows
-	 * always count.
+	 * product ids (all variants of those products are included). By default the
+	 * caller's own unbound holds are excluded (they do not block the own cart);
+	 * order-bound holds always count. Pass $exclude_session = false to count
+	 * every active hold — used by the admin, which inspects stock from the
+	 * seller's perspective and must see holds made in the same browser session.
 	 *
 	 * @param array $product_ids
+	 * @param string|null $session_id
+	 * @param bool $exclude_session
 	 * @return array<string, float>
 	 */
-	public function getReservedByProductIds(array $product_ids, ?string $session_id = null): array {
+	public function getReservedByProductIds(array $product_ids, ?string $session_id = null, bool $exclude_session = true): array {
 		$product_ids = array_values(array_unique(array_map('intval', $product_ids)));
 		$product_ids = array_filter($product_ids, function ($id) {
 			return $id > 0;
@@ -119,7 +123,11 @@ class DockercartStockReservation {
 
 		$in = implode(',', $product_ids);
 
-		$query = $this->db->query("SELECT product_id, variant_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE expires_at > NOW() AND product_id IN (" . $in . ") AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "') GROUP BY product_id, variant_id");
+		$session_filter = $exclude_session
+			? " AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "')"
+			: '';
+
+		$query = $this->db->query("SELECT product_id, variant_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE expires_at > NOW() AND product_id IN (" . $in . ")" . $session_filter . " GROUP BY product_id, variant_id");
 
 		$map = [];
 
@@ -131,10 +139,43 @@ class DockercartStockReservation {
 	}
 
 	/**
+	 * Reserved quantity summed per product (ignoring variant), keyed by
+	 * product_id. Used by the admin product picker to show how much of a
+	 * simple product (or a whole configurable product's stock) is currently
+	 * held in active checkout reservations.
+	 *
+	 * @param array $product_ids
+	 * @return array<int, float>
+	 */
+	public function getReservedTotalByProductIds(array $product_ids): array {
+		$product_ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$product_ids = array_filter($product_ids, function ($id) {
+			return $id > 0;
+		});
+
+		if (empty($product_ids)) {
+			return [];
+		}
+
+		$in = implode(',', $product_ids);
+
+		$query = $this->db->query("SELECT product_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE expires_at > NOW() AND product_id IN (" . $in . ") GROUP BY product_id");
+
+		$map = [];
+
+		foreach ($query->rows as $row) {
+			$map[(int)$row['product_id']] = (float)$row['reserved'];
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Atomically (re)create holds for the given cart lines. Existing unbound
-	 * holds of the session are replaced, refreshing expires_at. Rows for
-	 * products that do not track stock (subtract = 0) or are preorders are not
-	 * held and never fail.
+	 * holds of the session are replaced, refreshing expires_at. Lines that
+	 * cannot be held — no stock tracking (subtract = 0), preorders, a deleted
+	 * product, or a removed/disabled variant — are skipped and never fail, so a
+	 * single stale cart line cannot sink the whole batch.
 	 *
 	 * @param array $lines each line: ['product_id' => int, 'variant_id' => int, 'quantity' => float]
 	 * @return array failed lines (insufficient available stock)

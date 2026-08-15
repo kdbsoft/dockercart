@@ -354,6 +354,7 @@ $_['text_price_from']            = 'від';
 $_['text_stock_in']              = 'В наявності';
 $_['text_stock_out']             = 'Немає в наявності';
 $_['text_stock_not_tracked']     = 'Облік залишків не ведеться';
+$_['text_stock_reserved']        = 'У резерві';
 $_['text_configurable']          = 'Конфігурований';
 $_['text_variant']               = 'Варіант';
 $_['text_unit_price']            = 'Ціна за од.';
