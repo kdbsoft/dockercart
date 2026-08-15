@@ -656,6 +656,7 @@ class ControllerProductProduct extends Controller {
 					'name'             => $gift['name'],
 					'image'            => $gift_image,
 					'price'            => $this->currency->format($this->tax->calculate($gift['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'price_zero'       => $this->currency->format(0, $this->session->data['currency']),
 					'href'             => $this->url->link('product/product', 'product_id=' . $gift['gift_product_id']),
 					'minimum_quantity' => (int)$gift['minimum_quantity']
 				);
