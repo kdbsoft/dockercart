@@ -289,7 +289,7 @@ class ControllerAccountOrder extends Controller {
 
 			$data['total'] = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value']);
 			$data['paid_amount'] = $this->currency->format($order_info['paid_amount'], $order_info['currency_code'], $order_info['currency_value']);
-			$data['payment_status'] = $this->model_account_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
+			$data['payment_status'] = $this->model_account_order->getPaymentStatus($order_info['total'], $order_info['paid_amount'], $this->currency->getDecimalPlace($order_info['currency_code']), $order_info['currency_value']);
 			$data['payment_status_text'] = $this->language->get('text_payment_status_' . $data['payment_status']);
 			$data['payment_remaining'] = $this->currency->format(max(0, (float)$order_info['total'] - (float)$order_info['paid_amount']), $order_info['currency_code'], $order_info['currency_value']);
 

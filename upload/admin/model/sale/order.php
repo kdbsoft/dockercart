@@ -443,16 +443,20 @@ class ModelSaleOrder extends Model {
 
 	private function getPaymentStatusFilterSql(string $status, string $alias = ''): string {
 		$prefix = $alias ? $alias . '.' : '';
+		$decimal_place = "COALESCE((SELECT decimal_place FROM " . DB_PREFIX . "currency c WHERE c.code = " . $prefix . "currency_code LIMIT 1), 4)";
+		$paid_amount = "ROUND(" . $prefix . "paid_amount * " . $prefix . "currency_value, " . $decimal_place . ")";
+		$total = "ROUND(" . $prefix . "total * " . $prefix . "currency_value, " . $decimal_place . ")";
+		$payment_difference = "(" . $paid_amount . " - " . $total . ")";
 
 		switch ($status) {
 			case 'unpaid':
-				return " AND " . $prefix . "paid_amount <= 0";
+				return " AND " . $paid_amount . " <= 0";
 			case 'partial':
-				return " AND " . $prefix . "paid_amount > 0 AND " . $prefix . "paid_amount < " . $prefix . "total";
+				return " AND " . $paid_amount . " > 0 AND " . $payment_difference . " < 0";
 			case 'paid':
-				return " AND " . $prefix . "paid_amount >= " . $prefix . "total";
+				return " AND " . $payment_difference . " >= 0";
 			case 'overpaid':
-				return " AND " . $prefix . "paid_amount > " . $prefix . "total AND " . $prefix . "total > 0";
+				return " AND " . $payment_difference . " > 0 AND " . $prefix . "total > 0";
 			default:
 				return "";
 		}
@@ -2240,9 +2244,13 @@ class ModelSaleOrder extends Model {
 		return (int)$query->row['total'];
 	}
 
-	public function getPaymentStatus($total, $paid_amount) {
+	public function getPaymentStatus($total, $paid_amount, $decimal_place = 4, $currency_value = 1) {
 		$total = (float)$total;
 		$paid_amount = (float)$paid_amount;
+		$decimal_place = (int)$decimal_place;
+		$currency_value = (float)$currency_value;
+		$total = round($total * $currency_value, $decimal_place);
+		$paid_amount = round($paid_amount * $currency_value, $decimal_place);
 
 		if ($total <= 0) {
 			return 'paid';
@@ -2363,8 +2371,9 @@ class ModelSaleOrder extends Model {
 			$total = (float)$order_info['total'];
 			$paid_amount = (float)$order_info['paid_amount'];
 			$overpaid = $paid_amount - $total;
+			$overpaid_rounded = round($overpaid * (float)$order_info['currency_value'], (int)$this->currency->getDecimalPlace($order_info['currency_code']));
 
-			if ($overpaid <= 0) {
+			if ($overpaid_rounded <= 0) {
 				$this->db->query("ROLLBACK");
 				return false;
 			}

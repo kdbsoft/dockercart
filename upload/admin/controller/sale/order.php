@@ -152,10 +152,10 @@ class ControllerSaleOrder extends Controller {
 				continue;
 			}
 
-			$payment_status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount']);
 			$order_localizer = new OrderLocalizer($this->registry);
 			$currency_code = $order_info['currency_code'];
 			$currency_value = $order_info['currency_value'];
+			$payment_status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount'], $this->currency->getDecimalPlace($currency_code), $currency_value);
 
 			$rows[] = array(
 				$order_id,
@@ -458,8 +458,8 @@ class ControllerSaleOrder extends Controller {
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
-			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount']);
 			$order_localizer = new OrderLocalizer($this->registry);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
