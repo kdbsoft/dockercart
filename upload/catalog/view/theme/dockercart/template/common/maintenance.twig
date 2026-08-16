@@ -1,24 +1,25 @@
 {{ header }}
-<div id="common-maintenance" class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-6">
-      <div class="text-center bg-white rounded-3 shadow-sm p-5 border border-light">
-        <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle mb-4" style="width:88px;height:88px;">
-          <i data-lucide="wrench" width="40" height="40"></i>
-        </div>
-        <h1 class="fw-bold mb-3">{{ heading_title }}</h1>
-        <p class="text-muted fs-5 mb-4">{{ message }}</p>
-        <div class="d-inline-flex align-items-center gap-2 text-muted small">
-          <span class="spinner-border spinner-border-sm text-warning" role="status" aria-hidden="true"></span>
-          {{ text_status }}
-        </div>
-        {% if contact %}
-        <div class="mt-4 pt-3 border-top">
-          <a href="mailto:{{ contact }}" class="link-secondary text-decoration-none">{{ text_contact }}</a>
-        </div>
-        {% endif %}
+<main class="min-h-[80vh] flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-lg">
+    <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8 sm:p-12 text-center">
+      <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+        <i data-lucide="settings-2" class="h-9 w-9"></i>
       </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">{{ heading_title }}</h1>
+      <p class="mt-4 text-base leading-relaxed text-gray-500">{{ message }}</p>
+      <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-gray-50 px-4 py-2 text-sm font-medium text-gray-500">
+        <i data-lucide="loader" class="h-4 w-4 animate-spin"></i>
+        {{ text_status }}
+      </div>
+      {% if contact %}
+      <div class="mt-8 border-t border-gray-100 pt-6">
+        <a href="mailto:{{ contact }}" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+          <i data-lucide="mail" class="h-4 w-4"></i>
+          {{ text_contact }}
+        </a>
+      </div>
+      {% endif %}
     </div>
   </div>
-</div>
+</main>
 {{ footer }}
