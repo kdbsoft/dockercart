@@ -1,7 +1,7 @@
 # Docker Compose override for standalone self-signed SSL mode
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.ssl.yml up -d
-#   make ssl
+#   make start ARGS="--ssl"
 
 services:
   nginx:
