@@ -14,12 +14,21 @@ class ControllerCommonDashboard extends Controller {
 
 		$data['onboarding_enabled'] = (bool)$this->config->get('config_onboarding_enabled');
 
+		// The store is considered "configured" once the admin email differs from
+		// the value seeded at install time. The install default is recorded by the
+		// entrypoint bootstrap in `config_onboarding_email_default`; fall back to the
+		// known default for databases bootstrapped before that setting existed.
+		$default_email = $this->config->get('config_onboarding_email_default');
+		if ($default_email === null || $default_email === '') {
+			$default_email = 'admin@dockercart.net';
+		}
+
 		$data['onboarding_steps'] = array(
 			array(
 				'title' => $this->language->get('text_step_settings'),
 				'desc'  => $this->language->get('text_step_settings_desc'),
 				'href'  => $this->url->link('setting/setting', 'user_token=' . $this->session->data['user_token'], true),
-				'done'  => ($this->config->get('config_email') !== 'admin@example.com'),
+				'done'  => ((string)$this->config->get('config_email') !== (string)$default_email),
 				'icon'  => 'settings'
 			),
 			array(
