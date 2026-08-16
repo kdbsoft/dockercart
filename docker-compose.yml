@@ -3,7 +3,7 @@
 #
 # Usage:
 #   docker compose up -d --build
-#   make up
+#   make start
 #
 # For SSL:  docker compose -f docker-compose.yml -f docker-compose.ssl.yml up -d
 # For LE:   docker compose -f docker-compose.yml -f docker-compose.le.yml up -d
@@ -217,6 +217,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+    stop_signal: SIGTERM
+    stop_grace_period: 40s
 
   mariadb:
     image: mariadb:12.3.2
@@ -254,7 +256,10 @@ services:
       test:
         [
           "CMD-SHELL",
-          "MYSQL_PWD=${MARIADB_PASSWORD:-dockercart_password} mariadb-admin ping -h localhost -u ${MARIADB_USER:-dockercart} 2>/dev/null || exit 1",
+          # $$ escapes interpolation so the shell resolves these at runtime from
+          # the container env (works under docker compose and podman-compose,
+          # independent of .env interpolation quirks).
+          "MYSQL_PWD=\"$${MARIADB_PASSWORD}\" mariadb-admin ping -h localhost -u \"$${MARIADB_USER}\" 2>/dev/null || exit 1",
         ]
       interval: 10s
       timeout: 5s
@@ -370,7 +375,7 @@ services:
 
   # One-shot backup worker. Started by host cron via:
   #   docker compose run --rm --no-deps backup-worker
-  # Never started by `make up` (profile: backup). Reuses the same image as apache/scheduler.
+  # Never started by `make start` (profile: backup). Reuses the same image as apache/scheduler.
   backup-worker:
     profiles:
       - backup
