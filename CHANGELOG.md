@@ -1,3 +1,13 @@
+## [3.3.0](https://github.com/kdbsoft/dockercart/compare/v3.2.0...v3.3.0) (2026-08-15)
+
+### Features
+
+* **catalog:** redesign maintenance page with status and contact info ([14411d3](https://github.com/kdbsoft/dockercart/commit/14411d312f9ebe36b11f41f735696dbf18ef5d77))
+
+### Bug Fixes
+
+* **docker:** chown webroot to root:staff for rootless podman ([7580c4e](https://github.com/kdbsoft/dockercart/commit/7580c4edd981be5ffb46821207f93fbc2b78988b))
+
 ## [3.2.0](https://github.com/kdbsoft/dockercart/compare/v3.1.2...v3.2.0) (2026-08-15)
 
 ### Features
