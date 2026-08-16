@@ -7,12 +7,9 @@
 
 # Load runtime configuration from .env (best-effort)
 if [ -f .env ]; then
-    set -a
-    set +e
     # shellcheck disable=SC1091
-    . ./.env
-    set -e
-    set +a
+    . ./scripts/load-env.sh
+    load_env .env
 fi
 
 DOCKERCART_HTTP_PORT=${DOCKERCART_HTTP_PORT:-80}
