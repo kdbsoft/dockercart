@@ -173,7 +173,7 @@ class ReviewMedia {
 		$dir = 'catalog/reviews';
 
 		if ($review_id > 0) {
-			$dir .= '/' . $review_id;
+			$dir .= '/' . intdiv($review_id, 1000) . '/' . $review_id;
 		}
 
 		if ($sub !== '') {
