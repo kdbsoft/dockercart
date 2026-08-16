@@ -93,3 +93,7 @@ $_['error_reason']         = 'Return Reason must be selected!';
 $_['error_products']       = 'Select at least one item with a quantity to return!';
 $_['error_amount']         = 'Refund amount cannot be negative!';
 $_['button_export_csv']           = 'Export Selected Returns to CSV';
+
+// Empty state
+$_['text_empty_title']       = 'No returns yet';
+$_['text_empty_description'] = 'Product returns requested by customers appear here. Nothing to process right now.';

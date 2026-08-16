@@ -44,3 +44,7 @@ $_['entry_option']      = 'Option';
 $_['error_permission']      = 'Warning: You do not have permission to modify option sets!';
 $_['error_name']            = 'Option Set Name must be between 1 and 64 characters!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No option sets yet';
+$_['text_empty_description'] = 'Option sets group options you reuse across products. Create your first set.';

@@ -42,3 +42,7 @@ $_['error_name']        = 'Attribute Group Name must be between 1 and 64 charact
 $_['error_attribute']   = 'Warning: This attribute group cannot be deleted as it is currently assigned to %s attributes!';
 $_['error_product']     = 'Warning: This attribute group cannot be deleted as it is currently assigned to %s products!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No attribute groups yet';
+$_['text_empty_description'] = 'Group related attributes together for a cleaner product form. Create your first attribute group.';

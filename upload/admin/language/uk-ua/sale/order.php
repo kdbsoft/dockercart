@@ -434,3 +434,7 @@ $_['button_remove_overpayment']      = 'Прибрати переплату';
 $_['column_paid']                    = 'Оплачено';
 $_['error_payment_amount']           = 'Введіть суму платежу більше нуля!';
 $_['error_no_overpayment']           = 'Переплати немає!';
+
+// Empty state
+$_['text_empty_title']       = 'Поки немає замовлень';
+$_['text_empty_description'] = 'Замовлення покупців та їхній статус з’являться тут. Вони надійдуть, щойно почнуться продажі.';

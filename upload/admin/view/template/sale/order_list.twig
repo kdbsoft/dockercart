@@ -99,6 +99,7 @@
         </div>
       </div>
     </div>
+        {% if orders %}
         <form method="post" action="" enctype="multipart/form-data" id="form-order">
           <div class="table-responsive">
             <table class="table table-bordered table-hover">
@@ -117,7 +118,6 @@
               </thead>
               <tbody>
               
-              {% if orders %}
               {% for order in orders %}
               <tr data-href="{{ order.view }}">
                 <td class="text-center"> {% if order.order_id in selected %}
@@ -138,11 +138,6 @@
                 <td class="text-right">{{ order.total }}</td>
               </tr>
               {% endfor %}
-              {% else %}
-              <tr>
-                <td class="text-center" colspan="9">{{ text_no_results }}</td>
-              </tr>
-              {% endif %}
                 </tbody>
               
             </table>
@@ -154,6 +149,16 @@
             <div class="col-sm-6 text-right">{{ results }}</div>
           </div>
         </div>
+        {% else %}
+        {% include 'common/empty_state.twig' with {
+          icon: 'order',
+          standalone: true,
+          title: text_empty_title,
+          description: text_empty_description,
+          action_url: add,
+          action_text: button_add
+        } %}
+        {% endif %}
   </div>
   <script type="text/javascript"><!--
 $('#button-filter').on('click', function() {

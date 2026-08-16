@@ -44,3 +44,7 @@ $_['error_attribute_group']  = 'Attribute Group Required!';
 $_['error_name']             = 'Attribute Name must be between 1 and 64 characters!';
 $_['error_product']          = 'Warning: This attribute cannot be deleted as it is currently assigned to %s products!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No attributes yet';
+$_['text_empty_description'] = 'Attributes describe product specs like size or colour. Add your first attribute to start building structured data.';

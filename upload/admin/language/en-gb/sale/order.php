@@ -445,3 +445,7 @@ $_['button_remove_overpayment']      = 'Remove Overpayment';
 $_['column_paid']                    = 'Paid';
 $_['error_payment_amount']           = 'Please enter a payment amount greater than zero!';
 $_['error_no_overpayment']           = 'There is no overpayment!';
+
+// Empty state
+$_['text_empty_title']       = 'No orders yet';
+$_['text_empty_description'] = 'Customer orders and their fulfilment status show up here. They will arrive as soon as sales begin.';

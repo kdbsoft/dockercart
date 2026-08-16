@@ -24,3 +24,7 @@ $_['text_edit_voucher_theme_subtitle'] = 'Редагувати дизайн те
 
 // Panel / Card titles
 $_['text_design_card'] = 'Дизайн';
+
+// Empty state
+$_['text_empty_title']       = 'Поки немає тем сертифікатів';
+$_['text_empty_description'] = 'Шаблони оформлення задають вигляд друкованих сертифікатів. Створіть першу тему.';

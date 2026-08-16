@@ -57,3 +57,7 @@ $_['error_keyword']     = 'SEO URL already in use!';
 $_['error_unique']      = 'SEO URL must be unique!';
 $_['error_product']     = 'Warning: This manufacturer cannot be deleted as it is currently assigned to %s products!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No manufacturers yet';
+$_['text_empty_description'] = 'Organize products by brand or maker. Add your first manufacturer.';

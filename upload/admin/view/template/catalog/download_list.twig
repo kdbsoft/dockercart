@@ -26,6 +26,8 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+        {% if downloads %}
+
         <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-download">
           <div class="table-responsive">
             <table class="table table-bordered table-hover">
@@ -68,6 +70,26 @@
             <div class="col-sm-6 text-right">{{ results }}</div>
           </div>
         </div>
+
+        {% else %}
+
+            {% include 'common/empty_state.twig' with {
+
+              icon: 'download',
+
+              standalone: true,
+
+              title: text_empty_title,
+
+              description: text_empty_description,
+
+              action_url: add,
+
+              action_text: button_add
+
+            } %}
+
+        {% endif %}
   </div>
 </div>
 <script type="text/javascript"><!--

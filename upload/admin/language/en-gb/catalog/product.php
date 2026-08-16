@@ -297,3 +297,7 @@ $_['text_design_card']     = 'Theme';
 $_['text_seo_preview']     = 'Preview';
 $_['text_organization_card'] = 'Organization';
 $_['text_status_card'] = 'Status';
+
+// Empty state
+$_['text_empty_title']       = 'No products yet';
+$_['text_empty_description'] = 'Products are the heart of your store. Add your first product to start selling.';

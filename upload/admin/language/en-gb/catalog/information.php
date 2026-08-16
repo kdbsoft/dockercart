@@ -65,3 +65,7 @@ $_['error_affiliate']        = 'Warning: This information page cannot be deleted
 $_['error_return']           = 'Warning: This information page cannot be deleted as it is currently assigned as the store return terms!';
 $_['error_store']            = 'Warning: This information page cannot be deleted as it is currently used by %s stores!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No information pages yet';
+$_['text_empty_description'] = 'Add static pages like About or Terms of Service. Create your first information page.';

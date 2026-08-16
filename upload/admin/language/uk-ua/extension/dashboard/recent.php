@@ -31,3 +31,4 @@ $_['text_products']        = 'товарів';
 $_['text_tracking']        = 'Відстеження';
 $_['text_view']            = 'Детальніше';
 $_['text_no_products']     = 'Немає товарів';
+$_['text_no_results']      = 'Замовлення не знайдено';

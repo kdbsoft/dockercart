@@ -46,3 +46,7 @@ $_['text_edit_manufacturer_subtitle'] = 'Редактировать данные
 $_['text_status_card'] = 'Статус';
 $_['text_seo_card'] = 'Ссылки';
 $_['text_seo_preview'] = 'Предпросмотр';
+
+// Empty state
+$_['text_empty_title']       = 'Пока нет производителей';
+$_['text_empty_description'] = 'Организуйте товары по бренду или производителю. Добавьте первого производителя.';

@@ -284,3 +284,7 @@ $_['text_design_card']     = 'Тема';
 $_['text_seo_preview']     = 'Предпросмотр';
 $_['text_organization_card'] = 'Организация';
 $_['text_status_card'] = 'Статус';
+
+// Empty state
+$_['text_empty_title']       = 'Пока нет товаров';
+$_['text_empty_description'] = 'Товары — основа вашего магазина. Добавьте первый товар, чтобы начать продажи.';

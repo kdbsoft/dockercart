@@ -26,6 +26,8 @@
     </div>
     {% endif %}
     {{ user_filter }}
+    {% if customers %}
+
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-customer">
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -73,6 +75,26 @@
         <div class="col-sm-6 text-right">{{ results }}</div>
       </div>
     </div>
+
+    {% else %}
+
+        {% include 'common/empty_state.twig' with {
+
+          icon: 'customer',
+
+          standalone: true,
+
+          title: text_empty_title,
+
+          description: text_empty_description,
+
+          action_url: add,
+
+          action_text: button_add
+
+        } %}
+
+    {% endif %}
   </div>
 </div>
 <script type="text/javascript"><!--

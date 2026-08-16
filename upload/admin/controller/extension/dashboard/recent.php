@@ -67,13 +67,14 @@ class ControllerExtensionDashboardRecent extends Controller {
 	}
 	
 	public function dashboard() {
-		$this->load->language('extension/dashboard/recent');
 		$this->load->language('sale/order');
+		$this->load->language('extension/dashboard/recent');
 
 		$data['text_recent_subtitle'] = $this->language->get('text_recent_subtitle');
 		$data['text_products']        = $this->language->get('text_products');
 		$data['text_tracking']        = $this->language->get('text_tracking');
 		$data['text_no_products']     = $this->language->get('text_no_products');
+		$data['text_no_results']      = $this->language->get('text_no_results');
 		$data['text_view']            = $this->language->get('text_view');
 		$data['user_token']           = $this->session->data['user_token'];
 		$data['orders_link']          = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);

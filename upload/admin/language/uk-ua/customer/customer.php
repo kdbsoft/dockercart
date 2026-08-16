@@ -147,3 +147,7 @@ $_['text_security_signals']   = 'Сигнали безпеки';
 $_['text_current_balance']    = 'Поточний баланс';
 $_['text_loading_customer']   = 'Завантаження даних клієнта...';
 $_['text_activity_error']     = 'Не вдалося завантажити цей розділ.';
+
+// Empty state
+$_['text_empty_title']       = 'Поки немає покупців';
+$_['text_empty_description'] = 'Тут зберігаються акаунти покупців та історія замовлень. Додайте першого покупця.';

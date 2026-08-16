@@ -95,3 +95,7 @@ $_['entry_reply_text']          = 'Write a reply...';
 $_['button_reply']              = 'Reply';
 $_['error_reply_text']          = 'Reply must be between %s and %s characters!';
 $_['error_reply_not_found']     = 'Reply target not found!';
+
+// Empty state
+$_['text_empty_title']       = 'No reviews yet';
+$_['text_empty_description'] = 'Customer reviews build trust. They will appear here once shoppers start rating products.';
