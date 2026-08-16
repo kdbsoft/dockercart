@@ -38,12 +38,14 @@ cd dockercart
 make start
 ```
 
-On the first run `make start` interactively generates `.env` — it asks for the store domain, timezone, database and admin passwords (press Enter to generate random ones), the admin account, and whether to install demo data. Existing `.env` files are only completed with missing keys, never overwritten; `.env.example` remains the full reference template for manual tuning. For fully automated installs, set `DOCKERCART_NONINTERACTIVE=1` to fall back to a plain copy of `.env.example`.
+On the first run `make start` generates `.env` from `.env.example`. The interactive setup asks for only the store domain and the admin email; every other value (timezone, project name, ports, admin username, seed mode) gets a sane default, and all passwords (DB, MariaDB root, Redis, admin, FTP) are generated randomly and written to `.env`. `.env.example` remains the full reference template for manual tuning — edit it (or the generated `.env`) to change anything. For fully automated installs, set `DOCKERCART_NONINTERACTIVE=1` to skip the two prompts and just generate `.env` with random secrets.
+
+**Keep `.env` flat (no nested `${VAR}` references).** docker compose expands `MARIADB_USER=${DB_USERNAME}` recursively, but podman-compose (the `docker` shim on podman hosts) does not: the literal string lands in the container env, the mariadb healthcheck runs with an empty user, mariadb never becomes `healthy`, and `up` blocks indefinitely on `depends_on: condition: service_healthy` — the startup appears hung right after the mariadb/redis containers are listed. If that happens, fix the `MARIADB_USER`/`MARIADB_DATABASE` lines in `.env` to the plain values from `.env.example` (they must mirror `DB_USERNAME`/`DB_DATABASE`) and re-run `make start`. The mariadb healthcheck resolves its credentials from the container environment at runtime, so it does not depend on compose-side interpolation.
 
 ### First Boot
 
 ```bash
-make up
+make start
 ```
 
 The entrypoint script (`docker/entrypoint.sh`) runs the following on first start:
@@ -236,14 +238,10 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 | Command | Action |
 |---|---|
-| `make up` | Start standalone HTTP |
-| `make ssl` | Start standalone + self-signed HTTPS |
-| `make le` | Start standalone + Let's Encrypt HTTPS |
-| `make traefik` | Start with Traefik reverse proxy |
-| `make traefik-ssl` | Traefik + self-signed HTTPS |
-| `make traefik-le` | Traefik + Let's Encrypt HTTPS |
+| `make start` | Start the stack (interactive mode picker: Standalone/Traefik × none/self-signed/LE) |
+| `make start ARGS="..."` | Start non-interactively, passing `start.sh` flags (e.g. `--traefik --le`) |
 | `make ftp` | Attach FTP to running stack |
-| `make down` | Stop containers |
+| `make stop` | Stop containers |
 | `make restart` | Restart all containers |
 | `make logs` | View logs |
 | `make logs-follow` | Tail logs |
@@ -256,12 +254,12 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 ### Standalone Mode
 
-The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443). On a clean install the setup wizard (`make start`) prompts for the HTTP listen port and derives `DOCKERCART_URL` from the domain + port automatically, so a non-default port (e.g. `8080`) just works — internal links, `config_url`, `robots.txt` and `config.php` all include the port. On an existing install, simply set `DOCKERCART_HTTP_PORT` in `.env` and run `make restart`; `start.sh` re-derives `DOCKERCART_URL` so everything stays consistent.
+The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443). `start.sh` derives `DOCKERCART_URL` from `DOCKERCART_DOMAIN` + the HTTP port automatically, so a non-default port (e.g. `8080`) just works — internal links, `config_url`, `robots.txt` and `config.php` all include the port. On a clean install the default port is 80 (no prompt). To use a non-default port, set `DOCKERCART_HTTP_PORT` in `.env` and run `make restart`; `start.sh` re-derives `DOCKERCART_URL` so everything stays consistent.
 
 ```bash
-make up     # HTTP on port 80
-make ssl    # HTTPS with self-signed certificate
-make le     # HTTPS with Let's Encrypt (requires public DNS + port 80/443 access)
+make start               # interactive: pick Standalone HTTP / self-signed / Let's Encrypt
+make start ARGS="--ssl"  # HTTPS with self-signed certificate
+make start ARGS="--le"   # HTTPS with Let's Encrypt (requires public DNS + port 80/443 access)
 ```
 
 ### Traefik Mode
@@ -269,9 +267,9 @@ make le     # HTTPS with Let's Encrypt (requires public DNS + port 80/443 access
 Use when you already run Traefik as an external reverse proxy. Requires an existing `traefik` Docker network.
 
 ```bash
-make traefik       # HTTP
-make traefik-ssl   # HTTPS (self-signed)
-make traefik-le    # HTTPS (Let's Encrypt)
+make start ARGS="--traefik"        # HTTP
+make start ARGS="--traefik --ssl"  # HTTPS (self-signed)
+make start ARGS="--traefik --le"   # HTTPS (Let's Encrypt)
 ```
 
 ### FTP Add-on
@@ -436,7 +434,7 @@ Off by default. Provides one-shot `tar.gz` backup of the database, uploaded imag
 
 **Architecture:**
 
-- **Worker:** `upload/bin/dockercart_backup_s3.php` — PHP CLI, runs in the `backup-worker` Compose service (profile: `backup`, never started by `make up`)
+- **Worker:** `upload/bin/dockercart_backup_s3.php` — PHP CLI, runs in the `backup-worker` Compose service (profile: `backup`, never started by `make start`)
 - **Trigger:** host cron → `COMPOSE_PROFILES=backup docker compose run --rm --no-deps backup-worker`
 - **S3 client:** rclone (installed in Dockerfile), config at `/var/www/storage/.rclone.conf` generated at container start
 - **Staging:** `/var/www/storage/backup/` — local tar.gz deleted after successful upload
@@ -445,7 +443,7 @@ Off by default. Provides one-shot `tar.gz` backup of the database, uploaded imag
 **Setup:**
 
 1. Set `BACKUP_S3_ENABLED=true` and all `BACKUP_S3_*` vars in `.env`
-2. `make up` (builds image with rclone)
+2. `make start` (builds image with rclone)
 3. `sudo ./install-backup-cron.sh` (writes `/etc/cron.d/dockercart-backup`)
 
 ```bash

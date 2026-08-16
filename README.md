@@ -4,7 +4,7 @@
 
 DockerCart is a full-stack e-commerce platform built on a Docker infrastructure. A single command brings up the complete stack — Nginx reverse proxy, PHP 8.5 application server, MariaDB database, Redis cache, Manticore Search full-text engine, and a scheduler daemon — pre-configured and ready to serve production traffic.
 
-There is no web installer and no `/install` directory. Run `make start` (or `make up`) and a production-grade store is live.
+There is no web installer and no `/install` directory. Run `make start` and a production-grade store is live.
 
 Documentation and resources are available at [dockercart.net](https://dockercart.net), including the [capabilities list](https://dockercart.net/capabilities) and a [live demo](https://demo.dockercart.net).
 
@@ -34,7 +34,9 @@ cd dockercart
 make start
 ```
 
-On first run, `make start` prompts for the critical settings — store domain, timezone, database and admin passwords (press Enter to generate random ones), admin account, and whether to install demo data — and writes them to `.env`. Subsequent runs only prompt for missing keys. Use `make up` to skip the prompt and start in standalone HTTP mode.
+On first run, `make start` generates `.env` from `.env.example`. The interactive setup asks only for the store domain and admin email — everything else (timezone, ports, admin username, seed mode) gets a default, and all passwords are generated randomly. Set `DOCKERCART_NONINTERACTIVE=1` to skip the prompts entirely. Subsequent runs just start the stack (mode is remembered in `.env`). `make start` with no choice starts standalone HTTP; pass `start.sh` flags for non-interactive runs, e.g. `make start ARGS="--traefik --le"`.
+
+> **Note for podman-compose users:** the stack is tested with docker compose, but works under podman-compose (podman's `docker` shim) too, **provided `.env` stays flat** — no nested `${VAR}` references. docker compose expands `MARIADB_USER=${DB_USERNAME}` recursively; podman-compose does not, which leaves the literal string in the container env, breaks the mariadb healthcheck, and the startup hangs waiting on `condition: service_healthy`. If `make start` seems stuck, check the mariadb container env: `docker inspect ${MARIADB_CONTAINER_NAME:-dockercart_mariadb} --format '{{range .Config.Env}}{{println .}}{{end}}'` — a literal `${DB_USERNAME}` in `MARIADB_USER`/`MARIADB_DATABASE` means `.env` needs the flat values from `.env.example`.
 
 First boot performs the following automatically:
 
@@ -83,23 +85,20 @@ All services communicate over a shared `dockercart-network` bridge. See `docs/gu
 
 All modes are invoked via `make`. Container names are prefixed `dockercart_`. Full details are in `docs/guide.md#4-deployment`.
 
-`make start` shows an interactive menu of all modes and remembers the last choice in `.env` (`DOCKERCART_RUN_MODE`). A bare `make start` restarts in the same mode. `make stop` stops all containers regardless of the mode they were started in.
+The launch/SSL mode is chosen with `make start`, which shows an interactive menu
+(Standalone vs. Traefik × none/self-signed/Let's Encrypt) and remembers the choice
+in `.env` (`DOCKERCART_COMPOSE_FILES`). A bare `make start` (default HTTP) also
+restarts in the last used mode. For non-interactive/CI runs, pass `start.sh` flags
+directly: `make start ARGS="--traefik --le"`. `make stop` stops all containers
+regardless of the mode they were started in.
 
-### Standalone (default)
+### Start (interactive)
 
-| Mode | Command | Description |
-|---|---|---|
-| HTTP | `make up` | Plain HTTP on port 80 |
-| HTTPS (self-signed) | `make ssl` | HTTPS for development and staging |
-| HTTPS (Let's Encrypt) | `make le` | Production SSL with auto-renewal |
-
-### Traefik (external reverse proxy)
-
-| Mode | Command |
-|---|---|
-| HTTP | `make traefik` |
-| HTTPS (self-signed) | `make traefik-ssl` |
-| HTTPS (Let's Encrypt) | `make traefik-le` |
+```bash
+make start                 # menu: Standalone HTTP / self-signed / Let's Encrypt, or Traefik variants
+make start ARGS="--le"     # non-interactive: standalone + Let's Encrypt
+make start ARGS="--traefik --le"   # non-interactive: Traefik + Let's Encrypt
+```
 
 ### FTP (optional add-on)
 
@@ -109,9 +108,9 @@ make ftp   # Attach to any running mode — chrooted to ./upload/image
 
 ### External Traefik (pre-existing reverse proxy)
 
-The `make traefik*` targets assume a **separate, already-running Traefik** on the
-host, connected to the stack via the external `traefik` Docker network. DockerCart
-does **not** start Traefik for you.
+The Traefik modes (`make start` → option 4/5/6) assume a **separate, already-running
+Traefik** on the host, connected to the stack via the external `traefik` Docker
+network. DockerCart does **not** start Traefik for you.
 
 Prerequisites on the host:
 
@@ -119,7 +118,7 @@ Prerequisites on the host:
   name to `DOCKERCART_NETWORK`).
 - Traefik v3 with an entrypoint named `web` (HTTP) and/or `websecure` (HTTPS), and
   certificate resolvers named `le` (Let's Encrypt) and `selfsigned`.
-- For `make traefik-le`: a public DNS record pointing `DOCKERCART_DOMAIN` at the
+- For `make start ARGS="--traefik --le"`: a public DNS record pointing `DOCKERCART_DOMAIN` at the
   host, with inbound ports 80/443 open.
 
 The repository ships reference Traefik configs under `docker/traefik/` — these are
@@ -133,7 +132,7 @@ the `traefik.*` labels that register it with your external Traefik.
 
 ## Configuration
 
-All settings live in `.env`. The first `make start` generates it interactively (domain, timezone, passwords, admin account). Missing keys are subsequently requested at startup. `.env.example` is the full reference template.
+All settings live in `.env`. The first `make start` generates it from `.env.example` — asking only for the store domain and admin email, generating random passwords, and applying defaults for everything else. `.env.example` is the full reference template.
 
 Config files are generated at container start — they should never be edited manually.
 
@@ -170,7 +169,7 @@ Full reference: `docs/guide.md#3-configuration`
 
 1. Fork the repository and create a feature branch
 2. Write focused commits following [Conventional Commits](https://www.conventionalcommits.org/)
-3. Test with `make up`
+3. Test with `make start`
 4. Submit a pull request
 
 ---
