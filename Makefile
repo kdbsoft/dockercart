@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate up update start stop ssl le le-ftp ftp down logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart traefik traefik-ssl traefik-le scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status
+.PHONY: help migrate update start stop ftp logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status
 
 ### Convenience variables
 # Base compose file used by commands that don't need to match the running mode
@@ -12,7 +12,7 @@ COMPOSE := docker compose -f docker-compose.yml
 
 # Active compose file set: when the stack was started via start.sh (or a `make`
 # mode target), the chosen -f files are recorded in .env as
-# DOCKERCART_COMPOSE_FILES (space-separated filenames). If present, restart/stop/down
+# DOCKERCART_COMPOSE_FILES (space-separated filenames). If present, restart/stop
 # reconstruct the exact same mode (Traefik + SSL overrides) instead of falling
 # back to standalone HTTP.
 ifeq ($(DOCKERCART_COMPOSE_FILES),)
@@ -28,20 +28,14 @@ help: ## Show this help
 	@echo ""
 	@grep -hE '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""
-	@echo "Modes (default: standalone, no Traefik needed):"
-	@echo "  make start       Two-step interactive setup (1: Standalone/Traefik, 2: SSL; remembers last choice)"
-	@echo "  make up          HTTP mode       - http://$${DOCKERCART_DOMAIN:-dockercart.local}"
-	@echo "  make ssl         HTTPS SSL       - https://$${DOCKERCART_DOMAIN:-dockercart.local} (self-signed, local testing)"
-	@echo "  make le          HTTPS + LE      - Production with real domain SSL (requires SSL_DOMAIN in .env)"
-	@echo ""
-	@echo "Traefik mode (external reverse proxy):"
-	@echo "  make traefik          No SSL      - Traefik, HTTP"
-	@echo "  make traefik-ssl      HTTPS       - Traefik + self-signed"
-	@echo "  make traefik-le       HTTPS       - Traefik + Let's Encrypt"
+	@echo "Start (interactive mode picker; remembers last choice in .env; pass flags via ARGS for non-interactive runs):"
+	@echo "  make start                       Pick a mode from the menu (Standalone/Traefik x none/self-signed/LE);"
+	@echo "                                    Enter alone reuses the last remembered mode"
+	@echo "  make start ARGS=\"--traefik --le\"   Same as start.sh flags (no prompt; for CI/scripts)"
 	@echo ""
 	@echo "Other commands:"
-	@echo "  make down         Stop containers (base compose only)"
-	@echo "  make stop         Stop all containers, regardless of start mode"
+	@echo "  make ftp          Attach optional FTP server (chrooted to ./upload/image)"
+	@echo "  make stop         Stop containers (reconstructs the active mode from .env)"
 	@echo "  make restart      Restart containers"
 	@echo "  make logs         Show logs"
 	@echo "  make shell        Bash into app container"
@@ -58,45 +52,49 @@ migrate: ## Apply tracked SQL migrations from docker/mysql/migrations (idempoten
 update: ## Pull code changes and apply migrations via update.sh
 	@./update.sh
 
-up: ## Start in standalone mode, HTTP by default (use make ssl or make le for HTTPS)
-	@./start.sh
+start: ## Start the stack. Interactively pick a mode, or pass start.sh flags via ARGS="..."
+	@if [ -n "$(ARGS)" ]; then \
+		./start.sh $(ARGS); \
+	elif [ ! -t 0 ]; then \
+		echo "Non-interactive: starting standalone HTTP (use ARGS=... to choose a mode)."; \
+		./start.sh; \
+	else \
+		last_mode="$(DOCKERCART_LAST_START_MODE)"; \
+		[ -z "$$last_mode" ] && last_mode=1; \
+		printf '\n%s\n' "Select start mode:"; \
+		printf '  1) Standalone HTTP (default)          nginx -> apache, plain HTTP\n'; \
+		printf '  2) Standalone HTTPS (self-signed)     dev/staging, self-signed cert\n'; \
+		printf "  3) Standalone HTTPS (Let's Encrypt)   production, auto-renew (needs SSL_DOMAIN)\n"; \
+		printf '  4) Traefik HTTP                       external Traefik reverse proxy\n'; \
+		printf '  5) Traefik HTTPS (self-signed)\n'; \
+		printf '  6) Traefik HTTPS (Let'"'"'s Encrypt)\n'; \
+		printf 'Choice [%s] (Enter = last): ' "$$last_mode"; \
+		read choice; \
+		[ -z "$$choice" ] && choice="$$last_mode"; \
+		case "$$choice" in \
+			2) FLAGS="--ssl" ;; \
+			3) FLAGS="--le" ;; \
+			4) FLAGS="--traefik" ;; \
+			5) FLAGS="--traefik --ssl" ;; \
+			6) FLAGS="--traefik --le" ;; \
+			*) FLAGS="" ;; \
+		esac; \
+		./start.sh $$FLAGS; \
+		if grep -qE '^DOCKERCART_LAST_START_MODE=' .env 2>/dev/null; then \
+			sed -i "s|^DOCKERCART_LAST_START_MODE=.*|DOCKERCART_LAST_START_MODE=$$choice|" .env; \
+		else \
+			printf '\n# Last chosen start mode (written by make start)\nDOCKERCART_LAST_START_MODE=%s\n' "$$choice" >> .env; \
+		fi; \
+	fi
 
-start: ## Start the stack — interactive mode selection (choice is remembered in .env)
-	@./start.sh --menu
-
-ssl: ## Start standalone with self-signed SSL (HTTPS, local testing)
-	@./start.sh --ssl
-
-le: ## Start standalone with Let's Encrypt SSL (production, requires real domain)
-	@./start.sh --le
-
-le-ftp: ## Start Let's Encrypt mode and enable FTP profile (images only)
-	@$(MAKE) le
-	@docker compose --profile ftp up -d ftp
-	@echo ""
-	@echo "Let's Encrypt + FTP enabled"
-
-ftp: ## Start stack with optional FTP server (access only to ./upload/image)
+ftp: ## Attach optional FTP server (chrooted to ./upload/image) to the running stack
 	@docker compose --profile ftp up -d ftp
 	@echo ""
 	@echo "FTP enabled on port $${FTP_PORT:-21} (passive: $${FTP_PASV_MIN_PORT:-21100}-$${FTP_PASV_MAX_PORT:-21110})"
 	@echo "User: $${FTP_USER:-images}"
 
-traefik: ## Start in Traefik mode, HTTP (use traefik-ssl or traefik-le for HTTPS)
-	@./start.sh --traefik
-
-traefik-ssl: ## Start Traefik mode with self-signed SSL (HTTPS)
-	@./start.sh --traefik --ssl
-
-traefik-le: ## Start Traefik mode with Let's Encrypt SSL (production)
-	@./start.sh --traefik --le
-
-down: ## Stop containers (uses the active mode's compose files when recorded)
+stop: ## Stop containers without removing volumes
 	@$(ACTIVE_COMPOSE) down || true
-
-stop: ## Stop all containers, regardless of the mode the stack was started in
-	@$(ACTIVE_COMPOSE) down || true
-	@echo "Containers stopped"
 
 restart: ## Restart containers (rebuild + recreate) in the active mode
 	@$(ACTIVE_COMPOSE) up -d --build --force-recreate --remove-orphans

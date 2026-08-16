@@ -10,12 +10,9 @@ log() {
 }
 
 if [ -f "$SCRIPT_DIR/.env" ]; then
-    set -a
-    set +e
     # shellcheck disable=SC1091
-    . "$SCRIPT_DIR/.env"
-    set -e
-    set +a
+    . "$SCRIPT_DIR/scripts/load-env.sh"
+    load_env "$SCRIPT_DIR/.env"
 fi
 
 LOCK_FILE="${LOCK_FILE:-$SCRIPT_DIR/.update.lock}"

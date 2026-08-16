@@ -1,6 +1,5 @@
 #!/bin/bash
 # shellcheck shell=bash
-# shellcheck source=./scripts/select-mode.sh
 # shellcheck source=./scripts/configure-env.sh
 # DockerCart - Simple Start Script
 # Usage: ./start.sh [options]
@@ -10,9 +9,6 @@
 #   ./start.sh --traefik          - Traefik HTTP
 #   ./start.sh --traefik --ssl    - Traefik HTTPS (self-signed)
 #   ./start.sh --traefik --le     - Traefik HTTPS (Let's Encrypt)
-#   ./start.sh --menu             - Two-step interactive mode selection
-#                                     (1: Standalone/Traefik, 2: SSL submenu);
-#                                     remembers last choice in .env
 
 set -e
 
@@ -41,12 +37,6 @@ SSL_MODE="none"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --menu)
-            # Interactive mode selection; sets TRAEFIK_MODE / SSL_MODE
-            # in this shell and remembers the choice in .env
-            . ./scripts/select-mode.sh
-            shift
-            ;;
         --traefik)
             TRAEFIK_MODE=true
             shift
@@ -87,27 +77,21 @@ echo ""
 # SETUP
 # ============================================================================
 
-# Interactive wizard: creates .env from .env.example on first run and asks for
-# critical settings (domain, timezone, passwords, admin, seed mode). Existing
-# .env files are only completed with missing keys. Non-interactive runs (CI)
-# silently copy the template, exactly like before.
+# First-run configuration: creates .env from .env.example. The interactive
+# wizard (scripts/configure-env.sh) asks only for the store domain and the
+# admin email; everything else (timezone, project name, ports, admin username,
+# seed mode) gets a sane default, and all passwords are generated randomly.
+# Non-interactive runs (CI, no TTY) silently copy the template and generate
+# random passwords. Re-run with DOCKERCART_ENV_FORCE_WIZARD=1 to redo it.
 if [ ! -f .env ] || [ "${DOCKERCART_ENV_FORCE_WIZARD:-0}" = "1" ]; then
     . ./scripts/configure-env.sh
-    # When launched via --menu, select-mode.sh ran before .env existed, so the
-    # chosen mode wasn't persisted. Remember it now that the wizard created .env.
-    if [ -n "${MENU:-}" ] && [ -f .env ] && ! grep -qE '^DOCKERCART_RUN_MODE=' .env; then
-        printf '\n# Last run mode selected via make start\nDOCKERCART_RUN_MODE=%s\n' "$MENU" >> .env
-    fi
 fi
 
 if [ -f .env ]; then
     echo -e "${YELLOW}Loading .env variables...${NC}"
-    set -o allexport
-    set +e
     # shellcheck disable=SC1091
-    source .env
-    set -e
-    set +o allexport
+    . ./scripts/load-env.sh
+    load_env .env
 fi
 
 # ============================================================================
@@ -138,8 +122,7 @@ if [ -n "${DOCKERCART_DOMAIN:-}" ]; then
     export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX}"
     export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX}"
     # Persist the derived URLs back into .env so non-start.sh consumers (backup
-    # worker, install-cli.sh, health-check.sh) and the setup wizard memory see
-    # the canonical values.
+    # worker, install-cli.sh, health-check.sh) see the canonical values.
     if [ -f .env ]; then
         set_env_key() {
             local file="$1" key="$2" value="$3"
@@ -159,11 +142,10 @@ echo ""
 # ============================================================================
 # SEED MODE (only on fresh install: no existing DB volume)
 # ============================================================================
-# The seed choice is owned exclusively by the setup wizard (Step 3,
-# configure-env.sh) which writes DOCKERCART_SEED_MODE into .env. Here we only
-# read that value back; no interactive prompt. On a fresh database volume with
-# no seed key recorded, default to demo data.
-# Re-run the wizard with DOCKERCART_ENV_FORCE_WIZARD=1 to change the choice.
+# The seed choice lives in .env as DOCKERCART_SEED_MODE (see .env.example;
+# default "demo", use "clean" for an empty store). Here we only read it back;
+# no interactive prompt. On a fresh database volume with no seed key recorded,
+# default to demo data. Edit .env and run `make restart` to change the choice.
 
 SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
 DB_VOLUME_NAME="${DB_VOLUME_NAME:-${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}_mariadb-data}"
@@ -254,7 +236,7 @@ echo ""
 # PERSIST ACTIVE COMPOSE FILE SET
 # ============================================================================
 # Record the exact -f file list used to start the stack so that subsequent
-# `make restart` / `make stop` / `make down` reconstruct the same mode (Traefik
+# `make restart` / `make stop` reconstruct the same mode (Traefik
 # + SSL overrides) without an explicit mode argument. Without this, a traefik
 # stack restarted via the base-only Makefile target silently falls back to
 # standalone HTTP and loses Traefik labels / SSL.
@@ -264,7 +246,9 @@ if [ -f .env ]; then
         for ((i = 1; i < ${#COMPOSE_FILES[@]}; i += 2)); do
             files="${files}${COMPOSE_FILES[$i]} "
         done
-        files="$(printf '%s' "$files" | sed 's/[[:space:]]*$//')"
+        # Collapse any stray newlines and strip trailing whitespace so the value
+        # is always a single space-separated line (never a bare executable token).
+        files="$(printf '%s' "$files" | tr -d '\n' | sed 's/[[:space:]]*$//')"
         if grep -qE "^${key}=" .env; then
             sed -i "s|^${key}=.*|${key}=${files}|" .env
         else
@@ -426,8 +410,50 @@ echo ""
 # The chosen seed mode is passed for this run only — nothing is written to .env.
 DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d --build --remove-orphans
 
-echo -e "${YELLOW}Waiting for services to be ready...${NC}"
-sleep 10
+# ============================================================================
+# BOUNDED READINESS WAIT
+# ============================================================================
+# `up -d` returns once containers are created, not when the app is usable.
+# Wait for mariadb (healthy) and apache (healthy healthcheck) with a hard
+# timeout so a broken stack fails loudly with diagnostics instead of hanging
+# forever (e.g. podman-compose blocking on `condition: service_healthy` while
+# mariadb stays unhealthy — which happens when .env contains nested ${VAR}
+# references that podman-compose does not expand; keep .env flat, see
+# .env.example). Tune with START_TIMEOUT (seconds, default 240).
+
+PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
+MARIADB_CT="${MARIADB_CONTAINER_NAME:-${PROJECT_NAME}_mariadb}"
+APACHE_CT="${APACHE_CONTAINER_NAME:-${PROJECT_NAME}_apache}"
+START_TIMEOUT="${START_TIMEOUT:-240}"
+
+wait_for_healthy() {
+    local name="$1" desc="$2"
+    local deadline=$((SECONDS + START_TIMEOUT))
+    while [ "$SECONDS" -lt "$deadline" ]; do
+        local health
+        health=$(docker inspect --format '{{.State.Health.Status}}' "$name" 2>/dev/null || true)
+        if [ "$health" = "healthy" ]; then
+            echo -e "${GREEN}✓ ${desc} is healthy${NC}"
+            return 0
+        fi
+        sleep 3
+    done
+    return 1
+}
+
+echo -e "${YELLOW}Waiting for services to be ready (timeout ${START_TIMEOUT}s)...${NC}"
+if ! wait_for_healthy "$MARIADB_CT" "MariaDB"; then
+    echo -e "${RED}❌ MariaDB (${MARIADB_CT}) did not become healthy within ${START_TIMEOUT}s${NC}"
+    echo -e "${RED}   Run 'docker logs ${MARIADB_CT} --tail 50' and check MARIADB_USER/MARIADB_PASSWORD in .env${NC}"
+    docker inspect --format '  {{.Name}}: status={{.State.Status}} health={{.State.Health.Status}}' "$MARIADB_CT" 2>/dev/null || true
+    exit 1
+fi
+if ! wait_for_healthy "$APACHE_CT" "Apache"; then
+    echo -e "${RED}❌ Apache (${APACHE_CT}) did not become healthy within ${START_TIMEOUT}s${NC}"
+    echo -e "${RED}   Run 'docker logs ${APACHE_CT} --tail 50' for the entrypoint/migration errors${NC}"
+    docker inspect --format '  {{.Name}}: status={{.State.Status}} health={{.State.Health.Status}}' "$APACHE_CT" 2>/dev/null || true
+    exit 1
+fi
 
 echo -e "${GREEN}✓ Containers started${NC}"
 echo ""
@@ -448,10 +474,10 @@ if [ "$TRAEFIK_MODE" = true ]; then
     echo -e "${GREEN}✅ DockerCart is running in Traefik mode!${NC}"
     echo ""
     echo -e "${BLUE}Production mode (Nginx proxy + Apache):${NC}"
-    echo "  Network: ${GREEN}dockercart-network${NC}"
-    echo "  Frontend: ${GREEN}Nginx (ports managed externally)${NC}"
-    echo "  Backend:  ${GREEN}Apache (internal, port 80)${NC}"
-    echo "  Database: ${GREEN}MariaDB (internal)${NC}"
+    echo -e "  Network: ${GREEN}dockercart-network${NC}"
+    echo -e "  Frontend: ${GREEN}Nginx (ports managed externally)${NC}"
+    echo -e "  Backend:  ${GREEN}Apache (internal, port 80)${NC}"
+    echo -e "  Database: ${GREEN}MariaDB (internal)${NC}"
     echo ""
 else
     echo -e "${GREEN}✅ DockerCart is running!${NC}"
@@ -461,24 +487,24 @@ else
     DB_HOST_PRINT="${DB_HOSTNAME:-mariadb}"
     DB_PORT_PRINT="${DB_PORT:-3306}"
 
-    echo "  Site:      ${GREEN}${SITE_URL}${NC}"
-    echo "  Admin:     ${GREEN}${SITE_URL%/}/admin${NC}"
-    echo "  MariaDB:   ${GREEN}${DB_HOST_PRINT}:${DB_PORT_PRINT}${NC}"
+    echo -e "  Site:      ${GREEN}${SITE_URL}${NC}"
+    echo -e "  Admin:     ${GREEN}${SITE_URL%/}/admin${NC}"
+    echo -e "  MariaDB:   ${GREEN}${DB_HOST_PRINT}:${DB_PORT_PRINT}${NC}"
     if [ "$SSL_MODE" = "self-signed" ]; then
-        echo "  HTTPS:     ${GREEN}https://${SITE_HOST} (warning: self-signed)${NC}"
+        echo -e "  HTTPS:     ${GREEN}https://${SITE_HOST} (warning: self-signed)${NC}"
     fi
 fi
 
 echo ""
 echo -e "${BLUE}Database:${NC}"
-echo "  Host:     ${GREEN}${DB_HOSTNAME:-mariadb}${NC}"
-echo "  User:     ${GREEN}${DB_USERNAME:-dockercart}${NC}"
-echo "  Password: ${GREEN}${DB_PASSWORD:-dockercart_password}${NC}"
+echo -e "  Host:     ${GREEN}${DB_HOSTNAME:-mariadb}${NC}"
+echo -e "  User:     ${GREEN}${DB_USERNAME:-dockercart}${NC}"
+echo -e "  Password: ${GREEN}${DB_PASSWORD:-dockercart_password}${NC}"
 echo ""
 echo -e "${BLUE}Commands:${NC}"
-echo "  Stop:     ${GREEN}docker compose down${NC}"
-echo "  Logs:     ${GREEN}docker compose logs -f${NC}"
-echo "  Shell:    ${GREEN}docker compose exec apache bash${NC}"
+echo -e "  Stop:     ${GREEN}docker compose down${NC}"
+echo -e "  Logs:     ${GREEN}docker compose logs -f${NC}"
+echo -e "  Shell:    ${GREEN}docker compose exec apache bash${NC}"
 echo ""
 
 if [ "$SSL_MODE" = "letsencrypt" ]; then
