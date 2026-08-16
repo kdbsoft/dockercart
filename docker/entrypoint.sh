@@ -441,12 +441,13 @@ VALUES \
    '${admin_hash}', \
    'DockerCart', 'Admin', '${admin_email}', '', '', '', 1, NOW());
 
-DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption');
+DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_url', 'config_ssl', 'config_encryption', 'config_onboarding_email_default');
 INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
   (0, 'config', 'config_email', '${admin_email}', 0),
   (0, 'config', 'config_url', '${url}', 0),
   (0, 'config', 'config_ssl', '${url}', 0),
-  (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0);
+  (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0),
+  (0, 'config', 'config_onboarding_email_default', '${admin_email}', 0);
 SQL
     echo "DockerCart bootstrap finished."
 
@@ -631,9 +632,9 @@ setup_logrotate() {
 }
 
 # Emit a loud warning when the stack runs on publicly known default secrets
-# (typical when .env is missing and compose fallbacks kick in). The setup
-# wizard (make start) generates random passwords; unattended first boot keeps
-# defaults by design, hence warn-only, never abort.
+# (typical when .env is missing and compose fallbacks kick in). start.sh
+# generates random passwords into .env on first run; unattended first boot
+# (no .env at all) keeps defaults by design, hence warn-only, never abort.
 warn_default_secrets() {
 	local warned=0
 
