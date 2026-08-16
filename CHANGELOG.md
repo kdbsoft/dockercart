@@ -1,3 +1,17 @@
+## [3.4.0](https://github.com/kdbsoft/dockercart/compare/v3.3.0...v3.4.0) (2026-08-16)
+
+### Features
+
+* **admin:** add empty states to list pages ([ca09478](https://github.com/kdbsoft/dockercart/commit/ca09478c541066670c69eab48e394e005d54b126))
+* **theme:** redesign maintenance page with tailwind utilities ([03a6f82](https://github.com/kdbsoft/dockercart/commit/03a6f82a3a8a1175e80846403c4eb5548429edd7))
+
+### Bug Fixes
+
+* **dashboard:** detect configured store via seeded email ([b93e2bc](https://github.com/kdbsoft/dockercart/commit/b93e2bc978a06365a56ea4af4c4bd8cf0de3acaa))
+* **docker:** keep .env flat and harden mariadb healthcheck ([4775595](https://github.com/kdbsoft/dockercart/commit/4775595256fc46c8bb5db0e4ecd7c0b29ed9c472))
+* **review:** shard media into per-1000 subdirectories ([949ca33](https://github.com/kdbsoft/dockercart/commit/949ca33cb5bf69de52903285f7751671020157f4))
+* **scheduler:** treat SIGWINCH as graceful shutdown signal ([5f9c354](https://github.com/kdbsoft/dockercart/commit/5f9c3546370c19ecad7f6a6b82bad09e90c4b36d))
+
 ## [3.3.0](https://github.com/kdbsoft/dockercart/compare/v3.2.0...v3.3.0) (2026-08-15)
 
 ### Features
