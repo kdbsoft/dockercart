@@ -87,6 +87,10 @@ if [ ! -f .env ] || [ "${DOCKERCART_ENV_FORCE_WIZARD:-0}" = "1" ]; then
     . ./scripts/configure-env.sh
 fi
 
+# Load the shared project-name sanitizer (also used by the wizard above).
+# shellcheck disable=SC1091
+. ./scripts/project-name.sh
+
 if [ -f .env ]; then
     echo -e "${YELLOW}Loading .env variables...${NC}"
     # shellcheck disable=SC1091
@@ -148,7 +152,7 @@ echo ""
 # default to demo data. Edit .env and run `make restart` to change the choice.
 
 SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
-DB_VOLUME_NAME="${DB_VOLUME_NAME:-${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}_mariadb-data}"
+DB_VOLUME_NAME="${DB_VOLUME_NAME:-$(sanitize_project_name "${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}")_mariadb-data}"
 
 # Detect whether a database volume already exists (i.e. this is NOT a first run)
 if docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
@@ -421,7 +425,7 @@ DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d -
 # references that podman-compose does not expand; keep .env flat, see
 # .env.example). Tune with START_TIMEOUT (seconds, default 240).
 
-PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
+PROJECT_NAME="$(sanitize_project_name "${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}")"
 MARIADB_CT="${MARIADB_CONTAINER_NAME:-${PROJECT_NAME}_mariadb}"
 APACHE_CT="${APACHE_CONTAINER_NAME:-${PROJECT_NAME}_apache}"
 START_TIMEOUT="${START_TIMEOUT:-240}"
