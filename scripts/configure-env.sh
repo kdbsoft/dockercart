@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck source=./scripts/project-name.sh
 # First-run .env configuration for DockerCart.
 # Sourced by start.sh: creates .env from .env.example when it is missing (or
 # when DOCKERCART_ENV_FORCE_WIZARD=1 forces a redo).
@@ -20,6 +21,10 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # --- Helpers ---------------------------------------------------------------
+
+# Load the shared project-name sanitizer (also sourced by start.sh).
+# shellcheck disable=SC1091
+. ./scripts/project-name.sh
 
 gen_password() {
     local len="${1:-24}"
@@ -233,16 +238,31 @@ configure_env() {
 
     # --- Defaults (no prompts) ----------------------------------------------
     # Project name namespacing (containers, network, volumes).
+    # Derive from the directory basename unless the operator explicitly set a
+    # different value. A cloned/copied .env still carries the template default
+    # "dockercart", which must be replaced with the real basename so sibling
+    # checkouts stay isolated. Folder names with spaces or shell-special
+    # characters are sanitized into a valid Compose project name.
     local project
     project="$(get_env_key "$ENV_FILE" COMPOSE_PROJECT_NAME)"
-    if [ -z "$project" ]; then
-        project="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
-        while ! validate_no_ws "$project"; do
-            project="$(basename "$PWD")"
-        done
+    if [ -z "$project" ] || [ "$project" = "dockercart" ]; then
+        project="$(sanitize_project_name "$(basename "$PWD")")"
         set_env_key "$ENV_FILE" COMPOSE_PROJECT_NAME "$project"
         set_env_key "$ENV_FILE" DOCKERCART_NETWORK "${project}-network"
         set_env_key "$ENV_FILE" DOCKERCART_ROUTER_NAME "$project"
+    else
+        # Explicit override: ensure it is a valid Compose project name. Only
+        # rewrite (with a warning) when it contains illegal characters; a
+        # syntactically valid value (incl. uppercase) is left untouched.
+        if ! printf '%s' "$project" | grep -qE '^[a-zA-Z0-9][a-zA-Z0-9_.-]*$'; then
+            local fixed
+            fixed="$(sanitize_project_name "$project")"
+            echo -e "${YELLOW}⚠ COMPOSE_PROJECT_NAME '$project' is not a valid project name; using '$fixed'.${NC}"
+            project="$fixed"
+            set_env_key "$ENV_FILE" COMPOSE_PROJECT_NAME "$project"
+            set_env_key "$ENV_FILE" DOCKERCART_NETWORK "${project}-network"
+            set_env_key "$ENV_FILE" DOCKERCART_ROUTER_NAME "$project"
+        fi
     fi
 
     # Timezone: auto-detect from the host.
