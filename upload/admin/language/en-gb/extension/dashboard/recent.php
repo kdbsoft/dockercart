@@ -22,6 +22,7 @@ $_['text_products']        = 'products';
 $_['text_tracking']        = 'Tracking';
 $_['text_view']            = 'Details';
 $_['text_no_products']     = 'No products';
+$_['text_no_results']      = 'No orders found';
 
 
 

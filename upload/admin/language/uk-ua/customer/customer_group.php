@@ -38,3 +38,6 @@ $_['text_group_card'] = 'Група покупців';
 $_['text_description_card'] = 'Опис';
 $_['text_settings_card'] = 'Налаштування';
 
+// Empty state
+$_['text_empty_title']       = 'Поки немає груп покупців';
+$_['text_empty_description'] = 'Об’єднайте покупців для цін, знижок і прав доступу. Створіть першу групу.';

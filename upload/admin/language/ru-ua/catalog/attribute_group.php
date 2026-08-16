@@ -34,4 +34,6 @@ $_['text_add_attribute_group_subtitle'] = 'Создать новую групп�
 
 $_['text_edit_attribute_group_subtitle'] = 'Редактировать настройки группы атрибутов';
 
-
+// Empty state
+$_['text_empty_title']       = 'Пока нет групп атрибутов';
+$_['text_empty_description'] = 'Объедините связанные атрибуты для удобной формы товара. Создайте первую группу.';

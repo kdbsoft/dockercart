@@ -15,6 +15,10 @@ $_['text_quick_find']         = 'Quick find category...';
 
 $_['text_list_subtitle'] = 'Organize products into categories';
 
+// Empty state
+$_['text_empty_title']       = 'No categories yet';
+$_['text_empty_description'] = 'Categories help organize your products into a clear tree. Create your first category to get started.';
+
 $_['text_add_category_subtitle'] = 'Create a new product category';
 
 $_['text_edit_category_subtitle'] = 'Edit category name and settings';

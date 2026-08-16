@@ -31,3 +31,4 @@ $_['text_products']        = 'товаров';
 $_['text_tracking']        = 'Отслеживание';
 $_['text_view']            = 'Подробнее';
 $_['text_no_products']     = 'Нет товаров';
+$_['text_no_results']      = 'Заказы не найдены';

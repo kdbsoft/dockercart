@@ -32,3 +32,7 @@ $_['error_permission']  = 'Warning: You do not have permission to modify voucher
 $_['error_name']        = 'Voucher Theme Name must be between 3 and 32 characters!';
 $_['error_image']       = 'Image required!';
 $_['error_voucher']     = 'Warning: This voucher theme cannot be deleted as it is currently assigned to %s vouchers!';
+
+// Empty state
+$_['text_empty_title']       = 'No voucher themes yet';
+$_['text_empty_description'] = 'Design templates control how printed vouchers look. Create your first theme.';

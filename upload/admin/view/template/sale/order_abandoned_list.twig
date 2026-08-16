@@ -25,6 +25,7 @@
     </div>
     {% endif %}
     {{ user_filter }}
+    {% if abandoned_carts %}
           <div class="table-responsive">
             <table class="table table-bordered table-hover dcx-table">
               <thead>
@@ -39,7 +40,6 @@
                 </tr>
               </thead>
               <tbody>
-                {% if abandoned_carts %}
                 {% for cart in abandoned_carts %}
                 <tr>
                   <td class="text-left">#{{ cart.abandoned_id }}</td>
@@ -69,11 +69,6 @@
                   </td>
                 </tr>
                 {% endfor %}
-                {% else %}
-                <tr>
-                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
-                </tr>
-                {% endif %}
               </tbody>
             </table>
           </div>
@@ -83,6 +78,14 @@
             <div class="col-sm-6 text-right">{{ results }}</div>
           </div>
         </div>
+    {% else %}
+        {% include 'common/empty_state.twig' with {
+          icon: 'order_abandoned',
+          standalone: true,
+          title: text_empty_title,
+          description: text_empty_description
+        } %}
+    {% endif %}
   </div>
 </div>
 <script type="text/javascript">

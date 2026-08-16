@@ -40,4 +40,6 @@ $_['tab_description'] = 'Описание';
 // Sidebar cards
 $_['text_file_card'] = 'Файл';
 
-
+// Empty state
+$_['text_empty_title']       = 'Пока нет загрузок';
+$_['text_empty_description'] = 'Продавайте или прикрепляйте скачиваемые файлы к товарам. Загрузите первый файл.';

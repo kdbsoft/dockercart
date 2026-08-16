@@ -47,3 +47,7 @@ $_['error_discount_markup_exclusive'] = 'Only one value can be set: either Disco
 $_['error_default']     = 'Warning: This customer group cannot be deleted as it is currently assigned as the default store customer group!';
 $_['error_store']       = 'Warning: This customer group cannot be deleted as it is currently assigned to %s stores!';
 $_['error_customer']    = 'Warning: This customer group cannot be deleted as it is currently assigned to %s customers!';
+
+// Empty state
+$_['text_empty_title']       = 'No customer groups yet';
+$_['text_empty_description'] = 'Group customers for pricing, discounts and access rules. Create your first group.';
