@@ -424,6 +424,13 @@ pcntl_signal(SIGHUP, function () use (&$running, &$reload): void {
 	$reload  = true;
 });
 
+// Inherited STOPSIGNAL=SIGWINCH from the php:*-apache base image. The scheduler
+// is not Apache, so treat SIGWINCH like a shutdown request for graceful drain.
+pcntl_signal(SIGWINCH, function () use (&$running): void {
+	scheduler_log('SHUTDOWN', 'reason=SIGWINCH draining_active=' . ($GLOBALS['activeTaskCount'] ?? 0));
+	$running = false;
+});
+
 // ── Main Loop ──────────────────────────────────────────────────────────
 
 /**
