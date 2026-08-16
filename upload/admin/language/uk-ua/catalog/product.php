@@ -306,3 +306,7 @@ $_['text_design_card']     = 'Тема';
 $_['text_seo_preview']     = 'Попередній перегляд';
 $_['text_organization_card'] = 'Організація';
 $_['text_status_card'] = 'Статус';
+
+// Empty state
+$_['text_empty_title']       = 'Поки немає товарів';
+$_['text_empty_description'] = 'Товари — основа вашого магазину. Додайте перший товар, щоб розпочати продажі.';

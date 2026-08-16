@@ -84,3 +84,7 @@ $_['text_edit_return_subtitle'] = 'Редагувати дані поверне�
 
 
 $_['button_export_csv'] = 'Експорт обраних повернень у CSV';
+
+// Empty state
+$_['text_empty_title']       = 'Поки немає повернень';
+$_['text_empty_description'] = 'Повернення товарів від покупців з’являться тут. Зараз обробляти нічого.';

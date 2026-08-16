@@ -1,0 +1,38 @@
+.dc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.dc-empty-state__icon {
+  color: var(--dc-text-muted, #9aa0a6);
+  margin-bottom: 4px;
+  line-height: 0;
+}
+
+.dc-empty-state__icon svg {
+  width: 160px;
+  height: 160px;
+}
+
+.dc-empty-state__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dc-text, #202124);
+}
+
+.dc-empty-state__description {
+  margin: 0;
+  max-width: 420px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dc-text-muted, #6c757d);
+}
+
+.dc-empty-state__action {
+  margin-top: 8px;
+}

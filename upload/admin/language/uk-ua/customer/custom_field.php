@@ -56,4 +56,6 @@ $_['text_custom_field_card'] = 'Налаштовуване поле';
 $_['text_values_card'] = 'Значення';
 $_['text_settings_card'] = 'Налаштування';
 
-
+// Empty state
+$_['text_empty_title']       = 'Поки немає додаткових полів';
+$_['text_empty_description'] = 'Збирайте додаткові дані акаунта — день народження, ІПН тощо. Додайте перше поле.';

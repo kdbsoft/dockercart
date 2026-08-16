@@ -1,0 +1,28 @@
+{% if icon is not defined %}{% set icon = 'default' %}{% endif %}
+{% if standalone is not defined %}{% set standalone = false %}{% endif %}
+{% if colspan is not defined %}{% set colspan = 1 %}{% endif %}
+{% if action_url is not defined %}{% set action_url = add|default('') %}{% endif %}
+{% if action_text is not defined %}{% set action_text = button_add|default('') %}{% endif %}
+{% if standalone %}
+<div class="dc-empty-state">
+  <div class="dc-empty-state__icon">
+    {% include 'common/empty_icons/' ~ icon ~ '.twig' %}
+  </div>
+  {% if title is defined and title %}<h2 class="dc-empty-state__title">{{ title }}</h2>{% endif %}
+  {% if description is defined and description %}<p class="dc-empty-state__description">{{ description }}</p>{% endif %}
+  {% if action_url and action_text %}<a href="{{ action_url }}" class="btn btn-primary dc-empty-state__action"><i data-lucide="plus" width="16" height="16"></i> {{ action_text }}</a>{% endif %}
+</div>
+{% else %}
+<tr>
+  <td class="text-center" colspan="{{ colspan }}">
+    <div class="dc-empty-state">
+      <div class="dc-empty-state__icon">
+        {% include 'common/empty_icons/' ~ icon ~ '.twig' %}
+      </div>
+      {% if title is defined and title %}<h2 class="dc-empty-state__title">{{ title }}</h2>{% endif %}
+      {% if description is defined and description %}<p class="dc-empty-state__description">{{ description }}</p>{% endif %}
+      {% if action_url and action_text %}<a href="{{ action_url }}" class="btn btn-primary dc-empty-state__action"><i data-lucide="plus" width="16" height="16"></i> {{ action_text }}</a>{% endif %}
+    </div>
+  </td>
+</tr>
+{% endif %}

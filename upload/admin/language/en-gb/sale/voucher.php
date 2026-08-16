@@ -57,3 +57,7 @@ $_['error_from_name']   = 'Your Name must be between 1 and 64 characters!';
 $_['error_email']       = 'E-Mail Address does not appear to be valid!';
 $_['error_amount']      = 'Amount must be greater than or equal to 1!';
 $_['error_order']       = 'Warning: This voucher cannot be deleted as it is part of an <a href="%s">order</a>!';
+
+// Empty state
+$_['text_empty_title']       = 'No gift vouchers yet';
+$_['text_empty_description'] = 'Sell or issue gift vouchers with redeemable codes. Create your first voucher.';

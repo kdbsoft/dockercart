@@ -35,3 +35,7 @@ $_['entry_date_added']      = 'Date Created';
 // Error
 $_['error_permission']      = 'Warning: You do not have permission to modify customer approvals!';
 $_['error_warning']         = 'Warning: Please check the form carefully for errors!';
+
+// Empty state
+$_['text_empty_title']       = 'No pending approvals';
+$_['text_empty_description'] = 'New customer and affiliate registrations awaiting review will show up here. Nothing to approve right now.';

@@ -45,3 +45,7 @@ $_['error_restore_link']         = 'Warning: Could not generate the restore link
 
 // Confirm
 $_['text_confirm_mark_recovered'] = 'Mark this abandoned cart as recovered?';
+
+// Empty state
+$_['text_empty_title']       = 'No abandoned carts';
+$_['text_empty_description'] = 'Shoppers who left without checking out will appear here. Recovery starts when carts are tracked.';

@@ -65,3 +65,7 @@ $_['error_permission']     = 'Warning: You do not have permission to modify cust
 $_['error_name']           = 'Custom Field Name must be between 1 and 128 characters!';
 $_['error_type']           = 'Warning: Custom Field Values required!';
 $_['error_custom_value']   = 'Custom Value Name must be between 1 and 128 characters!';
+
+// Empty state
+$_['text_empty_title']       = 'No custom fields yet';
+$_['text_empty_description'] = 'Collect extra account details like birthday or VAT ID. Add your first custom field.';

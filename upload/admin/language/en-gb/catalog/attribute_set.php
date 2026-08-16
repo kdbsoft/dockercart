@@ -44,3 +44,7 @@ $_['entry_attribute']   = 'Attribute';
 $_['error_permission']      = 'Warning: You do not have permission to modify attribute sets!';
 $_['error_name']            = 'Attribute Set Name must be between 1 and 64 characters!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';
+
+// Empty state
+$_['text_empty_title']       = 'No attribute sets yet';
+$_['text_empty_description'] = 'Attribute sets bundle attributes you reuse across products. Create your first set.';
