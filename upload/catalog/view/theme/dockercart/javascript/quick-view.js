@@ -662,7 +662,7 @@
     const pid = String(key).split(':')[0];
     const vid = String(key).indexOf(':') > -1 ? String(key).split(':')[1] : '';
 
-    let body = 'product_id=' + encodeURIComponent(pid);
+    let body = 'product_id=' + encodeURIComponent(pid) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
 
     if (vid) {
       body += '&variant_id=' + encodeURIComponent(vid);

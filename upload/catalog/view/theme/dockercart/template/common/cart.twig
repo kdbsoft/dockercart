@@ -205,7 +205,8 @@ function dcRefreshCart(openAfter) {
 /* ── Cart actions (use existing OC routes) */
 function dcCartRemove(cartId) {
   // controller expects 'key' for removal
-  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'key=' + encodeURIComponent(cartId) })
+  var body = 'key=' + encodeURIComponent(cartId) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
+  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body })
     .then(function() { dcRefreshCart(false); });
 }
 
@@ -256,7 +257,8 @@ function dcCartAdjust(cartId, deltaDirection, stepValue, minimumValue, currentVa
 
 function dcVoucherRemove(voucherKey) {
   // controller remove() checks $_POST['key'] for both products and vouchers
-  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'key=' + encodeURIComponent(voucherKey) })
+  var body = 'key=' + encodeURIComponent(voucherKey) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
+  fetch('index.php?route=checkout/cart/remove', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: body })
     .then(function() { dcRefreshCart(false); });
 }
 
