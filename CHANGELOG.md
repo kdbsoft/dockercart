@@ -1,3 +1,9 @@
+## [3.5.1](https://github.com/kdbsoft/dockercart/compare/v3.5.0...v3.5.1) (2026-08-17)
+
+### Bug Fixes
+
+* **update:** close flock fd in compose/docker children to avoid podman lock leak ([d5b4822](https://github.com/kdbsoft/dockercart/commit/d5b48221e500cf850eeaccf2292375805a143b67))
+
 ## [3.5.0](https://github.com/kdbsoft/dockercart/compare/v3.4.2...v3.5.0) (2026-08-17)
 
 ### Features
