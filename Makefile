@@ -162,8 +162,30 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 	mv $$TMP_FILE docker/mysql/init.sql; \
 	echo "Dump written to docker/mysql/init.sql — review and commit when ready."
 
-clean: ## DESTRUCTIVE: Stop containers and remove all volumes
-	@echo "WARNING: All database data will be lost."
+clean: ## DESTRUCTIVE: Stop containers, drop DB/search volumes, force re-setup
+	@echo "WARNING: All database and search data will be lost, and the next"
+	@echo "WARNING: 'make start' will re-run the setup wizard (incl. seed mode)."
 	@read -p "Continue? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-	@$(COMPOSE) down -v
-	@echo "Cleaned"
+	# Tear down using the exact compose file set that is currently active
+	# (Traefik/SSL overrides recorded in .env), so every service is stopped.
+	@$(ACTIVE_COMPOSE) down -v || true
+	# Named volumes survive `down -v` under podman-compose when the file set
+	# differs, so drop them explicitly by project name. This guarantees a fresh
+	# MariaDB data volume, which makes the seed/init script re-run on next start.
+	@PROJECT="$${COMPOSE_PROJECT_NAME:-$(shell basename "$(shell pwd)")}"; \
+	PROJECT="$$(echo "$$PROJECT" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | tr -s '-' | sed -e 's/^-*//' -e 's/-*$$//' -e 's/^[0-9]*//')"; \
+	[ -z "$$PROJECT" ] && PROJECT=dockercart; \
+	for v in "$$PROJECT"_mariadb-data "$$PROJECT"_manticore-data; do \
+		echo "Removing volume $$v..."; \
+		docker volume rm "$$v" >/dev/null 2>&1 || true; \
+	done
+	# Force the setup wizard (which now asks for seed mode) on the next start,
+	# without wiping the rest of the user's .env.
+	@if [ -f .env ]; then \
+		if grep -qE '^DOCKERCART_ENV_FORCE_WIZARD=' .env; then \
+			sed -i 's|^DOCKERCART_ENV_FORCE_WIZARD=.*|DOCKERCART_ENV_FORCE_WIZARD=1|' .env; \
+		else \
+			printf '\n# Set by make clean so the next make start re-runs the wizard\nDOCKERCART_ENV_FORCE_WIZARD=1\n' >> .env; \
+		fi; \
+	fi
+	@echo "Cleaned. Run 'make start' to re-install (wizard will prompt for seed mode)."

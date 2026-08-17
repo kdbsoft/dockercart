@@ -236,6 +236,30 @@ configure_env() {
         echo -e "${GREEN}✓ Admin email: ${admin_email}${NC}"
     fi
 
+    # --- 3. Seed mode (demo / clean) -----------------------------------------
+    # Only prompt on a forced re-run (make clean -> make start, which sets
+    # DOCKERCART_ENV_FORCE_WIZARD=1) or when the key is missing/empty. The normal
+    # first-run wizard keeps the template default (demo) to stay minimal; the
+    # operator can edit DOCKERCART_SEED_MODE in .env later.
+    local force_wizard="${DOCKERCART_ENV_FORCE_WIZARD:-0}"
+    local seed_mode
+    seed_mode="$(get_env_key "$ENV_FILE" DOCKERCART_SEED_MODE)"
+    if [ "$force_wizard" = "1" ] || [ -z "$seed_mode" ]; then
+        echo ""
+        echo -e "${BLUE}Seed mode${NC}"
+        echo -e "  ${GREEN}demo${NC}  — pre-populated sample store (products, categories)"
+        echo -e "  ${GREEN}clean${NC} — empty store, no demo content"
+        local seed_default="demo"
+        [ -n "$seed_mode" ] && seed_default="$seed_mode"
+        ask_value seed_mode "Seed mode (demo/clean)" "$seed_default" || return $?
+        while [ "$seed_mode" != "demo" ] && [ "$seed_mode" != "clean" ]; do
+            echo -e "${RED}Please enter 'demo' or 'clean'.${NC}"
+            ask_value seed_mode "Seed mode (demo/clean)" "$seed_default" || return $?
+        done
+        set_env_key "$ENV_FILE" DOCKERCART_SEED_MODE "$seed_mode"
+        echo -e "${GREEN}✓ Seed mode: ${seed_mode}${NC}"
+    fi
+
     # --- Defaults (no prompts) ----------------------------------------------
     # Project name namespacing (containers, network, volumes).
     # Derive from the directory basename unless the operator explicitly set a
@@ -311,6 +335,14 @@ configure_env() {
     echo -e "${YELLOW}All passwords were generated randomly and saved to .env.${NC}"
     echo -e "${YELLOW}Edit .env to change any value, then re-run 'make start' if needed.${NC}"
     echo ""
+
+    # If this was a forced re-run (make clean -> make start), consume the flag so
+    # the next ordinary `make start` does not re-prompt the wizard every time.
+    if [ "${DOCKERCART_ENV_FORCE_WIZARD:-0}" = "1" ]; then
+        if grep -qE '^DOCKERCART_ENV_FORCE_WIZARD=' "$ENV_FILE"; then
+            sed -i '/^DOCKERCART_ENV_FORCE_WIZARD=/d' "$ENV_FILE"
+        fi
+    fi
 }
 
 configure_env
