@@ -115,7 +115,8 @@ MARIADB_ROOT_PASSWORD:root_password \
 MARIADB_PASSWORD:dockercart_password \
 REDIS_PASSWORD:dockercart_redis_pass \
 ADMIN_PASSWORD:type_password_here \
-FTP_PASS:change_me_please"
+FTP_PASS:change_me_please \
+HEALTHCHECK_TOKEN:"
 
     local generated=()
     local key default current gen
