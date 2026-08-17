@@ -1,3 +1,9 @@
+## [3.5.2](https://github.com/kdbsoft/dockercart/compare/v3.5.1...v3.5.2) (2026-08-17)
+
+### Bug Fixes
+
+* **migration:** create abandoned cart table if missing before alters ([34088fd](https://github.com/kdbsoft/dockercart/commit/34088fda7bffa335b870a03e997f6820de48dd9c))
+
 ## [3.5.1](https://github.com/kdbsoft/dockercart/compare/v3.5.0...v3.5.1) (2026-08-17)
 
 ### Bug Fixes
