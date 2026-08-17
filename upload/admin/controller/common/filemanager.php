@@ -278,10 +278,12 @@ class ControllerCommonFileManager extends Controller {
 						$json['error'] = $this->language->get('error_filename');
 					}
 
-					// Allowed extensions (both image and video regardless of type)
-					$allowed_ext = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'mp4', 'webm', 'ogv', 'glb');
+					// Allowed extensions (both image and video regardless of type).
+					// Note: svg is deliberately excluded — SVGs can carry scripts
+					// and are served raw, so they are a stored-XSS vector.
+					$allowed_ext = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'mp4', 'webm', 'ogv', 'glb');
 					$allowed_mime = array(
-						'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp', 'image/svg+xml',
+						'image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp',
 						'video/mp4', 'video/webm', 'video/ogg',
 						'model/gltf-binary'
 					);
