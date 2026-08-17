@@ -150,7 +150,7 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 	@cp -a docker/mysql/init.sql docker/mysql/init.sql.bak.$$(date -u +%Y%m%dT%H%M%SZ) || true
 	@TMP_FILE=$$(mktemp docker/mysql/init.sql.tmp.XXXXXX); \
 	echo "Generating new dump (may take some time)..."; \
-	if ! $(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' | sed "s/,'config_encryption','[^']*'/,'config_encryption',''/g" > $$TMP_FILE; then \
+	if ! $(COMPOSE) exec -T -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb sh -c 'mariadb-dump -u"$${MARIADB_USER:-dockercart}" "$${MARIADB_DATABASE:-dockercart}" --single-transaction --quick --hex-blob --routines --triggers --events --default-character-set=utf8mb4' | sed -e 's/DEFINER=[^ ]*//g' | sed "s/,'config_encryption','[^']*'/,'config_encryption',''/g" | sed -E "/INSERT INTO .oc_user. VALUES/,/ALTER TABLE .oc_user. ENABLE KEYS/s/^(\(1,1,'[^']*',)'[^']*'/\1'PASSWORD_PLACEHOLDER'/" > $$TMP_FILE; then \
 		rm -f $$TMP_FILE; \
 		echo "Dump failed"; \
 		exit 1; \

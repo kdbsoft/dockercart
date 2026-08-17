@@ -44,15 +44,16 @@ if [ -z "${USER_TABLE_EXISTS}" ] || [ -z "${SETTING_TABLE_EXISTS}" ]; then
 fi
 
 # NOTE: Admin account and store settings are NOT written here. The seed dump
-# (init.sql) already contains the admin user with an Argon2ID password hash,
-# and the runtime entrypoint's initialize_database() is the single source of
-# truth for bootstrap settings (store URL, encryption key, seed marker). This
-# avoids a duplicate SHA1 vs Argon2ID bootstrap that previously caused admin
-# login to break on first-run race conditions.
+# (init.sql) carries the admin row with a PASSWORD_PLACEHOLDER sentinel (the
+# real hash is stripped by `make dump-init`), and the runtime entrypoint's
+# ensure_admin_password() replaces it with the hash derived from ADMIN_PASSWORD
+# on every boot. initialize_database() is the single source of truth for the
+# rest of the bootstrap settings (store URL, encryption key, seed marker).
+# This avoids a duplicate SHA1 vs Argon2ID bootstrap that previously caused
+# admin login to break on first-run race conditions.
 #
-# For custom admin credentials at first install, edit the admin row inside
-# docker/mysql/init.sql (hashed with password_hash(..., PASSWORD_ARGON2ID)) or
-# set ADMIN_USERNAME/ADMIN_PASSWORD and let the entrypoint bootstrap an empty DB.
+# For custom admin credentials at first install, set ADMIN_USERNAME/ADMIN_PASSWORD
+# in .env and let the entrypoint bootstrap the admin on first boot.
 
 if [ -n "${PRODUCT_TABLE_EXISTS}" ]; then
   MYSQL_PWD="${DB_PASSWORD}" mariadb -u"${DB_USER}" "${DB_NAME}" -e "UPDATE \`${DB_PREFIX}product\` SET viewed = 0;" || true
