@@ -8,11 +8,13 @@ class User {
 	private $db;
 	private $request;
 	private $session;
+	private $config;
 
 	public function __construct($registry) {
 		$this->db = $registry->get('db');
 		$this->request = $registry->get('request');
 		$this->session = $registry->get('session');
+		$this->config = $registry->get('config');
 
 		if (isset($this->session->data['user_id'])) {
 			$user_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE user_id = '" . (int)$this->session->data['user_id'] . "' AND status = '1'");
@@ -77,9 +79,20 @@ class User {
 			}
 		}
 
-		if (session_id() && function_exists('session_regenerate_id')) {
-			session_regenerate_id(true);
-		}
+		$session_id = $this->session->rotate();
+
+		$secure = (!empty($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] == 'on' || $this->request->server['HTTPS'] == '1')) || (isset($this->request->server['HTTP_X_FORWARDED_PROTO']) && $this->request->server['HTTP_X_FORWARDED_PROTO'] == 'https');
+
+		setcookie($this->config->get('session_name'), $session_id, [
+			'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
+			'path'     => ini_get('session.cookie_path'),
+			'domain'   => ini_get('session.cookie_domain'),
+			'secure'   => $secure,
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
+
+		$_COOKIE[$this->config->get('session_name')] = $session_id;
 	}
 
 	public function logout() {

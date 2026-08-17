@@ -9,6 +9,15 @@ class ControllerStartupSession extends Controller {
 
 		$this->session->start($session_id);
 
-		setcookie($this->config->get('session_name'), $this->session->getId(), (ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0), ini_get('session.cookie_path'), ini_get('session.cookie_domain'));
+		$secure = (!empty($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] == 'on' || $this->request->server['HTTPS'] == '1')) || (isset($this->request->server['HTTP_X_FORWARDED_PROTO']) && $this->request->server['HTTP_X_FORWARDED_PROTO'] == 'https');
+
+		setcookie($this->config->get('session_name'), $this->session->getId(), [
+			'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
+			'path'     => ini_get('session.cookie_path'),
+			'domain'   => ini_get('session.cookie_domain'),
+			'secure'   => $secure,
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
 	}
 }

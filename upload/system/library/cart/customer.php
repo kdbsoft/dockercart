@@ -82,7 +82,7 @@ class Customer {
 					}
 
 					// Set cookie for 30 days (HttpOnly, Secure when applicable, SameSite=Lax)
-					$secure = (!empty($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] == 'on' || $this->request->server['HTTPS'] == '1'));
+					$secure = $this->isSecureRequest();
 					setcookie('remember_customer', $newToken, ['expires' => time() + 60 * 60 * 24 * 30, 'path' => '/', 'secure' => $secure, 'httponly' => true, 'samesite' => 'Lax']);
 					$_COOKIE['remember_customer'] = $newToken;
 				}
@@ -123,9 +123,7 @@ class Customer {
 		
 			$this->db->query("UPDATE " . DB_PREFIX . "customer SET language_id = '" . (int)$this->config->get('config_language_id') . "', ip = '" . $this->db->escape($this->request->server['REMOTE_ADDR']) . "' WHERE customer_id = '" . (int)$this->customer_id . "'");
 
-			if (session_id() && function_exists('session_regenerate_id')) {
-				session_regenerate_id(true);
-			}
+			$this->rotateSession();
 
 			// Generate remember token and set cookie for persistent login
 			try {
@@ -141,7 +139,7 @@ class Customer {
 				$this->db->query("UPDATE " . DB_PREFIX . "customer SET remember_token = '" . $this->db->escape($token) . "' WHERE customer_id = '" . (int)$this->customer_id . "'");
 			}
 
-			$secure = (!empty($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] == 'on' || $this->request->server['HTTPS'] == '1'));
+			$secure = $this->isSecureRequest();
 			setcookie('remember_customer', $token, ['expires' => time() + 60 * 60 * 24 * 30, 'path' => '/', 'secure' => $secure, 'httponly' => true, 'samesite' => 'Lax']);
 			$_COOKIE['remember_customer'] = $token;
 
@@ -149,6 +147,25 @@ class Customer {
 		} else {
 			return false;
 		}
+	}
+
+	private function isSecureRequest() {
+		return (!empty($this->request->server['HTTPS']) && ($this->request->server['HTTPS'] == 'on' || $this->request->server['HTTPS'] == '1')) || (isset($this->request->server['HTTP_X_FORWARDED_PROTO']) && $this->request->server['HTTP_X_FORWARDED_PROTO'] == 'https');
+	}
+
+	private function rotateSession() {
+		$session_id = $this->session->rotate();
+
+		setcookie($this->config->get('session_name'), $session_id, [
+			'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
+			'path'     => ini_get('session.cookie_path'),
+			'domain'   => ini_get('session.cookie_domain'),
+			'secure'   => $this->isSecureRequest(),
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
+
+		$_COOKIE[$this->config->get('session_name')] = $session_id;
 	}
 
 	public function logout() {
