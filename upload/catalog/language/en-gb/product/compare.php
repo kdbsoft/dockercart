@@ -25,3 +25,5 @@ $_['text_remove']       = 'Success: You have removed <a href="%s">%s</a> from yo
 $_['text_empty']        = 'You have not chosen any products to compare.';
 $_['text_products_fallback'] = 'Products';
 $_['text_category_nav'] = 'Compare categories';
+// Error
+$_['error_csrf'] = 'Invalid security token, please try again.';

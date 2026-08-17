@@ -80,8 +80,8 @@ class ControllerAccountWishList extends Controller {
 
 		$this->load->model('tool/image');
 
-		if (isset($this->request->get['remove'])) {
-			$remove = $this->parseWishlistKey($this->request->get['remove']);
+		if (isset($this->request->post['remove']) && $this->validateCsrf()) {
+			$remove = $this->parseWishlistKey($this->request->post['remove']);
 
 			if ($remove['product_id']) {
 				$this->removeWishlistRow($remove['product_id'], $remove['variant_id']);
@@ -295,7 +295,8 @@ class ControllerAccountWishList extends Controller {
 					'is_configurable'    => !empty($product_info['is_configurable']),
 					'variant_swatches'   => isset($product_info['variant_swatches']) ? $product_info['variant_swatches'] : array(),
 					'href'               => $this->url->link('product/product', $product_url),
-					'remove'             => $this->url->link('account/wishlist', 'remove=' . $this->buildWishlistKey((int)$product_info['product_id'], $variant_id))
+					'remove'             => $this->url->link('account/wishlist', ''),
+					'remove_key'         => $this->buildWishlistKey((int)$product_info['product_id'], $variant_id)
 				);
 			} else {
 				$this->removeWishlistRow((int)$result['product_id'], (int)$result['variant_id']);
@@ -311,6 +312,7 @@ class ControllerAccountWishList extends Controller {
 		$data['button_cart'] = $this->language->get('button_cart');
 		$data['button_continue'] = $this->language->get('button_continue');
 		$data['text_remove_wishlist'] = $this->language->get('text_remove_wishlist');
+		$data['csrf_token'] = $this->csrfToken();
 		$data['text_quick_view'] = $this->language->get('text_quick_view');
 		$data['text_sale'] = $this->language->get('text_sale');
 		$data['text_reviews'] = $this->language->get('text_reviews_word');
@@ -331,6 +333,15 @@ class ControllerAccountWishList extends Controller {
 		$this->load->language('account/wishlist');
 
 		$json = array();
+
+		if (!$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (isset($this->request->post['product_id'])) {
 			$product_id = (int)$this->request->post['product_id'];
@@ -382,6 +393,15 @@ class ControllerAccountWishList extends Controller {
 		$this->load->language('account/wishlist');
 
 		$json = array();
+
+		if (!$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (isset($this->request->post['product_id'])) {
 			$product_id = (int)$this->request->post['product_id'];

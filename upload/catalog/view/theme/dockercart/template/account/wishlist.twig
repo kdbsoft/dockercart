@@ -130,11 +130,15 @@
                   {{ button_cart }}
                 </button>
                 {% endif %}
-                <a href="{{ product.remove }}" title="{{ text_remove_wishlist }}"
-                  class="flex items-center justify-center w-10 h-10 border border-red-200 hover:border-red-300 text-red-400 hover:text-red-600 rounded-xl transition flex-shrink-0"
-                  aria-label="{{ text_remove_wishlist }}">
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </a>
+                <form action="{{ product.remove }}" method="post" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                  <input type="hidden" name="remove" value="{{ product.remove_key }}" />
+                  <button type="submit" title="{{ text_remove_wishlist }}"
+                    class="flex items-center justify-center w-10 h-10 border border-red-200 hover:border-red-300 text-red-400 hover:text-red-600 rounded-xl transition flex-shrink-0"
+                    aria-label="{{ text_remove_wishlist }}">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                  </button>
+                </form>
               </div>
             </div>
           </div>

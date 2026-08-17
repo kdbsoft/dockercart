@@ -630,6 +630,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			fileInput.type = 'file';
 			fileInput.name = 'file';
 			form.appendChild(fileInput);
+			var csrfInput = document.createElement('input');
+			csrfInput.type = 'hidden';
+			csrfInput.name = 'csrf_token';
+			csrfInput.value = window.dcCsrfToken || '';
+			form.appendChild(csrfInput);
 			document.body.insertBefore(form, document.body.firstChild);
 
 			fileInput.click();
