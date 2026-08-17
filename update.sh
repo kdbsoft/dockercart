@@ -44,7 +44,11 @@ compose() {
         fi
     fi
     # shellcheck disable=SC2086
-    docker compose $FILES "$@"
+    # 9>&- closes the flock fd in this child and all its descendants
+    # (podman spawns long-lived conmon container monitors that would otherwise
+    # inherit fd 9 and hold the .update.lock flock forever, blocking later
+    # `make update` runs with a bogus "already running" error).
+    docker compose $FILES "$@" 9>&-
 }
 
 reconcile_working_tree() {
@@ -184,7 +188,7 @@ db_exec_compose() {
 }
 
 db_exec_docker() {
-    docker exec -i -e MYSQL_PWD="$DB_PASS" "$MARIADB_CONTAINER" mariadb -u"$DB_USER" "$DB_NAME" "$@"
+    docker exec -i -e MYSQL_PWD="$DB_PASS" "$MARIADB_CONTAINER" mariadb -u"$DB_USER" "$DB_NAME" "$@" 9>&-
 }
 
 db_exec() {
