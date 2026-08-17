@@ -1,3 +1,9 @@
+## [3.4.2](https://github.com/kdbsoft/dockercart/compare/v3.4.1...v3.4.2) (2026-08-17)
+
+### Bug Fixes
+
+* **make:** re-run setup wizard with seed prompt after make clean ([c98bcfe](https://github.com/kdbsoft/dockercart/commit/c98bcfebfe1e88ecfa00da0c19ef9cc14fce6fed))
+
 ## [3.4.1](https://github.com/kdbsoft/dockercart/compare/v3.4.0...v3.4.1) (2026-08-16)
 
 ### Bug Fixes
