@@ -1,3 +1,16 @@
+## [3.5.0](https://github.com/kdbsoft/dockercart/compare/v3.4.2...v3.5.0) (2026-08-17)
+
+### Features
+
+* **security:** add CSRF checks to catalog actions and harden uploads ([930968e](https://github.com/kdbsoft/dockercart/commit/930968ea19fe07fff0a37fbea7c2ffa811df6f8c))
+* **security:** auto-generate healthcheck token when left empty ([7082c80](https://github.com/kdbsoft/dockercart/commit/7082c807babf3b176a0fa2bfe747b7839d8b63d2))
+* **security:** bootstrap admin password from ADMIN_PASSWORD on boot ([f532f1c](https://github.com/kdbsoft/dockercart/commit/f532f1c6dce8ec708c8e2bf7d47024eb28f4acb0))
+
+### Bug Fixes
+
+* **security:** deny web access to cli/mock scripts and drop svg uploads ([05e572b](https://github.com/kdbsoft/dockercart/commit/05e572bf7007594fe257a7475c0f8b6c6ec42e70))
+* **security:** rotate session id on login and harden cookie flags ([9253196](https://github.com/kdbsoft/dockercart/commit/92531968a6cb9bfd41f7ce17692996262b89a1e0))
+
 ## [3.4.2](https://github.com/kdbsoft/dockercart/compare/v3.4.1...v3.4.2) (2026-08-17)
 
 ### Bug Fixes
