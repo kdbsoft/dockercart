@@ -131,7 +131,7 @@ if ($config->get('session_autostart')) {
 		'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
 		'path'     => ini_get('session.cookie_path'),
 		'domain'   => ini_get('session.cookie_domain'),
-		'secure'   => !empty($request->server['HTTPS']),
+		'secure'   => !empty($request->server['HTTPS']) || (isset($request->server['HTTP_X_FORWARDED_PROTO']) && $request->server['HTTP_X_FORWARDED_PROTO'] == 'https'),
 		'httponly' => true,
 		'samesite' => 'Lax',
 	]);
