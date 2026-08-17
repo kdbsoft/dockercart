@@ -1646,7 +1646,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   window.compare = {
     _request: function(action, product_id, variant_id) {
-      var body = 'product_id=' + encodeURIComponent(product_id);
+      var body = 'product_id=' + encodeURIComponent(product_id) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
 
       if (variant_id && parseInt(variant_id, 10) > 0) {
         body += '&variant_id=' + encodeURIComponent(variant_id);
@@ -1804,7 +1804,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var button = clickedBtn || document.getElementById('dc-wishlist-btn');
       var active = button && button.getAttribute('data-in-wishlist') === '1';
 
-      var body = 'product_id=' + encodeURIComponent(productId);
+      var body = 'product_id=' + encodeURIComponent(productId) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
 
       if (variantId && parseInt(variantId, 10) > 0) {
         body += '&variant_id=' + encodeURIComponent(variantId);
@@ -1954,6 +1954,13 @@ document.addEventListener('DOMContentLoaded', function() {
       fileInput.name = 'file';
 
       form.appendChild(fileInput);
+
+      var csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrf_token';
+      csrfInput.value = window.dcCsrfToken || '';
+
+      form.appendChild(csrfInput);
       document.body.appendChild(form);
 
       fileInput.addEventListener('change', function() {

@@ -35,9 +35,11 @@ $_['column_status']         = 'Status';
 $_['column_tracking_number']  = 'Tracking Number';
 $_['column_comment']        = 'Comment';
 $_['text_gift']             = 'Gift';
+$_['text_reorder']          = 'Reorder';
 
 // Error
 $_['error_reorder']         = '%s is not currently available to be reordered.';
+$_['error_csrf']            = 'Invalid security token, please try again.';
 
 $_['text_product']  = 'product';
 $_['text_products'] = 'products';

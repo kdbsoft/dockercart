@@ -782,6 +782,15 @@ class ControllerCheckoutCart extends Controller {
 
 		$json = array();
 
+		if (!$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		// Remove
 		if (isset($this->request->post['key'])) {
 			$this->cart->remove($this->request->post['key']);

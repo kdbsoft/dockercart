@@ -47,3 +47,5 @@ $_['text_bxgy_discount']       = 'BXGY Discount';
 $_['text_bxgy_free_badge']     = 'BXGY: Free';
 $_['text_bxgy_percent_badge']  = 'BXGY: -%s%%';
 $_['text_model']               = 'Product Code:';
+
+$_['error_csrf'] = 'Invalid security token, please try again.';

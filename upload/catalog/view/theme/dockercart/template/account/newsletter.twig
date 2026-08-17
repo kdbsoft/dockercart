@@ -31,6 +31,7 @@
 
       <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <form action="{{ action }}" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
           <p class="text-sm text-gray-500 mb-6">{{ text_newsletter }}</p>
           <div class="flex items-center gap-6 mb-6">
             <label class="flex items-center gap-2 cursor-pointer">

@@ -123,6 +123,7 @@
   window.dcLang.text_home = {{ text_home ? '"' ~ text_home|e('js') ~ '"' : '' }};
   window.dcCompareIds = {{ compare_product_ids is defined ? compare_product_ids|json_encode|raw : '[]' }};
   window.dcWishlistKeys = {{ wishlist_keys is defined ? wishlist_keys|json_encode|raw : '[]' }};
+  window.dcCsrfToken = {{ csrf_token is defined ? csrf_token|json_encode|raw : '""' }};
 </script>
 
 <!-- ============================================================

@@ -423,7 +423,7 @@ class ControllerAccountOrder extends Controller {
 				$product_info = isset($product_info_map[(int)$product['product_id']]) ? $product_info_map[(int)$product['product_id']] : false;
 
 				if ($product_info) {
-					$reorder = $this->url->link('account/order/reorder', 'order_id=' . $order_id . '&order_product_id=' . $product['order_product_id'], true);
+					$reorder = $this->url->link('account/order/reorder', '', true);
 				} else {
 					$reorder = '';
 				}
@@ -464,6 +464,7 @@ class ControllerAccountOrder extends Controller {
 					'image'    => $image,
 					'href'     => $product_href,
 					'reorder'  => $reorder,
+					'order_product_id' => (int)$product['order_product_id'],
 					'return'   => $this->url->link('account/return/add', 'order_id=' . $order_info['order_id'] . '&product_id=' . $product['product_id'], true)
 				);
 			}
@@ -523,7 +524,10 @@ class ControllerAccountOrder extends Controller {
 				);
 			}
 
-			$data['continue'] = $this->url->link('account/order', '', true);
+			$data['order_id'] = $order_info['order_id'];
+		$data['csrf_token'] = $this->csrfToken();
+
+		$data['continue'] = $this->url->link('account/order', '', true);
 
 			$data['account_menu'] = $this->load->controller('common/account_menu');
 
@@ -625,8 +629,16 @@ class ControllerAccountOrder extends Controller {
 	public function reorder() {
 		$this->load->language('account/order');
 
-		if (isset($this->request->get['order_id'])) {
-			$order_id = $this->request->get['order_id'];
+		if (($this->request->server['REQUEST_METHOD'] != 'POST') || !$this->validateCsrf()) {
+			$this->session->data['error'] = $this->language->get('error_csrf');
+
+			$this->response->redirect($this->url->link('account/order/info', 'order_id=' . (int)($this->request->post['order_id'] ?? 0)));
+
+			return;
+		}
+
+		if (isset($this->request->post['order_id'])) {
+			$order_id = $this->request->post['order_id'];
 		} else {
 			$order_id = 0;
 		}
@@ -636,8 +648,8 @@ class ControllerAccountOrder extends Controller {
 		$order_info = $this->model_account_order->getOrder($order_id);
 
 		if ($order_info) {
-			if (isset($this->request->get['order_product_id'])) {
-				$order_product_id = $this->request->get['order_product_id'];
+			if (isset($this->request->post['order_product_id'])) {
+				$order_product_id = $this->request->post['order_product_id'];
 			} else {
 				$order_product_id = 0;
 			}

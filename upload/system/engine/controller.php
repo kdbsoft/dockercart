@@ -108,4 +108,25 @@ abstract class Controller {
 
 		return false;
 	}
+
+	/**
+	 * Returns the per-session CSRF token, generating it on first use.
+	 */
+	protected function csrfToken(): string {
+		if (empty($this->session->data['csrf_token'])) {
+			$this->session->data['csrf_token'] = token(32);
+		}
+
+		return (string)$this->session->data['csrf_token'];
+	}
+
+	/**
+	 * Validates the CSRF token submitted with the current POST request.
+	 */
+	protected function validateCsrf(): bool {
+		return isset($this->session->data['csrf_token'])
+			&& isset($this->request->post['csrf_token'])
+			&& is_string($this->request->post['csrf_token'])
+			&& hash_equals((string)$this->session->data['csrf_token'], $this->request->post['csrf_token']);
+	}
 }

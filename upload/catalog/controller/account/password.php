@@ -13,7 +13,7 @@ class ControllerAccountPassword extends Controller {
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$this->load->model('account/customer');
 
 			$this->model_account_customer->editPassword($this->customer->getEmail(), $this->request->post['password']);
@@ -53,6 +53,8 @@ class ControllerAccountPassword extends Controller {
 		}
 
 		$data['action'] = $this->url->link('account/password', '', true);
+
+		$data['csrf_token'] = $this->csrfToken();
 
 		if (isset($this->request->post['password'])) {
 			$data['password'] = $this->request->post['password'];
