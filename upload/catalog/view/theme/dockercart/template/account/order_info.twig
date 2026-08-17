@@ -201,9 +201,14 @@
                 <td class="text-right font-semibold text-gray-800 px-4 py-3 whitespace-nowrap">{{ product.total }}</td>
                 <td class="text-right px-4 py-3 whitespace-nowrap">
                   {% if product.reorder %}
-                  <a href="{{ product.reorder }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition text-xs mr-1">
-                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
-                  </a>
+                  <form action="{{ product.reorder }}" method="post" class="inline mr-1">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <input type="hidden" name="order_id" value="{{ order_id }}" />
+                    <input type="hidden" name="order_product_id" value="{{ product.order_product_id }}" />
+                    <button type="submit" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition text-xs" aria-label="{{ text_reorder }}">
+                      <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </form>
                   {% endif %}
                   <a href="{{ product.return }}" class="inline-flex items-center gap-1 text-red-500 hover:text-red-600 border border-red-200 hover:border-red-300 px-3 py-1.5 rounded-lg transition text-xs">
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>

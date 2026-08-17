@@ -29,8 +29,8 @@ class ControllerProductCompare extends Controller {
 			$this->session->data['compare'] = array();
 		}
 
-		if (isset($this->request->get['remove'])) {
-			$remove = $this->parseCompareKey($this->request->get['remove']);
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && isset($this->request->post['remove']) && $this->validateCsrf()) {
+			$remove = $this->parseCompareKey($this->request->post['remove']);
 
 			$key = array_search($this->buildCompareKey($remove['product_id'], $remove['variant_id']), $this->session->data['compare']);
 
@@ -243,7 +243,8 @@ class ControllerProductCompare extends Controller {
 					'category_id'   => $category_id,
 					'category_name' => $category_name,
 					'href'          => $this->url->link('product/product', $product_url),
-					'remove'        => $this->url->link('product/compare', 'remove=' . $key)
+					'remove'        => $this->url->link('product/compare', ''),
+					'remove_key'    => $key
 				);
 
 				foreach ($attribute_groups as $attribute_group) {
@@ -347,6 +348,8 @@ class ControllerProductCompare extends Controller {
 
 		$data['continue'] = '/';
 
+		$data['csrf_token'] = $this->csrfToken();
+
 		$data['compare_url'] = $this->url->link('product/compare');
 
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -364,6 +367,15 @@ class ControllerProductCompare extends Controller {
 		$this->load->helper('plural');
 
 		$json = array();
+
+		if (!$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (!isset($this->session->data['compare'])) {
 			$this->session->data['compare'] = array();
@@ -410,6 +422,15 @@ class ControllerProductCompare extends Controller {
 		$this->load->helper('plural');
 
 		$json = array();
+
+		if (!$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (isset($this->request->post['product_id'])) {
 			$product_id = (int)$this->request->post['product_id'];

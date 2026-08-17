@@ -172,7 +172,7 @@ function removeCartItem(cartId) {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'X-Requested-With': 'XMLHttpRequest'
 		},
-		body: `key=${encodeURIComponent(cartId)}`
+		body: `key=${encodeURIComponent(cartId)}&csrf_token=${encodeURIComponent(window.dcCsrfToken || '')}`
 	})
 	.then(response => response.json())
 	.then(json => {
@@ -226,7 +226,7 @@ function removeVoucher(voucherKey) {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'X-Requested-With': 'XMLHttpRequest'
 		},
-		body: `key=${encodeURIComponent(voucherKey)}`
+		body: `key=${encodeURIComponent(voucherKey)}&csrf_token=${encodeURIComponent(window.dcCsrfToken || '')}`
 	})
 	.then(response => response.json())
 	.then(json => {

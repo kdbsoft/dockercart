@@ -252,6 +252,9 @@ class ControllerCommonHeader extends Controller {
 			$data['compare_product_ids'] = array_values(array_unique(array_map('strval', $this->session->data['compare'])));
 		}
 
+		// CSRF token exposed to storefront JS (wishlist/upload fetches)
+		$data['csrf_token'] = $this->csrfToken();
+
 		$data['text_logged'] = sprintf($this->language->get('text_logged'), $this->url->link('account/account', '', true), $this->customer->getFirstName(), $this->url->link('account/logout', '', true));
 		
 		$data['home'] = '/';

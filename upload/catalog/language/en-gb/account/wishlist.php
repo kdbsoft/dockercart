@@ -26,3 +26,5 @@ $_['column_model']  = 'Product Code';
 $_['column_stock']  = 'Stock';
 $_['column_price']  = 'Unit Price';
 $_['column_action'] = 'Action';
+// Error
+$_['error_csrf'] = 'Invalid security token, please try again.';

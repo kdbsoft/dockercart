@@ -869,7 +869,7 @@
       ? (clickedBtn.dataset.inWishlist === '1' || clickedBtn.closest('.product-card') && clickedBtn.closest('.product-card').dataset.inWishlist === '1')
       : (card && card.dataset.inWishlist === '1');
 
-    let body = 'product_id=' + encodeURIComponent(productId);
+    let body = 'product_id=' + encodeURIComponent(productId) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
 
     if (key.indexOf(':') > -1) {
       body += '&variant_id=' + encodeURIComponent(key.split(':')[1]);

@@ -34,7 +34,7 @@ class ControllerAccountAddress extends Controller {
 
 		$this->load->model('account/address');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validateForm()) {
 			$this->model_account_address->addAddress($this->customer->getId(), $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_add');
@@ -61,7 +61,7 @@ class ControllerAccountAddress extends Controller {
 
 		$this->load->model('account/address');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validateForm()) {
 			$this->model_account_address->editAddress($this->request->get['address_id'], $this->request->post);
 
 			// Default Shipping Address
@@ -101,18 +101,18 @@ class ControllerAccountAddress extends Controller {
 
 		$this->load->model('account/address');
 
-		if (isset($this->request->get['address_id']) && $this->validateDelete()) {
-			$this->model_account_address->deleteAddress($this->request->get['address_id']);
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && isset($this->request->post['address_id']) && $this->validateCsrf() && $this->validateDelete()) {
+			$this->model_account_address->deleteAddress($this->request->post['address_id']);
 
 			// Default Shipping Address
-			if (isset($this->session->data['shipping_address']['address_id']) && ($this->request->get['address_id'] == $this->session->data['shipping_address']['address_id'])) {
+			if (isset($this->session->data['shipping_address']['address_id']) && ($this->request->post['address_id'] == $this->session->data['shipping_address']['address_id'])) {
 				unset($this->session->data['shipping_address']);
 				unset($this->session->data['shipping_method']);
 				unset($this->session->data['shipping_methods']);
 			}
 
 			// Default Payment Address
-			if (isset($this->session->data['payment_address']['address_id']) && ($this->request->get['address_id'] == $this->session->data['payment_address']['address_id'])) {
+			if (isset($this->session->data['payment_address']['address_id']) && ($this->request->post['address_id'] == $this->session->data['payment_address']['address_id'])) {
 				unset($this->session->data['payment_address']);
 				unset($this->session->data['payment_method']);
 				unset($this->session->data['payment_methods']);
@@ -197,10 +197,11 @@ class ControllerAccountAddress extends Controller {
 				'address_id' => $result['address_id'],
 				'address'    => str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format)))),
 				'update'     => $this->url->link('account/address/edit', 'address_id=' . $result['address_id'], true),
-				'delete'     => $this->url->link('account/address/delete', 'address_id=' . $result['address_id'], true)
+				'delete'     => $this->url->link('account/address/delete', '', true)
 			);
 		}
 
+		$data['csrf_token'] = $this->csrfToken();
 		$data['add'] = $this->url->link('account/address/add', '', true);
 		$data['back'] = $this->url->link('account/account', '', true);
 
@@ -301,6 +302,8 @@ class ControllerAccountAddress extends Controller {
 		} else {
 			$data['action'] = $this->url->link('account/address/edit', 'address_id=' . $this->request->get['address_id'], true);
 		}
+
+		$data['csrf_token'] = $this->csrfToken();
 
 		if (isset($this->request->get['address_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$address_info = $this->model_account_address->getAddress($this->request->get['address_id']);
@@ -498,7 +501,7 @@ class ControllerAccountAddress extends Controller {
 			$this->error['warning'] = $this->language->get('error_delete');
 		}
 
-		if ($this->customer->getAddressId() == $this->request->get['address_id']) {
+		if ($this->customer->getAddressId() == $this->request->post['address_id']) {
 			$this->error['warning'] = $this->language->get('error_default');
 		}
 
