@@ -1,3 +1,9 @@
+## [3.4.1](https://github.com/kdbsoft/dockercart/compare/v3.4.0...v3.4.1) (2026-08-16)
+
+### Bug Fixes
+
+* **scripts:** sanitize and derive compose project name from directory basename ([cdd8d1f](https://github.com/kdbsoft/dockercart/commit/cdd8d1fa72c88b35d8817d95ccc6e659072d7150))
+
 ## [3.4.0](https://github.com/kdbsoft/dockercart/compare/v3.3.0...v3.4.0) (2026-08-16)
 
 ### Features
