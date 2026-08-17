@@ -1,3 +1,9 @@
+## [3.5.3](https://github.com/kdbsoft/dockercart/compare/v3.5.2...v3.5.3) (2026-08-17)
+
+### Bug Fixes
+
+* **db:** ensure oc_order_document exists in invoice migrations ([5bc2525](https://github.com/kdbsoft/dockercart/commit/5bc2525b36165e760054306bb85108b736278d6c))
+
 ## [3.5.2](https://github.com/kdbsoft/dockercart/compare/v3.5.1...v3.5.2) (2026-08-17)
 
 ### Bug Fixes
