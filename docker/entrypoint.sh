@@ -496,6 +496,40 @@ WHERE \`key\` = 'config_encryption' AND store_id = 0
 SQL
 }
 
+# Если админ (user_id=1) всё ещё несёт плейсхолдер-пароль из init.sql
+# (PASSWORD_PLACEHOLDER, ставится make dump-init и живёт в репозитории),
+# заменяем его на хэш из ADMIN_PASSWORD. Срабатывает на каждом boot, но
+# пишет только когда найден плейсхолдер — магазины с реальным паролем,
+# сменившимся в админке, не затираются.
+ensure_admin_password() {
+    local db_host="${DB_HOSTNAME:-mariadb}"
+    local db_user="${DB_USERNAME:-dockercart}"
+    local db_pass="${DB_PASSWORD:-dockercart_password}"
+    local db_name="${DB_DATABASE:-dockercart}"
+    local db_prefix="${DB_PREFIX:-oc_}"
+    local admin_user="${ADMIN_USERNAME:-admin}"
+    local admin_pass="${ADMIN_PASSWORD:-admin123}"
+    local admin_email="${ADMIN_EMAIL:-admin@example.com}"
+
+    local current_password
+    current_password=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
+        -N -B -e "SELECT \`password\` FROM \`${db_prefix}user\` WHERE user_id = 1" \
+        "${db_name}" 2>/dev/null || true)
+
+    if [ -n "${current_password}" ] && [ "${current_password}" = "PASSWORD_PLACEHOLDER" ]; then
+        local admin_hash
+        admin_hash=$(php -r "echo password_hash('${admin_pass}', PASSWORD_ARGON2ID);")
+
+        MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
+SET NAMES utf8mb4;
+UPDATE \`${db_prefix}user\`
+SET \`username\` = '${admin_user}', \`password\` = '${admin_hash}', \`email\` = '${admin_email}'
+WHERE \`user_id\` = 1;
+SQL
+        echo "Admin password bootstrapped from ADMIN_PASSWORD (placeholder replaced)."
+    fi
+}
+
 # Всегда синхронизирует config_url/config_ssl из DOCKERCART_URL с БД
 ensure_store_url() {
     local db_host="${DB_HOSTNAME:-mariadb}"
@@ -737,6 +771,9 @@ apply_php_settings
 ensure_encryption_key
 
 ensure_store_url
+
+# Бутстрап админ-пароля из ADMIN_PASSWORD (плейсхолдер из init.sql)
+ensure_admin_password
 
 # rclone config for S3 backup worker (also lets `make shell` users run the
 # worker manually; no-op when BACKUP_S3_ENABLED != true).
