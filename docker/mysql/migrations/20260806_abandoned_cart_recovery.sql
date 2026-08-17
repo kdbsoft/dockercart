@@ -3,6 +3,30 @@
 -- INSERT ... SELECT ... WHERE NOT EXISTS because oc_setting has no unique key
 -- and migrations may re-run.
 
+-- The abandoned-cart table is normally created by the module's install()
+-- (admin/model/extension/module/dockercart_checkout.php), which never runs on a
+-- database where the module was not installed. Ensure it exists so the ALTER
+-- statements below never hit ERROR 1146 (table doesn't exist). Mirrors the
+-- module base schema; the migration-added columns are applied idempotently below.
+CREATE TABLE IF NOT EXISTS `oc_dockercart_checkout_abandoned` (
+    `abandoned_id` int(11) NOT NULL AUTO_INCREMENT,
+    `session_id` varchar(255) NOT NULL,
+    `customer_id` int(11) DEFAULT 0,
+    `email` varchar(255) DEFAULT NULL,
+    `phone` varchar(50) DEFAULT NULL,
+    `cart_data` text,
+    `address_data` text,
+    `last_step` varchar(50) NOT NULL,
+    `recovered` tinyint(1) DEFAULT 0,
+    `date_added` datetime NOT NULL,
+    `date_modified` datetime NOT NULL,
+    PRIMARY KEY (`abandoned_id`),
+    KEY `session_id` (`session_id`),
+    KEY `customer_id` (`customer_id`),
+    KEY `email` (`email`),
+    KEY `recovered` (`recovered`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET @db = DATABASE();
 
 SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
