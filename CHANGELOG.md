@@ -1,3 +1,10 @@
+## [3.5.4](https://github.com/kdbsoft/dockercart/compare/v3.5.3...v3.5.4) (2026-08-17)
+
+### Bug Fixes
+
+* **migrations:** correct user group permission array handling ([998c6e9](https://github.com/kdbsoft/dockercart/commit/998c6e9f6152e5a51d9e5d7407ada4efa80d6a3b))
+* **migrations:** repair corrupted user group permission arrays ([5282b49](https://github.com/kdbsoft/dockercart/commit/5282b49c83936f7c004fb9807c72b6287c521cc9))
+
 ## [3.5.3](https://github.com/kdbsoft/dockercart/compare/v3.5.2...v3.5.3) (2026-08-17)
 
 ### Bug Fixes
