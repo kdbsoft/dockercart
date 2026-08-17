@@ -17,7 +17,7 @@ class File {
 
 			fclose($handle);
 
-			return unserialize($data);
+			return unserialize($data, array('allowed_classes' => false));
 		} else {
 			return array();
 		}

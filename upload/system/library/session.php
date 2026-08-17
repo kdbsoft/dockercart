@@ -83,6 +83,26 @@ class Session {
 	
 	/**
 	 * 
+	 *
+	 * @return	string
+ 	*/	
+	public function rotate() {
+		$old_session_id = $this->session_id;
+		$session_data = $this->data;
+
+		$this->start('');
+
+		if ($this->session_id !== $old_session_id) {
+			$this->data = $session_data;
+
+			$this->adaptor->destroy($old_session_id);
+		}
+
+		return $this->session_id;
+	}
+
+	/**
+	 * 
  	*/	
 	public function destroy() {
 		$this->adaptor->destroy($this->session_id);
