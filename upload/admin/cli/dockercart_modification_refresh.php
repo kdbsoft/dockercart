@@ -9,6 +9,11 @@
 
 declare(strict_types=1);
 
+if (php_sapi_name() !== 'cli') {
+	fwrite(STDERR, "This script must be run from CLI.\n");
+	exit(1);
+}
+
 $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $_SERVER['REQUEST_URI'] = '/';

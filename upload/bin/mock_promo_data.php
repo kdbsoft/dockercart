@@ -15,6 +15,11 @@
  */
 declare(strict_types=1);
 
+if (php_sapi_name() !== 'cli') {
+	fwrite(STDERR, "This script must be run from CLI.\n");
+	exit(1);
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
