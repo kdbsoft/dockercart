@@ -1,9 +1,9 @@
 {{ header }}{{ column_left }}
 <div id="content">
-  <div class="container-fluid">
-    <div class="page-header">
+  <div class="page-header">
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -23,7 +23,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -33,21 +33,19 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="credit-card" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{% if method_id %}{{ text_edit_method }}{% else %}{{ text_add_method }}{% endif %}</div>
-                <div class="dcx-panel-subtitle">{{ text_method_form_description }}</div>
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-method">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="languages" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_name_description }}</div>
+                </div>
               </div>
-            </div>
-            <div class="dcx-panel-body">
-              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-method">
+              <div class="dcx-panel-body">
                 <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                  <h4><i data-lucide="languages" width="16" height="16"></i> {{ text_name_description }}</h4>
                   <ul class="nav nav-tabs" id="lang-tabs">
                     {% for language in languages %}
                     <li{% if loop.first %} class="active"{% endif %}>
@@ -76,8 +74,17 @@
                     {% endfor %}
                   </div>
                 </div>
-                <div class="dcx-section">
-                  <h4><i data-lucide="funnel" width="16" height="16"></i> {{ text_conditions }}</h4>
+              </div>
+            </div>
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="funnel" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_conditions }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
                   <div class="dcx-fields dcx-fields--row">
                     <div class="dcx-field">
                       <label class="dcx-label">{{ entry_geo_zone }}</label>
@@ -97,54 +104,61 @@
                       <input type="text" name="max_total" value="{{ max_total }}" placeholder="{{ text_unlimited }}" class="form-control" />
                     </div>
                   </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label">{{ entry_shipping_methods }}</label>
-                    <select name="shipping_methods[]" class="form-control" multiple size="10" style="max-width:400px;">
-                      {% for shipping_method in available_shipping_methods %}
-                      <option value="{{ shipping_method.code }}" title="{{ shipping_method.label }}"{% if shipping_method.code in shipping_methods %} selected{% endif %}>{{ shipping_method.label }}</option>
-                      {% endfor %}
-                    </select>
-                    <div class="help-block">{{ help_shipping_methods }}</div>
-                    {% if not available_shipping_methods %}
-                    <div class="help-block text-warning">{{ text_no_shipping_methods_available }}</div>
-                    {% endif %}
-                  </div>
-                </div>
-                <div class="dcx-section">
-                  <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_status_sorting }}</h4>
-                  <div class="dcx-fields dcx-fields--row">
+                  <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                      <select name="status" id="input-status" class="form-control">
-                        {% if status %}
-                        <option value="1" selected>{{ text_enabled }}</option>
-                        <option value="0">{{ text_disabled }}</option>
-                        {% else %}
-                        <option value="1">{{ text_enabled }}</option>
-                        <option value="0" selected>{{ text_disabled }}</option>
-                        {% endif %}
+                      <label class="dcx-label">{{ entry_shipping_methods }}</label>
+                      <select name="shipping_methods[]" class="form-control" multiple size="10">
+                        {% for shipping_method in available_shipping_methods %}
+                        <option value="{{ shipping_method.code }}" title="{{ shipping_method.label }}"{% if shipping_method.code in shipping_methods %} selected{% endif %}>{{ shipping_method.label }}</option>
+                        {% endfor %}
                       </select>
+                      <div class="help-block">{{ help_shipping_methods }}</div>
+                      {% if not available_shipping_methods %}
+                      <div class="help-block text-warning">{{ text_no_shipping_methods_available }}</div>
+                      {% endif %}
                     </div>
-                    <div class="dcx-field">
-                      <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                      <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="0" id="input-sort-order" class="form-control" style="max-width:100px;" />
-                    </div>
-                  </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-reserve-minutes">{{ entry_reserve_minutes }} <span title="{{ help_reserve_minutes }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                    <input type="number" name="reserve_minutes" value="{{ reserve_minutes }}" placeholder="{{ text_reserve_global }}" id="input-reserve-minutes" class="form-control" min="0" style="max-width:150px;" />
-                    <div class="help-block">{{ help_reserve_minutes }}</div>
-                    {% if error_reserve_minutes %}
-                    <div class="text-danger">{{ error_reserve_minutes }}</div>
-                    {% endif %}
                   </div>
                 </div>
-              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_sorting }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected>{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected>{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="0" id="input-sort-order" class="form-control" />
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-reserve-minutes">{{ entry_reserve_minutes }} <span data-toggle="tooltip" title="{{ help_reserve_minutes }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <input type="number" name="reserve_minutes" value="{{ reserve_minutes }}" placeholder="{{ text_reserve_global }}" id="input-reserve-minutes" class="form-control" min="0" />
+                <div class="help-block">{{ help_reserve_minutes }}</div>
+                {% if error_reserve_minutes %}
+                <div class="text-danger">{{ error_reserve_minutes }}</div>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>
 {{ footer }}

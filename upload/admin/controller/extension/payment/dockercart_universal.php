@@ -290,9 +290,13 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
                 continue;
             }
 
-            $this->load->language('extension/shipping/' . $code);
+            // Load into an isolated, keyed language namespace so the shipping
+            // file's shared keys (text_add_method, text_method_form_description,
+            // ...) do not overwrite the payment module's language data.
+            $this->load->language('extension/shipping/' . $code, 'shipping_' . $code);
+            $shipping_lang = $this->language->get('shipping_' . $code);
 
-            $title = $this->language->get('heading_title');
+            $title = $shipping_lang->get('heading_title');
             if (empty($title) || $title === 'heading_title') {
                 $title = ucfirst(str_replace('_', ' ', $code));
             }
@@ -318,7 +322,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
 
                 foreach ($shipping_methods as $shipping_method) {
                     $method_code = 'dockercart_universal.dockercart_universal_' . (int)$shipping_method['method_id'];
-                    $method_name = !empty($shipping_method['name']) ? $shipping_method['name'] : $this->language->get('text_unnamed');
+                    $method_name = !empty($shipping_method['name']) ? $shipping_method['name'] : $shipping_lang->get('text_unnamed');
 
                     $options[] = [
                         'code'  => $method_code,

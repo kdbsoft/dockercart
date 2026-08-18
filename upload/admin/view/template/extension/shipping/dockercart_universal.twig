@@ -1,9 +1,9 @@
 {{ header }}{{ column_left }}
 <div id="content">
-  <div class="container-fluid">
-    <div class="page-header">
+  <div class="page-header">
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -23,7 +23,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -33,42 +33,37 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="truck" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ heading_title }}</div>
-                <div class="dcx-panel-subtitle">{{ text_module_description }}</div>
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-shipping">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="truck" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ heading_title }}</div>
+                  <div class="dcx-panel-subtitle">{{ text_module_description }}</div>
+                </div>
               </div>
-            </div>
-            <div class="dcx-panel-body">
-              <ul class="dcx-pills">
-                <li class="active"><a href="#tab-methods" data-toggle="tab"><i data-lucide="list" width="14" height="14"></i> {{ tab_methods }}</a></li>
-                <li><a href="#tab-settings" data-toggle="tab"><i data-lucide="settings" width="14" height="14"></i> {{ tab_settings }}</a></li>
-              </ul>
-              <div class="tab-content">
-                <div class="tab-pane active" id="tab-methods">
-                  <div class="dcx-fields" style="margin-bottom:16px;">
-                    <div class="dcx-fields dcx-fields--row">
-                      <div class="dcx-field">
-                        <label class="dcx-label">{{ text_total_methods }}</label>
-                        <div style="font-size:24px;font-weight:700;color:var(--dc-text-dark);">{{ shipping_methods|length }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label">{{ text_active_methods }}</label>
-                        <div style="font-size:24px;font-weight:700;color:var(--dc-green-600);">{{ shipping_methods|filter(m => m.status == 1)|length }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label">{{ text_geo_zones }}</label>
-                        <div style="font-size:24px;font-weight:700;color:var(--dc-text-dark);">{{ geo_zones|length }}</div>
-                      </div>
-                    </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-stats">
+                  <div class="dcx-stat">
+                    <div class="dcx-stat__value">{{ shipping_methods|length }}</div>
+                    <div class="dcx-stat__label">{{ text_total_methods }}</div>
                   </div>
-                  <div style="margin-bottom:16px;">
-                    <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_method }}</a>
+                  <div class="dcx-stat">
+                    <div class="dcx-stat__value dcx-stat__value--success">{{ shipping_methods|filter(m => m.status == 1)|length }}</div>
+                    <div class="dcx-stat__label">{{ text_active_methods }}</div>
+                  </div>
+                  <div class="dcx-stat">
+                    <div class="dcx-stat__value">{{ geo_zones|length }}</div>
+                    <div class="dcx-stat__label">{{ text_geo_zones }}</div>
+                  </div>
+                </div>
+                <div class="dcx-panel-section">
+                  <div class="dcx-panel-section__head">
+                    <h4><i data-lucide="list" width="16" height="16"></i> {{ tab_methods }}</h4>
+                    <a href="{{ add }}" class="btn btn-primary btn-xs"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_method }}</a>
                   </div>
                   {% if shipping_methods %}
                   <div class="dc-shipping-list">
@@ -124,48 +119,49 @@
                   </div>
                   {% endif %}
                 </div>
-                <div class="tab-pane" id="tab-settings">
-                  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-shipping">
-                    <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                      <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_general_settings }}</h4>
-                      <div class="dcx-fields">
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                          <select name="shipping_dockercart_universal_status" id="input-status" class="form-control">
-                            {% if shipping_dockercart_universal_status %}
-                            <option value="1" selected>{{ text_enabled }}</option>
-                            <option value="0">{{ text_disabled }}</option>
-                            {% else %}
-                            <option value="1">{{ text_enabled }}</option>
-                            <option value="0" selected>{{ text_disabled }}</option>
-                            {% endif %}
-                          </select>
-                        </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-tax-class">{{ entry_tax_class }}</label>
-                          <select name="shipping_dockercart_universal_tax_class_id" id="input-tax-class" class="form-control">
-                            <option value="0">{{ text_none }}</option>
-                            {% for tax_class in tax_classes %}
-                            <option value="{{ tax_class.tax_class_id }}" {% if tax_class.tax_class_id == shipping_dockercart_universal_tax_class_id %}selected{% endif %}>{{ tax_class.title }}</option>
-                            {% endfor %}
-                          </select>
-                          <div class="help-block">{{ help_tax_class }}</div>
-                        </div>
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                          <input type="text" name="shipping_dockercart_universal_sort_order" value="{{ shipping_dockercart_universal_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
-                          <div class="help-block">{{ help_sort_order }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </form>
-                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="settings" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_general_settings }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="shipping_dockercart_universal_status" id="input-status" class="form-control">
+                  {% if shipping_dockercart_universal_status %}
+                  <option value="1" selected>{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected>{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-tax-class">{{ entry_tax_class }}</label>
+                <select name="shipping_dockercart_universal_tax_class_id" id="input-tax-class" class="form-control">
+                  <option value="0">{{ text_none }}</option>
+                  {% for tax_class in tax_classes %}
+                  <option value="{{ tax_class.tax_class_id }}" {% if tax_class.tax_class_id == shipping_dockercart_universal_tax_class_id %}selected{% endif %}>{{ tax_class.title }}</option>
+                  {% endfor %}
+                </select>
+                <div class="help-block">{{ help_tax_class }}</div>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <input type="text" name="shipping_dockercart_universal_sort_order" value="{{ shipping_dockercart_universal_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                <div class="help-block">{{ help_sort_order }}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>
 <script>
@@ -192,6 +188,34 @@ $(function() {
 });
 </script>
 <style>
+.dcx-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.dcx-stat {
+  flex: 1;
+  min-width: 110px;
+  padding: 14px 16px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+}
+.dcx-stat__value { font-size: 24px; font-weight: 700; color: var(--dc-text-dark); line-height: 1.1; }
+.dcx-stat__value--success { color: var(--dc-green-600); }
+.dcx-stat__label { font-size: 12px; color: var(--dc-text-muted); margin-top: 4px; }
+.dcx-panel-section { margin-top: 4px; }
+.dcx-panel-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dcx-panel-section__head h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dc-text-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .dc-shipping-list { display: flex; flex-direction: column; gap: 8px; }
 .dc-shipping-item {
   display: flex;
