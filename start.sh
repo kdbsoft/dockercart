@@ -126,7 +126,7 @@ if [ -n "${DOCKERCART_DOMAIN:-}" ]; then
     export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX}"
     export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX}"
     # Persist the derived URLs back into .env so non-start.sh consumers (backup
-    # worker, install-cli.sh, health-check.sh) see the canonical values.
+    # worker, health-check.sh) see the canonical values.
     if [ -f .env ]; then
         set_env_key() {
             local file="$1" key="$2" value="$3"
