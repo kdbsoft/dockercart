@@ -254,7 +254,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 ### Standalone Mode
 
-The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443). `start.sh` derives `DOCKERCART_URL` from `DOCKERCART_DOMAIN` + the HTTP port automatically, so a non-default port (e.g. `8080`) just works — internal links, `config_url`, `robots.txt` and `config.php` all include the port. On a clean install the default port is 80 (no prompt). To use a non-default port, set `DOCKERCART_HTTP_PORT` in `.env` and run `make restart`; `start.sh` re-derives `DOCKERCART_URL` so everything stays consistent.
+The default deployment. Nginx binds to `DOCKERCART_HTTP_PORT` (80) and optionally `DOCKERCART_HTTPS_PORT` (443). If `DOCKERCART_URL` is not set, `start.sh` derives it from `DOCKERCART_DOMAIN` + the HTTP port automatically, so a non-default port (e.g. `8080`) just works — internal links, `config_url`, `robots.txt` and `config.php` all include the port. On a clean install the default port is 80 (no prompt). To use a non-default port, either set `DOCKERCART_HTTP_PORT` in `.env` and run `make restart`, or set `DOCKERCART_URL` explicitly (e.g. `http://shop.local:8080`) — an explicitly set URL always wins and `start.sh` never rewrites `.env`.
 
 ```bash
 make start               # interactive: pick Standalone HTTP / self-signed / Let's Encrypt
