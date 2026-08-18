@@ -3,7 +3,7 @@
 <div class="page-header">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+      <div class="col-lg-8 col-xl-offset-1 col-xl-7">
         <a href="{{ cancel }}" class="page-header__link">
           <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
           <span class="page-header__title">
@@ -11,6 +11,8 @@
             <span class="page-header__badge page-header__badge--active">{{ text_active }}</span>
           </span>
         </a>
+      </div>
+      <div class="col-lg-4 col-xl-3">
         <div class="pull-right">
           <button type="submit" form="form-dockercart-checkout" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
           <button type="button" class="btn btn-success" id="button-apply"><i data-lucide="check" width="16" height="16"></i> {{ button_apply }}</button>
@@ -20,7 +22,7 @@
     </div>
     {% if error_warning %}
     <div class="row">
-      <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+      <div class="col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
@@ -29,7 +31,7 @@
     {% endif %}
     {% if success %}
     <div class="row">
-      <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+      <div class="col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
           <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
@@ -38,437 +40,461 @@
     {% endif %}
   </div>
 </div>
+
 <div class="container-fluid">
+  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-checkout">
   <div class="row">
-    <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+    <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
       <div class="dcx-shell">
-        <div class="dcx-panel">
+
+        <!-- BLOCKS -->
+        <div class="dcx-panel" id="panel-blocks" style="margin-top:16px;">
           <div class="dcx-panel-head">
-            <div class="dcx-panel-head__icon"><i data-lucide="shopping-cart" width="18" height="18"></i></div>
+            <div class="dcx-panel-head__icon"><i data-lucide="columns-2" width="18" height="18"></i></div>
             <div>
-              <div class="dcx-panel-title">{{ text_configurator_title }}</div>
+              <div class="dcx-panel-title">{{ tab_blocks }}</div>
             </div>
           </div>
           <div class="dcx-panel-body">
-            <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-dockercart-checkout">
-
-              <ul class="dcx-pills">
-                <li class="active"><a href="#tab-general" data-toggle="tab"><i data-lucide="settings" width="14" height="14"></i> {{ tab_general }}</a></li>
-                <li><a href="#tab-blocks" data-toggle="tab"><i data-lucide="columns-2" width="14" height="14"></i> {{ tab_blocks }}</a></li>
-                <li><a href="#tab-design" data-toggle="tab"><i data-lucide="paintbrush" width="14" height="14"></i> {{ tab_design }}</a></li>
-                <li><a href="#tab-method-overrides" data-toggle="tab"><i data-lucide="pen" width="14" height="14"></i> {{ tab_method_overrides }}</a></li>
-                <li><a href="#tab-advanced" data-toggle="tab"><i data-lucide="sliders-vertical" width="14" height="14"></i> {{ tab_advanced }}</a></li>
-              </ul>
-
-              <div class="tab-content">
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                  var applyBtn = document.getElementById('button-apply');
-                  var form = document.getElementById('form-dockercart-checkout');
-
-                  function createAlert(type, html, cls) {
-                    var container = document.querySelector('.container-fluid');
-                    if (!container) return;
-                    var existing = document.querySelector('.' + (cls || 'dc-apply-alert'));
-                    if (existing) existing.remove();
-                    var div = document.createElement('div');
-                    div.className = 'alert alert-' + type + ' alert-dismissible ' + (cls || 'dc-apply-alert');
-                    div.innerHTML = html + '\n<button type="button" class="close" data-dismiss="alert">&times;</button>';
-                    container.insertBefore(div, container.firstChild);
-                    try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch(e) {}
-                  }
-
-                  if (applyBtn && form) {
-                    applyBtn.addEventListener('click', function(e) {
-                      applyBtn.disabled = true;
-                      var fd = new FormData(form);
-
-                      fetch(form.action, {
-                        method: 'POST',
-                        body: fd,
-                        credentials: 'same-origin'
-                      }).then(function(response) {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.text();
-                      }).then(function() {
-                        createAlert('success', '<i data-lucide="circle-check"></i> {{ text_success|default("Settings saved") | e('js') }}');
-                      }).catch(function(err) {
-                        createAlert('danger', '<i data-lucide="circle-alert"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
-                      }).finally(function() {
-                        applyBtn.disabled = false;
-                      });
-                    });
-                  }
-                });
-                </script>
-
-                <!-- GENERAL TAB -->
-                <div class="tab-pane active" id="tab-general">
-                  <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="settings" width="16" height="16"></i> {{ text_checkout_settings|default('Checkout Settings') }}</h4>
-                    <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-checkbox-label">
-                          <input type="hidden" name="module_dockercart_checkout_redirect_standard" value="0">
-                          <input type="checkbox" name="module_dockercart_checkout_redirect_standard" value="1" id="input-redirect-standard" {% if module_dockercart_checkout_redirect_standard == 1 %}checked{% endif %}>
-                          {{ entry_redirect_standard }} — {{ help_redirect_standard }}
-                        </label>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-checkbox-label">
-                          <input type="hidden" name="module_dockercart_checkout_show_progress" value="0">
-                          <input type="checkbox" name="module_dockercart_checkout_show_progress" value="1" id="input-show-progress" {% if module_dockercart_checkout_show_progress == 1 %}checked{% endif %}>
-                          {{ entry_show_progress }} — {{ help_show_progress }}
-                        </label>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-checkbox-label">
-                          <input type="hidden" name="module_dockercart_checkout_guest_create_account" value="0">
-                          <input type="checkbox" name="module_dockercart_checkout_guest_create_account" value="1" id="input-guest-create-account" {% if module_dockercart_checkout_guest_create_account == 1 %}checked{% endif %}>
-                          {{ entry_guest_create_account }} — {{ help_guest_create_account }}
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="dcx-section">
-                    <h4><i data-lucide="map-pin" width="16" height="16"></i> {{ entry_default_country|default('Default Location') }}</h4>
-                    <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-default-country">{{ entry_default_country|default('Default Country') }}</label>
-                        <select name="module_dockercart_checkout_default_country_id" id="input-default-country" class="form-control" style="max-width:400px;">
-                          <option value="">{{ text_select|default('--- None ---') }}</option>
-                          {% for country in admin_countries %}
-                          <option value="{{ country.country_id }}" {% if module_dockercart_checkout_default_country_id == country.country_id %}selected{% endif %}>{{ country.name }}</option>
-                          {% endfor %}
-                        </select>
-                        <div class="help-block">{{ help_default_country }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-default-zone">{{ entry_default_zone|default('Default Region / State') }}</label>
-                        <select name="module_dockercart_checkout_default_zone_id" id="input-default-zone" class="form-control" style="max-width:400px;">
-                          <option value="">{{ text_select|default('--- None ---') }}</option>
-                        </select>
-                        <div class="help-block">{{ text_select_country_first|default('Select a country first, then choose a region') }}</div>
-                      </div>
-                    </div>
-                  </div>
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i data-lucide="columns-2" width="16" height="16"></i> {{ text_blocks_title|default('Manage Checkout Blocks') }}</h4>
+              <div class="dc-blocks-container">
+                <div class="dc-blocks-header">
+                  <div class="dc-block-col-name">{{ column_block_name|default('Block Name') }}</div>
+                  <div class="dc-block-col-fields">{{ column_block_fields|default('Fields') }}</div>
+                  <div class="dc-block-col-enabled">{{ column_block_enabled|default('Enabled') }}</div>
+                  <div class="dc-block-col-collapsible">{{ column_block_collapsible|default('Collapsible') }}</div>
+                  <div class="dc-block-col-settings">{{ text_settings|default('Settings') }}</div>
                 </div>
-
-                <!-- BLOCKS TAB -->
-                <div class="tab-pane" id="tab-blocks">
-                  <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="columns-2" width="16" height="16"></i> {{ text_blocks_title|default('Manage Checkout Blocks') }}</h4>
-                    <div class="dc-blocks-container">
-                      <div class="dc-blocks-header">
-                        <div class="dc-block-col-name">{{ column_block_name|default('Block Name') }}</div>
-                        <div class="dc-block-col-fields">{{ column_block_fields|default('Fields') }}</div>
-                        <div class="dc-block-col-enabled">{{ column_block_enabled|default('Enabled') }}</div>
-                        <div class="dc-block-col-collapsible">{{ column_block_collapsible|default('Collapsible') }}</div>
-                        <div class="dc-block-col-settings">{{ text_settings|default('Settings') }}</div>
-                      </div>
-                      <div id="blocks-sortable" class="dc-blocks-list">
-                        {% for block in blocks %}
-                        <div class="dc-block-item" data-block-id="{{ block.id }}">
-                          <div class="dc-block-col-name">
-                            <i data-lucide="{{ block.id == 'customer_details' ? 'user' : (block.id == 'shipping_address' ? 'map-pin' : (block.id == 'payment_address' ? 'credit-card' : (block.id == 'payment_method' ? 'dollar-sign' : (block.id == 'customer_order' ? 'shopping-cart' : 'code')))) }}" width="16" height="16"></i>
-                            <span>{{ block.name }}</span>
-                          </div>
-                          <div class="dc-block-col-fields">
-                            {% set enabled_fields = 0 %}
-                            {% set total_fields = 0 %}
-                            {% if block.rows is defined %}
-                              {% for row in block.rows %}
-                                {% for field in row.fields %}
-                                  {% set total_fields = total_fields + 1 %}
-                                  {% if field.visible == 1 %}
-                                    {% set enabled_fields = enabled_fields + 1 %}
-                                  {% endif %}
-                                {% endfor %}
-                              {% endfor %}
+                <div id="blocks-sortable" class="dc-blocks-list">
+                  {% for block in blocks %}
+                  <div class="dc-block-item" data-block-id="{{ block.id }}">
+                    <div class="dc-block-col-name">
+                      <i data-lucide="{{ block.id == 'customer_details' ? 'user' : (block.id == 'shipping_address' ? 'map-pin' : (block.id == 'payment_address' ? 'credit-card' : (block.id == 'payment_method' ? 'dollar-sign' : (block.id == 'customer_order' ? 'shopping-cart' : 'code')))) }}" width="16" height="16"></i>
+                      <span>{{ block.name }}</span>
+                    </div>
+                    <div class="dc-block-col-fields">
+                      {% set enabled_fields = 0 %}
+                      {% set total_fields = 0 %}
+                      {% if block.rows is defined %}
+                        {% for row in block.rows %}
+                          {% for field in row.fields %}
+                            {% set total_fields = total_fields + 1 %}
+                            {% if field.visible == 1 %}
+                              {% set enabled_fields = enabled_fields + 1 %}
                             {% endif %}
-                            <span class="badge badge-info">{{ enabled_fields }}/{{ total_fields }}</span>
-                          </div>
-                          <div class="dc-block-col-enabled">
-                            <label class="dc-toggle">
-                              <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][enabled]" value="1" {% if block.enabled == 1 %}checked{% endif %} class="block-enabled-input">
-                              <span class="dc-toggle-slider"></span>
-                            </label>
-                          </div>
-                          <div class="dc-block-col-collapsible">
-                            <label class="dc-toggle">
-                              <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][collapsible]" value="1" {% if block.collapsible == 1 %}checked{% endif %} class="block-collapsible-input">
-                              <span class="dc-toggle-slider"></span>
-                            </label>
-                          </div>
-                          <div class="dc-block-col-settings">
-                            <button type="button" class="btn btn-sm btn-primary btn-block-settings" data-block-index="{{ loop.index0 }}" data-block-id="{{ block.id }}">
-                              <i data-lucide="settings" width="14" height="14"></i> {{ text_configure|default('Configure') }}
-                            </button>
-                          </div>
-                          <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][id]" value="{{ block.id }}" class="block-id-input">
-                          <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][name]" value="{{ block.name }}" class="block-name-input">
-                          <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][sort_order]" value="{{ loop.index }}" class="sort-order-input">
-                          <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][rows]" value="{{ block.rows|json_encode|e('html') }}" class="block-rows-input">
+                          {% endfor %}
+                        {% endfor %}
+                      {% endif %}
+                      <span class="badge badge-info">{{ enabled_fields }}/{{ total_fields }}</span>
+                    </div>
+                    <div class="dc-block-col-enabled">
+                      <label class="dc-toggle">
+                        <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][enabled]" value="1" {% if block.enabled == 1 %}checked{% endif %} class="block-enabled-input">
+                        <span class="dc-toggle-slider"></span>
+                      </label>
+                    </div>
+                    <div class="dc-block-col-collapsible">
+                      <label class="dc-toggle">
+                        <input type="checkbox" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][collapsible]" value="1" {% if block.collapsible == 1 %}checked{% endif %} class="block-collapsible-input">
+                        <span class="dc-toggle-slider"></span>
+                      </label>
+                    </div>
+                    <div class="dc-block-col-settings">
+                      <button type="button" class="btn btn-sm btn-primary btn-block-settings" data-block-index="{{ loop.index0 }}" data-block-id="{{ block.id }}">
+                        <i data-lucide="settings" width="14" height="14"></i> {{ text_configure|default('Configure') }}
+                      </button>
+                    </div>
+                    <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][id]" value="{{ block.id }}" class="block-id-input">
+                    <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][name]" value="{{ block.name }}" class="block-name-input">
+                    <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][sort_order]" value="{{ loop.index }}" class="sort-order-input">
+                    <input type="hidden" name="module_dockercart_checkout_blocks[{{ loop.index0 }}][rows]" value="{{ block.rows|json_encode|e('html') }}" class="block-rows-input">
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESIGN -->
+        <div class="dcx-panel" id="panel-design" style="margin-top:16px;">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="paintbrush" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ tab_design }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i data-lucide="paintbrush" width="16" height="16"></i> {{ tab_design }}</h4>
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-theme">{{ entry_theme }} <span data-toggle="tooltip" title="{{ help_theme }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                  <select name="module_dockercart_checkout_theme" id="input-theme" class="form-control" style="max-width:300px;">
+                    {% for key, value in theme_options %}
+                    <option value="{{ key }}" {% if module_dockercart_checkout_theme == key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-css">{{ entry_custom_css }} <span data-toggle="tooltip" title="{{ help_custom_css }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                  <textarea name="module_dockercart_checkout_custom_css" id="input-custom-css" class="form-control" rows="8" placeholder=".dc-checkout { /* your styles */ }" style="font-family:monospace;">{{ module_dockercart_checkout_custom_css }}</textarea>
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-custom-js">{{ entry_custom_js }} <span data-toggle="tooltip" title="{{ help_custom_js }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                  <textarea name="module_dockercart_checkout_custom_js" id="input-custom-js" class="form-control" rows="8" placeholder="// Your ES6+ JavaScript" style="font-family:monospace;">{{ module_dockercart_checkout_custom_js }}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- METHOD OVERRIDES -->
+        <div class="dcx-panel" id="panel-overrides" style="margin-top:16px;">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="pen" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ tab_method_overrides }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i data-lucide="truck" width="16" height="16"></i> {{ text_shipping_methods }}</h4>
+              <div class="alert alert-info dc-alert-modern" style="margin-bottom:16px;">
+                <i data-lucide="info" width="16" height="16"></i>
+                <strong>{{ text_method_overrides }}</strong><br>
+                {{ text_method_overrides_help }}
+              </div>
+              {% if available_shipping_methods %}
+              <div class="dc-override-list">
+                {% for method_code, method_data in available_shipping_methods %}
+                {% set code_safe = method_code|replace({'.': '-'}) %}
+                <div class="dc-override-item" id="over-{{ code_safe }}">
+                  <div class="dc-override-item__header">
+                    <div class="dc-override-item__info">
+                      <i data-lucide="truck" width="16" height="16"></i>
+                      <div>
+                        <div class="dc-override-item__code">{{ method_code }}</div>
+                        <div class="dc-override-item__module">{{ text_module }}: {{ method_data.module_title }}</div>
+                      </div>
+                    </div>
+                    <div class="dc-override-item__toggle">
+                      <span class="dc-override-status" data-override-status
+                        data-on="{{ text_method_status_on }}" data-off="{{ text_method_status_off }}"></span>
+                      <label class="dc-toggle-sm" title="{{ text_method_enabled }}">
+                        <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" value="0">
+                        <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" value="1"
+                          {% if shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled %}checked{% endif %}
+                          class="method-override-toggle" data-target="over-{{ code_safe }}">
+                        <span class="dc-toggle-slider-sm"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="dc-override-item__body">
+                    <div class="dc-override-item__langs">
+                      <ul class="nav nav-tabs dc-override-langtabs">
+                        {% for language in languages %}
+                        <li{% if loop.first %} class="active"{% endif %}>
+                          <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                          </a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                    <div class="dc-override-item__field">
+                      <label class="dcx-label">{{ text_custom_title }}</label>
+                      <div class="dc-override-langcontent">
+                        {% for language in languages %}
+                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
+                          <input type="text"
+                            name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]"
+                            value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
+                            placeholder="{{ method_data.default_title }}"
+                            class="form-control override-field">
                         </div>
                         {% endfor %}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <!-- DESIGN TAB -->
-                <div class="tab-pane" id="tab-design">
-                  <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="paintbrush" width="16" height="16"></i> {{ tab_design }}</h4>
-                    <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-theme">{{ entry_theme }}</label>
-                        <select name="module_dockercart_checkout_theme" id="input-theme" class="form-control" style="max-width:300px;">
-                          {% for key, value in theme_options %}
-                          <option value="{{ key }}" {% if module_dockercart_checkout_theme == key %}selected{% endif %}>{{ value }}</option>
-                          {% endfor %}
-                        </select>
-                        <div class="help-block">{{ help_theme }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-custom-css">{{ entry_custom_css }}</label>
-                        <textarea name="module_dockercart_checkout_custom_css" id="input-custom-css" class="form-control" rows="8" placeholder=".dc-checkout { /* your styles */ }" style="font-family:monospace;">{{ module_dockercart_checkout_custom_css }}</textarea>
-                        <div class="help-block">{{ help_custom_css }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-custom-js">{{ entry_custom_js }}</label>
-                        <textarea name="module_dockercart_checkout_custom_js" id="input-custom-js" class="form-control" rows="8" placeholder="// Your ES6+ JavaScript" style="font-family:monospace;">{{ module_dockercart_checkout_custom_js }}</textarea>
-                        <div class="help-block">{{ help_custom_js }}</div>
+                    <div class="dc-override-item__field">
+                      <label class="dcx-label">{{ text_custom_description }}</label>
+                      <div class="dc-override-langcontent">
+                        {% for language in languages %}
+                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
+                          <input type="text"
+                            name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]"
+                            value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
+                            placeholder="{{ placeholder_optional_description }}"
+                            class="form-control override-field">
+                        </div>
+                        {% endfor %}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <!-- METHOD OVERRIDES TAB -->
-                <div class="tab-pane" id="tab-method-overrides">
-                  <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="truck" width="16" height="16"></i> {{ text_shipping_methods }}</h4>
-                    <div class="alert alert-info dc-alert-modern" style="margin-bottom:16px;">
-                      <i data-lucide="info" width="16" height="16"></i>
-                      <strong>{{ text_method_overrides }}</strong><br>
-                      {{ text_method_overrides_help }}
+                    <div class="dc-override-item__field">
+                      <label class="dcx-label">{{ text_address_fields }}</label>
+                      <div class="dcx-checkbox-group">
+                        {% for key in address_field_order|default(['company','address_1','address_2','city','postcode']) %}
+                        {% set label_key = 'text_field_' ~ key %}
+                        {% set field_data = shipping_overrides[method_code].fields[key]|default({'visible': 1, 'required': 0}) %}
+                        <div class="dc-addr-field-group">
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="0">
+                            <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="1" {% if field_data.visible %}checked{% endif %}>
+                            {{ attribute(_context, label_key)|default(key|replace({'_': ' '})|title) }}
+                          </label>
+                          <label class="dcx-checkbox-label dcx-checkbox-label--sm">
+                            <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="0">
+                            <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="1" {% if field_data.required %}checked{% endif %}>
+                            {{ text_required }}
+                          </label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                      <div class="help-block">{{ help_shipping_fields }}<br>({{ text_country_region_always_visible|default('Country and Region are always visible') }})</div>
                     </div>
-                    {% if available_shipping_methods %}
-                    <div class="dc-override-list">
-                      {% for method_code, method_data in available_shipping_methods %}
-                      {% set code_safe = method_code|replace({'.': '-'}) %}
-                      <div class="dc-override-item" id="over-{{ code_safe }}">
-                        <div class="dc-override-item__header">
-                          <div class="dc-override-item__info">
-                            <i data-lucide="truck" width="16" height="16"></i>
-                            <div>
-                              <div class="dc-override-item__code">{{ method_code }}</div>
-                              <div class="dc-override-item__module">{{ text_module }}: {{ method_data.module_title }}</div>
-                            </div>
-                          </div>
-                          <div class="dc-override-item__toggle">
-                            <span class="dc-override-status" data-override-status
-                              data-on="{{ text_method_status_on }}" data-off="{{ text_method_status_off }}"></span>
-                            <label class="dc-toggle-sm" title="{{ text_method_enabled }}">
-                              <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" value="0">
-                              <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][enabled]" value="1"
-                                {% if shipping_overrides[method_code].enabled is defined and shipping_overrides[method_code].enabled %}checked{% endif %}
-                                class="method-override-toggle" data-target="over-{{ code_safe }}">
-                              <span class="dc-toggle-slider-sm"></span>
-                            </label>
-                          </div>
-                        </div>
-                        <div class="dc-override-item__body">
-                          <div class="dc-override-item__langs">
-                            <ul class="nav nav-tabs dc-override-langtabs">
-                              {% for language in languages %}
-                              <li{% if loop.first %} class="active"{% endif %}>
-                                <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                                  <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                                </a>
-                              </li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                          <div class="dc-override-item__field">
-                            <label class="dcx-label">{{ text_custom_title }}</label>
-                            <div class="dc-override-langcontent">
-                              {% for language in languages %}
-                              <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                                <input type="text"
-                                  name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]"
-                                  value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
-                                  placeholder="{{ method_data.default_title }}"
-                                  class="form-control override-field">
-                              </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                          <div class="dc-override-item__field">
-                            <label class="dcx-label">{{ text_custom_description }}</label>
-                            <div class="dc-override-langcontent">
-                              {% for language in languages %}
-                              <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                                <input type="text"
-                                  name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]"
-                                  value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
-                                  placeholder="{{ placeholder_optional_description }}"
-                                  class="form-control override-field">
-                              </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                          <div class="dc-override-item__field">
-                            <label class="dcx-label">{{ text_address_fields }}</label>
-                            <div class="dcx-checkbox-group">
-                              {% for key in address_field_order|default(['company','address_1','address_2','city','postcode']) %}
-                              {% set label_key = 'text_field_' ~ key %}
-                              {% set field_data = shipping_overrides[method_code].fields[key]|default({'visible': 1, 'required': 0}) %}
-                              <div class="dc-addr-field-group">
-                                <label class="dcx-checkbox-label">
-                                  <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="0">
-                                  <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="1" {% if field_data.visible %}checked{% endif %}>
-                                  {{ attribute(_context, label_key)|default(key|replace({'_': ' '})|title) }}
-                                </label>
-                                <label class="dcx-checkbox-label dcx-checkbox-label--sm">
-                                  <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="0">
-                                  <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="1" {% if field_data.required %}checked{% endif %}>
-                                  {{ text_required }}
-                                </label>
-                              </div>
-                              {% endfor %}
-                            </div>
-                            <div class="help-block">{{ help_shipping_fields }}<br>({{ text_country_region_always_visible|default('Country and Region are always visible') }})</div>
-                          </div>
-                          <div class="dc-override-item__footer">
-                            <button type="button" class="method-override-reset" data-target="over-{{ code_safe }}">
-                              <i data-lucide="eraser" width="14" height="14"></i> {{ button_clear_fields }}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted">{{ text_no_methods_available }}</p>
-                    {% endif %}
-                  </div>
-
-                  <div class="dcx-section">
-                    <h4><i data-lucide="credit-card" width="16" height="16"></i> {{ text_payment_methods }}</h4>
-                    {% if available_payment_methods %}
-                    <div class="dc-override-list">
-                      {% for method_code, method_data in available_payment_methods %}
-                      {% set code_safe = method_code|replace({'.': '-'}) %}
-                      <div class="dc-override-item" id="over-pay-{{ code_safe }}">
-                        <div class="dc-override-item__header">
-                          <div class="dc-override-item__info">
-                            <i data-lucide="credit-card" width="16" height="16"></i>
-                            <div>
-                              <div class="dc-override-item__code">{{ method_code }}</div>
-                              <div class="dc-override-item__module">{{ text_default_title }}: {{ method_data.default_title }}</div>
-                            </div>
-                          </div>
-                          <div class="dc-override-item__toggle">
-                            <span class="dc-override-status" data-override-status
-                              data-on="{{ text_method_status_on }}" data-off="{{ text_method_status_off }}"></span>
-                            <label class="dc-toggle-sm" title="{{ text_method_enabled }}">
-                              <input type="hidden" name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" value="0">
-                              <input type="checkbox" name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" value="1"
-                                {% if payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled %}checked{% endif %}
-                                class="method-override-toggle" data-target="over-pay-{{ code_safe }}">
-                              <span class="dc-toggle-slider-sm"></span>
-                            </label>
-                          </div>
-                        </div>
-                        <div class="dc-override-item__body">
-                          <div class="dc-override-item__langs">
-                            <ul class="nav nav-tabs dc-override-langtabs">
-                              {% for language in languages %}
-                              <li{% if loop.first %} class="active"{% endif %}>
-                                <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                                  <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                                </a>
-                              </li>
-                              {% endfor %}
-                            </ul>
-                          </div>
-                          <div class="dc-override-item__field">
-                            <label class="dcx-label">{{ text_custom_title }}</label>
-                            <div class="dc-override-langcontent">
-                              {% for language in languages %}
-                              <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                                <input type="text"
-                                  name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]"
-                                  value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
-                                  placeholder="{{ method_data.default_title }}"
-                                  class="form-control override-field">
-                              </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                          <div class="dc-override-item__field">
-                            <label class="dcx-label">{{ text_custom_description }}</label>
-                            <div class="dc-override-langcontent">
-                              {% for language in languages %}
-                              <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                                <input type="text"
-                                  name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]"
-                                  value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
-                                  placeholder="{{ placeholder_optional_description }}"
-                                  class="form-control override-field">
-                              </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                          <div class="dc-override-item__footer">
-                            <button type="button" class="method-override-reset" data-target="over-pay-{{ code_safe }}">
-                              <i data-lucide="eraser" width="14" height="14"></i> {{ button_clear_fields }}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted">{{ text_no_methods_available }}</p>
-                    {% endif %}
-                  </div>
-                </div>
-
-                <!-- ADVANCED TAB -->
-                <div class="tab-pane" id="tab-advanced">
-                  <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
-                    <h4><i data-lucide="sliders-vertical" width="16" height="16"></i> {{ tab_advanced }}</h4>
-                    <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-cache-ttl">{{ entry_cache_ttl }}</label>
-                        <input type="number" name="module_dockercart_checkout_cache_ttl" id="input-cache-ttl" value="{{ module_dockercart_checkout_cache_ttl }}" class="form-control" min="0" max="86400" style="max-width:200px;">
-                        <div class="help-block">{{ help_cache_ttl }}</div>
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-debug">{{ entry_debug }}</label>
-                        <select name="module_dockercart_checkout_debug" id="input-debug" class="form-control" style="max-width:200px;">
-                          <option value="1" {% if module_dockercart_checkout_debug == 1 %}selected{% endif %}>{{ text_yes }}</option>
-                          <option value="0" {% if module_dockercart_checkout_debug == 0 %}selected{% endif %}>{{ text_no }}</option>
-                        </select>
-                        <div class="help-block">{{ help_debug }}</div>
-                      </div>
+                    <div class="dc-override-item__footer">
+                      <button type="button" class="method-override-reset" data-target="over-{{ code_safe }}">
+                        <i data-lucide="eraser" width="14" height="14"></i> {{ button_clear_fields }}
+                      </button>
                     </div>
                   </div>
                 </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-muted">{{ text_no_methods_available }}</p>
+              {% endif %}
+            </div>
 
-              </div>{# /.tab-content #}
-            </form>
-          </div>{# /.dcx-panel-body #}
-        </div>{# /.dcx-panel #}
+            <div class="dcx-section">
+              <h4><i data-lucide="credit-card" width="16" height="16"></i> {{ text_payment_methods }}</h4>
+              {% if available_payment_methods %}
+              <div class="dc-override-list">
+                {% for method_code, method_data in available_payment_methods %}
+                {% set code_safe = method_code|replace({'.': '-'}) %}
+                <div class="dc-override-item" id="over-pay-{{ code_safe }}">
+                  <div class="dc-override-item__header">
+                    <div class="dc-override-item__info">
+                      <i data-lucide="credit-card" width="16" height="16"></i>
+                      <div>
+                        <div class="dc-override-item__code">{{ method_code }}</div>
+                        <div class="dc-override-item__module">{{ text_default_title }}: {{ method_data.default_title }}</div>
+                      </div>
+                    </div>
+                    <div class="dc-override-item__toggle">
+                      <span class="dc-override-status" data-override-status
+                        data-on="{{ text_method_status_on }}" data-off="{{ text_method_status_off }}"></span>
+                      <label class="dc-toggle-sm" title="{{ text_method_enabled }}">
+                        <input type="hidden" name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" value="0">
+                        <input type="checkbox" name="module_dockercart_checkout_payment_override[{{ method_code }}][enabled]" value="1"
+                          {% if payment_overrides[method_code].enabled is defined and payment_overrides[method_code].enabled %}checked{% endif %}
+                          class="method-override-toggle" data-target="over-pay-{{ code_safe }}">
+                        <span class="dc-toggle-slider-sm"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="dc-override-item__body">
+                    <div class="dc-override-item__langs">
+                      <ul class="nav nav-tabs dc-override-langtabs">
+                        {% for language in languages %}
+                        <li{% if loop.first %} class="active"{% endif %}>
+                          <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                          </a>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                    <div class="dc-override-item__field">
+                      <label class="dcx-label">{{ text_custom_title }}</label>
+                      <div class="dc-override-langcontent">
+                        {% for language in languages %}
+                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
+                          <input type="text"
+                            name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]"
+                            value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
+                            placeholder="{{ method_data.default_title }}"
+                            class="form-control override-field">
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div class="dc-override-item__field">
+                      <label class="dcx-label">{{ text_custom_description }}</label>
+                      <div class="dc-override-langcontent">
+                        {% for language in languages %}
+                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
+                          <input type="text"
+                            name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]"
+                            value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
+                            placeholder="{{ placeholder_optional_description }}"
+                            class="form-control override-field">
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <div class="dc-override-item__footer">
+                      <button type="button" class="method-override-reset" data-target="over-pay-{{ code_safe }}">
+                        <i data-lucide="eraser" width="14" height="14"></i> {{ button_clear_fields }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <p class="text-muted">{{ text_no_methods_available }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
       </div>{# /.dcx-shell #}
-    </div>{# /.col #}
+    </div>{# /.col main #}
+
+    <!-- SIDEBAR -->
+    <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+      <div class="dcx-shell">
+        <div class="dcx-sidebar-card">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_sidebar_status }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-sidebar-card__help"><i data-lucide="info" width="14" height="14"></i> {{ text_module_always_active }}</div>
+          </div>
+        </div>
+
+        <div class="dcx-sidebar-card" style="margin-top:16px;">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="settings" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ text_checkout_settings|default('Checkout Settings') }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-fields">
+              <div class="dcx-field dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="hidden" name="module_dockercart_checkout_redirect_standard" value="0">
+                  <input type="checkbox" name="module_dockercart_checkout_redirect_standard" value="1" id="input-redirect-standard" {% if module_dockercart_checkout_redirect_standard == 1 %}checked{% endif %}>
+                  {{ entry_redirect_standard }}
+                  <span data-toggle="tooltip" title="{{ help_redirect_standard }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
+              <div class="dcx-field dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="hidden" name="module_dockercart_checkout_show_progress" value="0">
+                  <input type="checkbox" name="module_dockercart_checkout_show_progress" value="1" id="input-show-progress" {% if module_dockercart_checkout_show_progress == 1 %}checked{% endif %}>
+                  {{ entry_show_progress }}
+                  <span data-toggle="tooltip" title="{{ help_show_progress }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
+              <div class="dcx-field dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="hidden" name="module_dockercart_checkout_guest_create_account" value="0">
+                  <input type="checkbox" name="module_dockercart_checkout_guest_create_account" value="1" id="input-guest-create-account" {% if module_dockercart_checkout_guest_create_account == 1 %}checked{% endif %}>
+                  {{ entry_guest_create_account }}
+                  <span data-toggle="tooltip" title="{{ help_guest_create_account }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dcx-sidebar-card" style="margin-top:16px;">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="map-pin" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ entry_default_country|default('Default Location') }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-fields">
+              <div class="dcx-field">
+                <label class="dcx-label" for="input-default-country">{{ entry_default_country|default('Default Country') }} <span data-toggle="tooltip" title="{{ help_default_country }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <select name="module_dockercart_checkout_default_country_id" id="input-default-country" class="form-control">
+                  <option value="">{{ text_select|default('--- None ---') }}</option>
+                  {% for country in admin_countries %}
+                  <option value="{{ country.country_id }}" {% if module_dockercart_checkout_default_country_id == country.country_id %}selected{% endif %}>{{ country.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="dcx-field">
+                <label class="dcx-label" for="input-default-zone">{{ entry_default_zone|default('Default Region / State') }} <span data-toggle="tooltip" title="{{ text_select_country_first|default('Select a country first, then choose a region') }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <select name="module_dockercart_checkout_default_zone_id" id="input-default-zone" class="form-control">
+                  <option value="">{{ text_select|default('--- None ---') }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dcx-sidebar-card" style="margin-top:16px;">
+          <div class="dcx-sidebar-card__header">
+            <div class="dcx-sidebar-card__header-icon"><i data-lucide="sliders-vertical" width="16" height="16"></i></div>
+            <h3 class="dcx-sidebar-card__title">{{ tab_advanced }}</h3>
+          </div>
+          <div class="dcx-sidebar-card__body">
+            <div class="dcx-fields">
+              <div class="dcx-field">
+                <label class="dcx-label" for="input-cache-ttl">{{ entry_cache_ttl }} <span data-toggle="tooltip" title="{{ help_cache_ttl }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <input type="number" name="module_dockercart_checkout_cache_ttl" id="input-cache-ttl" value="{{ module_dockercart_checkout_cache_ttl }}" class="form-control" min="0" max="86400">
+              </div>
+              <div class="dcx-field">
+                <label class="dcx-label" for="input-debug">{{ entry_debug }} <span data-toggle="tooltip" title="{{ help_debug }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <select name="module_dockercart_checkout_debug" id="input-debug" class="form-control">
+                  <option value="1" {% if module_dockercart_checkout_debug == 1 %}selected{% endif %}>{{ text_yes }}</option>
+                  <option value="0" {% if module_dockercart_checkout_debug == 0 %}selected{% endif %}>{{ text_no }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>{# /.dcx-shell #}
+    </div>{# /.col sidebar #}
   </div>{# /.row #}
+  </form>
 </div>{# /.container-fluid #}
 
 <script>
+// Apply (save without leaving the page)
+document.addEventListener('DOMContentLoaded', function() {
+  var applyBtn = document.getElementById('button-apply');
+  var form = document.getElementById('form-dockercart-checkout');
+
+  function createAlert(type, html, cls) {
+    var container = document.querySelector('.container-fluid');
+    if (!container) return;
+    var existing = document.querySelector('.' + (cls || 'dc-apply-alert'));
+    if (existing) existing.remove();
+    var div = document.createElement('div');
+    div.className = 'alert alert-' + type + ' alert-dismissible ' + (cls || 'dc-apply-alert');
+    div.innerHTML = html + '\n<button type="button" class="close" data-dismiss="alert">&times;</button>';
+    container.insertBefore(div, container.firstChild);
+    try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch(e) {}
+  }
+
+  if (applyBtn && form) {
+    applyBtn.addEventListener('click', function(e) {
+      applyBtn.disabled = true;
+      var fd = new FormData(form);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin'
+      }).then(function(response) {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.text();
+      }).then(function() {
+        createAlert('success', '<i data-lucide="circle-check"></i> {{ text_success|default("Settings saved") | e('js') }}');
+      }).catch(function(err) {
+        createAlert('danger', '<i data-lucide="circle-alert"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
+      }).finally(function() {
+        applyBtn.disabled = false;
+      });
+    });
+  }
+});
+
 // Zone loading for default country
 document.addEventListener('DOMContentLoaded', function() {
   var defaultCountrySelect = document.getElementById('input-default-country');
@@ -583,11 +609,11 @@ document.addEventListener('DOMContentLoaded', function() {
         <span>{{ text_modal_instructions|default('Drag fields to reorder • Toggle switches to show/hide or set as required') }}</span>
       </div>
       <div class="dc-modal-buttons">
-        <button type="button" class="btn btn-default" id="btn-modal-close">
-          <i data-lucide="x"></i> {{ text_cancel|default('Cancel') }}
+        <button type="button" class="btn btn-sm btn-default" id="btn-modal-close">
+          <i data-lucide="x" width="14" height="14"></i> {{ text_cancel|default('Cancel') }}
         </button>
-        <button type="button" class="btn btn-success" id="btn-modal-save">
-          <i data-lucide="save"></i> {{ text_save|default('Save') }}
+        <button type="button" class="btn btn-sm btn-success" id="btn-modal-save">
+          <i data-lucide="save" width="14" height="14"></i> {{ text_save|default('Save') }}
         </button>
       </div>
     </div>
@@ -595,6 +621,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <style>
+/* ── Status pill ── */
+.dc-status-pill { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:999px; font-size:13px; font-weight:600; }
+.dc-status-pill--on { color:var(--dc-green-600); background:rgba(22,163,74,0.12); }
+.dc-status-pill--on i { width:14px; height:14px; }
+
+/* ── Sidebar nav ── */
+.dcx-sidebar-nav { display:flex; flex-direction:column; gap:4px; }
+.dcx-sidebar-nav__item {
+  display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px;
+  color:var(--dc-text-dark); font-size:14px; font-weight:500; text-decoration:none;
+  transition:background 150ms, color 150ms;
+}
+.dcx-sidebar-nav__item i { width:16px; height:16px; color:var(--dc-text-muted); flex-shrink:0; }
+.dcx-sidebar-nav__item:hover { background:var(--dc-gray-50); color:var(--dc-primary); text-decoration:none; }
+.dcx-sidebar-nav__item:hover i { color:var(--dc-primary); }
+
 /* ── Blocks list ── */
 .dc-blocks-container { background:#fff; border-radius:8px; border:1px solid var(--dc-border-soft); overflow:hidden; }
 .dc-blocks-header {
@@ -638,44 +680,44 @@ document.addEventListener('DOMContentLoaded', function() {
   animation:slideIn 300ms cubic-bezier(0.34,1.56,0.64,1);
 }
 @keyframes slideIn { from { opacity:0; transform:translateY(-20px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
-.dc-modal-header { padding:24px; border-bottom:1px solid var(--dc-border-soft); display:flex; align-items:center; justify-content:space-between; gap:16px; }
-.dc-modal-header h3 { margin:0; font-size:18px; font-weight:700; display:flex; align-items:center; gap:12px; }
-.dc-modal-header i { width:24px; height:24px; color:var(--dc-primary); }
-.dc-modal-close { background:none; border:none; font-size:28px; color:var(--dc-text-muted); cursor:pointer; transition:color 200ms; padding:0; line-height:1; }
+.dc-modal-header { padding:12px 16px; border-bottom:1px solid var(--dc-border-soft); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.dc-modal-header h3 { margin:0; font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.dc-modal-header i { width:18px; height:18px; color:var(--dc-primary); }
+.dc-modal-close { background:none; border:none; font-size:22px; color:var(--dc-text-muted); cursor:pointer; transition:color 200ms; padding:0; line-height:1; }
 .dc-modal-close:hover { color:var(--dc-text-dark); }
-.dc-modal-body { padding:24px; }
-.dc-modal-footer { padding:16px 24px; border-top:1px solid var(--dc-border-soft); display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--dc-gray-50); }
-.dc-modal-info { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--dc-text-muted); }
-.dc-modal-buttons { display:flex; gap:12px; }
+.dc-modal-body { padding:16px; }
+.dc-modal-footer { padding:10px 16px; border-top:1px solid var(--dc-border-soft); display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--dc-gray-50); }
+.dc-modal-info { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--dc-text-muted); }
+.dc-modal-buttons { display:flex; gap:8px; }
 
 /* ── Modal rows ── */
-.dc-modal-rows-list { margin-top:24px; display:flex; flex-direction:column; gap:16px; }
+.dc-modal-rows-list { margin-top:14px; display:flex; flex-direction:column; gap:10px; }
 .dc-modal-row-item {
-  background:var(--dc-gray-50); border:2px solid var(--dc-border-soft); border-radius:8px;
-  padding:16px; display:flex; flex-direction:column; gap:12px; transition:all 200ms;
+  background:var(--dc-gray-50); border:1px solid var(--dc-border-soft); border-radius:6px;
+  padding:10px; display:flex; flex-direction:column; gap:8px; transition:all 200ms;
 }
-.dc-modal-row-item:hover { border-color:var(--dc-primary); box-shadow:0 4px 12px rgba(37,99,235,0.08); }
+.dc-modal-row-item:hover { border-color:var(--dc-primary); box-shadow:0 2px 8px rgba(37,99,235,0.08); }
 .dc-modal-row-item.is-dragging { opacity:0.6; border-color:var(--dc-primary); background:rgba(37,99,235,0.05); }
-.dc-modal-row-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--dc-border-soft); }
-.drag-handle { display:flex; align-items:center; justify-content:center; width:32px; height:32px; background:white; border:1px solid var(--dc-border-soft); border-radius:6px; cursor:grab; transition:all 200ms; color:var(--dc-text-muted); }
+.dc-modal-row-header { display:flex; align-items:center; justify-content:space-between; gap:8px; padding-bottom:8px; border-bottom:1px solid var(--dc-border-soft); }
+.drag-handle { display:flex; align-items:center; justify-content:center; width:22px; height:22px; background:white; border:1px solid var(--dc-border-soft); border-radius:4px; cursor:grab; transition:all 200ms; color:var(--dc-text-muted); }
 .drag-handle:active { cursor:grabbing; background:var(--dc-primary); color:white; transform:scale(0.95); }
-.dc-modal-row-header strong { font-size:14px; color:var(--dc-text-dark); flex:1; }
-.dc-modal-row-header select { padding:6px 10px; border:1px solid var(--dc-border-soft); border-radius:6px; background:white; font-size:13px; cursor:pointer; min-width:100px; }
-.dc-modal-row-fields { min-height:60px; padding:12px; background:white; border-radius:8px; border:2px dashed var(--dc-border-soft); display:flex; flex-direction:column; gap:8px; }
-.dc-modal-row-fields:empty::after { content:'Drag fields here or add from list'; display:block; text-align:center; color:var(--dc-text-muted); padding:20px; font-size:13px; }
-.dc-modal-field-item { display:flex; align-items:center; background:white; border:1px solid var(--dc-border-soft); border-radius:6px; padding:12px; cursor:move; transition:all 200ms; gap:10px; }
-.dc-modal-field-item:hover { border-color:var(--dc-primary); box-shadow:0 2px 8px rgba(37,99,235,0.12); background:rgba(37,99,235,0.02); }
+.dc-modal-row-header strong { font-size:12px; font-weight:600; color:var(--dc-text-dark); flex:1; }
+.dc-modal-row-header select { padding:3px 6px; border:1px solid var(--dc-border-soft); border-radius:4px; background:white; font-size:12px; cursor:pointer; min-width:64px; }
+.dc-modal-row-fields { min-height:40px; padding:8px; background:white; border-radius:6px; border:1px dashed var(--dc-border-soft); display:flex; flex-direction:column; gap:6px; }
+.dc-modal-row-fields:empty::after { content:'Drag fields here or add from list'; display:block; text-align:center; color:var(--dc-text-muted); padding:12px; font-size:12px; }
+.dc-modal-field-item { display:flex; align-items:center; background:white; border:1px solid var(--dc-border-soft); border-radius:4px; padding:7px 9px; cursor:move; transition:all 200ms; gap:8px; }
+.dc-modal-field-item:hover { border-color:var(--dc-primary); box-shadow:0 1px 4px rgba(37,99,235,0.12); background:rgba(37,99,235,0.02); }
 .dc-modal-field-item.is-dragging { opacity:0.5; transform:scale(0.95); }
-.dc-modal-field-drag { color:var(--dc-text-muted); font-size:16px; }
-.dc-modal-field-name { flex:1; font-weight:500; font-size:14px; color:var(--dc-text-dark); }
-.dc-modal-field-toggles { display:flex; gap:12px; }
-.dc-toggle-sm { display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+.dc-modal-field-drag { color:var(--dc-text-muted); font-size:13px; }
+.dc-modal-field-name { flex:1; font-weight:500; font-size:13px; color:var(--dc-text-dark); }
+.dc-modal-field-toggles { display:flex; gap:8px; }
+.dc-toggle-sm { display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
 .dc-toggle-sm input { display:none; }
-.dc-toggle-slider-sm { display:inline-block; width:36px; height:20px; background:#d1d5db; border-radius:10px; position:relative; transition:background 200ms; flex-shrink:0; }
-.dc-toggle-slider-sm::after { content:''; position:absolute; width:16px; height:16px; background:white; border-radius:8px; top:2px; left:2px; transition:left 200ms; box-shadow:0 1px 3px rgba(0,0,0,0.15); }
+.dc-toggle-slider-sm { display:inline-block; width:30px; height:16px; background:#d1d5db; border-radius:8px; position:relative; transition:background 200ms; flex-shrink:0; }
+.dc-toggle-slider-sm::after { content:''; position:absolute; width:12px; height:12px; background:white; border-radius:6px; top:2px; left:2px; transition:left 200ms; box-shadow:0 1px 3px rgba(0,0,0,0.15); }
 .dc-toggle-sm input:checked ~ .dc-toggle-slider-sm { background:var(--dc-green-600); }
-.dc-toggle-sm input:checked ~ .dc-toggle-slider-sm::after { left:18px; }
-.dc-toggle-label-text { font-size:12px; color:var(--dc-text-muted); }
+.dc-toggle-sm input:checked ~ .dc-toggle-slider-sm::after { left:16px; }
+.dc-toggle-label-text { font-size:11px; color:var(--dc-text-muted); }
 
 /* ── Override cards ── */
 .dc-override-list { display:flex; flex-direction:column; gap:12px; }
@@ -836,12 +878,12 @@ const DockercartCheckout = (() => {
 
     document.getElementById('modal-block-title').textContent = `${blockName} - {{ text_configure|default("Configure") }}`;
 
-    let content = `<div style="margin-bottom:15px;">
-      <button type="button" class="btn btn-sm btn-success" id="btn-add-row">
-        <i data-lucide="plus"></i> {{ button_add_row|default("Add Row") }}
+    let content = `<div style="margin-bottom:10px;">
+      <button type="button" class="btn btn-xs btn-success" id="btn-add-row">
+        <i data-lucide="plus" width="13" height="13"></i> {{ button_add_row|default("Add Row") }}
       </button>
     </div>`;
-    content += `<h4 style="margin:0 0 12px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><i data-lucide="columns-2" style="width:18px;height:18px;color:var(--dc-primary);"></i> {{ text_rows_configuration|default("Rows Configuration") }}</h4>`;
+    content += `<h4 style="margin:0 0 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="columns-2" style="width:15px;height:15px;color:var(--dc-primary);"></i> {{ text_rows_configuration|default("Rows Configuration") }}</h4>`;
     content += `<div class="dc-modal-rows-list" data-block-index="${currentBlockIndex}">`;
 
     if (currentBlockRows && currentBlockRows.length > 0) {
@@ -859,8 +901,8 @@ const DockercartCheckout = (() => {
               <option value="2" ${columns === 2 ? 'selected' : ''}>2</option>
               <option value="3" ${columns === 3 ? 'selected' : ''}>3</option>
             </select>
-            <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left:10px;">
-              <i data-lucide="trash-2"></i>
+            <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left:8px;">
+              <i data-lucide="trash-2" width="13" height="13"></i>
             </button>
           </div>
           <div class="dc-modal-row-fields" data-row-index="${rowIdx}">`;
@@ -925,8 +967,8 @@ const DockercartCheckout = (() => {
                   <option value="2">2</option>
                   <option value="3">3</option>
                 </select>
-                <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left:10px;">
-                  <i data-lucide="trash-2"></i>
+                <button type="button" class="btn btn-xs btn-danger btn-remove-row" data-row-index="${rowIdx}" style="margin-left:8px;">
+                  <i data-lucide="trash-2" width="13" height="13"></i>
                 </button>
               </div>
               <div class="dc-modal-row-fields" data-row-index="${rowIdx}">

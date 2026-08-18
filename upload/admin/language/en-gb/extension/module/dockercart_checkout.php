@@ -203,6 +203,13 @@ $_["button_save"] = "Save";
 $_["button_cancel"] = "Cancel";
 $_["button_apply"] = "Apply";
 
+// Sidebar
+$_["text_sidebar_status"] = "Module Status";
+$_["text_sidebar_nav"] = "Sections";
+$_["text_sidebar_about"] = "About";
+$_["text_module_always_active"] =
+    "This is a system module and is always enabled.";
+
 // Info
 $_["text_info"] =
     "<strong>DockerCart Checkout</strong> is a free one-page checkout solution for DockerCart.<br>" .
