@@ -1,3 +1,9 @@
+## [3.5.5](https://github.com/kdbsoft/dockercart/compare/v3.5.4...v3.5.5) (2026-08-17)
+
+### Bug Fixes
+
+* **mysql:** drop unused source_table from manticore reindex migration ([ccac689](https://github.com/kdbsoft/dockercart/commit/ccac689415b9617de70a1b0f31b8702400e205cb))
+
 ## [3.5.4](https://github.com/kdbsoft/dockercart/compare/v3.5.3...v3.5.4) (2026-08-17)
 
 ### Bug Fixes
