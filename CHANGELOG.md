@@ -1,3 +1,9 @@
+## [3.6.1](https://github.com/kdbsoft/dockercart/compare/v3.6.0...v3.6.1) (2026-08-18)
+
+### Bug Fixes
+
+* **start:** keep explicitly set DOCKERCART_URL instead of overwriting it ([20d7352](https://github.com/kdbsoft/dockercart/commit/20d7352060c578622d001d061035190bb49ce99d))
+
 ## [3.6.0](https://github.com/kdbsoft/dockercart/compare/v3.5.5...v3.6.0) (2026-08-18)
 
 ### Features
