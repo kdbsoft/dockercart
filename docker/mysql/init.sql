@@ -1455,7 +1455,7 @@ CREATE TABLE `oc_cart` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `cart_id` (`customer_id`,`session_id`,`product_id`,`recurring_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14742 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14743 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3478,7 +3478,7 @@ CREATE TABLE `oc_customer_login` (
   UNIQUE KEY `ux_email` (`email`),
   KEY `email` (`email`),
   KEY `ip` (`ip`)
-) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5999,7 +5999,7 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
   `is_system` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_type` (`task_type`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=168 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=171 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6010,15 +6010,17 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-17 09:17:04',NULL,'2026-07-02 11:00:50','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-18 11:35:18',NULL,'2026-07-02 11:00:50','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
 (41,'license_check','License Verification',1,'every_3d','2026-08-17 10:33:05',NULL,'2026-07-03 18:33:04','2026-08-17 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-17 09:17:04',NULL,'2026-07-24 18:51:04','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-17 09:17:04',NULL,'2026-07-29 10:46:20','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-17 15:45:58',NULL,'2026-08-01 18:17:04','2026-08-17 15:45:58',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
-(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-17 09:17:04',NULL,'2026-08-06 08:09:03','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-08-17 09:17:04',NULL,'2026-08-06 15:36:09','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
-(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-17 09:17:04',NULL,'2026-08-09 15:39:28','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
-(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-08-17 09:17:04',NULL,'2026-08-10 13:33:35','2026-08-17 09:17:04',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0);
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-18 11:35:18',NULL,'2026-07-24 18:51:04','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-18 11:35:18',NULL,'2026-07-29 10:46:20','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-18 17:22:00',NULL,'2026-08-01 18:17:04','2026-08-18 17:22:00',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-18 11:35:18',NULL,'2026-08-06 08:09:03','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-08-18 11:35:18',NULL,'2026-08-06 15:36:09','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-18 11:35:18',NULL,'2026-08-09 15:39:28','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
+(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-08-18 11:35:18',NULL,'2026-08-10 13:33:35','2026-08-18 11:35:18',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
+(168,'dockercart_update_check','Update availability check',1,'hourly','2026-08-18 17:22:00',NULL,'2026-08-18 13:20:23','2026-08-18 17:22:00',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
+(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-08-18 14:08:39',NULL,'2026-08-18 14:08:08','2026-08-18 14:08:39',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6060,6 +6062,8 @@ INSERT INTO `oc_dockercart_scheduler_task_name` VALUES
 ('manticore_search_reindex',0,3,'Переиндексация поиска Manticore'),
 ('promo_renew',0,2,'Продовження автопродовжуваних акцій'),
 ('promo_renew',0,3,'Продление автопродлеваемых акций'),
+('recycle_bin_cleanup',0,2,'Очищення кошика'),
+('recycle_bin_cleanup',0,3,'Очистка корзины'),
 ('reservation_cleanup',0,2,'Очищення резервів товарів'),
 ('reservation_cleanup',0,3,'Очистка резервов товаров'),
 ('reward_auto_award',0,2,'Нарахування бонусних балів'),
@@ -6783,7 +6787,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=1614 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1616 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8361,7 +8365,9 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (1610,'50245a8fd700e8fefe1746feff','','none','','2026-08-17 12:28:48'),
 (1611,'0ce3fe28ada069b5540a6e43e8','','none','','2026-08-17 12:28:48'),
 (1612,'6cef32ab25ff8666d8b6bea59d','','none','','2026-08-17 12:28:53'),
-(1613,'cd7e72873260b72259e63365f9','','none','','2026-08-17 12:40:29');
+(1613,'cd7e72873260b72259e63365f9','','none','','2026-08-17 12:40:29'),
+(1614,'a30a03b50477c34a6d8aa0eab4','','none','','2026-08-18 11:50:57'),
+(1615,'3c4af289a612f7904e2513b751','','none','','2026-08-18 13:18:41');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8549,7 +8555,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6505 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6508 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8850,7 +8856,10 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (6501,NULL,'cfa28a08cc9be1c897e9803e9a',5008,'2026-08-17 11:42:45','2026-08-17 11:42:45'),
 (6502,NULL,'cfa28a08cc9be1c897e9803e9a',5062,'2026-08-17 11:44:21','2026-08-17 11:44:21'),
 (6503,NULL,'cfa28a08cc9be1c897e9803e9a',5014,'2026-08-17 12:08:53','2026-08-17 12:08:53'),
-(6504,NULL,'cfa28a08cc9be1c897e9803e9a',5006,'2026-08-17 12:09:07','2026-08-17 12:09:07');
+(6504,NULL,'cfa28a08cc9be1c897e9803e9a',5006,'2026-08-17 12:09:07','2026-08-17 12:09:07'),
+(6505,NULL,'cd7e72873260b72259e63365f9',5001,'2026-08-17 15:53:30','2026-08-17 15:53:30'),
+(6506,NULL,'cd7e72873260b72259e63365f9',5023,'2026-08-17 20:05:28','2026-08-17 20:05:28'),
+(6507,NULL,'3c4af289a612f7904e2513b751',5031,'2026-08-18 14:32:29','2026-08-18 14:32:29');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8927,7 +8936,7 @@ CREATE TABLE `oc_event` (
   `status` tinyint(1) NOT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`event_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=908 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=916 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8998,7 +9007,15 @@ INSERT INTO `oc_event` VALUES
 (904,'dockercart_search_variant_edit','admin/model/catalog/product_configurable/updateVariant/after','extension/module/dockercart_search/eventVariantEdit',1,0),
 (905,'dockercart_search_variant_delete','admin/model/catalog/product_configurable/deleteVariant/after','extension/module/dockercart_search/eventVariantDelete',1,0),
 (906,'dockercart_search_variant_delete_all','admin/model/catalog/product_configurable/deleteAllVariants/after','extension/module/dockercart_search/eventVariantDeleteAll',1,0),
-(907,'admin_mail_order','admin/model/sale/order/addOrderHistory/after','mail/order',1,0);
+(907,'admin_mail_order','admin/model/sale/order/addOrderHistory/after','mail/order',1,0),
+(908,'dockercart_trash_product','admin/model/catalog/product/deleteProduct/before','tool/recycle_bin/eventCapture',1,-100),
+(909,'dockercart_trash_category','admin/model/catalog/category/deleteCategory/before','tool/recycle_bin/eventCapture',1,-100),
+(910,'dockercart_trash_manufacturer','admin/model/catalog/manufacturer/deleteManufacturer/before','tool/recycle_bin/eventCapture',1,-100),
+(911,'dockercart_trash_information','admin/model/catalog/information/deleteInformation/before','tool/recycle_bin/eventCapture',1,-100),
+(912,'dockercart_trash_review','admin/model/catalog/review/deleteReview/before','tool/recycle_bin/eventCapture',1,-100),
+(913,'dockercart_trash_customer','admin/model/customer/customer/deleteCustomer/before','tool/recycle_bin/eventCapture',1,-100),
+(914,'dockercart_trash_order','admin/model/sale/order/deleteOrder/before','tool/recycle_bin/eventCapture',1,-100),
+(915,'dockercart_trash_blog_post','admin/model/extension/module/dockercart_blog_post/deletePost/before','tool/recycle_bin/eventCapture',1,-100);
 /*!40000 ALTER TABLE `oc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -9088,8 +9105,7 @@ INSERT INTO `oc_extension` VALUES
 (440,'module','dockercart_brand_carousel'),
 (442,'currency','ecb'),
 (462,'dashboard','dockercart_top_products'),
-(463,'dashboard','dockercart_category_revenue'),
-(500,'total','bxgy');
+(463,'dashboard','dockercart_category_revenue');
 /*!40000 ALTER TABLE `oc_extension` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -9712,7 +9728,7 @@ CREATE TABLE `oc_manufacturer` (
   `sort_order` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`manufacturer_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=324 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10467,7 +10483,7 @@ CREATE TABLE `oc_order` (
   KEY `idx_order_date_status` (`order_status_id`,`date_added`),
   KEY `idx_order_utm_source` (`utm_source`,`date_added`),
   KEY `idx_order_utm_medium` (`utm_medium`,`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=99620 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=99622 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10481,7 +10497,6 @@ INSERT INTO `oc_order` VALUES
 (99604,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99854,5,'Demo','Guest','guest@demo.local','','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'','[]','','','','','','','','','','Украина',220,'Kyiv',3490,'','[]','','','','','','','',0.0000,0.0000,0,0,1,0,0.0000,0,'',3,4,'UAH',1.00000000,'10.89.1.7','','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-12 15:25:20','2026-08-12 19:00:17'),
 (99609,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99852,1,'Reward','Customer','reward-customer@example.com','','','','[]','','','','','','','','Ukraine',220,'Kyiv',3490,'','[]','','','','','','','','','','Ukraine',220,'Kyiv',3490,'','[]','','','','','','','',0.0000,0.0000,0,0,1,0,0.0000,0,'',1,4,'UAH',1.00000000,'10.89.1.7','','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.9','2026-08-12 18:48:27','2026-08-12 18:55:21'),
 (99610,1,'DC-',0,'DockerCart','http://dockercart.local:8080/',0,1,'','','','','','','[]','','','','','','','','',0,'',0,'','[]','','','','','','','','','','',0,'',0,'','[]','','','','','','','',0.0000,0.0000,0,0,1,0,0.0000,0,'',3,4,'UAH',1.00000000,'10.89.1.7','','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-12 19:00:41','2026-08-12 19:00:41'),
-(99611,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',0,1,'','','','','','','[]','','','','','','','','',0,'',0,'','[]','','','','','','','','','','',0,'',0,'','[]','','','','','','','',0.0000,0.0000,0,0,130,0,0.0000,0,'',1,4,'UAH',1.00000000,'10.89.1.7','','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.9','2026-08-12 19:08:02','2026-08-15 12:07:54'),
 (99612,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',0,1,'Тест','Тестов','test@example.com','+380 (38) 050-12-34','','','[]','Тест','Тестов','','ул. Тестовая 1','','Киев','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Тест','Тестов','','ул. Тестовая 1','','Киев','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',3039.2398,0.0000,0,0,1,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.9','2026-08-13 07:55:16','2026-08-13 07:55:16'),
 (99615,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','1234567890','','','','',19297.8328,19297.8328,0,0,134,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 10:44:43','2026-08-15 11:39:01'),
 (99616,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:20','2026-08-15 11:56:20'),
@@ -10516,8 +10531,6 @@ CREATE TABLE `oc_order_claim` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_claim` WRITE;
 /*!40000 ALTER TABLE `oc_order_claim` DISABLE KEYS */;
-INSERT INTO `oc_order_claim` VALUES
-('cd7e72873260b72259e63365f9',99619,'2026-08-17 12:40:43');
 /*!40000 ALTER TABLE `oc_order_claim` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10578,7 +10591,7 @@ CREATE TABLE `oc_order_history` (
   `comment_params` mediumtext DEFAULT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7099 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=7103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10623,7 +10636,6 @@ INSERT INTO `oc_order_history` VALUES
 (7056,99604,1,0,'','',NULL,'2026-08-12 15:25:20'),
 (7064,99609,1,0,'','',NULL,'2026-08-12 18:48:27'),
 (7065,99610,1,0,'','',NULL,'2026-08-12 19:00:41'),
-(7066,99611,1,0,'','',NULL,'2026-08-12 19:08:02'),
 (7067,99612,1,0,'','','[]','2026-08-13 07:55:16'),
 (7068,99612,0,1,'Наложенный платеж','order_payment_method','{\"code\":\"dockercart_universal.dockercart_universal_4\"}','2026-08-13 07:55:16'),
 (7071,99615,1,0,'','','[]','2026-08-15 10:44:43'),
@@ -10651,7 +10663,6 @@ INSERT INTO `oc_order_history` VALUES
 (7093,99618,134,0,'text_return_complete_note','',NULL,'2026-08-15 12:04:02'),
 (7094,99618,0,0,'Проведён возврат средств: 7 300 ₴','text_refund_note_added','[\"7 300 \\u20b4\"]','2026-08-15 12:05:37'),
 (7095,99618,0,0,'Проведён возврат средств: 71 ₴','text_refund_note_added','[\"71 \\u20b4\"]','2026-08-15 12:06:35'),
-(7096,99611,130,1,'','',NULL,'2026-08-15 12:07:54'),
 (7097,99619,1,0,'','','[]','2026-08-17 12:40:43'),
 (7098,99619,0,1,'Наложенный платеж','order_payment_method','{\"code\":\"dockercart_universal.dockercart_universal_4\"}','2026-08-17 12:40:43');
 /*!40000 ALTER TABLE `oc_order_history` ENABLE KEYS */;
@@ -11111,7 +11122,7 @@ CREATE TABLE `oc_order_total` (
   `sort_order` int(11) NOT NULL,
   PRIMARY KEY (`order_total_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=14156 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11147,9 +11158,6 @@ INSERT INTO `oc_order_total` VALUES
 (14112,99610,'sub_total','Сумма',0.0000,1),
 (14113,99610,'shipping','Доставка',0.0000,3),
 (14114,99610,'total','Итого',0.0000,9),
-(14115,99611,'sub_total','Sub-Total',0.0000,1),
-(14116,99611,'shipping','Shipping',0.0000,3),
-(14117,99611,'total','Total',0.0000,9),
 (14118,99612,'sub_total','Сумма',2908.3278,1),
 (14119,99612,'shipping','Стандартная доставка (4-5 дней)',10.0000,3),
 (14120,99612,'tax','НДС (20%)',118.9120,5),
@@ -11271,7 +11279,7 @@ CREATE TABLE `oc_product` (
   KEY `idx_product_status_price` (`status`,`price`),
   KEY `idx_product_manufacturer` (`manufacturer_id`,`status`),
   KEY `idx_product_status_quantity` (`status`,`quantity`)
-) ENGINE=InnoDB AUTO_INCREMENT=100002 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=100006 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11282,7 +11290,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,590,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',25.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,591,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',25.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,372,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
 (5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',32.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,316,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',40.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,57,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
@@ -11304,7 +11312,7 @@ INSERT INTO `oc_product` VALUES
 (5020,'DEMO-5020',1973,'SKU-5020','','','','','','A1',84.00,0,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,16,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',24.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,162,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5022,'DEMO-5022',1302,'SKU-5022','','','','','','A1',31.00,0,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,11,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2082,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
+(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',15.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2083,'2026-03-03 08:51:05','2026-08-12 16:53:53'),
 (5024,'DEMO-5024',1301,'SKU-5024','','','','','','A1',45.00,0,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5025,'DEMO-5025',1302,'SKU-5025','','','','','','A1',52.00,0,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5026,'DEMO-5026',1302,'SKU-5026','','','','','','A1',59.00,0,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,5,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
@@ -11312,7 +11320,7 @@ INSERT INTO `oc_product` VALUES
 (5028,'DEMO-5028',1303,'SKU-5028','','','','','','A1',73.00,0,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,9,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5029,'DEMO-5029',1303,'SKU-5029','','','','','','A1',80.00,0,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
 (5030,'DEMO-5030',1301,'SKU-5030','','','','','','A1',87.00,0,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,29,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',27.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,158,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',27.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,159,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5032,'DEMO-5032',1402,'SKU-5032','','','','','','A1',34.00,0,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,26,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5033,'DEMO-5033',1403,'SKU-5033','','','','','','A1',41.00,0,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,34,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5034,'DEMO-5034',1401,'SKU-5034','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg','','',310,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,1,58,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
@@ -22140,7 +22148,9 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20260814_remove_wishlist_image_settings.sql','2026-08-15 12:06:25'),
 ('20260814_scheduler_task_name_and_presets.sql','2026-08-15 12:06:26'),
 ('20260814_seed_scheduler_task_names_ru_uk.sql','2026-08-15 12:06:26'),
-('20260815_add_tool_update_permission.sql','2026-08-15 12:07:37');
+('20260815_add_tool_update_permission.sql','2026-08-15 12:07:37'),
+('20260816_fix_user_group_permission_arrays.sql','2026-08-17 14:47:04'),
+('20260818_dockercart_update_check_task.sql','2026-08-18 10:20:23');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22193,7 +22203,7 @@ CREATE TABLE `oc_seo_url` (
   KEY `idx_store_id` (`store_id`),
   KEY `idx_store_language_query` (`store_id`,`language_id`,`query`(191)),
   KEY `idx_store_keyword` (`store_id`,`keyword`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=6660 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=6670 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22705,6 +22715,7 @@ INSERT INTO `oc_session` VALUES
 ('127e7e93b65465680f7006c8f5','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 09:09:59'),
 ('25dee840484112e009a4af5be0','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"yS2IaM0XKhbZOELa63Kl1ZABUZmg3kuG\"}','2026-08-18 09:09:48'),
 ('3279eeb8256d684b1f20717470','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 08:33:33'),
+('3c4af289a612f7904e2513b751','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"v60T2jumOAISlbEtvasw4IwaCUmLKjhE\"}','2026-08-19 14:24:03'),
 ('44ee4b7c486ebf4bc9e87515e4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"NBY3iiAFscWOmFUHg9796vxR0PUrKOOY\",\"redirect\":\"http:\\/\\/dockercart.local:8080\\/account\\/password\"}','2026-08-18 09:12:08'),
 ('50245a8fd700e8fefe1746feff','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 09:28:48'),
 ('59719ba5ebca020713f80d9220','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"FyugaQGKaiLX9W8HHpeaCUvl6ATDGZuT\"}','2026-08-18 09:09:54'),
@@ -22716,10 +22727,11 @@ INSERT INTO `oc_session` VALUES
 ('84e4df448e0d385d3ca9d8075a','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"qo9M91Ax2A0SXzngSqJwnZcOfMGwoI0U\"}','2026-08-18 09:10:18'),
 ('8c29aa46c904f91dc1e343586a','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"customer_id\":\"99851\",\"shipping_address\":false,\"csrf_token\":\"0GEFCc8xehnsw4CnpU85JMuIw1k73hyi\",\"success\":\"Success: Your password has been successfully updated.\"}','2026-08-18 09:13:49'),
 ('9c6e0e837943ff72893bd35ba5','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 08:33:33'),
+('a30a03b50477c34a6d8aa0eab4','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"3ApHnDaaFwwJBHWSGl9q4TzaHmEuX3sN\"}','2026-08-19 08:50:58'),
 ('a4dc2f9f052272666065b14cdb','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 08:33:33'),
 ('b4a568aeef5e686742fe2ae115','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 08:32:59'),
 ('cb52967523554c695a5b8b646d','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 09:09:59'),
-('cd7e72873260b72259e63365f9','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Tm0XDiQyQ1ke0fTxQfAI0YlQOGZ8j18a\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"account\":\"guest\",\"last_order_id\":99619}','2026-08-18 09:40:44'),
+('cd7e72873260b72259e63365f9','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Tm0XDiQyQ1ke0fTxQfAI0YlQOGZ8j18a\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"account\":\"guest\",\"last_order_id\":99619}','2026-08-18 17:06:44'),
 ('cfa28a08cc9be1c897e9803e9a','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"csrf_token\":\"9aqOnxLxsUeOHkCoqSKDBUDsHfoLf1vG\"}','2026-08-18 09:09:13'),
 ('da6ed53f8afac89809d293cd7b','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"YOQoo2qu9tTpitTXjTZGcR87Ztz0qgsq\"}','2026-08-18 09:18:48'),
 ('e5175fcdca4a656789af64c11e','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\"}','2026-08-18 08:33:22');
@@ -22743,7 +22755,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31578 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=31709 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23058,8 +23070,6 @@ INSERT INTO `oc_setting` VALUES
 (30045,0,'config','config_review_reply_author_name','',0),
 (30046,0,'config','config_review_show_distribution','1',0),
 (30047,0,'config','config_review_per_page','10',0),
-(30567,0,'total_bxgy','total_bxgy_status','1',0),
-(30568,0,'total_bxgy','total_bxgy_sort_order','2',0),
 (30583,0,'config','config_onboarding_enabled','1',0),
 (31120,0,'config','config_url','http://dockercart.local:8080/',0),
 (31121,0,'config','config_ssl','http://dockercart.local:8080/',0),
@@ -23186,9 +23196,9 @@ INSERT INTO `oc_setting` VALUES
 (31548,0,'config','config_address','Главная улица, 1, Киев, Украина',0),
 (31549,0,'config','config_open','Пн–Пт: 9:00–18:00',0),
 (31550,0,'config','config_comment','',0),
-(31575,0,'dockercart_update','dockercart_update_last_check','1786970706',0),
-(31576,0,'dockercart_update','dockercart_update_remote_version','3.4.2',0),
-(31577,0,'dockercart_update','dockercart_update_changelog','### Bug Fixes\n\n* **make:** re-run setup wizard with seed prompt after make clean ([c98bcfe](https://github.com/kdbsoft/dockercart/commit/c98bcfebfe1e88ecfa00da0c19ef9cc14fce6fed))',0);
+(31706,0,'dockercart_update','dockercart_update_last_check','1787063001',0),
+(31707,0,'dockercart_update','dockercart_update_remote_version','3.5.5',0),
+(31708,0,'dockercart_update','dockercart_update_changelog','',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23414,6 +23424,44 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_trash`
+--
+
+DROP TABLE IF EXISTS `oc_trash`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_trash` (
+  `trash_id` int(11) NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(50) NOT NULL,
+  `entity_id` int(11) NOT NULL DEFAULT 0,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `data` longtext DEFAULT NULL,
+  `deleted_by` int(11) DEFAULT NULL,
+  `deleted_at` datetime NOT NULL,
+  `restored_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`trash_id`),
+  KEY `idx_trash_entity` (`entity_type`,`deleted_at`),
+  KEY `idx_trash_deleted_at` (`deleted_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_trash`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_trash` WRITE;
+/*!40000 ALTER TABLE `oc_trash` DISABLE KEYS */;
+INSERT INTO `oc_trash` VALUES
+(13,'order',99611,'#99611 — DockerCart','{\"primary\":{\"order_id\":\"99611\",\"invoice_no\":\"0\",\"invoice_prefix\":\"DC-\",\"store_id\":\"0\",\"store_name\":\"DockerCart\",\"store_url\":\"http://dockercart.local:8080/\",\"customer_id\":\"0\",\"customer_group_id\":\"1\",\"firstname\":\"\",\"lastname\":\"\",\"email\":\"\",\"telephone\":\"\",\"tax_number\":\"\",\"fax\":\"\",\"custom_field\":\"[]\",\"payment_firstname\":\"\",\"payment_lastname\":\"\",\"payment_company\":\"\",\"payment_address_1\":\"\",\"payment_address_2\":\"\",\"payment_city\":\"\",\"payment_postcode\":\"\",\"payment_country\":\"\",\"payment_country_id\":\"0\",\"payment_zone\":\"\",\"payment_zone_id\":\"0\",\"payment_address_format\":\"\",\"payment_custom_field\":\"[]\",\"payment_method\":\"\",\"payment_code\":\"\",\"shipping_firstname\":\"\",\"shipping_lastname\":\"\",\"shipping_company\":\"\",\"shipping_address_1\":\"\",\"shipping_address_2\":\"\",\"shipping_city\":\"\",\"shipping_postcode\":\"\",\"shipping_country\":\"\",\"shipping_country_id\":\"0\",\"shipping_zone\":\"\",\"shipping_zone_id\":\"0\",\"shipping_address_format\":\"\",\"shipping_custom_field\":\"[]\",\"shipping_method\":\"\",\"shipping_code\":\"\",\"tracking_number\":\"\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"comment\":\"\",\"total\":\"0.0000\",\"paid_amount\":\"0.0000\",\"reward_awarded\":\"0\",\"reward_revoked_points\":\"0\",\"order_status_id\":\"130\",\"affiliate_id\":\"0\",\"commission\":\"0.0000\",\"marketing_id\":\"0\",\"tracking\":\"\",\"language_id\":\"1\",\"currency_id\":\"4\",\"currency_code\":\"UAH\",\"currency_value\":\"1.00000000\",\"ip\":\"10.89.1.7\",\"forwarded_ip\":\"\",\"user_agent\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36\",\"accept_language\":\"ru-RU,ru;q=0.9\",\"date_added\":\"2026-08-12 19:08:02\",\"date_modified\":\"2026-08-15 12:07:54\"},\"description\":[],\"to_store\":[],\"seo_url\":[],\"related\":{\"order_history\":[{\"order_history_id\":\"7066\",\"order_id\":\"99611\",\"order_status_id\":\"1\",\"notify\":\"0\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-12 19:08:02\"},{\"order_history_id\":\"7096\",\"order_id\":\"99611\",\"order_status_id\":\"130\",\"notify\":\"1\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-15 12:07:54\"}],\"order_total\":[{\"order_total_id\":\"14115\",\"order_id\":\"99611\",\"code\":\"sub_total\",\"title\":\"Sub-Total\",\"value\":\"0.0000\",\"sort_order\":\"1\"},{\"order_total_id\":\"14116\",\"order_id\":\"99611\",\"code\":\"shipping\",\"title\":\"Shipping\",\"value\":\"0.0000\",\"sort_order\":\"3\"},{\"order_total_id\":\"14117\",\"order_id\":\"99611\",\"code\":\"total\",\"title\":\"Total\",\"value\":\"0.0000\",\"sort_order\":\"9\"}]}}',0,'2026-08-18 14:13:16','2026-08-18 14:15:30'),
+(14,'order',99620,'#99620 — DockerCart','{\"primary\":{\"order_id\":\"99620\",\"invoice_no\":\"0\",\"invoice_prefix\":\"DC-\",\"store_id\":\"0\",\"store_name\":\"DockerCart\",\"store_url\":\"http://dockercart.local:8080/\",\"customer_id\":\"0\",\"customer_group_id\":\"0\",\"firstname\":\"\",\"lastname\":\"\",\"email\":\"\",\"telephone\":\"\",\"tax_number\":\"\",\"fax\":\"\",\"custom_field\":\"[]\",\"payment_firstname\":\"\",\"payment_lastname\":\"\",\"payment_company\":\"\",\"payment_address_1\":\"\",\"payment_address_2\":\"\",\"payment_city\":\"\",\"payment_postcode\":\"\",\"payment_country\":\"\",\"payment_country_id\":\"0\",\"payment_zone\":\"\",\"payment_zone_id\":\"0\",\"payment_address_format\":\"\",\"payment_custom_field\":\"[]\",\"payment_method\":\"\",\"payment_code\":\"\",\"shipping_firstname\":\"\",\"shipping_lastname\":\"\",\"shipping_company\":\"\",\"shipping_address_1\":\"\",\"shipping_address_2\":\"\",\"shipping_city\":\"\",\"shipping_postcode\":\"\",\"shipping_country\":\"\",\"shipping_country_id\":\"0\",\"shipping_zone\":\"\",\"shipping_zone_id\":\"0\",\"shipping_address_format\":\"\",\"shipping_custom_field\":\"[]\",\"shipping_method\":\"\",\"shipping_code\":\"\",\"tracking_number\":\"\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"comment\":\"\",\"total\":\"0.0000\",\"paid_amount\":\"0.0000\",\"reward_awarded\":\"0\",\"reward_revoked_points\":\"0\",\"order_status_id\":\"130\",\"affiliate_id\":\"0\",\"commission\":\"0.0000\",\"marketing_id\":\"0\",\"tracking\":\"\",\"language_id\":\"1\",\"currency_id\":\"4\",\"currency_code\":\"UAH\",\"currency_value\":\"1.00000000\",\"ip\":\"10.89.1.7\",\"forwarded_ip\":\"\",\"user_agent\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36\",\"accept_language\":\"ru-RU,ru;q=0.9\",\"date_added\":\"2026-08-12 19:08:02\",\"date_modified\":\"2026-08-15 12:07:54\"},\"description\":[],\"to_store\":[],\"seo_url\":[],\"related\":{\"order_history\":[{\"order_history_id\":\"7099\",\"order_id\":\"99620\",\"order_status_id\":\"1\",\"notify\":\"0\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-12 19:08:02\"},{\"order_history_id\":\"7100\",\"order_id\":\"99620\",\"order_status_id\":\"130\",\"notify\":\"1\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-15 12:07:54\"}],\"order_total\":[{\"order_total_id\":\"14150\",\"order_id\":\"99620\",\"code\":\"sub_total\",\"title\":\"Sub-Total\",\"value\":\"0.0000\",\"sort_order\":\"1\"},{\"order_total_id\":\"14151\",\"order_id\":\"99620\",\"code\":\"shipping\",\"title\":\"Shipping\",\"value\":\"0.0000\",\"sort_order\":\"3\"},{\"order_total_id\":\"14152\",\"order_id\":\"99620\",\"code\":\"total\",\"title\":\"Total\",\"value\":\"0.0000\",\"sort_order\":\"9\"}]}}',1,'2026-08-18 14:16:53','2026-08-18 14:16:58'),
+(15,'order',99621,'#99621 — DockerCart','{\"primary\":{\"order_id\":\"99621\",\"invoice_no\":\"0\",\"invoice_prefix\":\"DC-\",\"store_id\":\"0\",\"store_name\":\"DockerCart\",\"store_url\":\"http://dockercart.local:8080/\",\"customer_id\":\"0\",\"customer_group_id\":\"0\",\"firstname\":\"\",\"lastname\":\"\",\"email\":\"\",\"telephone\":\"\",\"tax_number\":\"\",\"fax\":\"\",\"custom_field\":\"[]\",\"payment_firstname\":\"\",\"payment_lastname\":\"\",\"payment_company\":\"\",\"payment_address_1\":\"\",\"payment_address_2\":\"\",\"payment_city\":\"\",\"payment_postcode\":\"\",\"payment_country\":\"\",\"payment_country_id\":\"0\",\"payment_zone\":\"\",\"payment_zone_id\":\"0\",\"payment_address_format\":\"\",\"payment_custom_field\":\"[]\",\"payment_method\":\"\",\"payment_code\":\"\",\"shipping_firstname\":\"\",\"shipping_lastname\":\"\",\"shipping_company\":\"\",\"shipping_address_1\":\"\",\"shipping_address_2\":\"\",\"shipping_city\":\"\",\"shipping_postcode\":\"\",\"shipping_country\":\"\",\"shipping_country_id\":\"0\",\"shipping_zone\":\"\",\"shipping_zone_id\":\"0\",\"shipping_address_format\":\"\",\"shipping_custom_field\":\"[]\",\"shipping_method\":\"\",\"shipping_code\":\"\",\"tracking_number\":\"\",\"utm_source\":\"\",\"utm_medium\":\"\",\"utm_campaign\":\"\",\"comment\":\"\",\"total\":\"0.0000\",\"paid_amount\":\"0.0000\",\"reward_awarded\":\"0\",\"reward_revoked_points\":\"0\",\"order_status_id\":\"130\",\"affiliate_id\":\"0\",\"commission\":\"0.0000\",\"marketing_id\":\"0\",\"tracking\":\"\",\"language_id\":\"1\",\"currency_id\":\"4\",\"currency_code\":\"UAH\",\"currency_value\":\"1.00000000\",\"ip\":\"10.89.1.7\",\"forwarded_ip\":\"\",\"user_agent\":\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36\",\"accept_language\":\"ru-RU,ru;q=0.9\",\"date_added\":\"2026-08-12 19:08:02\",\"date_modified\":\"2026-08-15 12:07:54\"},\"description\":[],\"to_store\":[],\"seo_url\":[],\"related\":{\"order_history\":[{\"order_history_id\":\"7101\",\"order_id\":\"99621\",\"order_status_id\":\"1\",\"notify\":\"0\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-12 19:08:02\"},{\"order_history_id\":\"7102\",\"order_id\":\"99621\",\"order_status_id\":\"130\",\"notify\":\"1\",\"comment\":\"\",\"comment_key\":\"\",\"comment_params\":null,\"date_added\":\"2026-08-15 12:07:54\"}],\"order_total\":[{\"order_total_id\":\"14153\",\"order_id\":\"99621\",\"code\":\"sub_total\",\"title\":\"Sub-Total\",\"value\":\"0.0000\",\"sort_order\":\"1\"},{\"order_total_id\":\"14154\",\"order_id\":\"99621\",\"code\":\"shipping\",\"title\":\"Shipping\",\"value\":\"0.0000\",\"sort_order\":\"3\"},{\"order_total_id\":\"14155\",\"order_id\":\"99621\",\"code\":\"total\",\"title\":\"Total\",\"value\":\"0.0000\",\"sort_order\":\"9\"}]}}',1,'2026-08-18 14:20:39',NULL);
+/*!40000 ALTER TABLE `oc_trash` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_upload`
 --
 
@@ -23504,7 +23552,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_user_group` WRITE;
 /*!40000 ALTER TABLE `oc_user_group` DISABLE KEYS */;
 INSERT INTO `oc_user_group` VALUES
-(1,'Administrator','{\"access\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/update\"], \"modify\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/update\"]}');
+(1,'Administrator','{\"access\":[\"catalog\\/attribute\",\"catalog\\/attribute_group\",\"catalog\\/attribute_set\",\"catalog\\/category\",\"catalog\\/download\",\"catalog\\/information\",\"catalog\\/manufacturer\",\"catalog\\/option\",\"catalog\\/option_set\",\"catalog\\/product\",\"catalog\\/product_bundle\",\"catalog\\/product_configurable\",\"catalog\\/review\",\"catalog\\/review_setting\",\"common\\/admin_search\",\"common\\/column_left\",\"common\\/developer\",\"common\\/filemanager\",\"common\\/profile\",\"common\\/security\",\"common\\/user_filter\",\"customer\\/custom_field\",\"customer\\/customer\",\"customer\\/customer_approval\",\"customer\\/customer_group\",\"design\\/banner\",\"design\\/layout\",\"design\\/seo_url\",\"event\\/dockercart_about_tab\",\"event\\/dockercart_license_admin\",\"event\\/language\",\"event\\/theme\",\"extension\\/analytics\\/clarity\",\"extension\\/analytics\\/facebook\",\"extension\\/analytics\\/google\",\"extension\\/captcha\\/dockercart\",\"extension\\/currency\\/ecb\",\"extension\\/dashboard\\/activity\",\"extension\\/dashboard\\/chart\",\"extension\\/dashboard\\/customer\",\"extension\\/dashboard\\/dockercart_aov\",\"extension\\/dashboard\\/dockercart_category_revenue\",\"extension\\/dashboard\\/dockercart_conversion\",\"extension\\/dashboard\\/dockercart_repeat\",\"extension\\/dashboard\\/dockercart_top_products\",\"extension\\/dashboard\\/order\",\"extension\\/dashboard\\/recent\",\"extension\\/dashboard\\/sale\",\"extension\\/dashboard\\/traffic_source\",\"extension\\/dashboard\\/viewed_product\",\"extension\\/extension\\/advertise\",\"extension\\/extension\\/analytics\",\"extension\\/extension\\/captcha\",\"extension\\/extension\\/currency\",\"extension\\/extension\\/dashboard\",\"extension\\/extension\\/feed\",\"extension\\/extension\\/fraud\",\"extension\\/extension\\/menu\",\"extension\\/extension\\/module\",\"extension\\/extension\\/payment\",\"extension\\/extension\\/promotion\",\"extension\\/extension\\/report\",\"extension\\/extension\\/shipping\",\"extension\\/extension\\/theme\",\"extension\\/extension\\/total\",\"extension\\/feed\\/dockercart_sitemap\",\"extension\\/module\\/account\",\"extension\\/module\\/banner\",\"extension\\/module\\/bestseller\",\"extension\\/module\\/carousel\",\"extension\\/module\\/category\",\"extension\\/module\\/dockercart_blog\",\"extension\\/module\\/dockercart_blog_author\",\"extension\\/module\\/dockercart_blog_category\",\"extension\\/module\\/dockercart_blog_comment\",\"extension\\/module\\/dockercart_blog_install\",\"extension\\/module\\/dockercart_blog_latest\",\"extension\\/module\\/dockercart_blog_post\",\"extension\\/module\\/dockercart_brand_carousel\",\"extension\\/module\\/dockercart_category_tree\",\"extension\\/module\\/dockercart_checkout\",\"extension\\/module\\/dockercart_newsletter\",\"extension\\/module\\/dockercart_search\",\"extension\\/module\\/dockercart_seo_description\",\"extension\\/module\\/dockercart_shop_features\",\"extension\\/module\\/dockercart_theme\",\"extension\\/module\\/dockercart_viewed\",\"extension\\/module\\/featured\",\"extension\\/module\\/html\",\"extension\\/module\\/latest\",\"extension\\/module\\/slideshow\",\"extension\\/module\\/special\",\"extension\\/module\\/store\",\"extension\\/payment\\/dockercart_universal\",\"extension\\/report\\/customer_activity\",\"extension\\/report\\/customer_order\",\"extension\\/report\\/customer_reward\",\"extension\\/report\\/customer_search\",\"extension\\/report\\/customer_transaction\",\"extension\\/report\\/dockercart_analytics\",\"extension\\/report\\/marketing\",\"extension\\/report\\/product_purchased\",\"extension\\/report\\/product_viewed\",\"extension\\/report\\/sale_coupon\",\"extension\\/report\\/sale_order\",\"extension\\/report\\/sale_return\",\"extension\\/report\\/sale_shipping\",\"extension\\/report\\/sale_tax\",\"extension\\/shipping\\/dockercart_universal\",\"extension\\/store\",\"extension\\/theme\\/dockercart\",\"extension\\/total\\/coupon\",\"extension\\/total\\/credit\",\"extension\\/total\\/handling\",\"extension\\/total\\/low_order_fee\",\"extension\\/total\\/reward\",\"extension\\/total\\/shipping\",\"extension\\/total\\/sub_total\",\"extension\\/total\\/tax\",\"extension\\/total\\/total\",\"extension\\/total\\/voucher\",\"localisation\\/country\",\"localisation\\/currency\",\"localisation\\/geo_zone\",\"localisation\\/language\",\"localisation\\/length_class\",\"localisation\\/location\",\"localisation\\/order_status\",\"localisation\\/return_action\",\"localisation\\/return_reason\",\"localisation\\/return_status\",\"localisation\\/tax_class\",\"localisation\\/tax_rate\",\"localisation\\/weight_class\",\"localisation\\/zone\",\"mail\\/affiliate\",\"mail\\/customer\",\"mail\\/forgotten\",\"mail\\/order\",\"mail\\/return\",\"mail\\/reward\",\"mail\\/transaction\",\"marketing\\/abandoned_stats\",\"marketing\\/contact\",\"marketing\\/coupon\",\"marketing\\/marketing\",\"marketplace\\/event\",\"marketplace\\/extension\",\"marketplace\\/install\",\"marketplace\\/installer\",\"marketplace\\/modification\",\"report\\/report\",\"sale\\/order\",\"sale\\/order_abandoned\",\"sale\\/order_detail\",\"sale\\/order_flow\",\"sale\\/return\",\"sale\\/voucher\",\"sale\\/voucher_theme\",\"setting\\/invoice_image\",\"setting\\/setting\",\"setting\\/store\",\"startup\\/error\",\"startup\\/event\",\"startup\\/login\",\"startup\\/permission\",\"startup\\/router\",\"startup\\/sass\",\"startup\\/startup\",\"tool\\/backup\",\"tool\\/dockercart_scheduler\",\"tool\\/log\",\"tool\\/recycle_bin\",\"tool\\/update\",\"tool\\/upload\",\"user\\/user\",\"user\\/user_permission\"],\"modify\":[\"catalog\\/attribute\",\"catalog\\/attribute_group\",\"catalog\\/attribute_set\",\"catalog\\/category\",\"catalog\\/download\",\"catalog\\/information\",\"catalog\\/manufacturer\",\"catalog\\/option\",\"catalog\\/option_set\",\"catalog\\/product\",\"catalog\\/product_bundle\",\"catalog\\/product_configurable\",\"catalog\\/review\",\"catalog\\/review_setting\",\"common\\/admin_search\",\"common\\/column_left\",\"common\\/developer\",\"common\\/filemanager\",\"common\\/profile\",\"common\\/security\",\"common\\/user_filter\",\"customer\\/custom_field\",\"customer\\/customer\",\"customer\\/customer_approval\",\"customer\\/customer_group\",\"design\\/banner\",\"design\\/layout\",\"design\\/seo_url\",\"event\\/dockercart_about_tab\",\"event\\/dockercart_license_admin\",\"event\\/language\",\"event\\/theme\",\"extension\\/analytics\\/clarity\",\"extension\\/analytics\\/facebook\",\"extension\\/analytics\\/google\",\"extension\\/captcha\\/dockercart\",\"extension\\/currency\\/ecb\",\"extension\\/dashboard\\/activity\",\"extension\\/dashboard\\/chart\",\"extension\\/dashboard\\/customer\",\"extension\\/dashboard\\/dockercart_aov\",\"extension\\/dashboard\\/dockercart_category_revenue\",\"extension\\/dashboard\\/dockercart_conversion\",\"extension\\/dashboard\\/dockercart_repeat\",\"extension\\/dashboard\\/dockercart_top_products\",\"extension\\/dashboard\\/order\",\"extension\\/dashboard\\/recent\",\"extension\\/dashboard\\/sale\",\"extension\\/dashboard\\/traffic_source\",\"extension\\/dashboard\\/viewed_product\",\"extension\\/extension\\/advertise\",\"extension\\/extension\\/analytics\",\"extension\\/extension\\/captcha\",\"extension\\/extension\\/currency\",\"extension\\/extension\\/dashboard\",\"extension\\/extension\\/feed\",\"extension\\/extension\\/fraud\",\"extension\\/extension\\/menu\",\"extension\\/extension\\/module\",\"extension\\/extension\\/payment\",\"extension\\/extension\\/promotion\",\"extension\\/extension\\/report\",\"extension\\/extension\\/shipping\",\"extension\\/extension\\/theme\",\"extension\\/extension\\/total\",\"extension\\/feed\\/dockercart_sitemap\",\"extension\\/module\\/account\",\"extension\\/module\\/banner\",\"extension\\/module\\/bestseller\",\"extension\\/module\\/carousel\",\"extension\\/module\\/category\",\"extension\\/module\\/dockercart_blog\",\"extension\\/module\\/dockercart_blog_author\",\"extension\\/module\\/dockercart_blog_category\",\"extension\\/module\\/dockercart_blog_comment\",\"extension\\/module\\/dockercart_blog_install\",\"extension\\/module\\/dockercart_blog_latest\",\"extension\\/module\\/dockercart_blog_post\",\"extension\\/module\\/dockercart_brand_carousel\",\"extension\\/module\\/dockercart_category_tree\",\"extension\\/module\\/dockercart_checkout\",\"extension\\/module\\/dockercart_newsletter\",\"extension\\/module\\/dockercart_search\",\"extension\\/module\\/dockercart_seo_description\",\"extension\\/module\\/dockercart_shop_features\",\"extension\\/module\\/dockercart_theme\",\"extension\\/module\\/dockercart_viewed\",\"extension\\/module\\/featured\",\"extension\\/module\\/html\",\"extension\\/module\\/latest\",\"extension\\/module\\/slideshow\",\"extension\\/module\\/special\",\"extension\\/module\\/store\",\"extension\\/payment\\/dockercart_universal\",\"extension\\/report\\/customer_activity\",\"extension\\/report\\/customer_order\",\"extension\\/report\\/customer_reward\",\"extension\\/report\\/customer_search\",\"extension\\/report\\/customer_transaction\",\"extension\\/report\\/dockercart_analytics\",\"extension\\/report\\/marketing\",\"extension\\/report\\/product_purchased\",\"extension\\/report\\/product_viewed\",\"extension\\/report\\/sale_coupon\",\"extension\\/report\\/sale_order\",\"extension\\/report\\/sale_return\",\"extension\\/report\\/sale_shipping\",\"extension\\/report\\/sale_tax\",\"extension\\/shipping\\/dockercart_universal\",\"extension\\/store\",\"extension\\/theme\\/dockercart\",\"extension\\/total\\/coupon\",\"extension\\/total\\/credit\",\"extension\\/total\\/handling\",\"extension\\/total\\/low_order_fee\",\"extension\\/total\\/reward\",\"extension\\/total\\/shipping\",\"extension\\/total\\/sub_total\",\"extension\\/total\\/tax\",\"extension\\/total\\/total\",\"extension\\/total\\/voucher\",\"localisation\\/country\",\"localisation\\/currency\",\"localisation\\/geo_zone\",\"localisation\\/language\",\"localisation\\/length_class\",\"localisation\\/location\",\"localisation\\/order_status\",\"localisation\\/return_action\",\"localisation\\/return_reason\",\"localisation\\/return_status\",\"localisation\\/tax_class\",\"localisation\\/tax_rate\",\"localisation\\/weight_class\",\"localisation\\/zone\",\"mail\\/affiliate\",\"mail\\/customer\",\"mail\\/forgotten\",\"mail\\/order\",\"mail\\/return\",\"mail\\/reward\",\"mail\\/transaction\",\"marketing\\/abandoned_stats\",\"marketing\\/contact\",\"marketing\\/coupon\",\"marketing\\/marketing\",\"marketplace\\/event\",\"marketplace\\/extension\",\"marketplace\\/install\",\"marketplace\\/installer\",\"marketplace\\/modification\",\"report\\/report\",\"sale\\/order\",\"sale\\/order_abandoned\",\"sale\\/order_detail\",\"sale\\/order_flow\",\"sale\\/return\",\"sale\\/voucher\",\"sale\\/voucher_theme\",\"setting\\/invoice_image\",\"setting\\/setting\",\"setting\\/store\",\"startup\\/error\",\"startup\\/event\",\"startup\\/login\",\"startup\\/permission\",\"startup\\/router\",\"startup\\/sass\",\"startup\\/startup\",\"tool\\/backup\",\"tool\\/dockercart_scheduler\",\"tool\\/log\",\"tool\\/recycle_bin\",\"tool\\/update\",\"tool\\/upload\",\"user\\/user\",\"user\\/user_permission\"]}');
 /*!40000 ALTER TABLE `oc_user_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -32155,4 +32203,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-08-17 15:52:14
+-- Dump completed on 2026-08-18 17:35:19
