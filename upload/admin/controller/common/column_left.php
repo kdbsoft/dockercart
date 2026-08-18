@@ -767,6 +767,17 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Recycle Bin
+			if ($this->user->hasPermission('access', 'tool/recycle_bin')) {
+				$system[] = array(
+					'id'       => 'menu-recycle-bin',
+					'icon'	   => 'trash-2',
+					'name'	   => $this->language->get('text_recycle_bin'),
+					'href'     => $this->url->link('tool/recycle_bin', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($system) {
 				$data['menus'][] = array(
 					'id'       => 'menu-system',
