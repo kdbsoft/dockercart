@@ -100,7 +100,7 @@ jobs:
           set -e
           for f in docker/entrypoint.sh docker/manticore/entrypoint.sh docker/mysql/init.sh \
                    docker/mysql/install-indexes.sh scripts/*.sh start.sh update.sh health-check.sh \
-                   install-backup-cron.sh install-cli.sh setup-letsencrypt.sh; do
+                   install-backup-cron.sh setup-letsencrypt.sh; do
             if [ -f "$f" ]; then
               bash -n "$f" && echo "OK: $f"
             fi
