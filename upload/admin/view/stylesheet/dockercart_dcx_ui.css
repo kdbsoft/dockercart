@@ -74,6 +74,27 @@
     flex-direction: column;
     gap: 18px;
 }
+/* Stacked subsections (replaces tabbed content) */
+.dcx-subsection {
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg);
+    padding: 16px 18px;
+    background: var(--dc-surface);
+}
+.dcx-subsection__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    margin-bottom: 12px;
+}
+.dcx-subsection__head svg {
+    width: 16px;
+    height: 16px;
+    color: var(--dc-text-muted);
+}
 .dcx-panel-body .form-control {
     height: 34px;
     font-size: 13px;
