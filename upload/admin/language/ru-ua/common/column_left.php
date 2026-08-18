@@ -58,6 +58,7 @@ $_['text_analytics'] = 'Аналитика';
 $_['text_return'] = 'Возвраты';
 $_['text_scheduler']            = 'Планировщик';
 $_['text_update']              = 'Обновление системы';
+$_['text_recycle_bin']          = 'Корзина';
 $_['text_return_action'] = 'Действия по возврату';
 $_['text_return_reason'] = 'Причины возврата';
 $_['text_return_status'] = 'Статусы возврата';

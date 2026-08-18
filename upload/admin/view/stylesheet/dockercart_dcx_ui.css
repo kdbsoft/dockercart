@@ -573,6 +573,10 @@ div.dcx-field.required > .dcx-label:before {
 .dcx-table > tbody > tr:hover {
     background: var(--dc-surface-alt);
 }
+.dc-entity-name {
+    font-weight: 600;
+    color: var(--dc-text-dark);
+}
 
 .dcx-inline-form {
     display: flex;

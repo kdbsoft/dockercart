@@ -1,0 +1,131 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="container-fluid">
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          {% if recycle_bin %}
+          <div class="pull-right">
+            <a href="{{ clear }}" class="btn btn-warning" onclick="return confirm('{{ text_confirm_clear }}');"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_clear }}</a>
+            <button type="submit" form="form-recycle-bin" formaction="{{ restore }}" class="btn btn-success dc-btn-selection"><i data-lucide="rotate-ccw" width="16" height="16"></i> {{ button_restore }}</button>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm_purge }}') ? $('#form-recycle-bin').prop('action', '{{ purge }}').submit() : false;"><i data-lucide="x-circle" width="16" height="16"></i> {{ button_purge }}</button>
+          </div>
+          {% endif %}
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="dcx-shell">
+      {% if recycle_bin %}
+      <div class="dcx-panel">
+        <div class="dcx-panel-head">
+          <div class="dcx-panel-head__icon"><i data-lucide="recycle" width="18" height="18"></i></div>
+          <div>
+            <div class="dcx-panel-title">{{ text_list }}</div>
+            <div class="dcx-panel-subtitle">{{ text_list_subtitle }}</div>
+          </div>
+        </div>
+        <div class="dcx-panel-body">
+          <form class="dcx-inline-form" id="form-filter" action="{{ action }}" method="get">
+            <input type="hidden" name="route" value="tool/recycle_bin" />
+            <input type="hidden" name="user_token" value="{{ user_token }}" />
+            <div class="dcx-field dcx-field-wide">
+              <label class="dcx-label" for="input-name">{{ entry_name }}</label>
+              <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" autocomplete="off" />
+            </div>
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-entity-type">{{ entry_entity_type }}</label>
+              <select name="filter_entity_type" id="input-entity-type" class="form-control">
+                <option value=""></option>
+                {% for entity in entity_types %}
+                {% if entity.value == filter_entity_type %}
+                <option value="{{ entity.value }}" selected="selected">{{ entity.label }}</option>
+                {% else %}
+                <option value="{{ entity.value }}">{{ entity.label }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="dcx-field">
+              <label class="dcx-label">&nbsp;</label>
+              <button type="submit" id="button-filter" class="btn btn-primary"><i data-lucide="search" width="16" height="16"></i> {{ button_filter }}</button>
+            </div>
+          </form>
+          <form action="{{ restore }}" method="post" enctype="multipart/form-data" id="form-recycle-bin">
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover dcx-table">
+                <thead>
+                  <tr>
+                    <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                    <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+                    <td class="text-left">{{ column_entity_type }}</td>
+                    <td class="text-left">{% if sort == 'deleted_at' %}<a href="{{ sort_deleted_at }}" class="{{ order|lower }} sortable">{{ column_deleted_at }}</a>{% else %}<a href="{{ sort_deleted_at }}" class="sortable">{{ column_deleted_at }}</a>{% endif %}</td>
+                    <td class="text-left">{% if sort == 'deleted_username' %}<a href="{{ sort_deleted_by }}" class="{{ order|lower }} sortable">{{ column_deleted_by }}</a>{% else %}<a href="{{ sort_deleted_by }}" class="sortable">{{ column_deleted_by }}</a>{% endif %}</td>
+                    <td class="text-right">{{ column_action }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in recycle_bin %}
+                  <tr>
+                    <td class="text-center">{% if item.trash_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ item.trash_id }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ item.trash_id }}" />
+                      {% endif %}</td>
+                    <td class="text-left">
+                      <span class="dc-entity-name">{{ item.name }}</span>
+                    </td>
+                    <td class="text-left"><span class="label label-default">{{ item.entity_label }}</span></td>
+                    <td class="text-left">{{ item.deleted_at }}</td>
+                    <td class="text-left">{{ item.deleted_by }}</td>
+                    <td class="text-right">
+                      <a href="{{ item.restore }}" data-toggle="tooltip" title="{{ button_restore }}" class="btn btn-success btn-sm"><i data-lucide="rotate-ccw" width="14" height="14"></i></a>
+                      <a href="{{ item.purge }}" data-toggle="tooltip" title="{{ button_purge }}" class="btn btn-danger btn-sm" onclick="return confirm('{{ text_confirm_purge }}');"><i data-lucide="x-circle" width="14" height="14"></i></a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </form>
+          <div class="pagination-wrap">
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      {% include 'common/empty_state.twig' with {
+        icon: 'recycle_bin',
+        standalone: true,
+        title: text_empty_title,
+        description: text_empty_description
+      } %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('button[form=\'form-recycle-bin\']').on('click', function(e) {
+	$('#form-recycle-bin').attr('action', $(this).attr('formaction'));
+
+	if ($('#form-recycle-bin input[name=\'selected[]\']:checked').length === 0) {
+		e.preventDefault();
+		return false;
+	}
+});
+//--></script>
+{{ footer }}
