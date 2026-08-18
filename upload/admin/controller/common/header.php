@@ -142,7 +142,10 @@ class ControllerCommonHeader extends Controller {
 				$this->load->language('tool/update');
 				$this->load->model('tool/update');
 
-				$update_info = $this->model_tool_update->getUpdateInfo(false);
+				// Serve only the cached result — never block the header (and thus
+				// every admin page load) on a network request. The cache is kept
+				// warm by the hourly scheduler worker or an explicit AJAX check.
+				$update_info = $this->model_tool_update->getCachedUpdateInfo();
 
 				$data['show_update_bell'] = true;
 				$data['update_available'] = $update_info['update_available'];

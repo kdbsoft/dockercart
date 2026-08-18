@@ -5,7 +5,6 @@ class ModelToolUpdate extends Model {
 	private const UPDATE_DIR = 'dockercart_update/';
 	private const DEFAULT_REMOTE = 'https://github.com/kdbsoft/dockercart';
 	private const DEFAULT_BRANCH = 'main';
-	private const CHECK_TTL = 3600; // cache the "update available" check for 1h
 	private const STALE_GRACE = 30; // seconds before an unstarted run counts as stale
 
 	private function updateDir(): string {
@@ -79,6 +78,64 @@ class ModelToolUpdate extends Model {
 		$content = trim((string)$response);
 
 		return $content === '' ? null : $content;
+	}
+
+	/**
+	 * Probes the remote repo's VERSION and CHANGELOG endpoints and returns a
+	 * human-readable explanation for the caller's diagnostics/logging. Used by
+	 * the scheduled worker so a failure to fetch (e.g. no network) is visible
+	 * instead of silently ending up with an empty changelog.
+	 *
+	 * @return array{version: string, changelog: string}
+	 */
+	public function getRemoteDiagnostics(string $remote, string $branch): array {
+		$diagnostics = [
+			'version'   => $this->probeRemoteUrl(rtrim($remote, '/') . '/raw/' . $branch . '/upload/VERSION'),
+			'changelog' => $this->probeRemoteUrl(rtrim($remote, '/') . '/raw/' . $branch . '/CHANGELOG.md'),
+		];
+
+		return $diagnostics;
+	}
+
+	/**
+	 * Attempts a single HTTP GET and returns why it succeeded or failed.
+	 */
+	private function probeRemoteUrl(string $url): string {
+		$ch = curl_init($url);
+
+		if ($ch === false) {
+			return 'curl_init failed';
+		}
+
+		curl_setopt_array($ch, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_TIMEOUT        => 8,
+			CURLOPT_SSL_VERIFYPEER => true,
+			CURLOPT_USERAGENT      => 'DockerCart-SystemUpdate'
+		]);
+
+		$response   = curl_exec($ch);
+		$http_code  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curl_error = curl_error($ch);
+
+		curl_close($ch);
+
+		if ($response === false) {
+			return $curl_error !== '' ? $curl_error : 'request failed';
+		}
+
+		if ($http_code < 200 || $http_code >= 300) {
+			return 'HTTP ' . $http_code;
+		}
+
+		$content = trim((string)$response);
+
+		if ($content === '') {
+			return 'empty body';
+		}
+
+		return 'OK';
 	}
 
 	/**
@@ -279,41 +336,50 @@ class ModelToolUpdate extends Model {
 	}
 
 	/**
-	 * Returns whether an update is available, plus the cached remote version and
-	 * changelog. Results are cached in settings for self::CHECK_TTL seconds so the
-	 * admin header can show the bell without hitting the network on every page.
+	 * Returns the cached update info without hitting the network. Used by the
+	 * header and the update page so loading the admin never blocks on a remote
+	 * request; the cache is kept warm by the scheduler worker and refreshed
+	 * on demand by the AJAX force-check.
 	 */
-	public function getUpdateInfo(bool $force = false): array {
+	public function getCachedUpdateInfo(): array {
 		$local = $this->getLocalVersion();
 		$cachedVersion = (string)$this->config->get('dockercart_update_remote_version');
 		$lastCheck = (int)$this->config->get('dockercart_update_last_check');
 
-		if (!$force && $lastCheck > 0 && (time() - $lastCheck) < self::CHECK_TTL) {
-			return [
-				'update_available' => $cachedVersion !== '' && version_compare($cachedVersion, $local, '>'),
-				'local'            => $local,
-				'remote'           => $cachedVersion,
-				'changelog'        => (string)$this->config->get('dockercart_update_changelog'),
-				'checked_at'       => $lastCheck,
-				'cached'           => true,
-				'fetch_failed'     => ($cachedVersion === '')
-			];
-		}
+		return [
+			'update_available' => $cachedVersion !== '' && version_compare($cachedVersion, $local, '>'),
+			'local'            => $local,
+			'remote'           => $cachedVersion,
+			'changelog'        => (string)$this->config->get('dockercart_update_changelog'),
+			'checked_at'       => $lastCheck,
+			'cached'           => true,
+			'fetch_failed'     => ($cachedVersion === '')
+		];
+	}
 
-		$config = $this->getConfig();
-		$remote = $this->getRemoteVersion($config['remote'], $config['branch'], 5);
+	/**
+	 * Performs a network fetch of the remote version/changelog and persists the
+	 * result to the cache. Used by the manual "Check" button (forced) so the
+	 * client can pull fresh data on demand; page/header renders must instead use
+	 * getCachedUpdateInfo() so they never block on the remote repo.
+	 */
+	public function refreshUpdateInfo(): array {
+		$local = $this->getLocalVersion();
+		$cfg    = $this->getConfig();
+		$remote = $this->getRemoteVersion($cfg['remote'], $cfg['branch'], 10);
 		$changelog = '';
 
 		if ($remote !== null) {
-			$raw = $this->getRemoteChangelog($config['remote'], $config['branch'], 5);
+			$raw = $this->getRemoteChangelog($cfg['remote'], $cfg['branch'], 5);
 
 			if ($raw !== null) {
 				$changelog = $this->parseChangelog($raw, $remote);
 			}
 		}
 
-		// Persist even on failure so we don't retry every page load (throttled by TTL).
-		$effectiveRemote = $remote ?? $cachedVersion;
+		// Persist even on failure so the header/auto-check keep serving a
+		// (possibly stale) cached snapshot rather than refetching every load.
+		$effectiveRemote = $remote ?? (string)$this->config->get('dockercart_update_remote_version');
 		$this->saveCheckCache($effectiveRemote, $changelog);
 
 		return [
@@ -321,7 +387,6 @@ class ModelToolUpdate extends Model {
 			'local'            => $local,
 			'remote'           => $effectiveRemote,
 			'changelog'        => $changelog,
-			'checked_at'       => time(),
 			'cached'           => false,
 			'fetch_failed'     => ($remote === null)
 		];
