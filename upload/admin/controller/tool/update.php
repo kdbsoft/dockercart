@@ -43,7 +43,10 @@ class ControllerToolUpdate extends Controller {
 		}
 
 		$config = $this->model_tool_update->getConfig();
-		$info = $this->model_tool_update->getUpdateInfo(false);
+		// Only serve cached data on page load; a network-backed, potentially
+		// blocking check runs client-side via the AJAX 'check' action so the
+		// admin page renders immediately instead of waiting on the remote repo.
+		$info = $this->model_tool_update->getCachedUpdateInfo();
 
 		$data['heading_title'] = $this->language->get('heading_title');
 
@@ -112,9 +115,12 @@ class ControllerToolUpdate extends Controller {
 		if (!$this->validateAccess()) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
-			$config = $this->model_tool_update->getConfig();
 			$local = $this->model_tool_update->getLocalVersion();
-			$info = $this->model_tool_update->getUpdateInfo(true);
+			// Manual "Check" (force=1) hits the network for fresh data; page load
+			// and auto-check serve the cached snapshot so views never block.
+			$info = empty($this->request->get['force'])
+				? $this->model_tool_update->getCachedUpdateInfo()
+				: $this->model_tool_update->refreshUpdateInfo();
 
 			if ($info['fetch_failed']) {
 				$json['error'] = $this->language->get('error_fetch');

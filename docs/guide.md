@@ -523,6 +523,14 @@ SKIP_MIGRATIONS=1 make update
 
 Full script: `update.sh`
 
+### Automatic Update-Availability Check
+
+The admin "System Update" page and the header update-bell show whether a newer version is available. The remote version/changelog are cached in `oc_setting` (keys `dockercart_update_*`) by a background scheduler task `dockercart_update_check` → `bin/dockercart_update_check.php`, running hourly.
+
+Admin page loads and the header update-bell **only read the cache** — they never make a network request, so views are never blocked on the remote repo. The "Check" button on the update page forces a fresh network fetch (`refreshUpdateInfo()`) and updates the cache. If the scheduler is disabled, the cache simply goes stale until a manual "Check" or scheduler re-run.
+
+If network fetching fails (e.g. no outbound internet / DNS), the worker writes the reason to its log (`docker/scheduler/...` or `make scheduler-logs`) — e.g. `Resolving timed out` — so an empty changelog is diagnosable rather than mysterious.
+
 ---
 
 ## 10. Security
