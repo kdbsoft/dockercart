@@ -144,9 +144,6 @@ services:
       start_period: 60s
 
   scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
     container_name: ${SCHEDULER_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_scheduler}
     restart: ${RESTART_POLICY:-unless-stopped}
