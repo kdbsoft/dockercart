@@ -77,7 +77,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		// Prepare breadcrumbs
 		// Prepare form data
 		$data['action'] = $this->url->link('extension/module/dockercart_blog', 'user_token=' . $this->session->data['user_token'], true);
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+		$data['cancel'] = $this->buildExtensionBackUrl();
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['text_form'] = $this->language->get('text_form');
 

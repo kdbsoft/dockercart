@@ -62,7 +62,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
             }
 
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+            $this->response->redirect($this->buildExtensionBackUrl());
         }
 
         if (isset($this->error['warning'])) {
@@ -87,7 +87,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
             $data['action'] = $this->url->link('extension/module/dockercart_newsletter', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $selected_module_id, true);
         }
 
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+        $data['cancel'] = $this->buildExtensionBackUrl();
         $data['import'] = $this->url->link('extension/module/dockercart_newsletter/import', 'user_token=' . $this->session->data['user_token'], true);
         $data['export'] = $this->url->link('extension/module/dockercart_newsletter/export', 'user_token=' . $this->session->data['user_token'], true);
         $data['user_token'] = $this->session->data['user_token'];

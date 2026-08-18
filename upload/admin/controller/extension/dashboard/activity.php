@@ -14,7 +14,7 @@ class ControllerExtensionDashboardActivity extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true));
+			$this->response->redirect($this->buildExtensionBackUrl('dashboard'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -25,7 +25,7 @@ class ControllerExtensionDashboardActivity extends Controller {
 
 		$data['action'] = $this->url->link('extension/dashboard/activity', 'user_token=' . $this->session->data['user_token'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=dashboard', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('dashboard');
 
 		if (isset($this->request->post['dashboard_activity_width'])) {
 			$data['dashboard_activity_width'] = $this->request->post['dashboard_activity_width'];

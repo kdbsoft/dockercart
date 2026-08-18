@@ -99,6 +99,34 @@ abstract class Controller {
 		return $this->model_user_user_filter->getFilter((int)$this->request->get['filter_id'], (int)$this->user->getId(), $entity);
 	}
 
+	/**
+	 * Builds the "Back" URL for an extension settings page (e.g. module settings).
+	 *
+	 * Returns a controller that brings the user back to the same extensions
+	 * listing view they came from. When the listing passed its active type
+	 * filter via the "filter_type" request param, that tab ("all" = unfiltered,
+	 * otherwise the specific type) is restored. Falls back to the given default
+	 * type (current behaviour) when no filter was passed.
+	 *
+	 * @param string $defaultType default extension type to filter by (e.g. "module")
+	 * @return string
+	 */
+	protected function buildExtensionBackUrl(string $defaultType = 'module'): string {
+		$user_token = $this->session->data['user_token'];
+
+		if (isset($this->request->get['filter_type'])) {
+			$filter_type = (string)$this->request->get['filter_type'];
+
+			if ($filter_type !== '' && $filter_type !== 'all') {
+				return $this->url->link('marketplace/extension', 'user_token=' . $user_token . '&type=' . $filter_type, true);
+			}
+
+			return $this->url->link('marketplace/extension', 'user_token=' . $user_token, true);
+		}
+
+		return $this->url->link('marketplace/extension', 'user_token=' . $user_token . '&type=' . $defaultType, true);
+	}
+
 	private function hasActiveExtraTab(array $extraTabs): bool {
 		foreach ($extraTabs as $tab) {
 			if (!empty($tab['is_active'])) {
