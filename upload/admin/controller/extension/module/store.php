@@ -14,7 +14,7 @@ class ControllerExtensionModuleStore extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->buildExtensionBackUrl());
 		}
 
 		if (isset($this->error['warning'])) {
@@ -25,7 +25,7 @@ class ControllerExtensionModuleStore extends Controller {
 
 		$data['action'] = $this->url->link('extension/module/store', 'user_token=' . $this->session->data['user_token'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+		$data['cancel'] = $this->buildExtensionBackUrl();
 
 		if (isset($this->request->post['module_store_admin'])) {
 			$data['module_store_admin'] = $this->request->post['module_store_admin'];

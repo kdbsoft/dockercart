@@ -14,7 +14,7 @@ class ControllerExtensionTotalCoupon extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=total', true));
+			$this->response->redirect($this->buildExtensionBackUrl('total'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -25,7 +25,7 @@ class ControllerExtensionTotalCoupon extends Controller {
 
 		$data['action'] = $this->url->link('extension/total/coupon', 'user_token=' . $this->session->data['user_token'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=total', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('total');
 
 		if (isset($this->request->post['total_coupon_status'])) {
 			$data['total_coupon_status'] = $this->request->post['total_coupon_status'];

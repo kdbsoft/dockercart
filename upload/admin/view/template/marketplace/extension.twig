@@ -264,6 +264,7 @@
     $typeFilter.find('.ext-type-btn').removeClass('active');
     $(this).addClass('active');
     applyFilters();
+    updateTypeUrl(activeType);
   });
 
   $search.on('input', applyFilters);
@@ -341,6 +342,34 @@
     }
     return window.location.pathname + '?' + params.join('&');
   }
+
+  // Update the "type" query param in the address bar without reloading the page,
+  // so switching tabs is reflected in the URL.
+  function updateTypeUrl(type) {
+    var url = new URL(window.location.href);
+    if (type && type !== 'all') {
+      url.searchParams.set('type', type);
+    } else {
+      url.searchParams.delete('type');
+    }
+    window.history.replaceState({}, '', url.toString());
+  }
+
+  // Navigate to an extension edit form, carrying along the active type filter
+  // so the settings page's "Back" button returns to the same listing tab.
+  function goToEditUrl(url) {
+    var sep = url.indexOf('?') === -1 ? '?' : '&';
+    var target = url + sep + 'filter_type=' + encodeURIComponent(activeType || 'all');
+    window.location.href = target;
+  }
+
+  // Make every edit link carry the active type filter.
+  // Bound directly (not delegated) so it runs before the .panel-footer
+  // stopPropagation() handler swallows the bubbling click.
+  $('.ext-card-link, .ext-instance > a.btn-info, .ext-card .panel-footer > a.btn-primary').on('click', function(e) {
+    e.preventDefault();
+    goToEditUrl($(this).attr('href'));
+  });
 
   // Install button
   $(document).on('click', '.btn-ext-install', function(e) {
@@ -426,7 +455,7 @@
     }
     var editUrl = $(this).closest('.ext-card-wrapper').data('edit');
     if (editUrl) {
-      window.location.href = editUrl;
+      goToEditUrl(editUrl);
     }
   });
 

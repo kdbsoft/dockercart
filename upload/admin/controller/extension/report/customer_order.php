@@ -14,7 +14,7 @@ class ControllerExtensionReportCustomerOrder extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=report', true));
+			$this->response->redirect($this->buildExtensionBackUrl('report'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -25,7 +25,7 @@ class ControllerExtensionReportCustomerOrder extends Controller {
 
 		$data['action'] = $this->url->link('extension/report/customer_order', 'user_token=' . $this->session->data['user_token'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=report', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('report');
 
 		if (isset($this->request->post['report_customer_order_status'])) {
 			$data['report_customer_order_status'] = $this->request->post['report_customer_order_status'];
