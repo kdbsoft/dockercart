@@ -1,3 +1,17 @@
+## [3.6.0](https://github.com/kdbsoft/dockercart/compare/v3.5.5...v3.6.0) (2026-08-18)
+
+### Features
+
+* **admin:** add recycle bin for soft-deleted entities ([f329715](https://github.com/kdbsoft/dockercart/commit/f329715d56a97fac28c834814215cd163d81cbc9))
+* **admin:** cache update check via scheduled worker ([23ec1f6](https://github.com/kdbsoft/dockercart/commit/23ec1f60372470fc2c97e2ea8b18c6d5ecd492de))
+* **admin:** preserve extension type filter on settings back navigation ([25b5cce](https://github.com/kdbsoft/dockercart/commit/25b5cceda1443ed2a73b37db3bff4e6da20a2e35))
+* **admin:** redesign dockercart checkout settings with sidebar layout ([ca2b3cf](https://github.com/kdbsoft/dockercart/commit/ca2b3cf13244082659bdb0458403de5ffb6358c9))
+* **admin:** redesign sitemap feed settings with stacked subsections ([640cbf3](https://github.com/kdbsoft/dockercart/commit/640cbf3a5145b1b4bf911abf3905c37612dd9518))
+
+### Bug Fixes
+
+* **cart:** include csrf token in ajax cart and quick-view requests ([c7ee885](https://github.com/kdbsoft/dockercart/commit/c7ee885545537e0122a1c430c66e88e51d1b7475))
+
 ## [3.5.5](https://github.com/kdbsoft/dockercart/compare/v3.5.4...v3.5.5) (2026-08-17)
 
 ### Bug Fixes
