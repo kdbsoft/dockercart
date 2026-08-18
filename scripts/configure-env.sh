@@ -145,6 +145,41 @@ HEALTHCHECK_TOKEN:"
     fi
 }
 
+# Reject nested ${VAR} references in the database secrets block of an existing
+# .env. The .env must stay flat (no `${DB_*}` aliases): `docker compose`
+# expands such references recursively, but podman-compose does not, so MariaDB
+# would be told to create a user/database literally named "${DB_USERNAME}"/"${DB_DATABASE}"
+# and the app would fail with 'Access denied' (see the note above MARIADB_* in
+# .env.example). Hard-fail with a self-explanatory message instead of producing
+# that silently-broken stack. Returns 0 when clean, 1 when an offending line is
+# found (caller aborts).
+validate_flat_env() {
+    local env_file="$1" offending="" key found=0
+
+    # Only these DB-secret keys feed manager databases/users/passwords directly.
+    # Scan the exact lines (KEY=value) and reject any whose value contains "${".
+    for key in MARIADB_DATABASE MARIADB_USER MARIADB_PASSWORD MARIADB_ROOT_PASSWORD; do
+        offending="$(grep -E "^${key}=" "$env_file" | tail -1 || true)"
+        if [ -n "$offending" ] && printf '%s' "$offending" | grep -q '\${'; then
+            echo -e "${RED}❌ Invalid value in .env: ${offending}${NC}"
+            echo -e "${RED}   Nested var references like \${DB_DATABASE}/\${DB_USERNAME} are not expanded"
+            echo -e "${RED}   by podman-compose and break the MariaDB container (user/database literally"
+            echo -e "${RED}   named \"\${DB_USERNAME}\" => 'Access denied').${NC}"
+            echo -e "${RED}   Keep the value flat. Mirror the DB_* value literally:${NC}"
+            case "$key" in
+                MARIADB_DATABASE)   echo -e "${RED}     ${key}=\${DB_DATABASE}  ->  ${key}=$(get_env_key "$env_file" DB_DATABASE)${NC}" ;;
+                MARIADB_USER)       echo -e "${RED}     ${key}=\${DB_USERNAME}  ->  ${key}=$(get_env_key "$env_file" DB_USERNAME)${NC}" ;;
+                MARIADB_PASSWORD)   echo -e "${RED}     ${key}=\${DB_PASSWORD}  ->  ${key}=<same as DB_PASSWORD>${NC}" ;;
+                MARIADB_ROOT_PASSWORD) echo -e "${RED}     replace with a flat random value${NC}" ;;
+            esac
+            echo -e "${RED}   Fix .env (or delete it and re-run 'make start' to regenerate it), then retry.${NC}"
+            found=1
+        fi
+    done
+
+    return $found
+}
+
 # --- Wizard ----------------------------------------------------------------
 
 configure_env() {
@@ -159,6 +194,9 @@ configure_env() {
         fi
         if [ -f "$ENV_FILE" ]; then
             generate_secrets "$ENV_FILE"
+        fi
+        if [ -f "$ENV_FILE" ]; then
+            validate_flat_env "$ENV_FILE" || return 1
         fi
         return 0
     fi
@@ -321,6 +359,9 @@ configure_env() {
 
     # --- Random secrets ------------------------------------------------------
     generate_secrets "$ENV_FILE"
+
+    # --- Flat-env guard (see validate_flat_env) -------------------------------
+    validate_flat_env "$ENV_FILE" || return 1
 
     # --- Summary -------------------------------------------------------------
     echo -e "${GREEN}✓ Setup complete.${NC}"
