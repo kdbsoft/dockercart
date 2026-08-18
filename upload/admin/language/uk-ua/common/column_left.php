@@ -89,6 +89,7 @@ $_['text_product_bundle'] = 'Знижки на комплекти';
 
 $_['text_scheduler']            = 'Планувальник';
 $_['text_update']              = 'Оновлення системи';
+$_['text_recycle_bin']          = 'Кошик';
 $_['text_report_affiliate'] = 'Партнерська програма';
 $_['text_report_affiliate_activity'] = 'Активність партнерів';
 $_['text_report_customer'] = 'Покупці';
