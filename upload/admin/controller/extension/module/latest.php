@@ -28,7 +28,7 @@ class ControllerExtensionModuleLatest extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->buildExtensionBackUrl());
 		}
 
 		if (isset($this->error['warning'])) {
@@ -65,7 +65,7 @@ class ControllerExtensionModuleLatest extends Controller {
 			$data['action'] = $this->url->link('extension/module/latest', 'user_token=' . $this->session->data['user_token'] . '&module_id=' . $this->request->get['module_id'], true);
 		}
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+		$data['cancel'] = $this->buildExtensionBackUrl();
 
 		$data['text_form'] = !isset($this->request->get['module_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 		$data['text_form_subtitle'] = !isset($this->request->get['module_id']) ? $this->language->get('text_add_subtitle') : $this->language->get('text_edit_subtitle');

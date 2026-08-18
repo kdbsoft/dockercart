@@ -47,7 +47,7 @@ class ControllerExtensionShippingDockercartUniversal extends Controller {
 
         // URLs
         $data['action'] = $this->url->link('extension/shipping/dockercart_universal', 'user_token=' . $this->session->data['user_token'], true);
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=shipping', true);
+        $data['cancel'] = $this->buildExtensionBackUrl('shipping');
         $data['add'] = $this->url->link('extension/shipping/dockercart_universal/add', 'user_token=' . $this->session->data['user_token'], true);
         $data['user_token'] = $this->session->data['user_token'];
 

@@ -40,7 +40,7 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         $data['error_name'] = isset($this->error['name']) ? $this->error['name'] : '';
 
         $data['action'] = $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'] . ($selected_module_id > 0 ? '&module_id=' . $selected_module_id : ''), true);
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+        $data['cancel'] = $this->buildExtensionBackUrl();
         $data['new_widget'] = $this->url->link('extension/module/dockercart_shop_features', 'user_token=' . $this->session->data['user_token'], true);
 
         if ($selected_module_id > 0 && ($this->request->server['REQUEST_METHOD'] != 'POST')) {

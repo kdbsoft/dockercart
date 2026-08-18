@@ -46,7 +46,7 @@ class ControllerExtensionPaymentDockercartUniversal extends Controller {
 
         // URLs
         $data['action'] = $this->url->link('extension/payment/dockercart_universal', 'user_token=' . $this->session->data['user_token'], true);
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=payment', true);
+        $data['cancel'] = $this->buildExtensionBackUrl('payment');
         $data['add'] = $this->url->link('extension/payment/dockercart_universal/add', 'user_token=' . $this->session->data['user_token'], true);
         $data['user_token'] = $this->session->data['user_token'];
 

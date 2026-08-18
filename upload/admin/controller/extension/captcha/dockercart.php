@@ -22,7 +22,7 @@ class ControllerExtensionCaptchaDockercart extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=captcha', true));
+			$this->response->redirect($this->buildExtensionBackUrl('captcha'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -33,7 +33,7 @@ class ControllerExtensionCaptchaDockercart extends Controller {
 
 		$data['action'] = $this->url->link('extension/captcha/dockercart', 'user_token=' . $this->session->data['user_token'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=captcha', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('captcha');
 
 		if (isset($this->request->post['captcha_dockercart_status'])) {
 			$data['captcha_dockercart_status'] = $this->request->post['captcha_dockercart_status'];

@@ -44,7 +44,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
             $this->session->data['success'] = $this->language->get('text_success');
 
-            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+            $this->response->redirect($this->buildExtensionBackUrl());
         }
 
         // Prepare data for view
@@ -70,7 +70,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
         // Breadcrumbs
         // Actions
         $data['action'] = $this->url->link('extension/module/dockercart_search', 'user_token=' . $this->session->data['user_token'], true);
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+        $data['cancel'] = $this->buildExtensionBackUrl();
         $data['reindex_url'] = $this->url->link('extension/module/dockercart_search/reindex', 'user_token=' . $this->session->data['user_token'], true);
         $data['test_connection_url'] = $this->url->link('extension/module/dockercart_search/testConnection', 'user_token=' . $this->session->data['user_token'], true);
         $data['apply_morphology_url'] = $this->url->link('extension/module/dockercart_search/applyMorphology', 'user_token=' . $this->session->data['user_token'], true);

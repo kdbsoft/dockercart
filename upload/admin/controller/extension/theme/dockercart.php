@@ -65,7 +65,7 @@ class ControllerExtensionThemeDockercart extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=theme', true));
+			$this->response->redirect($this->buildExtensionBackUrl('theme'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -130,7 +130,7 @@ class ControllerExtensionThemeDockercart extends Controller {
 
 		$data['action'] = $this->url->link('extension/theme/dockercart', 'user_token=' . $this->session->data['user_token'] . '&store_id=' . $this->request->get['store_id'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=theme', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('theme');
 
 		if (isset($this->request->get['store_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$setting_info = $this->model_setting_setting->getSetting('theme_dockercart', $this->request->get['store_id']);

@@ -14,7 +14,7 @@ class ControllerExtensionAnalyticsClarity extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=analytics', true));
+			$this->response->redirect($this->buildExtensionBackUrl('analytics'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -31,7 +31,7 @@ class ControllerExtensionAnalyticsClarity extends Controller {
 
 		$data['action'] = $this->url->link('extension/analytics/clarity', 'user_token=' . $this->session->data['user_token'] . '&store_id=' . $this->request->get['store_id'], true);
 
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=analytics', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('analytics');
 		
 		$data['user_token'] = $this->session->data['user_token'];
 				

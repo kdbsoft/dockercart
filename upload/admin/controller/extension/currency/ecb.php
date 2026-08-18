@@ -13,7 +13,7 @@ class ControllerExtensionCurrencyEcb extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
 			$this->model_setting_setting->editSetting('currency_ecb', $this->request->post);
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=currency', true));
+			$this->response->redirect($this->buildExtensionBackUrl('currency'));
 		}
 
 		if (isset($this->error['warning'])) {
@@ -29,7 +29,7 @@ class ControllerExtensionCurrencyEcb extends Controller {
 		}
 
 		$data['action'] = $this->url->link('extension/currency/ecb', 'user_token=' . $this->session->data['user_token'], true);
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=currency', true);
+		$data['cancel'] = $this->buildExtensionBackUrl('currency');
 		$data['refresh'] = $this->url->link('localisation/currency', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['text_edit'] = $this->language->get('text_edit');

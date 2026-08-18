@@ -62,7 +62,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
 
         /* ── URLs ── */
         $data['action']      = $this->url->link('extension/module/dockercart_theme', 'user_token=' . $this->session->data['user_token'], true);
-        $data['cancel']      = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+        $data['cancel']      = $this->buildExtensionBackUrl();
         $data['user_token']  = $this->session->data['user_token'];
 
         /* ── Module Status (system module — always enabled) ── */

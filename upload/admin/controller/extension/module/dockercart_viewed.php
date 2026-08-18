@@ -14,7 +14,7 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
-			$this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
+			$this->response->redirect($this->buildExtensionBackUrl());
 		}
 
 		if (isset($this->error['warning'])) {
@@ -24,7 +24,7 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 		}
 
 		$data['action'] = $this->url->link('extension/module/dockercart_viewed', 'user_token=' . $this->session->data['user_token'], true);
-		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
+		$data['cancel'] = $this->buildExtensionBackUrl();
 
 		if (isset($this->request->post['module_dockercart_viewed_status'])) {
 			$data['module_dockercart_viewed_status'] = $this->request->post['module_dockercart_viewed_status'];
