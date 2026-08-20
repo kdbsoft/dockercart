@@ -1,3 +1,10 @@
+## [3.7.0](https://github.com/kdbsoft/dockercart/compare/v3.6.2...v3.7.0) (2026-08-20)
+
+### Features
+
+* add currency_id column to oc_product table ([0f799a6](https://github.com/kdbsoft/dockercart/commit/0f799a68584eb67660b9b8e8d217780be1319f2c))
+* **currency:** convert per-product prices to store base currency ([3476a49](https://github.com/kdbsoft/dockercart/commit/3476a4972183bb9eb068e63edb2b52e1dfba28fc))
+
 ## [3.6.2](https://github.com/kdbsoft/dockercart/compare/v3.6.1...v3.6.2) (2026-08-18)
 
 ### Bug Fixes
