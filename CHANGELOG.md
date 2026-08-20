@@ -1,3 +1,9 @@
+## [3.6.2](https://github.com/kdbsoft/dockercart/compare/v3.6.1...v3.6.2) (2026-08-18)
+
+### Bug Fixes
+
+* **scripts:** reject nested ${VAR} refs in .env database secrets ([5d90ed3](https://github.com/kdbsoft/dockercart/commit/5d90ed30874d76bdc1af78e3876aa8b5c8ff525e))
+
 ## [3.6.1](https://github.com/kdbsoft/dockercart/compare/v3.6.0...v3.6.1) (2026-08-18)
 
 ### Bug Fixes
