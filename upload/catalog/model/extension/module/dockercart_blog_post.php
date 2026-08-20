@@ -274,7 +274,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			return $data;
 		}
 
-		$query = $this->db->query("SELECT p.product_id, pd.name, pd.description, p.image, p.price, p.call_for_price,
+		$query = $this->db->query("SELECT p.product_id, pd.name, pd.description, p.image, p.price, p.currency_id, p.call_for_price,
 					(SELECT price FROM `" . DB_PREFIX . "product_special` ps WHERE ps.product_id = p.product_id AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW()) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())) ORDER BY ps.priority ASC, ps.price ASC LIMIT 1) AS special,
 					(SELECT AVG(rating) AS total FROM `" . DB_PREFIX . "review` r1 WHERE r1.product_id = p.product_id AND r1.status = '1' GROUP BY r1.product_id) AS rating,
 					p.manufacturer_id, m.name as manufacturer
@@ -288,6 +288,15 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 				AND p.status = '1'
 				AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
 				ORDER BY (p.quantity <= 0 AND p.preorder = '0') ASC, p.sort_order, pd.name");
+
+		// Multi-currency: normalise the product price/special (raw DB amounts in
+		// the product's own currency) to the store base currency before caching.
+		foreach ($query->rows as &$row) {
+			$currency_id = isset($row['currency_id']) ? (int)$row['currency_id'] : 0;
+			$row['price'] = $this->currency->convertProductPrice($row['price'], $currency_id);
+			$row['special'] = ($row['special'] === null) ? null : $this->currency->convertProductPrice((float)$row['special'], $currency_id);
+		}
+		unset($row);
 
 		$this->cache->set($cache_key, $query->rows, 3600);
 

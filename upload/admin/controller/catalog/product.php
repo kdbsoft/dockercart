@@ -1276,6 +1276,18 @@ class ControllerCatalogProduct extends Controller {
 			$data['call_for_price'] = 0;
 		}
 
+		if (isset($this->request->post['currency_id'])) {
+			$data['currency_id'] = (int)$this->request->post['currency_id'];
+		} elseif (!empty($product_info) && isset($product_info['currency_id'])) {
+			$data['currency_id'] = (int)$product_info['currency_id'];
+		} else {
+			$data['currency_id'] = 0;
+		}
+
+		$this->load->model('localisation/currency');
+
+		$data['currencies'] = $this->model_localisation_currency->getCurrencies();
+
 		$this->load->model('localisation/tax_class');
 
 		$data['tax_classes'] = $this->model_localisation_tax_class->getTaxClasses();

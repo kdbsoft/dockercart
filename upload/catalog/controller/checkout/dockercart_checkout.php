@@ -2175,14 +2175,19 @@ class ControllerCheckoutDockercartCheckout extends Controller
             "marketing_id" => 0,
             "tracking" => "",
             "language_id" => $this->config->get("config_language_id"),
-            "currency_id" => $this->config->get("config_currency_id"),
-            // In some contexts $this->currency may be an instance that doesn't expose getCode()/getValue()
-            // (for example Cart\Currency). Use session values if available, otherwise fall back to config.
+            "currency_id" => $this->currency->getId(
+                isset($this->session->data["currency"])
+                    ? $this->session->data["currency"]
+                    : $this->config->get("config_currency"),
+            ),
+            // The order currency is the customer's display currency; the value
+            // is its exchange rate so order totals can be converted back to the
+            // store base currency.
             "currency_code" => isset($this->session->data["currency"])
                 ? $this->session->data["currency"]
                 : $this->config->get("config_currency"),
-            "currency_value" => isset($this->session->data["currency_value"])
-                ? $this->session->data["currency_value"]
+            "currency_value" => isset($this->session->data["currency"])
+                ? $this->currency->getValue($this->session->data["currency"])
                 : 1.0,
 
             // Environment
