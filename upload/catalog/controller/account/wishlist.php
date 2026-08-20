@@ -200,12 +200,13 @@ class ControllerAccountWishList extends Controller {
 				if (!empty($variant['price']) && (float)$variant['price'] > 0) {
 					$calculator = new ProductPricingCalculator($this->registry);
 					$variant_pricing = $calculator->calculate((int)$product_info['product_id'], $variant_id, 1);
+					$currency_id = isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0;
 
 					if ($variant_pricing['special'] !== null) {
-						$price_raw = (float)$variant_pricing['base_price'];
-						$special_raw = (float)$variant_pricing['special'];
+						$price_raw = (float)$this->currency->convertProductPrice($variant_pricing['base_price'], $currency_id);
+						$special_raw = (float)$this->currency->convertProductPrice($variant_pricing['special'], $currency_id);
 					} else {
-						$price_raw = (float)$variant_pricing['price'];
+						$price_raw = (float)$this->currency->convertProductPrice($variant_pricing['price'], $currency_id);
 						$special_raw = 0;
 					}
 				}

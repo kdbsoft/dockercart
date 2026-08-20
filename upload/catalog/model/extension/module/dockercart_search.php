@@ -573,13 +573,17 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 if ($variant !== null) {
                     // Price/special of the matched variant via the shared
                     // calculator (same formula as the cart and product page).
+                    // The calculator returns prices in the product's own currency,
+                    // so normalise them to the store base currency (which is what
+                    // product cards/format() expect).
                     $calculator = new \ProductPricingCalculator($this->registry);
                     $pricing = $calculator->calculate((int)$product_id, (int)$variant['variant_id'], 1);
+                    $currency_id = isset($product['currency_id']) ? (int)$product['currency_id'] : 0;
 
                     if (!empty($pricing['price'])) {
-                        $price = (float)$pricing['price'];
+                        $price = (float)$this->currency->convertProductPrice($pricing['price'], $currency_id);
                     }
-                    $special = $pricing['special'];
+                    $special = $pricing['special'] !== null ? $this->currency->convertProductPrice($pricing['special'], $currency_id) : null;
                 }
 
                 $products[] = [

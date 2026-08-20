@@ -216,7 +216,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $query = $this->db->query("
             SELECT p.product_id, p.model, p.sku, p.upc, p.ean, p.jan, p.isbn, p.mpn,
                    p.image, p.manufacturer_id, p.status, p.quantity, p.preorder, p.price,
-                   p.date_added, p.date_modified,
+                   p.currency_id, p.date_added, p.date_modified,
                    pd.name, pd.description, pd.meta_title, pd.meta_description, pd.meta_keyword, pd.tag
             FROM " . DB_PREFIX . "product p
             LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id)
@@ -256,7 +256,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'manufacturer_id'  => (int)$product['manufacturer_id'],
             'status'           => (int)$product['status'],
             'quantity'         => (int)$product['quantity'],
-            'price'            => (float)$product['price'],
+            'price'            => (float)$this->currency->convertProductPrice($product['price'], isset($product['currency_id']) ? (int)$product['currency_id'] : 0),
             'special'          => 0.0,
             'date_added'       => strtotime($product['date_added']),
             'date_modified'    => strtotime($product['date_modified']),
@@ -377,7 +377,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         ");
 
         if ($special_query->num_rows) {
-            $doc['special'] = (float)$special_query->row['price'];
+            $doc['special'] = (float)$this->currency->convertProductPrice($special_query->row['price'], isset($product['currency_id']) ? (int)$product['currency_id'] : 0);
         }
 
         // Insert/replace in Manticore

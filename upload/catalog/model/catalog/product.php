@@ -122,8 +122,9 @@ class ModelCatalogProduct extends Model {
 			'image_360'        => isset($row['image_360']) ? $row['image_360'] : '',
 			'manufacturer_id'  => $row['manufacturer_id'],
 			'manufacturer'     => $row['manufacturer'],
-			'price'            => $price,
-			'special'          => $special,
+			'price'            => $this->currency->convertProductPrice($price, isset($row['currency_id']) ? (int)$row['currency_id'] : 0),
+			'special'          => ($special === null) ? null : $this->currency->convertProductPrice((float)$special, isset($row['currency_id']) ? (int)$row['currency_id'] : 0),
+			'currency_id'      => isset($row['currency_id']) ? (int)$row['currency_id'] : 0,
 			'special_date_end' => $special_date_end,
 			'reward'           => $row['reward'],
 			'points'           => $row['points'],
@@ -187,12 +188,13 @@ class ModelCatalogProduct extends Model {
 				// (та же формула, что в корзине и админке заказов).
 				$calculator = new ProductPricingCalculator($this->registry);
 				$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
+				$currency_id = isset($product_data['currency_id']) ? (int)$product_data['currency_id'] : 0;
 
 				if ($default_pricing['special'] !== null) {
-					$product_data['price'] = (float)$default_pricing['base_price'];
-					$product_data['special'] = $default_pricing['special'];
+					$product_data['price'] = (float)$this->currency->convertProductPrice($default_pricing['base_price'], $currency_id);
+					$product_data['special'] = $this->currency->convertProductPrice($default_pricing['special'], $currency_id);
 				} else {
-					$product_data['price'] = (float)$default_pricing['price'];
+					$product_data['price'] = (float)$this->currency->convertProductPrice($default_pricing['price'], $currency_id);
 					$product_data['special'] = null;
 				}
 
@@ -234,13 +236,14 @@ class ModelCatalogProduct extends Model {
 			// ProductPricingCalculator (same formula as the cart and admin).
 			$calculator = new ProductPricingCalculator($this->registry);
 			$default_pricing = $calculator->calculate((int)$product_id, (int)$default_variant['variant_id'], 1);
+			$currency_id = isset($product_data['currency_id']) ? (int)$product_data['currency_id'] : 0;
 
 			if ($default_pricing['special'] !== null) {
-				$product_data['price'] = (float)$default_pricing['base_price'];
-				$product_data['special'] = $default_pricing['special'];
+				$product_data['price'] = (float)$this->currency->convertProductPrice($default_pricing['base_price'], $currency_id);
+				$product_data['special'] = $this->currency->convertProductPrice($default_pricing['special'], $currency_id);
 			} else {
 				if (!empty($default_pricing['price'])) {
-					$product_data['price'] = (float)$default_pricing['price'];
+					$product_data['price'] = (float)$this->currency->convertProductPrice($default_pricing['price'], $currency_id);
 				}
 
 				$product_data['special'] = null;
@@ -510,12 +513,13 @@ class ModelCatalogProduct extends Model {
 
 						$calculator = new ProductPricingCalculator($this->registry);
 						$default_pricing = $calculator->calculate((int)$pid, (int)$default_variant['variant_id'], 1);
+						$currency_id = isset($data['currency_id']) ? (int)$data['currency_id'] : 0;
 
 						if ($default_pricing['special'] !== null) {
-							$data['price'] = (float)$default_pricing['base_price'];
-							$data['special'] = $default_pricing['special'];
+							$data['price'] = (float)$this->currency->convertProductPrice($default_pricing['base_price'], $currency_id);
+							$data['special'] = $this->currency->convertProductPrice($default_pricing['special'], $currency_id);
 						} else {
-							$data['price'] = (float)$default_pricing['price'];
+							$data['price'] = (float)$this->currency->convertProductPrice($default_pricing['price'], $currency_id);
 							$data['special'] = null;
 						}
 
@@ -641,13 +645,14 @@ class ModelCatalogProduct extends Model {
 							// calculator (same formula as the cart and product page).
 							$calculator = new ProductPricingCalculator($this->registry);
 							$matched_pricing = $calculator->calculate((int)$pid, (int)$matched_variant['variant_id'], 1);
+							$currency_id = isset($data['currency_id']) ? (int)$data['currency_id'] : 0;
 
 							if ($matched_pricing['special'] !== null) {
-								$data['price'] = (float)$matched_pricing['base_price'];
-								$data['special'] = $matched_pricing['special'];
+								$data['price'] = (float)$this->currency->convertProductPrice($matched_pricing['base_price'], $currency_id);
+								$data['special'] = $this->currency->convertProductPrice($matched_pricing['special'], $currency_id);
 							} else {
 								if (!empty($matched_pricing['price'])) {
-									$data['price'] = (float)$matched_pricing['price'];
+									$data['price'] = (float)$this->currency->convertProductPrice($matched_pricing['price'], $currency_id);
 								}
 								$data['special'] = null;
 							}
@@ -1659,7 +1664,7 @@ class ModelCatalogProduct extends Model {
 
 		$ids = array_values(array_unique(array_map('intval', $product_ids)));
 
-		$query = $this->db->query("SELECT g.*, pd.name AS name, p.image, p.price FROM " . DB_PREFIX . "product_gift g LEFT JOIN " . DB_PREFIX . "product p ON (g.gift_product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (g.gift_product_id = pd.product_id) WHERE g.product_id IN (" . implode(',', $ids) . ") AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND (g.date_start = '0000-00-00' OR g.date_start <= NOW()) AND (g.date_end = '0000-00-00' OR g.date_end >= NOW()) ORDER BY g.minimum_quantity ASC");
+		$query = $this->db->query("SELECT g.*, pd.name AS name, p.image, p.price, p.currency_id FROM " . DB_PREFIX . "product_gift g LEFT JOIN " . DB_PREFIX . "product p ON (g.gift_product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (g.gift_product_id = pd.product_id) WHERE g.product_id IN (" . implode(',', $ids) . ") AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND (g.date_start = '0000-00-00' OR g.date_start <= NOW()) AND (g.date_end = '0000-00-00' OR g.date_end >= NOW()) ORDER BY g.minimum_quantity ASC");
 
 		$gifts = array();
 

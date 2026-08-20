@@ -79,6 +79,30 @@ try {
 	$cache = new Cache($config->get('cache_engine') ?: 'file', (int)($config->get('cache_expire') ?: 3600));
 	$registry->set('cache', $cache);
 
+	// Load store settings into config and register the currency library so the
+	// indexer can convert per-product prices to the store base currency.
+	try {
+		// Fetch configured DB credentials (fall back to config definitions).
+		$db_host = $config->get('db_hostname') ?: DB_HOSTNAME;
+		$db_user = $config->get('db_username') ?: DB_USERNAME;
+		$db_pass = $config->get('db_password') ?: DB_PASSWORD;
+		$db_name = $config->get('db_database') ?: DB_DATABASE;
+		$db_port = $config->get('db_port') ?: DB_PORT;
+
+		$settings_db = new DB($config->get('db_engine') ?: 'mysqli', $db_host, $db_user, $db_pass, $db_name, $db_port);
+		$settings_query = $settings_db->query("SELECT `key`, `value` FROM " . DB_PREFIX . "setting WHERE `store_id` = '0'");
+
+		foreach ($settings_query->rows as $setting) {
+			$config->set($setting['key'], $setting['value']);
+		}
+	} catch (\Throwable $e) {
+		// If settings cannot be loaded, currency conversion will be a no-op (base).
+	}
+
+	if (class_exists(\Cart\Currency::class)) {
+		$registry->set('currency', new \Cart\Currency($registry));
+	}
+
 	// Defaults required by indexing models
 	$config->set('config_store_id',    0);
 	$config->set('config_language_id', 1);
