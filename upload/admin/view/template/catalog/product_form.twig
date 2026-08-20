@@ -223,7 +223,7 @@
                       </div>
                       <div class="col-sm-12 col-lg-6 col-xl-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-currency">{{ entry_currency }}</label>
+                          <label class="dcx-label" for="input-currency">{{ entry_currency }} <span data-toggle="tooltip" title="{{ help_currency }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="currency_id" id="input-currency" class="form-control">
                             <option value="0">{{ text_store_default }}</option>
                             {% for currency in currencies %}
@@ -234,7 +234,6 @@
                               {% endif %}
                             {% endfor %}
                           </select>
-                          <span data-toggle="tooltip" title="{{ help_currency }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                         </div>
                       </div>
                     </div>
