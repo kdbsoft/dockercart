@@ -1415,6 +1415,22 @@ function restoreCatalogPrice(btn) {
 		});
 }
 
+function updateTotalsUI(totals, totalQuantity) {
+	const container = document.querySelector('.order-totals-card');
+	if (!container) return;
+	totals.forEach(t => {
+		const row = container.querySelector('.order-totals-card__row[data-total-code="' + t.code + '"]');
+		if (!row) return;
+		const val = row.querySelector('.order-totals-card__value');
+		if (val) val.textContent = t.text;
+		if (t.code === 'sub_total' && totalQuantity !== undefined) {
+			const label = row.querySelector('.order-totals-card__label');
+			const base = row.dataset.labelBase;
+			if (label && base) label.textContent = base + ' ({{ text_items }}: ' + totalQuantity + ')';
+		}
+	});
+}
+
 function loadTimeline(page) {
 	page = page || 1;
 	const c = document.getElementById('timeline-container');
@@ -2346,22 +2362,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				renderPreview(j);
 			}).catch(function() {});
 		}, 250);
-	}
-
-	function updateTotalsUI(totals, totalQuantity) {
-		const container = document.querySelector('.order-totals-card');
-		if (!container) return;
-		totals.forEach(t => {
-			const row = container.querySelector('.order-totals-card__row[data-total-code="' + t.code + '"]');
-			if (!row) return;
-			const val = row.querySelector('.order-totals-card__value');
-			if (val) val.textContent = t.text;
-			if (t.code === 'sub_total' && totalQuantity !== undefined) {
-				const label = row.querySelector('.order-totals-card__label');
-				const base = row.dataset.labelBase;
-				if (label && base) label.textContent = base + ' ({{ text_items }}: ' + totalQuantity + ')';
-			}
-		});
 	}
 
 	function appendProductCard(p) {
