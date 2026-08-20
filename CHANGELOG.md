@@ -1,3 +1,10 @@
+## [3.7.1](https://github.com/kdbsoft/dockercart/compare/v3.7.0...v3.7.1) (2026-08-20)
+
+### Bug Fixes
+
+* **admin:** convert product picker prices to selected currency ([c862875](https://github.com/kdbsoft/dockercart/commit/c862875721ff0943a48a0f8bcccd0f669067c73f))
+* **admin:** move currency help tooltip inside form label ([e54ce11](https://github.com/kdbsoft/dockercart/commit/e54ce11a591e5abc403b2a093ffe06f991f3978f))
+
 ## [3.7.0](https://github.com/kdbsoft/dockercart/compare/v3.6.2...v3.7.0) (2026-08-20)
 
 ### Features
