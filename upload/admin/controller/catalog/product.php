@@ -2631,13 +2631,14 @@ class ControllerCatalogProduct extends Controller {
 				foreach ($results as $result) {
 					$product_id = (int)$result['product_id'];
 					$is_configurable = !empty($configurable_map[$product_id]);
+					$currency_id = isset($result['currency_id']) ? (int)$result['currency_id'] : 0;
 
 					// The search results are normalized for the admin's default
 					// customer group; when the picker targets a specific order
 					// customer group, re-apply the storefront catalog pricing for
 					// that group so the displayed price matches what will be
 					// charged (mirrors sale/order calculateProductPricing()).
-					$display_price = (float)$result['price'];
+					$display_price = (float)$this->currency->convertProductPrice($result['price'], $currency_id);
 
 					if (!$is_configurable && $customer_group_id > 0) {
 						// Единый калькулятор цены (та же формула, что в корзине
@@ -2647,7 +2648,7 @@ class ControllerCatalogProduct extends Controller {
 						));
 
 						$pricing = $calculator->calculate((int)$product_id, 0, 1);
-						$display_price = (float)$pricing['price'];
+						$display_price = (float)$this->currency->convertProductPrice($pricing['price'], $currency_id);
 					}
 
 					$price_text = $this->currency->format($display_price, $format_currency, $currency_value);
@@ -2660,8 +2661,8 @@ class ControllerCatalogProduct extends Controller {
 						$range = $pc->getAggregatedPriceRange($product_id, $customer_group_id ? $customer_group_id : null);
 
 						if ($range['min'] > 0 || $range['max'] > 0) {
-							$price_min = $range['min'];
-							$price_max = $range['max'];
+							$price_min = (float)$this->currency->convertProductPrice($range['min'], $currency_id);
+							$price_max = (float)$this->currency->convertProductPrice($range['max'], $currency_id);
 							$price_range_text = $this->currency->format($price_min, $format_currency, $currency_value);
 
 							if ($price_max > $price_min) {
