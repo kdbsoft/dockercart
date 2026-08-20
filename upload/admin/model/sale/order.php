@@ -1550,6 +1550,18 @@ class ModelSaleOrder extends Model {
 			}
 		}
 
+		// Multi-currency: the pricing calculator returns amounts in the
+		// product's own currency. Orders are accounted in the store base
+		// currency, so normalise the line price (and option price) to base
+		// before computing tax/total, matching the storefront cart.
+		$currency_id = isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0;
+
+		if ($currency_id > 0) {
+			$price = $this->currency->convertProductPrice($price, $currency_id);
+			$option_price = $this->currency->convertProductPrice($option_price, $currency_id);
+			$price_before_bxgy = $this->currency->convertProductPrice($price_before_bxgy, $currency_id);
+		}
+
 		$tax = 0.0;
 
 		if ($tax_class_id) {

@@ -628,13 +628,15 @@ class ControllerProductProduct extends Controller {
 			$effective_unit_price = (float)$product_info['price'];
 
 			foreach ($discounts as $discount) {
-				if ((float)$discount['price'] >= $effective_unit_price) {
+				$discount_price = $this->currency->convertProductPrice($discount['price'], isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0);
+
+				if ((float)$discount_price >= $effective_unit_price) {
 					continue;
 				}
 
 				$data['discounts'][] = array(
 					'quantity' => $discount['quantity'],
-					'price'    => $this->currency->format($this->tax->calculate($discount['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
+					'price'    => $this->currency->format($this->tax->calculate($discount_price, $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
 				);
 			}
 
@@ -655,7 +657,7 @@ class ControllerProductProduct extends Controller {
 					'gift_product_id'  => $gift['gift_product_id'],
 					'name'             => $gift['name'],
 					'image'            => $gift_image,
-					'price'            => $this->currency->format($this->tax->calculate($gift['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'price'            => $this->currency->format($this->tax->calculate($this->currency->convertProductPrice($gift['price'], isset($gift['currency_id']) ? (int)$gift['currency_id'] : 0), $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
 					'price_zero'       => $this->currency->format(0, $this->session->data['currency']),
 					'href'             => $this->url->link('product/product', 'product_id=' . $gift['gift_product_id']),
 					'minimum_quantity' => (int)$gift['minimum_quantity']
@@ -742,7 +744,7 @@ class ControllerProductProduct extends Controller {
 					}
 
 					if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
-						$price = $this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency']);
+						$price = $this->currency->format($this->tax->calculate($this->currency->convertProductPrice($option_value['price'], isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0), $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency']);
 					} else {
 						$price = false;
 					}
@@ -753,7 +755,7 @@ class ControllerProductProduct extends Controller {
 					'name'                    => $option_value['name'],
 					'color_code'              => $option_value['color_code'],
 					'price'                   => $price,
-					'price_value'             => (float)$this->currency->format($this->tax->calculate($option_value['price'], $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
+					'price_value'             => (float)$this->currency->format($this->tax->calculate($this->currency->convertProductPrice($option_value['price'], isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0), $product_info['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), $this->session->data['currency'], '', false),
 					'price_prefix'            => $option_value['price_prefix'],
 				'is_hit'                  => !empty($option_value['is_hit']),
 				);
@@ -857,6 +859,7 @@ class ControllerProductProduct extends Controller {
 			$tax = $this->config->get('config_tax');
 			$currency_code = isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency');
 			$customer_group_id = (int)$this->config->get('config_customer_group_id');
+			$product_currency_id = isset($product_info['currency_id']) ? (int)$product_info['currency_id'] : 0;
 
 			// Global customer group discount/markup (percent). Applied to the raw
 			// variant prices the same way normalizeProductRow() applies it to
@@ -902,21 +905,21 @@ class ControllerProductProduct extends Controller {
 
 						$variant['discounts'][] = array(
 							'quantity'    => (int)$vd['quantity'],
-							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency']),
-							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency'], '', false)
+							'price'       => $this->currency->format($this->tax->calculate($this->currency->convertProductPrice((float)$vd['price'] * $cg_multiplier, $product_currency_id), $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate($this->currency->convertProductPrice((float)$vd['price'] * $cg_multiplier, $product_currency_id), $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
 
 				if ($vp !== null) {
-					$variant['price'] = (float)$vp['price'];
-					$variant['special_from'] = (float)$vp['base_price'];
+					$variant['price'] = (float)$this->currency->convertProductPrice($vp['price'], $product_currency_id);
+					$variant['special_from'] = (float)$this->currency->convertProductPrice($vp['base_price'], $product_currency_id);
 					// End date of the active special for this variant (0 = none).
 					// Drives the per-variant sale timer on the storefront.
 					$variant['special_date_end'] = (int)($vp['special_date_end'] ?? 0);
 
 					if ($vp['special'] !== null) {
-						$variant['special'] = (float)$vp['special'];
+						$variant['special'] = (float)$this->currency->convertProductPrice($vp['special'], $product_currency_id);
 					} else {
 						unset($variant['special']);
 					}
@@ -962,18 +965,20 @@ class ControllerProductProduct extends Controller {
 				$dvp = isset($variant_pricing[(int)$default_variant['variant_id']]) ? $variant_pricing[(int)$default_variant['variant_id']] : null;
 
 				if ($dvp !== null) {
-					$default_variant['price'] = (float)$dvp['price'];
-					$default_variant['special_from'] = (float)$dvp['base_price'];
+					$default_variant['price'] = (float)$this->currency->convertProductPrice($dvp['price'], $product_currency_id);
+					$default_variant['special_from'] = (float)$this->currency->convertProductPrice($dvp['base_price'], $product_currency_id);
 
 					if ($dvp['special'] !== null) {
-						$default_variant['special'] = (float)$dvp['special'];
+						$default_variant['special'] = (float)$this->currency->convertProductPrice($dvp['special'], $product_currency_id);
 					} else {
 						unset($default_variant['special']);
 					}
 				} elseif (!is_null($product_info['special']) && (float)$product_info['special'] >= 0) {
 					// The default variant carries the product's own price, so the
-					// product-level special applies to it as well.
+					// product-level special applies to it as well. The product
+					// info from the model is already in the base currency.
 					$default_variant['special'] = (float)$product_info['special'];
+					$default_variant['price'] = (float)$this->currency->convertProductPrice($default_variant['price'], $product_currency_id);
 					$default_variant['special_from'] = (float)$default_variant['price'];
 				}
 
@@ -1006,8 +1011,8 @@ class ControllerProductProduct extends Controller {
 
 						$default_variant['discounts'][] = array(
 							'quantity'    => (int)$vd['quantity'],
-							'price'       => $this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency']),
-							'price_value' => (float)$this->currency->format($this->tax->calculate((float)$vd['price'] * $cg_multiplier, $tax_class_id, $tax), $this->session->data['currency'], '', false)
+							'price'       => $this->currency->format($this->tax->calculate($this->currency->convertProductPrice((float)$vd['price'] * $cg_multiplier, $product_currency_id), $tax_class_id, $tax), $this->session->data['currency']),
+							'price_value' => (float)$this->currency->format($this->tax->calculate($this->currency->convertProductPrice((float)$vd['price'] * $cg_multiplier, $product_currency_id), $tax_class_id, $tax), $this->session->data['currency'], '', false)
 						);
 					}
 				}
@@ -1092,11 +1097,11 @@ class ControllerProductProduct extends Controller {
 
 				if ($price_range['min'] > 0 || $price_range['max'] > 0) {
 					$data['schema_variant_low_price'] = (float)$this->currency->format(
-						$this->tax->calculate($price_range['min'], $tax_class_id, $tax),
+						$this->tax->calculate($this->currency->convertProductPrice($price_range['min'], $product_currency_id), $tax_class_id, $tax),
 						$currency_code, '', false
 					);
 					$data['schema_variant_high_price'] = (float)$this->currency->format(
-						$this->tax->calculate($price_range['max'], $tax_class_id, $tax),
+						$this->tax->calculate($this->currency->convertProductPrice($price_range['max'], $product_currency_id), $tax_class_id, $tax),
 						$currency_code, '', false
 					);
 				} else {
