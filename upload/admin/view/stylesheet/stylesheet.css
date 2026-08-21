@@ -154,6 +154,11 @@ a:hover, a:focus {
     margin: 0;
     padding: 0;
     box-shadow: 0px 0px 3px var(--dc-gray-300);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
 }
 
 #header .container-fluid {
@@ -264,10 +269,43 @@ a:hover, a:focus {
     }
 }
 
+#content {
+    padding-top: 60px;
+}
+
 /* Show button-menu on mobile */
 @media (max-width: 767px) {
     #button-menu {
         display: flex;
+    }
+
+    #header .navbar-right {
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .admin-search-wrap {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    #content {
+        padding-top: 95px;
+    }
+
+    #header .nav > li > a {
+        line-height: 44px;
+        white-space: nowrap;
+    }
+
+    #header #user-profile {
+        max-width: 30px;
+        height: 30px;
+    }
+
+    #header .navbar-right .dropdown-menu {
+        left: 0;
+        right: auto;
     }
 }
 
@@ -1093,8 +1131,8 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 
 .pagination > li > a:hover,
 .pagination > li > span:hover {
-    background: var(--dc-primary-light);
-    color: var(--dc-primary);
+	background: var(--dc-gray-200);
+	color: var(--dc-gray-900);
 }
 
 .pagination > .active > a,
