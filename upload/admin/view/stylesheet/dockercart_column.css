@@ -22,10 +22,11 @@
 
 #column-left {
 	width: 245px;
-	height: 100%;
-	overflow: auto;
+	height: 100vh;
+	overflow-y: auto;
+	overflow-x: hidden;
 	background: linear-gradient(180deg, #1a1d21 0%, #2d3139 50%, #3d424d 100%);
-	position: absolute;
+	position: fixed;
 	top: 0px;
 	left: -245px;
 	padding-top: 60px;
@@ -34,7 +35,7 @@
 
 @media (max-width: 767px) {
 	#column-left {
-		padding-top: 80px;
+		padding-top: 90px;
 		background: #2d3139;
 	}
 	#column-left::before {
@@ -56,20 +57,30 @@
 		radial-gradient(ellipse at 80% 100%, rgba(156, 163, 175, 0.04) 0%, transparent 50%);
 }
 
+#column-left {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
+}
+
 #column-left::-webkit-scrollbar {
-	width: 10px;
-	background-color: transparent;
+	width: 8px;
+}
+
+#column-left::-webkit-scrollbar-track {
+	background: transparent;
 }
 
 #column-left::-webkit-scrollbar-thumb {
 	border-radius: 4px;
-	background-color: rgba(156, 163, 175, 0.15);
-	border: 2px solid transparent;
-	background-clip: padding-box;
+	background-color: rgba(156, 163, 175, 0.25);
 }
 
 #column-left::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(156, 163, 175, 0.3);
+	background-color: rgba(156, 163, 175, 0.45);
+}
+
+#column-left::-webkit-scrollbar-corner {
+	background: transparent;
 }
 
 #column-left, #content, #footer {
@@ -538,6 +549,32 @@
 	display: block;
 }
 
+.dc-flyout {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
+}
+
+.dc-flyout::-webkit-scrollbar {
+	width: 8px;
+}
+
+.dc-flyout::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.dc-flyout::-webkit-scrollbar-thumb {
+	border-radius: 4px;
+	background-color: rgba(156, 163, 175, 0.25);
+}
+
+.dc-flyout::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(156, 163, 175, 0.45);
+}
+
+.dc-flyout::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
 .dc-flyout__header {
 	display: flex;
 	align-items: center;
@@ -640,4 +677,3 @@
 		border-radius: 0 0 8px 8px;
 	}
 }
-

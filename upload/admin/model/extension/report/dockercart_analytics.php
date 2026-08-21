@@ -726,13 +726,15 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			$steps = array(1, 132, 133, 128, 129);
 		}
 
+		$step_columns = array();
+
+		foreach ($steps as $i => $step) {
+			$step_columns[] = "MAX(CASE WHEN o.order_status_id = '" . (int)$step . "' THEN 1 ELSE 0 END) AS step_" . $i;
+		}
+
 		$sql = "SELECT
 			o.order_id,
-			MAX(CASE WHEN o.order_status_id = '" . $steps[0] . "' THEN 1 ELSE 0 END) AS step_0,
-			MAX(CASE WHEN o.order_status_id = '" . $steps[1] . "' THEN 1 ELSE 0 END) AS step_1,
-			MAX(CASE WHEN o.order_status_id = '" . $steps[2] . "' THEN 1 ELSE 0 END) AS step_2,
-			MAX(CASE WHEN o.order_status_id = '" . $steps[3] . "' THEN 1 ELSE 0 END) AS step_3,
-			MAX(CASE WHEN o.order_status_id = '" . $steps[4] . "' THEN 1 ELSE 0 END) AS step_4
+			" . implode(",\n\t\t\t", $step_columns) . "
 		FROM `" . DB_PREFIX . "order` o
 		WHERE o.order_status_id > '0'";
 

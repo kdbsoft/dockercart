@@ -73,7 +73,7 @@ $_['text_selected']            = 'selected';
 $_['entry_review_criteria_group'] = 'Review Criteria Group';
  $_['help_review_criteria_group']  = 'Which "what is rated" group applies to product reviews in this category. Leave on "Inherit" to use the default group.';
  $_['text_review_criteria_inherit'] = 'Inherit default';
- $_['text_default']            = 'default';
+ $_['text_default']            = 'Default';
 
 // Help
 $_['help_top']               = 'Display in the top menu bar. Only works for the top parent categories.';
