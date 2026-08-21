@@ -241,7 +241,7 @@
     flex-wrap: wrap;
     gap: 16px 18px;
     margin-top: 12px;
-    align-items: flex-end;
+    align-items: flex-start;
 }
 .dcx-fields--row:first-child {
     margin-top: 0;
