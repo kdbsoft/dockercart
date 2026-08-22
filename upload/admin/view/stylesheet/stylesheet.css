@@ -1349,7 +1349,7 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 }
 
 .tile-neutral .tile-body {
-    color: var(--dc-text);
+    color: var(--dc-text-dark);
 }
 
 .tile-heading {
