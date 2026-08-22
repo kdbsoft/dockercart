@@ -326,6 +326,16 @@ $_['text_add_note']              = 'Add Note';
 $_['text_note']                  = 'Note';
 $_['text_edit_mode']             = 'Edit Mode';
 $_['text_view_customer']         = 'View Customer Profile';
+$_['text_edit_customer_profile'] = 'Full Profile';
+$_['text_member_since']          = 'Member since';
+$_['text_orders_count']          = 'orders';
+$_['text_total_spent']           = 'Total spent';
+$_['text_reward_points']         = 'Reward points';
+$_['text_balance']               = 'Balance';
+$_['text_addresses']             = 'Addresses';
+$_['text_default_address']       = 'Default';
+$_['text_no_addresses']          = 'No addresses on file.';
+$_['error_customer_not_found']   = 'Customer profile not found!';
 $_['text_next']                  = 'Next';
 $_['text_previous']              = 'Previous';
 $_['text_load_more']             = 'Load more';
@@ -449,3 +459,8 @@ $_['error_no_overpayment']           = 'There is no overpayment!';
 // Empty state
 $_['text_empty_title']       = 'No orders yet';
 $_['text_empty_description'] = 'Customer orders and their fulfilment status show up here. They will arrive as soon as sales begin.';
+
+// Buyer orders count
+$_['text_buyer_orders_one']          = '%s order';
+$_['text_buyer_orders_few']          = '%s orders';
+$_['text_buyer_orders_many']         = '%s orders';
