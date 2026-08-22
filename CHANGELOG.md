@@ -1,3 +1,9 @@
+## [3.8.0](https://github.com/kdbsoft/dockercart/compare/v3.7.2...v3.8.0) (2026-08-22)
+
+### Features
+
+* **sale:** add customer card modal and buyer order count to order detail ([6f73f10](https://github.com/kdbsoft/dockercart/commit/6f73f1035d5ad3b2507345c264a70e8b5a208bb9))
+
 ## [3.7.2](https://github.com/kdbsoft/dockercart/compare/v3.7.1...v3.7.2) (2026-08-21)
 
 ### Bug Fixes
