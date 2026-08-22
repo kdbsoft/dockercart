@@ -301,7 +301,7 @@
 				{% endif %}
 			<div class="dcx-sidebar-card__field">
 				<span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
-				<span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
+				<span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}{% if buyer_orders_text %} <span class="text-muted">({{ buyer_orders_text }})</span>{% endif %}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
 				<div class="edit-only" style="display:none">
                 <input type="text" class="form-control" value="{{ firstname }}" data-field="firstname" placeholder="{{ entry_firstname }}" style="width:48%;display:inline-block">
                 <input type="text" class="form-control" value="{{ lastname }}" data-field="lastname" placeholder="{{ entry_lastname }}" style="width:48%;display:inline-block">
@@ -333,9 +333,9 @@
             </div>
             {% if customer_id %}
             <div class="dcx-sidebar-card__field" style="margin-top:4px">
-              <a href="{{ customer_link }}" target="_blank" class="btn btn-default btn-xs">
-                <i data-lucide="external-link" width="11" height="11"></i> {{ text_view_customer }}
-              </a>
+              <button type="button" class="btn btn-default btn-xs" onclick="showCustomerCard({{ customer_id }})">
+                <i data-lucide="user" width="11" height="11"></i> {{ text_view_customer }}
+              </button>
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_replace_customer }}</span>
@@ -585,7 +585,7 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-products-list { display:flex; flex-direction:column; margin:0; padding:0; }
 .order-add-block { border:1px solid var(--dc-border); border-radius:var(--dc-radius-xl); padding:16px 20px 20px; margin:0 20px 20px; }
 .order-add-title { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#374151; margin-bottom:14px; }
-.order-add-block__row { gap:16px; width:fit-content; }
+.order-add-block__row { gap:16px; width:fit-content; align-items: flex-end; }
 .order-add-block__qty { max-width:120px; }
 .order-add-block__btn { flex:0 0 auto; }
 .order-product-card { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid #f0f0f0; transition:background .15s; }
@@ -755,6 +755,7 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .pcm-spinner { display:flex; align-items:center; justify-content:center; padding:40px; }
 .spinner { width:24px; height:24px; border:3px solid #e5e7eb; border-top-color:#2563eb; border-radius:50%; animation:spin .6s linear infinite; }
 .pcm { }
+.pcm-avatar { width:64px; height:64px; flex-shrink:0; border-radius:50%; background:#eef2ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:600; user-select:none; }
 .pcm-header { display:flex; gap:16px; }
 .pcm-gallery { flex-shrink:0; }
 .pcm-main-img { width:120px; height:120px; border-radius:8px; overflow:hidden; background:#f9fafb; }
@@ -2782,6 +2783,31 @@ function showProductCard(productId, orderProductId) {
 function closeProductCard() {
 	const o = document.getElementById('pcm-overlay');
 	if (o) o.style.display = 'none';
+}
+
+function showCustomerCard(customerId) {
+	if (!customerId) return;
+	let overlay = document.getElementById('pcm-overlay');
+	if (!overlay) {
+		overlay = document.createElement('div');
+		overlay.id = 'pcm-overlay';
+		overlay.className = 'pcm-overlay';
+		document.body.appendChild(overlay);
+	}
+	overlay.innerHTML = '<div class="pcm-spinner"><div class="spinner"></div></div>';
+	overlay.style.display = 'flex';
+	overlay.onclick = function(e) { if (!e.target.closest('.pcm-modal')) closeProductCard(); };
+
+	api('index.php?route=sale/order_detail/getCustomerCard&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID + '&customer_id=' + customerId, 'GET')
+		.then(j => {
+			if (j.html) {
+				overlay.innerHTML = '<div class="pcm-modal">' + j.html + '<button type="button" class="pcm-close" onclick="closeProductCard()"><i data-lucide="x" width="18" height="18"></i></button></div>';
+				lucide.createIcons();
+			} else {
+				closeProductCard();
+				if (j.error) showAlert(j.error);
+			}
+		});
 }
 
 function pcmSwitchImage(thumb) {

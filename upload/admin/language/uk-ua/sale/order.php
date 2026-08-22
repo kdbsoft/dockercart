@@ -232,6 +232,16 @@ $_['text_add_note']              = 'Додати нотатку';
 $_['text_note']                  = 'Нотатка';
 $_['text_edit_mode']             = 'Режим редагування';
 $_['text_view_customer']         = 'Перегляд профілю клієнта';
+$_['text_edit_customer_profile'] = 'Повний профіль';
+$_['text_member_since']          = 'Клієнт з';
+$_['text_orders_count']          = 'замовлень';
+$_['text_total_spent']           = 'Витрачено всього';
+$_['text_reward_points']         = 'Бонусні бали';
+$_['text_balance']               = 'Баланс';
+$_['text_addresses']             = 'Адреси';
+$_['text_default_address']       = 'За замовчуванням';
+$_['text_no_addresses']          = 'Адреси не вказано.';
+$_['error_customer_not_found']   = 'Профіль клієнта не знайдено!';
 $_['text_next']                  = 'Вперед';
 $_['text_previous']              = 'Назад';
 $_['text_load_more']             = 'Завантажити ще';
@@ -438,3 +448,8 @@ $_['error_no_overpayment']           = 'Переплати немає!';
 // Empty state
 $_['text_empty_title']       = 'Поки немає замовлень';
 $_['text_empty_description'] = 'Замовлення покупців та їхній статус з’являться тут. Вони надійдуть, щойно почнуться продажі.';
+
+// Buyer orders count
+$_['text_buyer_orders_one']          = '%s замовлення';
+$_['text_buyer_orders_few']          = '%s замовлення';
+$_['text_buyer_orders_many']         = '%s замовлень';

@@ -383,6 +383,10 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['customer_type'] = $this->getCustomerType($order_info);
 		$data['customer_type_badge'] = $this->getCustomerTypeBadgeClass($order_info);
 
+		$buyer_orders_count = $this->model_sale_order->getBuyerOrderCount($order_info);
+		$data['buyer_orders_count'] = $buyer_orders_count;
+		$data['buyer_orders_text'] = $buyer_orders_count > 1 ? $this->getBuyerOrdersCountText($buyer_orders_count) : '';
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -2434,6 +2438,27 @@ class ControllerSaleOrderDetail extends Controller {
 		return $order_info['customer_id'] ? 'registered' : 'guest';
 	}
 
+	private function getBuyerOrdersCountText(int $count): string {
+		$language_code = strtolower(isset($this->session->data['language']) ? (string)$this->session->data['language'] : (string)$this->config->get('config_admin_language'));
+
+		if (str_starts_with($language_code, 'ru') || str_starts_with($language_code, 'uk')) {
+			$mod10 = $count % 10;
+			$mod100 = $count % 100;
+
+			if ($mod10 === 1 && $mod100 !== 11) {
+				$key = 'text_buyer_orders_one';
+			} elseif ($mod10 >= 2 && $mod10 <= 4 && ($mod100 < 12 || $mod100 > 14)) {
+				$key = 'text_buyer_orders_few';
+			} else {
+				$key = 'text_buyer_orders_many';
+			}
+		} else {
+			$key = $count === 1 ? 'text_buyer_orders_one' : 'text_buyer_orders_many';
+		}
+
+		return sprintf($this->language->get($key), $count);
+	}
+
 	private function getAvailablePaymentMethods(): array {
 		$methods = [];
 		$this->load->model('setting/extension');
@@ -2760,6 +2785,97 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$json['success'] = true;
 					$json['html'] = $this->load->view('sale/order_product_card_modal', $data);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getCustomerCard(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$customer_id = (int)($this->request->get['customer_id'] ?? 0);
+
+			if ($customer_id) {
+				$this->load->model('customer/customer');
+				$this->load->model('customer/customer_group');
+
+				$customer_info = $this->model_customer_customer->getCustomer($customer_id);
+
+				if ($customer_info) {
+					$customer_group_info = $this->model_customer_customer_group->getCustomerGroup((int)$customer_info['customer_group_id']);
+
+					$addresses = [];
+					foreach ($this->model_customer_customer->getAddresses($customer_id) as $address) {
+						$parts = array_filter([
+							trim($address['firstname'] . ' ' . $address['lastname']),
+							$address['company'],
+							$address['address_1'],
+							$address['address_2'],
+							trim(($address['city'] ?? '') . (($address['city'] ?? '') && ($address['postcode'] ?? '') ? ', ' : '') . ($address['postcode'] ?? '')),
+							trim(($address['zone'] ?? '') . (($address['zone'] ?? '') && ($address['country'] ?? '') ? ', ' : '') . ($address['country'] ?? '')),
+						]);
+
+						$addresses[] = [
+							'address_id' => (int)$address['address_id'],
+							'text'       => implode(', ', $parts),
+							'default'    => (int)$address['address_id'] === (int)$customer_info['address_id'],
+						];
+					}
+
+					$orders_count = 0;
+					$orders_total = 0.0;
+
+					$order_query = $this->db->query("SELECT COUNT(*) AS orders_count, COALESCE(SUM(o.total), 0) AS orders_total FROM `" . DB_PREFIX . "order` o WHERE o.customer_id = '" . (int)$customer_id . "' AND o.order_status_id > '0'");
+
+					if ($order_query->num_rows) {
+						$orders_count = (int)$order_query->row['orders_count'];
+						$orders_total = (float)$order_query->row['orders_total'];
+					}
+
+					$order_info = null;
+
+					$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+					if ($order_id) {
+						$this->load->model('sale/order');
+						$order_info = $this->model_sale_order->getOrder($order_id);
+					}
+
+					$currency_code = ($order_info && !empty($order_info['currency_code'])) ? $order_info['currency_code'] : $this->config->get('config_currency');
+					$currency_value = ($order_info && !empty($order_info['currency_value'])) ? (float)$order_info['currency_value'] : 1.0;
+
+					$initials = mb_strtoupper(mb_substr($customer_info['firstname'], 0, 1) . mb_substr($customer_info['lastname'], 0, 1));
+
+					$data = [
+						'firstname'      => $customer_info['firstname'],
+						'lastname'       => $customer_info['lastname'],
+						'email'          => $customer_info['email'],
+						'telephone'      => $customer_info['telephone'],
+						'status'         => $customer_info['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+						'enabled'        => (bool)$customer_info['status'],
+						'customer_group' => $customer_group_info ? $customer_group_info['name'] : '',
+						'member_since'   => date($this->language->get('date_format_short'), strtotime($customer_info['date_added'])),
+						'orders_count'   => $orders_count,
+						'orders_total'   => $this->currency->format($orders_total, $currency_code, $currency_value),
+						'reward_total'   => (int)$this->model_customer_customer->getRewardTotal($customer_id),
+						'balance'        => $this->currency->format((float)$this->model_customer_customer->getTransactionTotal($customer_id), $currency_code, $currency_value),
+						'initials'       => $initials ?: '?',
+						'addresses'      => $addresses,
+						'href'           => $this->url->link('customer/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_id=' . $customer_id, true),
+					];
+
+					$json['success'] = true;
+					$json['html'] = $this->load->view('sale/order_customer_card_modal', $data);
+				} else {
+					$json['error'] = $this->language->get('error_customer_not_found');
 				}
 			}
 		}
