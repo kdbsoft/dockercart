@@ -498,35 +498,37 @@
                         <span class="help-block text-muted">{{ help_video_combined }}</span>
                       </div>
                     </div>
-                    <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_model_3d }}</label>
-                      <div class="dc-video-card">
-                        <a href="" id="thumb-model-3d" data-toggle="image" data-type="model_3d" class="dc-video-card__link">
-                          <img src="{{ model_3d_thumb }}" data-placeholder="{{ model_3d_placeholder }}" class="dc-video-card__img" />
-                          <div class="dc-video-card__overlay"{% if not model_3d %} style="display:none;"{% endif %}>
-                            <i data-lucide="box" class="dc-video-card__icon"></i>
-                            <span class="dc-video-card__name">{{ model_3d }}</span>
-                          </div>
-                        </a>
-                        <button type="button" onclick="clearModel3d()" class="dc-video-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                        <input type="hidden" name="model_3d" value="{{ model_3d }}" id="input-model-3d" />
+                    <div class="dcx-fields dcx-fields--row" style="margin-top:0;">
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ entry_model_3d }}</label>
+                        <div class="dc-video-card">
+                          <a href="" id="thumb-model-3d" data-toggle="image" data-type="model_3d" class="dc-video-card__link">
+                            <img src="{{ model_3d_thumb }}" data-placeholder="{{ model_3d_placeholder }}" class="dc-video-card__img" />
+                            <div class="dc-video-card__overlay"{% if not model_3d %} style="display:none;"{% endif %}>
+                              <i data-lucide="box" class="dc-video-card__icon"></i>
+                              <span class="dc-video-card__name">{{ model_3d }}</span>
+                            </div>
+                          </a>
+                          <button type="button" onclick="clearModel3d()" class="dc-video-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                          <input type="hidden" name="model_3d" value="{{ model_3d }}" id="input-model-3d" />
+                        </div>
+                        <div class="help-block text-muted" style="margin-top:8px;">{{ help_model_3d }}</div>
                       </div>
-                      <div class="help-block text-muted" style="margin-top:8px;">{{ help_model_3d }}</div>
-                    </div>
-                    <div class="dcx-field">
-                      <label class="dcx-label">{{ entry_image_360 }}</label>
-                      <div class="dc-video-card">
-                        <a href="" id="thumb-image-360" data-toggle="image" data-type="image" class="dc-video-card__link">
-                          <img src="{{ image_360_thumb }}" data-placeholder="{{ image_360_placeholder }}" class="dc-video-card__img" />
-                          <div class="dc-video-card__overlay"{% if not image_360 %} style="display:none;"{% endif %}>
-                            <i data-lucide="rotate-3d" class="dc-video-card__icon"></i>
-                            <span class="dc-video-card__name">{{ image_360 }}</span>
-                          </div>
-                        </a>
-                        <button type="button" onclick="clearImage360()" class="dc-video-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                        <input type="hidden" name="image_360" value="{{ image_360 }}" id="input-image-360" />
+                      <div class="dcx-field">
+                        <label class="dcx-label">{{ entry_image_360 }}</label>
+                        <div class="dc-video-card">
+                          <a href="" id="thumb-image-360" data-toggle="image" data-type="image" class="dc-video-card__link">
+                            <img src="{{ image_360_thumb }}" data-placeholder="{{ image_360_placeholder }}" class="dc-video-card__img" />
+                            <div class="dc-video-card__overlay"{% if not image_360 %} style="display:none;"{% endif %}>
+                              <i data-lucide="rotate-3d" class="dc-video-card__icon"></i>
+                              <span class="dc-video-card__name">{{ image_360 }}</span>
+                            </div>
+                          </a>
+                          <button type="button" onclick="clearImage360()" class="dc-video-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                          <input type="hidden" name="image_360" value="{{ image_360 }}" id="input-image-360" />
+                        </div>
+                        <div class="help-block text-muted" style="margin-top:8px;">{{ help_image_360 }}</div>
                       </div>
-                      <div class="help-block text-muted" style="margin-top:8px;">{{ help_image_360 }}</div>
                     </div>
                   </div>
                 </div>
@@ -1146,34 +1148,34 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dcx-fields">
-                    <div class="dcx-field">
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field" style="flex:0 0 auto;">
                       <label class="dcx-label" for="input-points">{{ entry_points }}</label>
-                      <div class="dcx-field-icon-wrap" style="max-width:100px;">
+                      <div class="dcx-field-icon-wrap" style="max-width:160px;">
                         <input type="text" name="points" value="{{ points }}" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
                         <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
-                  </div>
-                  <div id="rewards-container" class="table-responsive">
-                    <table class="table table-bordered dcx-table dcx-table--reward">
-                      <thead>
-                        <tr>
-                          <td class="text-left">{{ entry_customer_group }}</td>
-                          <td class="text-left" style="width: 200px;">{{ entry_reward }}</td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for customer_group in customer_groups %}
-                        <tr>
-                          <td class="text-left">{{ customer_group.name }}</td>
-                          <td class="text-left">
-                            <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
-                          </td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
+                    <div id="rewards-container" class="table-responsive" style="flex:1 1 auto;min-width:220px;">
+                      <table class="table table-bordered dcx-table dcx-table--reward">
+                        <thead>
+                          <tr>
+                            <td class="text-left">{{ entry_customer_group }}</td>
+                            <td class="text-left" style="width: 200px;">{{ entry_reward }}</td>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for customer_group in customer_groups %}
+                          <tr>
+                            <td class="text-left">{{ customer_group.name }}</td>
+                            <td class="text-left">
+                              <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
