@@ -3,7 +3,7 @@
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
             <a href="{{ cancel }}" class="page-header__link">
               <span class="page-header__back">
                 <i data-lucide="arrow-left" width="20" height="20"></i>
@@ -18,7 +18,7 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
@@ -30,7 +30,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-return">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-2 col-xl-5">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -40,20 +40,22 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-order-id">{{ entry_order_id }}</label>
-                <input type="text" name="order_id" value="{{ order_id }}" placeholder="{{ entry_order_id }}" id="input-order-id" class="form-control" />
-                {% if error_order_id %}
-                <div class="text-danger">{{ error_order_id }}</div>
-                {% endif %}
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-date-ordered">{{ entry_date_ordered }}</label>
-                <div class="input-group date">
-                  <input type="text" name="date_ordered" value="{{ date_ordered }}" placeholder="{{ entry_date_ordered }}" data-date-format="YYYY-MM-DD" id="input-date-ordered" class="form-control" />
-                  <span class="input-group-btn">
-                    <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-                  </span>
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-order-id">{{ entry_order_id }}</label>
+                  <input type="text" name="order_id" value="{{ order_id }}" placeholder="{{ entry_order_id }}" id="input-order-id" class="form-control" />
+                  {% if error_order_id %}
+                  <div class="text-danger">{{ error_order_id }}</div>
+                  {% endif %}
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-date-ordered">{{ entry_date_ordered }}</label>
+                  <div class="input-group date">
+                    <input type="text" name="date_ordered" value="{{ date_ordered }}" placeholder="{{ entry_date_ordered }}" data-date-format="YYYY-MM-DD" id="input-date-ordered" class="form-control" />
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+                    </span>
+                  </div>
                 </div>
               </div>
               <div class="dcx-field required">
@@ -61,33 +63,37 @@
                 <input type="text" name="customer" value="{{ customer }}" placeholder="{{ entry_customer }}" id="input-customer" class="form-control" />
                 <input type="hidden" name="customer_id" value="{{ customer_id }}" />
               </div>
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-firstname">{{ entry_firstname }}</label>
-                <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control" />
-                {% if error_firstname %}
-                <div class="text-danger">{{ error_firstname }}</div>
-                {% endif %}
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-firstname">{{ entry_firstname }}</label>
+                  <input type="text" name="firstname" value="{{ firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control" />
+                  {% if error_firstname %}
+                  <div class="text-danger">{{ error_firstname }}</div>
+                  {% endif %}
+                </div>
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-lastname">{{ entry_lastname }}</label>
+                  <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control" />
+                  {% if error_lastname %}
+                  <div class="text-danger">{{ error_lastname }}</div>
+                  {% endif %}
+                </div>
               </div>
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-lastname">{{ entry_lastname }}</label>
-                <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control" />
-                {% if error_lastname %}
-                <div class="text-danger">{{ error_lastname }}</div>
-                {% endif %}
-              </div>
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-email">{{ entry_email }}</label>
-                <input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control" />
-                {% if error_email %}
-                <div class="text-danger">{{ error_email }}</div>
-                {% endif %}
-              </div>
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-telephone">{{ entry_telephone }}</label>
-                <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control" />
-                {% if error_telephone %}
-                <div class="text-danger">{{ error_telephone }}</div>
-                {% endif %}
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-email">{{ entry_email }}</label>
+                  <input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control" />
+                  {% if error_email %}
+                  <div class="text-danger">{{ error_email }}</div>
+                  {% endif %}
+                </div>
+                <div class="dcx-field required">
+                  <label class="dcx-label" for="input-telephone">{{ entry_telephone }}</label>
+                  <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control" />
+                  {% if error_telephone %}
+                  <div class="text-danger">{{ error_telephone }}</div>
+                  {% endif %}
+                </div>
               </div>
             </div>
           </div>
@@ -199,21 +205,23 @@
             <div class="dcx-panel-body">
               <div id="history"></div>
               <hr/>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-history-status">{{ entry_return_status }}</label>
-                <select name="return_status_id" id="input-history-status" class="form-control">
-                  {% for return_status in return_statuses %}
-                  {% if return_status.return_status_id == return_status_id %}
-                  <option value="{{ return_status.return_status_id }}" selected="selected">{{ return_status.name }}</option>
-                  {% else %}
-                  <option value="{{ return_status.return_status_id }}">{{ return_status.name }}</option>
-                  {% endif %}
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-notify">{{ entry_notify }}</label>
-                <input type="checkbox" name="notify" value="1" id="input-notify" />
+              <div class="dcx-fields dcx-fields--row">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-history-status">{{ entry_return_status }}</label>
+                  <select name="return_status_id" id="input-history-status" class="form-control">
+                    {% for return_status in return_statuses %}
+                    {% if return_status.return_status_id == return_status_id %}
+                    <option value="{{ return_status.return_status_id }}" selected="selected">{{ return_status.name }}</option>
+                    {% else %}
+                    <option value="{{ return_status.return_status_id }}">{{ return_status.name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-notify">{{ entry_notify }}</label>
+                  <input type="checkbox" name="notify" value="1" id="input-notify" />
+                </div>
               </div>
               <div class="dcx-field">
                 <label class="dcx-label" for="input-history-comment">{{ entry_comment }}</label>
