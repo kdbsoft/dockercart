@@ -6,17 +6,22 @@
  * the checkout flow, so two customers cannot both check out the last item
  * under high traffic. Unbound holds (order_id IS NULL) expire via expires_at
  * and are swept by the scheduler task dockercart_reservation_cleanup. Once an
- * order is created the holds are bound to its order_id and persist until stock
- * is actually subtracted (processing/complete) or the order is cancelled or
- * refunded.
+ * order is created the holds are bound to its order_id and no longer depend on
+ * expires_at: they persist until stock is actually subtracted
+ * (processing/complete), the order is cancelled or refunded, or the cleanup
+ * sweep releases holds of orders stale beyond config_stock_reserve_stale_days
+ * that never reached a fulfilled status.
  *
  * Availability math: available = stock - SUM(active holds), where active holds
  * are unbound rows of OTHER sessions plus ALL order-bound rows (an order has
- * committed the stock, even from the same session's later checkout).
+ * committed the stock, even from the same session's later checkout). Bound
+ * rows count regardless of expires_at.
  *
  * Configuration:
  *   - config_stock_reserve_enabled    (global toggle)
  *   - config_stock_reserve_minutes    (global hold window, default 30)
+ *   - config_stock_reserve_stale_days (release bound holds of orders not in a
+ *                                      fulfilled status after N days; 0 = off)
  *   - oc_dockercart_universal_payment.reserve_minutes (per-method override:
  *     NULL = global, 0 = no hold for this method, N = custom minutes)
  */
@@ -127,7 +132,7 @@ class DockercartStockReservation {
 			? " AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "')"
 			: '';
 
-		$query = $this->db->query("SELECT product_id, variant_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE expires_at > NOW() AND product_id IN (" . $in . ")" . $session_filter . " GROUP BY product_id, variant_id");
+		$query = $this->db->query("SELECT product_id, variant_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE (order_id IS NOT NULL OR expires_at > NOW()) AND product_id IN (" . $in . ")" . $session_filter . " GROUP BY product_id, variant_id");
 
 		$map = [];
 
@@ -159,7 +164,7 @@ class DockercartStockReservation {
 
 		$in = implode(',', $product_ids);
 
-		$query = $this->db->query("SELECT product_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE expires_at > NOW() AND product_id IN (" . $in . ") GROUP BY product_id");
+		$query = $this->db->query("SELECT product_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE (order_id IS NOT NULL OR expires_at > NOW()) AND product_id IN (" . $in . ") GROUP BY product_id");
 
 		$map = [];
 
@@ -266,7 +271,7 @@ class DockercartStockReservation {
 			return true;
 		}
 
-		$reserved_query = $this->db->query("SELECT COALESCE(SUM(quantity), 0) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "' AND expires_at > NOW() AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "')");
+		$reserved_query = $this->db->query("SELECT COALESCE(SUM(quantity), 0) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "' AND (order_id IS NOT NULL OR expires_at > NOW()) AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "')");
 
 		$available = $stock_quantity - (float)$reserved_query->row['reserved'];
 
