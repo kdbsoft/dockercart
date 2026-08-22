@@ -1,3 +1,9 @@
+## [3.10.0](https://github.com/kdbsoft/dockercart/compare/v3.9.0...v3.10.0) (2026-08-22)
+
+### Features
+
+* **stock:** add stale-days release for bound order holds ([91a8bdb](https://github.com/kdbsoft/dockercart/commit/91a8bdb787ba5b7b07353b664ebb63f0b0a04b8a))
+
 ## [3.9.0](https://github.com/kdbsoft/dockercart/compare/v3.8.0...v3.9.0) (2026-08-22)
 
 ### Features
