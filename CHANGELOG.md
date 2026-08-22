@@ -1,3 +1,13 @@
+## [3.9.0](https://github.com/kdbsoft/dockercart/compare/v3.8.0...v3.9.0) (2026-08-22)
+
+### Features
+
+* **analytics:** persist session_id on order for traffic conversion joins ([2c55179](https://github.com/kdbsoft/dockercart/commit/2c551797c74d416b90f2bf2d21cc5890bc0099cd))
+
+### Bug Fixes
+
+* **analytics:** filter bots and normalize own-host in traffic tracking ([f24adf9](https://github.com/kdbsoft/dockercart/commit/f24adf9e731a7d063d8e2b13f3447883d86e0573))
+
 ## [3.8.0](https://github.com/kdbsoft/dockercart/compare/v3.7.2...v3.8.0) (2026-08-22)
 
 ### Features
