@@ -340,8 +340,14 @@ class ControllerStartupStartup extends Controller {
 			$this->db->query("UPDATE `" . DB_PREFIX . "marketing` SET clicks = (clicks + 1) WHERE code = '" . $this->db->escape($this->request->get['tracking']) . "'");
 		}
 
-		// Traffic source tracking (once per session)
-		if (!$is_xhr && !isset($this->session->data['dc_traffic_source'])) {
+		// Traffic source tracking (once per session). Empty UA and known
+		// bot/crawler signatures are skipped so automated requests don't
+		// pollute visit statistics.
+		$user_agent = strtolower((string)(isset($this->request->server['HTTP_USER_AGENT']) ? $this->request->server['HTTP_USER_AGENT'] : ''));
+
+		$is_bot = $user_agent === '' || (bool)preg_match('/(bot|crawl|spider|slurp|curl|wget|python-requests|go-http-client|okhttp|java\/|libwww-perl|facebookexternalhit|bingpreview|headless|lighthouse|postman|axios)/', $user_agent);
+
+		if (!$is_xhr && !$is_bot && !isset($this->session->data['dc_traffic_source'])) {
 			$source   = '';
 			$medium   = 'none';
 			$campaign = '';
@@ -358,6 +364,9 @@ class ControllerStartupStartup extends Controller {
 				$click_id_map = array(
 					'gclid'    => array('source' => 'google',    'medium' => 'cpc'),
 					'dclid'    => array('source' => 'google',    'medium' => 'display'),
+					'gbraid'   => array('source' => 'google',    'medium' => 'cpc'),
+					'wbraid'   => array('source' => 'google',    'medium' => 'cpc'),
+					'igshid'   => array('source' => 'instagram', 'medium' => 'social'),
 					'fbclid'   => array('source' => 'facebook',  'medium' => 'cpc'),
 					'msclkid'  => array('source' => 'microsoft', 'medium' => 'cpc'),
 					'ttclid'   => array('source' => 'tiktok',    'medium' => 'cpc'),
@@ -443,8 +452,15 @@ class ControllerStartupStartup extends Controller {
 						}
 					}
 
-					// Unknown referer — use domain as source name
-					if (!$matched && $host !== $_SERVER['HTTP_HOST']) {
+					// Unknown referer — use domain as source name. Own-host traffic
+					// must fall through to direct, so compare against a normalized
+					// HTTP_HOST (lowercase, no www., no port) rather than the raw
+					// header which may contain a port (e.g. dockercart.local:8080).
+					$own_host = strtolower((string)(isset($this->request->server['HTTP_HOST']) ? $this->request->server['HTTP_HOST'] : ''));
+					$own_host = preg_replace('/^www\./', '', $own_host);
+					$own_host = preg_replace('/:\d+$/', '', $own_host);
+
+					if (!$matched && $host !== $own_host) {
 						$source = preg_replace('/\.[^.]+$/', '', $host);
 						$medium = 'referral';
 					}
