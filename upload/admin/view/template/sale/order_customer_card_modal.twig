@@ -1,0 +1,56 @@
+<div class="pcm">
+  <div class="pcm-header">
+    <div class="pcm-avatar">{{ initials }}</div>
+    <div class="pcm-info">
+      <div class="pcm-name">{{ firstname }} {{ lastname }}</div>
+      <div class="pcm-codes">
+        {% if customer_group %}
+        <span class="pcm-code"><span class="pcm-code__label">{{ customer_group }}</span></span>
+        {% endif %}
+        <span class="pcm-stock pcm-stock--{{ enabled ? 'in' : 'out' }}">{{ status }}</span>
+      </div>
+      {% if email %}
+      <div class="pcm-sub"><a href="mailto:{{ email }}" class="pcm-name" style="font-size:12px;font-weight:400">{{ email }}</a><a href="#" class="dc-copy-btn" data-copy="{{ email }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></div>
+      {% endif %}
+      {% if telephone %}
+      <div class="pcm-sub">{{ telephone }}<a href="#" class="dc-copy-btn" data-copy="{{ telephone }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="pcm-meta" style="margin-top:10px">
+    <span>{{ text_member_since }}: {{ member_since }}</span>
+    <span class="pcm-sep">&middot;</span>
+    <span>{{ orders_count }} {{ text_orders_count }}</span>
+    <span class="pcm-sep">&middot;</span>
+    <span class="pcm-total">{{ orders_total }}</span>
+  </div>
+
+  <div class="pcm-sub">
+    <span>{{ text_reward_points }}: {{ reward_total }}</span>
+    <span class="pcm-sep">&middot;</span>
+    <span>{{ text_balance }}: {{ balance }}</span>
+  </div>
+
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_addresses }}</div>
+    {% if addresses %}
+    <table class="pcm-attrs">
+      {% for addr in addresses %}
+      <tr>
+        <td class="pcm-attrs__name">#{{ loop.index }}{% if addr.default %} &middot; {{ text_default_address }}{% endif %}</td>
+        <td>{{ addr.text }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <div class="pcm-desc">{{ text_no_addresses }}</div>
+    {% endif %}
+  </div>
+
+  <div class="pcm-section">
+    <a href="{{ href }}" target="_blank" class="btn btn-primary btn-xs btn-block">
+      <i data-lucide="external-link" width="11" height="11"></i> {{ text_edit_customer_profile }}
+    </a>
+  </div>
+</div>

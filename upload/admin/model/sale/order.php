@@ -523,6 +523,35 @@ class ModelSaleOrder extends Model {
 		return $query->row;
 	}
 
+	public function getBuyerOrderCount(array $order_info): int {
+		if (!empty($order_info['customer_id'])) {
+			$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE customer_id = '" . (int)$order_info['customer_id'] . "' AND order_status_id > '0'");
+
+			return max(1, (int)$query->row['total']);
+		}
+
+		$email = strtolower(trim((string)($order_info['email'] ?? '')));
+		$phone = preg_replace('/\D+/', '', (string)($order_info['telephone'] ?? ''));
+
+		if ($email === '' && $phone === '') {
+			return 1;
+		}
+
+		$conditions = array();
+
+		if ($email !== '') {
+			$conditions[] = "LOWER(email) = '" . $this->db->escape($email) . "'";
+		}
+
+		if ($phone !== '') {
+			$conditions[] = "REGEXP_REPLACE(telephone, '[^0-9]', '') = '" . $this->db->escape($phone) . "'";
+		}
+
+		$query = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "order` WHERE customer_id = '0' AND order_status_id > '0' AND (" . implode(' OR ', $conditions) . ")");
+
+		return max(1, (int)$query->row['total']);
+	}
+
 	public function getOrderTotals($order_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_total WHERE order_id = '" . (int)$order_id . "' ORDER BY sort_order");
 

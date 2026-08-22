@@ -231,6 +231,16 @@ $_['text_add_note']              = 'Добавить заметку';
 $_['text_note']                  = 'Заметка';
 $_['text_edit_mode']             = 'Режим редактирования';
 $_['text_view_customer']         = 'Просмотр профиля клиента';
+$_['text_edit_customer_profile'] = 'Полный профиль';
+$_['text_member_since']          = 'Клиент с';
+$_['text_orders_count']          = 'заказ(ов)';
+$_['text_total_spent']           = 'Всего потрачено';
+$_['text_reward_points']         = 'Бонусные баллы';
+$_['text_balance']               = 'Баланс';
+$_['text_addresses']             = 'Адреса';
+$_['text_default_address']       = 'По умолчанию';
+$_['text_no_addresses']          = 'Адреса не указаны.';
+$_['error_customer_not_found']   = 'Профиль клиента не найден!';
 $_['text_next']                  = 'Вперед';
 $_['text_previous']              = 'Назад';
 $_['text_load_more']             = 'Загрузить ещё';
@@ -437,3 +447,8 @@ $_['error_no_overpayment']           = 'Переплаты нет!';
 // Empty state
 $_['text_empty_title']       = 'Пока нет заказов';
 $_['text_empty_description'] = 'Заказы покупателей и их статусы появятся здесь. Они придут, як тільки почнуться продажі.';
+
+// Buyer orders count
+$_['text_buyer_orders_one']          = '%s заказ';
+$_['text_buyer_orders_few']          = '%s заказа';
+$_['text_buyer_orders_many']         = '%s заказов';
