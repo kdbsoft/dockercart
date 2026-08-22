@@ -671,6 +671,13 @@
                             <div class="text-danger">{{ error_stock_reserve_minutes }}</div>
                             {% endif %}
                           </div>
+                          <div class="dcx-field">
+                            <label class="dcx-label" for="input-stock-reserve-stale-days">{{ entry_stock_reserve_stale_days }} <span data-toggle="tooltip" title="{{ help_stock_reserve_stale_days }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                            <input type="number" name="config_stock_reserve_stale_days" value="{{ config_stock_reserve_stale_days }}" placeholder="14" id="input-stock-reserve-stale-days" class="form-control" min="0" style="max-width:120px;" />
+                            {% if error_stock_reserve_stale_days %}
+                            <div class="text-danger">{{ error_stock_reserve_stale_days }}</div>
+                            {% endif %}
+                          </div>
                         </div>
                       </div>
                     </div>

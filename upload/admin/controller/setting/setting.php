@@ -139,6 +139,12 @@ class ControllerSettingSetting extends Controller {
 			$data['error_stock_reserve_minutes'] = '';
 		}
 
+		if (isset($this->error['stock_reserve_stale_days'])) {
+			$data['error_stock_reserve_stale_days'] = $this->error['stock_reserve_stale_days'];
+		} else {
+			$data['error_stock_reserve_stale_days'] = '';
+		}
+
 		if (isset($this->error['invoice_language'])) {
 			$data['error_invoice_language'] = $this->error['invoice_language'];
 		} else {
@@ -725,6 +731,14 @@ class ControllerSettingSetting extends Controller {
 			$data['config_stock_reserve_minutes'] = (int)$this->config->get('config_stock_reserve_minutes');
 		} else {
 			$data['config_stock_reserve_minutes'] = 30;
+		}
+
+		if (isset($this->request->post['config_stock_reserve_stale_days'])) {
+			$data['config_stock_reserve_stale_days'] = $this->request->post['config_stock_reserve_stale_days'];
+		} elseif ($this->config->has('config_stock_reserve_stale_days')) {
+			$data['config_stock_reserve_stale_days'] = (int)$this->config->get('config_stock_reserve_stale_days');
+		} else {
+			$data['config_stock_reserve_stale_days'] = 14;
 		}
 
 		if (isset($this->request->post['config_affiliate_group_id'])) {
@@ -1374,6 +1388,10 @@ class ControllerSettingSetting extends Controller {
 
 		if (isset($this->request->post['config_stock_reserve_minutes']) && (!is_numeric($this->request->post['config_stock_reserve_minutes']) || (int)$this->request->post['config_stock_reserve_minutes'] < 0)) {
 			$this->error['stock_reserve_minutes'] = $this->language->get('error_stock_reserve_minutes');
+		}
+
+		if (isset($this->request->post['config_stock_reserve_stale_days']) && (!is_numeric($this->request->post['config_stock_reserve_stale_days']) || (int)$this->request->post['config_stock_reserve_stale_days'] < 0)) {
+			$this->error['stock_reserve_stale_days'] = $this->language->get('error_stock_reserve_stale_days');
 		}
 
 		if ($this->error && !isset($this->error['warning'])) {

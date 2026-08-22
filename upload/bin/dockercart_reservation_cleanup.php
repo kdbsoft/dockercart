@@ -3,10 +3,16 @@
 /**
  * DockerCart Stock Reservation Cleanup — CLI Worker
  *
- * Deletes expired unbound checkout holds (order_id IS NULL) so stock becomes
- * available again for other customers. Holds bound to an order are kept until
- * stock is subtracted (processing/complete) or the order is cancelled or
- * refunded — see DockercartStockReservation::releaseOrder().
+ * 1. Deletes expired unbound checkout holds (order_id IS NULL) so stock
+ *    becomes available again for other customers.
+ * 2. Releases holds bound to orders that have been sitting in a
+ *    non-fulfilled status (not processing/complete) untouched for more than
+ *    config_stock_reserve_stale_days days (0 = disabled) — a safety net so
+ *    abandoned orders cannot lock stock forever.
+ *
+ * Holds bound to an active order are otherwise kept until stock is subtracted
+ * (processing/complete) or the order is cancelled or refunded — see
+ * DockercartStockReservation::releaseOrder().
  * Called by the scheduler daemon (every 15 minutes).
  *
  * Usage:
@@ -88,6 +94,30 @@ try {
 	$db->query("DELETE FROM `" . DB_PREFIX . "stock_reservation` WHERE order_id IS NULL AND expires_at < NOW()");
 
 	fwrite(STDOUT, "[reservation-cleanup] Expired unbound checkout holds removed.\n");
+
+	// Safety net: release bound holds of orders stuck in a non-fulfilled
+	// status (never reached processing/complete) beyond the stale horizon.
+	// Covers abandoned orders and status-0 resets from admin order edits that
+	// are not part of config_cancelled_status. Cancelled/fulfilled orders
+	// already release via DockercartStockReservation::releaseOrder().
+	$stale_days = (int)$config->get('config_stock_reserve_stale_days');
+
+	if ($stale_days > 0) {
+		$kept_statuses = array_merge(
+			(array)$config->get('config_processing_status'),
+			(array)$config->get('config_complete_status')
+		);
+
+		$kept_statuses = array_values(array_unique(array_filter(array_map('intval', $kept_statuses), function ($id) {
+			return $id > 0;
+		})));
+
+		$status_filter = empty($kept_statuses) ? '' : " AND o.order_status_id NOT IN (" . implode(',', $kept_statuses) . ")";
+
+		$db->query("DELETE r FROM `" . DB_PREFIX . "stock_reservation` r INNER JOIN `" . DB_PREFIX . "order` o ON o.order_id = r.order_id WHERE o.date_modified < DATE_SUB(NOW(), INTERVAL " . $stale_days . " DAY)" . $status_filter);
+
+		fwrite(STDOUT, "[reservation-cleanup] Holds of stale non-fulfilled orders (>{$stale_days}d) released.\n");
+	}
 
 	exit(0);
 } catch (\Throwable $e) {
