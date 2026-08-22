@@ -1,3 +1,10 @@
+## [3.7.2](https://github.com/kdbsoft/dockercart/compare/v3.7.1...v3.7.2) (2026-08-21)
+
+### Bug Fixes
+
+* **admin:** capitalize default label in category language file ([664d08b](https://github.com/kdbsoft/dockercart/commit/664d08b390e4fff68336c93b0ceb2be654e7d84e))
+* **admin:** pin header, refine sidebar scrolling and mobile layout ([2530a6a](https://github.com/kdbsoft/dockercart/commit/2530a6a0f4901b153cbf0185c10fc48f05c7787c))
+
 ## [3.7.1](https://github.com/kdbsoft/dockercart/compare/v3.7.0...v3.7.1) (2026-08-20)
 
 ### Bug Fixes
