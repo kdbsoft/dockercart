@@ -1595,7 +1595,8 @@ div.dcx-field.required > .dcx-label:before {
 }
 
 .dcx-checkbox-label {
-    font-weight: normal;
+    font-weight: 500;
+    font-size: 12px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
