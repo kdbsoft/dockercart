@@ -114,23 +114,25 @@
               </div>
               <div class="text-muted" style="margin-top: 4px; font-size: 12px;">{{ help_banner_image }}</div>
             </div>
-            <div class="dcx-field">
-              <label class="dcx-label">{{ entry_image }}</label>
-              <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-              <input type="hidden" name="image" value="{{ image }}" id="input-image" />
-            </div>
-            <div class="dcx-field">
-              <div style="display:flex;align-items:center;gap:4px;">
-                <label class="dcx-label" for="input-icon">{{ entry_icon }}</label>
-                <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+            <div class="dcx-fields dcx-fields--row" style="margin-top: 0;">
+              <div class="dcx-field">
+                <label class="dcx-label">{{ entry_image }}</label>
+                <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                <input type="hidden" name="image" value="{{ image }}" id="input-image" />
               </div>
-              <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-              <input type="hidden" name="icon" value="{{ icon }}" id="input-icon" />
-            </div>
-            <div class="dcx-field">
-              <label class="dcx-label">{{ entry_background_image }}</label>
-              <a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-              <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
+              <div class="dcx-field">
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <label class="dcx-label" for="input-icon">{{ entry_icon }}</label>
+                  <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </div>
+                <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                <input type="hidden" name="icon" value="{{ icon }}" id="input-icon" />
+              </div>
+              <div class="dcx-field">
+                <label class="dcx-label">{{ entry_background_image }}</label>
+                <a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
+              </div>
             </div>
           </div>
         </div>
