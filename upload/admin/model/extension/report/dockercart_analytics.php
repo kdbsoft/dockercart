@@ -533,7 +533,9 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 
 	/**
 	 * Traffic conversion: sessions, orders and revenue per source/medium.
-	 * Joins traffic sessions to orders via order_claim (session -> order).
+	 * Joins traffic sessions to orders via the session_id persisted on
+	 * oc_order at checkout (order_claim is deleted after success, so it
+	 * cannot be used as a join key here).
 	 */
 	public function getTrafficConversions($data = array()) {
 		$conditions = array();
@@ -557,8 +559,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			COUNT(DISTINCT o.order_id) AS orders,
 			COALESCE(SUM(o.total / o.currency_value), 0) AS revenue
 		FROM `" . DB_PREFIX . "dockercart_traffic_source` t
-		LEFT JOIN `" . DB_PREFIX . "order_claim` oc ON (oc.session_id = t.session_id)
-		LEFT JOIN `" . DB_PREFIX . "order` o ON (o.order_id = oc.order_id AND o.order_status_id > '0')";
+		LEFT JOIN `" . DB_PREFIX . "order` o ON (o.session_id = t.session_id AND o.order_status_id > '0')";
 
 		if ($conditions) {
 			$sql .= " WHERE " . implode(" AND ", $conditions);
