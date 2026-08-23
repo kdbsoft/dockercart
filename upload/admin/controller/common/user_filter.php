@@ -186,7 +186,9 @@ class ControllerCommonUserFilter extends Controller {
 			'blog_comment'      => 'extension/module/dockercart_blog',
 			'abandoned_cart'    => 'sale/order',
 			'warehouse_stock'   => 'warehouse/stock',
-			'warehouse_movement' => 'warehouse/movement'
+			'warehouse_movement' => 'warehouse/movement',
+			'warehouse_transfer' => 'warehouse/transfer',
+			'warehouse_supplier_orders' => 'warehouse/supplier_orders'
 		);
 
 		return $map[$entity] ?? '';
