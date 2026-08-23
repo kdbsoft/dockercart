@@ -61,33 +61,6 @@
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
-              <div><div class="dcx-panel-title">{{ text_module_settings }}</div></div>
-            </div>
-            <div class="dcx-panel-body">
-              <div class="dcx-fields">
-                <div class="dcx-field required">
-                  <label class="dcx-label">{{ entry_name }}</label>
-                  {% for language in languages %}
-                  <div class="dc-attr-row__value">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
-                    <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
-                  </div>
-                  {% endfor %}
-                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
-                </div>
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                  <select name="status" id="input-status" class="form-control">
-                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="dcx-panel form-row--spaced">
-            <div class="dcx-panel-head">
               <div class="dcx-panel-head__icon"><i data-lucide="languages" width="18" height="18"></i></div>
               <div><div class="dcx-panel-title">{{ text_multilingual_settings }}</div></div>
             </div>
@@ -143,25 +116,55 @@
         <div class="dcx-shell">
           <div class="dcx-sidebar-card">
             <div class="dcx-sidebar-card__header">
-              <div class="dcx-sidebar-card__header-icon"><i data-lucide="users" width="16" height="16"></i></div>
-              <h3 class="dcx-sidebar-card__title">{{ text_subscribers }}</h3>
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
             </div>
             <div class="dcx-sidebar-card__body">
               <div class="dcx-sidebar-card__field">
-                <label class="dcx-sidebar-card__label">{{ text_stats_total }}</label>
-                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_total }}</div>
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
               </div>
+            </div>
+          </div>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="tag" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_name_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__links">
+                {% for language in languages %}
+                <div class="dcx-sidebar-card__link-item">
+                  <label class="dcx-sidebar-card__link-label">
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    {{ language.name }}
+                  </label>
+                  <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                </div>
+                {% endfor %}
+              </div>
+              {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="wrench" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_tools_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
               <div class="dcx-sidebar-card__field">
-                <label class="dcx-sidebar-card__label">{{ text_stats_guest }}</label>
-                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_guest }}</div>
-              </div>
-              <div class="dcx-sidebar-card__field">
-                <label class="dcx-sidebar-card__label">{{ text_stats_customer }}</label>
-                <div style="font-size:20px;font-weight:600;color:var(--dc-text-dark);">{{ stats_customer }}</div>
-              </div>
-              <div class="dcx-sidebar-card__field" style="margin-top:12px;">
                 <button type="button" class="btn btn-default btn-sm btn-block" onclick="location='{{ export }}';"><i data-lucide="download" width="14" height="14"></i> {{ button_export }}</button>
-                <button type="button" class="btn btn-default btn-sm btn-block" style="margin-top:8px;" onclick="$('#import-modal').modal('show');"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <button type="button" class="btn btn-default btn-sm btn-block" onclick="$('#import-modal').modal('show');"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
               </div>
             </div>
           </div>
@@ -179,6 +182,20 @@
               <div><div class="dcx-panel-title">{{ text_subscribers }}</div></div>
             </div>
             <div class="dcx-panel-body">
+              <div class="dcx-stats">
+                <div class="dcx-stat">
+                  <div class="dcx-stat__value">{{ stats_total }}</div>
+                  <div class="dcx-stat__label">{{ text_stats_total }}</div>
+                </div>
+                <div class="dcx-stat">
+                  <div class="dcx-stat__value">{{ stats_guest }}</div>
+                  <div class="dcx-stat__label">{{ text_stats_guest }}</div>
+                </div>
+                <div class="dcx-stat">
+                  <div class="dcx-stat__value dcx-stat__value--success">{{ stats_customer }}</div>
+                  <div class="dcx-stat__label">{{ text_stats_customer }}</div>
+                </div>
+              </div>
               <form action="{{ filter_action }}" method="get" style="margin-bottom:15px;display:flex;gap:8px;flex-wrap:wrap;">
                 <input type="hidden" name="route" value="extension/module/dockercart_newsletter" />
                 <input type="hidden" name="user_token" value="{{ user_token }}" />
@@ -272,6 +289,18 @@
   </div>
 </div>
 <style>
+.dcx-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.dcx-stat {
+  flex: 1;
+  min-width: 110px;
+  padding: 14px 16px;
+  border: 1px solid var(--dc-border-soft);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+}
+.dcx-stat__value { font-size: 24px; font-weight: 700; color: var(--dc-text-dark); line-height: 1.1; }
+.dcx-stat__value--success { color: var(--dc-green-600); }
+.dcx-stat__label { font-size: 12px; color: var(--dc-text-muted); margin-top: 4px; }
 .dc-newsletter-list { display: flex; flex-direction: column; gap: 8px; }
 .dc-newsletter-item {
   display: flex;
