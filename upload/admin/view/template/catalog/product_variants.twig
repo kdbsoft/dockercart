@@ -48,6 +48,7 @@ function loadVariantMatrix() {
 		container.html('<div class="alert alert-info">{{ text_save_product_first|e("js") }}</div>');
 		$('#dc-variant-axes-section').hide();
 		$('#dc-variant-matrix-section').hide();
+		$('#dc-inventory-variants-col').hide();
 		return;
 	}
 
@@ -62,18 +63,21 @@ function loadVariantMatrix() {
 
 			if (json.error) {
 				container.html('<div class="alert alert-danger">' + json.error + '</div>');
+				$('#dc-inventory-variants-col').hide();
 				return;
 			}
 
 			dcCurrentDefaultId = json.default_variant_id || 0;
 			renderVariantMatrix(productId, json);
 			renderAxesSelector(productId, json);
+			renderInventoryVariants(json);
 
 			var axes = json.configurable_options || [];
 			dcAxisOptionIds = axes.map(function(a) { return parseInt(a.option_id); });
 		},
 		error: function() {
 			container.html('<div class="alert alert-danger">{{ text_load_error|e("js") }}</div>');
+			$('#dc-inventory-variants-col').hide();
 		}
 	});
 }
@@ -286,9 +290,11 @@ function renderVariantMatrix(productId, json) {
 	html += '</tbody>';
 	html += '</table>';
 	html += '</div>';
+	html += '<div class="dc-hscroll" id="dc-hscroll"><div class="dc-hscroll__spacer"></div></div>';
 
 	section.html(html);
 	lucide.createIcons();
+	bindHScrollProxy();
 }
 
 function buildVariantRow(productId, variant, axes, defaultVariantId) {
@@ -938,6 +944,10 @@ function saveVariantRow(rowIdx, onSuccess) {
 					row.removeClass('dc-state-flash');
 				}, 1500);
 
+				if (typeof dcInventorySync === 'function') {
+					dcInventorySync(parseInt(row.data('variant-id')) || 0, row.find('.dc-variant-qty').val());
+				}
+
 				if (typeof onSuccess === 'function') {
 					onSuccess();
 				}
@@ -1110,6 +1120,247 @@ $(window).on('beforeunload', function() {
 		return '{{ text_unsaved_changes|e("js") }}';
 	}
 });
+
+var dcInvTimers = {};
+var dcHScrollLock = false;
+var dcHScrollRO = null;
+
+function dcEscapeHtml(text) {
+	return $('<span></span>').text(text === undefined || text === null ? '' : String(text)).html();
+}
+
+function renderInventoryVariants(json) {
+	var col = $('#dc-inventory-variants-col');
+	var container = $('#dc-inventory-variants');
+	var axes = json.configurable_options || [];
+	var variants = json.variants || [];
+
+	if (!axes.length || !variants.length) {
+		container.html('');
+		col.hide();
+		return;
+	}
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	var html = '';
+	for (var v = 0; v < variants.length; v++) {
+		var variant = variants[v];
+		var labels = [];
+		if (variant.values) {
+			for (var j = 0; j < variant.values.length; j++) {
+				labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+			}
+		}
+
+		var vid = parseInt(variant.variant_id) || 0;
+		var qty = String(variant.quantity || '0');
+		var model = String(variant.model || '');
+
+		html += '<div class="dc-inv-row' + (variant.status == 1 ? '' : ' dc-inv-row--off') + '" data-variant-id="' + vid + '">';
+		if (model) {
+			html += '<span class="dc-inv-model" title="' + dcEscapeHtml(model) + '">' + dcEscapeHtml(model) + '</span>';
+		}
+		html += '<span class="dc-inv-name" title="' + dcEscapeHtml(labels.join(' / ')) + '">' + dcEscapeHtml(labels.join(' / ')) + '</span>';
+		html += '<input type="text" inputmode="decimal" class="form-control input-sm dc-inv-qty' + (parseFloat(qty) == 0 ? ' dc-zero' : '') + '" value="' + dcEscapeHtml(qty) + '" data-variant-id="' + vid + '" />';
+		html += '</div>';
+	}
+
+	container.html(html);
+	col.show();
+	updateInventoryTotal();
+}
+
+function dcInventorySync(variantId, quantity) {
+	if (!variantId) return;
+
+	var $input = $('#dc-inventory-variants .dc-inv-qty[data-variant-id="' + variantId + '"]');
+
+	if ($input.length && $input[0] !== document.activeElement) {
+		$input.val(quantity);
+		updateInventoryTotal();
+	}
+}
+
+function updateInventoryTotal() {
+	var total = 0;
+	var count = 0;
+
+	$('#dc-inventory-variants .dc-inv-row').each(function() {
+		var $row = $(this);
+		var $input = $row.find('.dc-inv-qty');
+		var num = parseFloat(String($input.val()).replace(',', '.')) || 0;
+
+		count++;
+		$input.toggleClass('dc-zero', num == 0);
+
+		if (!$row.hasClass('dc-inv-row--off')) {
+			total += num;
+		}
+	});
+
+	$('#dc-inv-badge').text(count);
+	$('#dc-inv-total').text(count ? '{{ text_variant_qty_total|e("js") }}'.replace('%s', Math.round(total * 100) / 100) : '');
+}
+
+function onInventoryQtyInput(input) {
+	var $row = $(input).closest('.dc-inv-row');
+	var vid = $(input).data('variant-id');
+
+	$row.removeClass('dc-inv-saving dc-inv-error dc-inv-flash').addClass('dc-inv-dirty');
+	updateInventoryTotal();
+
+	if (!vid) return;
+
+	if (dcInvTimers[vid]) {
+		clearTimeout(dcInvTimers[vid]);
+	}
+
+	dcInvTimers[vid] = setTimeout(function() {
+		delete dcInvTimers[vid];
+		saveInventoryQty(vid);
+	}, 600);
+}
+
+function saveInventoryQty(variantId) {
+	var $row = $('#dc-inventory-variants .dc-inv-row[data-variant-id="' + variantId + '"]');
+
+	if (!$row.length) return;
+
+	var quantity = $row.find('.dc-inv-qty').val();
+
+	$row.removeClass('dc-inv-dirty dc-inv-error dc-inv-flash').addClass('dc-inv-saving');
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantQuantity&user_token={{ user_token }}',
+		type: 'POST',
+		data: {
+			product_id: getDcProductId(),
+			variant_id: variantId,
+			quantity: quantity
+		},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				$row.removeClass('dc-inv-saving dc-inv-dirty').addClass('dc-inv-error');
+				showToast(json.error, 'error');
+				return;
+			}
+
+			$row.removeClass('dc-inv-saving dc-inv-dirty dc-inv-error').addClass('dc-inv-flash');
+			showToast('{{ text_saved|e("js") }}', 'success');
+			setTimeout(function() {
+				$row.removeClass('dc-inv-flash');
+			}, 1500);
+
+			syncMatrixQty(variantId, quantity);
+			updateInventoryTotal();
+		},
+		error: function() {
+			$row.removeClass('dc-inv-saving dc-inv-dirty').addClass('dc-inv-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
+		}
+	});
+}
+
+function syncMatrixQty(variantId, quantity) {
+	$('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"] .dc-variant-qty').val(quantity);
+}
+
+function bindHScrollProxy() {
+	var proxy = $('#dc-hscroll');
+	var wrapper = $('.dc-variant-scroll-wrapper');
+	var table = $('#dc-variant-table');
+
+	if (!proxy.length || !wrapper.length || !table.length) return;
+
+	function syncSpacer() {
+		proxy.find('.dc-hscroll__spacer').width(table.outerWidth());
+		proxy.scrollLeft(wrapper.scrollLeft());
+	}
+
+	wrapper.off('scroll.dchscroll').on('scroll.dchscroll', function() {
+		if (dcHScrollLock) return;
+		dcHScrollLock = true;
+		proxy.scrollLeft(wrapper.scrollLeft());
+		dcHScrollLock = false;
+	});
+
+	proxy.off('scroll.dchscroll').on('scroll.dchscroll', function() {
+		if (dcHScrollLock) return;
+		dcHScrollLock = true;
+		wrapper.scrollLeft(proxy.scrollLeft());
+		dcHScrollLock = false;
+	});
+
+	if (dcHScrollRO) {
+		dcHScrollRO.disconnect();
+	}
+
+	if (window.ResizeObserver) {
+		dcHScrollRO = new ResizeObserver(syncSpacer);
+		dcHScrollRO.observe(table[0]);
+	}
+
+	$(window).off('resize.dchscroll').on('resize.dchscroll', syncSpacer);
+
+	syncSpacer();
+}
+
+function dcAutoWidth(input, expand) {
+	var $input = $(input);
+
+	if (!expand) {
+		$input.css('width', '');
+		return;
+	}
+
+	var value = String($input.val() || $input.attr('placeholder') || '');
+
+	if (!value) {
+		$input.css('width', '');
+		return;
+	}
+
+	var $sizer = $('<span></span>').css({
+		position: 'absolute',
+		visibility: 'hidden',
+		whiteSpace: 'pre',
+		fontFamily: $input.css('fontFamily'),
+		fontSize: $input.css('fontSize'),
+		fontWeight: $input.css('fontWeight'),
+		letterSpacing: $input.css('letterSpacing')
+	}).appendTo('body').text(value);
+
+	var width = Math.ceil($sizer.width())
+		+ (parseFloat($input.css('paddingLeft')) || 0)
+		+ (parseFloat($input.css('paddingRight')) || 0)
+		+ (parseFloat($input.css('borderLeftWidth')) || 0)
+		+ (parseFloat($input.css('borderRightWidth')) || 0)
+		+ 2;
+
+	$sizer.remove();
+
+	$input.css('width', Math.max(width, 44) + 'px');
+}
+
+$(document).on('focusin input', '.dc-variant-model, .dc-variant-price, .dc-variant-qty, .dc-variant-weight, .dc-inv-qty, .dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn', function() {
+	dcAutoWidth(this, true);
+});
+
+$(document).on('focusout', '.dc-variant-model, .dc-variant-price, .dc-variant-qty, .dc-variant-weight, .dc-inv-qty, .dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn', function() {
+	dcAutoWidth(this, false);
+});
+
+$(document).on('input', '.dc-inv-qty', function() {
+	onInventoryQtyInput(this);
+});
 //--></script>
 
 <style>
@@ -1241,4 +1492,37 @@ $(window).on('beforeunload', function() {
 .dc-variant-table .btn-xs svg { width: 12px; height: 12px; }
 #dc-variant-matrix-section > .row .btn i[data-lucide],
 #dc-variant-matrix-section > .row .btn svg { width: 14px; height: 14px; }
+
+.dc-hscroll { position: sticky; bottom: 0; height: 14px; overflow-x: auto; overflow-y: hidden; z-index: 9; margin-top: -1px; }
+.dc-hscroll__spacer { height: 1px; }
+.dc-hscroll::-webkit-scrollbar { height: 12px; -webkit-appearance: none; }
+.dc-hscroll::-webkit-scrollbar-track { background: #eef1f5; border-radius: 6px; }
+.dc-hscroll::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 6px; border: 2px solid #eef1f5; }
+.dc-hscroll::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+
+.dc-inv-label { display: flex; align-items: center; gap: 6px; }
+.dc-inv-label svg { flex-shrink: 0; color: #868e96; }
+.dc-inv-badge { background: #eef2ff; color: #4c6ef5; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; line-height: 1.4; }
+.dc-inv-total { margin-left: auto; font-size: 12px; color: #495057; font-weight: 600; white-space: nowrap; }
+
+.dc-inv-block { border: 1px solid #dee2e6; border-radius: 6px; background: #fff; max-height: min(320px, 38vh); overflow-y: scroll; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #b6bec9 #eef1f5; }
+.dc-inv-block::-webkit-scrollbar { width: 10px; -webkit-appearance: none; }
+.dc-inv-block::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-inv-block::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-inv-block::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+
+.dc-inv-row { display: flex; align-items: center; gap: 8px; padding: 3px 10px; border-bottom: 1px solid #f1f3f5; border-left: 3px solid transparent; transition: background-color 0.15s, border-left-color 0.3s; }
+.dc-inv-row:last-child { border-bottom: none; }
+.dc-inv-row:hover { background: #f0f4ff; }
+.dc-inv-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #343a40; cursor: default; }
+.dc-inv-model { flex-shrink: 0; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #868e96; background: #f1f3f5; border-radius: 3px; padding: 1px 6px; cursor: default; }
+.dc-inv-row--off { opacity: 0.55; }
+.dc-inv-row--off .dc-inv-name { color: #adb5bd; }
+.dc-inv-qty { width: 70px; min-width: 70px; flex-shrink: 0; text-align: right; height: 26px; line-height: 1.4; padding: 2px 6px; font-size: 12px; }
+.dc-inv-qty.dc-zero { color: #dc3545; font-weight: 600; }
+
+.dc-inv-row.dc-inv-dirty { border-left-color: #ffc107; }
+.dc-inv-row.dc-inv-saving { border-left-color: #6c757d; opacity: 0.75; pointer-events: none; }
+.dc-inv-row.dc-inv-error { border-left-color: #dc3545; }
+.dc-inv-row.dc-inv-flash { border-left-color: #28a745; }
 </style>

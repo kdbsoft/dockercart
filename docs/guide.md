@@ -19,6 +19,7 @@
 13. [Order Multilingual Display](#13-order-multilingual-display)
 14. [Order Flow](#14-order-flow)
 15. [Product Returns (full / partial / exchange)](#15-product-returns-full--partial--exchange)
+16. [Warehouses & Dropshipping](#16-warehouses--dropshipping)
 
 ---
 
@@ -908,3 +909,96 @@ details in admin.
   descriptive field.
 - Emails to the customer still go through the `admin_mail_return` event when
   a return history entry is added with `notify = 1`.
+
+---
+
+## 16. Warehouses & Dropshipping
+
+Multi-warehouse stock, self-pickup and dropshipping (migration
+`20260823_warehouses.sql`, core library `system/library/dockercart_warehouse.php`).
+
+### Data model
+
+| Table | Purpose |
+|---|---|
+| `oc_warehouse` | Warehouse registry: type (`physical`/`virtual`/`dropship`), `is_default`, `priority`, `status`, address + geo, `prepare_days`, `low_stock`, self-pickup (`allow_pickup`, `pickup_cost`, `pickup_note`), dropship supplier block |
+| `oc_warehouse_schedule` | 7-weekday open flag per warehouse (`day_of_week` 1=Mon..7=Sun) |
+| `oc_warehouse_schedule_window` | Multiple pickup windows per weekday (`time_from`/`time_to`) |
+| `oc_warehouse_holiday` | `warehouse_id` 0 = shared holiday for all warehouses; `is_open` marks a "working holiday" |
+| `oc_warehouse_stock` | **Source of truth**: `warehouse_id` × `product_id` × `variant_id` (0 = base), `quantity`, `unlimited` (dropship), `lead_time` override |
+| `oc_warehouse_stock_movement` | Journal: signed `quantity`, `type` (`inbound`/`outbound`/`adjustment`/`transfer_in`/`transfer_out`/`order_subtract`/`order_restock`/`return`), `reference`, `order_id`, `transfer_id`, `user_id`, `comment` |
+| `oc_warehouse_transfer` / `_item` | Transfers between warehouses; `status` `pending → in_transit → completed/cancelled`; stock moves on `completed` |
+
+Existing tables altered:
+
+- `oc_stock_reservation` + `warehouse_id` — holds are scoped to the warehouse
+  the line was allocated to.
+- `oc_order_product` + `warehouse_id`, `warehouse_name`, `estimate_date`
+  (snapshot per line), and dropship-supplier fields `supplier_status`,
+  `supplier_ordered_date`, `supplier_tracking`.
+
+`oc_product.quantity` / `oc_product_variant.quantity` remain the denormalised
+**SUM cache** across warehouses (rewritten on every mutation via
+`recomputeTotals()`). All legacy reads (cart, lists, sorting, `hasStock`,
+badges) keep working. A dropship `unlimited` line contributes the sentinel
+`999999`.
+
+### Allocation
+
+`DockercartWarehouse::allocate($lines)`:
+
+- candidates = active warehouses whose `available ≥ qty` (dropship rows
+  participate only when `config_warehouse_dropship_checkout`), ordered
+  `priority DESC, sort_order ASC, id ASC`.
+- Default is **one warehouse per order**: the first candidate covering the
+  whole cart wins.
+- `config_warehouse_split_allowed=1` falls back to per-line allocation.
+- A forced warehouse (pickup choice, or a seller move) is preferred.
+- Returns `[line_key => warehouse_id]` + per-line estimated ship dates.
+
+`available = stock − SUM(active holds for that warehouse)`, with dropship
+rows returning `+INF`. Forced pickup (`pickup@W`) recomputes allocation onto
+that warehouse.
+
+### Schedule, holidays & estimates
+
+- `isWorkingDay(warehouse, dt)`: a specific holiday beats a shared holiday,
+  else the weekday schedule row; no row → default open Mon–Sat.
+- `estimateShipDate(warehouse, line, from)`: advance `prepare_days + lead_time`
+  **working days**, skipping closed days and holidays.
+- `nextPickupSlot(warehouse, from)`: nearest open day + window for self-pickup.
+
+### Checkout & orders
+
+- Reservation holds are scoped per warehouse (`dockercart_stock_reservation`
+  `reserve()` threads `warehouse_id` through each line).
+- Order creation (`catalog/model/checkout/order.php addOrder()` / `editOrder()`)
+  snapshots `warehouse_id`/`name`/`estimate_date` into `oc_order_product`.
+- Stock is **subtracted / restocked via `adjustStock()`** on the order line's
+  warehouse (processing/complete → subtract, reversal → restock; returns use
+  the original `oc_order_product.warehouse_id`). When warehouses are disabled
+  the legacy `oc_product`/`oc_product_variant` path runs unchanged.
+- Admin can move a line to another warehouse in order detail → `moveStock()`
+  + a movement journal entry (reference = order number) + updated snapshot.
+
+### Self-pickup
+
+The `dockercart_warehouse_pickup` shipping extension offers one quote per
+warehouse with `allow_pickup=1` that covers the cart. Choosing it forces the
+allocation to that warehouse. Quoted title includes address/phone and the
+nearest pickup slot.
+
+### Admin section
+
+Top-level **Warehouses** menu (ACL `warehouse/*`): warehouse CRUD (incl.
+schedule + holidays + pickup + dropship), stock matrix with AJAX cell editing,
+movement journal + per-position running balance, transfers, and dropship
+supplier orders (deadlines + CSV export).
+
+### Configuration
+
+`config_warehouse_enabled`, `_split_allowed`, `_stock_display`, `_show_pickup`,
+`_estimate_enabled`, `_dropship_checkout` (seeded in the migration, editable in
+Settings → Options → Warehouses). A daily scheduler task `warehouse_audit`
+(`bin/dockercart_warehouse_audit.php`) recomputes the caches and self-heals
+drift; the stock screen offers a manual "Recalculate totals" run.

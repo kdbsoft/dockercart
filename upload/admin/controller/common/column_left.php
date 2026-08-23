@@ -405,6 +405,60 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Warehouses (Склады)
+			$warehouse_children = array();
+
+			if ($this->user->hasPermission('access', 'warehouse/warehouse')) {
+				$warehouse_children[] = array(
+					'name'     => $this->language->get('text_warehouse_warehouses'),
+					'href'     => $this->url->link('warehouse/warehouse', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'warehouse',
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'warehouse/stock')) {
+				$warehouse_children[] = array(
+					'name'     => $this->language->get('text_warehouse_stock'),
+					'href'     => $this->url->link('warehouse/stock', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'boxes',
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'warehouse/movement')) {
+				$warehouse_children[] = array(
+					'name'     => $this->language->get('text_warehouse_movement'),
+					'href'     => $this->url->link('warehouse/movement', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'arrow-right-left',
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'warehouse/transfer')) {
+				$warehouse_children[] = array(
+					'name'     => $this->language->get('text_warehouse_transfer'),
+					'href'     => $this->url->link('warehouse/transfer', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'move-horizontal',
+					'children' => array()
+				);
+			}
+			if ($this->user->hasPermission('access', 'warehouse/supplier_orders')) {
+				$warehouse_children[] = array(
+					'name'     => $this->language->get('text_warehouse_supplier'),
+					'href'     => $this->url->link('warehouse/supplier_orders', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'     => 'truck',
+					'children' => array()
+				);
+			}
+
+			if ($warehouse_children) {
+				$data['menus'][] = array(
+					'id'       => 'menu-warehouse',
+					'icon'     => 'warehouse',
+					'name'     => $this->language->get('text_warehouse'),
+					'href'     => '',
+					'children' => $warehouse_children
+				);
+			}
+
 			// Design
 			$design = array();
 

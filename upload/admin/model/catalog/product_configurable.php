@@ -26,6 +26,10 @@ class ModelCatalogProductConfigurable extends Model {
 		return $this->lib()->updateVariant($variant_id, $data);
 	}
 
+	public function updateVariantQuantity($variant_id, $quantity) {
+		$this->lib()->updateVariantQuantity($variant_id, $quantity);
+	}
+
 	public function deleteVariant($variant_id) {
 		return $this->lib()->deleteVariant($variant_id);
 	}

@@ -225,6 +225,18 @@ class ProductConfigurable {
 		$this->touchProduct($product_id);
 	}
 
+	public function updateVariantQuantity($variant_id, $quantity) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = '" . (float)$quantity . "' WHERE variant_id = '" . (int)$variant_id . "'");
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
 	public function deleteVariant($variant_id) {
 		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
 

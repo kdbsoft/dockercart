@@ -62,6 +62,7 @@ $_['text_switch_to_combined'] = 'Switch to Combined Variants';
 $_['error_permission'] = 'Warning: You do not have permission to modify configurable products!';
 $_['error_product_id'] = 'Product ID is required!';
 $_['error_variant_id'] = 'Variant ID is required!';
+$_['error_variant_not_found'] = 'Variant not found for this product.';
 $_['error_variant_values'] = 'Please select values for all option axes.';
 $_['error_no_axes'] = 'Please configure at least one option axis before generating variants.';
 $_['error_variant_duplicate'] = 'A variant with this combination already exists.';

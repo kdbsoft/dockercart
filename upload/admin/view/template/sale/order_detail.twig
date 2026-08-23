@@ -126,6 +126,18 @@
                         <span class="order-product-card__option">· {{ option.name }}: {{ option.value }}</span>
                       {% endfor %}
                     {% endif %}
+                    {% if warehouses %}
+                      <span class="order-product-card__option warehouse-line">
+                        · <i data-lucide="warehouse" width="12" height="12"></i>
+                        <span class="warehouse-name" data-warehouse-id="{{ product.warehouse_id }}">{{ product.warehouse ? product.warehouse : '-' }}</span>
+                        <select class="form-control input-xs warehouse-move-select" style="display:none;width:auto;" data-order-product-id="{{ product.order_product_id }}" data-order-id="{{ product.order_id is defined ? product.order_id : order_id }}">
+                          <option value="">{{ text_move_warehouse }}</option>
+                          {% for warehouse in warehouses %}
+                          <option value="{{ warehouse.warehouse_id }}"{% if warehouse.warehouse_id == product.warehouse_id %} disabled="true"{% endif %}>{{ warehouse.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </span>
+                    {% endif %}
                   </div>
                   {% if product.discount_percent > 0 %}
                   <div class="order-product-card__discount">{{ product.discount_percent|round(1) }}% {{ text_discount }}</div>
@@ -2969,4 +2981,34 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 <div id="pcm-overlay" class="pcm-overlay" style="display:none"></div>
+<script type="text/javascript"><!--
+// Warehouse: reveal the move-to-warehouse selector, then submit the move.
+$(document).on('click', '.warehouse-name', function() {
+	$(this).hide();
+	$(this).closest('.warehouse-line').find('.warehouse-move-select').show();
+});
+$(document).on('change', '.warehouse-move-select', function() {
+	var $select = $(this);
+	var warehouseId = $select.val();
+	if (!warehouseId) { $select.hide(); $select.closest('.warehouse-line').find('.warehouse-name').show(); return; }
+
+	$.ajax({
+		url: '{{ move_warehouse_url }}',
+		type: 'post',
+		dataType: 'json',
+		data: {
+			order_id: $select.data('order-id'),
+			order_product_id: $select.data('order-product-id'),
+			warehouse_id: warehouseId
+		},
+		success: function(json) {
+			if (json['error']) { alert(json['error']); return; }
+			$select.hide();
+			$select.closest('.warehouse-line').find('.warehouse-name').attr('data-warehouse-id', json['warehouse_id']).text(json['warehouse_name']).show();
+			if (window.lucide) lucide.createIcons();
+		},
+		error: function() { alert('{{ text_warehouse_move_failed }}'); }
+	});
+});
+//--></script>
 {{ footer }}

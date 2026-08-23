@@ -170,6 +170,49 @@ class ControllerCatalogProductConfigurable extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	public function saveVariantQuantity() {
+		$this->load->language('catalog/product_configurable');
+		$this->load->model('catalog/product_configurable');
+
+		$json = array();
+
+		$product_id = isset($this->request->post['product_id']) ? (int)$this->request->post['product_id'] : 0;
+		$variant_id = isset($this->request->post['variant_id']) ? (int)$this->request->post['variant_id'] : 0;
+		$quantity = isset($this->request->post['quantity']) ? $this->request->post['quantity'] : '0';
+
+		if (!$this->user->hasPermission('modify', 'catalog/product_configurable')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!$json && !$product_id) {
+			$json['error'] = $this->language->get('error_product_id');
+		}
+
+		if (!$json && !$variant_id) {
+			$json['error'] = $this->language->get('error_variant_id');
+		}
+
+		if (!$json && $quantity !== '' && !is_numeric($quantity)) {
+			$json['error'] = $this->language->get('error_variant_quantity_numeric');
+		}
+
+		if (!$json) {
+			$variant = $this->model_catalog_product_configurable->getVariant($variant_id);
+
+			if (!$variant || (int)$variant['product_id'] !== $product_id) {
+				$json['error'] = $this->language->get('error_variant_not_found');
+			}
+		}
+
+		if (!$json) {
+			$this->model_catalog_product_configurable->updateVariantQuantity($variant_id, $quantity !== '' ? $quantity : 0);
+			$json['success'] = $this->language->get('text_saved');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function deleteVariant() {
 		$this->load->language('catalog/product_configurable');
 		$this->load->model('catalog/product_configurable');

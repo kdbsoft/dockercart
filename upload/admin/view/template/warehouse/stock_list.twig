@@ -1,0 +1,149 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <button type="button" id="btn-recalculate" class="btn btn-warning"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_recalculate }}</button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="alert alert-info alert-dismissible dcx-flash" style="display:none;"></div>
+    {{ user_filter }}
+
+    {% if rows %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <td>{{ column_warehouse }}</td>
+            <td>{{ column_product }}</td>
+            <td>{{ column_model }}</td>
+            <td>{{ column_variant }}</td>
+            <td class="text-right">{{ column_quantity }}</td>
+            <td class="text-center">{{ column_unlimited }}</td>
+            <td class="text-right">{{ column_lead_time }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td>
+              <a href="{{ warehouse_edit_url }}&warehouse_id={{ row.warehouse_id }}" target="_blank">{{ row.warehouse_name }}</a>
+            </td>
+            <td>
+              <a href="{{ product_edit_url }}&product_id={{ row.product_id }}" target="_blank">{{ row.product_name }}</a>
+            </td>
+            <td>{{ row.product_model }}</td>
+            <td>{{ row.variant_sku }}</td>
+            <td class="text-right">
+              <span class="editable-stock inline-edit" data-stock-id="{{ row.stock_id }}" data-mode="quantity" data-value="{{ row.quantity }}">{{ row.quantity }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+            </td>
+            <td class="text-center">
+              <input type="checkbox" class="editable-stock-toggle" data-stock-id="{{ row.stock_id }}" data-mode="unlimited"{% if row.unlimited %} checked="checked"{% endif %} />
+            </td>
+            <td class="text-right">
+              <span class="editable-stock inline-edit" data-stock-id="{{ row.stock_id }}" data-mode="lead_time" data-value="{{ row.lead_time }}">{{ row.lead_time }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% endif %}
+  </div>
+</div>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+
+function flashMessage(msg) {
+	$('.dcx-flash').text(msg).fadeIn(200).delay(2500).fadeOut(400);
+}
+
+function pushCellUpdate(data, onSuccess) {
+	$.ajax({
+		url: 'index.php?route=warehouse/stock/updateCell&user_token=' + userToken,
+		type: 'post',
+		dataType: 'json',
+		data: data,
+		success: function(json) {
+			if (json['error']) { flashMessage(json['error']); return; }
+			if (onSuccess) onSuccess();
+		},
+		error: function() { flashMessage('{{ text_network_error }}'); }
+	});
+}
+
+// Inline edit quantity / lead_time
+$(document).on('click', '.editable-stock', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, input').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+$(document).on('click', '.editable-stock .inline-edit-icon', function(e) {
+	e.stopPropagation();
+	var $span = $(this).closest('.editable-stock');
+	if ($span.find('input').length) return;
+	var mode = $span.data('mode');
+	var val = $span.data('value');
+	$span.addClass('editing');
+	$span.data('display', $span.html());
+	$span.html('<input type="number" step="any" class="form-control input-sm" value="' + val + '" style="width:110px;display:inline-block;">');
+	var $input = $span.find('input');
+	$input.focus().select();
+	$input.on('blur', function() { saveCell($span, mode, $input.val()); });
+	$input.on('keydown', function(ev) {
+		if (ev.which === 13) { ev.preventDefault(); saveCell($span, mode, $input.val()); }
+		if (ev.which === 27) { $span.removeClass('editing'); $span.html($span.data('display')); }
+	});
+});
+
+function saveCell($span, mode, value) {
+	$span.removeClass('editing');
+	pushCellUpdate({
+		stock_id: $span.data('stock-id'),
+		mode: mode,
+		value: value
+	}, function() {
+		$span.data('value', value);
+		$span.html(value + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+		lucide.createIcons({ nodes: [$span[0]] });
+	});
+}
+
+// Unlimited toggle
+$(document).on('change', '.editable-stock-toggle', function() {
+	var self = this;
+	pushCellUpdate({
+		stock_id: $(this).data('stock-id'),
+		mode: 'unlimited',
+		value: this.checked ? 1 : 0
+	}, function() {});
+});
+
+// Recalculate
+$('#btn-recalculate').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=warehouse/stock/recalculate&user_token=' + userToken,
+		dataType: 'json',
+		success: function(json) {
+			if (json['error']) { flashMessage(json['error']); return; }
+			flashMessage(json['totals_message']);
+		}
+	});
+});
+//--></script>
+{{ footer }}

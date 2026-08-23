@@ -26,6 +26,7 @@ $_['text_to']                 = 'До';
 $_['button_save']             = 'Зберегти';
 $_['button_cancel']           = 'Скасувати';
 $_['button_remove']           = 'Видалити';
+$_['button_clear_search']     = 'Скинути пошук';
 
 $_['error_permission']        = 'Увага: У вас немає прав на зміну!';
 $_['error_action']            = 'Увага: Не вдалося виконати дію!';

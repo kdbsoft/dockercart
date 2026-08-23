@@ -1,0 +1,32 @@
+<?php
+// Остатки по складам
+$_['heading_title'] = 'Остатки по складам';
+$_['text_list'] = 'Матрица остатков';
+$_['text_success'] = 'Успешно: Остатки обновлены!';
+$_['text_no_results'] = 'Строки остатков не найдены';
+$_['text_home'] = 'Главная';
+$_['text_pagination'] = 'Показано с %d по %d из %d (%d страниц)';
+$_['text_types'] = [];
+$_['text_recalculate'] = 'Пересчитать итоги';
+$_['text_recalculated'] = 'Пересчитано товаров: %d, исправлено дрейфов: %d.';
+$_['text_unlimited'] = 'Безлимит';
+$_['button_update'] = 'Обновить';
+$_['button_recalculate'] = 'Пересчитать';
+$_['column_warehouse'] = 'Склад';
+$_['column_product'] = 'Товар';
+$_['column_model'] = 'Код товара';
+$_['column_variant'] = 'Вариант';
+$_['column_quantity'] = 'Количество';
+$_['column_unlimited'] = 'Безлимит';
+$_['column_lead_time'] = 'Срок (дн)';
+$_['entry_warehouse'] = 'Склад';
+$_['entry_product'] = 'Товар';
+$_['entry_model'] = 'Код товара';
+$_['entry_sku'] = 'Артикул';
+$_['entry_quantity'] = 'Количество';
+$_['entry_unlimited'] = 'Безлимит';
+$_['entry_recalculate'] = 'Пересчитать';
+$_['text_all'] = 'Все';
+$_['text_search_placeholder'] = 'Поиск остатков по названию или коду товара...';
+$_['text_network_error'] = 'Сетевая ошибка.';
+$_['error_permission'] = 'Внимание: У вас нет прав для изменения остатков!';

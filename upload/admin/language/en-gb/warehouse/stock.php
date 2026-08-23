@@ -1,0 +1,32 @@
+<?php
+// Warehouse Stock
+$_['heading_title'] = 'Stock by Warehouse';
+$_['text_list'] = 'Stock Matrix';
+$_['text_success'] = 'Success: Stock updated!';
+$_['text_no_results'] = 'No stock rows found';
+$_['text_home'] = 'Home';
+$_['text_pagination'] = 'Showing %d to %d of %d (%d pages)';
+$_['text_types'] = [];
+$_['text_recalculate'] = 'Recalculate totals';
+$_['text_recalculated'] = 'Recalculated %d product(s), %d drift(s) corrected.';
+$_['text_unlimited'] = 'Unlimited';
+$_['button_update'] = 'Update';
+$_['button_recalculate'] = 'Recalculate';
+$_['column_warehouse'] = 'Warehouse';
+$_['column_product'] = 'Product';
+$_['column_model'] = 'Product Code';
+$_['column_variant'] = 'Variant';
+$_['column_quantity'] = 'Quantity';
+$_['column_unlimited'] = 'Unlimited';
+$_['column_lead_time'] = 'Lead time (d)';
+$_['entry_warehouse'] = 'Warehouse';
+$_['entry_product'] = 'Product';
+$_['entry_model'] = 'Product Code';
+$_['entry_sku'] = 'SKU';
+$_['entry_quantity'] = 'Quantity';
+$_['entry_unlimited'] = 'Unlimited';
+$_['entry_recalculate'] = 'Recalculate';
+$_['text_all'] = 'All';
+$_['text_search_placeholder'] = 'Search stock by product name or code...';
+$_['text_network_error'] = 'Network error.';
+$_['error_permission'] = 'Warning: You do not have permission to modify stock!';

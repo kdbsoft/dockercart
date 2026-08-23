@@ -212,3 +212,5 @@ $_["text_voucher_applied"] = "Ваучер успішно застосовано
 $_["text_voucher_removed"] = "Ваучер видалено";
 $_["text_your_details"] = "Ваші дані";
 $_["text_free"] = "Безкоштовно";
+$_["text_ships_from"] = "Відправляється:";
+$_["text_pickup_from"] = "Самовивіз:";
