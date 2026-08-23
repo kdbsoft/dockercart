@@ -1,12 +1,8 @@
 <?php
 // Замовлення постачальникам
 $_['heading_title'] = 'Замовлення постачальникам';
-$_['text_list'] = 'Дроп-рядки по постачальниках';
-$_['text_no_results'] = 'Дроп-рядки не знайдено';
 $_['text_home'] = 'Головна';
 $_['text_pagination'] = 'Показано з %d по %d із %d (%d сторінок)';
-$_['text_all_status'] = 'Усі статуси';
-$_['text_all_ordered'] = 'Усі';
 $_['text_ordered_pending'] = 'Не замовлено';
 $_['text_ordered_done'] = 'Замовлено';
 $_['text_line_pending'] = 'Очікує';
@@ -15,10 +11,19 @@ $_['text_line_shipped'] = 'Відвантажено';
 $_['text_mark_ordered'] = 'Позначити замовленим';
 $_['text_mark_shipped'] = 'Позначити відвантаженим';
 $_['text_overdue'] = 'Прострочено';
-$_['text_export'] = 'Експорт CSV';
+$_['text_kpi_pending'] = 'Очікують';
+$_['text_kpi_ordered'] = 'Замовлено';
+$_['text_kpi_shipped'] = 'Відвантажено';
+$_['text_kpi_overdue'] = 'Прострочено';
+$_['text_kpi_lines'] = 'дроп-рядків';
+$_['text_search_placeholder'] = 'Пошук за товаром чи замовленням...';
+$_['text_empty_title'] = 'Дроп-рядків ще немає';
+$_['text_empty_description'] = 'Рядки з’являються тут автоматично, коли замовлення містить товари дропшип-постачальника.';
+$_['text_days_overdue'] = 'прострочено на %d дн.';
+$_['text_days_left'] = 'залишилось %d дн.';
+$_['text_due_today'] = 'Спливає сьогодні';
+$_['text_network_error'] = 'Помилка мережі. Спробуйте ще раз.';
 $_['button_export'] = 'Експорт CSV';
-$_['button_mark_ordered'] = 'Замовлено';
-$_['button_mark_shipped'] = 'Відвантажено';
 $_['column_order'] = 'Замовлення';
 $_['column_supplier'] = 'Постачальник';
 $_['column_customer'] = 'Клієнт';

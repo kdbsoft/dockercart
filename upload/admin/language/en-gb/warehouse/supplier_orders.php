@@ -1,12 +1,8 @@
 <?php
 // Warehouse Supplier Orders
 $_['heading_title'] = 'Supplier Orders';
-$_['text_list'] = 'Dropship lines by supplier';
-$_['text_no_results'] = 'No dropship lines found';
 $_['text_home'] = 'Home';
 $_['text_pagination'] = 'Showing %d to %d of %d (%d pages)';
-$_['text_all_status'] = 'All statuses';
-$_['text_all_ordered'] = 'All';
 $_['text_ordered_pending'] = 'Not ordered';
 $_['text_ordered_done'] = 'Ordered';
 $_['text_line_pending'] = 'Pending';
@@ -15,10 +11,19 @@ $_['text_line_shipped'] = 'Shipped';
 $_['text_mark_ordered'] = 'Mark ordered';
 $_['text_mark_shipped'] = 'Mark shipped';
 $_['text_overdue'] = 'Overdue';
-$_['text_export'] = 'Export CSV';
+$_['text_kpi_pending'] = 'Pending';
+$_['text_kpi_ordered'] = 'Ordered';
+$_['text_kpi_shipped'] = 'Shipped';
+$_['text_kpi_overdue'] = 'Overdue';
+$_['text_kpi_lines'] = 'dropship lines';
+$_['text_search_placeholder'] = 'Search product or order...';
+$_['text_empty_title'] = 'No dropship lines yet';
+$_['text_empty_description'] = 'Lines appear here automatically once an order contains products shipped by a dropship supplier.';
+$_['text_days_overdue'] = '%d days overdue';
+$_['text_days_left'] = 'due in %d days';
+$_['text_due_today'] = 'Due today';
+$_['text_network_error'] = 'Network error. Please try again.';
 $_['button_export'] = 'Export CSV';
-$_['button_mark_ordered'] = 'Ordered';
-$_['button_mark_shipped'] = 'Shipped';
 $_['column_order'] = 'Order';
 $_['column_supplier'] = 'Supplier';
 $_['column_customer'] = 'Customer';

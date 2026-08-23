@@ -1,12 +1,8 @@
 <?php
 // Заказы поставщикам
 $_['heading_title'] = 'Заказы поставщикам';
-$_['text_list'] = 'Дроп-строки по поставщикам';
-$_['text_no_results'] = 'Дроп-строки не найдены';
 $_['text_home'] = 'Главная';
 $_['text_pagination'] = 'Показано с %d по %d из %d (%d страниц)';
-$_['text_all_status'] = 'Все статусы';
-$_['text_all_ordered'] = 'Все';
 $_['text_ordered_pending'] = 'Не заказано';
 $_['text_ordered_done'] = 'Заказано';
 $_['text_line_pending'] = 'Ожидает';
@@ -15,10 +11,19 @@ $_['text_line_shipped'] = 'Отгружено';
 $_['text_mark_ordered'] = 'Отметить заказанным';
 $_['text_mark_shipped'] = 'Отметить отгруженным';
 $_['text_overdue'] = 'Просрочено';
-$_['text_export'] = 'Экспорт CSV';
+$_['text_kpi_pending'] = 'Ожидают';
+$_['text_kpi_ordered'] = 'Заказано';
+$_['text_kpi_shipped'] = 'Отгружено';
+$_['text_kpi_overdue'] = 'Просрочено';
+$_['text_kpi_lines'] = 'дроп-строк';
+$_['text_search_placeholder'] = 'Поиск по товару или заказу...';
+$_['text_empty_title'] = 'Дроп-строк пока нет';
+$_['text_empty_description'] = 'Строки появляются здесь автоматически, когда заказ содержит товары дропшип-поставщика.';
+$_['text_days_overdue'] = 'просрочено на %d дн.';
+$_['text_days_left'] = 'осталось %d дн.';
+$_['text_due_today'] = 'Истекает сегодня';
+$_['text_network_error'] = 'Ошибка сети. Попробуйте ещё раз.';
 $_['button_export'] = 'Экспорт CSV';
-$_['button_mark_ordered'] = 'Заказано';
-$_['button_mark_shipped'] = 'Отгружено';
 $_['column_order'] = 'Заказ';
 $_['column_supplier'] = 'Поставщик';
 $_['column_customer'] = 'Клиент';
