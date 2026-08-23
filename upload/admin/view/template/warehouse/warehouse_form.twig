@@ -6,7 +6,16 @@
 				<div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
 					<a href="{{ cancel }}" class="page-header__link">
 						<span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
-						<span class="page-header__title">{{ text_form }}</span>
+						<span class="page-header__title">
+							{% if warehouse_name %}
+							{{ warehouse_name }}
+							<span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+								{{ status ? text_active : text_inactive }}
+							</span>
+							{% else %}
+							{{ text_form }}
+							{% endif %}
+						</span>
 					</a>
 					<div class="pull-right">
 						<button type="submit" form="form-warehouse" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
@@ -30,34 +39,26 @@
 			<div class="row">
 				<div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
 					<div class="dcx-shell">
-						{# General #}
+						{# Warehouse #}
 						<div class="dcx-panel">
 							<div class="dcx-panel-head">
 								<div class="dcx-panel-head__icon"><i data-lucide="warehouse" width="18" height="18"></i></div>
-								<div><div class="dcx-panel-title">{{ tab_general }}</div></div>
+								<div><div class="dcx-panel-title">{{ tab_warehouse }}</div></div>
 							</div>
 							<div class="dcx-panel-body">
-								<div class="dc-lang-frame">
-								<ul class="nav nav-tabs" id="language">
-									{% for language in languages %}
-									<li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-									{% endfor %}
-								</ul>
-								<div class="tab-content">
-									{% for language in languages %}
-									<div class="tab-pane" id="language{{ language.language_id }}">
-										<div class="dcx-fields">
-											<div class="dcx-field required">
-												<label class="dcx-label" for="input-name{{ language.language_id }}">{{ entry_name }}</label>
-												<input type="text" name="warehouse_description[{{ language.language_id }}][name]" value="{{ warehouse_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control{% if error_name[language.language_id] %} is-invalid{% endif %}" />
-												{% if error_name[language.language_id] %}
-												<div class="text-danger">{{ error_name[language.language_id] }}</div>
-												{% endif %}
-											</div>
+								<div class="dcx-fields">
+									<div class="dcx-field required">
+										<label class="dcx-label">{{ entry_name }}</label>
+										{% for language in languages %}
+										<div class="dc-attr-row__value">
+											<span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+											<input type="text" name="warehouse_description[{{ language.language_id }}][name]" value="{{ warehouse_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control{% if error_name[language.language_id] %} is-invalid{% endif %}" />
 										</div>
+										{% if error_name[language.language_id] %}
+										<div class="text-danger">{{ error_name[language.language_id] }}</div>
+										{% endif %}
+										{% endfor %}
 									</div>
-									{% endfor %}
-								</div>
 								</div>
 								<div class="dcx-fields">
 									<div class="dcx-field">
@@ -88,17 +89,32 @@
 							</div>
 							<div class="dcx-panel-body">
 								<div class="dcx-fields">
-									<div class="dcx-field">
-										<label class="dcx-label" for="input-city">{{ entry_city }}</label>
-										<input type="text" name="city" id="input-city" value="{{ city }}" class="form-control" />
+									<div class="dc-lang-frame">
+									<ul class="nav nav-tabs" id="language-address">
+										{% for language in languages %}
+										<li{% if loop.first %} class="active"{% endif %}><a href="#language-address{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+										{% endfor %}
+									</ul>
+									<div class="tab-content">
+										{% for language in languages %}
+										<div class="tab-pane{% if loop.first %} active{% endif %}" id="language-address{{ language.language_id }}">
+											<div class="dcx-fields">
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-city{{ language.language_id }}">{{ entry_city }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][city]" value="{{ warehouse_description[language.language_id].city }}" placeholder="{{ entry_city }}" id="input-city{{ language.language_id }}" class="form-control" />
+												</div>
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-address-1{{ language.language_id }}">{{ entry_address_1 }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][address_1]" value="{{ warehouse_description[language.language_id].address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1{{ language.language_id }}" class="form-control" />
+												</div>
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-address-2{{ language.language_id }}">{{ entry_address_2 }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][address_2]" value="{{ warehouse_description[language.language_id].address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2{{ language.language_id }}" class="form-control" />
+												</div>
+											</div>
+										</div>
+										{% endfor %}
 									</div>
-									<div class="dcx-field">
-										<label class="dcx-label" for="input-address-1">{{ entry_address_1 }}</label>
-										<input type="text" name="address_1" id="input-address-1" value="{{ address_1 }}" class="form-control" />
-									</div>
-									<div class="dcx-field">
-										<label class="dcx-label" for="input-address-2">{{ entry_address_2 }}</label>
-										<input type="text" name="address_2" id="input-address-2" value="{{ address_2 }}" class="form-control" />
 									</div>
 									<div class="dcx-field">
 										<label class="dcx-label" for="input-postcode">{{ entry_postcode }}</label>
@@ -205,29 +221,31 @@
 								</div>
 							</div>
 							<div class="dcx-panel-body">
-								<div class="dcx-fields">
-									<table class="table table-bordered">
-										<thead>
-											<tr>
-												<td>{{ entry_holiday_date }}</td>
-												<td>{{ entry_holiday_name }}</td>
-												<td>{{ entry_working_holiday }}</td>
-												<td></td>
-											</tr>
-										</thead>
-										<tbody class="holiday-rows">
-											{% for holiday in holiday %}
-											<tr>
-												<td><input type="date" name="holiday[{{ loop.index0 }}][date]" value="{{ holiday.date }}" class="form-control" /></td>
-												<td><input type="text" name="holiday[{{ loop.index0 }}][name]" value="{{ holiday.name }}" class="form-control" /></td>
-												<td><input type="checkbox" name="holiday[{{ loop.index0 }}][is_open]" value="1"{% if holiday.is_open %} checked="checked"{% endif %} /></td>
-												<td><button type="button" class="btn btn-danger btn-xs remove-holiday"><i data-lucide="trash-2" width="12" height="12"></i></button></td>
-											</tr>
+								<div class="dcx-holiday-list holiday-rows">
+									{% for holiday in holiday %}
+									<div class="dcx-holiday-card" data-idx="{{ loop.index0 }}">
+										<div class="dcx-holiday-card__main">
+											<div class="dcx-field">
+												<label class="dcx-label" for="input-holiday-date-{{ loop.index0 }}">{{ entry_holiday_date }}</label>
+												<input type="date" name="holiday[{{ loop.index0 }}][date]" value="{{ holiday.date }}" id="input-holiday-date-{{ loop.index0 }}" class="form-control" />
+											</div>
+											<label class="dcx-checkbox-label">
+												<input type="checkbox" name="holiday[{{ loop.index0 }}][is_open]" value="1"{% if holiday.is_open %} checked="checked"{% endif %} /> {{ entry_working_holiday }}
+											</label>
+											<button type="button" class="dcx-holiday-card__remove remove-holiday" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+										</div>
+										<div class="dcx-holiday-card__names">
+											{% for language in languages %}
+											<div class="dc-attr-row__value">
+												<span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+												<input type="text" name="holiday[{{ loop.parent.loop.index0 }}][description][{{ language.language_id }}][name]" value="{{ holiday.description[language.language_id].name }}" placeholder="{{ entry_holiday_name }}" class="form-control" />
+											</div>
 											{% endfor %}
-										</tbody>
-									</table>
-									<button type="button" id="btn-add-holiday" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add }}</button>
+										</div>
+									</div>
+									{% endfor %}
 								</div>
+								<button type="button" id="btn-add-holiday" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add }}</button>
 							</div>
 						</div>
 					</div>
@@ -414,35 +432,69 @@ $('#btn-schedule-clear').on('click', function() {
 	$('.dcx-schedule__window').remove();
 });
 
-// Holidays: add / remove
-$('#btn-add-holiday').on('click', function() {
-	var idx = $('.holiday-rows tr').length;
-	$('.holiday-rows').append('<tr><td><input type="date" name="holiday[' + idx + '][date]" value="" class="form-control" /></td><td><input type="text" name="holiday[' + idx + '][name]" value="" class="form-control" /></td><td><input type="checkbox" name="holiday[' + idx + '][is_open]" value="1" /></td><td><button type="button" class="btn btn-danger btn-xs remove-holiday"><i data-lucide="trash-2" width="12" height="12"></i></button></td></tr>');
-	renumberHolidays();
-	lucide.createIcons();
-});
-$(document).on('click', '.remove-holiday', function() {
-	$(this).closest('tr').remove();
-	renumberHolidays();
-});
+// Holidays: cards (date + working-day + per-language name rows)
+var dcLanguages = {{ languages|json_encode()|raw }};
+
+function buildHolidayCard(idx, date, isOpen, descriptions) {
+	descriptions = descriptions || {};
+	var checked = isOpen ? ' checked="checked"' : '';
+	var names = '';
+	$.each(dcLanguages, function(i, lang) {
+		var code = lang.code.split('-')[0].toUpperCase();
+		var val = (descriptions[lang.language_id] && descriptions[lang.language_id].name) ? descriptions[lang.language_id].name : '';
+		val = $('<div/>').text(val).html();
+		names += '<div class="dc-attr-row__value">'
+			+ '<span class="lang-code">' + code + '</span>'
+			+ '<input type="text" name="holiday[' + idx + '][description][' + lang.language_id + '][name]" value="' + val + '" placeholder="{{ entry_holiday_name }}" class="form-control" />'
+			+ '</div>';
+	});
+	return '<div class="dcx-holiday-card" data-idx="' + idx + '">'
+		+ '<div class="dcx-holiday-card__main">'
+		+ '<div class="dcx-field"><label class="dcx-label" for="input-holiday-date-' + idx + '">{{ entry_holiday_date }}</label>'
+		+ '<input type="date" name="holiday[' + idx + '][date]" value="' + date + '" id="input-holiday-date-' + idx + '" class="form-control" /></div>'
+		+ '<label class="dcx-checkbox-label"><input type="checkbox" name="holiday[' + idx + '][is_open]" value="1"' + checked + ' /> {{ entry_working_holiday }}</label>'
+		+ '<button type="button" class="dcx-holiday-card__remove remove-holiday" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>'
+		+ '</div>'
+		+ '<div class="dcx-holiday-card__names">' + names + '</div>'
+		+ '</div>';
+}
+
 function renumberHolidays() {
-	$('.holiday-rows tr').each(function(i) {
-		$(this).find('input[type="date"]').attr('name', 'holiday[' + i + '][date]');
-		$(this).find('input[type="text"]').attr('name', 'holiday[' + i + '][name]');
-		$(this).find('input[type="checkbox"]').attr('name', 'holiday[' + i + '][is_open]');
+	$('.holiday-rows .dcx-holiday-card').each(function(i) {
+		var $card = $(this);
+		$card.attr('data-idx', i);
+		$card.find('input[type="date"]').attr('name', 'holiday[' + i + '][date]').attr('id', 'input-holiday-date-' + i);
+		$card.find('input[type="checkbox"]').attr('name', 'holiday[' + i + '][is_open]');
+		$.each(dcLanguages, function(j, lang) {
+			$card.find('input[name*="[description][' + lang.language_id + ']"]').attr('name', 'holiday[' + i + '][description][' + lang.language_id + '][name]');
+		});
 	});
 }
 
-// Copy shared holidays
+$('#btn-add-holiday').on('click', function() {
+	var idx = $('.holiday-rows .dcx-holiday-card').length;
+	var $card = $(buildHolidayCard(idx, '', false, {}));
+	$('.holiday-rows').append($card);
+	renumberHolidays();
+	lucide.createIcons();
+});
+
+$(document).on('click', '.remove-holiday', function() {
+	$(this).closest('.dcx-holiday-card').remove();
+	renumberHolidays();
+});
+
+// Copy shared holidays (incl. translations)
 $('#btn-copy-shared').on('click', function() {
 	$.ajax({
 		url: '{{ shared_holidays_url }}',
 		dataType: 'json',
 		success: function(json) {
 			if (!json['success']) return;
-			var idx = $('.holiday-rows tr').length;
+			var idx = $('.holiday-rows .dcx-holiday-card').length;
 			$.each(json['holidays'], function(k, h) {
-				$('.holiday-rows').append('<tr><td><input type="date" name="holiday[' + idx + '][date]" value="' + h.date + '" class="form-control" /></td><td><input type="text" name="holiday[' + idx + '][name]" value="' + h.name + '" class="form-control" /></td><td><input type="checkbox" name="holiday[' + idx + '][is_open]" value="1"' + (h.is_open ? ' checked' : '') + ' /></td><td><button type="button" class="btn btn-danger btn-xs remove-holiday"><i data-lucide="trash-2" width="12" height="12"></i></button></td></tr>');
+				var $card = $(buildHolidayCard(idx, h.date, h.is_open, h.description || {}));
+				$('.holiday-rows').append($card);
 				idx++;
 			});
 			renumberHolidays();
@@ -451,6 +503,6 @@ $('#btn-copy-shared').on('click', function() {
 	});
 });
 
-$('#language a:first').tab('show');
+$('#language-address a:first').tab('show');
 //--></script>
 {{ footer }}

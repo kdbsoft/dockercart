@@ -49,7 +49,7 @@ class DockercartWarehouse {
 	 * ASC. When the feature is disabled only the legacy default is returned.
 	 */
 	public function getWarehouses(): array {
-		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE w.`status` = '1' ORDER BY w.`priority` DESC, w.`sort_order` ASC, w.`warehouse_id` ASC";
+		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name, COALESCE(wd.city, w.city) AS city, COALESCE(wd.address_1, w.address_1) AS address_1, COALESCE(wd.address_2, w.address_2) AS address_2 FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE w.`status` = '1' ORDER BY w.`priority` DESC, w.`sort_order` ASC, w.`warehouse_id` ASC";
 
 		$query = $this->db->query($sql);
 
@@ -60,7 +60,7 @@ class DockercartWarehouse {
 	 * All warehouses regardless of status (admin lists).
 	 */
 	public function getAllWarehouses(): array {
-		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') ORDER BY w.`is_default` DESC, w.`priority` DESC, w.`sort_order` ASC, w.`warehouse_id` ASC";
+		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name, COALESCE(wd.city, w.city) AS city, COALESCE(wd.address_1, w.address_1) AS address_1, COALESCE(wd.address_2, w.address_2) AS address_2 FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') ORDER BY w.`is_default` DESC, w.`priority` DESC, w.`sort_order` ASC, w.`warehouse_id` ASC";
 
 		$query = $this->db->query($sql);
 
@@ -71,7 +71,7 @@ class DockercartWarehouse {
 	 * Single warehouse by id, or null.
 	 */
 	public function getWarehouse(int $warehouse_id): ?array {
-		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE w.`warehouse_id` = '" . (int)$warehouse_id . "'";
+		$sql = "SELECT w.*, COALESCE(wd.name, w.name) AS name, COALESCE(wd.city, w.city) AS city, COALESCE(wd.address_1, w.address_1) AS address_1, COALESCE(wd.address_2, w.address_2) AS address_2 FROM `" . DB_PREFIX . "warehouse` w LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE w.`warehouse_id` = '" . (int)$warehouse_id . "'";
 
 		$query = $this->db->query($sql);
 

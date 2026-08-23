@@ -18,9 +18,9 @@ class ModelWarehouseWarehouse extends Model {
 			`priority` = '" . (int)($data['priority'] ?? 0) . "',
 			`status` = '" . (int)!empty($data['status']) . "',
 			`sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
-			`address_1` = '" . $this->db->escape((string)($data['address_1'] ?? '')) . "',
-			`address_2` = '" . $this->db->escape((string)($data['address_2'] ?? '')) . "',
-			`city` = '" . $this->db->escape((string)($data['city'] ?? '')) . "',
+			`address_1` = '" . $this->db->escape($this->resolveBaseAddress($data)['address_1']) . "',
+			`address_2` = '" . $this->db->escape($this->resolveBaseAddress($data)['address_2']) . "',
+			`city` = '" . $this->db->escape($this->resolveBaseAddress($data)['city']) . "',
 			`postcode` = '" . $this->db->escape((string)($data['postcode'] ?? '')) . "',
 			`country_id` = '" . (int)($data['country_id'] ?? 0) . "',
 			`zone_id` = '" . (int)($data['zone_id'] ?? 0) . "',
@@ -68,9 +68,9 @@ class ModelWarehouseWarehouse extends Model {
 			`priority` = '" . (int)($data['priority'] ?? 0) . "',
 			`status` = '" . (int)!empty($data['status']) . "',
 			`sort_order` = '" . (int)($data['sort_order'] ?? 0) . "',
-			`address_1` = '" . $this->db->escape((string)($data['address_1'] ?? '')) . "',
-			`address_2` = '" . $this->db->escape((string)($data['address_2'] ?? '')) . "',
-			`city` = '" . $this->db->escape((string)($data['city'] ?? '')) . "',
+			`address_1` = '" . $this->db->escape($this->resolveBaseAddress($data)['address_1']) . "',
+			`address_2` = '" . $this->db->escape($this->resolveBaseAddress($data)['address_2']) . "',
+			`city` = '" . $this->db->escape($this->resolveBaseAddress($data)['city']) . "',
 			`postcode` = '" . $this->db->escape((string)($data['postcode'] ?? '')) . "',
 			`country_id` = '" . (int)($data['country_id'] ?? 0) . "',
 			`zone_id` = '" . (int)($data['zone_id'] ?? 0) . "',
@@ -125,6 +125,7 @@ class ModelWarehouseWarehouse extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_description` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_schedule` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_holiday_description` WHERE `holiday_id` IN (SELECT `holiday_id` FROM `" . DB_PREFIX . "warehouse_holiday` WHERE `warehouse_id` = '" . (int)$warehouse_id . "')");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_holiday` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
 
@@ -238,7 +239,54 @@ class ModelWarehouseWarehouse extends Model {
 	public function getHolidayRows(int $warehouse_id): array {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_holiday` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' ORDER BY `date` ASC");
 
-		return $query->rows;
+		return $this->attachHolidayDescriptions($query->rows);
+	}
+
+	/**
+	 * Per-language names for a single holiday, keyed by language_id.
+	 */
+	public function getHolidayDescriptions(int $holiday_id): array {
+		$descriptions = [];
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_holiday_description` WHERE `holiday_id` = '" . (int)$holiday_id . "'");
+
+		foreach ($query->rows as $result) {
+			$descriptions[(int)$result['language_id']] = ['name' => $result['name']];
+		}
+
+		return $descriptions;
+	}
+
+	/**
+	 * Attach a `description` key (language_id => name) to each holiday row.
+	 */
+	protected function attachHolidayDescriptions(array $rows): array {
+		if (!$rows) {
+			return $rows;
+		}
+
+		$ids = array_map(static fn($r) => (int)$r['holiday_id'], $rows);
+		$in = implode(',', $ids);
+
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_holiday_description` WHERE `holiday_id` IN (" . $in . ")");
+
+		$by_holiday = [];
+
+		foreach ($query->rows as $result) {
+			$by_holiday[(int)$result['holiday_id']][(int)$result['language_id']] = $result['name'];
+		}
+
+		foreach ($rows as &$row) {
+			$descriptions = [];
+
+			foreach ($by_holiday[(int)$row['holiday_id']] ?? [] as $language_id => $name) {
+				$descriptions[$language_id] = ['name' => $name];
+			}
+
+			$row['description'] = $descriptions;
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -250,7 +298,12 @@ class ModelWarehouseWarehouse extends Model {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_description` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
 
 		foreach ($query->rows as $result) {
-			$description_data[(int)$result['language_id']] = ['name' => $result['name']];
+			$description_data[(int)$result['language_id']] = [
+				'name' => $result['name'],
+				'city' => $result['city'],
+				'address_1' => $result['address_1'],
+				'address_2' => $result['address_2'],
+			];
 		}
 
 		return $description_data;
@@ -263,7 +316,7 @@ class ModelWarehouseWarehouse extends Model {
 			}
 
 			$this->db->query("DELETE FROM `" . DB_PREFIX . "warehouse_description` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `language_id` = '" . (int)$language_id . "'");
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_description` SET `warehouse_id` = '" . (int)$warehouse_id . "', `language_id` = '" . (int)$language_id . "', `name` = '" . $this->db->escape((string)$description['name']) . "'");
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_description` SET `warehouse_id` = '" . (int)$warehouse_id . "', `language_id` = '" . (int)$language_id . "', `name` = '" . $this->db->escape((string)$description['name']) . "', `city` = '" . $this->db->escape((string)($description['city'] ?? '')) . "', `address_1` = '" . $this->db->escape((string)($description['address_1'] ?? '')) . "', `address_2` = '" . $this->db->escape((string)($description['address_2'] ?? '')) . "'");
 		}
 	}
 
@@ -293,12 +346,42 @@ class ModelWarehouseWarehouse extends Model {
 	}
 
 	/**
+	 * Denormalised base address = default-language description values (first
+	 * non-empty as last resort). Keeps the storefront pickup method working
+	 * without per-language joins when no translation exists.
+	 */
+	protected function resolveBaseAddress(array $data): array {
+		$descriptions = isset($data['warehouse_description']) && is_array($data['warehouse_description']) ? $data['warehouse_description'] : [];
+		$default_language_id = (int)$this->config->get('config_language_id');
+
+		$pick = function (string $key) use ($descriptions, $default_language_id): string {
+			if (!empty($descriptions[$default_language_id][$key])) {
+				return (string)$descriptions[$default_language_id][$key];
+			}
+
+			foreach ($descriptions as $description) {
+				if (!empty($description[$key])) {
+					return (string)$description[$key];
+				}
+			}
+
+			return '';
+		};
+
+		return [
+			'city' => $pick('city'),
+			'address_1' => $pick('address_1'),
+			'address_2' => $pick('address_2'),
+		];
+	}
+
+	/**
 	 * Shared holidays (warehouse_id = 0).
 	 */
 	public function getSharedHolidays(): array {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_holiday` WHERE `warehouse_id` = '0' ORDER BY `date` ASC");
 
-		return $query->rows;
+		return $this->attachHolidayDescriptions($query->rows);
 	}
 
 	protected function saveSchedule(int $warehouse_id, array $schedule): void {
@@ -330,7 +413,48 @@ class ModelWarehouseWarehouse extends Model {
 				continue;
 			}
 
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_holiday` SET `warehouse_id` = '" . (int)$warehouse_id . "', `date` = '" . $this->db->escape($holiday['date']) . "', `name` = '" . $this->db->escape((string)($holiday['name'] ?? '')) . "', `is_open` = '" . (int)!empty($holiday['is_open']) . "' ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `is_open` = VALUES(`is_open`)");
+			$base_name = $this->resolveBaseHolidayName($holiday);
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_holiday` SET `warehouse_id` = '" . (int)$warehouse_id . "', `date` = '" . $this->db->escape($holiday['date']) . "', `name` = '" . $this->db->escape($base_name) . "', `is_open` = '" . (int)!empty($holiday['is_open']) . "'");
+
+			$holiday_id = $this->db->getLastId();
+
+			$this->saveHolidayDescriptions($holiday_id, $holiday['description'] ?? []);
+		}
+	}
+
+	/**
+	 * Denormalised base name = default-language description name (first
+	 * non-empty as last resort). Keeps the base `name` column meaningful
+	 * without joins, mirroring resolveBaseName() for warehouses.
+	 */
+	protected function resolveBaseHolidayName(array $holiday): string {
+		$descriptions = isset($holiday['description']) && is_array($holiday['description']) ? $holiday['description'] : [];
+
+		if ($descriptions) {
+			$default_language_id = (int)$this->config->get('config_language_id');
+
+			if (!empty($descriptions[$default_language_id]['name'])) {
+				return (string)$descriptions[$default_language_id]['name'];
+			}
+
+			foreach ($descriptions as $description) {
+				if (!empty($description['name'])) {
+					return (string)$description['name'];
+				}
+			}
+		}
+
+		return (string)($holiday['name'] ?? '');
+	}
+
+	protected function saveHolidayDescriptions(int $holiday_id, array $descriptions): void {
+		foreach ($descriptions as $language_id => $description) {
+			if (!is_array($description) || !isset($description['name'])) {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_holiday_description` SET `holiday_id` = '" . (int)$holiday_id . "', `language_id` = '" . (int)$language_id . "', `name` = '" . $this->db->escape((string)$description['name']) . "'");
 		}
 	}
 

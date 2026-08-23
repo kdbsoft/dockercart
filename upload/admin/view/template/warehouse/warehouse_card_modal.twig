@@ -1,0 +1,126 @@
+<div class="pcm">
+  <div class="pcm-header">
+    <div class="pcm-avatar"><i data-lucide="warehouse" width="26" height="26"></i></div>
+    <div class="pcm-info">
+      <a href="{{ href }}" target="_blank" class="pcm-name">{{ name }}</a>
+      <div class="pcm-sub">
+        {% if type %}<span class="pcm-badge">{{ type }}</span>{% endif %}
+        <span class="pcm-stock{% if status %} pcm-stock--in{% else %} pcm-stock--out{% endif %}">{% if status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}</span>
+        {% if is_default %}<span class="pcm-badge pcm-badge--accent">{{ text_default }}</span>{% endif %}
+        {% if priority %}<span>{{ column_priority }}: {{ priority }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if address or phone or email or map_url %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_card_address }}</div>
+    {% if address %}
+    <div class="whc-line"><i data-lucide="map-pin" width="14" height="14"></i><span>{{ address }}</span></div>
+    {% endif %}
+    {% if phone %}
+    <div class="whc-line"><i data-lucide="phone" width="14" height="14"></i><span>{{ phone }}</span></div>
+    {% endif %}
+    {% if email %}
+    <div class="whc-line"><i data-lucide="mail" width="14" height="14"></i><span>{{ email }}</span></div>
+    {% endif %}
+    {% if map_url %}
+    <a class="whc-line whc-line--link" href="{{ map_url }}" target="_blank"><i data-lucide="external-link" width="14" height="14"></i><span>{{ text_card_map }}</span></a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if allow_pickup %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_card_pickup }}</div>
+    <table class="pcm-attrs">
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_pickup_cost }}</td>
+        <td>{{ pickup_cost }}</td>
+      </tr>
+      {% if prepare_days %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_prepare_days }}</td>
+        <td>{{ prepare_days }}</td>
+      </tr>
+      {% endif %}
+      {% if pickup_note %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_pickup_note }}</td>
+        <td>{{ pickup_note }}</td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+  {% endif %}
+
+  {% if supplier_name or supplier_phone or supplier_email or supplier_note or supplier_lead_time or type_code == 'dropship' %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_card_supplier }}</div>
+    <table class="pcm-attrs">
+      {% if supplier_name %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_supplier_name }}</td>
+        <td>{{ supplier_name }}</td>
+      </tr>
+      {% endif %}
+      {% if supplier_phone %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_supplier_phone }}</td>
+        <td>{{ supplier_phone }}</td>
+      </tr>
+      {% endif %}
+      {% if supplier_email %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_supplier_email }}</td>
+        <td>{{ supplier_email }}</td>
+      </tr>
+      {% endif %}
+      {% if supplier_lead_time %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_supplier_lead_time }}</td>
+        <td>{{ supplier_lead_time }}</td>
+      </tr>
+      {% endif %}
+      {% if supplier_note %}
+      <tr>
+        <td class="pcm-attrs__name">{{ entry_supplier_note }}</td>
+        <td>{{ supplier_note }}</td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_card_schedule }}</div>
+    <table class="pcm-attrs">
+      {% for day in schedule %}
+      <tr>
+        <td class="pcm-attrs__name">{{ day.day }}</td>
+        <td>{% if day.open %}{% if day.time %}{{ day.time }}{% else %}&mdash;{% endif %}{% else %}<span class="whc-closed">{{ text_card_closed }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  {% if positions %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_card_stats }}</div>
+    <div class="whc-stats">
+      <div class="whc-stat">
+        <div class="whc-stat__value">{{ positions }}</div>
+        <div class="whc-stat__label">{{ text_card_positions }}</div>
+      </div>
+      <div class="whc-stat">
+        <div class="whc-stat__value">{{ total_quantity }}</div>
+        <div class="whc-stat__label">{{ text_card_total_quantity }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="pcm-section">
+    <a href="{{ href }}" target="_blank" class="btn btn-primary btn-sm btn-block"><i data-lucide="pencil" width="14" height="14"></i> {{ button_edit }}</a>
+  </div>
+</div>
