@@ -1,12 +1,22 @@
 {{ header }}
 {{ column_left }}
 <div id="content">
+  {% set type_badges = {
+    'inbound': 'label-success',
+    'outbound': 'label-danger',
+    'adjustment': 'label-warning',
+    'transfer_in': 'label-info',
+    'transfer_out': 'label-info',
+    'order_subtract': 'label-default',
+    'order_restock': 'label-primary',
+    'return': 'label-primary'
+  } %}
   <div class="page-header">
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <button type="submit" form="form-movement" class="btn btn-primary"><i data-lucide="arrow-right-left" width="16" height="16"></i> {{ text_add }}</button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-movement"><i data-lucide="arrow-right-left" width="16" height="16"></i> {{ text_add_movement }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -25,121 +35,68 @@
     </div>
     {% endif %}
 
-    <div class="dcx-shell">
-      <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i data-lucide="arrow-right-left" width="18" height="18"></i></div>
-          <div><div class="dcx-panel-title">{{ text_add_movement }}</div></div>
-        </div>
-        <div class="dcx-panel-body">
-          <form action="{{ add }}" method="post" enctype="multipart/form-data" id="form-movement">
-            <div class="dcx-fields">
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-warehouse">{{ entry_warehouse }}</label>
-                <select name="warehouse_id" id="input-warehouse" class="form-control">
-                  <option value="0">--</option>
-                  {% for warehouse in warehouses %}
-                  <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
-                  {% endfor %}
-                </select>
-                {% if error_warehouse %}<div class="text-danger">{{ error_warehouse }}</div>{% endif %}
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-type">{{ entry_type }}</label>
-                <select name="type" id="input-type" class="form-control">
-                  {% for key, label in types %}
-                  <option value="{{ key }}">{{ label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-product">{{ entry_product }}</label>
-                <input type="text" name="product" id="input-product" value="" placeholder="{{ entry_product_id }}" class="form-control" />
-                <input type="hidden" name="product_id" id="input-product-id" value="" />
-                <input type="hidden" name="variant_id" id="input-variant-id" value="0" />
-              </div>
-              <div class="dcx-field required">
-                <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
-                <input type="number" name="quantity" id="input-quantity" value="" class="form-control" style="max-width:160px;" min="0" step="any" />
-                {% if error_quantity %}<div class="text-danger">{{ error_quantity }}</div>{% endif %}
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-reference">{{ entry_reference }}</label>
-                <input type="text" name="reference" id="input-reference" value="" class="form-control" />
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-comment">{{ entry_comment }}</label>
-                <input type="text" name="comment" id="input-comment" value="" class="form-control" />
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="dcx-shell">
-      <div class="dcx-panel dcx-panel--flush">
-        <div class="dcx-panel-body">
-          <form class="form-inline dcx-filter" method="get">
-            <input type="hidden" name="route" value="warehouse/movement" />
-            <input type="hidden" name="user_token" value="{{ user_token }}" />
-            {% for key, value in filter %}
-            {% if key starts with 'filter_' %}<input type="hidden" name="{{ key }}" value="{{ value }}" />{% endif %}
-            {% endfor %}
-            <div class="form-group">
-              <label class="control-label">{{ entry_warehouse }}</label>
-              <select name="filter_warehouse_id" class="form-control">
-                <option value="">--</option>
-                {% for warehouse in warehouses %}
-                <option value="{{ warehouse.warehouse_id }}"{% if filter.filter_warehouse_id == warehouse.warehouse_id %} selected="selected"{% endif %}>{{ warehouse.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="control-label">{{ entry_type }}</label>
-              <select name="filter_type" class="form-control">
-                <option value="">--</option>
-                {% for key, label in types %}
-                <option value="{{ key }}"{% if filter.filter_type == key %} selected="selected"{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="control-label">{{ entry_order_id }}</label>
-              <input type="text" name="filter_order_id" value="{{ filter.filter_order_id }}" class="form-control" style="width:100px;" />
-            </div>
-            <button type="submit" class="btn btn-default">{{ button_filter }}</button>
-          </form>
-        </div>
-      </div>
-    </div>
+    {{ user_filter }}
 
     {% if movements %}
+    <div class="dcx-kpis">
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--success">
+        <div class="dcx-kpi__head"><i data-lucide="package-plus" width="15" height="15"></i><span>{{ text_summary_inbound }}</span></div>
+        <div class="dcx-kpi__value">+{{ summary.inbound }}</div>
+        <div class="dcx-kpi__sub">{{ text_summary_units_in }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--danger">
+        <div class="dcx-kpi__head"><i data-lucide="package-minus" width="15" height="15"></i><span>{{ text_summary_outbound }}</span></div>
+        <div class="dcx-kpi__value">&minus;{{ summary.outbound }}</div>
+        <div class="dcx-kpi__sub">{{ text_summary_units_out }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card{% if summary.net_positive %} dcx-stat-card--success{% elseif summary.net_negative %} dcx-stat-card--danger{% endif %}">
+        <div class="dcx-kpi__head"><i data-lucide="scale" width="15" height="15"></i><span>{{ text_summary_net }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.net_sign }}{{ summary.net }}</div>
+        <div class="dcx-kpi__sub">{{ text_summary_net_sub }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--info">
+        <div class="dcx-kpi__head"><i data-lucide="activity" width="15" height="15"></i><span>{{ text_summary_movements }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.total }}</div>
+        <div class="dcx-kpi__sub">{{ text_summary_entries }}</div>
+      </div>
+    </div>
+
     <div class="table-responsive">
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover dcx-table">
         <thead>
           <tr>
             <td>{{ column_date }}</td>
-            <td>{{ column_warehouse }}</td>
             <td>{{ column_product }}</td>
+            <td>{{ column_warehouse }}</td>
             <td>{{ column_type }}</td>
             <td class="text-right">{{ column_quantity }}</td>
+            <td>{{ column_order }}</td>
             <td>{{ column_reference }}</td>
-            <td>{{ column_comment }}</td>
+            <td>{{ column_user }}</td>
+            <td class="text-right"></td>
           </tr>
         </thead>
         <tbody>
           {% for movement in movements %}
           <tr>
-            <td>{{ movement.date }}</td>
-            <td>{{ movement.warehouse }}</td>
-            <td>{{ movement.product_model }}{% if movement.variant_sku %} / {{ movement.variant_sku }}{% endif %}
-              <a href="{{ stock_map_url }}&product_id={{ movement.product_id }}&variant_id={{ movement.variant_id }}&warehouse_id={{ movement.warehouse_id }}" class="btn btn-xs btn-default" data-toggle="tooltip" title="{{ text_stock_map }}"><i data-lucide="list" width="12" height="12"></i></a>
+            <td class="text-left text-nowrap">{{ movement.date }}</td>
+            <td class="text-left">
+              <div class="dc-entity-name">{{ movement.product_name ?: '#' ~ movement.product_id }}</div>
+              <small class="text-muted">{{ movement.product_model }}{% if movement.variant_sku %} &middot; {{ movement.variant_sku }}{% endif %}</small>
             </td>
-            <td><span class="label label-default">{{ movement.type }}</span></td>
-            <td class="text-right {% if movement.quantity > 0 %}text-success{% else %}text-danger{% endif %}">{{ movement.quantity }}</td>
-            <td>{{ movement.reference }}</td>
-            <td>{{ movement.comment }}</td>
+            <td class="text-left">{{ movement.warehouse }}</td>
+            <td class="text-left"><span class="label {{ type_badges[movement.type_key]|default('label-default') }}">{{ movement.type }}</span></td>
+            <td class="text-right">{% if movement.quantity > 0 %}<span class="label label-success">+{{ movement.quantity }}</span>{% else %}<span class="label label-danger">{{ movement.quantity }}</span>{% endif %}</td>
+            <td class="text-left">{% if movement.order_id %}<a href="{{ order_info_url }}&order_id={{ movement.order_id }}">#{{ movement.order_id }}</a>{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+            <td class="text-left">
+              {% if movement.reference %}<div>{{ movement.reference }}</div>{% endif %}
+              {% if movement.comment %}<small class="text-muted">{{ movement.comment }}</small>{% endif %}
+              {% if not movement.reference and not movement.comment %}<span class="text-muted">&mdash;</span>{% endif %}
+            </td>
+            <td class="text-left">{% if movement.username %}{{ movement.username }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+            <td class="text-right text-nowrap">
+              <a href="{{ stock_map_url }}&product_id={{ movement.product_id }}&variant_id={{ movement.variant_id }}&warehouse_id={{ movement.warehouse_id }}" class="btn btn-default btn-xs" data-toggle="tooltip" title="{{ text_stock_map }}"><i data-lucide="history" width="14" height="14"></i></a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -152,20 +109,86 @@
       </div>
     </div>
     {% else %}
-    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% include 'common/empty_state.twig' with { icon: 'warehouse_movement', standalone: true, title: text_empty_title, description: text_empty_description, action_text: text_add_movement, action_modal: 'modal-movement' } %}
     {% endif %}
+  </div>
+</div>
+
+<div class="modal fade" id="modal-movement" tabindex="-1" role="dialog" aria-labelledby="modal-movement-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-movement-title"><i data-lucide="arrow-right-left" width="18" height="18" style="margin-right:8px;"></i>{{ text_add_movement }}</h4>
+      </div>
+      <div class="modal-body">
+        <form action="{{ add }}" method="post" enctype="multipart/form-data" id="form-movement">
+          <div class="dcx-fields--row">
+            <div class="dcx-field required">
+              <label class="dcx-label" for="input-warehouse">{{ entry_warehouse }}</label>
+              <select name="warehouse_id" id="input-warehouse" class="form-control">
+                <option value="0">{{ text_select }}</option>
+                {% for warehouse in warehouses %}
+                <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                {% endfor %}
+              </select>
+              {% if error_warehouse %}<div class="text-danger">{{ error_warehouse }}</div>{% endif %}
+            </div>
+            <div class="dcx-field required">
+              <label class="dcx-label" for="input-type">{{ entry_type }}</label>
+              <select name="type" id="input-type" class="form-control">
+                {% for key, label in types %}
+                <option value="{{ key }}"{% if key == 'inbound' %} selected="selected"{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="dcx-fields--row" style="margin-top:16px;">
+            <div class="dcx-field{% if error_product %} has-error{% endif %}">
+              <label class="dcx-label" for="input-product">{{ entry_product }}</label>
+              <input type="text" name="product" id="input-product" value="" placeholder="{{ entry_product_id }}" class="form-control" autocomplete="off" />
+              <input type="hidden" name="product_id" id="input-product-id" value="" />
+              <input type="hidden" name="variant_id" id="input-variant-id" value="0" />
+              {% if error_product %}<div class="text-danger">{{ error_product }}</div>{% endif %}
+            </div>
+            <div class="dcx-field required" style="flex:0 0 160px;min-width:0;">
+              <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
+              <input type="number" name="quantity" id="input-quantity" value="" class="form-control" min="0" step="any" />
+              <div class="dcx-field-help" id="quantity-help"></div>
+              {% if error_quantity %}<div class="text-danger">{{ error_quantity }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="dcx-fields--row" style="margin-top:16px;">
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-reference">{{ entry_reference }}</label>
+              <input type="text" name="reference" id="input-reference" value="" class="form-control" />
+            </div>
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-comment">{{ entry_comment }}</label>
+              <input type="text" name="comment" id="input-comment" value="" class="form-control" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="submit" form="form-movement" class="btn btn-primary"><i data-lucide="check" width="14" height="14"></i> {{ text_add }}</button>
+      </div>
+    </div>
   </div>
 </div>
 <script type="text/javascript"><!--
 var userToken = '{{ user_token }}';
+
+// Product autocomplete (modal): simple products + variants
 $('#input-product').autocomplete({
 	source: function(request, response) {
 		$.ajax({
-			url: 'index.php?route=catalog/product/autocomplete&user_token=' + userToken + '&filter_name=' + encodeURIComponent(request.term),
+			url: 'index.php?route=warehouse/movement/positionAutocomplete&user_token=' + userToken + '&filter_search=' + encodeURIComponent(request),
 			dataType: 'json',
 			success: function(json) {
 				response($.map(json, function(item) {
-					return { label: item['name'] + ' (' + item['model'] + ')', value: item['product_id'], model: item['model'] };
+					return { label: item['label'], value: item['value'], variant_id: item['variant_id'] };
 				}));
 			}
 		});
@@ -173,9 +196,48 @@ $('#input-product').autocomplete({
 	select: function(item) {
 		$('#input-product').val(item['label']);
 		$('#input-product-id').val(item['value']);
-		$('#input-variant-id').val(0);
+		$('#input-variant-id').val(item['variant_id'] || 0);
 		return false;
 	}
 });
+
+// Manual edit of the product field invalidates the picked product
+$('#input-product').on('input', function() {
+	$('#input-product-id').val('');
+	$('#input-variant-id').val(0);
+});
+
+// Quantity hint follows the movement type
+var quantitySigns = {
+	inbound: '+',
+	transfer_in: '+',
+	order_restock: '+',
+	return: '+',
+	outbound: '-',
+	transfer_out: '-',
+	order_subtract: '-',
+	adjustment: '&#177;'
+};
+
+function updateQuantityHelp() {
+	var sign = quantitySigns[$('#input-type').val()] || '';
+	var qty = parseFloat($('#input-quantity').val());
+
+	if ($('#input-quantity').val() !== '' && !isNaN(qty)) {
+		var cls = sign === '+' ? 'label-success' : (sign === '-' ? 'label-danger' : 'label-default');
+		$('#quantity-help').html('<span class="label ' + cls + '">' + sign + qty + '</span>');
+	} else {
+		$('#quantity-help').html('{{ text_quantity_hint }}');
+	}
+}
+
+$('#input-type').on('change', updateQuantityHelp);
+$('#input-quantity').on('input', updateQuantityHelp);
+updateQuantityHelp();
+
+// Re-open the modal when validation failed
+{% if error_warning or error_warehouse or error_product or error_quantity %}
+$('#modal-movement').modal('show');
+{% endif %}
 //--></script>
 {{ footer }}
