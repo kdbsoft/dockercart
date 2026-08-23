@@ -42,16 +42,23 @@ class ModelWarehouseTransfer extends Model {
 	}
 
 	public function getTransferItems(int $transfer_id): array {
-		$query = $this->db->query("SELECT ti.*, p.model AS product_model, pv.sku AS variant_sku FROM `" . DB_PREFIX . "warehouse_transfer_item` ti LEFT JOIN `" . DB_PREFIX . "product` p ON (p.product_id = ti.product_id) LEFT JOIN `" . DB_PREFIX . "product_variant` pv ON (pv.variant_id = ti.variant_id) WHERE ti.`transfer_id` = '" . (int)$transfer_id . "'");
+		$query = $this->db->query("SELECT ti.*, pd.name AS product_name, p.model AS product_model, pv.sku AS variant_sku FROM `" . DB_PREFIX . "warehouse_transfer_item` ti LEFT JOIN `" . DB_PREFIX . "product` p ON (p.product_id = ti.product_id) LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (pd.product_id = p.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "') LEFT JOIN `" . DB_PREFIX . "product_variant` pv ON (pv.variant_id = ti.variant_id) WHERE ti.`transfer_id` = '" . (int)$transfer_id . "'");
 
 		return $query->rows;
 	}
 
 	public function getTransfers(array $data = []): array {
-		$sql = "SELECT t.*, wf.`name` AS from_name, wt.`name` AS to_name
+		$sql = "SELECT t.*, wf.`name` AS from_name, wt.`name` AS to_name, u.`username` AS creator,
+				COALESCE(ti.`items_count`, 0) AS items_count, COALESCE(ti.`total_quantity`, 0) AS total_quantity
 			FROM `" . DB_PREFIX . "warehouse_transfer` t
 			LEFT JOIN `" . DB_PREFIX . "warehouse` wf ON (wf.warehouse_id = t.from_warehouse_id)
 			LEFT JOIN `" . DB_PREFIX . "warehouse` wt ON (wt.warehouse_id = t.to_warehouse_id)
+			LEFT JOIN (
+				SELECT `transfer_id`, COUNT(*) AS items_count, SUM(`quantity`) AS total_quantity
+				FROM `" . DB_PREFIX . "warehouse_transfer_item`
+				GROUP BY `transfer_id`
+			) ti ON (ti.`transfer_id` = t.`transfer_id`)
+			LEFT JOIN `" . DB_PREFIX . "user` u ON (u.`user_id` = t.created_by)
 			WHERE 1 = 1";
 
 		if (!empty($data['filter_status'])) {
