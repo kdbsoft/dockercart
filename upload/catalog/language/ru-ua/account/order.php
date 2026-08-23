@@ -46,6 +46,12 @@ $_['text_payment_status_paid'] = 'Оплачен';
 $_['text_payment_status_overpaid'] = 'Переплата';
 $_['text_payment_paid_of'] = 'Оплачено:';
 $_['text_payment_remaining'] = 'Остаток';
+
+// Отгрузки
+$_['text_shipping_status'] = 'Статус отгрузки';
+$_['text_shipping_status_none'] = 'Не отгружен';
+$_['text_shipping_status_partial'] = 'Отгружен частично';
+$_['text_shipping_status_shipped'] = 'Отгружен';
 $_['column_payment_method'] = 'Способ оплаты';
 $_['column_payment_amount'] = 'Сумма';
 

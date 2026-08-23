@@ -403,6 +403,10 @@ class ModelSaleOrder extends Model {
 			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status'], 'o');
 		}
 
+		if (!empty($data['filter_shipping_status'])) {
+			$sql .= $this->getShippingStatusFilterSql((string)$data['filter_shipping_status'], 'o');
+		}
+
 		$sort_data = array(
 			'o.order_id',
 			'customer',
@@ -457,6 +461,25 @@ class ModelSaleOrder extends Model {
 				return " AND " . $payment_difference . " >= 0";
 			case 'overpaid':
 				return " AND " . $payment_difference . " > 0 AND " . $prefix . "total > 0";
+			default:
+				return "";
+		}
+	}
+
+	private function getShippingStatusFilterSql(string $status, string $alias = ''): string {
+		// Qualify with the real table name when no alias is used, otherwise the
+		// bare column inside the subqueries would resolve to order_product instead.
+		$order_id = $alias ? $alias . '.order_id' : '`' . DB_PREFIX . 'order`.`order_id`';
+		$ordered = "(SELECT COALESCE(SUM(op.quantity), 0) FROM " . DB_PREFIX . "order_product op WHERE op.order_id = " . $order_id . ")";
+		$shipped = "(SELECT COALESCE(SUM(LEAST(si.quantity, op.quantity)), 0) FROM " . DB_PREFIX . "order_shipment_item si LEFT JOIN " . DB_PREFIX . "order_product op ON op.order_product_id = si.order_product_id WHERE op.order_id = " . $order_id . ")";
+
+		switch ($status) {
+			case 'none':
+				return " AND " . $ordered . " > 0 AND " . $shipped . " <= 0";
+			case 'partial':
+				return " AND " . $shipped . " > 0 AND " . $shipped . " < " . $ordered;
+			case 'shipped':
+				return " AND " . $ordered . " > 0 AND " . $shipped . " >= " . $ordered;
 			default:
 				return "";
 		}
@@ -647,6 +670,10 @@ class ModelSaleOrder extends Model {
 
 		if (!empty($data['filter_payment_status'])) {
 			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status']);
+		}
+
+		if (!empty($data['filter_shipping_status'])) {
+			$sql .= $this->getShippingStatusFilterSql((string)$data['filter_shipping_status']);
 		}
 
 		$query = $this->db->query($sql);
@@ -2750,6 +2777,43 @@ class ModelSaleOrder extends Model {
 		}
 
 		return $progress;
+	}
+
+	public function getShippingSumsByOrderIds(array $order_ids): array {
+		$order_ids = array_map('intval', $order_ids);
+
+		if (!$order_ids) {
+			return [];
+		}
+
+		$query = $this->db->query("SELECT op.order_id, SUM(op.quantity) AS ordered, SUM(LEAST(COALESCE(si.shipped, 0), op.quantity)) AS shipped FROM `" . DB_PREFIX . "order_product` op LEFT JOIN (SELECT order_product_id, SUM(quantity) AS shipped FROM `" . DB_PREFIX . "order_shipment_item` GROUP BY order_product_id) si ON si.order_product_id = op.order_product_id WHERE op.order_id IN (" . implode(',', $order_ids) . ") GROUP BY op.order_id");
+
+		$sums = [];
+
+		foreach ($query->rows as $row) {
+			$sums[(int)$row['order_id']] = [
+				'ordered' => (float)$row['ordered'],
+				'shipped' => (float)$row['shipped'],
+			];
+		}
+
+		return $sums;
+	}
+
+	public function getShippingStatus(float $ordered, float $shipped): string {
+		if ($ordered <= 0) {
+			return '';
+		}
+
+		if ($shipped <= 0) {
+			return 'none';
+		}
+
+		if ($shipped >= $ordered) {
+			return 'shipped';
+		}
+
+		return 'partial';
 	}
 
 	public function deleteOrder($order_id) {

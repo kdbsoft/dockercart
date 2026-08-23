@@ -10,6 +10,9 @@
               {{ heading_title }}
               <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
               <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
+              {% if shipping_status %}
+              <span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span>
+              {% endif %}
             </span>
           </a>
           <div class="pull-right" id="header-actions">
@@ -825,6 +828,9 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .dcx-shipment-item__items { margin-top:4px; display:flex; flex-direction:column; gap:2px; }
 .dcx-shipment-item__line { font-size:11px; color:#555; }
 .dcx-shipment-progress { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
+.dcx-shipment-status { display:flex; align-items:center; gap:8px; }
+.dcx-shipment-status__count { font-size:12px; font-weight:600; color:#2563eb; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.dcx-shipment-status .payment-progress { flex:1; margin-top:0; }
 .dcx-shipment-progress__row { margin-top:6px; font-size:12px; }
 .dcx-shipment-progress__name { color:#374151; font-weight:500; display:block; margin-bottom:2px; }
 .dcx-shipment-progress__count { color:#2563eb; font-weight:600; font-size:11px; }
@@ -1720,7 +1726,7 @@ function confirmFlowTransition() {
 			'POST', { tracking_number: tracking, comment: '', items: JSON.stringify(items), notify: notify ? '1' : '0' })
 			.then(j => {
 				if (j.success) {
-					if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+					if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 					doTransition(false);
 				} else if (j.error) {
 					showAlert(j.error, 'danger');
@@ -1731,10 +1737,28 @@ function confirmFlowTransition() {
 	}
 }
 
-function refreshShipmentsCard(html) {
+function refreshShipmentsCard(html, j) {
 	const container = document.getElementById('shipments-card');
 	if (container && html) container.innerHTML = html;
+	if (j) updateHeaderShippingBadge(j);
 	lucide.createIcons();
+}
+
+function updateHeaderShippingBadge(j) {
+	let badge = document.getElementById('header-shipping-badge');
+	if (!badge && j.shipping_status) {
+		badge = document.createElement('span');
+		badge.id = 'header-shipping-badge';
+		const payment = document.querySelector('.page-header__title .page-header__badge:nth-of-type(2)');
+		if (payment) payment.after(badge); else return;
+	}
+	if (!badge) return;
+	if (!j.shipping_status) {
+		badge.remove();
+		return;
+	}
+	badge.className = 'page-header__badge ' + j.shipping_status_header_badge_class;
+	badge.textContent = j.shipping_status_text;
 }
 
 function addShipment() {
@@ -1758,7 +1782,7 @@ function addShipment() {
 		'POST', { tracking_number: tracking, comment: comment, items: JSON.stringify(items), notify: notify ? '1' : '0' })
 		.then(j => {
 			if (j.success) {
-				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 				showAlert(j.success);
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
@@ -1772,7 +1796,7 @@ function deleteShipment(shipmentId) {
 		'POST', { shipment_id: shipmentId })
 		.then(j => {
 			if (j.success) {
-				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 				showAlert(j.success);
 			} else if (j.error) {
 				showAlert(j.error, 'danger');

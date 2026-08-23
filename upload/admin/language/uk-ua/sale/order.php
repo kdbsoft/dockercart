@@ -181,6 +181,7 @@ $_['text_search_no_results']  = 'Замовлення не знайдено';
 $_['text_filter_all']         = 'Всі';
 $_['text_filter_unfulfilled'] = 'Не виконані';
 $_['text_filter_unpaid']      = 'Не оплачені';
+$_['text_filter_unshipped']   = 'Не відвантажені';
 $_['text_filter_abandoned']   = 'Покинуті кошики';
 $_['text_add_filter']         = 'Додати фільтр';
 $_['text_add_condition']      = 'Додати умову';
@@ -402,6 +403,12 @@ $_['text_payment_status_overpaid']   = 'Переплата';
 $_['text_payment_paid_of']           = 'Оплачено:';
 $_['text_payment_remaining']         = 'Залишок';
 $_['text_no_payments']               = 'Платежі не записані';
+
+// Відвантаження
+$_['text_shipping_status']           = 'Відвантаження';
+$_['text_shipping_status_none']      = 'Не відвантажено';
+$_['text_shipping_status_partial']   = 'Відвантажено частково';
+$_['text_shipping_status_shipped']   = 'Відвантажено';
 $_['text_reference']                 = 'Транз.';
 $_['text_payment_note_received']     = 'Платіж отримано: %s (оплачено %s з %s)';
 $_['text_payment_note_reversed']     = 'Платіж скасовано: -%s';

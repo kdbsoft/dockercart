@@ -141,6 +141,28 @@
         {% endif %}
       </div>
 
+      {# Shipping Status #}
+      {% if shipping_status %}
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
+        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_shipping_status }}</p>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          {% if shipping_status == 'shipped' %}
+            {% set shipping_badge = 'bg-green-100 text-green-700' %}
+          {% elseif shipping_status == 'partial' %}
+            {% set shipping_badge = 'bg-amber-100 text-amber-700' %}
+          {% else %}
+            {% set shipping_badge = 'bg-gray-100 text-gray-600' %}
+          {% endif %}
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium {{ shipping_badge }}">
+            <i data-lucide="truck" width="13" height="13"></i>{{ shipping_status_text }}
+          </span>
+          {% if tracking_number %}
+          <span class="text-gray-400 font-mono text-xs">{{ tracking_number|replace({'|': ' | '}) }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
       {# Addresses #}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">

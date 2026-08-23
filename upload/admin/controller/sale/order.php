@@ -65,6 +65,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_payment_status'])) {
 			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
 		}
+
+		if (isset($this->request->get['filter_shipping_status'])) {
+			$url .= '&filter_shipping_status=' . $this->request->get['filter_shipping_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -233,7 +237,13 @@ class ControllerSaleOrder extends Controller {
 		} else {
 			$filter_payment_status = '';
 		}
-		
+
+		if (isset($this->request->get['filter_shipping_status'])) {
+			$filter_shipping_status = $this->request->get['filter_shipping_status'];
+		} else {
+			$filter_shipping_status = '';
+		}
+
 		if (isset($this->request->get['filter_total'])) {
 			$filter_total = $this->request->get['filter_total'];
 		} else {
@@ -274,6 +284,7 @@ class ControllerSaleOrder extends Controller {
 			'all' => $this->model_sale_order->getTotalOrders(array()),
 			'unfulfilled' => $this->model_sale_order->getTotalOrders(array('filter_order_status_exclude' => $this->getFulfilledStatusIds())),
 			'unpaid' => $this->model_sale_order->getTotalOrders(array('filter_payment_status' => 'unpaid')),
+			'unshipped' => $this->model_sale_order->getTotalOrders(array('filter_shipping_status' => 'none')),
 			'abandoned' => $this->countAbandonedCarts()
 		);
 
@@ -298,6 +309,13 @@ class ControllerSaleOrder extends Controller {
 				'is_active' => $active_builtin === 'unpaid'
 			),
 			array(
+				'id'    => 'unshipped',
+				'name'  => $this->language->get('text_filter_unshipped'),
+				'href'  => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . '&filter=unshipped', true),
+				'count' => $tab_counts['unshipped'],
+				'is_active' => $active_builtin === 'unshipped'
+			),
+			array(
 				'id'    => 'abandoned',
 				'name'  => $this->language->get('text_filter_abandoned'),
 				'href'  => $this->url->link('sale/order_abandoned', 'user_token=' . $this->session->data['user_token'], true),
@@ -313,6 +331,11 @@ class ControllerSaleOrder extends Controller {
 				array('value' => 'partial', 'label' => $this->language->get('text_payment_status_partial')),
 				array('value' => 'paid', 'label' => $this->language->get('text_payment_status_paid')),
 				array('value' => 'overpaid', 'label' => $this->language->get('text_payment_status_overpaid'))
+			)),
+			array('key' => 'shipping_status', 'label' => $this->language->get('text_shipping_status'), 'type' => 'select', 'options' => array(
+				array('value' => 'none', 'label' => $this->language->get('text_shipping_status_none')),
+				array('value' => 'partial', 'label' => $this->language->get('text_shipping_status_partial')),
+				array('value' => 'shipped', 'label' => $this->language->get('text_shipping_status_shipped'))
 			)),
 			array('key' => 'payment_method', 'label' => $this->language->get('text_payment_method'), 'type' => 'text'),
 			array('key' => 'shipping_method', 'label' => $this->language->get('text_shipping_method'), 'type' => 'text'),
@@ -366,6 +389,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_payment_status'])) {
 			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
 		}
+
+		if (isset($this->request->get['filter_shipping_status'])) {
+			$url .= '&filter_shipping_status=' . $this->request->get['filter_shipping_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -407,6 +434,7 @@ class ControllerSaleOrder extends Controller {
 			'filter_order_status'    => $filter_order_status,
 			'filter_order_status_id' => $filter_order_status_id,
 			'filter_payment_status'  => $filter_payment_status,
+			'filter_shipping_status' => $filter_shipping_status,
 			'filter_total'           => $filter_total,
 			'filter_total_operator'  => $filter_total_operator,
 			'filter_date_added'      => $filter_date_added,
@@ -417,11 +445,13 @@ class ControllerSaleOrder extends Controller {
 			'limit'                  => $this->config->get('config_limit_admin')
 		);
 
-		// Apply built-in quick filter (unfulfilled / unpaid)
+		// Apply built-in quick filter (unfulfilled / unpaid / unshipped)
 		if (isset($this->request->get['filter']) && $this->request->get['filter'] === 'unfulfilled') {
 			$filter_data['filter_order_status_exclude'] = $this->getFulfilledStatusIds();
 		} elseif (isset($this->request->get['filter']) && $this->request->get['filter'] === 'unpaid') {
 			$filter_data['filter_payment_status'] = 'unpaid';
+		} elseif (isset($this->request->get['filter']) && $this->request->get['filter'] === 'unshipped') {
+			$filter_data['filter_shipping_status'] = 'none';
 		}
 
 		// Apply conditions of the active saved filter
@@ -452,6 +482,8 @@ class ControllerSaleOrder extends Controller {
 			}
 		}
 
+		$order_shipping_sums = $order_ids ? $this->model_sale_order->getShippingSumsByOrderIds($order_ids) : array();
+
 		foreach ($results as $result) {
 			$order_type = $this->getOrderType($result);
 			$order_type_badge_class = $this->getOrderTypeBadgeClass($result);
@@ -460,6 +492,10 @@ class ControllerSaleOrder extends Controller {
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 			$order_localizer = new OrderLocalizer($this->registry);
 			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+
+			$shipping_sums = isset($order_shipping_sums[(int)$result['order_id']]) ? $order_shipping_sums[(int)$result['order_id']] : array('ordered' => 0, 'shipped' => 0);
+			$shipping_status = $this->model_sale_order->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
+			$shipping_progress_percent = $shipping_sums['ordered'] > 0 ? (int)round(min((float)$shipping_sums['shipped'], (float)$shipping_sums['ordered']) / (float)$shipping_sums['ordered'] * 100) : 0;
 
 			$data['orders'][] = array(
 				'order_id'      => $result['order_id'],
@@ -476,6 +512,12 @@ class ControllerSaleOrder extends Controller {
 				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
 				'payment_method' => $order_localizer->paymentMethodTitle($result),
 				'paid_amount'   => $this->currency->format($result['paid_amount'], $result['currency_code'], $result['currency_value']),
+				'shipping_status' => $shipping_status,
+				'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
+				'shipping_status_badge_class' => $this->getShippingStatusBadgeClass($shipping_status),
+				'shipping_shipped_quantity' => min((float)$shipping_sums['shipped'], (float)$shipping_sums['ordered']),
+				'shipping_ordered_quantity' => (float)$shipping_sums['ordered'],
+				'shipping_progress_percent' => $shipping_progress_percent,
 				'shipping_method' => $order_localizer->shippingMethodTitle($result),
 				'items_count'   => isset($order_items[(int)$result['order_id']]) ? $order_items[(int)$result['order_id']] : 0,
 				'tracking_number' => $result['tracking_number'],
@@ -533,6 +575,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_payment_status'])) {
 			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
 		}
+
+		if (isset($this->request->get['filter_shipping_status'])) {
+			$url .= '&filter_shipping_status=' . $this->request->get['filter_shipping_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -582,6 +628,10 @@ class ControllerSaleOrder extends Controller {
 		if (isset($this->request->get['filter_payment_status'])) {
 			$url .= '&filter_payment_status=' . $this->request->get['filter_payment_status'];
 		}
+
+		if (isset($this->request->get['filter_shipping_status'])) {
+			$url .= '&filter_shipping_status=' . $this->request->get['filter_shipping_status'];
+		}
 			
 		if (isset($this->request->get['filter_total'])) {
 			$url .= '&filter_total=' . $this->request->get['filter_total'];
@@ -616,6 +666,7 @@ class ControllerSaleOrder extends Controller {
 		$data['filter_order_status'] = $filter_order_status;
 		$data['filter_order_status_id'] = $filter_order_status_id;
 		$data['filter_payment_status'] = $filter_payment_status;
+		$data['filter_shipping_status'] = $filter_shipping_status;
 		$data['filter_total'] = $filter_total;
 		$data['filter_total_operator'] = $filter_total_operator;
 		$data['filter_date_added'] = $filter_date_added;
@@ -626,6 +677,12 @@ class ControllerSaleOrder extends Controller {
 			'partial'  => $this->language->get('text_payment_status_partial'),
 			'paid'     => $this->language->get('text_payment_status_paid'),
 			'overpaid' => $this->language->get('text_payment_status_overpaid')
+		);
+
+		$data['shipping_statuses'] = array(
+			'none'    => $this->language->get('text_shipping_status_none'),
+			'partial' => $this->language->get('text_shipping_status_partial'),
+			'shipped' => $this->language->get('text_shipping_status_shipped')
 		);
 
 		$data['filter_operators'] = array(
@@ -1070,6 +1127,10 @@ class ControllerSaleOrder extends Controller {
 					$data['filter_payment_status'] = $value;
 					break;
 
+				case 'shipping_status':
+					$data['filter_shipping_status'] = $value;
+					break;
+
 				case 'payment_method':
 					$data['filter_payment_method'] = (string)$value;
 					break;
@@ -1170,6 +1231,17 @@ class ControllerSaleOrder extends Controller {
 				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 			case 'overpaid':
 				return 'page-header__badge page-header__badge--danger';
+			default:
+				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+		}
+	}
+
+	private function getShippingStatusBadgeClass($shipping_status) {
+		switch ($shipping_status) {
+			case 'shipped':
+				return 'page-header__badge page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 			default:
 				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
 		}
