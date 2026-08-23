@@ -48,6 +48,10 @@ class ControllerMailOrder extends Controller {
 				$data['comment'] = strip_tags(html_entity_decode($comment, ENT_QUOTES, 'UTF-8'));
 				$data['link'] = $order_info['store_url'] . 'index.php?route=account/order/info&order_id=' . $order_id;
 
+				$data['store_name'] = html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8');
+				$data['store_url'] = $order_info['store_url'];
+				$data['text_button_order'] = $this->language->get('text_button_order');
+
 				$this->send($order_info, sprintf($this->language->get('text_subject'), html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'), $order_id), $this->load->view('mail/order_edit', $data));
 			}
 		}
@@ -71,6 +75,10 @@ class ControllerMailOrder extends Controller {
 
 			$data['tracking_number'] = $tracking_number;
 			$data['link'] = $order_info['store_url'] . 'index.php?route=account/order/info&order_id=' . $order_id;
+
+			$data['store_name'] = html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $order_info['store_url'];
+			$data['text_button_order'] = $this->language->get('text_button_order');
 
 			$this->send($order_info, sprintf($this->language->get('text_shipped_subject'), html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'), $order_id), $this->load->view('mail/order_shipped', $data));
 		}
@@ -97,7 +105,7 @@ class ControllerMailOrder extends Controller {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject($subject);
-		$mail->setText($body);
+		$mail->setHtml($body);
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};

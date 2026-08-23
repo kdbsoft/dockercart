@@ -38,6 +38,9 @@ class ControllerMailCustomer extends Controller {
 
 			$data['login'] = $store_url . 'index.php?route=account/login';
 			$data['store'] = $store_name;
+			$data['store_name'] = $store_name;
+			$data['store_url'] = $store_url;
+			$data['text_button_login'] = $language->get('text_button_login');
 
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -55,7 +58,7 @@ class ControllerMailCustomer extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender($store_name);
 			$mail->setSubject($subject);
-			$mail->setText($this->load->view('mail/customer_approve', $data));
+			$mail->setHtml($this->load->view('mail/customer_approve', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};
@@ -102,6 +105,8 @@ class ControllerMailCustomer extends Controller {
 
 			$data['contact'] = $store_url . 'index.php?route=information/contact';
 			$data['store'] = $store_name;
+			$data['store_name'] = $store_name;
+			$data['store_url'] = $store_url;
 
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -119,7 +124,7 @@ class ControllerMailCustomer extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender($store_name);
 			$mail->setSubject($subject);
-			$mail->setText($this->load->view('mail/customer_deny', $data));
+			$mail->setHtml($this->load->view('mail/customer_deny', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};

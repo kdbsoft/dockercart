@@ -44,6 +44,10 @@ class ControllerMailTransaction extends Controller {
 
 			$data['text_received'] = sprintf($this->language->get('text_received'), $this->currency->format($amount, $this->config->get('config_currency')));
 			$data['text_total'] = sprintf($this->language->get('text_total'), $this->currency->format($this->model_customer_customer->getTransactionTotal($customer_id), $this->config->get('config_currency')));
+
+			$data['store_name'] = html_entity_decode($store_name, ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $store_info['url'] ?? HTTP_CATALOG;
+			$data['logo'] = '';
 			
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -61,7 +65,7 @@ class ControllerMailTransaction extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($store_name, ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
-			$mail->setText($this->load->view('mail/transaction', $data));
+			$mail->setHtml($this->load->view('mail/transaction', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};

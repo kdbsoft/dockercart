@@ -45,6 +45,10 @@ class ControllerMailReward extends Controller {
 			$data['text_received'] = sprintf($this->language->get('text_received'), $points);
 			$data['text_total'] = sprintf($this->language->get('text_total'), $this->model_customer_customer->getRewardTotal($customer_id));
 
+			$data['store_name'] = html_entity_decode($store_name, ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $store_info['url'] ?? HTTP_CATALOG;
+			$data['logo'] = '';
+
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->protocol = $this->config->get('config_mail_protocol');
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -62,7 +66,7 @@ class ControllerMailReward extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($store_name, ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($store_name, ENT_QUOTES, 'UTF-8')));
-			$mail->setText($this->load->view('mail/reward', $data));
+			$mail->setHtml($this->load->view('mail/reward', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};

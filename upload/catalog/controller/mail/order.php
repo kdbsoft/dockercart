@@ -85,6 +85,8 @@ class ControllerMailOrder extends Controller {
 		$data['text_price'] = $language->get('text_price');
 		$data['text_total'] = $language->get('text_total');
 		$data['text_footer'] = $language->get('text_footer');
+		$data['text_button_order'] = $language->get('text_button_order');
+		$data['text_button_download'] = $language->get('text_button_download');
 
 		$data['logo'] = $order_info['store_url'] . 'image/' . $this->config->get('config_logo');
 		$data['store_name'] = $order_info['store_name'];
@@ -223,7 +225,9 @@ class ControllerMailOrder extends Controller {
 				'option'   => $option_data,
 				'quantity' => $order_product['quantity'],
 				'price'    => $this->currency->format($order_product['price'] + ($this->config->get('config_tax') ? $order_product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'total'    => $this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])
+				'total'    => $this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'warehouse' => (string)($order_product['warehouse_name'] ?? ''),
+				'estimate_date' => !empty($order_product['estimate_date']) ? $order_product['estimate_date'] : null,
 			);
 		}
 
@@ -250,15 +254,14 @@ class ControllerMailOrder extends Controller {
 				'text'  => $this->currency->format($order_total['value'], $order_info['currency_code'], $order_info['currency_value']),
 			);
 		}
-	
 		$this->load->model('setting/setting');
-		
+
 		$from = $this->model_setting_setting->getSettingValue('config_email', $order_info['store_id']);
-		
+
 		if (!$from) {
 			$from = $this->config->get('config_email');
 		}
-		
+
 		// If no customer email is available, skip sending the mail (prevents Mail class exception)
 		if (empty($order_info['email'])) {
 			return;
@@ -299,6 +302,7 @@ class ControllerMailOrder extends Controller {
 		$data['text_link'] = $language->get('text_link');
 		$data['text_comment'] = $language->get('text_comment');
 		$data['text_footer'] = $language->get('text_footer');
+		$data['text_button_order'] = $language->get('text_button_order');
 
 		$data['order_id'] = $order_info['order_id'];
 		$data['date_added'] = date($language->get('date_format_short'), strtotime($order_info['date_added']));
@@ -320,13 +324,23 @@ class ControllerMailOrder extends Controller {
 		$data['comment'] = strip_tags($comment);
 
 		$this->load->model('setting/setting');
-		
+
 		$from = $this->model_setting_setting->getSettingValue('config_email', $order_info['store_id']);
-		
+
 		if (!$from) {
 			$from = $this->config->get('config_email');
 		}
-		
+
+		$data['store_name'] = html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8');
+		$data['store_url'] = $order_info['store_url'];
+		$data['logo'] = '';
+
+		$logo = $this->model_setting_setting->getSettingValue('config_logo', $order_info['store_id']);
+
+		if ($logo && is_file(DIR_IMAGE . $logo)) {
+			$data['logo'] = $order_info['store_url'] . 'image/' . $logo;
+		}
+
 		$mail = new Mail($this->config->get('config_mail_engine'));
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
@@ -343,7 +357,7 @@ class ControllerMailOrder extends Controller {
 		$mail->setFrom($from);
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
-		$mail->setText($this->load->view('mail/order_edit', $data));
+		$mail->setHtml($this->load->view('mail/order_edit', $data));
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};
@@ -390,7 +404,10 @@ class ControllerMailOrder extends Controller {
 			$data['text_product'] = $this->language->get('text_product');
 			$data['text_total'] = $this->language->get('text_total');
 			$data['text_comment'] = $this->language->get('text_comment');
-			
+
+			$data['store_name'] = html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $order_info['store_url'];
+
 			$data['order_id'] = $order_info['order_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 
@@ -481,7 +498,7 @@ class ControllerMailOrder extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
-			$mail->setText($this->load->view('mail/order_alert', $data));
+			$mail->setHtml($this->load->view('mail/order_alert', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};
