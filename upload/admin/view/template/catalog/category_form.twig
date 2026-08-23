@@ -49,6 +49,7 @@
           </div>
         </div>
         <div class="dcx-panel-body">
+          <div class="dc-lang-frame">
           <ul class="nav nav-tabs" id="language">
             {% for language in languages %}
             <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -87,6 +88,7 @@
               </div>
             </div>
             {% endfor %}
+          </div>
           </div>
         </div>
       </div>
