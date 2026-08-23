@@ -1241,14 +1241,20 @@ class ControllerProductProduct extends Controller {
 
 						$data['dc_base_price_value'] = $sv_base_price;
 						$data['dc_full_price_value'] = $sv_full_price;
-						$data['price'] = $this->currency->format($sv_full_price, $this->session->data['currency']);
+						// Variant prices above are already tax-included display
+						// values (converted by Currency::format(..., false) in
+						// the variants loop), so format them with rate 1 —
+						// passing no rate would apply the currency value a
+						// second time (e.g. 0.20 USD → $0.00).
+						$data['price'] = $this->currency->format($sv_full_price, $this->session->data['currency'], 1);
 
 						if (isset($selected_variant['special'])) {
 							$sv_special = (float)$selected_variant['special'];
-							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency']);
+							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency'], 1);
 							$data['you_save_amount'] = $this->currency->format(
 								$sv_full_price - $sv_special,
-								$this->session->data['currency']
+								$this->session->data['currency'],
+								1
 							);
 
 							// Скидка выбранного варианта (спеццена против полной
