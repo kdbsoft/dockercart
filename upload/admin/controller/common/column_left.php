@@ -620,14 +620,6 @@ class ControllerCommonColumnLeft extends Controller {
 			// Localisation
 			$localisation = array();
 
-			if ($this->user->hasPermission('access', 'localisation/location')) {
-				$localisation[] = array(
-					'name'	   => $this->language->get('text_location'),
-					'href'     => $this->url->link('localisation/location', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($this->user->hasPermission('access', 'localisation/language')) {
 				$localisation[] = array(
 					'name'	   => $this->language->get('text_language'),

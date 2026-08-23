@@ -31,7 +31,6 @@ $_['text_installer']            = 'Installer';
 $_['text_language']             = 'Languages';
 $_['text_layout']               = 'Layouts';
 $_['text_localisation']         = 'References';
-$_['text_location']             = 'Store Location';
 $_['text_contact']              = 'Mail';
 $_['text_marketing']            = 'Marketing';
 $_['text_maintenance']          = 'Maintenance';

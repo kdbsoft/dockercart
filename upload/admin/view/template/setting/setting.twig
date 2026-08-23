@@ -175,24 +175,6 @@
                         </div>
                         <p class="help-block">{{ help_images }}</p>
                       </div>
-                      {% if locations %}
-                      <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_location }} <span data-toggle="tooltip" title="{{ help_location }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                        {% for location in locations %}
-                        <div class="checkbox">
-                          <label>
-                            {% if location.location_id in config_location %}
-                            <input type="checkbox" name="config_location[]" value="{{ location.location_id }}" checked="checked" />
-                            {{ location.name }}
-                            {% else %}
-                            <input type="checkbox" name="config_location[]" value="{{ location.location_id }}" />
-                            {{ location.name }}
-                            {% endif %}
-                          </label>
-                        </div>
-                        {% endfor %}
-                      </div>
-                      {% endif %}
                     </div>
                   </div>
                   <div class="tab-pane" id="tab-seo">
