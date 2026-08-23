@@ -11,7 +11,7 @@ $_['text_disabled']                    = 'Disabled';
 $_['text_home']                        = 'Home';
 $_['text_subscribers']                 = 'Subscribers';
 $_['text_module_settings']             = 'Widget settings';
-$_['text_multilingual_settings']       = 'Multilingual content';
+$_['text_multilingual_settings']       = 'Widget';
 $_['text_list']                        = 'Subscribers list';
 $_['text_no_results']                  = 'No subscribers found.';
 $_['text_pagination']                  = 'Showing %d to %d of %d (%d Pages)';
@@ -28,6 +28,11 @@ $_['text_default_button']              = 'Subscribe';
 $_['text_default_privacy']             = 'By subscribing you agree to our Privacy Policy.';
 $_['text_default_success']             = 'Thanks! You are now subscribed.';
 $_['text_default_already']             = 'You are subscribed';
+$_['text_active']                      = 'Active';
+$_['text_inactive']                    = 'Inactive';
+$_['text_status_card']                 = 'Status';
+$_['text_name_card']                   = 'Name';
+$_['text_tools_card']                  = 'Tools';
 
 // Entry
 $_['entry_name']                       = 'Module Name';
