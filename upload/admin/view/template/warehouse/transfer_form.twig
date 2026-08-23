@@ -1,0 +1,187 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">{{ text_form }}</span>
+          </a>
+          <div class="pull-right">
+            {% if not is_immutable %}
+            <button type="submit" form="form-transfer" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            {% endif %}
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if is_immutable %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+          <div class="alert alert-info">{{ text_immutable }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-transfer">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="arrow-right-left" width="18" height="18"></i></div>
+                <div><div class="dcx-panel-title">{{ text_form }}</div></div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-transfer-no">{{ entry_transfer_no }}</label>
+                        <input type="text" name="transfer_no" id="input-transfer-no" value="{{ transfer_no }}" class="form-control" {% if is_immutable %}disabled="disabled"{% endif %} />
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                        <select name="status" id="input-status" class="form-control" {% if is_immutable %}disabled="disabled"{% endif %}>
+                          {% for key, label in status_options %}
+                          <option value="{{ key }}"{% if status == key %} selected="selected"{% endif %}>{{ label }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-from">{{ entry_from }}</label>
+                        <select name="from_warehouse_id" id="input-from" class="form-control" {% if transfer_id %}disabled="disabled"{% endif %}>
+                          <option value="0">--</option>
+                          {% for warehouse in warehouses %}
+                          {% if from_warehouse_id == warehouse.warehouse_id %}
+                          <option value="{{ warehouse.warehouse_id }}" selected="selected">{{ warehouse.name }}</option>
+                          {% else %}
+                          <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                          {% endif %}
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <div class="dcx-field">
+                        <label class="dcx-label" for="input-to">{{ entry_to }}</label>
+                        <select name="to_warehouse_id" id="input-to" class="form-control" {% if transfer_id %}disabled="disabled"{% endif %}>
+                          <option value="0">--</option>
+                          {% for warehouse in warehouses %}
+                          {% if to_warehouse_id == warehouse.warehouse_id %}
+                          <option value="{{ warehouse.warehouse_id }}" selected="selected">{{ warehouse.name }}</option>
+                          {% else %}
+                          <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                          {% endif %}
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-note">{{ entry_note }}</label>
+                    <input type="text" name="note" id="input-note" value="{{ note }}" class="form-control" {% if is_immutable %}disabled="disabled"{% endif %} />
+                  </div>
+
+                  <div class="dcx-field">
+                    <label class="dcx-label">{{ entry_product }}</label>
+                    <div class="transfer-items" id="transfer-items">
+                      {% for item in items %}
+                      <div class="transfer-item" style="display:flex;gap:8px;margin-bottom:6px;">
+                        <input type="text" class="form-control item-product" placeholder="{{ entry_product }}" value="{{ item.label }}" {% if is_immutable %}disabled="disabled"{% endif %} />
+                        <input type="hidden" class="item-product-id" name="items[{{ loop.index0 }}][product_id]" value="{{ item.product_id }}" />
+                        <input type="hidden" class="item-variant-id" name="items[{{ loop.index0 }}][variant_id]" value="{{ item.variant_id }}" />
+                        <input type="number" step="any" class="form-control item-qty" name="items[{{ loop.index0 }}][quantity]" value="{{ item.quantity }}" placeholder="{{ entry_quantity }}" style="width:120px;" {% if is_immutable %}disabled="disabled"{% endif %} />
+                        {% if not is_immutable %}<button type="button" class="btn btn-danger btn-xs remove-transfer-item"><i data-lucide="x" width="12" height="12"></i></button>{% endif %}
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% if not is_immutable %}
+                    <button type="button" id="btn-add-transfer-item" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_item }}</button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+var transferUrl = '{{ transfer_url }}';
+
+$('#btn-add-transfer-item').on('click', function() {
+	var idx = $('#transfer-items .transfer-item').length;
+	var html = '<div class="transfer-item" style="display:flex;gap:8px;margin-bottom:6px;">';
+	html += '<input type="text" class="form-control item-product" placeholder="{{ entry_product }}" value="" />';
+	html += '<input type="hidden" class="item-product-id" name="items[' + idx + '][product_id]" value="" />';
+	html += '<input type="hidden" class="item-variant-id" name="items[' + idx + '][variant_id]" value="0" />';
+	html += '<input type="number" step="any" class="form-control item-qty" name="items[' + idx + '][quantity]" value="" placeholder="{{ entry_quantity }}" style="width:120px;" />';
+	html += '<button type="button" class="btn btn-danger btn-xs remove-transfer-item"><i data-lucide="x" width="12" height="12"></i></button>';
+	html += '</div>';
+	$('#transfer-items').append(html);
+	renumberTransferItems();
+	lucide.createIcons();
+});
+
+$(document).on('click', '.remove-transfer-item', function() {
+	$(this).closest('.transfer-item').remove();
+	renumberTransferItems();
+});
+
+$(document).on('focus', '.item-product', function() {
+	var $item = $(this).closest('.transfer-item');
+
+	if (!$(this).hasClass('ui-autocomplete-input')) {
+		$(this).autocomplete({
+			source: function(request, response) {
+				$.ajax({
+					url: transferUrl + '&filter_name=' + encodeURIComponent(request.term),
+					dataType: 'json',
+					success: function(json) {
+						response($.map(json, function(product) {
+							return { label: product['name'] + ' (' + product['model'] + ')', value: product['product_id'], product: product };
+						}));
+					}
+				});
+			},
+			select: function(event, ui) {
+				$(this).val(ui.item.label);
+				$item.find('.item-product-id').val(ui.item.value);
+				return false;
+			}
+		});
+		$(this).attr('disabled', false);
+	}
+});
+
+function renumberTransferItems() {
+	$('#transfer-items .transfer-item').each(function(i) {
+		$(this).find('.item-product-id').attr('name', 'items[' + i + '][product_id]');
+		$(this).find('.item-variant-id').attr('name', 'items[' + i + '][variant_id]');
+		$(this).find('.item-qty').attr('name', 'items[' + i + '][quantity]');
+	});
+}
+//--></script>
+{{ footer }}

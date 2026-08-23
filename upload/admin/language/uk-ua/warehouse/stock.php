@@ -1,0 +1,32 @@
+<?php
+// Залишки по складах
+$_['heading_title'] = 'Залишки по складах';
+$_['text_list'] = 'Матриця залишків';
+$_['text_success'] = 'Успішно: Залишки оновлено!';
+$_['text_no_results'] = 'Рядки залишків не знайдено';
+$_['text_home'] = 'Головна';
+$_['text_pagination'] = 'Показано з %d по %d із %d (%d сторінок)';
+$_['text_types'] = [];
+$_['text_recalculate'] = 'Перерахувати підсумки';
+$_['text_recalculated'] = 'Перераховано товарів: %d, виправлено дрейфів: %d.';
+$_['text_unlimited'] = 'Безліміт';
+$_['button_update'] = 'Оновити';
+$_['button_recalculate'] = 'Перерахувати';
+$_['column_warehouse'] = 'Склад';
+$_['column_product'] = 'Товар';
+$_['column_model'] = 'Код товару';
+$_['column_variant'] = 'Варіант';
+$_['column_quantity'] = 'Кількість';
+$_['column_unlimited'] = 'Безліміт';
+$_['column_lead_time'] = 'Строк (дн)';
+$_['entry_warehouse'] = 'Склад';
+$_['entry_product'] = 'Товар';
+$_['entry_model'] = 'Код товару';
+$_['entry_sku'] = 'Артикул';
+$_['entry_quantity'] = 'Кількість';
+$_['entry_unlimited'] = 'Безліміт';
+$_['entry_recalculate'] = 'Перерахувати';
+$_['text_all'] = 'Усі';
+$_['text_search_placeholder'] = 'Пошук залишків за назвою або кодом товару...';
+$_['text_network_error'] = 'Мережева помилка.';
+$_['error_permission'] = 'Увага: У вас немає прав для зміни залишків!';

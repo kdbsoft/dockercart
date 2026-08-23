@@ -60,6 +60,15 @@ class ModelExtensionShippingDockercartUniversal extends Model {
                 $title .= ' (' . $method['delivery_time'] . ')';
             }
 
+            // Optionally append the warehouse preparation lead time to the
+            // estimated delivery, using the current checkout allocation.
+            if ($this->config->get('config_warehouse_estimate_enabled') && $this->config->get('config_warehouse_enabled')) {
+                $lead_days = $this->getAllocationLeadDays();
+                if ($lead_days > 0) {
+                    $title .= sprintf(' (+%d %s)', $lead_days, $this->language->get('text_days_suffix'));
+                }
+            }
+
             // Format the display text
             if ($cost === null) {
                 $text = '';
@@ -93,6 +102,41 @@ class ModelExtensionShippingDockercartUniversal extends Model {
             'sort_order' => $this->config->get('shipping_dockercart_universal_sort_order'),
             'error'      => false
         ];
+    }
+
+    /**
+     * Maximum warehouse prepare + lead days across the current checkout
+     * allocation (from the session). 0 when unallocated.
+     */
+    protected function getAllocationLeadDays(): int {
+        $alloc = $this->session->data['warehouse_allocation'] ?? [];
+
+        if (empty($alloc)) {
+            return 0;
+        }
+
+        $warehouse = new \DockercartWarehouse($this->registry);
+        $max_days = 0;
+
+        foreach ($alloc as $key => $warehouse_id) {
+            if ($key === 'estimate' || !is_numeric($warehouse_id)) {
+                continue;
+            }
+
+            $info = $warehouse->getWarehouse((int)$warehouse_id);
+
+            if (!$info) {
+                continue;
+            }
+
+            $days = (int)$info['prepare_days'] + (int)$info['supplier_lead_time'];
+
+            if ($days > $max_days) {
+                $max_days = $days;
+            }
+        }
+
+        return $max_days;
     }
 
     /**

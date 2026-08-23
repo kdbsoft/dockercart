@@ -224,6 +224,29 @@
           {% endif %}
         </div>
 
+        {% if warehouse_enabled is defined and warehouse_enabled and warehouse_stock is defined %}
+        <div id="dc-warehouse-stock" class="mb-3 space-y-1.5">
+          {% for wh in warehouse_stock %}
+          {% if wh.type == 'dropship' %}
+          <div class="flex items-center gap-2 text-sm text-gray-600" data-warehouse-id="{{ wh.warehouse_id }}" data-unlimited="1">
+            <i data-lucide="truck" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
+            <span><strong>{{ wh.name }}</strong> — {{ text_warehouse_dropship }}{% if wh.lead_time > 0 %} {{ text_warehouse_lead }} ~{{ wh.lead_time }}{% endif %}</span>
+          </div>
+          {% elseif wh.allow_pickup and config_warehouse_show_pickup %}
+          <div class="flex items-center gap-2 text-sm text-gray-600" data-warehouse-id="{{ wh.warehouse_id }}" data-unlimited="{% if wh.unlimited %}1{% else %}0{% endif %}" data-qty="{{ wh.quantity }}">
+            <i data-lucide="package-open" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>
+            <span>{{ text_warehouse_pickup }} <strong>{{ wh.name }}</strong>{% if not wh.unlimited %} ({{ wh.quantity }}){% endif %}</span>
+          </div>
+          {% elseif config_warehouse_stock_display %}
+          <div class="flex items-center gap-2 text-sm text-gray-600" data-warehouse-id="{{ wh.warehouse_id }}" data-unlimited="{% if wh.unlimited %}1{% else %}0{% endif %}" data-qty="{{ wh.quantity }}">
+            <i data-lucide="warehouse" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
+            <span><strong>{{ wh.name }}</strong>: {% if wh.unlimited %}{{ text_warehouse_available }}{% else %}{{ wh.quantity }}{% endif %}</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <h1 id="dc-product-name" data-base-name="{{ base_product_name }}" data-base-meta-title="{{ base_meta_title }}" class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ heading_title }}</h1>
 
         {% if review_status %}

@@ -305,6 +305,8 @@ class ControllerSaleOrderDetail extends Controller {
 				'name'             => $order_localizer->productName($product),
 				'model'            => $product['model'],
 				'variant_sku'      => $product['variant_sku'] ?? '',
+				'warehouse_id'     => (int)($product['warehouse_id'] ?? 0),
+				'warehouse'        => (string)($product['warehouse_name'] ?? ''),
 				'option'           => $option_data,
 				'quantity'         => $product['quantity'],
 				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
@@ -386,6 +388,14 @@ class ControllerSaleOrderDetail extends Controller {
 		$buyer_orders_count = $this->model_sale_order->getBuyerOrderCount($order_info);
 		$data['buyer_orders_count'] = $buyer_orders_count;
 		$data['buyer_orders_text'] = $buyer_orders_count > 1 ? $this->getBuyerOrdersCountText($buyer_orders_count) : '';
+
+		// Warehouses: list for the per-line "move to warehouse" control.
+		$data['warehouses'] = [];
+		if ($this->config->get('config_warehouse_enabled')) {
+			$this->load->model('warehouse/warehouse');
+			$data['warehouses'] = $this->model_warehouse_warehouse->getWarehouses(['sort' => 'priority', 'order' => 'DESC', 'limit' => 1000]);
+		}
+		$data['move_warehouse_url'] = $this->url->link('sale/order_detail/moveWarehouse', 'user_token=' . $this->session->data['user_token'], true);
 
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -1620,6 +1630,41 @@ class ControllerSaleOrderDetail extends Controller {
 			$json['success'] = $this->language->get('text_success');
 			$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
 			$json['total_quantity'] = $this->getOrderTotalQuantity($order_id);
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Move one order line to another warehouse: moves the stock between the
+	 * warehouses, records a movement (reference = order number) and updates the
+	 * order_product snapshot + estimated ship date.
+	 */
+	public function moveWarehouse(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->post['order_id'] ?? 0);
+			$order_product_id = (int)($this->request->post['order_product_id'] ?? 0);
+			$to_warehouse_id = (int)($this->request->post['warehouse_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$result = $this->model_sale_order->moveOrderProductToWarehouse($order_id, $order_product_id, $to_warehouse_id);
+
+			if ($result) {
+				$json['success'] = $this->language->get('text_warehouse_moved');
+				$json['warehouse_id'] = $result['warehouse_id'];
+				$json['warehouse_name'] = $result['warehouse_name'];
+				$json['estimate_date'] = $result['estimate_date'];
+			} else {
+				$json['error'] = $this->language->get('text_warehouse_move_failed');
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');

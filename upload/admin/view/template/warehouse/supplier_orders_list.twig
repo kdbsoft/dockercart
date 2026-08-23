@@ -1,0 +1,146 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ export_url }}" class="btn btn-default"><i data-lucide="download" width="16" height="16"></i> {{ button_export }}</a>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="dcx-shell">
+      <div class="dcx-panel dcx-panel--flush">
+        <div class="dcx-panel-body">
+          <form class="form-inline dcx-filter" method="get">
+            <input type="hidden" name="route" value="warehouse/supplier_orders" />
+            <input type="hidden" name="user_token" value="{{ user_token }}" />
+            <div class="form-group">
+              <label class="control-label">{{ entry_supplier }}</label>
+              <select name="filter_supplier_id" class="form-control">
+                <option value="">--</option>
+                {% for supplier in suppliers %}
+                <option value="{{ supplier.warehouse_id }}"{% if filter.filter_supplier_id == supplier.warehouse_id %} selected="selected"{% endif %}>{{ supplier.supplier_name ? supplier.supplier_name : supplier.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="control-label">{{ entry_status }}</label>
+              <select name="filter_status" class="form-control">
+                {% for key, label in status_options %}
+                <option value="{{ key }}"{% if filter.filter_status == key %} selected="selected"{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="control-label">{{ entry_ordered }}</label>
+              <select name="filter_ordered" class="form-control">
+                {% for key, label in ordered_options %}
+                <option value="{{ key }}"{% if filter.filter_ordered == key %} selected="selected"{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-default">{{ button_filter }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% if orders %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <td>{{ column_order }}</td>
+            <td>{{ column_supplier }}</td>
+            <td>{{ column_customer }}</td>
+            <td>{{ column_product }}</td>
+            <td class="text-right">{{ column_quantity }}</td>
+            <td>{{ column_status }}</td>
+            <td>{{ column_ordered }}</td>
+            <td>{{ column_deadline }}</td>
+            <td>{{ column_tracking }}</td>
+            <td class="text-right">{{ column_action }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td>#{{ order.order_id }}</td>
+            <td>{{ order.supplier_name }}</td>
+            <td>{{ order.customer }}</td>
+            <td>{{ order.name }}{% if order.variant_sku %} / {{ order.variant_sku }}{% endif %}</td>
+            <td class="text-right">{{ order.quantity }}</td>
+            <td>
+              {% if order.supplier_status == 'shipped' %}<span class="label label-success">{{ order.supplier_status_text }}</span>
+              {% elseif order.supplier_status == 'ordered' %}<span class="label label-info">{{ order.supplier_status_text }}</span>
+              {% else %}<span class="label label-warning">{{ order.supplier_status_text }}</span>{% endif %}
+            </td>
+            <td>{{ order.ordered_date ? order.ordered_date : '-' }}</td>
+            <td>
+              {% if order.overdue %}<span class="label label-danger">{{ order.deadline }}</span>
+              {% elseif order.deadline %}<span class="label">{{ order.deadline }}</span>
+              {% else %}-{% endif %}
+            </td>
+            <td>{{ order.tracking }}</td>
+            <td class="text-right">
+              {% if order.supplier_status == 'shipped' %}
+              <span>{{ text_line_shipped }}</span>
+              {% else %}
+              <span class="supplier-actions" data-order-product-id="{{ order.order_product_id }}" data-status="{{ order.supplier_status }}">
+                {% if order.supplier_status != 'ordered' %}
+                <button type="button" class="btn btn-default btn-xs btn-mark-ordered" data-toggle="tooltip" title="{{ text_mark_ordered }}"><i data-lucide="package-check" width="14" height="14"></i></button>
+                {% endif %}
+                <input type="text" class="form-control input-sm input-tracking" placeholder="{{ entry_tracking }}" style="width:110px;display:inline-block;" value="{{ order.tracking }}" />
+                <button type="button" class="btn btn-primary btn-xs btn-mark-shipped" data-toggle="tooltip" title="{{ text_mark_shipped }}"><i data-lucide="truck" width="14" height="14"></i></button>
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% endif %}
+  </div>
+</div>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+
+$(document).on('click', '.btn-mark-ordered', function() {
+	var $row = $(this).closest('.supplier-actions');
+	updateLine($row, 'ordered', '');
+});
+
+$(document).on('click', '.btn-mark-shipped', function() {
+	var $row = $(this).closest('.supplier-actions');
+	updateLine($row, 'shipped', $row.find('.input-tracking').val());
+});
+
+function updateLine($row, action, tracking) {
+	$.ajax({
+		url: 'index.php?route=warehouse/supplier_orders/updateLine&user_token=' + userToken,
+		type: 'post',
+		dataType: 'json',
+		data: { order_product_id: $row.data('order-product-id'), action: action, tracking: tracking },
+		success: function(json) {
+			if (json['error']) { alert(json['error']); return; }
+			location.reload();
+		}
+	});
+}
+//--></script>
+{{ footer }}

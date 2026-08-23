@@ -1,0 +1,97 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-transfer').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="dcx-shell">
+      <div class="dcx-panel dcx-panel--flush">
+        <div class="dcx-panel-body">
+          <form class="form-inline dcx-filter" method="get">
+            <input type="hidden" name="route" value="warehouse/transfer" />
+            <input type="hidden" name="user_token" value="{{ user_token }}" />
+            <div class="form-group">
+              <label class="control-label">{{ entry_status }}</label>
+              <select name="filter_status" class="form-control">
+                {% for key, label in status_options %}
+                <option value="{{ key }}"{% if filter_status == key %} selected="selected"{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-default">{{ button_filter }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% if transfers %}
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-transfer">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+              <td>{{ column_transfer_no }}</td>
+              <td>{{ column_from }}</td>
+              <td>{{ column_to }}</td>
+              <td>{{ column_status }}</td>
+              <td>{{ column_date }}</td>
+              <td class="text-right">{{ column_action }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transfer in transfers %}
+            <tr data-href="{{ transfer.edit }}">
+              <td class="text-center">{% if transfer.transfer_id in selected %}
+                <input type="checkbox" name="selected[]" value="{{ transfer.transfer_id }}" checked="checked" />
+                {% else %}
+                <input type="checkbox" name="selected[]" value="{{ transfer.transfer_id }}" />
+                {% endif %}</td>
+              <td>{{ transfer.transfer_no }}</td>
+              <td>{{ transfer.from }}</td>
+              <td>{{ transfer.to }}</td>
+              <td><span class="label label-default">{{ transfer.status }}</span></td>
+              <td>{{ transfer.date }}</td>
+              <td class="text-right">
+                <a href="{{ transfer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-default btn-xs"><i data-lucide="pencil" width="14" height="14"></i></a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% endif %}
+  </div>
+</div>
+{{ footer }}

@@ -200,3 +200,5 @@ $_["text_voucher_applied"] = "Сертификат успешно примене
 $_["text_voucher_removed"] = "Сертификат удален";
 $_["text_your_details"] = "Ваши данные";
 $_["text_free"] = "Бесплатно";
+$_["text_ships_from"] = "Отправляется:";
+$_["text_pickup_from"] = "Самовывоз:";

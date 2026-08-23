@@ -50,6 +50,7 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
+                  <div class="dc-lang-frame">
                   <ul class="nav nav-tabs" id="language">
                     {% for language in languages %}
                       <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -96,6 +97,7 @@
                         </div>
                       </div>
                     {% endfor %}</div>
+                  </div>
                 </div>
               </div>
               <div class="dcx-panel" style="margin-top: 16px;">
@@ -221,7 +223,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="col-sm-12 col-lg-6 col-xl-3">
+                      <div class="col-sm-12 col-lg-6 col-xl-4">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-currency">{{ entry_currency }} <span data-toggle="tooltip" title="{{ help_currency }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <select name="currency_id" id="input-currency" class="form-control">
@@ -312,6 +314,12 @@
                               <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-12 col-lg-6 col-xl-8" style="display:none" id="dc-inventory-variants-col">
+                        <div class="dcx-field">
+                          <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span></label>
+                          <div class="dc-inv-block" id="dc-inventory-variants"></div>
                         </div>
                       </div>
                     </div>
@@ -413,7 +421,7 @@
                           <a href="" id="thumb-image" data-toggle="image" class="dc-img-link" style="margin:0;"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                           <input type="hidden" name="image" value="{{ image }}" id="input-image"/>
                         </div>
-                        <div class="product-media-thumbs">
+                        <div class="product-media-thumbs dc-lang-frame">
                           <ul class="nav nav-tabs" id="language-images">
                             <li class="active"><a href="#tab-image-all" data-toggle="tab"><i data-lucide="globe" width="14" height="14"></i> {{ text_all_languages }}</a></li>
                             {% for language in languages %}

@@ -429,6 +429,44 @@ class ControllerProductProduct extends Controller {
 				&& (empty($product_info['is_configurable']) || (int)($product_info['variants_in_stock'] ?? 0) === 0);
 			$data['text_discontinued'] = $this->language->get('text_discontinued');
 
+			// Warehouse availability (multi-warehouse feature).
+			$data['warehouse_enabled'] = (bool)$this->config->get('config_warehouse_enabled');
+
+			if ($data['warehouse_enabled'] && ($this->config->get('config_warehouse_stock_display') || $this->config->get('config_warehouse_show_pickup'))) {
+				$warehouse = new \DockercartWarehouse($this->registry);
+
+				if (!empty($product_info['is_configurable']) && !empty($product_info['default_variant_id'])) {
+					$warehouse_variant_id = (int)$product_info['default_variant_id'];
+				} else {
+					$warehouse_variant_id = 0;
+				}
+
+				$data['warehouse_stock'] = [];
+
+				foreach ($warehouse->getWarehouses() as $wh) {
+					$available = $warehouse->getAvailableForLine((int)$product_info['product_id'], $warehouse_variant_id, (int)$wh['warehouse_id']);
+
+					$unlimited = $available >= PHP_FLOAT_MAX * 0.5;
+
+					$data['warehouse_stock'][] = [
+						'warehouse_id' => (int)$wh['warehouse_id'],
+						'name' => (string)$wh['name'],
+						'type' => (string)$wh['type'],
+						'quantity' => $unlimited ? null : (float)$available,
+						'unlimited' => $unlimited,
+						'lead_time' => (int)$wh['supplier_lead_time'],
+						'allow_pickup' => (bool)$wh['allow_pickup'],
+					];
+				}
+
+				$data['text_in_stock'] = $this->language->get('text_instock');
+				$data['text_out_of_stock'] = $this->language->get('text_out_of_stock');
+				$data['text_warehouse_available'] = $this->language->get('text_warehouse_available');
+				$data['text_warehouse_dropship'] = $this->language->get('text_warehouse_dropship');
+				$data['text_warehouse_pickup'] = $this->language->get('text_warehouse_pickup');
+				$data['text_warehouse_lead'] = $this->language->get('text_warehouse_lead');
+			}
+
 			$this->load->model('tool/image');
 
 			// Brand logo for the "all brand products" block
