@@ -12,9 +12,6 @@
  * @version    1.0.3
  */
 
-require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
-require_once DIR_SYSTEM . 'library/dockercart/keyboard_layout.php';
-
 use Dockercart\KeyboardLayout;
 use Dockercart\ManticoreClient;
 

@@ -12,8 +12,6 @@
  * @version    1.0.0
  */
 
-require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
-
 use Dockercart\ManticoreClient;
 
 class ModelCommonAdminSearch extends Model {
