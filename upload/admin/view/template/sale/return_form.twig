@@ -400,18 +400,6 @@ $('#button-history').on('click', function(e) {
 const PAID_AMOUNT = {{ paid_amount_raw }};
 
 function returnItemChanged() {
-	const type = document.querySelector('input[name="type"]:checked');
-	if (type && type.value === 'full') {
-		document.querySelectorAll('.return-item-row').forEach(row => {
-			const check = row.querySelector('.return-item-check');
-			const qty = row.querySelector('.return-item-qty');
-			if (!check.checked) {
-				check.checked = true;
-				qty.disabled = false;
-				qty.value = qty.max;
-			}
-		});
-	}
 	document.querySelectorAll('.return-item-row').forEach(row => {
 		const check = row.querySelector('.return-item-check');
 		const qty = row.querySelector('.return-item-qty');
@@ -482,6 +470,11 @@ function recalcRefund() {
 
 	amount.value = PAID_AMOUNT > 0 ? Math.min(sum, PAID_AMOUNT).toFixed(2) : sum.toFixed(2);
 }
+
+(function() {
+	const checked = document.querySelector('input[name="type"]:checked');
+	if (checked) returnTypeChanged(checked);
+})();
 //--></script>
   <script type="text/javascript"><!--
 $('.date').datetimepicker({
