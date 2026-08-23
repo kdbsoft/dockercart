@@ -32,7 +32,6 @@ $_['text_language'] = 'Языки';
 $_['text_layout'] = 'Макеты';
 $_['text_length_class'] = 'Классы длины';
 $_['text_localisation'] = 'Справочники';
-$_['text_location'] = 'Местоположение магазина';
 $_['text_log'] = 'Журналы ошибок';
 $_['text_maintenance'] = 'Обслуживание';
 $_['text_manufacturer'] = 'Производители';
