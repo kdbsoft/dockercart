@@ -47,7 +47,6 @@ $_['text_language'] = 'Мови';
 $_['text_layout'] = 'Макети';
 $_['text_length_class'] = 'Класи довжини';
 $_['text_localisation'] = 'Довідники';
-$_['text_location'] = 'Розташування магазину';
 $_['text_log'] = 'Журнали помилок';
 $_['text_maintenance'] = 'Технічне обслуговування';
 $_['text_manufacturer'] = 'Виробники';
