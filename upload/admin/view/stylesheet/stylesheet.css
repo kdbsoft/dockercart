@@ -116,6 +116,11 @@ a {
     color: #fff;
 }
 
+.page-header__badge--info {
+    background: var(--dc-blue-100, #dbeafe);
+    color: var(--dc-blue-700, #1d4ed8);
+}
+
 .page-header__badge--unfilled::before {
     background: transparent;
     border: 1.5px solid currentColor;
