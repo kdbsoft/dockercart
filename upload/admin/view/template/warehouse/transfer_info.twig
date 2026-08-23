@@ -1,0 +1,36 @@
+{# Read-only transfer details, loaded via AJAX into the list-screen modal. #}
+<div class="dc-transfer-info">
+  <div class="dc-transfer-info__head">
+    <span class="dc-entity-name dc-transfer-info__no">{{ transfer_no }}</span>
+    <span class="{{ status_badge }}">{{ status_label }}</span>
+  </div>
+  <div class="dc-transfer-route dc-transfer-info__route">
+    <span class="dc-entity-name">{{ from }}</span>
+    <i data-lucide="move-right" width="14" height="14" class="text-muted"></i>
+    <span class="dc-entity-name">{{ to }}</span>
+  </div>
+  <div class="dc-transfer-info__meta">
+    <div><span class="text-muted">{{ column_date }}:</span> {{ date_added }}</div>
+    {% if creator %}<div><span class="text-muted">{{ entry_created_by }}:</span> {{ creator }}</div>{% endif %}
+    {% if note %}<div><span class="text-muted">{{ entry_note }}:</span> {{ note }}</div>{% endif %}
+  </div>
+  <table class="table table-bordered table-hover dcx-table dc-transfer-info__items">
+    <thead>
+      <tr>
+        <td>{{ entry_product }}</td>
+        <td class="text-right" style="width:120px;">{{ entry_quantity }}</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>
+          <div class="dc-entity-name">{{ item.product_name }}</div>
+          {% if item.model %}<small class="text-muted">{{ item.model }}</small>{% endif %}
+        </td>
+        <td class="text-right text-nowrap">{{ item.quantity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

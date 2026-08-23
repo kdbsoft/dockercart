@@ -6,8 +6,8 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
-            <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
-            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-transfer').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-transfer"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</button>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-transfer-delete').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -26,36 +26,41 @@
     </div>
     {% endif %}
 
-    <div class="dcx-shell">
-      <div class="dcx-panel dcx-panel--flush">
-        <div class="dcx-panel-body">
-          <form class="form-inline dcx-filter" method="get">
-            <input type="hidden" name="route" value="warehouse/transfer" />
-            <input type="hidden" name="user_token" value="{{ user_token }}" />
-            <div class="form-group">
-              <label class="control-label">{{ entry_status }}</label>
-              <select name="filter_status" class="form-control">
-                {% for key, label in status_options %}
-                <option value="{{ key }}"{% if filter_status == key %} selected="selected"{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <button type="submit" class="btn btn-default">{{ button_filter }}</button>
-          </form>
-        </div>
+    {{ user_filter }}
+
+    {% if transfers %}
+    <div class="dcx-kpis">
+      <div class="dcx-kpi dcx-stat-card">
+        <div class="dcx-kpi__head"><i data-lucide="clock" width="15" height="15"></i><span>{{ text_status_pending }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.pending }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_transfers }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--info">
+        <div class="dcx-kpi__head"><i data-lucide="truck" width="15" height="15"></i><span>{{ text_status_in_transit }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.in_transit }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_transfers }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--success">
+        <div class="dcx-kpi__head"><i data-lucide="circle-check" width="15" height="15"></i><span>{{ text_status_completed }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.completed }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_transfers }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--danger">
+        <div class="dcx-kpi__head"><i data-lucide="circle-x" width="15" height="15"></i><span>{{ text_status_cancelled }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.cancelled }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_transfers }}</div>
       </div>
     </div>
 
-    {% if transfers %}
-    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-transfer">
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-transfer-delete">
       <div class="table-responsive">
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover dcx-table">
           <thead>
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td>{{ column_transfer_no }}</td>
-              <td>{{ column_from }}</td>
-              <td>{{ column_to }}</td>
+              <td>{{ column_route }}</td>
+              <td class="text-right">{{ column_items }}</td>
               <td>{{ column_status }}</td>
               <td>{{ column_date }}</td>
               <td class="text-right">{{ column_action }}</td>
@@ -63,19 +68,37 @@
           </thead>
           <tbody>
             {% for transfer in transfers %}
-            <tr data-href="{{ transfer.edit }}">
+            <tr data-transfer-id="{{ transfer.transfer_id }}">
               <td class="text-center">{% if transfer.transfer_id in selected %}
                 <input type="checkbox" name="selected[]" value="{{ transfer.transfer_id }}" checked="checked" />
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ transfer.transfer_id }}" />
                 {% endif %}</td>
-              <td>{{ transfer.transfer_no }}</td>
-              <td>{{ transfer.from }}</td>
-              <td>{{ transfer.to }}</td>
-              <td><span class="label label-default">{{ transfer.status }}</span></td>
-              <td>{{ transfer.date }}</td>
-              <td class="text-right">
-                <a href="{{ transfer.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-default btn-xs"><i data-lucide="pencil" width="14" height="14"></i></a>
+              <td><a class="row-title-link dc-entity-name btn-transfer-info" href="javascript:void(0);" data-transfer-id="{{ transfer.transfer_id }}">{{ transfer.transfer_no }}</a></td>
+              <td>
+                <div class="dc-transfer-route">
+                  <span class="dc-entity-name">{{ transfer.from ?: '—' }}</span>
+                  <i data-lucide="move-right" width="14" height="14" class="text-muted"></i>
+                  <span class="dc-entity-name">{{ transfer.to ?: '—' }}</span>
+                </div>
+                {% if transfer.note %}<small class="text-muted">{{ transfer.note }}</small>{% endif %}
+              </td>
+              <td class="text-right text-nowrap">{{ transfer.items_count }} <small class="text-muted">({{ transfer.total_quantity }} {{ text_units_short }})</small></td>
+              <td><span class="{{ transfer.status_badge }}">{{ transfer.status }}</span></td>
+              <td class="text-left">
+                <div>{{ transfer.date }}</div>
+                {% if transfer.creator %}<small class="text-muted"><i data-lucide="user" width="11" height="11" style="vertical-align:-1px;"></i> {{ transfer.creator }}</small>{% endif %}
+              </td>
+              <td class="text-right text-nowrap">
+                {% if transfer.status_key == 'pending' %}
+                <button type="button" class="btn btn-default btn-xs btn-transfer-status" data-transfer-id="{{ transfer.transfer_id }}" data-status="in_transit" data-toggle="tooltip" title="{{ text_mark_in_transit }}"><i data-lucide="truck" width="14" height="14"></i></button>
+                <button type="button" class="btn btn-default btn-xs btn-transfer-status" data-transfer-id="{{ transfer.transfer_id }}" data-status="completed" data-confirm="{{ text_confirm_complete }}" data-toggle="tooltip" title="{{ text_mark_completed }}"><i data-lucide="circle-check" width="14" height="14"></i></button>
+                <button type="button" class="btn btn-default btn-xs btn-transfer-status" data-transfer-id="{{ transfer.transfer_id }}" data-status="cancelled" data-confirm="{{ text_confirm_cancel }}" data-toggle="tooltip" title="{{ text_mark_cancelled }}"><i data-lucide="circle-x" width="14" height="14"></i></button>
+                {% elseif transfer.status_key == 'in_transit' %}
+                <button type="button" class="btn btn-default btn-xs btn-transfer-status" data-transfer-id="{{ transfer.transfer_id }}" data-status="completed" data-confirm="{{ text_confirm_complete }}" data-toggle="tooltip" title="{{ text_mark_completed }}"><i data-lucide="circle-check" width="14" height="14"></i></button>
+                <button type="button" class="btn btn-default btn-xs btn-transfer-status" data-transfer-id="{{ transfer.transfer_id }}" data-status="cancelled" data-confirm="{{ text_confirm_cancel }}" data-toggle="tooltip" title="{{ text_mark_cancelled }}"><i data-lucide="circle-x" width="14" height="14"></i></button>
+                {% endif %}
+                <a class="btn btn-default btn-xs btn-transfer-info" href="javascript:void(0);" data-transfer-id="{{ transfer.transfer_id }}" data-toggle="tooltip" title="{{ text_details }}"><i data-lucide="eye" width="14" height="14"></i></a>
               </td>
             </tr>
             {% endfor %}
@@ -90,8 +113,259 @@
       </div>
     </div>
     {% else %}
-    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% include 'common/empty_state.twig' with { icon: 'warehouse_transfer', standalone: true, title: text_empty_title, description: text_empty_description, action_text: button_add, action_modal: 'modal-transfer' } %}
     {% endif %}
   </div>
 </div>
+
+<div class="modal fade" id="modal-transfer" tabindex="-1" role="dialog" aria-labelledby="modal-transfer-title">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-transfer-title"><i data-lucide="arrow-right-left" width="18" height="18" style="margin-right:8px;"></i>{{ text_add }}</h4>
+      </div>
+      <div class="modal-body">
+        <form action="{{ add }}" method="post" enctype="multipart/form-data" id="form-transfer">
+          <div class="dcx-fields--row">
+            <div class="dcx-field required">
+              <label class="dcx-label" for="input-from">{{ entry_from }}</label>
+              <select name="from_warehouse_id" id="input-from" class="form-control">
+                <option value="0">--</option>
+                {% for warehouse in warehouses %}
+                <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="dc-transfer-swap">
+              <button type="button" id="btn-swap-warehouses" class="btn btn-default" data-toggle="tooltip" title="{{ text_swap }}"><i data-lucide="arrow-left-right" width="14" height="14"></i></button>
+            </div>
+            <div class="dcx-field required">
+              <label class="dcx-label" for="input-to">{{ entry_to }}</label>
+              <select name="to_warehouse_id" id="input-to" class="form-control">
+                <option value="0">--</option>
+                {% for warehouse in warehouses %}
+                <option value="{{ warehouse.warehouse_id }}">{{ warehouse.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="dcx-fields--row" style="margin-top:16px;">
+            <div class="dcx-field">
+              <label class="dcx-label" for="input-transfer-no">{{ entry_transfer_no }} <span data-toggle="tooltip" title="{{ help_transfer_no }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+              <input type="text" name="transfer_no" id="input-transfer-no" value="" class="form-control" placeholder="{{ text_auto_number }}" />
+            </div>
+            <div class="dcx-field dc-transfer-note">
+              <label class="dcx-label" for="input-note">{{ entry_note }}</label>
+              <input type="text" name="note" id="input-note" value="" class="form-control" />
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <label class="dcx-label">{{ text_items }}</label>
+            <div class="dc-transfer-items" id="transfer-items">
+              <div class="dc-transfer-item">
+                <div class="dc-autocomplete-wrap dc-transfer-item__product">
+                  <input type="text" class="form-control item-product" placeholder="{{ entry_product }}" value="" />
+                </div>
+                <input type="hidden" class="item-product-id" name="items[0][product_id]" value="" />
+                <input type="hidden" class="item-variant-id" name="items[0][variant_id]" value="0" />
+                <input type="number" step="any" min="0" class="form-control item-qty" name="items[0][quantity]" value="" placeholder="{{ entry_quantity }}" />
+                <button type="button" class="btn btn-default remove-transfer-item" data-toggle="tooltip" title="{{ button_remove_item }}"><i data-lucide="x" width="14" height="14"></i></button>
+              </div>
+            </div>
+            <div class="dc-transfer-items-footer" style="margin-top:12px;">
+              <button type="button" id="btn-add-transfer-item" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_item }}</button>
+              <span class="dc-transfer-items-summary" id="transfer-items-summary"></span>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="submit" form="form-transfer" class="btn btn-primary"><i data-lucide="check" width="14" height="14"></i> {{ button_create }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-transfer-details" tabindex="-1" role="dialog" aria-labelledby="modal-transfer-details-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-transfer-details-title"><i data-lucide="clipboard-list" width="18" height="18" style="margin-right:8px;"></i>{{ text_details }}</h4>
+      </div>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+var quickStatusUrl = '{{ quick_status }}';
+var transferUrl = '{{ transfer_url }}';
+var transferInfoUrl = '{{ info_url }}';
+
+// Quick status advance from a list row
+$(document).on('click', '.btn-transfer-status', function(e) {
+	e.stopPropagation();
+
+	var $btn = $(this);
+	var confirmText = $btn.data('confirm');
+
+	if (confirmText && !window.confirm(confirmText)) {
+		return;
+	}
+
+	$btn.prop('disabled', true);
+
+	$.ajax({
+		url: quickStatusUrl,
+		type: 'post',
+		dataType: 'json',
+		data: { transfer_id: $btn.data('transfer-id'), status: $btn.data('status') },
+		success: function(json) {
+			if (json['error']) {
+				$btn.prop('disabled', false);
+				alert(json['error']);
+				return;
+			}
+			location.reload();
+		},
+		error: function() {
+			$btn.prop('disabled', false);
+			alert('{{ text_network_error }}');
+		}
+	});
+});
+
+// Transfer details modal (AJAX)
+function openTransferDetails(transferId) {
+	var $modal = $('#modal-transfer-details');
+
+	$modal.find('.modal-body').load(transferInfoUrl + '&transfer_id=' + transferId, function() {
+		lucide.createIcons();
+	});
+
+	$modal.modal('show');
+}
+
+$(document).on('click', '.btn-transfer-info', function(e) {
+	e.stopPropagation();
+
+	openTransferDetails($(this).data('transfer-id'));
+});
+
+// Whole-row navigation: click anywhere on a row opens the details modal
+$(document).on('click', 'tr[data-transfer-id]', function(e) {
+	if ($(e.target).closest('a, button, input, select, textarea').length) {
+		return;
+	}
+
+	openTransferDetails($(this).data('transfer-id'));
+});
+
+// Swap source/destination warehouses
+$('#btn-swap-warehouses').on('click', function() {
+	var $from = $('#input-from');
+	var $to = $('#input-to');
+	var tmp = $from.val();
+	$from.val($to.val());
+	$to.val(tmp);
+});
+
+// Live items summary ("N positions · M units")
+function updateTransferItemsSummary() {
+	var positions = 0;
+	var units = 0;
+
+	$('#transfer-items .dc-transfer-item').each(function() {
+		var qty = parseFloat($(this).find('.item-qty').val());
+
+		if (!isNaN(qty) && qty > 0) {
+			positions++;
+			units += qty;
+		}
+	});
+
+	units = Math.round(units * 1000) / 1000;
+
+	if (positions) {
+		$('#transfer-items-summary').html(positions + ' {{ text_positions_short }} &middot; ' + units + ' {{ text_units_short }}');
+	} else {
+		$('#transfer-items-summary').html('');
+	}
+}
+
+$(document).on('input', '.item-qty', updateTransferItemsSummary);
+
+$('#btn-add-transfer-item').on('click', function() {
+	var idx = $('#transfer-items .dc-transfer-item').length;
+	var html = '<div class="dc-transfer-item">';
+	html += '<div class="dc-autocomplete-wrap dc-transfer-item__product"><input type="text" class="form-control item-product" placeholder="{{ entry_product }}" value="" /></div>';
+	html += '<input type="hidden" class="item-product-id" name="items[' + idx + '][product_id]" value="" />';
+	html += '<input type="hidden" class="item-variant-id" name="items[' + idx + '][variant_id]" value="0" />';
+	html += '<input type="number" step="any" min="0" class="form-control item-qty" name="items[' + idx + '][quantity]" value="" placeholder="{{ entry_quantity }}" />';
+	html += '<button type="button" class="btn btn-default remove-transfer-item" data-toggle="tooltip" title="{{ button_remove_item }}"><i data-lucide="x" width="14" height="14"></i></button>';
+	html += '</div>';
+	$('#transfer-items').append(html);
+	renumberTransferItems();
+	updateTransferItemsSummary();
+	lucide.createIcons();
+	$('#transfer-items .dc-transfer-item:last .item-product').focus();
+});
+
+$(document).on('click', '.remove-transfer-item', function() {
+	$(this).closest('.dc-transfer-item').remove();
+	renumberTransferItems();
+	updateTransferItemsSummary();
+});
+
+$(document).on('focus', '.item-product', function() {
+	var $item = $(this).closest('.dc-transfer-item');
+
+	if (!$(this).hasClass('dc-ac-init')) {
+		$(this).addClass('dc-ac-init');
+		$(this).autocomplete({
+			source: function(request, response) {
+				$.ajax({
+					url: transferUrl + '&filter_search=' + encodeURIComponent(request),
+					dataType: 'json',
+					success: function(json) {
+						response($.map(json, function(item) {
+							return { label: item['label'], value: item['value'], variant_id: item['variant_id'] };
+						}));
+					}
+				});
+			},
+			select: function(item) {
+				$item.find('.item-product').val(item.label);
+				$item.find('.item-product-id').val(item.value);
+				$item.find('.item-variant-id').val(item.variant_id || 0);
+				return false;
+			}
+		});
+	}
+});
+
+// Manual edit of a product field invalidates the picked position
+$(document).on('input', '.item-product', function() {
+	var $item = $(this).closest('.dc-transfer-item');
+
+	$item.find('.item-product-id').val('');
+	$item.find('.item-variant-id').val(0);
+});
+
+function renumberTransferItems() {
+	$('#transfer-items .dc-transfer-item').each(function(i) {
+		$(this).find('.item-product-id').attr('name', 'items[' + i + '][product_id]');
+		$(this).find('.item-variant-id').attr('name', 'items[' + i + '][variant_id]');
+		$(this).find('.item-qty').attr('name', 'items[' + i + '][quantity]');
+	});
+}
+
+// Re-open the modal when validation failed
+{% if error_warning %}
+$('#modal-transfer').modal('show');
+{% endif %}
+//--></script>
 {{ footer }}
