@@ -8,6 +8,7 @@ class ControllerMailRegister extends Controller {
 		$data['text_approval'] = $this->language->get('text_approval');
 		$data['text_service'] = $this->language->get('text_service');
 		$data['text_thanks'] = $this->language->get('text_thanks');
+		$data['text_button_login'] = $this->language->get('text_button_login');
 
 		$this->load->model('account/customer_group');
 			
@@ -25,8 +26,15 @@ class ControllerMailRegister extends Controller {
 			$data['approval'] = '';
 		}
 			
-		$data['login'] = $this->url->link('account/login', '', true);		
+		$data['login'] = $this->url->link('account/login', '', true);
 		$data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+		$data['store_name'] = $data['store'];
+		$data['store_url'] = $this->config->get('config_url');
+		$data['logo'] = '';
+
+		if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$data['logo'] = $data['store_url'] . 'image/' . $this->config->get('config_logo');
+		}
 
 		$mail = new Mail($this->config->get('config_mail_engine'));
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -44,7 +52,7 @@ class ControllerMailRegister extends Controller {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
-		$mail->setText($this->load->view('mail/register', $data));
+		$mail->setHtml($this->load->view('mail/register', $data));
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};
@@ -86,6 +94,14 @@ class ControllerMailRegister extends Controller {
 			$data['email'] = $args[0]['email'];
 			$data['telephone'] = $args[0]['telephone'];
 
+			$data['store_name'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $this->config->get('config_url');
+			$data['logo'] = '';
+
+			if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+				$data['logo'] = $data['store_url'] . 'image/' . $this->config->get('config_logo');
+			}
+
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
@@ -102,7 +118,7 @@ class ControllerMailRegister extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(html_entity_decode($this->language->get('text_new_customer'), ENT_QUOTES, 'UTF-8'));
-			$mail->setText($this->load->view('mail/register_alert', $data));
+			$mail->setHtml($this->load->view('mail/register_alert', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};

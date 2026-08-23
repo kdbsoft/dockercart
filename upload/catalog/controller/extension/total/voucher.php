@@ -71,6 +71,10 @@ class ControllerExtensionTotalVoucher extends Controller {
 					$data['text_message'] = $language->get('text_message');
 					$data['text_redeem'] = sprintf($language->get('text_redeem'), $voucher['code']);
 					$data['text_footer'] = $language->get('text_footer');
+					$data['text_gift_voucher'] = $language->get('text_gift_voucher');
+					$data['text_button_shop'] = $language->get('text_button_shop');
+					$data['amount'] = $this->currency->format($voucher['amount'], $order_info['currency_code'], $order_info['currency_value']);
+					$data['code'] = $voucher['code'];
 
 					if (is_file(DIR_IMAGE . $voucher['image'])) {
 						$data['image'] = $this->config->get('config_url') . 'image/' . $voucher['image'];

@@ -201,13 +201,22 @@ class ControllerMarketingContact extends Controller {
 						$json['next'] = '';
 					}
 
-					$message  = '<html dir="ltr" lang="' . $this->language->get('code') . '">' . "\n";
-					$message .= '  <head>' . "\n";
-					$message .= '    <title>' . $this->request->post['subject'] . '</title>' . "\n";
-					$message .= '    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . "\n";
-					$message .= '  </head>' . "\n";
-					$message .= '  <body>' . html_entity_decode($this->request->post['message'], ENT_QUOTES, 'UTF-8') . '</body>' . "\n";
-					$message .= '</html>' . "\n";
+					$store_url = $store_info ? rtrim($store_info['url'], '/') . '/' : HTTP_CATALOG;
+
+					$mail_data = array(
+						'title'      => html_entity_decode($this->request->post['subject'], ENT_QUOTES, 'UTF-8'),
+						'store_name' => html_entity_decode($store_name, ENT_QUOTES, 'UTF-8'),
+						'store_url'  => $store_url,
+						'logo'       => '',
+					);
+
+					if (!empty($setting['config_logo']) && is_file(DIR_IMAGE . $setting['config_logo'])) {
+						$mail_data['logo'] = $store_url . 'image/' . $setting['config_logo'];
+					}
+
+					$mail_data['message_html'] = html_entity_decode($this->request->post['message'], ENT_QUOTES, 'UTF-8');
+
+					$message = $this->load->view('mail/newsletter_shell', $mail_data);
 
 					foreach ($emails as $email) {
 						if (filter_var($email, FILTER_VALIDATE_EMAIL)) {

@@ -735,18 +735,27 @@ class ModelCatalogReview extends Model {
 
 		$subject = sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 
-		$message = $this->language->get('text_waiting') . "\n";
-		$message .= sprintf($this->language->get('text_product'), html_entity_decode($product_info['name'] ?? '', ENT_QUOTES, 'UTF-8')) . "\n";
-		$message .= sprintf($this->language->get('text_reviewer'), html_entity_decode($data['name'] ?? '', ENT_QUOTES, 'UTF-8')) . "\n";
-		$message .= sprintf($this->language->get('text_rating'), ReviewRating::format($rating)) . "\n";
-		$message .= $this->language->get('text_review') . "\n";
-		$message .= html_entity_decode($data['text'] ?? '', ENT_QUOTES, 'UTF-8') . "\n\n";
+		$mail_data = array(
+			'text_waiting'  => $this->language->get('text_waiting'),
+			'text_review'   => $this->language->get('text_review'),
+			'product_line'  => sprintf($this->language->get('text_product'), html_entity_decode($product_info['name'] ?? '', ENT_QUOTES, 'UTF-8')),
+			'reviewer_line' => sprintf($this->language->get('text_reviewer'), html_entity_decode($data['name'] ?? '', ENT_QUOTES, 'UTF-8')),
+			'rating_line'   => sprintf($this->language->get('text_rating'), ReviewRating::format($rating)),
+			'review_text'   => nl2br(html_entity_decode($data['text'] ?? '', ENT_QUOTES, 'UTF-8')),
+			'store_name'    => html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'),
+			'store_url'     => $this->config->get('config_url'),
+			'logo'          => '',
+		);
 
-		$this->sendMail($subject, $message);
+		if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$mail_data['logo'] = $mail_data['store_url'] . 'image/' . $this->config->get('config_logo');
+		}
+
+		$this->sendMail($subject, $this->load->view('mail/review_alert', $mail_data));
 	}
 
 	/**
-	 * Send a plain-text mail to the store alert addresses.
+	 * Send an HTML mail to the store alert addresses.
 	 */
 	private function sendMail(string $subject, string $message): void {
 		$mail = new Mail($this->config->get('config_mail_engine'));
@@ -765,7 +774,7 @@ class ModelCatalogReview extends Model {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject($subject);
-		$mail->setText($message);
+		$mail->setHtml($message);
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};

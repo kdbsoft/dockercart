@@ -8,6 +8,7 @@ class ControllerMailAffiliate extends Controller {
 		$data['text_approval'] = $this->language->get('text_approval');
 		$data['text_service'] = $this->language->get('text_service');
 		$data['text_thanks'] = $this->language->get('text_thanks');
+		$data['text_button_login'] = $this->language->get('text_button_login');
 
 		$this->load->model('account/customer_group');
 		
@@ -27,6 +28,13 @@ class ControllerMailAffiliate extends Controller {
 		
 		$data['login'] = $this->url->link('affiliate/login', '', true);
 		$data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+		$data['store_name'] = $data['store'];
+		$data['store_url'] = $this->config->get('config_url');
+		$data['logo'] = '';
+
+		if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$data['logo'] = $data['store_url'] . 'image/' . $this->config->get('config_logo');
+		}
 
 		$mail = new Mail($this->config->get('config_mail_engine'));
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -49,7 +57,7 @@ class ControllerMailAffiliate extends Controller {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
-		$mail->setText($this->load->view('mail/affiliate', $data));
+		$mail->setHtml($this->load->view('mail/affiliate', $data));
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};
@@ -88,7 +96,15 @@ class ControllerMailAffiliate extends Controller {
 			
 			$data['website'] = html_entity_decode($args[1]['website'], ENT_QUOTES, 'UTF-8');
 			$data['company'] = $args[1]['company'];
-							
+
+			$data['store_name'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+			$data['store_url'] = $this->config->get('config_url');
+			$data['logo'] = '';
+
+			if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+				$data['logo'] = $data['store_url'] . 'image/' . $this->config->get('config_logo');
+			}
+	
 			$this->load->model('account/customer_group');
 
 			$customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
@@ -115,7 +131,7 @@ class ControllerMailAffiliate extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));			
 			$mail->setSubject(html_entity_decode($this->language->get('text_new_affiliate'), ENT_QUOTES, 'UTF-8'));
-			$mail->setText($this->load->view('mail/affiliate_alert', $data));
+			$mail->setHtml($this->load->view('mail/affiliate_alert', $data));
 			$mail->on_token_refresh = function ($token) {
 				$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 			};
