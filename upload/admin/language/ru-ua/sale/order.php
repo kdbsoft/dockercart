@@ -180,6 +180,7 @@ $_['text_search_no_results']  = 'Заказы не найдены';
 $_['text_filter_all']         = 'Все';
 $_['text_filter_unfulfilled'] = 'Не выполненные';
 $_['text_filter_unpaid']      = 'Не оплаченные';
+$_['text_filter_unshipped']   = 'Не отгруженные';
 $_['text_filter_abandoned']   = 'Брошенные корзины';
 $_['text_add_filter']         = 'Добавить фильтр';
 $_['text_add_condition']      = 'Добавить условие';
@@ -401,6 +402,12 @@ $_['text_payment_status_overpaid']   = 'Переплата';
 $_['text_payment_paid_of']           = 'Оплачено:';
 $_['text_payment_remaining']         = 'Остаток';
 $_['text_no_payments']               = 'Платежи не записаны';
+
+// Отгрузки
+$_['text_shipping_status']           = 'Отгрузка';
+$_['text_shipping_status_none']      = 'Не отгружен';
+$_['text_shipping_status_partial']   = 'Отгружен частично';
+$_['text_shipping_status_shipped']   = 'Отгружен';
 $_['text_reference']                 = 'Транз.';
 $_['text_payment_note_received']     = 'Платёж получен: %s (оплачено %s из %s)';
 $_['text_payment_note_reversed']     = 'Платёж отменён: -%s';

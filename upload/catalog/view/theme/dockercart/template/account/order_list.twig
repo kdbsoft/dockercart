@@ -65,6 +65,18 @@
                   {% set payment_badge = 'bg-gray-100 text-gray-600' %}
                 {% endif %}
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_badge }}" title="{{ text_payment_status }}">{{ order.payment_status_text }}</span>
+                {% if order.shipping_status == 'shipped' %}
+                  {% set shipping_badge = 'bg-green-100 text-green-700' %}
+                {% elseif order.shipping_status == 'partial' %}
+                  {% set shipping_badge = 'bg-amber-100 text-amber-700' %}
+                {% else %}
+                  {% set shipping_badge = 'bg-gray-100 text-gray-600' %}
+                {% endif %}
+                {% if order.shipping_status %}
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium {{ shipping_badge }}" title="{{ text_shipping_status }}">
+                  <i data-lucide="truck" class="w-3 h-3"></i>{{ order.shipping_status_text }}
+                </span>
+                {% endif %}
                 {% if order.return_count %}
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700" title="{{ text_returned_status|format(order.return_status) }}">
                   <i data-lucide="rotate-ccw" class="w-3 h-3"></i>{{ text_returned }}{% if order.return_count > 1 %} ({{ order.return_count }}){% endif %}

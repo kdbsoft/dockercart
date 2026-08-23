@@ -1,4 +1,11 @@
 {# Order shipments panel: tracking numbers with partial quantities #}
+{% if shipment_products %}
+<div class="dcx-shipment-status">
+  <span class="{{ shipping_status_badge_class }}" data-toggle="tooltip" title="{{ text_shipping_status }}">{{ shipping_status_text }}</span>
+  <span class="dcx-shipment-status__count">{{ shipping_shipped_total }} / {{ shipping_ordered_total }}</span>
+  <div class="payment-progress"><div class="payment-progress__bar" style="width: {{ shipping_progress_percent }}%"></div></div>
+</div>
+{% endif %}
 {% if shipments %}
 <div class="dcx-payment-list">
   {% for shipment in shipments %}
