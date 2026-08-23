@@ -50,7 +50,7 @@ $_['text_tab_general']        = 'Основное';
 $_['text_tab_slides']         = 'Слайды';
 
 // Sections
-$_['text_general_settings']   = 'Основные настройки';
+$_['text_status_card']        = 'Статус';
 $_['text_slides_by_language'] = 'Слайды по языкам';
 
 // Slides
