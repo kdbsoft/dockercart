@@ -11,9 +11,10 @@ class ModelWarehouseSupplierOrders extends Model {
 	 * Dropship lines: order_product rows whose warehouse is a dropship type.
 	 */
 	public function getOrders(array $data = []): array {
-		$sql = "SELECT op.*, o.order_status_id, os.`name` AS order_status_name, o.`firstname` AS customer_firstname, o.`lastname` AS customer_lastname, w.`name` AS warehouse_name, w.`supplier_name`, w.`supplier_phone`, w.`supplier_email`
+		$sql = "SELECT op.*, o.order_status_id, os.`name` AS order_status_name, o.`firstname` AS customer_firstname, o.`lastname` AS customer_lastname, COALESCE(wd.`name`, w.`name`) AS warehouse_name, w.`supplier_name`, w.`supplier_phone`, w.`supplier_email`
 			FROM `" . DB_PREFIX . "order_product` op
 			JOIN `" . DB_PREFIX . "warehouse` w ON (w.warehouse_id = op.warehouse_id AND w.`type` = 'dropship')
+			LEFT JOIN `" . DB_PREFIX . "warehouse_description` wd ON (wd.warehouse_id = w.warehouse_id AND wd.language_id = '" . (int)($this->config->get('config_language_id')) . "')
 			LEFT JOIN `" . DB_PREFIX . "order` o ON (o.order_id = op.order_id)
 			LEFT JOIN `" . DB_PREFIX . "order_status` os ON (os.order_status_id = o.order_status_id AND os.language_id = '" . (int)($this->config->get('config_language_id')) . "')
 			WHERE 1 = 1";

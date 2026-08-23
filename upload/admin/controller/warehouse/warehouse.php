@@ -218,7 +218,7 @@ class ControllerWarehouseWarehouse extends Controller {
 			$warehouse_info = [];
 		}
 
-		$fields = ['type', 'is_default', 'priority', 'status', 'sort_order', 'address_1', 'address_2', 'city', 'postcode', 'country_id', 'zone_id', 'latitude', 'longitude', 'phone', 'email', 'map_url', 'prepare_days', 'low_stock', 'allow_pickup', 'pickup_cost', 'pickup_note', 'supplier_name', 'supplier_phone', 'supplier_email', 'supplier_lead_time', 'supplier_note'];
+		$fields = ['type', 'is_default', 'priority', 'status', 'sort_order', 'postcode', 'country_id', 'zone_id', 'latitude', 'longitude', 'phone', 'email', 'map_url', 'prepare_days', 'low_stock', 'allow_pickup', 'pickup_cost', 'pickup_note', 'supplier_name', 'supplier_phone', 'supplier_email', 'supplier_lead_time', 'supplier_note'];
 
 		foreach ($fields as $field) {
 			if (isset($this->request->post[$field])) {
@@ -243,6 +243,14 @@ class ControllerWarehouseWarehouse extends Controller {
 		}
 
 		$data['error_name'] = $this->error['name'] ?? [];
+
+		// Display name for the page header (edit mode only).
+		if (isset($this->request->get['warehouse_id']) && $warehouse_info) {
+			$descriptions = $this->model_warehouse_warehouse->getDescriptions((int)$this->request->get['warehouse_id']);
+			$data['warehouse_name'] = $descriptions[$this->config->get('config_language_id')]['name'] ?? '';
+		} else {
+			$data['warehouse_name'] = '';
+		}
 
 		if (isset($this->request->post['schedule'])) {
 			$data['schedule'] = $this->request->post['schedule'];

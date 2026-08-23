@@ -12,6 +12,8 @@ $_['text_confirm'] = 'Are you sure?';
 $_['text_default'] = 'Default';
 $_['text_enabled'] = 'Enabled';
 $_['text_disabled'] = 'Disabled';
+$_['text_active'] = 'Active';
+$_['text_inactive'] = 'Inactive';
 $_['text_type_physical'] = 'Physical';
 $_['text_type_virtual'] = 'Virtual';
 $_['text_type_dropship'] = 'Dropship';
@@ -26,6 +28,7 @@ $_['text_copy_shared'] = 'Copy shared holidays';
 
 // Buttons
 $_['button_add'] = 'Add New';
+$_['button_remove'] = 'Remove';
 $_['button_delete'] = 'Delete';
 $_['button_save'] = 'Save';
 $_['button_cancel'] = 'Cancel';
@@ -41,7 +44,7 @@ $_['column_default'] = 'Default';
 $_['column_status'] = 'Status';
 
 // Tabs
-$_['tab_general'] = 'General';
+$_['tab_warehouse'] = 'Warehouse';
 $_['tab_address'] = 'Address & Location';
 $_['tab_schedule'] = 'Schedule';
 $_['tab_holidays'] = 'Holidays';
