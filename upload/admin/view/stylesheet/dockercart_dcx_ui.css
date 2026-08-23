@@ -1749,6 +1749,24 @@ div.dcx-field.required > .dcx-label:before {
   .dc-attr-row { position: relative; }
 }
 
+/* ── Language tabs frame (fieldset-like: tabs straddle the top border) ── */
+.dc-lang-frame {
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg);
+    padding: 22px 16px 16px;
+}
+.dc-lang-frame > .nav-tabs {
+    width: fit-content;
+    margin: -37px 0 16px;
+    padding: 0 10px;
+    background: var(--dc-surface);
+    border-radius: var(--dc-radius-lg);
+}
+
+@media (max-width: 767px) {
+  .dc-lang-frame { padding: 18px 12px 12px; }
+}
+
 /* Customer detail workspace */
 .dcx-customer-summary {
     display: grid;
@@ -2937,5 +2955,86 @@ div.dcx-field.required > .dcx-label:before {
 @media (max-width: 767px) {
     .dcx-onboarding__steps {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Warehouse form: compact schedule grid (one row per day) */
+.dcx-schedule {
+    display: flex;
+    flex-direction: column;
+}
+.dcx-schedule__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-radius: var(--dc-radius-md);
+}
+.dcx-schedule__row:nth-child(odd) {
+    background: var(--dc-gray-100);
+}
+.dcx-schedule__day {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 150px;
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+}
+.dcx-schedule__windows {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+.dcx-schedule__window {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.dcx-schedule__time {
+    width: 90px;
+    height: auto;
+    padding: 3px 6px;
+    font-size: 12px;
+    border-radius: var(--dc-radius-md);
+}
+.dcx-schedule__sep {
+    color: var(--dc-text-muted);
+}
+.dcx-schedule__remove,
+.dcx-schedule__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    padding: 3px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--dc-text-muted);
+}
+.dcx-schedule__remove:hover {
+    color: #d9534f;
+}
+.dcx-schedule__add {
+    border: 1px dashed var(--dc-border);
+    border-radius: var(--dc-radius-md);
+    padding: 3px 8px;
+}
+.dcx-schedule__add:hover {
+    color: var(--dc-primary);
+    border-color: var(--dc-primary);
+}
+@media (max-width: 767px) {
+    .dcx-schedule__row {
+        flex-wrap: wrap;
+        gap: 4px 12px;
+    }
+    .dcx-schedule__day {
+        width: 100%;
     }
 }
