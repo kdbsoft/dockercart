@@ -100,6 +100,7 @@ $_['text_search_no_results']  = 'No orders found';
 $_['text_filter_all']         = 'All';
 $_['text_filter_unfulfilled'] = 'Unfulfilled';
 $_['text_filter_unpaid']      = 'Unpaid';
+$_['text_filter_unshipped']   = 'Unshipped';
 $_['text_filter_abandoned']   = 'Abandoned carts';
 $_['text_add_filter']         = 'Add filter';
 $_['text_add_condition']      = 'Add condition';
@@ -413,6 +414,12 @@ $_['text_payment_status_overpaid']   = 'Overpaid';
 $_['text_payment_paid_of']           = 'Paid:';
 $_['text_payment_remaining']         = 'Remaining';
 $_['text_no_payments']               = 'No payments recorded';
+
+// Shipments
+$_['text_shipping_status']           = 'Shipping';
+$_['text_shipping_status_none']      = 'Not Shipped';
+$_['text_shipping_status_partial']   = 'Partially Shipped';
+$_['text_shipping_status_shipped']   = 'Shipped';
 $_['text_reference']                 = 'Trans.';
 $_['text_payment_note_received']     = 'Payment received: %s (paid %s of %s)';
 $_['text_payment_note_reversed']     = 'Payment reversed: -%s';

@@ -332,4 +332,32 @@ class ModelAccountOrder extends Model {
 
 		return $result;
 	}
+
+	/**
+	 * Bulk shipped/ordered quantity sums for many orders (N+1 killer).
+	 * Returns [order_id => ['ordered' => float, 'shipped' => float]].
+	 *
+	 * @param int[] $order_ids
+	 * @return array<int, array{ordered: float, shipped: float}>
+	 */
+	public function getShippingSumsByOrderIds(array $order_ids) {
+		if (empty($order_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_ids)));
+
+		$query = $this->db->query("SELECT op.order_id, SUM(op.quantity) AS ordered, SUM(LEAST(COALESCE(si.shipped, 0), op.quantity)) AS shipped FROM `" . DB_PREFIX . "order_product` op LEFT JOIN (SELECT order_product_id, SUM(quantity) AS shipped FROM `" . DB_PREFIX . "order_shipment_item` GROUP BY order_product_id) si ON si.order_product_id = op.order_product_id WHERE op.order_id IN (" . implode(',', $ids) . ") GROUP BY op.order_id");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_id']] = array(
+				'ordered' => (float)$row['ordered'],
+				'shipped' => (float)$row['shipped'],
+			);
+		}
+
+		return $result;
+	}
 }
