@@ -12,8 +12,6 @@
  * @version    1.0.3
  */
 
-require_once DIR_SYSTEM . 'library/dockercart/manticore.php';
-
 use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {

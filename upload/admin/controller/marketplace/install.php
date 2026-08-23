@@ -1,7 +1,5 @@
 <?php
 
-require_once DIR_SYSTEM . 'library/dockercart/install_helper.php';
-
 class ControllerMarketplaceInstall extends Controller {
 	public function install() {
 		$this->load->language('marketplace/install');
@@ -648,16 +646,12 @@ class ControllerMarketplaceInstall extends Controller {
 				$this->model_user_user_group->removePermissions('extension/module/' . $code);
 
 				// Remove DockerCart metadata + license
-				if (is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
-					require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
-
+				if (class_exists('DockercartExtensionStore')) {
 					$store = new DockercartExtensionStore($this->registry);
 					$store->removeInstalledMeta($code);
 				}
 
-				if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-					require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
+				if (class_exists('DockercartLicensing')) {
 					$licensing = new DockercartLicensing($this->registry);
 					$licensing->removeLicense($code);
 				}

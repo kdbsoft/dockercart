@@ -55,8 +55,6 @@ class ControllerEventDockercartAboutTab extends Controller {
 			return null;
 		}
 
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
 		$licensing = new DockercartLicensing($this->registry);
 
 		return $licensing->getLicense($module_code) ?: null;

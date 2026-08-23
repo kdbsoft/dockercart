@@ -323,14 +323,12 @@ class ControllerMarketplaceExtension extends Controller {
 			$this->load->model('user/user_group');
 			$this->model_user_user_group->removePermissions('extension/' . $type . '/' . $extension);
 
-			if (is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
-				require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
+			if (class_exists('DockercartExtensionStore')) {
 				$store = new DockercartExtensionStore($this->registry);
 				$store->removeInstalledMeta($extension);
 			}
 
-			if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-				require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			if (class_exists('DockercartLicensing')) {
 				$licensing = new DockercartLicensing($this->registry);
 				$licensing->removeLicense($extension);
 			}
