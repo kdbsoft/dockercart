@@ -259,6 +259,8 @@ class ControllerDesignSeoUrl extends Controller {
 
 		$data['add'] = $this->url->link('design/seo_url/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('design/seo_url/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['export'] = $this->url->link('design/seo_url/export', 'user_token=' . $this->session->data['user_token'] . $url, true);
+		$data['import'] = $this->url->link('design/seo_url/import', 'user_token=' . $this->session->data['user_token'], true);
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
 		// Search-only toolbar (no saved filter tabs)
@@ -673,5 +675,298 @@ class ControllerDesignSeoUrl extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Export SEO URLs as CSV (UTF-8 with BOM for Excel compatibility).
+	 * Respects the current list filters. Columns: store_id, language, query, keyword.
+	 */
+	public function export(): void {
+		$this->load->language('design/seo_url');
+
+		if (!$this->user->hasPermission('access', 'design/seo_url')) {
+			$this->session->data['error_warning'] = $this->language->get('error_permission');
+
+			$this->response->redirect($this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true));
+		}
+
+		$this->load->model('design/seo_url');
+		$this->load->model('localisation/language');
+
+		$language_codes = array();
+
+		foreach ($this->model_localisation_language->getLanguages() as $language) {
+			$language_codes[(int)$language['language_id']] = $language['code'];
+		}
+
+		$filter_data = array(
+			'filter_query'       => isset($this->request->get['filter_query']) ? $this->request->get['filter_query'] : '',
+			'filter_keyword'     => isset($this->request->get['filter_keyword']) ? $this->request->get['filter_keyword'] : '',
+			'filter_store_id'    => isset($this->request->get['filter_store_id']) ? $this->request->get['filter_store_id'] : '',
+			'filter_language_id' => isset($this->request->get['filter_language_id']) ? $this->request->get['filter_language_id'] : '',
+			'sort'               => 'query',
+			'order'              => 'ASC'
+		);
+
+		$csv = "\xEF\xBB\xBF" . 'store_id,language,query,keyword' . "\n";
+
+		foreach ($this->model_design_seo_url->getSeoUrls($filter_data) as $result) {
+			if (isset($language_codes[(int)$result['language_id']])) {
+				$language = $language_codes[(int)$result['language_id']];
+			} else {
+				$language = $result['language_id'];
+			}
+
+			$csv .= $this->csvField($result['store_id']) . ',' . $this->csvField($language) . ',' . $this->csvField($result['query']) . ',' . $this->csvField($result['keyword']) . "\n";
+		}
+
+		$this->response->addHeader('Content-Type: text/csv; charset=utf-8');
+		$this->response->addHeader('Content-Disposition: attachment; filename="seo_urls_' . date('Ymd_Hi') . '.csv"');
+		$this->response->addHeader('Content-Length: ' . strlen($csv));
+		$this->response->setOutput($csv);
+	}
+
+	/**
+	 * Import SEO URLs from an uploaded CSV file (all-or-nothing).
+	 *
+	 * Expected columns: store_id, language (code), query, keyword. The whole
+	 * file is validated first; on any error nothing is written and every
+	 * offending line is reported. Existing (query, store_id, language_id)
+	 * records are updated, missing ones are added.
+	 */
+	public function import(): void {
+		$this->load->language('design/seo_url');
+		$this->load->model('design/seo_url');
+
+		$json = array();
+
+		if ($this->request->server['REQUEST_METHOD'] != 'POST') {
+			$json['error'] = 'Invalid request';
+		} elseif (!$this->user->hasPermission('modify', 'design/seo_url')) {
+			$json['error'] = $this->language->get('error_permission');
+		} elseif (!isset($_FILES['file']) || (int)$_FILES['file']['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($_FILES['file']['tmp_name'])) {
+			$json['error'] = $this->language->get('error_upload');
+		} else {
+			$json = $this->processImportCsv($_FILES['file']['tmp_name']);
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	private function processImportCsv($filename) {
+		$handle = fopen($filename, 'r');
+
+		if (!$handle) {
+			return array('error' => $this->language->get('error_upload'));
+		}
+
+		// Reference data used for validation.
+		$languages = array();
+
+		foreach ($this->model_localisation_language->getLanguages() as $language) {
+			$languages[mb_strtolower($language['code'], 'UTF-8')] = (int)$language['language_id'];
+		}
+
+		$stores = array(0);
+
+		$this->load->model('setting/store');
+
+		foreach ($this->model_setting_store->getStores() as $store) {
+			$stores[] = (int)$store['store_id'];
+		}
+
+		// Existing rows indexed for uniqueness checks. Keys are lowercased to
+		// mirror the case-insensitive DB collation.
+		$existing_groups = array();
+		$existing_keywords = array();
+
+		$seo_urls = $this->db->query("SELECT `query`, `store_id`, `language_id`, `keyword` FROM `" . DB_PREFIX . "seo_url`");
+
+		foreach ($seo_urls->rows as $row) {
+			$existing_groups[$this->groupKey($row['query'], (int)$row['store_id'], (int)$row['language_id'])] = $row['keyword'];
+			$existing_keywords[(int)$row['store_id'] . '|' . (int)$row['language_id'] . '|' . mb_strtolower($row['keyword'], 'UTF-8')] = $row['query'];
+		}
+
+		$rows = array();
+		$errors = array();
+		$file_groups = array();
+		$file_keywords = array();
+		$first_row = true;
+		$line_no = 0;
+
+		while (($data = fgetcsv($handle, 0, ',')) !== false) {
+			$line_no++;
+
+			$data = array_map('trim', (array)$data);
+
+			// Skip blank lines.
+			if (count($data) === 1 && $data[0] === '') {
+				continue;
+			}
+
+			if ($first_row) {
+				$data[0] = ltrim((string)$data[0], "\xEF\xBB\xBF");
+
+				// Optional header row.
+				if (count($data) >= 4 && array_map('strtolower', array_slice($data, 0, 4)) === array('store_id', 'language', 'query', 'keyword')) {
+					$first_row = false;
+
+					continue;
+				}
+			}
+
+			$first_row = false;
+
+			// Tolerate trailing separators.
+			while (count($data) > 4 && $data[count($data) - 1] === '') {
+				array_pop($data);
+			}
+
+			if (count($data) !== 4) {
+				$errors[] = sprintf($this->language->get('error_csv_columns'), $line_no, count($data));
+
+				continue;
+			}
+
+			list($store_field, $language_field, $query, $keyword) = $data;
+
+			$store_id = 0;
+			$language_id = 0;
+			$valid = true;
+
+			if (preg_match('/^\d+$/', (string)$store_field) && in_array((int)$store_field, $stores, true)) {
+				$store_id = (int)$store_field;
+			} else {
+				$errors[] = sprintf($this->language->get('error_csv_store'), $line_no, (string)$store_field);
+
+				$valid = false;
+			}
+
+			$language_key = mb_strtolower((string)$language_field, 'UTF-8');
+
+			if (isset($languages[$language_key])) {
+				$language_id = $languages[$language_key];
+			} else {
+				$errors[] = sprintf($this->language->get('error_csv_language'), $line_no, (string)$language_field);
+
+				$valid = false;
+			}
+
+			if ((string)$query === '') {
+				$errors[] = sprintf($this->language->get('error_csv_query'), $line_no);
+
+				$valid = false;
+			} elseif (utf8_strlen((string)$query) > 255) {
+				$errors[] = sprintf($this->language->get('error_csv_query_length'), $line_no);
+
+				$valid = false;
+			}
+
+			if ((string)$keyword === '') {
+				$errors[] = sprintf($this->language->get('error_csv_keyword'), $line_no);
+
+				$valid = false;
+			} elseif (utf8_strlen((string)$keyword) > 255) {
+				$errors[] = sprintf($this->language->get('error_csv_keyword_length'), $line_no);
+
+				$valid = false;
+			}
+
+			if (!$valid) {
+				continue;
+			}
+
+			$query = (string)$query;
+			$keyword = (string)$keyword;
+			$query_key = mb_strtolower($query, 'UTF-8');
+			$group_key = $this->groupKey($query, $store_id, $language_id);
+
+			// Duplicate row for the same alias inside this file?
+			if (isset($file_groups[$group_key])) {
+				$errors[] = sprintf($this->language->get('error_csv_duplicate'), $line_no, $query, $store_id, (string)$language_field, $file_groups[$group_key]);
+
+				continue;
+			}
+
+			// Keyword already claimed by another query in this file?
+			$keyword_key = $store_id . '|' . $language_id . '|' . mb_strtolower($keyword, 'UTF-8');
+
+			if (isset($file_keywords[$keyword_key]) && $file_keywords[$keyword_key]['query_key'] !== $query_key) {
+				$errors[] = sprintf($this->language->get('error_csv_keyword_conflict'), $line_no, $keyword, $file_keywords[$keyword_key]['query'], $store_id, (string)$language_field);
+
+				continue;
+			}
+
+			// Keyword held by a different query in the DB?
+			if (isset($existing_keywords[$keyword_key]) && mb_strtolower($existing_keywords[$keyword_key], 'UTF-8') !== $query_key) {
+				$errors[] = sprintf($this->language->get('error_csv_keyword_conflict'), $line_no, $keyword, $existing_keywords[$keyword_key], $store_id, (string)$language_field);
+
+				continue;
+			}
+
+			$file_groups[$group_key] = $line_no;
+			$file_keywords[$keyword_key] = array('query' => $query, 'query_key' => $query_key);
+
+			$rows[] = array(
+				'store_id'    => $store_id,
+				'language_id' => $language_id,
+				'query'       => $query,
+				'keyword'     => $keyword
+			);
+		}
+
+		fclose($handle);
+
+		if ($errors) {
+			return array('error' => implode('<br>', $errors));
+		}
+
+		if (!$rows) {
+			return array('error' => $this->language->get('error_csv_empty'));
+		}
+
+		$added = 0;
+		$updated = 0;
+
+		try {
+			$this->db->query("START TRANSACTION");
+
+			foreach ($rows as $row) {
+				$seo_url_id = $this->model_design_seo_url->getSeoUrlIdByGroup($row['query'], $row['store_id'], $row['language_id']);
+
+				if ($seo_url_id) {
+					$this->model_design_seo_url->editSeoUrl($seo_url_id, $row);
+
+					$updated++;
+				} else {
+					$this->model_design_seo_url->addSeoUrl($row);
+
+					$added++;
+				}
+			}
+
+			$this->db->query("COMMIT");
+		} catch (Exception $e) {
+			$this->db->query("ROLLBACK");
+
+			return array('error' => 'Import failed: ' . $e->getMessage());
+		}
+
+		return array('success' => sprintf($this->language->get('text_import_success'), count($rows), $added, $updated));
+	}
+
+	/**
+	 * Case-insensitive identity of one alias row: (query, store_id, language_id).
+	 */
+	private function groupKey($query, $store_id, $language_id) {
+		return mb_strtolower($query, 'UTF-8') . '|' . $store_id . '|' . $language_id;
+	}
+
+	/**
+	 * Escape a value for CSV output (always quoted, quotes doubled).
+	 */
+	private function csvField($value) {
+		return '"' . str_replace('"', '""', (string)$value) . '"';
 	}
 }
