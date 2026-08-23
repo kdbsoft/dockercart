@@ -1,5 +1,10 @@
-{{ text_received }}
-
-{{ text_total }}
-
-{{ text_credit }}
+{% include 'mail/partials/_head.twig' %}
+{% include 'mail/partials/_header.twig' %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; line-height: 26px; font-weight: 600; color: #111827;">{{ text_received }}</p>
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_total }}</p>
+            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 22px; color: #6b7280;">{{ text_credit }}</p>
+          </td>
+        </tr>
+{% include 'mail/partials/_footer.twig' %}

@@ -25,3 +25,7 @@ $_['text_shipping_method'] = 'Спосіб доставки:';
 $_['text_subject'] = '%s – Замовлення %s';
 $_['text_telephone'] = 'Телефон:';
 $_['text_total'] = 'Сума';
+$_['text_pickup_warehouse'] = 'Склад / Самовивіз';
+$_['text_estimate'] = 'Видача/оцінка';
+$_['text_button_order'] = 'Переглянути замовлення';
+$_['text_button_download'] = 'Завантажити файли';

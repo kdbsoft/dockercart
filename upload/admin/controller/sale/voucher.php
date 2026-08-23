@@ -584,6 +584,10 @@ class ControllerSaleVoucher extends Controller {
 							$data['text_message'] = $language->get('text_message');
 							$data['text_redeem'] = sprintf($language->get('text_redeem'), $voucher_info['code']);
 							$data['text_footer'] = $language->get('text_footer');
+							$data['text_gift_voucher'] = $language->get('text_gift_voucher');
+							$data['text_button_shop'] = $language->get('text_button_shop');
+							$data['amount'] = $this->currency->format($voucher_info['amount'], (!empty($order_info['currency_code']) ? $order_info['currency_code'] : $this->config->get('config_currency')), (!empty($order_info['currency_value']) ? $order_info['currency_value'] : $this->currency->getValue($this->config->get('config_currency'))));
+							$data['code'] = $voucher_info['code'];
 			
 							$voucher_theme_info = $this->model_sale_voucher_theme->getVoucherTheme($voucher_info['voucher_theme_id']);
 			
@@ -630,7 +634,11 @@ class ControllerSaleVoucher extends Controller {
 							$data['text_from'] = sprintf($this->language->get('text_from'), $voucher_info['from_name']);
 							$data['text_message'] = $this->language->get('text_message');
 							$data['text_redeem'] = sprintf($this->language->get('text_redeem'), $voucher_info['code']);
-							$data['text_footer'] = $this->language->get('text_footer');		
+							$data['text_footer'] = $this->language->get('text_footer');
+							$data['text_gift_voucher'] = $this->language->get('text_gift_voucher');
+							$data['text_button_shop'] = $this->language->get('text_button_shop');
+							$data['amount'] = $this->currency->format($voucher_info['amount'], $this->config->get('config_currency'));
+							$data['code'] = $voucher_info['code'];
 			
 							$voucher_theme_info = $this->model_sale_voucher_theme->getVoucherTheme($voucher_info['voucher_theme_id']);
 
