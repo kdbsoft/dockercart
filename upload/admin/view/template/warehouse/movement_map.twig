@@ -1,0 +1,56 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">{{ text_map_title }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="dcx-shell">
+      <div class="dcx-panel dcx-panel--flush">
+        <div class="dcx-panel-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td>{{ column_date }}</td>
+                  <td>{{ entry_warehouse }}</td>
+                  <td>{{ entry_type }}</td>
+                  <td class="text-right">{{ entry_quantity }}</td>
+                  <td>{{ entry_reference }}</td>
+                  <td>{{ entry_comment }}</td>
+                  <td class="text-right"><strong>{{ entry_balance }}</strong></td>
+                </tr>
+              </thead>
+              <tbody>
+                {% if lines %}
+                {% for line in lines %}
+                <tr>
+                  <td>{{ line.date }}</td>
+                  <td>{{ line.warehouse }}</td>
+                  <td><span class="label label-default">{{ line.type }}</span></td>
+                  <td class="text-right {% if line.quantity > 0 %}text-success{% else %}text-danger{% endif %}">{{ line.quantity }}</td>
+                  <td>{{ line.reference }}</td>
+                  <td>{{ line.comment }}</td>
+                  <td class="text-right"><strong>{{ line.balance }}</strong></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td class="text-center" colspan="7">{{ text_no_results }}</td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

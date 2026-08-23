@@ -741,6 +741,16 @@ class ControllerSettingSetting extends Controller {
 			$data['config_stock_reserve_stale_days'] = 14;
 		}
 
+		foreach (['config_warehouse_enabled', 'config_warehouse_split_allowed', 'config_warehouse_stock_display', 'config_warehouse_show_pickup', 'config_warehouse_estimate_enabled', 'config_warehouse_dropship_checkout'] as $key) {
+			if (isset($this->request->post[$key])) {
+				$data[$key] = $this->request->post[$key];
+			} elseif ($this->config->has($key)) {
+				$data[$key] = (int)$this->config->get($key);
+			} else {
+				$data[$key] = 0;
+			}
+		}
+
 		if (isset($this->request->post['config_affiliate_group_id'])) {
 			$data['config_affiliate_group_id'] = $this->request->post['config_affiliate_group_id'];
 		} else {

@@ -1661,7 +1661,9 @@ class ModelSaleOrder extends Model {
 			tax = '" . (float)$pricing['tax_total'] . "',
 			reward = '" . (int)($pricing['reward'] ?? 0) . "',
 			variant_id = '" . (int)$pricing['variant_id'] . "',
-			variant_sku = '" . $this->db->escape($pricing['variant_sku']) . "'
+			variant_sku = '" . $this->db->escape($pricing['variant_sku']) . "',
+			warehouse_id = '" . (int)$this->getOrderWarehouseId() . "',
+			warehouse_name = '" . $this->db->escape($this->getOrderWarehouseName()) . "'
 		");
 
 		$order_product_id = $this->db->getLastId();
@@ -1684,6 +1686,89 @@ class ModelSaleOrder extends Model {
 		}
 
 		return $order_product_id;
+	}
+
+	/**
+	 * Default warehouse id for admin-added order lines (legacy source).
+	 */
+	protected function getOrderWarehouseId(): int {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return 0;
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+
+		return $warehouse->getDefaultWarehouseId();
+	}
+
+	protected function getOrderWarehouseName(): string {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return '';
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$info = $warehouse->getWarehouse($warehouse->getDefaultWarehouseId());
+
+		return $info ? (string)$info['name'] : '';
+	}
+
+	/**
+	 * Move one order line to another warehouse: move the stock, record a
+	 * movement referencing the order, and update the order_product snapshot.
+	 * Returns the new snapshot or null on failure / disabled warehouses.
+	 */
+	public function moveOrderProductToWarehouse(int $order_id, int $order_product_id, int $to_warehouse_id): ?array {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return null;
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+
+		if (!$warehouse->getWarehouse($to_warehouse_id)) {
+			return null;
+		}
+
+		$line = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE `order_product_id` = '" . (int)$order_product_id . "' AND `order_id` = '" . (int)$order_id . "'");
+
+		if (!$line->num_rows) {
+			return null;
+		}
+
+		$line = $line->row;
+		$from_warehouse_id = (int)($line['warehouse_id'] ?: $warehouse->getDefaultWarehouseId());
+
+		if ($from_warehouse_id === $to_warehouse_id) {
+			return ['warehouse_id' => $to_warehouse_id, 'warehouse_name' => (string)$line['warehouse_name'], 'estimate_date' => $line['estimate_date']];
+		}
+
+		$target_info = $warehouse->getWarehouse($to_warehouse_id);
+
+		$warehouse->moveStock(
+			$from_warehouse_id,
+			$to_warehouse_id,
+			(int)$line['product_id'],
+			(int)$line['variant_id'],
+			(float)$line['quantity'],
+			[
+				'reference' => 'order-' . $order_id,
+				'order_id' => $order_id,
+				'user_id' => (int)($this->user ? $this->user->getId() : 0),
+			]
+		);
+
+		$estimate = $warehouse->estimateShipDate($to_warehouse_id, ['product_id' => (int)$line['product_id'], 'variant_id' => (int)$line['variant_id']], null);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET
+			`warehouse_id` = '" . (int)$to_warehouse_id . "',
+			`warehouse_name` = '" . $this->db->escape((string)$target_info['name']) . "',
+			`estimate_date` = '" . $this->db->escape($estimate) . "'
+			WHERE `order_product_id` = '" . (int)$order_product_id . "'");
+
+		return [
+			'warehouse_id' => $to_warehouse_id,
+			'warehouse_name' => (string)$target_info['name'],
+			'estimate_date' => $estimate,
+		];
 	}
 
 	/**
@@ -2953,11 +3038,27 @@ class ModelSaleOrder extends Model {
 
 				$order_products = $this->getOrderProducts($order_id);
 
-				foreach ($order_products as $order_product) {
-					$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+				if ($this->config->get('config_warehouse_enabled')) {
+					$warehouse = new \DockercartWarehouse($this->registry);
+					$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+					foreach ($order_products as $order_product) {
+						$warehouse->adjustStock(
+							(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+							(int)$order_product['product_id'],
+							(int)$order_product['variant_id'],
+							-(float)$order_product['quantity'],
+							'order_subtract',
+							['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+						);
+					}
+				} else {
+					foreach ($order_products as $order_product) {
+						$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+
+						if ((int)$order_product['variant_id'] > 0) {
+							$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+						}
 					}
 				}
 
@@ -2997,11 +3098,27 @@ class ModelSaleOrder extends Model {
 			if ($was_processing && !$is_processing) {
 				$order_products = $this->getOrderProducts($order_id);
 
-				foreach ($order_products as $order_product) {
-					$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+				if ($this->config->get('config_warehouse_enabled')) {
+					$warehouse = new \DockercartWarehouse($this->registry);
+					$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+					foreach ($order_products as $order_product) {
+						$warehouse->adjustStock(
+							(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+							(int)$order_product['product_id'],
+							(int)$order_product['variant_id'],
+							(float)$order_product['quantity'],
+							'order_restock',
+							['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+						);
+					}
+				} else {
+					foreach ($order_products as $order_product) {
+						$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+
+						if ((int)$order_product['variant_id'] > 0) {
+							$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+						}
 					}
 				}
 

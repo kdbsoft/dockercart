@@ -177,6 +177,12 @@ $(document).ready(function() {
 		dcUpdateSelectionButtons();
 	});
 
+	// Header select-all sets rows via .prop() which fires no change events;
+	// recompute selection buttons after its inline onclick has run
+	$(document).on('click change', 'thead input[type=\'checkbox\']', function() {
+		dcUpdateSelectionButtons();
+	});
+
 	dcUpdateSelectionButtons();
 
 	// Show/hide buttons whose disabled state changes (class 'dc-btn-disabled')
@@ -196,23 +202,58 @@ $(document).ready(function() {
 		$('#column-left').toggleClass('active');
 	});
 
-	// Set last page opened on the menu
-	$('#menu a[href]').on('click', function() {
-		sessionStorage.setItem('menu', $(this).attr('href'));
-	});
+	// Highlight the menu item matching the current page route
+	var dcRoute = getURLVar('route');
 
-	if (!sessionStorage.getItem('menu')) {
-		$('#menu #dashboard').addClass('active');
-	} else {
-		// Sets active and open to selected page in the left column menu.
-		$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parent().addClass('active');
+	if (dcRoute) {
+		// Pages whose route differs from the menu link they belong to
+		var dcRouteAlias = {
+			'setting/setting': 'setting/store'
+		};
+
+		var dcCurrent = dcRouteAlias[dcRoute] || dcRoute;
+		var dcBestLink = null;
+		var dcBestLength = 0;
+
+		$('#menu a[href]').each(function() {
+			var href = String($(this).attr('href'));
+
+			if (href.charAt(0) === '#') {
+				return; // collapse toggle, not a page
+			}
+
+			var match = href.match(/[?&]route=([^&]+)/);
+
+			if (!match) {
+				return;
+			}
+
+			var menuRoute = decodeURIComponent(match[1]);
+
+			// Segment-boundary prefix match so e.g. sale/order_detail or
+			// catalog/product/edit highlights their list-page menu entry,
+			// but catalog/option_set does not highlight catalog/option
+			if (menuRoute === dcCurrent || dcCurrent.indexOf(menuRoute + '/') === 0 || dcCurrent.indexOf(menuRoute + '_') === 0 || dcCurrent.indexOf(menuRoute + '.') === 0) {
+				if (menuRoute.length > dcBestLength) {
+					dcBestLength = menuRoute.length;
+					dcBestLink = this;
+				}
+			}
+		});
+
+		if (dcBestLink) {
+			var $link = $(dcBestLink);
+
+			$link.parent().addClass('active');
+			$link.closest('#menu > li').addClass('active');
+
+			// Expand the submenus leading to the active item
+			$link.parents('#menu ul.collapse').addClass('in');
+			$link.parents('#menu li').children('a.parent').removeClass('collapsed');
+		}
+	} else if ($('#menu #menu-dashboard').length) {
+		$('#menu #menu-dashboard').addClass('active');
 	}
-	
-	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('li > a').removeClass('collapsed');
-	
-	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('ul').addClass('in');
-	
-	$('#menu a[href=\'' + sessionStorage.getItem('menu') + '\']').parents('li').addClass('active');
 	
 	// Image Manager
 	$(document).on('click', 'a[data-toggle=\'image\']', function(e) {

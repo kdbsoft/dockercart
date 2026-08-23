@@ -953,6 +953,8 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_panel_pricing_subtitle']     = $this->language->get('text_panel_pricing_subtitle');
 		$data['text_panel_inventory_title']      = $this->language->get('text_panel_inventory_title');
 		$data['text_panel_inventory_subtitle']   = $this->language->get('text_panel_inventory_subtitle');
+		$data['text_variant_qty_title']          = $this->language->get('text_variant_qty_title');
+		$data['text_variant_qty_total']          = $this->language->get('text_variant_qty_total');
 		$data['text_panel_media_title']          = $this->language->get('text_panel_media_title');
 		$data['text_panel_media_subtitle']       = $this->language->get('text_panel_media_subtitle');
 		$data['text_panel_attributes_title']     = $this->language->get('text_panel_attributes_title');
