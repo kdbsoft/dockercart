@@ -1077,6 +1077,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // saveShippingAddress/savePaymentAddress) so abandoned carts keep the
         // customer email even before the confirm flow calls the customer endpoint.
         $this->persistContactData($data);
+        $this->trackContactStep($data);
 
         // Apply default country/zone from module config when not provided by user
         if (
@@ -1375,6 +1376,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Persist contact identifiers sent with the address (see frontend
         // savePaymentAddress/savePaymentAddressSameAsShipping).
         $this->persistContactData($data);
+        $this->trackContactStep($data);
 
         // If payment country/zone fields are hidden in module settings, use store defaults.
         if (
@@ -4737,6 +4739,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         if (!empty($data["email"])) {
             $this->persistContactData($data);
+            $this->trackContactStep($data);
+
             $this->saveAbandonedCart(
                 "customer",
                 $data["email"],
@@ -4802,6 +4806,25 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 "custom_field" => [],
             ];
         }
+    }
+
+    /**
+     * Track the customer funnel step once a valid contact email is present.
+     * The frontend usually submits contact data together with the address
+     * payloads instead of calling the customer endpoint, so every handler
+     * that persists contact data reports this step too.
+     */
+    private function trackContactStep($data)
+    {
+        if (
+            empty($data["email"]) ||
+            !filter_var($data["email"], FILTER_VALIDATE_EMAIL)
+        ) {
+            return;
+        }
+
+        $this->load->model("checkout/dockercart_checkout");
+        $this->model_checkout_dockercart_checkout->trackStep("customer");
     }
 
     /**
