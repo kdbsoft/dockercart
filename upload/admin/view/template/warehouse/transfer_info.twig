@@ -14,7 +14,7 @@
     {% if creator %}<div><span class="text-muted">{{ entry_created_by }}:</span> {{ creator }}</div>{% endif %}
     {% if note %}<div><span class="text-muted">{{ entry_note }}:</span> {{ note }}</div>{% endif %}
   </div>
-  <table class="table table-bordered table-hover dcx-table dc-transfer-info__items">
+  <table class="table table-bordered table-hover dc-transfer-info__items">
     <thead>
       <tr>
         <td>{{ entry_product }}</td>
@@ -25,7 +25,7 @@
       {% for item in items %}
       <tr>
         <td>
-          <div class="dc-entity-name">{{ item.product_name }}</div>
+          <div>{{ item.product_name }}</div>
           {% if item.model %}<small class="text-muted">{{ item.model }}</small>{% endif %}
         </td>
         <td class="text-right text-nowrap">{{ item.quantity }}</td>

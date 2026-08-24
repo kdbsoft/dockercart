@@ -54,7 +54,7 @@
 
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-transfer-delete">
       <div class="table-responsive">
-        <table class="table table-bordered table-hover dcx-table">
+        <table class="table table-bordered table-hover">
           <thead>
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
@@ -74,12 +74,12 @@
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ transfer.transfer_id }}" />
                 {% endif %}</td>
-              <td><a class="row-title-link dc-entity-name btn-transfer-info" href="javascript:void(0);" data-transfer-id="{{ transfer.transfer_id }}">{{ transfer.transfer_no }}</a></td>
+              <td><a class="row-title-link btn-transfer-info" href="javascript:void(0);" data-transfer-id="{{ transfer.transfer_id }}">{{ transfer.transfer_no }}</a></td>
               <td>
                 <div class="dc-transfer-route">
-                  <span class="dc-entity-name">{{ transfer.from ?: '—' }}</span>
+                  <span>{{ transfer.from ?: '—' }}</span>
                   <i data-lucide="move-right" width="14" height="14" class="text-muted"></i>
-                  <span class="dc-entity-name">{{ transfer.to ?: '—' }}</span>
+                  <span>{{ transfer.to ?: '—' }}</span>
                 </div>
                 {% if transfer.note %}<small class="text-muted">{{ transfer.note }}</small>{% endif %}
               </td>
