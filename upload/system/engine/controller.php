@@ -82,6 +82,7 @@ abstract class Controller {
 			'active_filter_id' => $active_filter_id,
 			'fields'           => $fields,
 			'search'           => $search,
+			'redirect_url'     => $this->url->link($route, 'user_token=' . $this->session->data['user_token'], true),
 			'show_add'         => $showAdd
 		));
 	}

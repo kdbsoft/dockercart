@@ -72,7 +72,7 @@
 	var rowsWrap = document.getElementById('uf-condition-rows');
 	var saveUrl = '{{ uf_save_url }}';
 	var deleteUrl = '{{ uf_delete_url }}';
-	var token = '{{ uf_user_token }}';
+	var redirectUrl = '{{ uf_redirect_url }}';
 
 	var fields = {{ uf_fields_json|raw }};
 	var operatorLabels = {{ uf_operators_json|raw }};
@@ -572,9 +572,12 @@
 			success: function(json) {
 				if (json['error']) {
 					alert(json['error']);
+				} else if (redirectUrl) {
+					$('#uf-filter-modal').modal('hide');
+					location = redirectUrl + '&filter_id=' + json['filter_id'];
 				} else {
 					$('#uf-filter-modal').modal('hide');
-					location = 'index.php?route=' + entity + '&user_token=' + token + '&filter_id=' + json['filter_id'];
+					location.reload();
 				}
 			},
 			error: function(xhr, ajaxOptions, thrownError) {
