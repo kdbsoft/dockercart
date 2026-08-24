@@ -72,7 +72,7 @@ CREATE TABLE `oc_admin_filter` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`filter_id`),
   KEY `idx_admin_filter_user_entity` (`user_id`,`entity`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -706,7 +706,7 @@ CREATE TABLE `oc_banner_image` (
   `sort_order` int(11) NOT NULL DEFAULT 0,
   `content_position` varchar(16) NOT NULL DEFAULT 'left',
   PRIMARY KEY (`banner_image_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1316 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1319 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -761,9 +761,9 @@ INSERT INTO `oc_banner_image` VALUES
 (1307,7,3,'Техника, которая меняет всё','Новейшие смартфоны, мощные ноутбуки, умные гаджеты и аудио премиум-класса.','Будущее уже здесь','#ffe252','Подробнее','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left'),
 (1308,7,3,'Стиль, комфорт и необходимые вещи','Модные вещи и товары для дома, созданные для комфорта, качества и непринужденного стиля.','Основные элементы стиля и комфорта','#6ef264','Подробнее','catalog/demo/demo-seed/banners/home-slideshow-2.jpg','','route=product/category&amp;path=1971','','',1,'left'),
 (1309,7,3,'Всё для домашних животных и автомобилей','Аксессуары и принадлежности для того, чтобы домашние животные были счастливы, а автомобили были хорошо оборудованы и обслуживались.','Товары для животных и автозапчасти','#6366f1','Подробнее','catalog/demo/demo-seed/banners/home-slideshow-3.jpg','','route=product/category&amp;path=109','','',2,'left'),
-(1313,9,1,'Up to 50% Off Electronics','Today only — grab the best deals before they\'re gone.','','#7fa8be','Shop Now','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left'),
-(1314,9,2,'Знижки до 50% на електроніку','Тільки сьогодні — скористайтеся найкращими пропозиціями, поки вони не зникли.','','#7fa8be','Купуйте зараз','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left'),
-(1315,9,3,'Скидки до 50% на электронику','Только сегодня — воспользуйтесь лучшими предложениями, пока они не закончились.','','#7fa8be','Купить сейчас','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left');
+(1316,9,1,'Up to 50% Off Electronics','Today only — grab the best deals before they\'re gone.','','#7fa8be','Shop Now','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left'),
+(1317,9,2,'Знижки до 50% на електроніку','Тільки сьогодні — скористайтеся найкращими пропозиціями, поки вони не зникли.','','#7fa8be','Купуйте зараз','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left'),
+(1318,9,3,'Скидки до 50% на электронику','Только сегодня — воспользуйтесь лучшими предложениями, пока они не закончились.','','#7fa8be','Купить сейчас','catalog/demo/demo-seed/banners/home-slideshow-1.jpg','','route=product/category&amp;path=101','','',0,'left');
 /*!40000 ALTER TABLE `oc_banner_image` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -1017,7 +1017,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_blog_post` WRITE;
 /*!40000 ALTER TABLE `oc_blog_post` DISABLE KEYS */;
 INSERT INTO `oc_blog_post` VALUES
-(1,5,'blog/post-1-smartphones.jpg','catalog/demo/demo-seed/banners/37464827_SL-113022-54210-35.jpg',1,1,1,1,194,'2026-05-05 21:30:56','2026-03-01 12:58:01','2026-07-27 10:55:38'),
+(1,5,'blog/post-1-smartphones.jpg','catalog/demo/demo-seed/banners/37464827_SL-113022-54210-35.jpg',1,1,1,1,195,'2026-05-05 21:30:56','2026-03-01 12:58:01','2026-07-27 10:55:38'),
 (2,1,'blog/post-2-laptops.jpg',NULL,1,1,1,2,70,'2026-02-26 12:58:01','2026-02-26 12:58:01','2026-02-26 12:58:01'),
 (3,1,'blog/post-3-headphones.jpg',NULL,1,0,1,3,20,'2026-02-22 12:58:01','2026-02-22 12:58:01','2026-02-22 12:58:01'),
 (4,1,'blog/post-4-cameras.jpg',NULL,1,1,1,4,0,'2026-02-19 12:58:01','2026-02-19 12:58:01','2026-02-19 12:58:01'),
@@ -1455,7 +1455,7 @@ CREATE TABLE `oc_cart` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `cart_id` (`customer_id`,`session_id`,`product_id`,`recurring_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14752 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14756 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1537,8 +1537,11 @@ INSERT INTO `oc_cart` VALUES
 (14747,0,'95c4c21af979a4dffee3f588d1',5041,0,'{\"9146\":\"10164\",\"variant_id\":\"787\"}',1.00,'2026-08-20 09:46:33'),
 (14748,0,'e7744b5b6ce51f0d8f710e7575',5041,0,'{\"9146\":\"10164\",\"variant_id\":\"787\"}',1.00,'2026-08-20 09:49:25'),
 (14749,0,'e87afa71fdc67761238ade231e',5041,0,'{\"9146\":\"10164\",\"variant_id\":\"787\"}',1.00,'2026-08-20 09:50:37'),
-(14750,0,'4ccfee0725f3e8c43c484e1695',5041,0,'{\"9146\":\"10164\",\"variant_id\":\"787\"}',1.00,'2026-08-20 09:54:22'),
-(14751,0,'4ccfee0725f3e8c43c484e1695',5041,0,'{\"9146\":\"10165\",\"variant_id\":\"788\"}',1.00,'2026-08-20 09:54:27');
+(14750,0,'9a03ffda0d2b9faa35a6e3b5c3',5041,0,'{\"9146\":\"10164\",\"variant_id\":\"787\"}',1.00,'2026-08-20 09:54:22'),
+(14751,0,'9a03ffda0d2b9faa35a6e3b5c3',5041,0,'{\"9146\":\"10165\",\"variant_id\":\"788\"}',1.00,'2026-08-20 09:54:27'),
+(14752,0,'9a03ffda0d2b9faa35a6e3b5c3',5023,0,'{\"9061\":\"9989\",\"9060\":\"9986\",\"variant_id\":\"703\"}',1.00,'2026-08-23 10:44:51'),
+(14753,0,'9a03ffda0d2b9faa35a6e3b5c3',5002,0,'{\"9006\":\"9880\",\"9007\":\"9881\",\"9008\":\"9884\",\"9009\":\"9885\",\"9010\":[\"9886\"],\"variant_id\":\"624\"}',1.00,'2026-08-23 16:28:47'),
+(14754,0,'9a03ffda0d2b9faa35a6e3b5c3',5071,0,'{\"9116\":\"10105\",\"variant_id\":\"848\"}',1.00,'2026-08-23 18:19:53');
 /*!40000 ALTER TABLE `oc_cart` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -2864,10 +2867,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_currency` WRITE;
 /*!40000 ALTER TABLE `oc_currency` DISABLE KEYS */;
 INSERT INTO `oc_currency` VALUES
-(1,'Pound Sterling','GBP','£','','2',0.01639642,1,'2026-08-23 09:36:03'),
-(2,'US Dollar','USD','$','','2',0.02239077,1,'2026-08-23 09:36:03'),
-(3,'Euro','EUR','','€','2',0.01913905,1,'2026-08-23 09:36:03'),
-(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-08-23 09:36:03');
+(1,'Pound Sterling','GBP','£','','2',0.01639642,1,'2026-08-24 07:51:43'),
+(2,'US Dollar','USD','$','','2',0.02239077,1,'2026-08-24 07:51:43'),
+(3,'Euro','EUR','','€','2',0.01913905,1,'2026-08-24 07:51:43'),
+(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-08-24 07:51:43');
 /*!40000 ALTER TABLE `oc_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4205,7 +4208,7 @@ CREATE TABLE `oc_dockercart_checkout_abandoned` (
   KEY `customer_id` (`customer_id`),
   KEY `email` (`email`),
   KEY `recovered` (`recovered`)
-) ENGINE=InnoDB AUTO_INCREMENT=347 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=383 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4236,7 +4239,10 @@ INSERT INTO `oc_dockercart_checkout_abandoned` VALUES
 (296,'cfa28a08cc9be1c897e9803e9a',99853,'vip@demo.local','+380 (38) 111-11-11','[{\"cart_id\":\"14734\",\"product_id\":\"5004\",\"variant_id\":639,\"variant_sku\":\"DEMO-5004-BLK-256-12G\",\"name\":\"OnePlus 12\",\"model\":\"DEMO-5004-BLK-256-12G\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/oneplus-12.jpg\",\"option\":[{\"product_option_id\":\"9016\",\"product_option_value_id\":\"9898\",\"option_id\":\"1\",\"option_value_id\":\"1\",\"name\":\"\\u0426\\u0432\\u0435\\u0442\",\"value\":\"\\u0427\\u0435\\u0440\\u043d\\u044b\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9017\",\"product_option_value_id\":\"9900\",\"option_id\":\"3\",\"option_value_id\":\"14\",\"name\":\"\\u041f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"256 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9018\",\"product_option_value_id\":\"9902\",\"option_id\":\"4\",\"option_value_id\":\"17\",\"name\":\"\\u041e\\u043f\\u0435\\u0440\\u0430\\u0442\\u0438\\u0432\\u043d\\u0430\\u044f \\u043f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"12 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9019\",\"product_option_value_id\":\"9904\",\"option_id\":\"5\",\"option_value_id\":\"20\",\"name\":\"\\u0413\\u0430\\u0440\\u0430\\u043d\\u0442\\u0438\\u044f\",\"value\":\"24 \\u043c\\u0435\\u0441\\u044f\\u0446\\u0430\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":36794.1269,\"total\":36794.1269,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"Demo\",\"lastname\":\"VIP\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','confirm',NULL,NULL,0,NULL,0,NULL,1,'2026-08-15 11:56:04','2026-08-15 12:01:27'),
 (307,'cfa28a08cc9be1c897e9803e9a',0,'','','[{\"cart_id\":\"14739\",\"product_id\":\"5062\",\"variant_id\":829,\"variant_sku\":\"DEMO-5062-STD\",\"name\":\"\\u0413\\u043b\\u0443\\u0431\\u043e\\u043a\\u0430\\u044f \\u0440\\u0430\\u0431\\u043e\\u0442\\u0430 (\\u0430\\u0432\\u0442\\u043e\\u0440: \\u041a\\u044d\\u043b \\u041d\\u044c\\u044e\\u043f\\u043e\\u0440\\u0442)\",\"model\":\"DEMO-5062-STD\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/deep-work-by-cal-newport.jpg\",\"option\":[{\"product_option_id\":\"9157\",\"product_option_value_id\":\"10186\",\"option_id\":\"7\",\"option_value_id\":\"23\",\"name\":\"\\u0418\\u0437\\u0434\\u0430\\u043d\\u0438\\u0435\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u043e\\u0435\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":501.44,\"total\":501.44,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-15 12:26:37','2026-08-17 12:09:02'),
 (333,'cd7e72873260b72259e63365f9',0,'admin@dockercart.local','+380 (38) 111-11-11','[{\"cart_id\":\"14740\",\"product_id\":\"5006\",\"variant_id\":654,\"variant_sku\":\"DEMO-5006-12G-16\",\"name\":\"Apple MacBook Air M3\",\"model\":\"DEMO-5006-12G-16\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/electronics\\/google-pixel-8-pro-2.jpg\",\"option\":[{\"product_option_id\":\"9025\",\"product_option_value_id\":\"9916\",\"option_id\":\"4\",\"option_value_id\":\"17\",\"name\":\"\\u041e\\u043f\\u0435\\u0440\\u0430\\u0442\\u0438\\u0432\\u043d\\u0430\\u044f \\u043f\\u0430\\u043c\\u044f\\u0442\\u044c\",\"value\":\"12 \\u0413\\u0411\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9024\",\"product_option_value_id\":\"9914\",\"option_id\":\"10\",\"option_value_id\":\"33\",\"name\":\"\\u0420\\u0430\\u0437\\u043c\\u0435\\u0440 \\u044d\\u043a\\u0440\\u0430\\u043d\\u0430\",\"value\":\"16\\\"\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":0.5,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":10147.56,\"total\":10147.56,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14739\",\"product_id\":\"5062\",\"variant_id\":829,\"variant_sku\":\"DEMO-5062-STD\",\"name\":\"\\u0413\\u043b\\u0443\\u0431\\u043e\\u043a\\u0430\\u044f \\u0440\\u0430\\u0431\\u043e\\u0442\\u0430 (\\u0430\\u0432\\u0442\\u043e\\u0440: \\u041a\\u044d\\u043b \\u041d\\u044c\\u044e\\u043f\\u043e\\u0440\\u0442)\",\"model\":\"DEMO-5062-STD\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/books-media\\/deep-work-by-cal-newport.jpg\",\"option\":[{\"product_option_id\":\"9157\",\"product_option_value_id\":\"10186\",\"option_id\":\"7\",\"option_value_id\":\"23\",\"name\":\"\\u0418\\u0437\\u0434\\u0430\\u043d\\u0438\\u0435\",\"value\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u043e\\u0435\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":501.44,\"total\":501.44,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"\\u0423\\u043a\\u0440\\u0430\\u0438\\u043d\\u0430\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','confirm',NULL,NULL,0,NULL,0,NULL,1,'2026-08-17 12:40:33','2026-08-17 12:40:43'),
-(343,'b05791f1c44dc8ad7987d6cc2a',0,'','','[{\"cart_id\":\"14750\",\"product_id\":\"5041\",\"variant_id\":787,\"variant_sku\":\"DEMO-5041-1L\",\"name\":\"CeraVe Hydrating Cleanser\",\"model\":\"DEMO-5041-1L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10164\",\"option_id\":\"9\",\"option_value_id\":\"28\",\"name\":\"Capacity\",\"value\":\"1 L\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":37155.046097589446,\"total\":37155.046097589446,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14751\",\"product_id\":\"5041\",\"variant_id\":788,\"variant_sku\":\"DEMO-5041-2L\",\"name\":\"CeraVe Hydrating Cleanser\",\"model\":\"DEMO-5041-2L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10165\",\"option_id\":\"9\",\"option_value_id\":\"29\",\"name\":\"Capacity\",\"value\":\"2 L\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":41350.12124119867,\"total\":41350.12124119867,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-20 10:02:00','2026-08-20 10:40:31');
+(343,'b05791f1c44dc8ad7987d6cc2a',0,'','','[{\"cart_id\":\"14750\",\"product_id\":\"5041\",\"variant_id\":787,\"variant_sku\":\"DEMO-5041-1L\",\"name\":\"CeraVe Hydrating Cleanser\",\"model\":\"DEMO-5041-1L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10164\",\"option_id\":\"9\",\"option_value_id\":\"28\",\"name\":\"Capacity\",\"value\":\"1 L\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":37155.046097589446,\"total\":37155.046097589446,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14751\",\"product_id\":\"5041\",\"variant_id\":788,\"variant_sku\":\"DEMO-5041-2L\",\"name\":\"CeraVe Hydrating Cleanser\",\"model\":\"DEMO-5041-2L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10165\",\"option_id\":\"9\",\"option_value_id\":\"29\",\"name\":\"Capacity\",\"value\":\"2 L\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":41350.12124119867,\"total\":41350.12124119867,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-20 10:02:00','2026-08-20 10:40:31'),
+(347,'4ccfee0725f3e8c43c484e1695',0,'','','[{\"cart_id\":\"14752\",\"product_id\":\"5023\",\"variant_id\":703,\"variant_sku\":\"DEMO-5023-WHT-S\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"DEMO-5023-WHT-S\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9061\",\"product_option_value_id\":\"9989\",\"option_id\":\"1\",\"option_value_id\":\"2\",\"name\":\"\\u041a\\u043e\\u043b\\u0456\\u0440\",\"value\":\"\\u0411\\u0456\\u043b\\u0438\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9060\",\"product_option_value_id\":\"9986\",\"option_id\":\"2\",\"option_value_id\":\"8\",\"name\":\"\\u0420\\u043e\\u0437\\u043c\\u0456\\u0440\",\"value\":\"S\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":61349.13,\"total\":61349.13,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14750\",\"product_id\":\"5041\",\"variant_id\":787,\"variant_sku\":\"DEMO-5041-1L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-1L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10164\",\"option_id\":\"9\",\"option_value_id\":\"28\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"1 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":37428.19000943098,\"total\":37428.19000943098,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14751\",\"product_id\":\"5041\",\"variant_id\":788,\"variant_sku\":\"DEMO-5041-2L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-2L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10165\",\"option_id\":\"9\",\"option_value_id\":\"29\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"2 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":41654.105088810575,\"total\":41654.105088810575,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-23 10:44:52','2026-08-23 11:08:55'),
+(353,'78c1959793f3076f0ffe169a43',0,'','','[{\"cart_id\":\"14752\",\"product_id\":\"5023\",\"variant_id\":703,\"variant_sku\":\"DEMO-5023-WHT-S\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"DEMO-5023-WHT-S\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9061\",\"product_option_value_id\":\"9989\",\"option_id\":\"1\",\"option_value_id\":\"2\",\"name\":\"\\u041a\\u043e\\u043b\\u0456\\u0440\",\"value\":\"\\u0411\\u0456\\u043b\\u0438\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9060\",\"product_option_value_id\":\"9986\",\"option_id\":\"2\",\"option_value_id\":\"8\",\"name\":\"\\u0420\\u043e\\u0437\\u043c\\u0456\\u0440\",\"value\":\"S\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":61349.13,\"total\":61349.13,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14750\",\"product_id\":\"5041\",\"variant_id\":787,\"variant_sku\":\"DEMO-5041-1L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-1L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10164\",\"option_id\":\"9\",\"option_value_id\":\"28\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"1 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":37428.19000943098,\"total\":37428.19000943098,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14751\",\"product_id\":\"5041\",\"variant_id\":788,\"variant_sku\":\"DEMO-5041-2L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-2L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10165\",\"option_id\":\"9\",\"option_value_id\":\"29\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"2 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":41654.105088810575,\"total\":41654.105088810575,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-23 11:32:01','2026-08-23 12:06:00'),
+(375,'06c5e77fb6512d86117e50e0f3',0,'','','[{\"cart_id\":\"14752\",\"product_id\":\"5023\",\"variant_id\":703,\"variant_sku\":\"DEMO-5023-WHT-S\",\"name\":\"Adidas Ultraboost Light\",\"model\":\"DEMO-5023-WHT-S\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/fashion\\/adidas-ultraboost-light-2.jpg\",\"option\":[{\"product_option_id\":\"9061\",\"product_option_value_id\":\"9989\",\"option_id\":\"1\",\"option_value_id\":\"2\",\"name\":\"\\u041a\\u043e\\u043b\\u0456\\u0440\",\"value\":\"\\u0411\\u0456\\u043b\\u0438\\u0439\",\"type\":\"color\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"},{\"product_option_id\":\"9060\",\"product_option_value_id\":\"9986\",\"option_id\":\"2\",\"option_value_id\":\"8\",\"name\":\"\\u0420\\u043e\\u0437\\u043c\\u0456\\u0440\",\"value\":\"S\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":61349.13,\"total\":61349.13,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"0\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14750\",\"product_id\":\"5041\",\"variant_id\":787,\"variant_sku\":\"DEMO-5041-1L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-1L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10164\",\"option_id\":\"9\",\"option_value_id\":\"28\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"1 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":37428.19000943098,\"total\":37428.19000943098,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"},{\"cart_id\":\"14751\",\"product_id\":\"5041\",\"variant_id\":788,\"variant_sku\":\"DEMO-5041-2L\",\"name\":\"\\u0417\\u0432\\u043e\\u043b\\u043e\\u0436\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u043e\\u0447\\u0438\\u0449\\u0443\\u0432\\u0430\\u043b\\u044c\\u043d\\u0438\\u0439 \\u0437\\u0430\\u0441\\u0456\\u0431 CeraVe\",\"model\":\"DEMO-5041-2L\",\"shipping\":\"1\",\"image\":\"catalog\\/demo\\/demo-seed\\/products\\/beauty-health\\/cerave-hydrating-cleanser.jpg\",\"option\":[{\"product_option_id\":\"9146\",\"product_option_value_id\":\"10165\",\"option_id\":\"9\",\"option_value_id\":\"29\",\"name\":\"\\u041c\\u0456\\u0441\\u0442\\u043a\\u0456\\u0441\\u0442\\u044c\",\"value\":\"2 \\u043b\",\"type\":\"radio\",\"price\":\"0.0000\",\"price_prefix\":\"+\",\"points\":\"0\",\"points_prefix\":\"+\",\"weight\":\"0.0000\",\"weight_prefix\":\"+\"}],\"download\":[],\"quantity\":1,\"minimum\":1,\"quantity_step\":1,\"subtract\":1,\"stock\":true,\"preorder\":false,\"price\":41654.105088810575,\"total\":41654.105088810575,\"bxgy_applied\":false,\"bxgy_per_unit\":0,\"bxgy_units\":0,\"bxgy_text\":\"\",\"bxgy_original_price\":\"\",\"reward\":0,\"points\":0,\"tax_class_id\":\"9\",\"weight\":1,\"weight_class_id\":1,\"length\":\"20.0000\",\"width\":\"15.0000\",\"height\":\"10.0000\",\"length_class_id\":\"1\"}]','{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]}','payment_address',NULL,NULL,0,NULL,0,NULL,0,'2026-08-23 12:18:17','2026-08-23 12:45:15');
 /*!40000 ALTER TABLE `oc_dockercart_checkout_abandoned` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4260,7 +4266,7 @@ CREATE TABLE `oc_dockercart_checkout_analytics` (
   KEY `session_id` (`session_id`),
   KEY `step` (`step`),
   KEY `date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=594 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=685 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4852,7 +4858,98 @@ INSERT INTO `oc_dockercart_checkout_analytics` VALUES
 (590,'b05791f1c44dc8ad7987d6cc2a',0,'shipping_address','[]','2026-08-20 10:40:31'),
 (591,'b05791f1c44dc8ad7987d6cc2a',0,'shipping_method','[]','2026-08-20 10:40:31'),
 (592,'b05791f1c44dc8ad7987d6cc2a',0,'payment_address','[]','2026-08-20 10:40:31'),
-(593,'b05791f1c44dc8ad7987d6cc2a',0,'payment_method','[]','2026-08-20 10:40:31');
+(593,'b05791f1c44dc8ad7987d6cc2a',0,'payment_method','[]','2026-08-20 10:40:31'),
+(594,'4ccfee0725f3e8c43c484e1695',0,'cart','[]','2026-08-23 10:44:52'),
+(595,'4ccfee0725f3e8c43c484e1695',0,'shipping_address','[]','2026-08-23 10:44:52'),
+(596,'4ccfee0725f3e8c43c484e1695',0,'shipping_method','[]','2026-08-23 10:44:52'),
+(597,'4ccfee0725f3e8c43c484e1695',0,'payment_address','[]','2026-08-23 10:44:52'),
+(598,'4ccfee0725f3e8c43c484e1695',0,'payment_method','[]','2026-08-23 10:44:52'),
+(599,'4ccfee0725f3e8c43c484e1695',0,'shipping_method','[]','2026-08-23 10:45:12'),
+(600,'4ccfee0725f3e8c43c484e1695',0,'payment_address','[]','2026-08-23 10:45:12'),
+(601,'4ccfee0725f3e8c43c484e1695',0,'payment_method','[]','2026-08-23 10:45:12'),
+(602,'4ccfee0725f3e8c43c484e1695',0,'shipping_method','[]','2026-08-23 10:45:13'),
+(603,'4ccfee0725f3e8c43c484e1695',0,'payment_address','[]','2026-08-23 10:45:13'),
+(604,'4ccfee0725f3e8c43c484e1695',0,'payment_method','[]','2026-08-23 10:45:13'),
+(605,'4ccfee0725f3e8c43c484e1695',0,'cart','[]','2026-08-23 11:08:54'),
+(606,'4ccfee0725f3e8c43c484e1695',0,'shipping_address','[]','2026-08-23 11:08:55'),
+(607,'4ccfee0725f3e8c43c484e1695',0,'shipping_method','[]','2026-08-23 11:08:55'),
+(608,'4ccfee0725f3e8c43c484e1695',0,'payment_address','[]','2026-08-23 11:08:55'),
+(609,'4ccfee0725f3e8c43c484e1695',0,'payment_method','[]','2026-08-23 11:08:55'),
+(610,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:32:00'),
+(611,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:32:01'),
+(612,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:32:01'),
+(613,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:32:01'),
+(614,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:32:01'),
+(615,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:46:59'),
+(616,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:47:00'),
+(617,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:47:00'),
+(618,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:47:00'),
+(619,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:47:00'),
+(620,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:47:15'),
+(621,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:47:15'),
+(622,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:47:15'),
+(623,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:47:15'),
+(624,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:47:15'),
+(625,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:56:07'),
+(626,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:56:07'),
+(627,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:56:07'),
+(628,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:56:07'),
+(629,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:56:07'),
+(630,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:59:01'),
+(631,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:59:02'),
+(632,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:59:02'),
+(633,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:59:02'),
+(634,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:59:02'),
+(635,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 11:59:02'),
+(636,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 11:59:02'),
+(637,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 11:59:02'),
+(638,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 11:59:02'),
+(639,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 11:59:02'),
+(640,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 12:03:04'),
+(641,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 12:03:04'),
+(642,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 12:03:04'),
+(643,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 12:03:04'),
+(644,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 12:03:04'),
+(645,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 12:03:04'),
+(646,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 12:03:05'),
+(647,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 12:03:05'),
+(648,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 12:03:05'),
+(649,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 12:03:05'),
+(650,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 12:03:05'),
+(651,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 12:03:05'),
+(652,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 12:03:07'),
+(653,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 12:03:08'),
+(654,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 12:03:08'),
+(655,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 12:03:08'),
+(656,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 12:03:08'),
+(657,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 12:03:11'),
+(658,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 12:03:11'),
+(659,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 12:03:11'),
+(660,'78c1959793f3076f0ffe169a43',0,'cart','[]','2026-08-23 12:06:00'),
+(661,'78c1959793f3076f0ffe169a43',0,'shipping_address','[]','2026-08-23 12:06:00'),
+(662,'78c1959793f3076f0ffe169a43',0,'shipping_method','[]','2026-08-23 12:06:00'),
+(663,'78c1959793f3076f0ffe169a43',0,'payment_address','[]','2026-08-23 12:06:00'),
+(664,'78c1959793f3076f0ffe169a43',0,'payment_method','[]','2026-08-23 12:06:00'),
+(665,'06c5e77fb6512d86117e50e0f3',0,'cart','[]','2026-08-23 12:18:17'),
+(666,'06c5e77fb6512d86117e50e0f3',0,'shipping_address','[]','2026-08-23 12:18:17'),
+(667,'06c5e77fb6512d86117e50e0f3',0,'shipping_method','[]','2026-08-23 12:18:17'),
+(668,'06c5e77fb6512d86117e50e0f3',0,'payment_address','[]','2026-08-23 12:18:17'),
+(669,'06c5e77fb6512d86117e50e0f3',0,'payment_method','[]','2026-08-23 12:18:17'),
+(670,'06c5e77fb6512d86117e50e0f3',0,'cart','[]','2026-08-23 12:18:17'),
+(671,'06c5e77fb6512d86117e50e0f3',0,'shipping_address','[]','2026-08-23 12:18:18'),
+(672,'06c5e77fb6512d86117e50e0f3',0,'shipping_method','[]','2026-08-23 12:18:18'),
+(673,'06c5e77fb6512d86117e50e0f3',0,'payment_address','[]','2026-08-23 12:18:18'),
+(674,'06c5e77fb6512d86117e50e0f3',0,'payment_method','[]','2026-08-23 12:18:18'),
+(675,'06c5e77fb6512d86117e50e0f3',0,'cart','[]','2026-08-23 12:18:19'),
+(676,'06c5e77fb6512d86117e50e0f3',0,'shipping_address','[]','2026-08-23 12:18:20'),
+(677,'06c5e77fb6512d86117e50e0f3',0,'shipping_method','[]','2026-08-23 12:18:20'),
+(678,'06c5e77fb6512d86117e50e0f3',0,'payment_address','[]','2026-08-23 12:18:20'),
+(679,'06c5e77fb6512d86117e50e0f3',0,'payment_method','[]','2026-08-23 12:18:20'),
+(680,'06c5e77fb6512d86117e50e0f3',0,'cart','[]','2026-08-23 12:45:15'),
+(681,'06c5e77fb6512d86117e50e0f3',0,'shipping_address','[]','2026-08-23 12:45:15'),
+(682,'06c5e77fb6512d86117e50e0f3',0,'shipping_method','[]','2026-08-23 12:45:15'),
+(683,'06c5e77fb6512d86117e50e0f3',0,'payment_address','[]','2026-08-23 12:45:15'),
+(684,'06c5e77fb6512d86117e50e0f3',0,'payment_method','[]','2026-08-23 12:45:15');
 /*!40000 ALTER TABLE `oc_dockercart_checkout_analytics` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5346,7 +5443,7 @@ CREATE TABLE `oc_dockercart_product_variant_customer_group_price` (
   `price` decimal(15,4) NOT NULL DEFAULT 0.0000,
   PRIMARY KEY (`variant_customer_group_price_id`),
   UNIQUE KEY `variant_group` (`variant_id`,`customer_group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3992 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3994 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5572,7 +5669,8 @@ INSERT INTO `oc_dockercart_product_variant_customer_group_price` VALUES
 (3988,669,3,7013.9600),
 (3989,669,4,6480.2900),
 (3990,708,3,56441.2000),
-(3991,708,4,52146.7600);
+(3991,708,4,52146.7600),
+(3993,580,1,50000.0000);
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_customer_group_price` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5597,7 +5695,7 @@ CREATE TABLE `oc_dockercart_product_variant_discount` (
   `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`variant_discount_id`),
   KEY `variant_id` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5794,9 +5892,9 @@ INSERT INTO `oc_dockercart_product_variant_discount` VALUES
 (711,873,4,2,1,571.0200,'0000-00-00','0000-00-00',0),
 (712,873,4,5,1,534.1800,'0000-00-00','0000-00-00',0),
 (713,873,4,10,1,491.2000,'0000-00-00','0000-00-00',0),
-(1101,703,2,2,1,57054.6900,'0000-00-00','0000-00-00',0),
-(1102,703,2,5,1,53373.7400,'0000-00-00','0000-00-00',0),
-(1103,708,2,2,1,57054.6900,'0000-00-00','0000-00-00',0);
+(1103,708,2,2,1,57054.6900,'0000-00-00','0000-00-00',0),
+(1104,703,2,2,1,57054.6900,'0000-00-00','0000-00-00',0),
+(1105,703,2,5,1,53373.7400,'0000-00-00','0000-00-00',0);
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_discount` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -5820,7 +5918,7 @@ CREATE TABLE `oc_dockercart_product_variant_special` (
   `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`variant_special_id`),
   KEY `variant_id` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1988 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1993 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5832,7 +5930,6 @@ LOCK TABLES `oc_dockercart_product_variant_special` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_special` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_product_variant_special` VALUES
 (114,579,1,1,38000.0000,'0000-00-00','2026-10-25',1),
-(115,580,1,1,46350.0000,'0000-00-00','2026-08-30',0),
 (116,581,1,1,45760.0000,'2026-07-12','2026-09-07',0),
 (117,583,1,1,43335.0000,'0000-00-00','0000-00-00',0),
 (118,585,1,1,44400.0000,'0000-00-00','2026-10-27',0),
@@ -6003,7 +6100,8 @@ INSERT INTO `oc_dockercart_product_variant_special` VALUES
 (1000,704,1,1,44784.8600,'0000-00-00','0000-00-00',0),
 (1980,669,1,1,5870.3800,'0000-00-00','0000-00-00',1),
 (1981,669,3,1,5717.9000,'0000-00-00','0000-00-00',0),
-(1987,802,1,1,13259.0700,'0000-00-00','0000-00-00',0);
+(1987,802,1,1,13259.0700,'0000-00-00','0000-00-00',0),
+(1992,580,1,1,46350.0000,'0000-00-00','2026-08-30',0);
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6033,7 +6131,7 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
   `is_system` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_type` (`task_type`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=173 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=175 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -6044,18 +6142,19 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-23 09:36:02',NULL,'2026-07-02 11:00:50','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-08-24 07:51:37',NULL,'2026-07-02 11:00:50','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
 (41,'license_check','License Verification',1,'every_3d','2026-08-23 10:33:05',NULL,'2026-07-03 18:33:04','2026-08-23 10:33:05',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-23 09:36:02',NULL,'2026-07-24 18:51:04','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-23 09:36:02',NULL,'2026-07-29 10:46:20','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-23 10:36:02',NULL,'2026-08-01 18:17:04','2026-08-23 10:36:02',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
-(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-23 09:36:02',NULL,'2026-08-06 08:09:03','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-08-23 09:36:02',NULL,'2026-08-06 15:36:09','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
-(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-23 09:36:02',NULL,'2026-08-09 15:39:28','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
-(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-08-23 09:36:02',NULL,'2026-08-10 13:33:35','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
-(168,'dockercart_update_check','Update availability check',1,'hourly','2026-08-23 10:36:02',NULL,'2026-08-18 13:20:23','2026-08-23 10:36:02',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
-(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-08-23 09:36:02',NULL,'2026-08-18 14:08:08','2026-08-23 09:36:02',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
-(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-08-23 10:14:02',NULL,'2026-08-23 10:13:15','2026-08-23 10:14:02',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1);
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-08-24 07:51:37',NULL,'2026-07-24 18:51:04','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-08-24 07:51:37',NULL,'2026-07-29 10:46:20','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-08-24 13:40:48',NULL,'2026-08-01 18:17:04','2026-08-24 13:40:48',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-06 08:09:03','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-06 15:36:09','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-09 15:39:28','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
+(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-10 13:33:35','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
+(168,'dockercart_update_check','Update availability check',1,'hourly','2026-08-24 13:10:48',NULL,'2026-08-18 13:20:23','2026-08-24 13:10:48',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
+(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-18 14:08:08','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
+(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-08-24 07:51:37',NULL,'2026-08-23 10:13:15','2026-08-24 07:51:37',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1),
+(173,'backup_s3','S3 Backup',0,'','2026-08-23 22:12:03','{\"status\":\"ok\",\"ts\":\"20260823_221152\",\"size_bytes\":106312990,\"size_mb\":101.39,\"db_size_bytes\":2000599,\"s3_key\":\"dockercart/backups/dockercart_20260823_221152.tar.gz\",\"retention_deleted\":[]}','2026-08-23 22:11:19','2026-08-23 22:12:03',NULL,0,'',1,1);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6822,7 +6921,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=1717 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1722 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8447,7 +8546,12 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (1657,'249aa88c3be1fa358415a188f9','','none','','2026-08-20 10:19:04'),
 (1658,'6f2e689cde8f586a8e26b7112f','','none','','2026-08-20 10:19:04'),
 (1659,'e9467579bc3cf373e792ca19ab','','none','','2026-08-20 10:34:02'),
-(1660,'52fde4b8ee6c3698907cbbb734','','none','','2026-08-20 10:34:02');
+(1660,'52fde4b8ee6c3698907cbbb734','','none','','2026-08-20 10:34:02'),
+(1717,'4ccfee0725f3e8c43c484e1695','','none','','2026-08-23 10:44:43'),
+(1718,'78c1959793f3076f0ffe169a43','','none','','2026-08-23 11:32:00'),
+(1719,'06c5e77fb6512d86117e50e0f3','','none','','2026-08-23 12:18:17'),
+(1720,'f95f03f34f5354f9956126fbf5','','none','','2026-08-23 22:28:19'),
+(1721,'9a03ffda0d2b9faa35a6e3b5c3','','none','','2026-08-23 22:33:40');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8635,7 +8739,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6536 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6629 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8944,7 +9048,22 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (6532,NULL,'b05791f1c44dc8ad7987d6cc2a',5041,'2026-08-20 10:40:28','2026-08-20 10:40:28'),
 (6533,NULL,'b05791f1c44dc8ad7987d6cc2a',5023,'2026-08-20 10:40:37','2026-08-20 10:40:37'),
 (6534,NULL,'b05791f1c44dc8ad7987d6cc2a',5001,'2026-08-20 10:50:18','2026-08-20 10:50:18'),
-(6535,NULL,'b05791f1c44dc8ad7987d6cc2a',5022,'2026-08-20 10:50:25','2026-08-20 10:50:25');
+(6535,NULL,'b05791f1c44dc8ad7987d6cc2a',5022,'2026-08-20 10:50:25','2026-08-20 10:50:25'),
+(6536,NULL,'4ccfee0725f3e8c43c484e1695',5023,'2026-08-23 10:44:46','2026-08-23 10:44:46'),
+(6542,NULL,'06c5e77fb6512d86117e50e0f3',5036,'2026-08-23 16:28:59','2026-08-23 16:28:59'),
+(6544,NULL,'06c5e77fb6512d86117e50e0f3',5023,'2026-08-23 16:47:54','2026-08-23 16:47:54'),
+(6549,NULL,'06c5e77fb6512d86117e50e0f3',5011,'2026-08-23 17:06:21','2026-08-23 17:06:21'),
+(6551,NULL,'06c5e77fb6512d86117e50e0f3',5001,'2026-08-23 17:31:39','2026-08-23 17:31:39'),
+(6552,NULL,'06c5e77fb6512d86117e50e0f3',5014,'2026-08-23 18:19:45','2026-08-23 18:19:45'),
+(6553,NULL,'06c5e77fb6512d86117e50e0f3',5071,'2026-08-23 18:19:50','2026-08-23 18:19:50'),
+(6568,NULL,'06c5e77fb6512d86117e50e0f3',5075,'2026-08-23 19:04:05','2026-08-23 19:04:05'),
+(6569,NULL,'06c5e77fb6512d86117e50e0f3',5031,'2026-08-23 19:04:08','2026-08-23 19:04:08'),
+(6573,NULL,'06c5e77fb6512d86117e50e0f3',5012,'2026-08-23 19:38:51','2026-08-23 19:38:51'),
+(6574,NULL,'06c5e77fb6512d86117e50e0f3',5033,'2026-08-23 20:59:05','2026-08-23 20:59:05'),
+(6584,NULL,'f95f03f34f5354f9956126fbf5',5033,'2026-08-23 22:29:45','2026-08-23 22:29:45'),
+(6621,NULL,'9a03ffda0d2b9faa35a6e3b5c3',5033,'2026-08-24 13:03:19','2026-08-24 13:03:19'),
+(6627,NULL,'9a03ffda0d2b9faa35a6e3b5c3',5001,'2026-08-24 13:08:03','2026-08-24 13:08:03'),
+(6628,NULL,'9a03ffda0d2b9faa35a6e3b5c3',5011,'2026-08-24 13:08:08','2026-08-24 13:08:08');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -9118,7 +9237,7 @@ CREATE TABLE `oc_extension` (
   `type` varchar(32) NOT NULL,
   `code` varchar(32) NOT NULL,
   PRIMARY KEY (`extension_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=502 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=506 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -9191,7 +9310,8 @@ INSERT INTO `oc_extension` VALUES
 (442,'currency','ecb'),
 (462,'dashboard','dockercart_top_products'),
 (463,'dashboard','dockercart_category_revenue'),
-(501,'shipping','dockercart_warehouse_pickup');
+(504,'shipping','dockercart_warehouse_pickup'),
+(505,'report','supplier_profit');
 /*!40000 ALTER TABLE `oc_extension` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -9762,40 +9882,6 @@ INSERT INTO `oc_length_class_description` VALUES
 (3,2,'Дюйм','в'),
 (3,3,'Дюйм','в');
 /*!40000 ALTER TABLE `oc_length_class_description` ENABLE KEYS */;
-UNLOCK TABLES;
-COMMIT;
-SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
-
---
--- Table structure for table `oc_location`
---
-
-DROP TABLE IF EXISTS `oc_location`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oc_location` (
-  `location_id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) NOT NULL,
-  `address` mediumtext NOT NULL,
-  `telephone` varchar(32) NOT NULL,
-  `fax` varchar(32) NOT NULL,
-  `geocode` varchar(32) NOT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `open` mediumtext NOT NULL,
-  `comment` mediumtext NOT NULL,
-  PRIMARY KEY (`location_id`),
-  KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `oc_location`
---
-
-SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
-LOCK TABLES `oc_location` WRITE;
-/*!40000 ALTER TABLE `oc_location` DISABLE KEYS */;
-/*!40000 ALTER TABLE `oc_location` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -10588,9 +10674,9 @@ INSERT INTO `oc_order` VALUES
 (99612,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',0,'',1,'Тест','Тестов','test@example.com','+380 (38) 050-12-34','','','[]','Тест','Тестов','','ул. Тестовая 1','','Киев','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Тест','Тестов','','ул. Тестовая 1','','Киев','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',3039.2398,0.0000,0,0,1,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.9','2026-08-13 07:55:16','2026-08-13 07:55:16'),
 (99615,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','1234567890','','','','',19297.8328,19297.8328,0,0,134,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 10:44:43','2026-08-15 11:39:01'),
 (99616,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:20','2026-08-15 11:56:20'),
-(99617,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:29','2026-08-15 11:56:29'),
-(99618,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','123','','','','',44164.9523,0.0000,0,0,134,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 12:01:27','2026-08-15 12:06:35'),
-(99619,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',0,'',1,'John','Doe','admin@dockercart.local','+380 (38) 111-11-11','','','[]','','','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','','','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Самовывоз','dockercart_universal.dockercart_universal_5','','','none','','',10649.0000,0.0000,0,0,1,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.5.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-17 12:40:43','2026-08-20 10:38:43');
+(99617,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:29','2026-08-24 10:24:37'),
+(99618,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','123','','','','',92018.3439,0.0000,0,0,134,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 12:01:27','2026-08-23 16:23:39'),
+(99619,2,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','','','','[]','','','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Самовывоз','dockercart_universal.dockercart_universal_5','1234567890','','none','','',331936.1066,500.0000,0,0,129,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.5.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-17 12:40:43','2026-08-24 13:05:22');
 /*!40000 ALTER TABLE `oc_order` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10644,7 +10730,7 @@ CREATE TABLE `oc_order_document` (
   UNIQUE KEY `ux_order_document_type` (`order_id`,`document_type`),
   UNIQUE KEY `ux_order_document_public_token` (`public_token`),
   KEY `idx_order_document_storage_key` (`storage_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10656,7 +10742,8 @@ LOCK TABLES `oc_order_document` WRITE;
 /*!40000 ALTER TABLE `oc_order_document` DISABLE KEYS */;
 INSERT INTO `oc_order_document` VALUES
 (10,1005,'invoice','ffbc62486daf70448123b32cee971d36e3b3d519a19c0c85.pdf','INV-1005','d96b7dd4c43b434a009af9caf6b99927f5073a3d5975acf8bda4e3641ca8a980','qr-v4','2026-08-11 19:41:32'),
-(11,99610,'invoice','3457cb113c2c248ac3052a87e29b4b841306d9fe599b35db.pdf','DC-1','7571b07ba37715d695914b563f7ec0ed508fb53d97d7bf78b7cb7ef7d548e28b','qr-v4','2026-08-12 19:31:15');
+(11,99610,'invoice','3457cb113c2c248ac3052a87e29b4b841306d9fe599b35db.pdf','DC-1','7571b07ba37715d695914b563f7ec0ed508fb53d97d7bf78b7cb7ef7d548e28b','qr-v4','2026-08-12 19:31:15'),
+(12,99619,'invoice','ba66ecab34aac4c7ee59f7958178cf9001096d4b8b203317.pdf','DC-2','9a8cb933b9adb51a14ceba022d5aca62c2d4d6f23c95376e71ec9166a5625c5b','qr-v4','2026-08-23 16:23:59');
 /*!40000 ALTER TABLE `oc_order_document` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10679,7 +10766,7 @@ CREATE TABLE `oc_order_history` (
   `comment_params` mediumtext DEFAULT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_history_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=7122 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10760,7 +10847,16 @@ INSERT INTO `oc_order_history` VALUES
 (7107,99619,0,0,'Order total changed: 10 649 ₴ → 47 804 ₴','text_payment_note_total_changed','[\"10 649 \\u20b4\",\"47 804 \\u20b4\"]','2026-08-20 10:32:52'),
 (7108,99619,0,0,'Order total changed: 47 804 ₴ → 10 649 ₴','text_payment_note_total_changed','[\"47 804 \\u20b4\",\"10 649 \\u20b4\"]','2026-08-20 10:32:55'),
 (7109,99619,0,0,'Order total changed: 10 649 ₴ → 47 804 ₴','text_payment_note_total_changed','[\"10 649 \\u20b4\",\"47 804 \\u20b4\"]','2026-08-20 10:38:40'),
-(7110,99619,0,0,'Order total changed: 47 804 ₴ → 10 649 ₴','text_payment_note_total_changed','[\"47 804 \\u20b4\",\"10 649 \\u20b4\"]','2026-08-20 10:38:43');
+(7110,99619,0,0,'Order total changed: 47 804 ₴ → 10 649 ₴','text_payment_note_total_changed','[\"47 804 \\u20b4\",\"10 649 \\u20b4\"]','2026-08-20 10:38:43'),
+(7111,99618,0,0,'Сумма заказа изменена: 44 165 ₴ → 92 018 ₴','text_payment_note_total_changed','[\"44 165 \\u20b4\",\"92 018 \\u20b4\"]','2026-08-23 16:23:39'),
+(7112,99619,132,1,'','',NULL,'2026-08-23 20:27:39'),
+(7113,99619,133,1,'','',NULL,'2026-08-23 20:27:46'),
+(7114,99619,0,0,'Добавлена отгрузка: 1234567890','text_shipping_note_added','[\"1234567890\"]','2026-08-23 20:28:58'),
+(7115,99619,128,0,'','',NULL,'2026-08-23 20:28:58'),
+(7116,99619,129,1,'','',NULL,'2026-08-23 20:40:48'),
+(7117,99619,0,0,'Payment received: 500 ₴ (paid 500 ₴ of 10 649 ₴)','text_payment_note_received','[\"500 \\u20b4\",\"500 \\u20b4\",\"10 649 \\u20b4\"]','2026-08-23 21:02:08'),
+(7120,99619,0,0,'Order total changed: 10 649 ₴ → 442 880 ₴','text_payment_note_total_changed','[\"10 649 \\u20b4\",\"442 880 \\u20b4\"]','2026-08-24 11:28:16'),
+(7121,99619,0,0,'Order total changed: 442 880 ₴ → 398 095 ₴','text_payment_note_total_changed','[\"442 880 \\u20b4\",\"398 095 \\u20b4\"]','2026-08-24 11:28:19');
 /*!40000 ALTER TABLE `oc_order_history` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10783,7 +10879,7 @@ CREATE TABLE `oc_order_option` (
   `value` mediumtext NOT NULL,
   `type` varchar(32) NOT NULL,
   PRIMARY KEY (`order_option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1065 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=1069 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10832,7 +10928,9 @@ INSERT INTO `oc_order_option` VALUES
 (1057,99618,16,9019,9904,'Гарантия','24 месяца','radio'),
 (1058,99619,17,9025,9916,'Оперативная память','12 ГБ','radio'),
 (1059,99619,17,9024,9914,'Размер экрана','16\"','radio'),
-(1060,99619,18,9157,10186,'Издание','Стандартное','radio');
+(1060,99619,18,9157,10186,'Издание','Стандартное','radio'),
+(1065,99618,23,9061,9989,'Цвет','Белый','color'),
+(1066,99618,23,9060,9987,'Размер','M','radio');
 /*!40000 ALTER TABLE `oc_order_option` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10857,7 +10955,7 @@ CREATE TABLE `oc_order_payment` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`order_payment_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1011 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10875,7 +10973,8 @@ INSERT INTO `oc_order_payment` VALUES
 (1006,99618,44165.0000,'Наложенный платеж','dockercart_universal.dockercart_universal_4','','',1,'2026-08-15 12:02:13'),
 (1007,99618,-36794.1300,'Наложенный платеж','dockercart_universal.dockercart_universal_4','','Возврат средств по возврату #3',1,'2026-08-15 12:04:02'),
 (1008,99618,-7300.0000,'Наложенный платеж','dockercart_universal.dockercart_universal_4','','Проведён возврат средств: 7 300 ₴',1,'2026-08-15 12:05:37'),
-(1009,99618,-70.8700,'Наложенный платеж','dockercart_universal.dockercart_universal_4','','Проведён возврат средств: 71 ₴',1,'2026-08-15 12:06:35');
+(1009,99618,-70.8700,'Наложенный платеж','dockercart_universal.dockercart_universal_4','','Проведён возврат средств: 71 ₴',1,'2026-08-15 12:06:35'),
+(1010,99619,500.0000,'Cash on Delivery','dockercart_universal.dockercart_universal_4','','',1,'2026-08-23 21:02:08');
 /*!40000 ALTER TABLE `oc_order_payment` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10904,12 +11003,13 @@ CREATE TABLE `oc_order_product` (
   `warehouse_id` int(11) NOT NULL DEFAULT 0,
   `warehouse_name` varchar(255) NOT NULL DEFAULT '',
   `estimate_date` date DEFAULT NULL,
-  `supplier_status` varchar(24) NOT NULL DEFAULT '',
+  `supplier_status` varchar(24) NOT NULL DEFAULT 'pending',
   `supplier_ordered_date` datetime DEFAULT NULL,
   `supplier_tracking` varchar(128) NOT NULL DEFAULT '',
+  `supplier_cost` decimal(15,4) DEFAULT NULL,
   PRIMARY KEY (`order_product_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10920,14 +11020,26 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_order_product` WRITE;
 /*!40000 ALTER TABLE `oc_order_product` DISABLE KEYS */;
 INSERT INTO `oc_order_product` VALUES
-(9,99612,5010,'JBL Charge 5','DEMO-5010-BLK-W12',1.00,2313.7678,2313.7678,0.0000,0,667,'DEMO-5010-BLK-W12',0,'',NULL,'',NULL,''),
-(10,99612,5064,'Sapiens, Юваль Ноа Харари','DEMO-5064-STD',1.00,594.5600,594.5600,120.9120,0,833,'DEMO-5064-STD',0,'',NULL,'',NULL,''),
-(13,99615,5051,'Nintendo Switch OLED','DEMO-5051-STD',1.00,16071.5273,16071.5273,3216.3055,0,807,'DEMO-5051-STD',0,'',NULL,'',NULL,''),
-(14,99616,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'',NULL,''),
-(15,99617,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'',NULL,''),
-(16,99618,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'',NULL,''),
-(17,99619,5006,'Apple MacBook Air M3','DEMO-5006-12G-16',1.00,10147.5600,10147.5600,0.0000,0,654,'DEMO-5006-12G-16',0,'',NULL,'',NULL,''),
-(18,99619,5062,'Глубокая работа (автор: Кэл Ньюпорт)','DEMO-5062-STD',1.00,501.4400,501.4400,102.2880,0,829,'DEMO-5062-STD',0,'',NULL,'',NULL,'');
+(9,99612,5010,'JBL Charge 5','DEMO-5010-BLK-W12',1.00,2313.7678,2313.7678,0.0000,0,667,'DEMO-5010-BLK-W12',0,'',NULL,'pending',NULL,'',NULL),
+(10,99612,5064,'Sapiens, Юваль Ноа Харари','DEMO-5064-STD',1.00,594.5600,594.5600,120.9120,0,833,'DEMO-5064-STD',0,'',NULL,'pending',NULL,'',NULL),
+(13,99615,5051,'Nintendo Switch OLED','DEMO-5051-STD',1.00,16071.5273,16071.5273,3216.3055,0,807,'DEMO-5051-STD',0,'',NULL,'pending',NULL,'',NULL),
+(14,99616,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'pending',NULL,'',NULL),
+(15,99617,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'pending',NULL,'',NULL),
+(16,99618,5004,'OnePlus 12','DEMO-5004-BLK-256-12G',1.00,36794.1269,36794.1269,7360.8254,0,639,'DEMO-5004-BLK-256-12G',0,'',NULL,'pending',NULL,'',NULL),
+(17,99619,5006,'Apple MacBook Air M3','DEMO-5006-12G-16',1.00,9583.8100,9583.8100,0.0000,0,654,'DEMO-5006-12G-16',0,'',NULL,'pending',NULL,'',NULL),
+(18,99619,5062,'Глубокая работа (автор: Кэл Ньюпорт)','DEMO-5062-STD',1.00,644.7031,644.7031,130.9406,0,829,'DEMO-5062-STD',0,'',NULL,'pending',NULL,'',NULL),
+(23,99618,5023,'Adidas Ultraboost Light','DEMO-5023-WHT-M',1.00,55214.2170,55214.2170,0.0000,0,704,'DEMO-5023-WHT-M',1,'Основной склад',NULL,'pending',NULL,'',NULL),
+(28,99619,5001,'Apple iPhone 15 Pro','DEMO-5001',1.00,45000.0000,45000.0000,0.0000,0,0,'',101,'Dropship: GadgetHub',NULL,'ordered','2026-08-14 21:11:30','',NULL),
+(29,99619,5002,'Samsung Galaxy S24 Ultra','DEMO-5002',2.00,41717.4072,83434.8144,0.0000,0,0,'',101,'Dropship: GadgetHub',NULL,'ordered','2026-08-18 21:11:30','',NULL),
+(30,99612,5003,'Google Pixel 8 Pro','DEMO-5003',1.00,45999.0544,45999.0544,0.0000,0,0,'',101,'Dropship: GadgetHub',NULL,'pending',NULL,'',NULL),
+(31,99619,5004,'OnePlus 12','DEMO-5004',1.00,36794.1269,36794.1269,7360.8254,0,0,'',101,'Dropship: GadgetHub',NULL,'shipped','2026-08-13 21:11:30','SF7291345580',NULL),
+(32,99618,5008,'Sony WH-1000XM5','DEMO-5008',1.00,17857.2525,17857.2525,0.0000,0,0,'',102,'Dropship: MobileParts',NULL,'ordered','2026-08-20 21:11:30','',NULL),
+(33,99618,5009,'Bose QuietComfort Ultra','DEMO-5009',2.00,21950.6055,43901.2110,0.0000,0,0,'',102,'Dropship: MobileParts',NULL,'shipped','2026-08-19 21:11:30','CNEK1122334455',NULL),
+(34,99604,5010,'JBL Charge 5','DEMO-5010',3.00,7623.8700,22871.6100,0.0000,0,0,'',1,'Main Warehouse','2026-08-24','pending',NULL,'',NULL),
+(35,99612,5005,'Dell XPS 13','DEMO-5005',1.00,66465.8195,66465.8195,0.0000,0,0,'',103,'Dropship: ShenzhenTech',NULL,'ordered','2026-08-17 21:11:30','',NULL),
+(36,99612,5006,'Apple MacBook Air M3','DEMO-5006',1.00,775.0700,775.0700,0.0000,0,0,'',103,'Dropship: ShenzhenTech',NULL,'pending',NULL,'',NULL),
+(37,99619,5007,'Lenovo ThinkPad X1 Carbon','DEMO-5007',2.00,78239.3261,156478.6522,31299.7304,0,0,'',103,'Dropship: ShenzhenTech',NULL,'shipped','2026-08-21 21:11:30','LP0044778899',225.0000),
+(38,99604,5012,'Philips Airfryer XXL','DEMO-5012',1.00,10182.2156,10182.2156,0.0000,0,0,'',103,'Dropship: ShenzhenTech',NULL,'shipped','2026-08-24 12:45:47','222',NULL);
 /*!40000 ALTER TABLE `oc_order_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -11083,7 +11195,7 @@ CREATE TABLE `oc_order_shipment` (
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`shipment_id`),
   KEY `order_id` (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1006 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11097,7 +11209,8 @@ INSERT INTO `oc_order_shipment` VALUES
 (1001,1001,'TTN-1001','Новая Почта, отделение 12',0,'2026-07-22 11:30:00'),
 (1002,1002,'TTN-1002','Новая Почта, отделение 3',0,'2026-07-30 12:00:00'),
 (1003,99615,'1234567890','',1,'2026-08-15 11:28:57'),
-(1004,99618,'123','',1,'2026-08-15 12:01:40');
+(1004,99618,'123','',1,'2026-08-15 12:01:40'),
+(1005,99619,'1234567890','',1,'2026-08-23 20:28:58');
 /*!40000 ALTER TABLE `oc_order_shipment` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -11118,7 +11231,7 @@ CREATE TABLE `oc_order_shipment_item` (
   PRIMARY KEY (`shipment_item_id`),
   KEY `shipment_id` (`shipment_id`),
   KEY `order_product_id` (`order_product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1008 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1009 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11141,7 +11254,8 @@ INSERT INTO `oc_order_shipment_item` VALUES
 (1004,1002,10104,1),
 (1005,1002,10105,1),
 (1006,1003,13,1),
-(1007,1004,16,1);
+(1007,1004,16,1),
+(1008,1005,17,1);
 /*!40000 ALTER TABLE `oc_order_shipment_item` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -11280,16 +11394,16 @@ INSERT INTO `oc_order_total` VALUES
 (14137,99617,'tax','НДС (20%)',7358.8254,5),
 (14138,99617,'tax','Экологический налог (2,00)',2.0000,5),
 (14139,99617,'total','Итого',44164.9523,9),
-(14140,99618,'sub_total','Сумма',36794.1269,1),
+(14140,99618,'sub_total','Сумма',92008.3439,1),
 (14141,99618,'shipping','Стандартная доставка (4-5 дней)',10.0000,3),
-(14142,99618,'tax','НДС (20%)',7358.8254,5),
-(14143,99618,'tax','Экологический налог (2,00)',2.0000,5),
-(14144,99618,'total','Итого',44164.9523,9),
-(14145,99619,'sub_total','Сумма',10649.0000,1),
+(14142,99618,'tax','НДС (20%)',7360.8254,5),
+(14143,99618,'tax','Экологический налог (2,00)',7360.8254,5),
+(14144,99618,'total','Итого',92018.3439,9),
+(14145,99619,'sub_total','Сумма',331936.1066,1),
 (14146,99619,'shipping','Самовывоз',0.0000,3),
-(14147,99619,'tax','НДС (20%)',102.2880,5),
-(14148,99619,'tax','Экологический налог (2,00)',102.2880,5),
-(14149,99619,'total','Итого',10649.0000,9);
+(14147,99619,'tax','НДС (20%)',38791.4964,5),
+(14148,99619,'tax','Экологический налог (2,00)',38791.4964,5),
+(14149,99619,'total','Итого',331936.1066,9);
 /*!40000 ALTER TABLE `oc_order_total` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -11381,7 +11495,7 @@ CREATE TABLE `oc_product` (
   KEY `idx_product_status_price` (`status`,`price`),
   KEY `idx_product_manufacturer` (`manufacturer_id`,`status`),
   KEY `idx_product_status_quantity` (`status`,`quantity`)
-) ENGINE=InnoDB AUTO_INCREMENT=100006 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=100010 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -11392,95 +11506,95 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',959.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,592,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',308.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,372,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
-(5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',424.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,316,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',351.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,57,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5005,'DEMO-5005',1102,'SKU-5005','','','','','','A1',239.00,0,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','catalog/Aero_Airship_01.glb','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,125,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5006,'DEMO-5006',1102,'SKU-5006','','','','','','A1',269.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_chair.jpg',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,0,374,'2026-03-03 08:51:04','2026-08-11 12:38:26'),
-(5007,'DEMO-5007',1102,'SKU-5007','','','','','','A1',305.00,0,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5008,'DEMO-5008',1103,'SKU-5008','','','','','','A1',332.00,0,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,26,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5009,'DEMO-5009',1103,'SKU-5009','','','','','','A1',370.00,0,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,11,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5010,'DEMO-5010',1103,'SKU-5010','','','','','','A1',419.00,0,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','','',304,1,7623.8700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,19,'2026-03-03 08:51:04','2026-08-12 16:02:38'),
-(5011,'DEMO-5011',1973,'SKU-5011','','','','','','A1',11.00,0,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','catalog/test_360_lounge_chair.jpg',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,124,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5012,'DEMO-5012',1973,'SKU-5012','','','','','','A1',92.00,0,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','catalog/test_360_lounge_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,126,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5013,'DEMO-5013',1973,'SKU-5013','','','','','','A1',111.00,0,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,23,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
-(5014,'DEMO-5014',1972,'SKU-5014','','','','','','A1',118.00,0,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,385,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5015,'DEMO-5015',1972,'SKU-5015','','','','','','A1',142.00,0,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,13,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',164.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,22,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5017,'DEMO-5017',1974,'SKU-5017','','','','','','A1',201.00,0,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','','catalog/test_360_lounge_chair.jpg',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,8,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5018,'DEMO-5018',1974,'SKU-5018','','','','','','A1',216.00,0,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,5,'2026-03-03 08:51:05','2026-08-10 12:03:57'),
-(5019,'DEMO-5019',1973,'SKU-5019','','','','','','A1',241.00,0,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','catalog/test_360_lounge_chair.jpg',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5020,'DEMO-5020',1973,'SKU-5020','','','','','','A1',249.00,0,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,16,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',186.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,162,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5022,'DEMO-5022',1302,'SKU-5022','','','','','','A1',235.00,0,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,12,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',116.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2091,'2026-03-03 08:51:05','2026-08-22 09:26:59'),
-(5024,'DEMO-5024',1301,'SKU-5024','','','','','','A1',345.00,0,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5025,'DEMO-5025',1302,'SKU-5025','','','','','','A1',265.00,0,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5026,'DEMO-5026',1302,'SKU-5026','','','','','','A1',434.00,0,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,5,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5027,'DEMO-5027',1301,'SKU-5027','','','','','','A1',476.00,0,'catalog/demo/demo-seed/products/fashion/the-north-face-nuptse-jacket.jpg','','',306,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5028,'DEMO-5028',1303,'SKU-5028','','','','','','A1',501.00,0,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,9,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5029,'DEMO-5029',1303,'SKU-5029','','','','','','A1',567.00,0,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5030,'DEMO-5030',1301,'SKU-5030','','','','','','A1',437.00,0,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,29,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
-(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',135.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,159,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5032,'DEMO-5032',1402,'SKU-5032','','','','','','A1',165.00,0,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,26,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5033,'DEMO-5033',1403,'SKU-5033','','','','','','A1',215.00,0,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,34,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5001,'DEMO-5001',1101,'SKU-5001','','','','','','A1',780.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,602,'2026-03-03 08:51:04','2026-08-24 13:40:45'),
+(5002,'DEMO-5002',1101,'SKU-5002','','','','','','A1',186.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,373,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
+(5003,'DEMO-5003',1101,'SKU-5003','','','','','','A1',392.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,316,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5004,'DEMO-5004',1101,'SKU-5004','','','','','','A1',240.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,57,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5005,'DEMO-5005',1102,'SKU-5005','','','','','','A1',193.00,0,'catalog/demo/demo-seed/products/electronics/dell-xps-13.jpg','catalog/Aero_Airship_01.glb','',306,1,66465.8195,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,125,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5006,'DEMO-5006',1102,'SKU-5006','','','','','','A1',215.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_chair.jpg',308,1,775.0700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,0.50,5,1,0,374,'2026-03-03 08:51:04','2026-08-11 12:38:26'),
+(5007,'DEMO-5007',1102,'SKU-5007','','','','','','A1',245.00,0,'catalog/demo/demo-seed/products/electronics/lenovo-thinkpad-x1-carbon.jpg','','',310,1,86932.5845,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5008,'DEMO-5008',1103,'SKU-5008','','','','','','A1',265.00,0,'catalog/demo/demo-seed/products/electronics/sony-wh-1000xm5.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,26,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5009,'DEMO-5009',1103,'SKU-5009','','','','','','A1',296.00,0,'catalog/demo/demo-seed/products/electronics/bose-quietcomfort-ultra.jpg','','',302,1,21950.6055,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,11,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5010,'DEMO-5010',1103,'SKU-5010','','','','','','A1',338.00,0,'catalog/demo/demo-seed/products/electronics/jbl-charge-5.jpg','','',304,1,7623.8700,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,19,'2026-03-03 08:51:04','2026-08-12 16:02:38'),
+(5011,'DEMO-5011',1973,'SKU-5011','','','','','','A1',11.00,0,'catalog/demo/demo-seed/products/home-kitchen/instant-pot-duo-plus.jpg','','catalog/test_360_lounge_chair.jpg',308,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,128,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5012,'DEMO-5012',1973,'SKU-5012','','','','','','A1',64.00,0,'catalog/demo/demo-seed/products/home-kitchen/philips-airfryer-xxl.jpg','','catalog/test_360_lounge_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,128,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5013,'DEMO-5013',1973,'SKU-5013','','','','','','A1',76.00,0,'catalog/demo/demo-seed/products/home-kitchen/delonghi-magnifica-evo.jpg','','',312,1,28090.6350,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,23,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
+(5014,'DEMO-5014',1972,'SKU-5014','','','','','','A1',76.00,0,'catalog/demo/demo-seed/products/home-kitchen/kitchenaid-artisan-mixer.jpg','','',302,1,25532.2894,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,0.50,0.10,3,1,0,386,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5015,'DEMO-5015',1972,'SKU-5015','','','','','','A1',94.00,0,'catalog/demo/demo-seed/products/home-kitchen/tefal-ingenio-cookware-set.jpg','','',304,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,13,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5016,'DEMO-5016',1972,'SKU-5016','','','','','','A1',108.00,0,'catalog/demo/demo-seed/products/home-kitchen/le-creuset-dutch-oven.jpg','','',306,1,14275.5686,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,22,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5017,'DEMO-5017',1974,'SKU-5017','','','','','','A1',138.00,0,'catalog/demo/demo-seed/products/home-kitchen/dyson-v15-detect.jpg','','catalog/test_360_lounge_chair.jpg',308,1,38324.0175,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,8,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5018,'DEMO-5018',1974,'SKU-5018','','','','','','A1',146.00,0,'catalog/demo/demo-seed/products/home-kitchen/irobot-roomba-j7-plus.jpg','','',310,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,5,'2026-03-03 08:51:05','2026-08-10 12:03:57'),
+(5019,'DEMO-5019',1973,'SKU-5019','','','','','','A1',164.00,0,'catalog/demo/demo-seed/products/home-kitchen/ninja-foodi-blender.jpg','','catalog/test_360_lounge_chair.jpg',312,1,8647.2082,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5020,'DEMO-5020',1973,'SKU-5020','','','','','','A1',165.00,0,'catalog/demo/demo-seed/products/home-kitchen/nespresso-vertuo-next.jpg','','',302,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,16,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5021,'DEMO-5021',1301,'SKU-5021','','','','','','A1',162.00,0,'catalog/demo/demo-seed/products/fashion/levis-501-original-jeans.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,162,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5022,'DEMO-5022',1302,'SKU-5022','','','','','','A1',204.00,0,'catalog/demo/demo-seed/products/fashion/nike-air-max-270.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,12,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5023,'DEMO-5023',1303,'SKU-5023','','','','','','A1',82.00,0,'catalog/demo/demo-seed/products/fashion/adidas-ultraboost-light-2.jpg','','',303,1,61349.1300,0,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,2098,'2026-03-03 08:51:05','2026-08-24 13:40:10'),
+(5024,'DEMO-5024',1301,'SKU-5024','','','','','','A1',206.00,0,'catalog/demo/demo-seed/products/fashion/uniqlo-ultra-light-down-jacket.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5025,'DEMO-5025',1302,'SKU-5025','','','','','','A1',213.00,0,'catalog/demo/demo-seed/products/fashion/calvin-klein-slim-fit-shirt.jpg','','',302,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,7,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5026,'DEMO-5026',1302,'SKU-5026','','','','','','A1',375.00,0,'catalog/demo/demo-seed/products/fashion/tommy-hilfiger-polo-shirt.jpg','','',304,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,5,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5027,'DEMO-5027',1301,'SKU-5027','','','','','','A1',347.00,0,'catalog/demo/demo-seed/products/fashion/the-north-face-nuptse-jacket.jpg','','',306,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5028,'DEMO-5028',1303,'SKU-5028','','','','','','A1',357.00,0,'catalog/demo/demo-seed/products/fashion/converse-chuck-taylor-all-star.jpg','','',308,1,3530.5170,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,9,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5029,'DEMO-5029',1303,'SKU-5029','','','','','','A1',401.00,0,'catalog/demo/demo-seed/products/fashion/ray-ban-wayfarer-classic.jpg','','',310,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5030,'DEMO-5030',1301,'SKU-5030','','','','','','A1',263.00,0,'catalog/demo/demo-seed/products/fashion/fjallraven-kanken-backpack.jpg','','',312,1,4042.1861,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,29,'2026-03-03 08:51:05','2026-08-09 13:52:09'),
+(5031,'DEMO-5031',1401,'SKU-5031','','','','','','A1',81.00,0,'catalog/demo/demo-seed/products/sports-outdoors/garmin-forerunner-965.jpg','','',304,1,30648.9807,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,160,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5032,'DEMO-5032',1402,'SKU-5032','','','','','','A1',102.00,0,'catalog/demo/demo-seed/products/sports-outdoors/polar-h10-heart-rate-sensor.jpg','','',306,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,26,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5033,'DEMO-5033',1403,'SKU-5033','','','','','','A1',174.00,0,'catalog/demo/demo-seed/products/sports-outdoors/trx-suspension-trainer.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,84,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5034,'DEMO-5034',1401,'SKU-5034','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle.jpg','','',310,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,1,58,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5035,'DEMO-5035',1402,'SKU-5035','','','','','','A1',267.00,0,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg','','catalog/test_360_chair.jpg',312,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5036,'DEMO-5036',1403,'SKU-5036','','','','','','A1',314.00,0,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,29,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5037,'DEMO-5037',1401,'SKU-5037','','','','','','A1',350.00,0,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg','','',304,1,2507.1787,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,33,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5038,'DEMO-5038',1402,'SKU-5038','','','','','','A1',387.00,0,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg','','',306,1,22973.9438,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5039,'DEMO-5039',1403,'SKU-5039','','','','','','A1',433.00,0,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg','','',308,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5040,'DEMO-5040',1401,'SKU-5040','','','','','','A1',469.00,0,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg','','catalog/test_360_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5041,'DEMO-5041',1501,'SKU-5041','','','','','','A1',89.00,0,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','','',302,1,716.3400,3,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,205,'2026-03-03 08:51:06','2026-08-20 09:37:48'),
-(5042,'DEMO-5042',1502,'SKU-5042','','','','','','A1',118.00,0,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,70,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5043,'DEMO-5043',1503,'SKU-5043','','','','','','A1',141.00,0,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,17,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5044,'DEMO-5044',1501,'SKU-5044','','','','','','A1',157.00,0,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel.jpg','','',308,1,1228.0059,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5045,'DEMO-5045',1502,'SKU-5045','','','','','','A1',180.00,0,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5046,'DEMO-5046',1503,'SKU-5046','','','','','','A1',192.00,0,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean.jpg','','',312,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
-(5047,'DEMO-5047',1501,'SKU-5047','','','','','','A1',210.00,0,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6.jpg','','',302,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,2,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5035,'DEMO-5035',1402,'SKU-5035','','','','','','A1',212.00,0,'catalog/demo/demo-seed/products/sports-outdoors/coleman-sundome-tent.jpg','','catalog/test_360_chair.jpg',312,1,4553.8552,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5036,'DEMO-5036',1403,'SKU-5036','','','','','','A1',252.00,0,'catalog/demo/demo-seed/products/sports-outdoors/osprey-atmos-ag-65.jpg','','',302,1,12740.5612,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,30,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5037,'DEMO-5037',1401,'SKU-5037','','','','','','A1',213.00,0,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400.jpg','','',304,1,2507.1787,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,33,'2026-03-03 08:51:06','2026-08-23 12:49:52'),
+(5038,'DEMO-5038',1402,'SKU-5038','','','','','','A1',228.00,0,'catalog/demo/demo-seed/products/sports-outdoors/gopro-hero12-black.jpg','','',306,1,22973.9438,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5039,'DEMO-5039',1403,'SKU-5039','','','','','','A1',259.00,0,'catalog/demo/demo-seed/products/sports-outdoors/schwinn-ic4-indoor-bike.jpg','','',308,1,45999.0544,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,0,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5040,'DEMO-5040',1401,'SKU-5040','','','','','','A1',281.00,0,'catalog/demo/demo-seed/products/sports-outdoors/therm-a-rest-neoair-xlite.jpg','','catalog/test_360_chair.jpg',310,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5041,'DEMO-5041',1501,'SKU-5041','','','','','','A1',59.00,0,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser.jpg','','',302,1,716.3400,3,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,205,'2026-03-03 08:51:06','2026-08-20 09:37:48'),
+(5042,'DEMO-5042',1502,'SKU-5042','','','','','','A1',81.00,0,'catalog/demo/demo-seed/products/beauty-health/la-roche-posay-anthelios-spf50.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,70,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5043,'DEMO-5043',1503,'SKU-5043','','','','','','A1',98.00,0,'catalog/demo/demo-seed/products/beauty-health/the-ordinary-niacinamide-10.jpg','','',306,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,17,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5044,'DEMO-5044',1501,'SKU-5044','','','','','','A1',106.00,0,'catalog/demo/demo-seed/products/beauty-health/neutrogena-hydro-boost-gel.jpg','','',308,1,1228.0059,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5045,'DEMO-5045',1502,'SKU-5045','','','','','','A1',64.00,0,'catalog/demo/demo-seed/products/beauty-health/dyson-supersonic-hair-dryer.jpg','','',310,1,20415.5981,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,5,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5046,'DEMO-5046',1503,'SKU-5046','','','','','','A1',127.00,0,'catalog/demo/demo-seed/products/beauty-health/philips-sonicare-protectiveclean.jpg','','',312,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,1,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
+(5047,'DEMO-5047',1501,'SKU-5047','','','','','','A1',138.00,0,'catalog/demo/demo-seed/products/beauty-health/oral-b-io-series-6.jpg','','',302,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,2,'2026-03-03 08:51:06','2026-08-09 13:52:09'),
 (5048,'DEMO-5048',1502,'SKU-5048','','','','','','A1',45.00,0,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro.jpg','','',304,1,15298.9069,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,1,45,'2026-03-03 08:51:07','2026-08-12 16:03:24'),
-(5049,'DEMO-5049',1503,'SKU-5049','','','','','','A1',256.00,0,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,5,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5049,'DEMO-5049',1503,'SKU-5049','','','','','','A1',170.00,0,'catalog/demo/demo-seed/products/beauty-health/fitbit-charge-6.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,5,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
 (5050,'DEMO-5050',1501,'SKU-5050','','','','','','A1',9.00,1,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale.jpg','','',308,1,1483.8405,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,73,'2026-03-03 08:51:07','2026-08-10 15:05:51'),
-(5051,'DEMO-5051',1601,'SKU-5051','','','','','','A1',111.00,0,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,76,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5052,'DEMO-5052',1602,'SKU-5052','','','','','','A1',104.00,0,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,24,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5053,'DEMO-5053',1603,'SKU-5053','','','','','','A1',145.00,0,'catalog/demo/demo-seed/products/toys-games/xbox-series-x.jpg','','',304,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,32,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5054,'DEMO-5054',1601,'SKU-5054','','','','','','A1',164.00,0,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,20,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5055,'DEMO-5055',1602,'SKU-5055','','','','','','A1',185.00,0,'catalog/demo/demo-seed/products/toys-games/lego-technic-mclaren-formula-1.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,2,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5056,'DEMO-5056',1603,'SKU-5056','','','','','','A1',208.00,0,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg','','',310,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,11,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5057,'DEMO-5057',1601,'SKU-5057','','','','','','A1',216.00,0,'catalog/demo/demo-seed/products/toys-games/ravensburger-disney-villainous.jpg','','catalog/test_360_cube.jpg',312,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,15,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5058,'DEMO-5058',1602,'SKU-5058','','','','','','A1',236.00,0,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5059,'DEMO-5059',1603,'SKU-5059','','','','','','A1',274.00,0,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,8,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5060,'DEMO-5060',1601,'SKU-5060','','','','','','A1',297.00,0,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','','catalog/test_360_cube.jpg',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,26,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5061,'DEMO-5061',1701,'SKU-5061','','','','','','A1',115.00,0,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,131,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5062,'DEMO-5062',1702,'SKU-5062','','','','','','A1',140.00,0,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,61,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
-(5063,'DEMO-5063',1703,'SKU-5063','','','','','','A1',145.00,0,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,49,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5064,'DEMO-5064',1701,'SKU-5064','','','','','','A1',170.00,0,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,130,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5065,'DEMO-5065',1702,'SKU-5065','','','','','','A1',200.00,0,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg','','',306,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5066,'DEMO-5066',1703,'SKU-5066','','','','','','A1',224.00,0,'catalog/demo/demo-seed/products/books-media/dune-by-frank-herbert.jpg','','',308,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5067,'DEMO-5067',1701,'SKU-5067','','','','','','A1',238.00,0,'catalog/demo/demo-seed/products/books-media/harry-potter-and-the-sorcerers-stone.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5068,'DEMO-5068',1702,'SKU-5068','','','','','','A1',252.00,0,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,6,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5069,'DEMO-5069',1703,'SKU-5069','','','','','','A1',283.00,0,'catalog/demo/demo-seed/products/books-media/rich-dad-poor-dad.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5051,'DEMO-5051',1601,'SKU-5051','','','','','','A1',78.00,0,'catalog/demo/demo-seed/products/toys-games/nintendo-switch-oled.jpg','','',312,1,17857.2525,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,76,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5052,'DEMO-5052',1602,'SKU-5052','','','','','','A1',72.00,0,'catalog/demo/demo-seed/products/toys-games/sony-playstation-5-slim.jpg','','',302,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,24,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5053,'DEMO-5053',1603,'SKU-5053','','','','','','A1',53.00,0,'catalog/demo/demo-seed/products/toys-games/xbox-series-x.jpg','','',304,1,25532.2894,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,32,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5054,'DEMO-5054',1601,'SKU-5054','','','','','','A1',110.00,0,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon.jpg','','',306,1,7623.8700,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,20,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5055,'DEMO-5055',1602,'SKU-5055','','','','','','A1',60.00,0,'catalog/demo/demo-seed/products/toys-games/lego-technic-mclaren-formula-1.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,2,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5056,'DEMO-5056',1603,'SKU-5056','','','','','','A1',76.00,0,'catalog/demo/demo-seed/products/toys-games/mattel-uno-card-game.jpg','','',310,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,11,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5057,'DEMO-5057',1601,'SKU-5057','','','','','','A1',141.00,0,'catalog/demo/demo-seed/products/toys-games/ravensburger-disney-villainous.jpg','','catalog/test_360_cube.jpg',312,1,1483.8405,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,15,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5058,'DEMO-5058',1602,'SKU-5058','','','','','','A1',154.00,0,'catalog/demo/demo-seed/products/toys-games/hasbro-monopoly-classic.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5059,'DEMO-5059',1603,'SKU-5059','','','','','','A1',185.00,0,'catalog/demo/demo-seed/products/toys-games/jenga-classic-game.jpg','','',304,1,972.1713,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,8,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5060,'DEMO-5060',1601,'SKU-5060','','','','','','A1',201.00,0,'catalog/demo/demo-seed/products/toys-games/hot-wheels-20-car-pack.jpg','','catalog/test_360_cube.jpg',306,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,26,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5061,'DEMO-5061',1701,'SKU-5061','','','','','','A1',79.00,0,'catalog/demo/demo-seed/products/books-media/atomic-habits-by-james-clear.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,131,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5062,'DEMO-5062',1702,'SKU-5062','','','','','','A1',96.00,0,'catalog/demo/demo-seed/products/books-media/deep-work-by-cal-newport.jpg','','',312,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,61,'2026-03-03 08:51:07','2026-08-09 13:52:09'),
+(5063,'DEMO-5063',1703,'SKU-5063','','','','','','A1',98.00,0,'catalog/demo/demo-seed/products/books-media/the-psychology-of-money.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,49,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5064,'DEMO-5064',1701,'SKU-5064','','','','','','A1',115.00,0,'catalog/demo/demo-seed/products/books-media/sapiens-by-yuval-noah-harari.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,130,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5065,'DEMO-5065',1702,'SKU-5065','','','','','','A1',65.00,0,'catalog/demo/demo-seed/products/books-media/the-hobbit-by-j.r.r.-tolkien.jpg','','',306,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5066,'DEMO-5066',1703,'SKU-5066','','','','','','A1',153.00,0,'catalog/demo/demo-seed/products/books-media/dune-by-frank-herbert.jpg','','',308,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5067,'DEMO-5067',1701,'SKU-5067','','','','','','A1',160.00,0,'catalog/demo/demo-seed/products/books-media/harry-potter-and-the-sorcerers-stone.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,4,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5068,'DEMO-5068',1702,'SKU-5068','','','','','','A1',84.00,0,'catalog/demo/demo-seed/products/books-media/the-very-hungry-caterpillar.jpg','','',312,1,409.3353,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,6,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5069,'DEMO-5069',1703,'SKU-5069','','','','','','A1',191.00,0,'catalog/demo/demo-seed/products/books-media/rich-dad-poor-dad.jpg','','',302,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,2,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5070,'DEMO-5070',1701,'SKU-5070','','','','','','A1',0.00,1,'catalog/demo/demo-seed/products/books-media/the-lean-startup.jpg','','',304,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,1,5,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5071,'DEMO-5071',1801,'SKU-5071','','','','','','A1',113.00,0,'catalog/demo/demo-seed/products/automotive/garmin-dash-cam-67w.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,66,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5072,'DEMO-5072',1802,'SKU-5072','','','','','','A1',90.00,0,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg','','',310,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,35,'2026-03-03 08:51:08','2026-08-12 16:05:50'),
-(5073,'DEMO-5073',1803,'SKU-5073','','','','','','A1',161.00,0,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg','','',312,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,10,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5074,'DEMO-5074',1801,'SKU-5074','','','','','','A1',188.00,0,'catalog/demo/demo-seed/products/automotive/bosch-icon-wiper-blades.jpg','','',302,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5075,'DEMO-5075',1802,'SKU-5075','','','','','','A1',201.00,0,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg','','',304,1,9.0000,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,8,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5076,'DEMO-5076',1803,'SKU-5076','','','','','','A1',221.00,0,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg','','',306,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,8,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5077,'DEMO-5077',1801,'SKU-5077','','','','','','A1',68.00,0,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg','','',308,1,0.0000,NULL,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,36,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5078,'DEMO-5078',1802,'SKU-5078','','','','','','A1',254.00,0,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg','','',310,1,15298.9069,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,0,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
-(5079,'DEMO-5079',1803,'SKU-5079','','','','','','A1',296.00,0,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg','','',312,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5071,'DEMO-5071',1801,'SKU-5071','','','','','','A1',74.00,0,'catalog/demo/demo-seed/products/automotive/garmin-dash-cam-67w.jpg','','',308,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,67,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5072,'DEMO-5072',1802,'SKU-5072','','','','','','A1',0.00,0,'catalog/demo/demo-seed/products/automotive/noco-boost-plus-gb40.jpg','','',310,1,5065.5243,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,35,'2026-03-03 08:51:08','2026-08-12 16:05:50'),
+(5073,'DEMO-5073',1803,'SKU-5073','','','','','','A1',108.00,0,'catalog/demo/demo-seed/products/automotive/michelin-easy-grip-wipers.jpg','','',312,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,10,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5074,'DEMO-5074',1801,'SKU-5074','','','','','','A1',63.00,0,'catalog/demo/demo-seed/products/automotive/bosch-icon-wiper-blades.jpg','','',302,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,10,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5075,'DEMO-5075',1802,'SKU-5075','','','','','','A1',134.00,0,'catalog/demo/demo-seed/products/automotive/armor-all-cleaning-wipes.jpg','','',304,1,9.0000,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,23,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5076,'DEMO-5076',1803,'SKU-5076','','','','','','A1',147.00,0,'catalog/demo/demo-seed/products/automotive/meguiars-ultimate-wax.jpg','','',306,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,8,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5077,'DEMO-5077',1801,'SKU-5077','','','','','','A1',46.00,0,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver.jpg','','',308,1,0.0000,0,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,36,'2026-03-03 08:51:08','2026-08-24 10:27:54'),
+(5078,'DEMO-5078',1802,'SKU-5078','','','','','','A1',83.00,0,'catalog/demo/demo-seed/products/automotive/pioneer-sph-10bt-car-stereo.jpg','','',310,1,15298.9069,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,0,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
+(5079,'DEMO-5079',1803,'SKU-5079','','','','','','A1',201.00,0,'catalog/demo/demo-seed/products/automotive/philips-x-tremevision-headlight-bulbs.jpg','','',312,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5080,'DEMO-5080',1801,'SKU-5080','','','','','','A1',17.00,0,'catalog/demo/demo-seed/products/automotive/weathertech-floorliner-set.jpg','','',302,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:08','2026-08-09 13:52:09'),
 (5081,'DEMO-5081',1901,'SKU-5081','','','','','','A1',42.00,0,'catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg','','catalog/demo/demo-seed/products/pet-supplies/furbo-360-dog-camera.jpg',306,1,10182.2156,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,2,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5082,'DEMO-5082',1902,'SKU-5082','','','','','','A1',49.00,0,'catalog/demo/demo-seed/products/pet-supplies/petsafe-drinkwell-fountain.jpg','','',308,1,2507.1787,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
 (5083,'DEMO-5083',1901,'SKU-5083','','','','','','A1',56.00,0,'catalog/demo/demo-seed/products/pet-supplies/kong-classic-dog-toy.jpg','','',310,1,716.3368,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,3,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5085,'DEMO-5085',1902,'SKU-5085','','','','','','A1',210.00,0,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5086,'DEMO-5086',1903,'SKU-5086','','','','','','A1',242.00,0,'catalog/demo/demo-seed/products/pet-supplies/purina-pro-plan-adult.jpg','','',304,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5087,'DEMO-5087',1901,'SKU-5087','','','','','','A1',249.00,0,'catalog/demo/demo-seed/products/pet-supplies/catit-senses-2.0-digger.jpg','','',306,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5088,'DEMO-5088',1902,'SKU-5088','','','','','','A1',273.00,0,'catalog/demo/demo-seed/products/pet-supplies/surefeed-microchip-feeder.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5089,'DEMO-5089',1903,'SKU-5089','','','','','','A1',303.00,0,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
-(5090,'DEMO-5090',1901,'SKU-5090','','','','','','A1',61.00,0,'catalog/demo/demo-seed/products/pet-supplies/hartz-groomers-brush.jpg','','',312,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09');
+(5085,'DEMO-5085',1902,'SKU-5085','','','','','','A1',140.00,0,'catalog/demo/demo-seed/products/pet-supplies/whiskas-dry-cat-food.jpg','','',302,1,1228.0059,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,4,1,0,4,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5086,'DEMO-5086',1903,'SKU-5086','','','','','','A1',165.00,0,'catalog/demo/demo-seed/products/pet-supplies/purina-pro-plan-adult.jpg','','',304,1,1995.5096,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,5,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5087,'DEMO-5087',1901,'SKU-5087','','','','','','A1',81.00,0,'catalog/demo/demo-seed/products/pet-supplies/catit-senses-2.0-digger.jpg','','',306,1,1739.6750,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,6,1,0,7,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5088,'DEMO-5088',1902,'SKU-5088','','','','','','A1',89.00,0,'catalog/demo/demo-seed/products/pet-supplies/surefeed-microchip-feeder.jpg','','',308,1,6600.5317,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,7,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5089,'DEMO-5089',1903,'SKU-5089','','','','','','A1',205.00,0,'catalog/demo/demo-seed/products/pet-supplies/earth-rated-dog-bags.jpg','','',310,1,614.0030,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,8,1,0,1,'2026-03-03 08:51:09','2026-08-09 13:52:09'),
+(5090,'DEMO-5090',1901,'SKU-5090','','','','','','A1',41.00,0,'catalog/demo/demo-seed/products/pet-supplies/hartz-groomers-brush.jpg','','',312,1,460.5022,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,9,1,0,0,'2026-03-03 08:51:09','2026-08-09 13:52:09');
 /*!40000 ALTER TABLE `oc_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -13014,7 +13128,7 @@ CREATE TABLE `oc_product_bundle_product` (
   PRIMARY KEY (`bundle_product_id`),
   KEY `bundle_id` (`bundle_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=413 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=420 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -13025,13 +13139,13 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_bundle_product` WRITE;
 /*!40000 ALTER TABLE `oc_product_bundle_product` DISABLE KEYS */;
 INSERT INTO `oc_product_bundle_product` VALUES
-(406,1,5023),
-(407,1,5001),
-(408,1,5006),
-(409,2,5023),
-(410,2,5001),
-(411,2,5006),
-(412,2,5075);
+(413,1,5023),
+(414,1,5001),
+(415,1,5006),
+(416,2,5023),
+(417,2,5001),
+(418,2,5006),
+(419,2,5075);
 /*!40000 ALTER TABLE `oc_product_bundle_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -13998,7 +14112,7 @@ CREATE TABLE `oc_product_image` (
   PRIMARY KEY (`product_image_id`),
   KEY `product_id` (`product_id`),
   KEY `language_id` (`language_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=3128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -16797,7 +16911,6 @@ INSERT INTO `oc_product_image` VALUES
 (2845,5054,NULL,'catalog/demo/demo-seed/products/toys-games/lego-star-wars-millennium-falcon-2.jpg',1),
 (2910,5034,NULL,'catalog/demo/demo-seed/products/sports-outdoors/yeti-rambler-36oz-bottle-2.jpg',1),
 (2911,5070,NULL,'catalog/demo/demo-seed/products/books-media/the-lean-startup-2.jpg',1),
-(2963,5077,NULL,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',1),
 (2982,5037,NULL,'catalog/demo/demo-seed/products/sports-outdoors/black-diamond-spot-400-2.jpg',1),
 (3098,5006,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1),
 (3099,5003,NULL,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro-2.jpg',1),
@@ -16805,11 +16918,12 @@ INSERT INTO `oc_product_image` VALUES
 (3101,5010,NULL,'catalog/demo/demo-seed/products/electronics/jbl-charge-5-2.jpg',1),
 (3105,5001,NULL,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro-2.jpg',1),
 (3114,5048,NULL,'catalog/demo/demo-seed/products/beauty-health/braun-series-9-pro-2.jpg',1),
-(3119,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',0),
-(3120,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1),
 (3121,5002,NULL,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra-2.jpg',1),
 (3123,5050,NULL,'catalog/demo/demo-seed/products/beauty-health/renpho-smart-body-scale-2.jpg',1),
-(3124,5041,NULL,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser-2.jpg',1);
+(3124,5041,NULL,'catalog/demo/demo-seed/products/beauty-health/cerave-hydrating-cleanser-2.jpg',1),
+(3125,5077,NULL,'catalog/demo/demo-seed/products/automotive/anker-roav-bluetooth-receiver-2.jpg',1),
+(3126,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3.jpg',0),
+(3127,5023,NULL,'catalog/demo/demo-seed/products/electronics/apple-macbook-air-m3-2.jpg',1);
 /*!40000 ALTER TABLE `oc_product_image` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -17315,8 +17429,8 @@ INSERT INTO `oc_product_option_value` VALUES
 (10127,9127,5076,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
 (10128,9128,5077,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
 (10129,9128,5077,5,20,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
-(10130,9129,5077,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
-(10131,9129,5077,12,38,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
+(10130,9129,5077,12,37,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,2),
+(10131,9129,5077,12,38,0.00,0,0.0000,'+',0,'+',0.0000,'+',0,3),
 (10132,9130,5078,5,19,50.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
 (10133,9130,5078,5,20,30.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
 (10134,9131,5078,12,37,99.00,1,0.0000,'+',0,'+',0.0000,'+',0,0),
@@ -17440,7 +17554,7 @@ INSERT INTO `oc_product_rating` VALUES
 (5011,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5012,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5013,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:35:44'),
-(5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-17 12:08:53'),
+(5014,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-23 18:19:45'),
 (5015,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-17 09:33:00'),
 (5016,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 12:29:16'),
 (5017,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
@@ -17459,10 +17573,10 @@ INSERT INTO `oc_product_rating` VALUES
 (5030,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:13:11'),
 (5031,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5032,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 20:01:37'),
-(5033,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-13 08:13:34'),
+(5033,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-24 13:03:18'),
 (5034,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 19:05:45'),
 (5035,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 10:51:21'),
-(5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-14 10:36:36'),
+(5036,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-23 16:28:59'),
 (5037,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:57:21'),
 (5038,5.00,1,'{\"5\": 1, \"4\": 0, \"3\": 0, \"2\": 0, \"1\": 0}','2026-08-15 15:06:25'),
 (5040,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 17:34:11'),
@@ -17498,7 +17612,7 @@ INSERT INTO `oc_product_rating` VALUES
 (5072,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 16:00:14'),
 (5073,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:04:01'),
 (5074,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-08 10:58:33'),
-(5075,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-15 09:04:10'),
+(5075,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-23 19:04:05'),
 (5076,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-17 10:45:16'),
 (5077,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-17 09:31:03'),
 (5078,0.00,0,'{\"5\":0,\"4\":0,\"3\":0,\"2\":0,\"1\":0}','2026-08-12 08:42:59'),
@@ -18126,7 +18240,7 @@ CREATE TABLE `oc_product_special` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_special_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2032 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=2035 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -18141,7 +18255,6 @@ INSERT INTO `oc_product_special` VALUES
 (58,5003,1,1,36789.0102,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
 (59,5014,1,1,20415.5981,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
 (60,5010,1,1,6088.8626,'2024-01-01','2027-01-01',0,'2026-07-25 09:33:28'),
-(68,5023,1,0,500.0000,'0000-00-00','2026-07-07',0,'2026-07-25 10:12:03'),
 (1120,5002,4,1,41717.4072,'0000-00-00','2026-11-02',0,'2026-08-10 12:06:31'),
 (1121,5005,4,1,49184.7064,'0000-00-00','0000-00-00',0,'2026-08-10 12:06:31'),
 (1122,5006,2,1,658.8095,'2026-07-28','0000-00-00',0,'2026-08-10 12:06:31'),
@@ -18158,8 +18271,6 @@ INSERT INTO `oc_product_special` VALUES
 (1133,5019,4,1,5707.1574,'0000-00-00','2026-10-16',1,'2026-08-10 12:06:31'),
 (1134,5020,2,1,5808.4679,'0000-00-00','2026-10-08',1,'2026-08-10 12:06:31'),
 (1135,5021,4,1,2960.0059,'0000-00-00','2026-10-18',1,'2026-08-10 12:06:31'),
-(1136,5023,2,1,45398.3562,'2026-07-06','0000-00-00',0,'2026-08-10 12:06:31'),
-(1137,5023,3,1,51533.2692,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31'),
 (1138,5024,4,1,2667.8428,'0000-00-00','0000-00-00',0,'2026-08-10 12:06:31'),
 (1139,5026,2,1,3961.8540,'0000-00-00','0000-00-00',0,'2026-08-10 12:06:31'),
 (1140,5026,3,1,3460.9300,'0000-00-00','2026-11-07',0,'2026-08-10 12:06:31'),
@@ -18202,7 +18313,10 @@ INSERT INTO `oc_product_special` VALUES
 (1179,5083,3,1,573.0694,'0000-00-00','0000-00-00',0,'2026-08-10 12:06:31'),
 (1180,5089,4,1,466.6423,'0000-00-00','0000-00-00',0,'2026-08-10 12:06:31'),
 (1241,5050,2,1,1335.4565,'2026-07-02','2026-09-27',0,'2026-08-10 12:06:31'),
-(1242,5050,3,1,1246.4260,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31');
+(1242,5050,3,1,1246.4260,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31'),
+(2032,5023,2,1,45398.3562,'2026-07-06','0000-00-00',0,'2026-08-10 12:06:31'),
+(2033,5023,3,1,51533.2692,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31'),
+(2034,5023,1,0,500.0000,'0000-00-00','2026-07-07',0,'2026-07-25 10:12:03');
 /*!40000 ALTER TABLE `oc_product_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -20277,11 +20391,14 @@ CREATE TABLE `oc_product_variant` (
   `variant_hash` varchar(255) NOT NULL DEFAULT '',
   `sort_order` int(11) NOT NULL DEFAULT 0,
   `status` tinyint(1) NOT NULL DEFAULT 1,
+  `length` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `width` decimal(15,8) NOT NULL DEFAULT 0.00000000,
+  `height` decimal(15,8) NOT NULL DEFAULT 0.00000000,
   PRIMARY KEY (`variant_id`),
   UNIQUE KEY `ux_product_variant_hash` (`product_id`,`variant_hash`),
   KEY `product_id` (`product_id`),
   CONSTRAINT `fk_pv_product` FOREIGN KEY (`product_id`) REFERENCES `oc_product` (`product_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=101382 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=101385 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -20292,304 +20409,304 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product_variant` WRITE;
 /*!40000 ALTER TABLE `oc_product_variant` DISABLE KEYS */;
 INSERT INTO `oc_product_variant` VALUES
-(579,5001,'DEMO-5001-BLK-128-8G-W12','DEMO-5001-BLK-128-8G-W12','','','','','',50000.0000,37.0000,1,1.0000,1,'','1-13-16-19',0,0),
-(580,5001,'DEMO-5001-BLK-128-8G-W24','DEMO-5001-BLK-128-8G-W24','','','','','',51500.0000,24.0000,1,1.0000,1,'','1-13-16-20',1,1),
-(581,5001,'DEMO-5001-BLK-128-12G-W12','DEMO-5001-BLK-128-12G-W12','','','','','',52000.0000,21.0000,1,1.0000,1,'','1-13-17-19',2,1),
-(582,5001,'DEMO-5001-BLK-128-12G-W24','DEMO-5001-BLK-128-12G-W24','','','','','',53500.0000,29.0000,1,1.0000,1,'','1-13-17-20',3,1),
-(583,5001,'DEMO-5001-BLK-256-8G-W12','DEMO-5001-BLK-256-8G-W12','','','','','',53500.0000,20.0000,1,1.0000,1,'','1-14-16-19',4,1),
-(584,5001,'DEMO-5001-BLK-256-8G-W24','DEMO-5001-BLK-256-8G-W24','','','','','',55000.0000,25.0000,1,1.0000,1,'','1-14-16-20',5,1),
-(585,5001,'DEMO-5001-BLK-256-12G-W12','DEMO-5001-BLK-256-12G-W12','','','','','',55500.0000,28.0000,1,1.0000,1,'','1-14-17-19',6,1),
-(586,5001,'DEMO-5001-BLK-256-12G-W24','DEMO-5001-BLK-256-12G-W24','','','','','',57000.0000,29.0000,1,1.0000,1,'','1-14-17-20',7,1),
-(587,5001,'DEMO-5001-BLK-512-8G-W12','DEMO-5001-BLK-512-8G-W12','','','','','',57000.0000,32.0000,1,1.0000,1,'','1-15-16-19',8,1),
-(588,5001,'DEMO-5001-BLK-512-8G-W24','DEMO-5001-BLK-512-8G-W24','','','','','',58500.0000,24.0000,1,1.0000,1,'','1-15-16-20',9,0),
-(589,5001,'DEMO-5001-BLK-512-12G-W12','DEMO-5001-BLK-512-12G-W12','','','','','',59000.0000,28.0000,1,1.0000,1,'','1-15-17-19',10,1),
-(590,5001,'DEMO-5001-BLK-512-12G-W24','DEMO-5001-BLK-512-12G-W24','','','','','',60500.0000,23.0000,1,1.0000,1,'','1-15-17-20',11,1),
-(591,5001,'DEMO-5001-WHT-128-8G-W12','DEMO-5001-WHT-128-8G-W12','','','','','',50000.0000,32.0000,1,1.0000,1,'','2-13-16-19',12,1),
-(592,5001,'DEMO-5001-WHT-128-8G-W24','DEMO-5001-WHT-128-8G-W24','','','','','',51500.0000,25.0000,1,1.0000,1,'','2-13-16-20',13,1),
-(593,5001,'DEMO-5001-WHT-128-12G-W12','DEMO-5001-WHT-128-12G-W12','','','','','',52000.0000,25.0000,1,1.0000,1,'','2-13-17-19',14,0),
-(594,5001,'DEMO-5001-WHT-128-12G-W24','DEMO-5001-WHT-128-12G-W24','','','','','',53500.0000,26.0000,1,1.0000,1,'','2-13-17-20',15,1),
-(595,5001,'DEMO-5001-WHT-256-8G-W12','DEMO-5001-WHT-256-8G-W12','','','','','',53500.0000,27.0000,1,1.0000,1,'','2-14-16-19',16,1),
-(596,5001,'DEMO-5001-WHT-256-8G-W24','DEMO-5001-WHT-256-8G-W24','','','','','',55000.0000,23.0000,1,1.0000,1,'','2-14-16-20',17,1),
-(597,5001,'DEMO-5001-WHT-256-12G-W12','DEMO-5001-WHT-256-12G-W12','','','','','',55500.0000,28.0000,1,1.0000,1,'','2-14-17-19',18,1),
-(598,5001,'DEMO-5001-WHT-256-12G-W24','DEMO-5001-WHT-256-12G-W24','','','','','',57000.0000,21.0000,1,1.0000,1,'','2-14-17-20',19,1),
-(599,5001,'DEMO-5001-WHT-512-8G-W12','DEMO-5001-WHT-512-8G-W12','','','','','',57000.0000,22.0000,1,1.0000,1,'','2-15-16-19',20,1),
-(600,5001,'DEMO-5001-WHT-512-8G-W24','DEMO-5001-WHT-512-8G-W24','','','','','',58500.0000,22.0000,1,1.0000,1,'','2-15-16-20',21,1),
-(601,5001,'DEMO-5001-WHT-512-12G-W12','DEMO-5001-WHT-512-12G-W12','','','','','',59000.0000,25.0000,1,1.0000,1,'','2-15-17-19',22,1),
-(602,5001,'DEMO-5001-WHT-512-12G-W24','DEMO-5001-WHT-512-12G-W24','','','','','',60500.0000,33.0000,1,1.0000,1,'','2-15-17-20',23,1),
-(603,5001,'DEMO-5001-SLV-128-8G-W12','DEMO-5001-SLV-128-8G-W12','','','','','',50000.0000,21.0000,1,1.0000,1,'','3-13-16-19',24,1),
-(604,5001,'DEMO-5001-SLV-128-8G-W24','DEMO-5001-SLV-128-8G-W24','','','','','',51500.0000,27.0000,1,1.0000,1,'','3-13-16-20',25,1),
-(605,5001,'DEMO-5001-SLV-128-12G-W12','DEMO-5001-SLV-128-12G-W12','','','','','',52000.0000,29.0000,1,1.0000,1,'','3-13-17-19',26,1),
-(606,5001,'DEMO-5001-SLV-128-12G-W24','DEMO-5001-SLV-128-12G-W24','','','','','',53500.0000,25.0000,1,1.0000,1,'','3-13-17-20',27,0),
-(607,5001,'DEMO-5001-SLV-256-8G-W12','DEMO-5001-SLV-256-8G-W12','','','','','',53500.0000,22.0000,1,1.0000,1,'','3-14-16-19',28,1),
-(608,5001,'DEMO-5001-SLV-256-8G-W24','DEMO-5001-SLV-256-8G-W24','','','','','',55000.0000,21.0000,1,1.0000,1,'','3-14-16-20',29,1),
-(609,5001,'DEMO-5001-SLV-256-12G-W12','DEMO-5001-SLV-256-12G-W12','','','','','',55500.0000,27.0000,1,1.0000,1,'','3-14-17-19',30,0),
-(610,5001,'DEMO-5001-SLV-256-12G-W24','DEMO-5001-SLV-256-12G-W24','','','','','',57000.0000,23.0000,1,1.0000,1,'','3-14-17-20',31,1),
-(611,5001,'DEMO-5001-SLV-512-8G-W12','DEMO-5001-SLV-512-8G-W12','','','','','',57000.0000,28.0000,1,1.0000,1,'','3-15-16-19',32,1),
-(612,5001,'DEMO-5001-SLV-512-8G-W24','DEMO-5001-SLV-512-8G-W24','','','','','',58500.0000,28.0000,1,1.0000,1,'','3-15-16-20',33,1),
-(613,5001,'DEMO-5001-SLV-512-12G-W12','DEMO-5001-SLV-512-12G-W12','','','','','',59000.0000,27.0000,1,1.0000,1,'','3-15-17-19',34,1),
-(614,5001,'DEMO-5001-SLV-512-12G-W24','DEMO-5001-SLV-512-12G-W24','','','','','',60500.0000,27.0000,1,1.0000,1,'','3-15-17-20',35,1),
-(615,5002,'DEMO-5002-BLK-256-12G','DEMO-5002-BLK-256-12G','','','','','',61349.1282,30.0000,1,1.0000,1,'','1-14-17',0,1),
-(616,5002,'DEMO-5002-BLK-256-16G','DEMO-5002-BLK-256-16G','','','','','',64349.1282,0.0000,1,1.0000,1,'','1-14-18',0,1),
-(617,5002,'DEMO-5002-BLK-512-12G','DEMO-5002-BLK-512-12G','','','','','',64849.1282,25.0000,1,1.0000,1,'','1-15-17',2,1),
-(618,5002,'DEMO-5002-BLK-512-16G','DEMO-5002-BLK-512-16G','','','','','',67849.1282,29.0000,1,1.0000,1,'','1-15-18',3,1),
-(619,5002,'DEMO-5002-SLV-256-12G','DEMO-5002-SLV-256-12G','','','','','',61349.1282,27.0000,1,1.0000,1,'','3-14-17',4,1),
-(620,5002,'DEMO-5002-SLV-256-16G','DEMO-5002-SLV-256-16G','','','','','',64349.1282,22.0000,1,1.0000,1,'','3-14-18',5,0),
-(621,5002,'DEMO-5002-SLV-512-12G','DEMO-5002-SLV-512-12G','','','','','',64849.1282,28.0000,1,1.0000,1,'','3-15-17',6,0),
-(622,5002,'DEMO-5002-SLV-512-16G','DEMO-5002-SLV-512-16G','','','','','',67849.1282,22.0000,1,1.0000,1,'','3-15-18',7,1),
-(623,5002,'DEMO-5002-BLU-256-12G','DEMO-5002-BLU-256-12G','','','','','',61349.1282,31.0000,1,1.0000,1,'','4-14-17',8,1),
-(624,5002,'DEMO-5002-BLU-256-16G','DEMO-5002-BLU-256-16G','','','','','',64349.1282,22.0000,1,1.0000,1,'','4-14-18',9,1),
-(625,5002,'DEMO-5002-BLU-512-12G','DEMO-5002-BLU-512-12G','','','','','',64849.1282,22.0000,1,1.0000,1,'','4-15-17',10,0),
-(626,5002,'DEMO-5002-BLU-512-16G','DEMO-5002-BLU-512-16G','','','','','',67849.1282,25.0000,1,1.0000,1,'','4-15-18',11,0),
-(627,5003,'DEMO-5003-WHT-128-8G','DEMO-5003-WHT-128-8G','','','','','',45999.0544,29.0000,1,1.0000,1,'','2-13-16',0,1),
-(628,5003,'DEMO-5003-WHT-128-12G','DEMO-5003-WHT-128-12G','','','','','',48499.0544,30.0000,1,1.0000,1,'','2-13-17',1,1),
-(629,5003,'DEMO-5003-WHT-256-8G','DEMO-5003-WHT-256-8G','','','','','',48499.0544,30.0000,1,1.0000,1,'','2-14-16',2,1),
-(630,5003,'DEMO-5003-WHT-256-12G','DEMO-5003-WHT-256-12G','','','','','',50999.0544,40.0000,1,1.0000,1,'','2-14-17',3,1),
-(631,5003,'DEMO-5003-BLU-128-8G','DEMO-5003-BLU-128-8G','','','','','',45999.0544,39.0000,1,1.0000,1,'','4-13-16',4,1),
-(632,5003,'DEMO-5003-BLU-128-12G','DEMO-5003-BLU-128-12G','','','','','',48499.0544,30.0000,1,1.0000,1,'','4-13-17',5,1),
-(633,5003,'DEMO-5003-BLU-256-8G','DEMO-5003-BLU-256-8G','','','','','',48499.0544,27.0000,1,1.0000,1,'','4-14-16',6,1),
-(634,5003,'DEMO-5003-BLU-256-12G','DEMO-5003-BLU-256-12G','','','','','',50999.0544,31.0000,1,1.0000,1,'','4-14-17',7,1),
-(635,5003,'DEMO-5003-GRN-128-8G','DEMO-5003-GRN-128-8G','','','','','',45999.0544,33.0000,1,1.0000,1,'','5-13-16',8,1),
-(636,5003,'DEMO-5003-GRN-128-12G','DEMO-5003-GRN-128-12G','','','','','',48499.0544,36.0000,1,1.0000,1,'','5-13-17',9,1),
-(637,5003,'DEMO-5003-GRN-256-8G','DEMO-5003-GRN-256-8G','','','','','',48499.0544,37.0000,1,1.0000,1,'','5-14-16',10,1),
-(638,5003,'DEMO-5003-GRN-256-12G','DEMO-5003-GRN-256-12G','','','','','',50999.0544,30.0000,1,1.0000,1,'','5-14-17',11,1),
-(639,5004,'DEMO-5004-BLK-256-12G','DEMO-5004-BLK-256-12G','','','','','',40882.3632,41.0000,1,1.0000,1,'','1-14-17',0,1),
-(640,5004,'DEMO-5004-BLK-256-16G','DEMO-5004-BLK-256-16G','','','','','',43382.3632,35.0000,1,1.0000,1,'','1-14-18',1,0),
-(641,5004,'DEMO-5004-BLK-512-12G','DEMO-5004-BLK-512-12G','','','','','',43882.3632,34.0000,1,1.0000,1,'','1-15-17',2,1),
-(642,5004,'DEMO-5004-BLK-512-16G','DEMO-5004-BLK-512-16G','','','','','',46382.3632,36.0000,1,1.0000,1,'','1-15-18',3,0),
-(643,5004,'DEMO-5004-RED-256-12G','DEMO-5004-RED-256-12G','','','','','',40882.3632,39.0000,1,1.0000,1,'','6-14-17',4,1),
-(644,5004,'DEMO-5004-RED-256-16G','DEMO-5004-RED-256-16G','','','','','',43382.3632,44.0000,1,1.0000,1,'','6-14-18',5,1),
-(645,5004,'DEMO-5004-RED-512-12G','DEMO-5004-RED-512-12G','','','','','',43882.3632,41.0000,1,1.0000,1,'','6-15-17',6,1),
-(646,5004,'DEMO-5004-RED-512-16G','DEMO-5004-RED-512-16G','','','','','',46382.3632,41.0000,1,1.0000,1,'','6-15-18',7,1),
-(647,5005,'DEMO-5005-8G-13','DEMO-5005-8G-13','','','','','',66465.8195,44.0000,1,1.0000,1,'','16-31',0,1),
-(648,5005,'DEMO-5005-8G-14','DEMO-5005-8G-14','','','','','',66465.8195,48.0000,1,1.0000,1,'','16-32',1,1),
-(649,5005,'DEMO-5005-12G-13','DEMO-5005-12G-13','','','','','',68965.8195,54.0000,1,1.0000,1,'','17-31',2,1),
-(650,5005,'DEMO-5005-12G-14','DEMO-5005-12G-14','','','','','',68965.8195,47.0000,1,1.0000,1,'','17-32',3,1),
-(651,5006,'DEMO-5006-8G-13','DEMO-5006-8G-13','','','','','',775.0700,51.0000,1,1.0000,1,'','16-31',0,1),
-(652,5006,'DEMO-5006-8G-16','DEMO-5006-8G-16','','','','','',8775.0700,51.0000,1,1.0000,1,'','16-33',1,1),
-(653,5006,'DEMO-5006-12G-13','DEMO-5006-12G-13','','','','','',3275.0700,57.0000,1,1.0000,1,'','17-31',2,1),
-(654,5006,'DEMO-5006-12G-16','DEMO-5006-12G-16','','','','','',11275.0700,57.0000,1,1.0000,1,'','17-33',3,1),
-(655,5007,'DEMO-5007-12G-14','DEMO-5007-12G-14','','','','','',86932.5845,60.0000,1,1.0000,1,'','17-32',0,1),
-(656,5007,'DEMO-5007-12G-16','DEMO-5007-12G-16','','','','','',92932.5845,68.0000,1,1.0000,1,'','17-33',1,1),
-(657,5007,'DEMO-5007-16G-14','DEMO-5007-16G-14','','','','','',89932.5845,60.0000,1,1.0000,1,'','18-32',2,1),
-(658,5007,'DEMO-5007-16G-16','DEMO-5007-16G-16','','','','','',95932.5845,57.0000,1,1.0000,1,'','18-33',3,1),
-(659,5008,'DEMO-5008-BLK-W12','DEMO-5008-BLK-W12','','','','','',17857.2525,65.0000,1,1.0000,1,'','1-19',0,1),
-(660,5008,'DEMO-5008-BLK-W24','DEMO-5008-BLK-W24','','','','','',19057.2525,65.0000,1,1.0000,1,'','1-20',1,1),
-(661,5008,'DEMO-5008-WHT-W12','DEMO-5008-WHT-W12','','','','','',17857.2525,67.0000,1,1.0000,1,'','2-19',2,1),
-(662,5008,'DEMO-5008-WHT-W24','DEMO-5008-WHT-W24','','','','','',19057.2525,68.0000,1,1.0000,1,'','2-20',3,1),
-(663,5009,'DEMO-5009-BLK-W12','DEMO-5009-BLK-W12','','','','','',21950.6055,70.0000,1,1.0000,1,'','1-19',0,1),
-(664,5009,'DEMO-5009-BLK-W24','DEMO-5009-BLK-W24','','','','','',23150.6055,71.0000,1,1.0000,1,'','1-20',1,1),
-(665,5009,'DEMO-5009-WHT-W12','DEMO-5009-WHT-W12','','','','','',21950.6055,80.0000,1,1.0000,1,'','2-19',2,1),
-(666,5009,'DEMO-5009-WHT-W24','DEMO-5009-WHT-W24','','','','','',23150.6055,75.0000,1,1.0000,1,'','2-20',3,1),
-(667,5010,'DEMO-5010-BLK-W12','DEMO-5010-BLK-W12','','','','','',7623.8700,82.0000,1,1.0000,1,'','1-19',0,1),
-(668,5010,'DEMO-5010-BLK-W24','DEMO-5010-BLK-W24','','','','','',8823.8700,87.0000,1,1.0000,1,'','1-20',1,1),
-(669,5010,'DEMO-5010-BLU-W12','DEMO-5010-BLU-W12','','','','','',7623.8700,90.0000,1,1.0000,1,'','4-19',0,1),
-(670,5010,'DEMO-5010-BLU-W24','DEMO-5010-BLU-W24','','','','','',8823.8700,79.0000,1,1.0000,1,'','4-20',3,1),
-(671,5011,'DEMO-5011-W12','DEMO-5011-W12','','','','','',4553.8552,11.0000,1,1.0000,1,'','19',0,1),
-(672,5011,'DEMO-5011-W24','DEMO-5011-W24','','','','','',6053.8552,0.0000,0,1.0000,1,'','20',1,1),
-(673,5012,'DEMO-5012-W12','DEMO-5012-W12','','','','','',10182.2156,36.0000,1,1.0000,1,'','19',0,1),
-(674,5012,'DEMO-5012-W24','DEMO-5012-W24','','','','','',11682.2156,28.0000,1,1.0000,1,'','20',1,1),
-(675,5013,'DEMO-5013-W12','DEMO-5013-W12','','','','','',28090.6350,38.0000,1,1.0000,1,'','19',0,1),
-(676,5013,'DEMO-5013-W24','DEMO-5013-W24','','','','','',30090.6350,38.0000,1,1.0000,1,'','20',1,1),
-(677,5014,'DEMO-5014-W12','DEMO-5014-W12','','','','','',25532.2894,39.0000,1,1.0000,1,'','19',0,1),
-(678,5014,'DEMO-5014-W24','DEMO-5014-W24','','','','','',26732.2894,37.0000,1,1.0000,1,'','20',1,1),
-(679,5015,'DEMO-5015-W12','DEMO-5015-W12','','','','','',6600.5317,45.0000,1,1.0000,1,'','19',0,1),
-(680,5015,'DEMO-5015-W24','DEMO-5015-W24','','','','','',7600.5317,49.0000,1,1.0000,1,'','20',1,1),
-(681,5016,'DEMO-5016-W12','DEMO-5016-W12','','','','','',14275.5686,53.0000,1,1.0000,1,'','19',0,1),
-(682,5016,'DEMO-5016-W24','DEMO-5016-W24','','','','','',15775.5686,55.0000,1,1.0000,1,'','20',1,1),
-(683,5017,'DEMO-5017-W12','DEMO-5017-W12','','','','','',38324.0175,68.0000,1,1.0000,1,'','19',0,1),
-(684,5017,'DEMO-5017-W24','DEMO-5017-W24','','','','','',40324.0175,70.0000,1,1.0000,1,'','20',1,1),
-(685,5018,'DEMO-5018-W12','DEMO-5018-W12','','','','','',40882.3632,69.0000,1,1.0000,1,'','19',0,1),
-(686,5018,'DEMO-5018-W24','DEMO-5018-W24','','','','','',42882.3632,77.0000,1,1.0000,1,'','20',0,1),
-(687,5019,'DEMO-5019-W12','DEMO-5019-W12','','','','','',8647.2082,84.0000,1,1.0000,1,'','19',0,1),
-(688,5019,'DEMO-5019-W24','DEMO-5019-W24','','','','','',9847.2082,80.0000,1,1.0000,1,'','20',1,1),
-(689,5020,'DEMO-5020-W12','DEMO-5020-W12','','','','','',6600.5317,83.0000,1,1.0000,1,'','19',0,1),
-(690,5020,'DEMO-5020-W24','DEMO-5020-W24','','','','','',8100.5317,82.0000,1,1.0000,1,'','20',1,1),
-(691,5021,'DEMO-5021-BLK-S','DEMO-5021-BLK-S','','','','','',4553.8552,25.0000,1,1.0000,1,'','1-8',0,1),
-(692,5021,'DEMO-5021-BLK-M','DEMO-5021-BLK-M','','','','','',4553.8552,32.0000,1,1.0000,1,'','1-9',1,1),
-(693,5021,'DEMO-5021-BLK-L','DEMO-5021-BLK-L','','','','','',4553.8552,28.0000,1,1.0000,1,'','1-10',2,1),
-(694,5021,'DEMO-5021-BLU-S','DEMO-5021-BLU-S','','','','','',4553.8552,25.0000,1,1.0000,1,'','4-8',3,1),
-(695,5021,'DEMO-5021-BLU-M','DEMO-5021-BLU-M','','','','','',4553.8552,26.0000,1,1.0000,1,'','4-9',4,1),
-(696,5021,'DEMO-5021-BLU-L','DEMO-5021-BLU-L','','','','','',4553.8552,26.0000,1,1.0000,1,'','4-10',5,1),
-(697,5022,'DEMO-5022-BLK-M','DEMO-5022-BLK-M','','','','','',6600.5317,34.0000,1,1.0000,1,'','1-9',0,1),
-(698,5022,'DEMO-5022-BLK-L','DEMO-5022-BLK-L','','','','','',6600.5317,30.0000,1,1.0000,1,'','1-10',1,1),
-(699,5022,'DEMO-5022-BLK-XL','DEMO-5022-BLK-XL','','','','','',6600.5317,35.0000,1,1.0000,1,'','1-11',2,1),
-(700,5022,'DEMO-5022-WHT-M','DEMO-5022-WHT-M','','','','','',6600.5317,39.0000,1,1.0000,1,'','2-9',3,1),
-(701,5022,'DEMO-5022-WHT-L','DEMO-5022-WHT-L','','','','','',6600.5317,35.0000,1,1.0000,1,'','2-10',4,1),
-(702,5022,'DEMO-5022-WHT-XL','DEMO-5022-WHT-XL','','','','','',6600.5317,31.0000,1,1.0000,1,'','2-11',5,1),
-(703,5023,'DEMO-5023-WHT-S','DEMO-5023-WHT-S','','','','','',61349.1300,14.0000,1,1.0000,1,'','2-8',0,1),
-(704,5023,'DEMO-5023-WHT-M','DEMO-5023-WHT-M','','','','','',61349.1300,11.0000,1,1.0000,1,'','2-9',0,1),
-(705,5023,'DEMO-5023-WHT-L','DEMO-5023-WHT-L','','','','','',61349.1300,16.0000,1,1.0000,1,'','2-10',2,0),
-(706,5023,'DEMO-5023-SLV-S','DEMO-5023-SLV-S','','','','','',61349.1300,20.0000,1,1.0000,1,'','3-8',3,1),
-(707,5023,'DEMO-5023-SLV-M','DEMO-5023-SLV-M','','','','','',61349.1300,19.0000,1,1.0000,1,'','3-9',4,1),
-(708,5023,'DEMO-5023-SLV-L','DEMO-5023-SLV-L','','','','','',61349.1300,21.0000,1,1.0000,1,'','3-10',0,1),
-(709,5024,'DEMO-5024-BLK-XS','DEMO-5024-BLK-XS','','','','','',4042.1861,53.0000,1,1.0000,1,'','1-7',0,1),
-(710,5024,'DEMO-5024-BLK-S','DEMO-5024-BLK-S','','','','','',4042.1861,42.0000,1,1.0000,1,'','1-8',1,0),
-(711,5024,'DEMO-5024-BLK-M','DEMO-5024-BLK-M','','','','','',4042.1861,52.0000,1,1.0000,1,'','1-9',2,0),
-(712,5024,'DEMO-5024-WHT-XS','DEMO-5024-WHT-XS','','','','','',4042.1861,48.0000,1,1.0000,1,'','2-7',3,1),
-(713,5024,'DEMO-5024-WHT-S','DEMO-5024-WHT-S','','','','','',4042.1861,53.0000,1,1.0000,1,'','2-8',4,1),
-(714,5024,'DEMO-5024-WHT-M','DEMO-5024-WHT-M','','','','','',4042.1861,52.0000,1,1.0000,1,'','2-9',5,1),
-(715,5025,'DEMO-5025-WHT-M','DEMO-5025-WHT-M','','','','','',3530.5170,54.0000,1,1.0000,1,'','2-9',0,1),
-(716,5025,'DEMO-5025-WHT-L','DEMO-5025-WHT-L','','','','','',3530.5170,50.0000,1,1.0000,1,'','2-10',1,1),
-(717,5025,'DEMO-5025-SLV-M','DEMO-5025-SLV-M','','','','','',3530.5170,53.0000,1,1.0000,1,'','3-9',2,1),
-(718,5025,'DEMO-5025-SLV-L','DEMO-5025-SLV-L','','','','','',3530.5170,56.0000,1,1.0000,1,'','3-10',3,1),
-(719,5026,'DEMO-5026-BLK-M','DEMO-5026-BLK-M','','','','','',4553.8552,62.0000,1,1.0000,1,'','1-9',0,1),
-(720,5026,'DEMO-5026-BLK-L','DEMO-5026-BLK-L','','','','','',4553.8552,60.0000,1,1.0000,1,'','1-10',1,1),
-(721,5026,'DEMO-5026-BLK-XL','DEMO-5026-BLK-XL','','','','','',4553.8552,60.0000,1,1.0000,1,'','1-11',2,1),
-(722,5026,'DEMO-5026-BLU-M','DEMO-5026-BLU-M','','','','','',4553.8552,66.0000,1,1.0000,1,'','4-9',3,1),
-(723,5026,'DEMO-5026-BLU-L','DEMO-5026-BLU-L','','','','','',4553.8552,67.0000,1,1.0000,1,'','4-10',4,1),
-(724,5026,'DEMO-5026-BLU-XL','DEMO-5026-BLU-XL','','','','','',4553.8552,60.0000,1,1.0000,1,'','4-11',5,1),
-(725,5027,'DEMO-5027-BLK-M','DEMO-5027-BLK-M','','','','','',12740.5612,69.0000,1,1.0000,1,'','1-9',0,1),
-(726,5027,'DEMO-5027-BLK-L','DEMO-5027-BLK-L','','','','','',12740.5612,74.0000,1,1.0000,1,'','1-10',1,1),
-(727,5027,'DEMO-5027-BLK-XL','DEMO-5027-BLK-XL','','','','','',12740.5612,74.0000,1,1.0000,1,'','1-11',2,1),
-(728,5027,'DEMO-5027-BLU-M','DEMO-5027-BLU-M','','','','','',12740.5612,62.0000,1,1.0000,1,'','4-9',3,1),
-(729,5027,'DEMO-5027-BLU-L','DEMO-5027-BLU-L','','','','','',12740.5612,63.0000,1,1.0000,1,'','4-10',4,0),
-(730,5027,'DEMO-5027-BLU-XL','DEMO-5027-BLU-XL','','','','','',12740.5612,68.0000,1,1.0000,1,'','4-11',5,1),
-(731,5028,'DEMO-5028-BLK-S','DEMO-5028-BLK-S','','','','','',3530.5170,71.0000,1,1.0000,1,'','1-8',0,0),
-(732,5028,'DEMO-5028-BLK-M','DEMO-5028-BLK-M','','','','','',3530.5170,68.0000,1,1.0000,1,'','1-9',1,1),
-(733,5028,'DEMO-5028-BLK-L','DEMO-5028-BLK-L','','','','','',3530.5170,77.0000,1,1.0000,1,'','1-10',2,1),
-(734,5028,'DEMO-5028-WHT-S','DEMO-5028-WHT-S','','','','','',3530.5170,69.0000,1,1.0000,1,'','2-8',3,1),
-(735,5028,'DEMO-5028-WHT-M','DEMO-5028-WHT-M','','','','','',3530.5170,72.0000,1,1.0000,1,'','2-9',4,1),
-(736,5028,'DEMO-5028-WHT-L','DEMO-5028-WHT-L','','','','','',3530.5170,71.0000,1,1.0000,1,'','2-10',5,1),
-(737,5029,'DEMO-5029-BLK-XS','DEMO-5029-BLK-XS','','','','','',7623.8700,79.0000,1,1.0000,1,'','1-7',0,1),
-(738,5029,'DEMO-5029-BLK-S','DEMO-5029-BLK-S','','','','','',7623.8700,80.0000,1,1.0000,1,'','1-8',1,1),
-(739,5029,'DEMO-5029-BLK-M','DEMO-5029-BLK-M','','','','','',7623.8700,77.0000,1,1.0000,1,'','1-9',2,1),
-(740,5029,'DEMO-5029-SLV-XS','DEMO-5029-SLV-XS','','','','','',7623.8700,79.0000,1,1.0000,1,'','3-7',3,1),
-(741,5029,'DEMO-5029-SLV-S','DEMO-5029-SLV-S','','','','','',7623.8700,86.0000,1,1.0000,1,'','3-8',4,0),
-(742,5029,'DEMO-5029-SLV-M','DEMO-5029-SLV-M','','','','','',7623.8700,86.0000,1,1.0000,1,'','3-9',5,1),
-(743,5030,'DEMO-5030-BLK-M','DEMO-5030-BLK-M','','','','','',4042.1861,87.0000,1,1.0000,1,'','1-9',0,0),
-(744,5030,'DEMO-5030-BLK-L','DEMO-5030-BLK-L','','','','','',4042.1861,83.0000,1,1.0000,1,'','1-10',1,1),
-(745,5030,'DEMO-5030-GRN-M','DEMO-5030-GRN-M','','','','','',4042.1861,90.0000,1,1.0000,1,'','5-9',2,1),
-(746,5030,'DEMO-5030-GRN-L','DEMO-5030-GRN-L','','','','','',4042.1861,90.0000,1,1.0000,1,'','5-10',3,1),
-(747,5031,'DEMO-5031-BLK-M','DEMO-5031-BLK-M','','','','','',30648.9807,26.0000,1,1.0000,1,'','1-9',0,1),
-(748,5031,'DEMO-5031-BLK-L','DEMO-5031-BLK-L','','','','','',30648.9807,27.0000,1,1.0000,1,'','1-10',1,0),
-(749,5031,'DEMO-5031-BLU-M','DEMO-5031-BLU-M','','','','','',30648.9807,29.0000,1,1.0000,1,'','4-9',2,1),
-(750,5031,'DEMO-5031-BLU-L','DEMO-5031-BLU-L','','','','','',30648.9807,26.0000,1,1.0000,1,'','4-10',3,1),
-(751,5032,'DEMO-5032-BLK-M','DEMO-5032-BLK-M','','','','','',4553.8552,34.0000,1,1.0000,1,'','1-9',0,1),
-(752,5032,'DEMO-5032-BLK-L','DEMO-5032-BLK-L','','','','','',4553.8552,31.0000,1,1.0000,1,'','1-10',1,1),
-(753,5032,'DEMO-5032-WHT-M','DEMO-5032-WHT-M','','','','','',4553.8552,29.0000,1,1.0000,1,'','2-9',2,0),
-(754,5032,'DEMO-5032-WHT-L','DEMO-5032-WHT-L','','','','','',4553.8552,37.0000,1,1.0000,1,'','2-10',3,1),
-(755,5033,'DEMO-5033-BLK-M','DEMO-5033-BLK-M','','','','','',10182.2156,42.0000,1,1.0000,1,'','1-9',0,1),
-(756,5033,'DEMO-5033-BLK-L','DEMO-5033-BLK-L','','','','','',10182.2156,41.0000,1,1.0000,1,'','1-10',1,1),
-(757,5033,'DEMO-5033-GRN-M','DEMO-5033-GRN-M','','','','','',10182.2156,43.0000,1,1.0000,1,'','5-9',2,1),
-(758,5033,'DEMO-5033-GRN-L','DEMO-5033-GRN-L','','','','','',10182.2156,48.0000,1,1.0000,1,'','5-10',3,1),
-(759,5034,'DEMO-5034-BLK-M','DEMO-5034-BLK-M','','','','','',2507.1787,0.0000,1,1.0000,1,'','1-9',0,0),
-(760,5034,'DEMO-5034-BLK-L','DEMO-5034-BLK-L','','','','','',2507.1787,0.0000,1,1.0000,1,'','1-10',1,0),
-(761,5034,'DEMO-5034-BLU-M','DEMO-5034-BLU-M','','','','','',2507.1787,0.0000,1,1.0000,1,'','4-9',2,0),
-(762,5034,'DEMO-5034-BLU-L','DEMO-5034-BLU-L','','','','','',2507.1787,0.0000,1,1.0000,1,'','4-10',3,0),
-(763,5035,'DEMO-5035-BLK-M','DEMO-5035-BLK-M','','','','','',4553.8552,54.0000,1,1.0000,1,'','1-9',0,1),
-(764,5035,'DEMO-5035-BLK-L','DEMO-5035-BLK-L','','','','','',4553.8552,50.0000,1,1.0000,1,'','1-10',1,1),
-(765,5035,'DEMO-5035-GRN-M','DEMO-5035-GRN-M','','','','','',4553.8552,51.0000,1,1.0000,1,'','5-9',2,1),
-(766,5035,'DEMO-5035-GRN-L','DEMO-5035-GRN-L','','','','','',4553.8552,57.0000,1,1.0000,1,'','5-10',3,1),
-(767,5036,'DEMO-5036-BLK-M','DEMO-5036-BLK-M','','','','','',12740.5612,61.0000,1,1.0000,1,'','1-9',0,1),
-(768,5036,'DEMO-5036-BLK-L','DEMO-5036-BLK-L','','','','','',12740.5612,59.0000,1,1.0000,1,'','1-10',1,1),
-(769,5036,'DEMO-5036-GRN-M','DEMO-5036-GRN-M','','','','','',12740.5612,64.0000,1,1.0000,1,'','5-9',2,1),
-(770,5036,'DEMO-5036-GRN-L','DEMO-5036-GRN-L','','','','','',12740.5612,68.0000,1,1.0000,1,'','5-10',3,1),
-(771,5037,'DEMO-5037-BLK-M','DEMO-5037-BLK-M','','','','','',2507.1787,71.0000,1,1.0000,1,'','1-9',0,1),
-(772,5037,'DEMO-5037-BLK-L','DEMO-5037-BLK-L','','','','','',2507.1787,75.0000,1,1.0000,1,'','1-10',1,1),
-(773,5037,'DEMO-5037-SLV-M','DEMO-5037-SLV-M','','','','','',2507.1787,67.0000,1,1.0000,1,'','3-9',2,1),
-(774,5037,'DEMO-5037-SLV-L','DEMO-5037-SLV-L','','','','','',2507.1787,69.0000,1,1.0000,1,'','3-10',3,0),
-(775,5038,'DEMO-5038-BLK-M','DEMO-5038-BLK-M','','','','','',22973.9438,81.0000,1,1.0000,1,'','1-9',0,1),
-(776,5038,'DEMO-5038-BLK-L','DEMO-5038-BLK-L','','','','','',22973.9438,76.0000,1,1.0000,1,'','1-10',1,1),
-(777,5038,'DEMO-5038-BLU-M','DEMO-5038-BLU-M','','','','','',22973.9438,83.0000,1,1.0000,1,'','4-9',2,0),
-(778,5038,'DEMO-5038-BLU-L','DEMO-5038-BLU-L','','','','','',22973.9438,71.0000,1,1.0000,1,'','4-10',3,1),
-(779,5039,'DEMO-5039-BLK-M','DEMO-5039-BLK-M','','','','','',45999.0544,91.0000,1,1.0000,1,'','1-9',0,0),
-(780,5039,'DEMO-5039-BLK-L','DEMO-5039-BLK-L','','','','','',45999.0544,81.0000,1,1.0000,1,'','1-10',1,1),
-(781,5039,'DEMO-5039-WHT-M','DEMO-5039-WHT-M','','','','','',45999.0544,87.0000,1,1.0000,1,'','2-9',2,1),
-(782,5039,'DEMO-5039-WHT-L','DEMO-5039-WHT-L','','','','','',45999.0544,91.0000,1,1.0000,1,'','2-10',3,1),
-(783,5040,'DEMO-5040-BLK-M','DEMO-5040-BLK-M','','','','','',10182.2156,92.0000,1,1.0000,1,'','1-9',0,1),
-(784,5040,'DEMO-5040-BLK-L','DEMO-5040-BLK-L','','','','','',10182.2156,98.0000,1,1.0000,1,'','1-10',1,0),
-(785,5040,'DEMO-5040-GRN-M','DEMO-5040-GRN-M','','','','','',10182.2156,95.0000,1,1.0000,1,'','5-9',2,1),
-(786,5040,'DEMO-5040-GRN-L','DEMO-5040-GRN-L','','','','','',10182.2156,94.0000,1,1.0000,1,'','5-10',3,1),
-(787,5041,'DEMO-5041-1L','DEMO-5041-1L','','','','','',716.3400,32.0000,1,1.0000,1,'','28',0,1),
-(788,5041,'DEMO-5041-2L','DEMO-5041-2L','','','','','',916.3400,27.0000,1,1.0000,1,'','29',1,1),
-(789,5042,'DEMO-5042-1L','DEMO-5042-1L','','','','','',972.1713,41.0000,1,1.0000,1,'','28',0,1),
-(790,5042,'DEMO-5042-2L','DEMO-5042-2L','','','','','',1122.1713,40.0000,1,1.0000,1,'','29',1,1),
-(791,5043,'DEMO-5043-1L','DEMO-5043-1L','','','','','',460.5022,49.0000,1,1.0000,1,'','28',0,1),
-(792,5043,'DEMO-5043-2L','DEMO-5043-2L','','','','','',560.5022,49.0000,1,1.0000,1,'','29',1,1),
-(793,5044,'DEMO-5044-1L','DEMO-5044-1L','','','','','',1228.0059,59.0000,1,1.0000,1,'','28',0,1),
-(794,5044,'DEMO-5044-2L','DEMO-5044-2L','','','','','',1378.0059,47.0000,1,1.0000,1,'','29',1,1),
-(795,5045,'DEMO-5045-1L','DEMO-5045-1L','','','','','',20415.5981,58.0000,1,1.0000,1,'','28',0,0),
-(796,5045,'DEMO-5045-2L','DEMO-5045-2L','','','','','',20665.5981,64.0000,1,1.0000,1,'','29',1,1),
-(797,5046,'DEMO-5046-1L','DEMO-5046-1L','','','','','',5065.5243,60.0000,1,1.0000,1,'','28',0,1),
-(798,5046,'DEMO-5046-2L','DEMO-5046-2L','','','','','',5265.5243,67.0000,1,1.0000,1,'','29',1,1),
-(799,5047,'DEMO-5047-1L','DEMO-5047-1L','','','','','',7623.8700,69.0000,1,1.0000,1,'','28',0,1),
-(800,5047,'DEMO-5047-2L','DEMO-5047-2L','','','','','',7823.8700,69.0000,1,1.0000,1,'','29',1,1),
-(801,5048,'DEMO-5048-1L','DEMO-5048-1L','','','','','',15298.9069,0.0000,1,1.0000,1,'','28',0,0),
-(802,5048,'DEMO-5048-2L','DEMO-5048-2L','','','','','',15598.9069,45.0000,1,1.0000,1,'','29',0,1),
-(803,5049,'DEMO-5049-1L','DEMO-5049-1L','','','','','',7623.8700,81.0000,1,1.0000,1,'','28',0,1),
-(804,5049,'DEMO-5049-2L','DEMO-5049-2L','','','','','',7773.8700,89.0000,1,1.0000,1,'','29',1,1),
-(805,5050,'DEMO-5050-1L','DEMO-5050-1L','','','','','',1483.8405,0.0000,0,1.0000,1,'','28',0,1),
-(806,5050,'DEMO-5050-2L','DEMO-5050-2L','','','','','',1733.8405,9.0000,1,1.0000,1,'','29',1,1),
-(807,5051,'DEMO-5051-STD','DEMO-5051-STD','','','','','',17857.2525,41.0000,1,1.0000,1,'','23',0,1),
-(808,5051,'DEMO-5051-DLX','DEMO-5051-DLX','','','','','',20357.2525,37.0000,1,1.0000,1,'','24',1,1),
-(809,5052,'DEMO-5052-STD','DEMO-5052-STD','','','','','',25532.2894,33.0000,1,1.0000,1,'','23',0,1),
-(810,5052,'DEMO-5052-DLX','DEMO-5052-DLX','','','','','',28532.2894,39.0000,1,1.0000,1,'','24',1,1),
-(811,5053,'DEMO-5053-STD','DEMO-5053-STD','','','','','',25532.2894,53.0000,1,1.0000,1,'','23',0,1),
-(812,5053,'DEMO-5053-DLX','DEMO-5053-DLX','','','','','',28532.2894,45.0000,1,1.0000,1,'','24',1,0),
-(813,5054,'DEMO-5054-STD','DEMO-5054-STD','','','','','',7623.8700,51.0000,1,1.0000,1,'','23',0,1),
-(814,5054,'DEMO-5054-DLX','DEMO-5054-DLX','','','','','',9123.8700,59.0000,1,1.0000,1,'','24',1,1),
-(815,5055,'DEMO-5055-STD','DEMO-5055-STD','','','','','',10182.2156,60.0000,1,1.0000,1,'','23',0,1),
-(816,5055,'DEMO-5055-DLX','DEMO-5055-DLX','','','','','',12182.2156,64.0000,1,1.0000,1,'','24',1,0),
-(817,5056,'DEMO-5056-STD','DEMO-5056-STD','','','','','',460.5022,64.0000,1,1.0000,1,'','23',0,0),
-(818,5056,'DEMO-5056-DLX','DEMO-5056-DLX','','','','','',1260.5022,76.0000,1,1.0000,1,'','24',1,1),
-(819,5057,'DEMO-5057-STD','DEMO-5057-STD','','','','','',1483.8405,70.0000,1,1.0000,1,'','23',0,1),
-(820,5057,'DEMO-5057-DLX','DEMO-5057-DLX','','','','','',2483.8405,71.0000,1,1.0000,1,'','24',1,1),
-(821,5058,'DEMO-5058-STD','DEMO-5058-STD','','','','','',1228.0059,77.0000,1,1.0000,1,'','23',0,1),
-(822,5058,'DEMO-5058-DLX','DEMO-5058-DLX','','','','','',1828.0059,77.0000,1,1.0000,1,'','24',1,1),
-(823,5059,'DEMO-5059-STD','DEMO-5059-STD','','','','','',972.1713,97.0000,1,1.0000,1,'','23',0,1),
-(824,5059,'DEMO-5059-DLX','DEMO-5059-DLX','','','','','',1472.1713,88.0000,1,1.0000,1,'','24',1,1),
-(825,5060,'DEMO-5060-STD','DEMO-5060-STD','','','','','',716.3368,99.0000,1,1.0000,1,'','23',0,1),
-(826,5060,'DEMO-5060-DLX','DEMO-5060-DLX','','','','','',1416.3368,102.0000,1,1.0000,1,'','24',1,1),
-(827,5061,'DEMO-5061-STD','DEMO-5061-STD','','','','','',716.3368,40.0000,1,1.0000,1,'','23',0,1),
-(828,5061,'DEMO-5061-DLX','DEMO-5061-DLX','','','','','',1216.3368,39.0000,1,1.0000,1,'','24',1,1),
-(829,5062,'DEMO-5062-STD','DEMO-5062-STD','','','','','',716.3368,51.0000,1,1.0000,1,'','23',0,1),
-(830,5062,'DEMO-5062-DLX','DEMO-5062-DLX','','','','','',1166.3368,46.0000,1,1.0000,1,'','24',1,1),
-(831,5063,'DEMO-5063-STD','DEMO-5063-STD','','','','','',716.3368,53.0000,1,1.0000,1,'','23',0,1),
-(832,5063,'DEMO-5063-DLX','DEMO-5063-DLX','','','','','',1116.3368,45.0000,1,1.0000,1,'','24',1,1),
-(833,5064,'DEMO-5064-STD','DEMO-5064-STD','','','','','',716.3368,60.0000,1,1.0000,1,'','23',0,1),
-(834,5064,'DEMO-5064-DLX','DEMO-5064-DLX','','','','','',1166.3368,55.0000,1,1.0000,1,'','24',1,1),
-(835,5065,'DEMO-5065-STD','DEMO-5065-STD','','','','','',614.0030,65.0000,1,1.0000,1,'','23',0,1),
-(836,5065,'DEMO-5065-DLX','DEMO-5065-DLX','','','','','',964.0030,71.0000,1,1.0000,1,'','24',1,0),
-(837,5066,'DEMO-5066-STD','DEMO-5066-STD','','','','','',614.0030,79.0000,1,1.0000,1,'','23',0,1),
-(838,5066,'DEMO-5066-DLX','DEMO-5066-DLX','','','','','',1014.0030,74.0000,1,1.0000,1,'','24',1,1),
-(839,5067,'DEMO-5067-STD','DEMO-5067-STD','','','','','',614.0030,84.0000,1,1.0000,1,'','23',0,1),
-(840,5067,'DEMO-5067-DLX','DEMO-5067-DLX','','','','','',914.0030,76.0000,1,1.0000,1,'','24',1,1),
-(841,5068,'DEMO-5068-STD','DEMO-5068-STD','','','','','',409.3353,84.0000,1,1.0000,1,'','23',0,1),
-(842,5068,'DEMO-5068-DLX','DEMO-5068-DLX','','','','','',659.3353,83.0000,1,1.0000,1,'','24',1,0),
-(843,5069,'DEMO-5069-STD','DEMO-5069-STD','','','','','',716.3368,98.0000,1,1.0000,1,'','23',0,1),
-(844,5069,'DEMO-5069-DLX','DEMO-5069-DLX','','','','','',1116.3368,93.0000,1,1.0000,1,'','24',1,1),
-(845,5070,'DEMO-5070-STD','DEMO-5070-STD','','','','','',716.3368,0.0000,1,1.0000,1,'','23',0,0),
-(846,5070,'DEMO-5070-DLX','DEMO-5070-DLX','','','','','',1066.3368,0.0000,0,1.0000,1,'','24',1,0),
-(847,5071,'DEMO-5071-W12','DEMO-5071-W12','','','','','',10182.2156,40.0000,1,1.0000,1,'','19',0,1),
-(848,5071,'DEMO-5071-W24','DEMO-5071-W24','','','','','',11382.2156,34.0000,1,1.0000,1,'','20',1,1),
-(849,5072,'DEMO-5072-W12','DEMO-5072-W12','','','','','',5065.5243,44.0000,1,1.0000,1,'','19',0,0),
-(850,5072,'DEMO-5072-W24','DEMO-5072-W24','','','','','',6565.5243,0.0000,1,1.0000,1,'','20',0,1),
-(851,5073,'DEMO-5073-W12','DEMO-5073-W12','','','','','',1995.5096,56.0000,1,1.0000,1,'','19',0,1),
-(852,5073,'DEMO-5073-W24','DEMO-5073-W24','','','','','',2795.5096,52.0000,1,1.0000,1,'','20',1,1),
-(853,5074,'DEMO-5074-W12','DEMO-5074-W12','','','','','',1739.6750,63.0000,1,1.0000,1,'','19',0,1),
-(854,5074,'DEMO-5074-W24','DEMO-5074-W24','','','','','',2539.6750,65.0000,1,1.0000,1,'','20',1,0),
-(855,5075,'DEMO-5075-W12','DEMO-5075-W12','','','','','',9.0000,66.0000,1,1.0000,1,'','19',0,1),
-(856,5075,'DEMO-5075-W24','DEMO-5075-W24','','','','','',509.0000,68.0000,1,1.0000,1,'','20',1,1),
-(857,5076,'DEMO-5076-W12','DEMO-5076-W12','','','','','',1228.0059,78.0000,1,1.0000,1,'','19',0,1),
-(858,5076,'DEMO-5076-W24','DEMO-5076-W24','','','','','',2028.0059,69.0000,1,1.0000,1,'','20',1,1),
-(859,5077,'DEMO-5077-W12','DEMO-5077-W12','','','','','',0.0000,22.0000,1,1.0000,1,'','19',0,1),
-(860,5077,'DEMO-5077-W24','DEMO-5077-W24','','','','','',600.0000,21.0000,1,1.0000,1,'','20',1,1),
-(861,5078,'DEMO-5078-W12','DEMO-5078-W12','','','','','',15298.9069,83.0000,1,1.0000,1,'','19',0,0),
-(862,5078,'DEMO-5078-W24','DEMO-5078-W24','','','','','',16798.9069,83.0000,1,1.0000,1,'','20',1,1),
-(863,5079,'DEMO-5079-W12','DEMO-5079-W12','','','','','',1739.6750,100.0000,1,1.0000,1,'','19',0,1),
-(864,5079,'DEMO-5079-W24','DEMO-5079-W24','','','','','',2739.6750,101.0000,1,1.0000,1,'','20',1,1),
-(865,5085,'DEMO-5085-1L','DEMO-5085-1L','','','','','',1228.0059,66.0000,1,1.0000,1,'','28',0,1),
-(866,5085,'DEMO-5085-2L','DEMO-5085-2L','','','','','',1528.0059,74.0000,1,1.0000,1,'','29',1,1),
-(867,5086,'DEMO-5086-1L','DEMO-5086-1L','','','','','',1995.5096,85.0000,1,1.0000,1,'','28',0,1),
-(868,5086,'DEMO-5086-2L','DEMO-5086-2L','','','','','',2395.5096,80.0000,1,1.0000,1,'','29',1,1),
-(869,5087,'DEMO-5087-1L','DEMO-5087-1L','','','','','',1739.6750,81.0000,1,1.0000,1,'','28',0,1),
-(870,5087,'DEMO-5087-2L','DEMO-5087-2L','','','','','',1989.6750,84.0000,1,1.0000,1,'','29',1,0),
-(871,5088,'DEMO-5088-2L','DEMO-5088-2L','','','','','',6600.5317,93.0000,1,1.0000,1,'','29',0,0),
-(872,5088,'DEMO-5088-5L','DEMO-5088-5L','','','','','',7100.5317,89.0000,1,1.0000,1,'','30',1,1),
-(873,5089,'DEMO-5089-1L','DEMO-5089-1L','','','','','',614.0030,105.0000,1,1.0000,1,'','28',0,1),
-(874,5089,'DEMO-5089-2L','DEMO-5089-2L','','','','','',814.0030,100.0000,1,1.0000,1,'','29',1,1),
-(875,5090,'DEMO-5090-1L','DEMO-5090-1L','','','','','',460.5022,24.0000,1,1.0000,1,'','28',0,1),
-(876,5090,'DEMO-5090-2L','DEMO-5090-2L','','','','','',610.5022,17.0000,1,1.0000,1,'','29',1,1);
+(579,5001,'DEMO-5001-BLK-128-8G-W12','DEMO-5001-BLK-128-8G-W12','','','','','',50000.0000,35.0000,1,1.0000,1,'','1-13-16-19',0,1,0.00000000,0.00000000,0.00000000),
+(580,5001,'DEMO-5001-BLK-128-8G-W24','DEMO-5001-BLK-128-8G-W24','','','','','',40000.0000,11.0000,1,1.0000,1,'','1-13-16-20',0,1,0.00000000,0.00000000,0.00000000),
+(581,5001,'DEMO-5001-BLK-128-12G-W12','DEMO-5001-BLK-128-12G-W12','','','','','',52000.0000,21.0000,1,1.0000,1,'','1-13-17-19',2,1,0.00000000,0.00000000,0.00000000),
+(582,5001,'DEMO-5001-BLK-128-12G-W24','DEMO-5001-BLK-128-12G-W24','','','','','',53500.0000,29.0000,1,1.0000,1,'','1-13-17-20',3,1,0.00000000,0.00000000,0.00000000),
+(583,5001,'DEMO-5001-BLK-256-8G-W12','DEMO-5001-BLK-256-8G-W12','','','','','',53500.0000,20.0000,1,1.0000,1,'','1-14-16-19',4,1,0.00000000,0.00000000,0.00000000),
+(584,5001,'DEMO-5001-BLK-256-8G-W24','DEMO-5001-BLK-256-8G-W24','','','','','',55000.0000,25.0000,1,1.0000,1,'','1-14-16-20',5,1,0.00000000,0.00000000,0.00000000),
+(585,5001,'DEMO-5001-BLK-256-12G-W12','DEMO-5001-BLK-256-12G-W12','','','','','',55500.0000,28.0000,1,1.0000,1,'','1-14-17-19',6,1,0.00000000,0.00000000,0.00000000),
+(586,5001,'DEMO-5001-BLK-256-12G-W24','DEMO-5001-BLK-256-12G-W24','','','','','',57000.0000,29.0000,1,1.0000,1,'','1-14-17-20',7,1,0.00000000,0.00000000,0.00000000),
+(587,5001,'DEMO-5001-BLK-512-8G-W12','DEMO-5001-BLK-512-8G-W12','','','','','',57000.0000,32.0000,1,1.0000,1,'','1-15-16-19',8,1,0.00000000,0.00000000,0.00000000),
+(588,5001,'DEMO-5001-BLK-512-8G-W24','DEMO-5001-BLK-512-8G-W24','','','','','',58500.0000,24.0000,1,1.0000,1,'','1-15-16-20',9,0,0.00000000,0.00000000,0.00000000),
+(589,5001,'DEMO-5001-BLK-512-12G-W12','DEMO-5001-BLK-512-12G-W12','','','','','',59000.0000,28.0000,1,1.0000,1,'','1-15-17-19',10,1,0.00000000,0.00000000,0.00000000),
+(590,5001,'DEMO-5001-BLK-512-12G-W24','DEMO-5001-BLK-512-12G-W24','','','','','',60500.0000,23.0000,1,1.0000,1,'','1-15-17-20',11,1,0.00000000,0.00000000,0.00000000),
+(591,5001,'DEMO-5001-WHT-128-8G-W12','DEMO-5001-WHT-128-8G-W12','','','','','',50000.0000,32.0000,1,1.0000,1,'','2-13-16-19',12,1,0.00000000,0.00000000,0.00000000),
+(592,5001,'DEMO-5001-WHT-128-8G-W24','DEMO-5001-WHT-128-8G-W24','','','','','',51500.0000,25.0000,1,1.0000,1,'','2-13-16-20',13,1,0.00000000,0.00000000,0.00000000),
+(593,5001,'DEMO-5001-WHT-128-12G-W12','DEMO-5001-WHT-128-12G-W12','','','','','',52000.0000,25.0000,1,1.0000,1,'','2-13-17-19',14,0,0.00000000,0.00000000,0.00000000),
+(594,5001,'DEMO-5001-WHT-128-12G-W24','DEMO-5001-WHT-128-12G-W24','','','','','',53500.0000,26.0000,1,1.0000,1,'','2-13-17-20',15,1,0.00000000,0.00000000,0.00000000),
+(595,5001,'DEMO-5001-WHT-256-8G-W12','DEMO-5001-WHT-256-8G-W12','','','','','',53500.0000,27.0000,1,1.0000,1,'','2-14-16-19',16,1,0.00000000,0.00000000,0.00000000),
+(596,5001,'DEMO-5001-WHT-256-8G-W24','DEMO-5001-WHT-256-8G-W24','','','','','',55000.0000,23.0000,1,1.0000,1,'','2-14-16-20',17,1,0.00000000,0.00000000,0.00000000),
+(597,5001,'DEMO-5001-WHT-256-12G-W12','DEMO-5001-WHT-256-12G-W12','','','','','',55500.0000,28.0000,1,1.0000,1,'','2-14-17-19',18,1,0.00000000,0.00000000,0.00000000),
+(598,5001,'DEMO-5001-WHT-256-12G-W24','DEMO-5001-WHT-256-12G-W24','','','','','',57000.0000,21.0000,1,1.0000,1,'','2-14-17-20',19,1,0.00000000,0.00000000,0.00000000),
+(599,5001,'DEMO-5001-WHT-512-8G-W12','DEMO-5001-WHT-512-8G-W12','','','','','',57000.0000,22.0000,1,1.0000,1,'','2-15-16-19',20,1,0.00000000,0.00000000,0.00000000),
+(600,5001,'DEMO-5001-WHT-512-8G-W24','DEMO-5001-WHT-512-8G-W24','','','','','',58500.0000,22.0000,1,1.0000,1,'','2-15-16-20',21,1,0.00000000,0.00000000,0.00000000),
+(601,5001,'DEMO-5001-WHT-512-12G-W12','DEMO-5001-WHT-512-12G-W12','','','','','',59000.0000,25.0000,1,1.0000,1,'','2-15-17-19',22,1,0.00000000,0.00000000,0.00000000),
+(602,5001,'DEMO-5001-WHT-512-12G-W24','DEMO-5001-WHT-512-12G-W24','','','','','',60500.0000,33.0000,1,1.0000,1,'','2-15-17-20',23,1,0.00000000,0.00000000,0.00000000),
+(603,5001,'DEMO-5001-SLV-128-8G-W12','DEMO-5001-SLV-128-8G-W12','','','','','',50000.0000,21.0000,1,1.0000,1,'','3-13-16-19',24,1,0.00000000,0.00000000,0.00000000),
+(604,5001,'DEMO-5001-SLV-128-8G-W24','DEMO-5001-SLV-128-8G-W24','','','','','',51500.0000,27.0000,1,1.0000,1,'','3-13-16-20',25,1,0.00000000,0.00000000,0.00000000),
+(605,5001,'DEMO-5001-SLV-128-12G-W12','DEMO-5001-SLV-128-12G-W12','','','','','',52000.0000,29.0000,1,1.0000,1,'','3-13-17-19',26,1,0.00000000,0.00000000,0.00000000),
+(606,5001,'DEMO-5001-SLV-128-12G-W24','DEMO-5001-SLV-128-12G-W24','','','','','',53500.0000,25.0000,1,1.0000,1,'','3-13-17-20',27,0,0.00000000,0.00000000,0.00000000),
+(607,5001,'DEMO-5001-SLV-256-8G-W12','DEMO-5001-SLV-256-8G-W12','','','','','',53500.0000,22.0000,1,1.0000,1,'','3-14-16-19',28,1,0.00000000,0.00000000,0.00000000),
+(608,5001,'DEMO-5001-SLV-256-8G-W24','DEMO-5001-SLV-256-8G-W24','','','','','',55000.0000,21.0000,1,1.0000,1,'','3-14-16-20',29,1,0.00000000,0.00000000,0.00000000),
+(609,5001,'DEMO-5001-SLV-256-12G-W12','DEMO-5001-SLV-256-12G-W12','','','','','',55500.0000,27.0000,1,1.0000,1,'','3-14-17-19',30,0,0.00000000,0.00000000,0.00000000),
+(610,5001,'DEMO-5001-SLV-256-12G-W24','DEMO-5001-SLV-256-12G-W24','','','','','',57000.0000,23.0000,1,1.0000,1,'','3-14-17-20',31,1,0.00000000,0.00000000,0.00000000),
+(611,5001,'DEMO-5001-SLV-512-8G-W12','DEMO-5001-SLV-512-8G-W12','','','','','',57000.0000,25.0000,1,1.0000,1,'','3-15-16-19',32,1,0.00000000,0.00000000,0.00000000),
+(612,5001,'DEMO-5001-SLV-512-8G-W24','DEMO-5001-SLV-512-8G-W24','','','','','',58500.0000,28.0000,1,1.0000,1,'','3-15-16-20',33,1,0.00000000,0.00000000,0.00000000),
+(613,5001,'DEMO-5001-SLV-512-12G-W12','DEMO-5001-SLV-512-12G-W12','','','','','',59000.0000,27.0000,1,1.0000,1,'','3-15-17-19',34,1,0.00000000,0.00000000,0.00000000),
+(614,5001,'DEMO-5001-SLV-512-12G-W24','DEMO-5001-SLV-512-12G-W24','','','','','',60500.0000,27.0000,1,1.0000,1,'','3-15-17-20',35,1,0.00000000,0.00000000,0.00000000),
+(615,5002,'DEMO-5002-BLK-256-12G','DEMO-5002-BLK-256-12G','','','','','',61349.1282,30.0000,1,1.0000,1,'','1-14-17',0,1,0.00000000,0.00000000,0.00000000),
+(616,5002,'DEMO-5002-BLK-256-16G','DEMO-5002-BLK-256-16G','','','','','',64349.1282,0.0000,1,1.0000,1,'','1-14-18',0,1,0.00000000,0.00000000,0.00000000),
+(617,5002,'DEMO-5002-BLK-512-12G','DEMO-5002-BLK-512-12G','','','','','',64849.1282,25.0000,1,1.0000,1,'','1-15-17',2,1,0.00000000,0.00000000,0.00000000),
+(618,5002,'DEMO-5002-BLK-512-16G','DEMO-5002-BLK-512-16G','','','','','',67849.1282,29.0000,1,1.0000,1,'','1-15-18',3,1,0.00000000,0.00000000,0.00000000),
+(619,5002,'DEMO-5002-SLV-256-12G','DEMO-5002-SLV-256-12G','','','','','',61349.1282,27.0000,1,1.0000,1,'','3-14-17',4,1,0.00000000,0.00000000,0.00000000),
+(620,5002,'DEMO-5002-SLV-256-16G','DEMO-5002-SLV-256-16G','','','','','',64349.1282,22.0000,1,1.0000,1,'','3-14-18',5,0,0.00000000,0.00000000,0.00000000),
+(621,5002,'DEMO-5002-SLV-512-12G','DEMO-5002-SLV-512-12G','','','','','',64849.1282,28.0000,1,1.0000,1,'','3-15-17',6,0,0.00000000,0.00000000,0.00000000),
+(622,5002,'DEMO-5002-SLV-512-16G','DEMO-5002-SLV-512-16G','','','','','',67849.1282,22.0000,1,1.0000,1,'','3-15-18',7,1,0.00000000,0.00000000,0.00000000),
+(623,5002,'DEMO-5002-BLU-256-12G','DEMO-5002-BLU-256-12G','','','','','',61349.1282,31.0000,1,1.0000,1,'','4-14-17',8,1,0.00000000,0.00000000,0.00000000),
+(624,5002,'DEMO-5002-BLU-256-16G','DEMO-5002-BLU-256-16G','','','','','',64349.1282,22.0000,1,1.0000,1,'','4-14-18',9,1,0.00000000,0.00000000,0.00000000),
+(625,5002,'DEMO-5002-BLU-512-12G','DEMO-5002-BLU-512-12G','','','','','',64849.1282,22.0000,1,1.0000,1,'','4-15-17',10,0,0.00000000,0.00000000,0.00000000),
+(626,5002,'DEMO-5002-BLU-512-16G','DEMO-5002-BLU-512-16G','','','','','',67849.1282,25.0000,1,1.0000,1,'','4-15-18',11,0,0.00000000,0.00000000,0.00000000),
+(627,5003,'DEMO-5003-WHT-128-8G','DEMO-5003-WHT-128-8G','','','','','',45999.0544,29.0000,1,1.0000,1,'','2-13-16',0,1,0.00000000,0.00000000,0.00000000),
+(628,5003,'DEMO-5003-WHT-128-12G','DEMO-5003-WHT-128-12G','','','','','',48499.0544,30.0000,1,1.0000,1,'','2-13-17',1,1,0.00000000,0.00000000,0.00000000),
+(629,5003,'DEMO-5003-WHT-256-8G','DEMO-5003-WHT-256-8G','','','','','',48499.0544,30.0000,1,1.0000,1,'','2-14-16',2,1,0.00000000,0.00000000,0.00000000),
+(630,5003,'DEMO-5003-WHT-256-12G','DEMO-5003-WHT-256-12G','','','','','',50999.0544,40.0000,1,1.0000,1,'','2-14-17',3,1,0.00000000,0.00000000,0.00000000),
+(631,5003,'DEMO-5003-BLU-128-8G','DEMO-5003-BLU-128-8G','','','','','',45999.0544,39.0000,1,1.0000,1,'','4-13-16',4,1,0.00000000,0.00000000,0.00000000),
+(632,5003,'DEMO-5003-BLU-128-12G','DEMO-5003-BLU-128-12G','','','','','',48499.0544,30.0000,1,1.0000,1,'','4-13-17',5,1,0.00000000,0.00000000,0.00000000),
+(633,5003,'DEMO-5003-BLU-256-8G','DEMO-5003-BLU-256-8G','','','','','',48499.0544,27.0000,1,1.0000,1,'','4-14-16',6,1,0.00000000,0.00000000,0.00000000),
+(634,5003,'DEMO-5003-BLU-256-12G','DEMO-5003-BLU-256-12G','','','','','',50999.0544,31.0000,1,1.0000,1,'','4-14-17',7,1,0.00000000,0.00000000,0.00000000),
+(635,5003,'DEMO-5003-GRN-128-8G','DEMO-5003-GRN-128-8G','','','','','',45999.0544,33.0000,1,1.0000,1,'','5-13-16',8,1,0.00000000,0.00000000,0.00000000),
+(636,5003,'DEMO-5003-GRN-128-12G','DEMO-5003-GRN-128-12G','','','','','',48499.0544,36.0000,1,1.0000,1,'','5-13-17',9,1,0.00000000,0.00000000,0.00000000),
+(637,5003,'DEMO-5003-GRN-256-8G','DEMO-5003-GRN-256-8G','','','','','',48499.0544,37.0000,1,1.0000,1,'','5-14-16',10,1,0.00000000,0.00000000,0.00000000),
+(638,5003,'DEMO-5003-GRN-256-12G','DEMO-5003-GRN-256-12G','','','','','',50999.0544,30.0000,1,1.0000,1,'','5-14-17',11,1,0.00000000,0.00000000,0.00000000),
+(639,5004,'DEMO-5004-BLK-256-12G','DEMO-5004-BLK-256-12G','','','','','',40882.3632,41.0000,1,1.0000,1,'','1-14-17',0,1,0.00000000,0.00000000,0.00000000),
+(640,5004,'DEMO-5004-BLK-256-16G','DEMO-5004-BLK-256-16G','','','','','',43382.3632,35.0000,1,1.0000,1,'','1-14-18',1,0,0.00000000,0.00000000,0.00000000),
+(641,5004,'DEMO-5004-BLK-512-12G','DEMO-5004-BLK-512-12G','','','','','',43882.3632,34.0000,1,1.0000,1,'','1-15-17',2,1,0.00000000,0.00000000,0.00000000),
+(642,5004,'DEMO-5004-BLK-512-16G','DEMO-5004-BLK-512-16G','','','','','',46382.3632,36.0000,1,1.0000,1,'','1-15-18',3,0,0.00000000,0.00000000,0.00000000),
+(643,5004,'DEMO-5004-RED-256-12G','DEMO-5004-RED-256-12G','','','','','',40882.3632,39.0000,1,1.0000,1,'','6-14-17',4,1,0.00000000,0.00000000,0.00000000),
+(644,5004,'DEMO-5004-RED-256-16G','DEMO-5004-RED-256-16G','','','','','',43382.3632,44.0000,1,1.0000,1,'','6-14-18',5,1,0.00000000,0.00000000,0.00000000),
+(645,5004,'DEMO-5004-RED-512-12G','DEMO-5004-RED-512-12G','','','','','',43882.3632,41.0000,1,1.0000,1,'','6-15-17',6,1,0.00000000,0.00000000,0.00000000),
+(646,5004,'DEMO-5004-RED-512-16G','DEMO-5004-RED-512-16G','','','','','',46382.3632,41.0000,1,1.0000,1,'','6-15-18',7,1,0.00000000,0.00000000,0.00000000),
+(647,5005,'DEMO-5005-8G-13','DEMO-5005-8G-13','','','','','',66465.8195,44.0000,1,1.0000,1,'','16-31',0,1,0.00000000,0.00000000,0.00000000),
+(648,5005,'DEMO-5005-8G-14','DEMO-5005-8G-14','','','','','',66465.8195,48.0000,1,1.0000,1,'','16-32',1,1,0.00000000,0.00000000,0.00000000),
+(649,5005,'DEMO-5005-12G-13','DEMO-5005-12G-13','','','','','',68965.8195,54.0000,1,1.0000,1,'','17-31',2,1,0.00000000,0.00000000,0.00000000),
+(650,5005,'DEMO-5005-12G-14','DEMO-5005-12G-14','','','','','',68965.8195,47.0000,1,1.0000,1,'','17-32',3,1,0.00000000,0.00000000,0.00000000),
+(651,5006,'DEMO-5006-8G-13','DEMO-5006-8G-13','','','','','',775.0700,51.0000,1,1.0000,1,'','16-31',0,1,0.00000000,0.00000000,0.00000000),
+(652,5006,'DEMO-5006-8G-16','DEMO-5006-8G-16','','','','','',8775.0700,51.0000,1,1.0000,1,'','16-33',1,1,0.00000000,0.00000000,0.00000000),
+(653,5006,'DEMO-5006-12G-13','DEMO-5006-12G-13','','','','','',3275.0700,57.0000,1,1.0000,1,'','17-31',2,1,0.00000000,0.00000000,0.00000000),
+(654,5006,'DEMO-5006-12G-16','DEMO-5006-12G-16','','','','','',11275.0700,56.0000,1,1.0000,1,'','17-33',3,1,0.00000000,0.00000000,0.00000000),
+(655,5007,'DEMO-5007-12G-14','DEMO-5007-12G-14','','','','','',86932.5845,60.0000,1,1.0000,1,'','17-32',0,1,0.00000000,0.00000000,0.00000000),
+(656,5007,'DEMO-5007-12G-16','DEMO-5007-12G-16','','','','','',92932.5845,68.0000,1,1.0000,1,'','17-33',1,1,0.00000000,0.00000000,0.00000000),
+(657,5007,'DEMO-5007-16G-14','DEMO-5007-16G-14','','','','','',89932.5845,60.0000,1,1.0000,1,'','18-32',2,1,0.00000000,0.00000000,0.00000000),
+(658,5007,'DEMO-5007-16G-16','DEMO-5007-16G-16','','','','','',95932.5845,57.0000,1,1.0000,1,'','18-33',3,1,0.00000000,0.00000000,0.00000000),
+(659,5008,'DEMO-5008-BLK-W12','DEMO-5008-BLK-W12','','','','','',17857.2525,65.0000,1,1.0000,1,'','1-19',0,1,0.00000000,0.00000000,0.00000000),
+(660,5008,'DEMO-5008-BLK-W24','DEMO-5008-BLK-W24','','','','','',19057.2525,65.0000,1,1.0000,1,'','1-20',1,1,0.00000000,0.00000000,0.00000000),
+(661,5008,'DEMO-5008-WHT-W12','DEMO-5008-WHT-W12','','','','','',17857.2525,67.0000,1,1.0000,1,'','2-19',2,1,0.00000000,0.00000000,0.00000000),
+(662,5008,'DEMO-5008-WHT-W24','DEMO-5008-WHT-W24','','','','','',19057.2525,68.0000,1,1.0000,1,'','2-20',3,1,0.00000000,0.00000000,0.00000000),
+(663,5009,'DEMO-5009-BLK-W12','DEMO-5009-BLK-W12','','','','','',21950.6055,70.0000,1,1.0000,1,'','1-19',0,1,0.00000000,0.00000000,0.00000000),
+(664,5009,'DEMO-5009-BLK-W24','DEMO-5009-BLK-W24','','','','','',23150.6055,71.0000,1,1.0000,1,'','1-20',1,1,0.00000000,0.00000000,0.00000000),
+(665,5009,'DEMO-5009-WHT-W12','DEMO-5009-WHT-W12','','','','','',21950.6055,80.0000,1,1.0000,1,'','2-19',2,1,0.00000000,0.00000000,0.00000000),
+(666,5009,'DEMO-5009-WHT-W24','DEMO-5009-WHT-W24','','','','','',23150.6055,75.0000,1,1.0000,1,'','2-20',3,1,0.00000000,0.00000000,0.00000000),
+(667,5010,'DEMO-5010-BLK-W12','DEMO-5010-BLK-W12','','','','','',7623.8700,82.0000,1,1.0000,1,'','1-19',0,1,0.00000000,0.00000000,0.00000000),
+(668,5010,'DEMO-5010-BLK-W24','DEMO-5010-BLK-W24','','','','','',8823.8700,87.0000,1,1.0000,1,'','1-20',1,1,0.00000000,0.00000000,0.00000000),
+(669,5010,'DEMO-5010-BLU-W12','DEMO-5010-BLU-W12','','','','','',7623.8700,90.0000,1,1.0000,1,'','4-19',0,1,0.00000000,0.00000000,0.00000000),
+(670,5010,'DEMO-5010-BLU-W24','DEMO-5010-BLU-W24','','','','','',8823.8700,79.0000,1,1.0000,1,'','4-20',3,1,0.00000000,0.00000000,0.00000000),
+(671,5011,'DEMO-5011-W12','DEMO-5011-W12','','','','','',4553.8552,11.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(672,5011,'DEMO-5011-W24','DEMO-5011-W24','','','','','',6053.8552,0.0000,0,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(673,5012,'DEMO-5012-W12','DEMO-5012-W12','','','','','',10182.2156,36.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(674,5012,'DEMO-5012-W24','DEMO-5012-W24','','','','','',11682.2156,28.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(675,5013,'DEMO-5013-W12','DEMO-5013-W12','','','','','',28090.6350,38.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(676,5013,'DEMO-5013-W24','DEMO-5013-W24','','','','','',30090.6350,38.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(677,5014,'DEMO-5014-W12','DEMO-5014-W12','','','','','',25532.2894,39.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(678,5014,'DEMO-5014-W24','DEMO-5014-W24','','','','','',26732.2894,37.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(679,5015,'DEMO-5015-W12','DEMO-5015-W12','','','','','',6600.5317,45.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(680,5015,'DEMO-5015-W24','DEMO-5015-W24','','','','','',7600.5317,49.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(681,5016,'DEMO-5016-W12','DEMO-5016-W12','','','','','',14275.5686,53.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(682,5016,'DEMO-5016-W24','DEMO-5016-W24','','','','','',15775.5686,55.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(683,5017,'DEMO-5017-W12','DEMO-5017-W12','','','','','',38324.0175,68.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(684,5017,'DEMO-5017-W24','DEMO-5017-W24','','','','','',40324.0175,70.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(685,5018,'DEMO-5018-W12','DEMO-5018-W12','','','','','',40882.3632,69.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(686,5018,'DEMO-5018-W24','DEMO-5018-W24','','','','','',42882.3632,77.0000,1,1.0000,1,'','20',0,1,0.00000000,0.00000000,0.00000000),
+(687,5019,'DEMO-5019-W12','DEMO-5019-W12','','','','','',8647.2082,84.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(688,5019,'DEMO-5019-W24','DEMO-5019-W24','','','','','',9847.2082,80.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(689,5020,'DEMO-5020-W12','DEMO-5020-W12','','','','','',6600.5317,83.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(690,5020,'DEMO-5020-W24','DEMO-5020-W24','','','','','',8100.5317,82.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(691,5021,'DEMO-5021-BLK-S','DEMO-5021-BLK-S','','','','','',4553.8552,25.0000,1,1.0000,1,'','1-8',0,1,0.00000000,0.00000000,0.00000000),
+(692,5021,'DEMO-5021-BLK-M','DEMO-5021-BLK-M','','','','','',4553.8552,32.0000,1,1.0000,1,'','1-9',1,1,0.00000000,0.00000000,0.00000000),
+(693,5021,'DEMO-5021-BLK-L','DEMO-5021-BLK-L','','','','','',4553.8552,28.0000,1,1.0000,1,'','1-10',2,1,0.00000000,0.00000000,0.00000000),
+(694,5021,'DEMO-5021-BLU-S','DEMO-5021-BLU-S','','','','','',4553.8552,25.0000,1,1.0000,1,'','4-8',3,1,0.00000000,0.00000000,0.00000000),
+(695,5021,'DEMO-5021-BLU-M','DEMO-5021-BLU-M','','','','','',4553.8552,26.0000,1,1.0000,1,'','4-9',4,1,0.00000000,0.00000000,0.00000000),
+(696,5021,'DEMO-5021-BLU-L','DEMO-5021-BLU-L','','','','','',4553.8552,26.0000,1,1.0000,1,'','4-10',5,1,0.00000000,0.00000000,0.00000000),
+(697,5022,'DEMO-5022-BLK-M','DEMO-5022-BLK-M','','','','','',6600.5317,34.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(698,5022,'DEMO-5022-BLK-L','DEMO-5022-BLK-L','','','','','',6600.5317,30.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(699,5022,'DEMO-5022-BLK-XL','DEMO-5022-BLK-XL','','','','','',6600.5317,35.0000,1,1.0000,1,'','1-11',2,1,0.00000000,0.00000000,0.00000000),
+(700,5022,'DEMO-5022-WHT-M','DEMO-5022-WHT-M','','','','','',6600.5317,39.0000,1,1.0000,1,'','2-9',3,1,0.00000000,0.00000000,0.00000000),
+(701,5022,'DEMO-5022-WHT-L','DEMO-5022-WHT-L','','','','','',6600.5317,35.0000,1,1.0000,1,'','2-10',4,1,0.00000000,0.00000000,0.00000000),
+(702,5022,'DEMO-5022-WHT-XL','DEMO-5022-WHT-XL','','','','','',6600.5317,31.0000,1,1.0000,1,'','2-11',5,1,0.00000000,0.00000000,0.00000000),
+(703,5023,'DEMO-5023-WHT-S','DEMO-5023-WHT-S','','','','','',61349.1300,11.0000,1,2.0000,1,'','2-8',0,1,0.00000000,0.00000000,0.00000000),
+(704,5023,'DEMO-5023-WHT-M','DEMO-5023-WHT-M','','','','','',61349.1300,11.0000,1,1.0000,1,'','2-9',0,1,0.00000000,0.00000000,0.00000000),
+(705,5023,'DEMO-5023-WHT-L','DEMO-5023-WHT-L','','','','','',61349.1300,16.0000,1,1.0000,1,'','2-10',2,0,0.00000000,0.00000000,0.00000000),
+(706,5023,'DEMO-5023-SLV-S','DEMO-5023-SLV-S','','','','','',61349.1300,20.0000,1,1.0000,1,'','3-8',3,1,0.00000000,0.00000000,0.00000000),
+(707,5023,'DEMO-5023-SLV-M','DEMO-5023-SLV-M','','','','','',61349.1300,19.0000,1,1.0000,1,'','3-9',4,1,0.00000000,0.00000000,0.00000000),
+(708,5023,'DEMO-5023-SLV-L','DEMO-5023-SLV-L','','','','','',61349.1300,21.0000,1,1.0000,1,'','3-10',0,1,0.00000000,0.00000000,0.00000000),
+(709,5024,'DEMO-5024-BLK-XS','DEMO-5024-BLK-XS','','','','','',4042.1861,53.0000,1,1.0000,1,'','1-7',0,1,0.00000000,0.00000000,0.00000000),
+(710,5024,'DEMO-5024-BLK-S','DEMO-5024-BLK-S','','','','','',4042.1861,42.0000,1,1.0000,1,'','1-8',1,0,0.00000000,0.00000000,0.00000000),
+(711,5024,'DEMO-5024-BLK-M','DEMO-5024-BLK-M','','','','','',4042.1861,52.0000,1,1.0000,1,'','1-9',2,0,0.00000000,0.00000000,0.00000000),
+(712,5024,'DEMO-5024-WHT-XS','DEMO-5024-WHT-XS','','','','','',4042.1861,48.0000,1,1.0000,1,'','2-7',3,1,0.00000000,0.00000000,0.00000000),
+(713,5024,'DEMO-5024-WHT-S','DEMO-5024-WHT-S','','','','','',4042.1861,53.0000,1,1.0000,1,'','2-8',4,1,0.00000000,0.00000000,0.00000000),
+(714,5024,'DEMO-5024-WHT-M','DEMO-5024-WHT-M','','','','','',4042.1861,52.0000,1,1.0000,1,'','2-9',5,1,0.00000000,0.00000000,0.00000000),
+(715,5025,'DEMO-5025-WHT-M','DEMO-5025-WHT-M','','','','','',3530.5170,54.0000,1,1.0000,1,'','2-9',0,1,0.00000000,0.00000000,0.00000000),
+(716,5025,'DEMO-5025-WHT-L','DEMO-5025-WHT-L','','','','','',3530.5170,50.0000,1,1.0000,1,'','2-10',1,1,0.00000000,0.00000000,0.00000000),
+(717,5025,'DEMO-5025-SLV-M','DEMO-5025-SLV-M','','','','','',3530.5170,53.0000,1,1.0000,1,'','3-9',2,1,0.00000000,0.00000000,0.00000000),
+(718,5025,'DEMO-5025-SLV-L','DEMO-5025-SLV-L','','','','','',3530.5170,56.0000,1,1.0000,1,'','3-10',3,1,0.00000000,0.00000000,0.00000000),
+(719,5026,'DEMO-5026-BLK-M','DEMO-5026-BLK-M','','','','','',4553.8552,62.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(720,5026,'DEMO-5026-BLK-L','DEMO-5026-BLK-L','','','','','',4553.8552,60.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(721,5026,'DEMO-5026-BLK-XL','DEMO-5026-BLK-XL','','','','','',4553.8552,60.0000,1,1.0000,1,'','1-11',2,1,0.00000000,0.00000000,0.00000000),
+(722,5026,'DEMO-5026-BLU-M','DEMO-5026-BLU-M','','','','','',4553.8552,66.0000,1,1.0000,1,'','4-9',3,1,0.00000000,0.00000000,0.00000000),
+(723,5026,'DEMO-5026-BLU-L','DEMO-5026-BLU-L','','','','','',4553.8552,67.0000,1,1.0000,1,'','4-10',4,1,0.00000000,0.00000000,0.00000000),
+(724,5026,'DEMO-5026-BLU-XL','DEMO-5026-BLU-XL','','','','','',4553.8552,60.0000,1,1.0000,1,'','4-11',5,1,0.00000000,0.00000000,0.00000000),
+(725,5027,'DEMO-5027-BLK-M','DEMO-5027-BLK-M','','','','','',12740.5612,69.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(726,5027,'DEMO-5027-BLK-L','DEMO-5027-BLK-L','','','','','',12740.5612,74.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(727,5027,'DEMO-5027-BLK-XL','DEMO-5027-BLK-XL','','','','','',12740.5612,74.0000,1,1.0000,1,'','1-11',2,1,0.00000000,0.00000000,0.00000000),
+(728,5027,'DEMO-5027-BLU-M','DEMO-5027-BLU-M','','','','','',12740.5612,62.0000,1,1.0000,1,'','4-9',3,1,0.00000000,0.00000000,0.00000000),
+(729,5027,'DEMO-5027-BLU-L','DEMO-5027-BLU-L','','','','','',12740.5612,63.0000,1,1.0000,1,'','4-10',4,0,0.00000000,0.00000000,0.00000000),
+(730,5027,'DEMO-5027-BLU-XL','DEMO-5027-BLU-XL','','','','','',12740.5612,68.0000,1,1.0000,1,'','4-11',5,1,0.00000000,0.00000000,0.00000000),
+(731,5028,'DEMO-5028-BLK-S','DEMO-5028-BLK-S','','','','','',3530.5170,71.0000,1,1.0000,1,'','1-8',0,0,0.00000000,0.00000000,0.00000000),
+(732,5028,'DEMO-5028-BLK-M','DEMO-5028-BLK-M','','','','','',3530.5170,68.0000,1,1.0000,1,'','1-9',1,1,0.00000000,0.00000000,0.00000000),
+(733,5028,'DEMO-5028-BLK-L','DEMO-5028-BLK-L','','','','','',3530.5170,77.0000,1,1.0000,1,'','1-10',2,1,0.00000000,0.00000000,0.00000000),
+(734,5028,'DEMO-5028-WHT-S','DEMO-5028-WHT-S','','','','','',3530.5170,69.0000,1,1.0000,1,'','2-8',3,1,0.00000000,0.00000000,0.00000000),
+(735,5028,'DEMO-5028-WHT-M','DEMO-5028-WHT-M','','','','','',3530.5170,72.0000,1,1.0000,1,'','2-9',4,1,0.00000000,0.00000000,0.00000000),
+(736,5028,'DEMO-5028-WHT-L','DEMO-5028-WHT-L','','','','','',3530.5170,71.0000,1,1.0000,1,'','2-10',5,1,0.00000000,0.00000000,0.00000000),
+(737,5029,'DEMO-5029-BLK-XS','DEMO-5029-BLK-XS','','','','','',7623.8700,79.0000,1,1.0000,1,'','1-7',0,1,0.00000000,0.00000000,0.00000000),
+(738,5029,'DEMO-5029-BLK-S','DEMO-5029-BLK-S','','','','','',7623.8700,80.0000,1,1.0000,1,'','1-8',1,1,0.00000000,0.00000000,0.00000000),
+(739,5029,'DEMO-5029-BLK-M','DEMO-5029-BLK-M','','','','','',7623.8700,77.0000,1,1.0000,1,'','1-9',2,1,0.00000000,0.00000000,0.00000000),
+(740,5029,'DEMO-5029-SLV-XS','DEMO-5029-SLV-XS','','','','','',7623.8700,79.0000,1,1.0000,1,'','3-7',3,1,0.00000000,0.00000000,0.00000000),
+(741,5029,'DEMO-5029-SLV-S','DEMO-5029-SLV-S','','','','','',7623.8700,86.0000,1,1.0000,1,'','3-8',4,0,0.00000000,0.00000000,0.00000000),
+(742,5029,'DEMO-5029-SLV-M','DEMO-5029-SLV-M','','','','','',7623.8700,86.0000,1,1.0000,1,'','3-9',5,1,0.00000000,0.00000000,0.00000000),
+(743,5030,'DEMO-5030-BLK-M','DEMO-5030-BLK-M','','','','','',4042.1861,87.0000,1,1.0000,1,'','1-9',0,0,0.00000000,0.00000000,0.00000000),
+(744,5030,'DEMO-5030-BLK-L','DEMO-5030-BLK-L','','','','','',4042.1861,83.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(745,5030,'DEMO-5030-GRN-M','DEMO-5030-GRN-M','','','','','',4042.1861,90.0000,1,1.0000,1,'','5-9',2,1,0.00000000,0.00000000,0.00000000),
+(746,5030,'DEMO-5030-GRN-L','DEMO-5030-GRN-L','','','','','',4042.1861,90.0000,1,1.0000,1,'','5-10',3,1,0.00000000,0.00000000,0.00000000),
+(747,5031,'DEMO-5031-BLK-M','DEMO-5031-BLK-M','','','','','',30648.9807,26.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(748,5031,'DEMO-5031-BLK-L','DEMO-5031-BLK-L','','','','','',30648.9807,27.0000,1,1.0000,1,'','1-10',1,0,0.00000000,0.00000000,0.00000000),
+(749,5031,'DEMO-5031-BLU-M','DEMO-5031-BLU-M','','','','','',30648.9807,29.0000,1,1.0000,1,'','4-9',2,1,0.00000000,0.00000000,0.00000000),
+(750,5031,'DEMO-5031-BLU-L','DEMO-5031-BLU-L','','','','','',30648.9807,26.0000,1,1.0000,1,'','4-10',3,1,0.00000000,0.00000000,0.00000000),
+(751,5032,'DEMO-5032-BLK-M','DEMO-5032-BLK-M','','','','','',4553.8552,34.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(752,5032,'DEMO-5032-BLK-L','DEMO-5032-BLK-L','','','','','',4553.8552,31.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(753,5032,'DEMO-5032-WHT-M','DEMO-5032-WHT-M','','','','','',4553.8552,29.0000,1,1.0000,1,'','2-9',2,0,0.00000000,0.00000000,0.00000000),
+(754,5032,'DEMO-5032-WHT-L','DEMO-5032-WHT-L','','','','','',4553.8552,37.0000,1,1.0000,1,'','2-10',3,1,0.00000000,0.00000000,0.00000000),
+(755,5033,'DEMO-5033-BLK-M','DEMO-5033-BLK-M','','','','','',10182.2156,42.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(756,5033,'DEMO-5033-BLK-L','DEMO-5033-BLK-L','','','','','',10182.2156,41.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(757,5033,'DEMO-5033-GRN-M','DEMO-5033-GRN-M','','','','','',10182.2156,43.0000,1,1.0000,1,'','5-9',2,1,0.00000000,0.00000000,0.00000000),
+(758,5033,'DEMO-5033-GRN-L','DEMO-5033-GRN-L','','','','','',10182.2156,48.0000,1,1.0000,1,'','5-10',3,1,0.00000000,0.00000000,0.00000000),
+(759,5034,'DEMO-5034-BLK-M','DEMO-5034-BLK-M','','','','','',2507.1787,0.0000,1,1.0000,1,'','1-9',0,0,0.00000000,0.00000000,0.00000000),
+(760,5034,'DEMO-5034-BLK-L','DEMO-5034-BLK-L','','','','','',2507.1787,0.0000,1,1.0000,1,'','1-10',1,0,0.00000000,0.00000000,0.00000000),
+(761,5034,'DEMO-5034-BLU-M','DEMO-5034-BLU-M','','','','','',2507.1787,0.0000,1,1.0000,1,'','4-9',2,0,0.00000000,0.00000000,0.00000000),
+(762,5034,'DEMO-5034-BLU-L','DEMO-5034-BLU-L','','','','','',2507.1787,0.0000,1,1.0000,1,'','4-10',3,0,0.00000000,0.00000000,0.00000000),
+(763,5035,'DEMO-5035-BLK-M','DEMO-5035-BLK-M','','','','','',4553.8552,54.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(764,5035,'DEMO-5035-BLK-L','DEMO-5035-BLK-L','','','','','',4553.8552,50.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(765,5035,'DEMO-5035-GRN-M','DEMO-5035-GRN-M','','','','','',4553.8552,51.0000,1,1.0000,1,'','5-9',2,1,0.00000000,0.00000000,0.00000000),
+(766,5035,'DEMO-5035-GRN-L','DEMO-5035-GRN-L','','','','','',4553.8552,57.0000,1,1.0000,1,'','5-10',3,1,0.00000000,0.00000000,0.00000000),
+(767,5036,'DEMO-5036-BLK-M','DEMO-5036-BLK-M','','','','','',12740.5612,61.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(768,5036,'DEMO-5036-BLK-L','DEMO-5036-BLK-L','','','','','',12740.5612,59.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(769,5036,'DEMO-5036-GRN-M','DEMO-5036-GRN-M','','','','','',12740.5612,64.0000,1,1.0000,1,'','5-9',2,1,0.00000000,0.00000000,0.00000000),
+(770,5036,'DEMO-5036-GRN-L','DEMO-5036-GRN-L','','','','','',12740.5612,68.0000,1,1.0000,1,'','5-10',3,1,0.00000000,0.00000000,0.00000000),
+(771,5037,'DEMO-5037-BLK-M','DEMO-5037-BLK-M','','','','','',2507.1787,71.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(772,5037,'DEMO-5037-BLK-L','DEMO-5037-BLK-L','','','','','',2507.1787,75.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(773,5037,'DEMO-5037-SLV-M','DEMO-5037-SLV-M','','','','','',2507.1787,67.0000,1,1.0000,1,'','3-9',2,1,0.00000000,0.00000000,0.00000000),
+(774,5037,'DEMO-5037-SLV-L','DEMO-5037-SLV-L','','','','','',2507.1787,69.0000,1,1.0000,1,'','3-10',3,0,0.00000000,0.00000000,0.00000000),
+(775,5038,'DEMO-5038-BLK-M','DEMO-5038-BLK-M','','','','','',22973.9438,81.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(776,5038,'DEMO-5038-BLK-L','DEMO-5038-BLK-L','','','','','',22973.9438,76.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(777,5038,'DEMO-5038-BLU-M','DEMO-5038-BLU-M','','','','','',22973.9438,83.0000,1,1.0000,1,'','4-9',2,0,0.00000000,0.00000000,0.00000000),
+(778,5038,'DEMO-5038-BLU-L','DEMO-5038-BLU-L','','','','','',22973.9438,71.0000,1,1.0000,1,'','4-10',3,1,0.00000000,0.00000000,0.00000000),
+(779,5039,'DEMO-5039-BLK-M','DEMO-5039-BLK-M','','','','','',45999.0544,91.0000,1,1.0000,1,'','1-9',0,0,0.00000000,0.00000000,0.00000000),
+(780,5039,'DEMO-5039-BLK-L','DEMO-5039-BLK-L','','','','','',45999.0544,81.0000,1,1.0000,1,'','1-10',1,1,0.00000000,0.00000000,0.00000000),
+(781,5039,'DEMO-5039-WHT-M','DEMO-5039-WHT-M','','','','','',45999.0544,87.0000,1,1.0000,1,'','2-9',2,1,0.00000000,0.00000000,0.00000000),
+(782,5039,'DEMO-5039-WHT-L','DEMO-5039-WHT-L','','','','','',45999.0544,91.0000,1,1.0000,1,'','2-10',3,1,0.00000000,0.00000000,0.00000000),
+(783,5040,'DEMO-5040-BLK-M','DEMO-5040-BLK-M','','','','','',10182.2156,92.0000,1,1.0000,1,'','1-9',0,1,0.00000000,0.00000000,0.00000000),
+(784,5040,'DEMO-5040-BLK-L','DEMO-5040-BLK-L','','','','','',10182.2156,98.0000,1,1.0000,1,'','1-10',1,0,0.00000000,0.00000000,0.00000000),
+(785,5040,'DEMO-5040-GRN-M','DEMO-5040-GRN-M','','','','','',10182.2156,95.0000,1,1.0000,1,'','5-9',2,1,0.00000000,0.00000000,0.00000000),
+(786,5040,'DEMO-5040-GRN-L','DEMO-5040-GRN-L','','','','','',10182.2156,94.0000,1,1.0000,1,'','5-10',3,1,0.00000000,0.00000000,0.00000000),
+(787,5041,'DEMO-5041-1L','DEMO-5041-1L','','','','','',716.3400,32.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(788,5041,'DEMO-5041-2L','DEMO-5041-2L','','','','','',916.3400,27.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(789,5042,'DEMO-5042-1L','DEMO-5042-1L','','','','','',972.1713,41.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(790,5042,'DEMO-5042-2L','DEMO-5042-2L','','','','','',1122.1713,40.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(791,5043,'DEMO-5043-1L','DEMO-5043-1L','','','','','',460.5022,49.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(792,5043,'DEMO-5043-2L','DEMO-5043-2L','','','','','',560.5022,49.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(793,5044,'DEMO-5044-1L','DEMO-5044-1L','','','','','',1228.0059,59.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(794,5044,'DEMO-5044-2L','DEMO-5044-2L','','','','','',1378.0059,47.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(795,5045,'DEMO-5045-1L','DEMO-5045-1L','','','','','',20415.5981,58.0000,1,1.0000,1,'','28',0,0,0.00000000,0.00000000,0.00000000),
+(796,5045,'DEMO-5045-2L','DEMO-5045-2L','','','','','',20665.5981,64.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(797,5046,'DEMO-5046-1L','DEMO-5046-1L','','','','','',5065.5243,60.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(798,5046,'DEMO-5046-2L','DEMO-5046-2L','','','','','',5265.5243,67.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(799,5047,'DEMO-5047-1L','DEMO-5047-1L','','','','','',7623.8700,69.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(800,5047,'DEMO-5047-2L','DEMO-5047-2L','','','','','',7823.8700,69.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(801,5048,'DEMO-5048-1L','DEMO-5048-1L','','','','','',15298.9069,0.0000,1,1.0000,1,'','28',0,0,0.00000000,0.00000000,0.00000000),
+(802,5048,'DEMO-5048-2L','DEMO-5048-2L','','','','','',15598.9069,45.0000,1,1.0000,1,'','29',0,1,0.00000000,0.00000000,0.00000000),
+(803,5049,'DEMO-5049-1L','DEMO-5049-1L','','','','','',7623.8700,81.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(804,5049,'DEMO-5049-2L','DEMO-5049-2L','','','','','',7773.8700,89.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(805,5050,'DEMO-5050-1L','DEMO-5050-1L','','','','','',1483.8405,0.0000,0,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(806,5050,'DEMO-5050-2L','DEMO-5050-2L','','','','','',1733.8405,9.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(807,5051,'DEMO-5051-STD','DEMO-5051-STD','','','','','',17857.2525,41.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(808,5051,'DEMO-5051-DLX','DEMO-5051-DLX','','','','','',20357.2525,37.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(809,5052,'DEMO-5052-STD','DEMO-5052-STD','','','','','',25532.2894,33.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(810,5052,'DEMO-5052-DLX','DEMO-5052-DLX','','','','','',28532.2894,39.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(811,5053,'DEMO-5053-STD','DEMO-5053-STD','','','','','',25532.2894,53.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(812,5053,'DEMO-5053-DLX','DEMO-5053-DLX','','','','','',28532.2894,45.0000,1,1.0000,1,'','24',1,0,0.00000000,0.00000000,0.00000000),
+(813,5054,'DEMO-5054-STD','DEMO-5054-STD','','','','','',7623.8700,51.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(814,5054,'DEMO-5054-DLX','DEMO-5054-DLX','','','','','',9123.8700,59.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(815,5055,'DEMO-5055-STD','DEMO-5055-STD','','','','','',10182.2156,60.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(816,5055,'DEMO-5055-DLX','DEMO-5055-DLX','','','','','',12182.2156,64.0000,1,1.0000,1,'','24',1,0,0.00000000,0.00000000,0.00000000),
+(817,5056,'DEMO-5056-STD','DEMO-5056-STD','','','','','',460.5022,64.0000,1,1.0000,1,'','23',0,0,0.00000000,0.00000000,0.00000000),
+(818,5056,'DEMO-5056-DLX','DEMO-5056-DLX','','','','','',1260.5022,76.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(819,5057,'DEMO-5057-STD','DEMO-5057-STD','','','','','',1483.8405,70.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(820,5057,'DEMO-5057-DLX','DEMO-5057-DLX','','','','','',2483.8405,71.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(821,5058,'DEMO-5058-STD','DEMO-5058-STD','','','','','',1228.0059,77.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(822,5058,'DEMO-5058-DLX','DEMO-5058-DLX','','','','','',1828.0059,77.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(823,5059,'DEMO-5059-STD','DEMO-5059-STD','','','','','',972.1713,97.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(824,5059,'DEMO-5059-DLX','DEMO-5059-DLX','','','','','',1472.1713,88.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(825,5060,'DEMO-5060-STD','DEMO-5060-STD','','','','','',716.3368,99.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(826,5060,'DEMO-5060-DLX','DEMO-5060-DLX','','','','','',1416.3368,102.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(827,5061,'DEMO-5061-STD','DEMO-5061-STD','','','','','',716.3368,40.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(828,5061,'DEMO-5061-DLX','DEMO-5061-DLX','','','','','',1216.3368,39.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(829,5062,'DEMO-5062-STD','DEMO-5062-STD','','','','','',716.3368,50.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(830,5062,'DEMO-5062-DLX','DEMO-5062-DLX','','','','','',1166.3368,46.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(831,5063,'DEMO-5063-STD','DEMO-5063-STD','','','','','',716.3368,53.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(832,5063,'DEMO-5063-DLX','DEMO-5063-DLX','','','','','',1116.3368,45.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(833,5064,'DEMO-5064-STD','DEMO-5064-STD','','','','','',716.3368,60.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(834,5064,'DEMO-5064-DLX','DEMO-5064-DLX','','','','','',1166.3368,55.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(835,5065,'DEMO-5065-STD','DEMO-5065-STD','','','','','',614.0030,65.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(836,5065,'DEMO-5065-DLX','DEMO-5065-DLX','','','','','',964.0030,71.0000,1,1.0000,1,'','24',1,0,0.00000000,0.00000000,0.00000000),
+(837,5066,'DEMO-5066-STD','DEMO-5066-STD','','','','','',614.0030,79.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(838,5066,'DEMO-5066-DLX','DEMO-5066-DLX','','','','','',1014.0030,74.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(839,5067,'DEMO-5067-STD','DEMO-5067-STD','','','','','',614.0030,84.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(840,5067,'DEMO-5067-DLX','DEMO-5067-DLX','','','','','',914.0030,76.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(841,5068,'DEMO-5068-STD','DEMO-5068-STD','','','','','',409.3353,84.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(842,5068,'DEMO-5068-DLX','DEMO-5068-DLX','','','','','',659.3353,83.0000,1,1.0000,1,'','24',1,0,0.00000000,0.00000000,0.00000000),
+(843,5069,'DEMO-5069-STD','DEMO-5069-STD','','','','','',716.3368,98.0000,1,1.0000,1,'','23',0,1,0.00000000,0.00000000,0.00000000),
+(844,5069,'DEMO-5069-DLX','DEMO-5069-DLX','','','','','',1116.3368,93.0000,1,1.0000,1,'','24',1,1,0.00000000,0.00000000,0.00000000),
+(845,5070,'DEMO-5070-STD','DEMO-5070-STD','','','','','',716.3368,0.0000,1,1.0000,1,'','23',0,0,0.00000000,0.00000000,0.00000000),
+(846,5070,'DEMO-5070-DLX','DEMO-5070-DLX','','','','','',1066.3368,0.0000,0,1.0000,1,'','24',1,0,0.00000000,0.00000000,0.00000000),
+(847,5071,'DEMO-5071-W12','DEMO-5071-W12','','','','','',10182.2156,40.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(848,5071,'DEMO-5071-W24','DEMO-5071-W24','','','','','',11382.2156,34.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(849,5072,'DEMO-5072-W12','DEMO-5072-W12','','','','','',5065.5243,44.0000,1,1.0000,1,'','19',0,0,0.00000000,0.00000000,0.00000000),
+(850,5072,'DEMO-5072-W24','DEMO-5072-W24','','','','','',6565.5243,0.0000,1,1.0000,1,'','20',0,1,0.00000000,0.00000000,0.00000000),
+(851,5073,'DEMO-5073-W12','DEMO-5073-W12','','','','','',1995.5096,56.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(852,5073,'DEMO-5073-W24','DEMO-5073-W24','','','','','',2795.5096,52.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(853,5074,'DEMO-5074-W12','DEMO-5074-W12','','','','','',1739.6750,63.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(854,5074,'DEMO-5074-W24','DEMO-5074-W24','','','','','',2539.6750,65.0000,1,1.0000,1,'','20',1,0,0.00000000,0.00000000,0.00000000),
+(855,5075,'DEMO-5075-W12','DEMO-5075-W12','','','','','',9.0000,66.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(856,5075,'DEMO-5075-W24','DEMO-5075-W24','','','','','',509.0000,68.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(857,5076,'DEMO-5076-W12','DEMO-5076-W12','','','','','',1228.0059,78.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(858,5076,'DEMO-5076-W24','DEMO-5076-W24','','','','','',2028.0059,69.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(859,5077,'DEMO-5077-W12','DEMO-5077-W12','','','','','',0.0000,25.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(860,5077,'DEMO-5077-W24','DEMO-5077-W24','','','','','',600.0000,21.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(861,5078,'DEMO-5078-W12','DEMO-5078-W12','','','','','',15298.9069,83.0000,1,1.0000,1,'','19',0,0,0.00000000,0.00000000,0.00000000),
+(862,5078,'DEMO-5078-W24','DEMO-5078-W24','','','','','',16798.9069,83.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(863,5079,'DEMO-5079-W12','DEMO-5079-W12','','','','','',1739.6750,100.0000,1,1.0000,1,'','19',0,1,0.00000000,0.00000000,0.00000000),
+(864,5079,'DEMO-5079-W24','DEMO-5079-W24','','','','','',2739.6750,101.0000,1,1.0000,1,'','20',1,1,0.00000000,0.00000000,0.00000000),
+(865,5085,'DEMO-5085-1L','DEMO-5085-1L','','','','','',1228.0059,66.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(866,5085,'DEMO-5085-2L','DEMO-5085-2L','','','','','',1528.0059,74.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(867,5086,'DEMO-5086-1L','DEMO-5086-1L','','','','','',1995.5096,85.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(868,5086,'DEMO-5086-2L','DEMO-5086-2L','','','','','',2395.5096,80.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(869,5087,'DEMO-5087-1L','DEMO-5087-1L','','','','','',1739.6750,81.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(870,5087,'DEMO-5087-2L','DEMO-5087-2L','','','','','',1989.6750,84.0000,1,1.0000,1,'','29',1,0,0.00000000,0.00000000,0.00000000),
+(871,5088,'DEMO-5088-2L','DEMO-5088-2L','','','','','',6600.5317,93.0000,1,1.0000,1,'','29',0,0,0.00000000,0.00000000,0.00000000),
+(872,5088,'DEMO-5088-5L','DEMO-5088-5L','','','','','',7100.5317,89.0000,1,1.0000,1,'','30',1,1,0.00000000,0.00000000,0.00000000),
+(873,5089,'DEMO-5089-1L','DEMO-5089-1L','','','','','',614.0030,105.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(874,5089,'DEMO-5089-2L','DEMO-5089-2L','','','','','',814.0030,100.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000),
+(875,5090,'DEMO-5090-1L','DEMO-5090-1L','','','','','',460.5022,24.0000,1,1.0000,1,'','28',0,1,0.00000000,0.00000000,0.00000000),
+(876,5090,'DEMO-5090-2L','DEMO-5090-2L','','','','','',610.5022,17.0000,1,1.0000,1,'','29',1,1,0.00000000,0.00000000,0.00000000);
 /*!40000 ALTER TABLE `oc_product_variant` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22257,7 +22374,16 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20260820_product_currency.sql','2026-08-22 07:57:55'),
 ('20260822_add_order_session_id.sql','2026-08-22 07:57:55'),
 ('20260822_stock_reserve_stale_days.sql','2026-08-22 08:57:28'),
-('20260823_warehouses.sql','2026-08-23 07:13:15');
+('20260823_configurable_head_stock.sql','2026-08-23 10:39:36'),
+('20260823_holiday_i18n.sql','2026-08-23 14:37:10'),
+('20260823_remove_store_locations.sql','2026-08-23 14:37:10'),
+('20260823_warehouse_multilang_address.sql','2026-08-23 14:09:02'),
+('20260823_warehouse_multilang_names.sql','2026-08-23 08:52:07'),
+('20260823_warehouses.sql','2026-08-23 07:13:15'),
+('20260824_fix_user_group_permissions.sql','2026-08-24 05:12:19'),
+('20260824_supplier_cost_profit.sql','2026-08-24 10:21:47'),
+('20260824_supplier_status_pending_default.sql','2026-08-24 10:21:47'),
+('20260825_add_variant_dimensions.sql','2026-08-24 10:21:47');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22310,7 +22436,7 @@ CREATE TABLE `oc_seo_url` (
   KEY `idx_store_id` (`store_id`),
   KEY `idx_store_language_query` (`store_id`,`language_id`,`query`(191)),
   KEY `idx_store_keyword` (`store_id`,`keyword`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=6673 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=6683 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22743,9 +22869,6 @@ INSERT INTO `oc_seo_url` VALUES
 (6114,0,1,'information_id=101','payment'),
 (6115,0,2,'information_id=101','oplata'),
 (6116,0,3,'information_id=101','oplata'),
-(6315,0,1,'product_id=5077','automotive-anker-roav-bluetooth-receiver-1'),
-(6316,0,2,'product_id=5077','automotive-anker-roav-bluetooth-receiver-2'),
-(6317,0,3,'product_id=5077','bluetooth-priemnik-anker-roav'),
 (6348,0,1,'product_id=5037','sports-outdoors-black-diamond-spot-400-1'),
 (6349,0,2,'product_id=5037','sports-outdoors-black-diamond-spot-400-2'),
 (6536,0,1,'manufacturer_id=310','brand-lego-1'),
@@ -22768,9 +22891,6 @@ INSERT INTO `oc_seo_url` VALUES
 (6627,0,3,'checkout/dockercart_checkout/restore','restore-cart'),
 (6628,0,1,'product_id=5048','beauty-health-braun-series-9-pro-1'),
 (6629,0,2,'product_id=5048','beauty-health-braun-series-9-pro-2'),
-(6636,0,1,'product_id=5023','adidas-ultraboost-light'),
-(6637,0,2,'product_id=5023','adidas-ultraboost-light'),
-(6638,0,3,'product_id=5023','adidas-ultraboost-light'),
 (6639,0,1,'category_id=108','automotive'),
 (6640,0,2,'category_id=108','avtomobilna-promislovist'),
 (6641,0,3,'category_id=108','avtomobilnaya-promyshlennost'),
@@ -22787,7 +22907,13 @@ INSERT INTO `oc_seo_url` VALUES
 (6659,0,2,'category_id=107','books-media-2'),
 (6670,0,1,'product_id=5041','beauty-health-cerave-hydrating-cleanser'),
 (6671,0,2,'product_id=5041','beauty-health-cerave-hydrating-cleanser-2'),
-(6672,0,3,'product_id=5041','ochischayuschee-sredstvo-dlya-litsa-cerave');
+(6672,0,3,'product_id=5041','ochischayuschee-sredstvo-dlya-litsa-cerave'),
+(6677,0,1,'product_id=5077','automotive-anker-roav-bluetooth-receiver-1'),
+(6678,0,2,'product_id=5077','automotive-anker-roav-bluetooth-receiver-2'),
+(6679,0,3,'product_id=5077','bluetooth-priemnik-anker-roav'),
+(6680,0,1,'product_id=5023','adidas-ultraboost-light'),
+(6681,0,2,'product_id=5023','adidas-ultraboost-light'),
+(6682,0,3,'product_id=5023','adidas-ultraboost-light');
 /*!40000 ALTER TABLE `oc_seo_url` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22816,78 +22942,33 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('063e1db2771791e40626218db4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Jg5grTPTA39YTvGMfRQi7AWtd2eGuFYs\"}','2026-08-23 07:34:54'),
-('09499cdff100ec1ab3078c191c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"CWbb5LqYyJCWCdYMk5VLO7vrpsbSo34y\"}','2026-08-23 07:34:55'),
-('0ba724bb5d1dffa76862a992b3','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"u8U4s0NNmjy8CETgZXl5EF7qDkBo3YzP\"}','2026-08-23 07:58:26'),
-('0f5134e2f1af6e5671160a3b0c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"rkSs4HnUMXAl1cAQjuazXJ5MoFe0Fyk2\"}','2026-08-23 07:38:49'),
-('12950e594f2813128c06469aa1','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"DZ9Pk4OYhEoaq8CfzxYGeAmQa0AWZBON\"}','2026-08-23 07:38:50'),
-('13ae99e8d279a18f2446bb0306','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"WfIoi5C3Zo1ZPPUeG1c2HIQMYNGw9tsV\"}','2026-08-23 07:59:49'),
-('19d9ffd3c6d5075a821b415ca6','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"FLWG1qzyduP8gF6amRzDZYWucz6aLo6i\"}','2026-08-23 07:38:48'),
-('1ae3ddaeec95365d2c2912699d','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"wcB5trstQ4qRLQJ8X5lvESwNGE14Ik9o\"}','2026-08-23 07:34:54'),
-('1ef909a81ca342ec943a9e5f04','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"0EyZWru2Gqf14bKrmNNCIbyc759pq54Q\"}','2026-08-23 07:38:47'),
-('232ec9a7ac0aaa4725d4d92803','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"2HEOHW4N8kOeewl6ikjxwJQxhY7BktmJ\"}','2026-08-23 07:58:07'),
+('06c5e77fb6512d86117e50e0f3','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"pickup_warehouse_id\":0,\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"warehouse_allocation\":{\"14752\":1,\"estimate\":{\"14752\":\"2026-08-23\",\"14750\":\"2026-08-23\",\"14751\":\"2026-08-23\"},\"14750\":1,\"14751\":1},\"csrf_token\":\"t9WOHkDCatP6X4XWxPGkdTa8L3Fc1UuW\"}','2026-08-24 17:59:05'),
 ('2498074d6462a5d39fd244b0e9','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:40:53'),
-('286df198ee6c76cdbdea255003','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"PvZOcjI8aGNqxHxJy6l654B7gj0uwXRx\"}','2026-08-23 07:59:49'),
-('3bff3b4b34a69128d8da6c7f99','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"ve7L72ZAjTT6gIUE7JV08bNuoLniVZUF\"}','2026-08-23 07:58:06'),
+('29a6e9b64bc18b2a61244cdb9d','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"Pnut0oH1LUqLT8hAFNavUxRnNRlbtUDL\"}','2026-08-25 10:28:50'),
+('39c4438c8ee96e5f1023749d8e','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 14:40:41'),
+('412d1698cfac93d51c24a86cfd','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"7dIHdlMw35VgRd6rKoS0OLuHBQbCj2d8\"}','2026-08-24 14:40:45'),
 ('4757b404ea2eef7cd7e18b5023','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"G8H9YddZsT1xqXavtvv0kxeANq2gupnr\"}','2026-08-24 07:40:53'),
-('47facb8ad8a03dd0850e07f7e6','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"B7d3LeMHWxGDYv0ERDodKhGdAwMN7U6H\"}','2026-08-23 07:58:26'),
-('534d479e96f44c99e302309fec','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"JYwEDBCJ8THJSoorEUD8ISzTkEFmpWef\"}','2026-08-23 07:38:47'),
-('55d19a2b176768eef80dd443b0','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"QRnhyfcxEpdU4UPDymo7MLnIkYZ0HDF5\"}','2026-08-23 07:58:25'),
-('55f3a4f6a486072bc56c00e1a2','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"DxBEO8M3IBo1SrfZtztsjJFdPzQigv4e\"}','2026-08-23 07:58:07'),
+('4ccfee0725f3e8c43c484e1695','{\"language\":\"uk-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"RmBcKW4O8CUmvJ8aBBj6dmC08TQKVO7X\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"shipping_methods\":{\"dockercart_universal\":{\"title\":\"\\u0414\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430\",\"quote\":{\"dockercart_universal_3\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430 \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0456\\u0432)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u0415\\u043a\\u0441\\u043f\\u0440\\u0435\\u0441-\\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (2-3 \\u0434\\u043d\\u0456)\",\"cost\":20,\"tax_class_id\":\"0\",\"text\":\"20 \\u20b4\",\"description\":\"\"},\"dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0421\\u0430\\u043c\\u043e\\u0432\\u0438\\u0432\\u0456\\u0437\",\"cost\":0,\"tax_class_id\":\"0\",\"text\":\"\\u0411\\u0435\\u0437\\u043a\\u043e\\u0448\\u0442\\u043e\\u0432\\u043d\\u043e\",\"description\":\"\"}},\"sort_order\":\"\",\"error\":false}},\"shipping_method\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430 \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0456\\u0432)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"pickup_warehouse_id\":0,\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_methods\":{\"dockercart_universal.dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041f\\u0456\\u0441\\u043b\\u044f\\u043f\\u043b\\u0430\\u0442\\u0430\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"},\"dockercart_universal.dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0411\\u0430\\u043d\\u043a\\u0456\\u0432\\u0441\\u044c\\u043a\\u0438\\u0439 \\u043f\\u0435\\u0440\\u0435\\u043a\\u0430\\u0437\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":5,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"}},\"payment_method\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041f\\u0456\\u0441\\u043b\\u044f\\u043f\\u043b\\u0430\\u0442\\u0430\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"},\"warehouse_allocation\":{\"14752\":1,\"estimate\":{\"14752\":\"2026-08-23\",\"14750\":\"2026-08-23\",\"14751\":\"2026-08-23\"},\"14750\":1,\"14751\":1}}','2026-08-24 08:08:55'),
 ('56035185b26527d0e473e06c03','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:40:48'),
-('56144729fc2664e0d6cf6a30c2','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"fcb9M7S7QwQvDY6U3WrVjV1bxMRtNa8q\"}','2026-08-23 07:58:06'),
-('5c47693e06e3dda4f9c8360385','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"CGUREzf23Wr825kep2oIzqW66ZYgLyRT\"}','2026-08-23 07:34:57'),
-('5d263c30a8ba4e15e98854f085','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"xeTNoEIwnNwgB2AGLs7SHQvjT98idQE3\"}','2026-08-23 07:38:48'),
-('5da8e0c260101c25929437240e','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"l116k8WbFApechiDLrRuL92OkrLpzXLh\"}','2026-08-23 07:38:47'),
-('5f148f3764b870242a9a1325b1','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Bx1ZskGEzAOGQ3SJHJxc5AT1cGct6Hzb\"}','2026-08-23 07:58:08'),
-('5f99f83140f39958e3aaae23f7','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"JBZfCafU3M9dPUfQybLPybNtF2rhuabm\"}','2026-08-23 07:58:26'),
 ('60bbd7d92900d9f1a8a5e6d7bb','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:41:06'),
-('66c5ac50ed0a47c8dca279d167','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"iVeBmFcOdJT51ohR6CiIUDA1vA7iudPH\"}','2026-08-23 07:58:25'),
-('674642a80192104b8b0eb4deed','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"WymB3xEDXzCybdSwSZb14uDEL5ZsI5zS\"}','2026-08-23 07:38:49'),
-('6d0cd48d76d0fd9c016897f464','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"XZMSIJJ6XgEaqdpI4PjjkUZrKGiNVVlE\"}','2026-08-23 07:35:50'),
-('7146fed37989ab01c6518ea664','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"gga0MadPb3fKv1JDy2x5B2U8gtKcE2XD\"}','2026-08-23 07:34:55'),
-('72f8605ab3fec203d1f57f0100','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"nRi8JkhGE21qZ4pBWDT8jIzuiYUfoSrk\"}','2026-08-23 07:34:02'),
-('78f6725578939f2a875f9dcf96','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"IIPst0GexMBXuAcCdIlkE6BrS8og4EMU\"}','2026-08-23 07:58:08'),
-('7e33246378c75bd906c91f8fab','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Lxx6OIXZTkGiSGIhrsnMrIWaAEWYy5Li\"}','2026-08-23 07:34:11'),
-('7f99a6a72578597e25ed44e953','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"uaUBXr06kxskC2VYPWzYX7gN3GXrftC9\"}','2026-08-23 07:38:50'),
-('83339bdb82baf76338e6e57f94','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"K4HoAWEKFe7QbMNBHRX232tLOwsYAd4s\"}','2026-08-23 07:34:55'),
-('8497b4d43ae79de7f7ccaf72f2','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"HybOEbmruH9hYVBwpEXcDw39CWYYZjUs\"}','2026-08-23 07:34:53'),
-('84e905190d694d946d145b9a2a','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"rbsAzeKT7g73QSYOW3TjR3aUmf67Pc2a\"}','2026-08-23 07:38:48'),
-('8606e67012f5ed454f88fdfcd7','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"qvNKUPaSLlsDk6TGuqK3znEj3R9LwDbz\"}','2026-08-23 07:58:08'),
-('86438d5288513fbe04c722a399','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"msYBKua1HliPcYeCz7sUDGXqY0QEXQ6H\"}','2026-08-23 07:34:54'),
-('8c3e9cb1eb0787406e5a7090e6','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"2h5CAswpaYpJUEfVK6Pl6NQObnuqlvCy\"}','2026-08-23 07:38:50'),
+('78c1959793f3076f0ffe169a43','{\"language\":\"uk-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"shipping_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"shipping_methods\":{\"dockercart_universal\":{\"title\":\"\\u0414\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430\",\"quote\":{\"dockercart_universal_3\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430 \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0456\\u0432)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u0415\\u043a\\u0441\\u043f\\u0440\\u0435\\u0441-\\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (2-3 \\u0434\\u043d\\u0456)\",\"cost\":20,\"tax_class_id\":\"0\",\"text\":\"20 \\u20b4\",\"description\":\"\"},\"dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0421\\u0430\\u043c\\u043e\\u0432\\u0438\\u0432\\u0456\\u0437\",\"cost\":0,\"tax_class_id\":\"0\",\"text\":\"\\u0411\\u0435\\u0437\\u043a\\u043e\\u0448\\u0442\\u043e\\u0432\\u043d\\u043e\",\"description\":\"\"}},\"sort_order\":\"\",\"error\":false}},\"shipping_method\":{\"code\":\"dockercart_universal.dockercart_universal_3\",\"title\":\"\\u0421\\u0442\\u0430\\u043d\\u0434\\u0430\\u0440\\u0442\\u043d\\u0430 \\u0434\\u043e\\u0441\\u0442\\u0430\\u0432\\u043a\\u0430 (4-5 \\u0434\\u043d\\u0456\\u0432)\",\"cost\":10,\"tax_class_id\":\"0\",\"text\":\"10 \\u20b4\",\"description\":\"\"},\"pickup_warehouse_id\":0,\"payment_address\":{\"firstname\":\"\",\"lastname\":\"\",\"company\":\"\",\"address_1\":\"\",\"address_2\":\"\",\"postcode\":\"\",\"city\":\"\",\"zone_id\":\"3490\",\"zone\":\"Kyiv\",\"zone_code\":\"30\",\"country_id\":\"220\",\"country\":\"Ukraine\",\"iso_code_2\":\"UA\",\"iso_code_3\":\"UKR\",\"address_format\":\"{lastname} {firstname}\\r\\n{company}\\r\\n{country}\\r\\n{zone}\\r\\n{city} {postcode}\\r\\n{address_1}\",\"custom_field\":[]},\"payment_methods\":{\"dockercart_universal.dockercart_universal_4\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041f\\u0456\\u0441\\u043b\\u044f\\u043f\\u043b\\u0430\\u0442\\u0430\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"},\"dockercart_universal.dockercart_universal_5\":{\"code\":\"dockercart_universal.dockercart_universal_5\",\"title\":\"\\u0411\\u0430\\u043d\\u043a\\u0456\\u0432\\u0441\\u044c\\u043a\\u0438\\u0439 \\u043f\\u0435\\u0440\\u0435\\u043a\\u0430\\u0437\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":5,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"}},\"payment_method\":{\"code\":\"dockercart_universal.dockercart_universal_4\",\"title\":\"\\u041f\\u0456\\u0441\\u043b\\u044f\\u043f\\u043b\\u0430\\u0442\\u0430\",\"terms\":\"\",\"sort_order\":0,\"dockercart_universal_method_id\":4,\"dockercart_universal_description\":\"\",\"dockercart_universal_parent_code\":\"dockercart_universal\",\"description\":\"\"},\"warehouse_allocation\":{\"14752\":1,\"estimate\":{\"14752\":\"2026-08-23\",\"14750\":\"2026-08-23\",\"14751\":\"2026-08-23\"},\"14750\":1,\"14751\":1}}','2026-08-24 09:06:00'),
+('88d9a145235ee497a4b90fdefd','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"Mf8YHRXSrWvAhByCWZhClsOrzSfg9znK\"}','2026-08-24 07:42:57'),
 ('93a30a960a90699373c6c59ae0','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:41:06'),
-('962f2e48670666747c6b829a86','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"Hm9ruq7KP72yif9Sr2vcj0m89XWv6LSu\"}','2026-08-23 07:58:07'),
-('97dc583f80f0c2c55df523aa24','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"OM0q519T6cCvtyQj9FTQdM5q98Gw3PTa\"}','2026-08-23 07:38:48'),
-('98a44ac3f229ea044a796b98a4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"TzIFAFfrlyBeK1MxHCy9Emqjrsx1rj8G\"}','2026-08-23 07:58:07'),
-('9c2c6d839380dd2a07b4590d50','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"fgDYx4d47b2GVevmpAG1HZsgoYYpysey\"}','2026-08-23 07:38:49'),
-('a14cccb42ad42d5a12d60494ad','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"7tiZgJRwhYyFoNDNYxa1roMupmoVuPdo\"}','2026-08-23 07:58:09'),
-('a434a45bf4edd8182552e31567','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"55e415HJHxawuWwHsSNYwxTu7p6DL2UU\"}','2026-08-23 07:34:56'),
-('a59cabaa82617faf79f1b357c4','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"TM2bGlfOc3vZtXG0xMrqgE0NIOcP5D6T\"}','2026-08-23 07:34:54'),
-('a7b460d96add242a951291d267','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"ABOkExC3cMGZ5L3k8a9WKWb81Ql6taZS\"}','2026-08-23 07:34:57'),
-('a7c0d906c2fbd4adf9cb6ef17b','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"wPk6lepYzz0o0sw08ceJsMvzpSAsvZEf\"}','2026-08-23 07:38:49'),
-('ab7edfb0cbd6f18b9c1f927d16','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"oto0GZioz6b8TMAvHeatPyB6BR5FX50h\"}','2026-08-23 07:34:55'),
-('af6bb57d38feca9d31a891f87a','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"ECH3y04A3G0020XeaRZlRSZNkXKAnVnj\"}','2026-08-23 07:58:08'),
-('b12481642f20a028bada884be0','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"3xkKGQm77tyScjKpqCjwf9RfjHj4Sp2h\"}','2026-08-23 07:58:26'),
-('b1dbec12fcef2fa4e5fb83e71e','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"FR5zOYy0Vc3gLIsBTQ6Ftiue28rXFOM1\"}','2026-08-23 07:38:47'),
-('b409410f95fd2b69242a7771bf','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"6cGhwQywiPB6dDzqRvDYwu8189oSF2LE\"}','2026-08-23 07:58:08'),
-('b8e2e4f3a640d85535364953dc','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"HtukjkHgKUZOjB8vFK17RJTWXbHV9UBd\"}','2026-08-23 07:59:49'),
+('9a03ffda0d2b9faa35a6e3b5c3','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"7oHDXIuASwSb2bvpjvAjGxgYkTFeyuQF\"}','2026-08-25 10:08:08'),
+('9c6e633fe2dd54d5e2ed2229dc','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"jD6G0AmDORWKNimSQ1C9i9dxvXQGtGGA\"}','2026-08-24 16:00:06'),
+('9ec94fbcdd8d6da767e02614a5','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 14:40:45'),
+('a9a5f67b3b0c1253091fd49692','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"lI6Ihbyqia5tyjxAi7jnxZCAIZtcNcpz\"}','2026-08-24 16:03:34'),
+('b2fdeaa8c231844f88415521f2','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 14:40:41'),
 ('ba99e100ab3641aa2fd209c032','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:40:48'),
-('bacc4e745ce6f4dbc40044a041','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"5WysEXv2ZwOqrhzJZgLU6ZhvIlTw3p4X\"}','2026-08-23 07:34:54'),
-('c875d204166c18eebf2f566521','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"ZX9jTXtapPFYZsqLz8NBSgXuv8whLuSK\"}','2026-08-23 07:58:07'),
-('c94c4de4e646b08d55d407b723','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"3xYiJ8ZUlJhxBU9kkLslvLfDZ8R7hdfD\"}','2026-08-23 07:38:50'),
-('ca342c8424c03e16b10a65526c','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"d3HNuorrvCy35wJD6u0w34JjrBD5Ugmp\"}','2026-08-23 07:58:26'),
-('d4c8b40eb559c27eaee450d45c','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"F1hTfL6eDcV3VqgSRJYHVbfE2w0MqpDz\"}','2026-08-23 07:58:06'),
-('d50b7e769a35c1c4b86d46a76f','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"AKvNNd2fyPQO1XrFHt8mUXMrzRwELoid\"}','2026-08-23 07:34:56'),
-('d855e09f54ac68a58ae343c676','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"smR15lYE804cuIEi1QhOGhbwTI0T9DIx\"}','2026-08-23 07:58:06'),
-('d9bd5cbf2db5a84fff85cb2baa','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"ElHlYoCLBPDZv6xYUSR5EH36dvdUmQh2\"}','2026-08-23 07:34:56'),
-('dbccaecbeadea167d91850e017','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"etMzPckuANHWqKPq41HBBFYNWHzkxBct\"}','2026-08-23 07:58:05'),
-('e142641b7b4f0f17cadd264bef','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"j6FPhabrLbiSdhG2czbOe7ZcORCCynQK\"}','2026-08-23 07:38:49'),
-('e44e399db7d05186c0f8f7a70f','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"g84ovITE0SNjPbuXvtUTNM5bmEWxFSgu\"}','2026-08-23 07:34:56'),
-('e729ab285b2dbbcd1b92605727','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"lhbitkiYwHNffsIQfILG5JlJkSzPCkZm\"}','2026-08-23 07:34:55'),
-('ee153dc03d0eecbfd391a884bb','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"0PfyO0SrYOkgrJPz9anPIwV6s0hK1OQr\"}','2026-08-23 07:58:09'),
-('f9262867404c8dfee7e09abf04','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"ClyVhEai3dJQYZXmHLlwNeExgPkTaKFX\"}','2026-08-23 07:37:52'),
-('fc0ec841e1797b3272e1a0be61','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"v4w7o6doIIwX8QGfzfdiomopVp0hHqyK\"}','2026-08-23 07:58:25');
+('c5281b549d7f4798f3e3bb2e38','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"CRLc4IgleFakGZ2iDl6DkCsVrBVUnqFD\"}','2026-08-24 16:00:39'),
+('d02dee4dce33d2f194566dc89d','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"Trf0IqJ1mV4JKZDkgQfPLyzmx8C5PJMF\"}','2026-08-24 14:40:45'),
+('d3b8e054e8d204e69f38c9fd45','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"oxh9YOY7UGJNEUaER1QPThnj0T3uV2K0\"}','2026-08-24 15:59:58'),
+('dac1d3724421a6d15d31c029c7','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 07:42:57'),
+('e7e15def044dbce06a3b997e4f','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"1fhsXSeyckT7lYMqusTDGPAlOF4EoPqP\"}','2026-08-25 10:28:32'),
+('f48d85738bb5398985c609e7f4','{\"language\":\"en-gb\",\"currency\":\"EUR\",\"csrf_token\":\"ZMsjzk7cpQ6K7S9SrxZWMC4mFGKWZKUm\"}','2026-08-24 16:03:45'),
+('f95f03f34f5354f9956126fbf5','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"DB5P407Nd2DzVxkOCedoz4mH172Wvcwq\"}','2026-08-24 19:29:45'),
+('fede3c122511b84765e7f25ecf','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-08-24 14:40:45'),
+('ff0694551d44c399a157c09459','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"0A3mrev7X9je0mB49ujki98Aqy7hyKN9\"}','2026-08-24 16:00:06');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22908,7 +22989,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31836 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=31898 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23007,8 +23088,6 @@ INSERT INTO `oc_setting` VALUES
 (22637,0,'theme_dockercart','theme_dockercart_image_compare_height','90',0),
 (22640,0,'theme_dockercart','theme_dockercart_image_cart_width','64',0),
 (22641,0,'theme_dockercart','theme_dockercart_image_cart_height','64',0),
-(22642,0,'theme_dockercart','theme_dockercart_image_location_width','268',0),
-(22643,0,'theme_dockercart','theme_dockercart_image_location_height','50',0),
 (26063,0,'report_dockercart_analytics','report_dockercart_analytics_status','1',0),
 (26064,0,'report_dockercart_analytics','report_dockercart_analytics_sort_order','0',0),
 (26149,0,'dashboard_chart','dashboard_chart_width','12',0),
@@ -23356,9 +23435,11 @@ INSERT INTO `oc_setting` VALUES
 (31830,0,'config','config_warehouse_show_pickup','1',0),
 (31831,0,'config','config_warehouse_estimate_enabled','1',0),
 (31832,0,'config','config_warehouse_dropship_checkout','0',0),
-(31833,0,'dockercart_update','dockercart_update_last_check','1787470566',0),
-(31834,0,'dockercart_update','dockercart_update_remote_version','3.10.0',0),
-(31835,0,'dockercart_update','dockercart_update_changelog','### Features\n\n* **stock:** add stale-days release for bound order holds ([91a8bdb](https://github.com/kdbsoft/dockercart/commit/91a8bdb787ba5b7b07353b664ebb63f0b0a04b8a))',0);
+(31893,0,'dockercart_update','dockercart_update_last_check','1787566250',0),
+(31894,0,'dockercart_update','dockercart_update_remote_version','3.10.0',0),
+(31895,0,'dockercart_update','dockercart_update_changelog','### Features\n\n* **stock:** add stale-days release for bound order holds ([91a8bdb](https://github.com/kdbsoft/dockercart/commit/91a8bdb787ba5b7b07353b664ebb63f0b0a04b8a))',0),
+(31896,0,'report_supplier_profit','report_supplier_profit_status','1',0),
+(31897,0,'report_supplier_profit','report_supplier_profit_sort_order','12',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23387,7 +23468,7 @@ CREATE TABLE `oc_stock_reservation` (
   KEY `idx_reservation_expiry` (`expires_at`),
   KEY `idx_reservation_order` (`order_id`),
   KEY `idx_reservation_warehouse` (`warehouse_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=377 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=486 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23397,9 +23478,6 @@ CREATE TABLE `oc_stock_reservation` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_stock_reservation` WRITE;
 /*!40000 ALTER TABLE `oc_stock_reservation` DISABLE KEYS */;
-INSERT INTO `oc_stock_reservation` VALUES
-(367,'cd7e72873260b72259e63365f9',5006,654,1.0000,99619,0,'2026-08-17 13:10:43','2026-08-17 12:40:43'),
-(368,'cd7e72873260b72259e63365f9',5062,829,1.0000,99619,0,'2026-08-17 13:10:43','2026-08-17 12:40:43');
 /*!40000 ALTER TABLE `oc_stock_reservation` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23714,7 +23792,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_user_group` WRITE;
 /*!40000 ALTER TABLE `oc_user_group` DISABLE KEYS */;
 INSERT INTO `oc_user_group` VALUES
-(1,'Administrator','{\"access\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/recycle_bin\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/recycle_bin\", \"warehouse/warehouse\", \"warehouse/stock\", \"warehouse/movement\", \"warehouse/transfer\", \"warehouse/supplier_orders\"], \"modify\": [\"catalog\\/attribute\", \"catalog\\/attribute_group\", \"catalog\\/attribute_set\", \"catalog\\/category\", \"catalog\\/download\", \"catalog\\/information\", \"catalog\\/manufacturer\", \"catalog\\/option\", \"catalog\\/option_set\", \"catalog\\/product\", \"catalog\\/product_bundle\", \"catalog\\/product_configurable\", \"catalog\\/review\", \"catalog\\/review_setting\", \"common\\/admin_search\", \"common\\/column_left\", \"common\\/developer\", \"common\\/filemanager\", \"common\\/profile\", \"common\\/security\", \"common\\/user_filter\", \"customer\\/custom_field\", \"customer\\/customer\", \"customer\\/customer_approval\", \"customer\\/customer_group\", \"design\\/banner\", \"design\\/layout\", \"design\\/seo_url\", \"event\\/dockercart_about_tab\", \"event\\/dockercart_license_admin\", \"event\\/language\", \"event\\/theme\", \"extension\\/analytics\\/clarity\", \"extension\\/analytics\\/facebook\", \"extension\\/analytics\\/google\", \"extension\\/captcha\\/dockercart\", \"extension\\/currency\\/ecb\", \"extension\\/dashboard\\/activity\", \"extension\\/dashboard\\/chart\", \"extension\\/dashboard\\/customer\", \"extension\\/dashboard\\/dockercart_aov\", \"extension\\/dashboard\\/dockercart_category_revenue\", \"extension\\/dashboard\\/dockercart_conversion\", \"extension\\/dashboard\\/dockercart_repeat\", \"extension\\/dashboard\\/dockercart_top_products\", \"extension\\/dashboard\\/order\", \"extension\\/dashboard\\/recent\", \"extension\\/dashboard\\/sale\", \"extension\\/dashboard\\/traffic_source\", \"extension\\/dashboard\\/viewed_product\", \"extension\\/extension\\/advertise\", \"extension\\/extension\\/analytics\", \"extension\\/extension\\/captcha\", \"extension\\/extension\\/currency\", \"extension\\/extension\\/dashboard\", \"extension\\/extension\\/feed\", \"extension\\/extension\\/fraud\", \"extension\\/extension\\/menu\", \"extension\\/extension\\/module\", \"extension\\/extension\\/payment\", \"extension\\/extension\\/promotion\", \"extension\\/extension\\/report\", \"extension\\/extension\\/shipping\", \"extension\\/extension\\/theme\", \"extension\\/extension\\/total\", \"extension\\/feed\\/dockercart_sitemap\", \"extension\\/module\\/account\", \"extension\\/module\\/banner\", \"extension\\/module\\/bestseller\", \"extension\\/module\\/carousel\", \"extension\\/module\\/category\", \"extension\\/module\\/dockercart_blog\", \"extension\\/module\\/dockercart_blog_author\", \"extension\\/module\\/dockercart_blog_category\", \"extension\\/module\\/dockercart_blog_comment\", \"extension\\/module\\/dockercart_blog_install\", \"extension\\/module\\/dockercart_blog_latest\", \"extension\\/module\\/dockercart_blog_post\", \"extension\\/module\\/dockercart_brand_carousel\", \"extension\\/module\\/dockercart_category_tree\", \"extension\\/module\\/dockercart_checkout\", \"extension\\/module\\/dockercart_newsletter\", \"extension\\/module\\/dockercart_search\", \"extension\\/module\\/dockercart_seo_description\", \"extension\\/module\\/dockercart_shop_features\", \"extension\\/module\\/dockercart_theme\", \"extension\\/module\\/dockercart_viewed\", \"extension\\/module\\/featured\", \"extension\\/module\\/html\", \"extension\\/module\\/latest\", \"extension\\/module\\/slideshow\", \"extension\\/module\\/special\", \"extension\\/module\\/store\", \"extension\\/payment\\/dockercart_universal\", \"extension\\/report\\/customer_activity\", \"extension\\/report\\/customer_order\", \"extension\\/report\\/customer_reward\", \"extension\\/report\\/customer_search\", \"extension\\/report\\/customer_transaction\", \"extension\\/report\\/dockercart_analytics\", \"extension\\/report\\/marketing\", \"extension\\/report\\/product_purchased\", \"extension\\/report\\/product_viewed\", \"extension\\/report\\/sale_coupon\", \"extension\\/report\\/sale_order\", \"extension\\/report\\/sale_return\", \"extension\\/report\\/sale_shipping\", \"extension\\/report\\/sale_tax\", \"extension\\/shipping\\/dockercart_universal\", \"extension\\/store\", \"extension\\/theme\\/dockercart\", \"extension\\/total\\/coupon\", \"extension\\/total\\/credit\", \"extension\\/total\\/handling\", \"extension\\/total\\/low_order_fee\", \"extension\\/total\\/reward\", \"extension\\/total\\/shipping\", \"extension\\/total\\/sub_total\", \"extension\\/total\\/tax\", \"extension\\/total\\/total\", \"extension\\/total\\/voucher\", \"localisation\\/country\", \"localisation\\/currency\", \"localisation\\/geo_zone\", \"localisation\\/language\", \"localisation\\/length_class\", \"localisation\\/location\", \"localisation\\/order_status\", \"localisation\\/return_action\", \"localisation\\/return_reason\", \"localisation\\/return_status\", \"localisation\\/tax_class\", \"localisation\\/tax_rate\", \"localisation\\/weight_class\", \"localisation\\/zone\", \"mail\\/affiliate\", \"mail\\/customer\", \"mail\\/forgotten\", \"mail\\/order\", \"mail\\/return\", \"mail\\/reward\", \"mail\\/transaction\", \"marketing\\/abandoned_stats\", \"marketing\\/contact\", \"marketing\\/coupon\", \"marketing\\/marketing\", \"marketplace\\/event\", \"marketplace\\/extension\", \"marketplace\\/install\", \"marketplace\\/installer\", \"marketplace\\/modification\", \"report\\/report\", \"sale\\/order\", \"sale\\/order_abandoned\", \"sale\\/order_detail\", \"sale\\/order_flow\", \"sale\\/return\", \"sale\\/voucher\", \"sale\\/voucher_theme\", \"setting\\/invoice_image\", \"setting\\/setting\", \"setting\\/store\", \"startup\\/error\", \"startup\\/event\", \"startup\\/login\", \"startup\\/permission\", \"startup\\/router\", \"startup\\/sass\", \"startup\\/startup\", \"tool\\/backup\", \"tool\\/dockercart_scheduler\", \"tool\\/log\", \"tool\\/recycle_bin\", \"tool\\/update\", \"tool\\/upload\", \"user\\/user\", \"user\\/user_permission\", \"tool/recycle_bin\", \"warehouse/warehouse\", \"warehouse/stock\", \"warehouse/movement\", \"warehouse/transfer\", \"warehouse/supplier_orders\"]}');
+(1,'Administrator','{\"access\": [\"catalog/attribute\", \"catalog/attribute_group\", \"catalog/attribute_set\", \"catalog/category\", \"catalog/download\", \"catalog/information\", \"catalog/manufacturer\", \"catalog/option\", \"catalog/option_set\", \"catalog/product\", \"catalog/product_bundle\", \"catalog/product_configurable\", \"catalog/review\", \"catalog/review_setting\", \"common/admin_search\", \"common/column_left\", \"common/developer\", \"common/filemanager\", \"common/profile\", \"common/security\", \"common/user_filter\", \"customer/customer\", \"customer/customer_approval\", \"customer/customer_group\", \"customer/custom_field\", \"design/banner\", \"design/layout\", \"design/seo_url\", \"event/dockercart_about_tab\", \"event/dockercart_license_admin\", \"event/language\", \"event/theme\", \"extension/analytics/clarity\", \"extension/analytics/facebook\", \"extension/analytics/google\", \"extension/analytics/tiktok\", \"extension/captcha/dockercart\", \"extension/currency/ecb\", \"extension/dashboard/activity\", \"extension/dashboard/chart\", \"extension/dashboard/customer\", \"extension/dashboard/dockercart_aov\", \"extension/dashboard/dockercart_category_revenue\", \"extension/dashboard/dockercart_conversion\", \"extension/dashboard/dockercart_repeat\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/order\", \"extension/dashboard/recent\", \"extension/dashboard/sale\", \"extension/dashboard/traffic_source\", \"extension/dashboard/viewed_product\", \"extension/extension/advertise\", \"extension/extension/analytics\", \"extension/extension/captcha\", \"extension/extension/currency\", \"extension/extension/dashboard\", \"extension/extension/feed\", \"extension/extension/fraud\", \"extension/extension/menu\", \"extension/extension/module\", \"extension/extension/payment\", \"extension/extension/promotion\", \"extension/extension/report\", \"extension/extension/shipping\", \"extension/extension/theme\", \"extension/extension/total\", \"extension/feed/dockercart_sitemap\", \"extension/module/account\", \"extension/module/banner\", \"extension/module/bestseller\", \"extension/module/carousel\", \"extension/module/category\", \"extension/module/dockercart_blog\", \"extension/module/dockercart_blog_author\", \"extension/module/dockercart_blog_category\", \"extension/module/dockercart_blog_comment\", \"extension/module/dockercart_blog_install\", \"extension/module/dockercart_blog_latest\", \"extension/module/dockercart_blog_post\", \"extension/module/dockercart_brand_carousel\", \"extension/module/dockercart_category_tree\", \"extension/module/dockercart_checkout\", \"extension/module/dockercart_newsletter\", \"extension/module/dockercart_search\", \"extension/module/dockercart_seo_description\", \"extension/module/dockercart_shop_features\", \"extension/module/dockercart_theme\", \"extension/module/dockercart_viewed\", \"extension/module/featured\", \"extension/module/html\", \"extension/module/latest\", \"extension/module/slideshow\", \"extension/module/special\", \"extension/module/store\", \"extension/payment/dockercart_universal\", \"extension/report/customer_activity\", \"extension/report/customer_order\", \"extension/report/customer_reward\", \"extension/report/customer_search\", \"extension/report/customer_transaction\", \"extension/report/dockercart_analytics\", \"extension/report/marketing\", \"extension/report/product_purchased\", \"extension/report/product_viewed\", \"extension/report/sale_coupon\", \"extension/report/sale_order\", \"extension/report/sale_return\", \"extension/report/sale_shipping\", \"extension/report/sale_tax\", \"extension/shipping/dockercart_universal\", \"extension/shipping/dockercart_warehouse_pickup\", \"extension/store\", \"extension/theme/dockercart\", \"extension/total/coupon\", \"extension/total/credit\", \"extension/total/handling\", \"extension/total/low_order_fee\", \"extension/total/reward\", \"extension/total/shipping\", \"extension/total/sub_total\", \"extension/total/tax\", \"extension/total/total\", \"extension/total/voucher\", \"localisation/country\", \"localisation/currency\", \"localisation/geo_zone\", \"localisation/language\", \"localisation/length_class\", \"localisation/order_status\", \"localisation/return_action\", \"localisation/return_reason\", \"localisation/return_status\", \"localisation/tax_class\", \"localisation/tax_rate\", \"localisation/weight_class\", \"localisation/zone\", \"mail/affiliate\", \"mail/customer\", \"mail/forgotten\", \"mail/order\", \"mail/return\", \"mail/reward\", \"mail/transaction\", \"marketing/abandoned_stats\", \"marketing/contact\", \"marketing/coupon\", \"marketing/marketing\", \"marketplace/event\", \"marketplace/extension\", \"marketplace/install\", \"marketplace/installer\", \"marketplace/modification\", \"report/report\", \"sale/order\", \"sale/order_abandoned\", \"sale/order_detail\", \"sale/order_flow\", \"sale/return\", \"sale/voucher\", \"sale/voucher_theme\", \"setting/invoice_image\", \"setting/setting\", \"setting/store\", \"startup/error\", \"startup/event\", \"startup/login\", \"startup/permission\", \"startup/router\", \"startup/sass\", \"startup/startup\", \"tool/backup\", \"tool/dockercart_scheduler\", \"tool/log\", \"tool/recycle_bin\", \"tool/update\", \"tool/upload\", \"user/user\", \"user/user_permission\", \"warehouse/movement\", \"warehouse/stock\", \"warehouse/supplier_orders\", \"warehouse/transfer\", \"warehouse/warehouse\", \"extension/report/supplier_profit\"], \"modify\": [\"catalog/attribute\", \"catalog/attribute_group\", \"catalog/attribute_set\", \"catalog/category\", \"catalog/download\", \"catalog/information\", \"catalog/manufacturer\", \"catalog/option\", \"catalog/option_set\", \"catalog/product\", \"catalog/product_bundle\", \"catalog/product_configurable\", \"catalog/review\", \"catalog/review_setting\", \"common/admin_search\", \"common/column_left\", \"common/developer\", \"common/filemanager\", \"common/profile\", \"common/security\", \"common/user_filter\", \"customer/customer\", \"customer/customer_approval\", \"customer/customer_group\", \"customer/custom_field\", \"design/banner\", \"design/layout\", \"design/seo_url\", \"event/dockercart_about_tab\", \"event/dockercart_license_admin\", \"event/language\", \"event/theme\", \"extension/analytics/clarity\", \"extension/analytics/facebook\", \"extension/analytics/google\", \"extension/analytics/tiktok\", \"extension/captcha/dockercart\", \"extension/currency/ecb\", \"extension/dashboard/activity\", \"extension/dashboard/chart\", \"extension/dashboard/customer\", \"extension/dashboard/dockercart_aov\", \"extension/dashboard/dockercart_category_revenue\", \"extension/dashboard/dockercart_conversion\", \"extension/dashboard/dockercart_repeat\", \"extension/dashboard/dockercart_top_products\", \"extension/dashboard/order\", \"extension/dashboard/recent\", \"extension/dashboard/sale\", \"extension/dashboard/traffic_source\", \"extension/dashboard/viewed_product\", \"extension/extension/advertise\", \"extension/extension/analytics\", \"extension/extension/captcha\", \"extension/extension/currency\", \"extension/extension/dashboard\", \"extension/extension/feed\", \"extension/extension/fraud\", \"extension/extension/menu\", \"extension/extension/module\", \"extension/extension/payment\", \"extension/extension/promotion\", \"extension/extension/report\", \"extension/extension/shipping\", \"extension/extension/theme\", \"extension/extension/total\", \"extension/feed/dockercart_sitemap\", \"extension/module/account\", \"extension/module/banner\", \"extension/module/bestseller\", \"extension/module/carousel\", \"extension/module/category\", \"extension/module/dockercart_blog\", \"extension/module/dockercart_blog_author\", \"extension/module/dockercart_blog_category\", \"extension/module/dockercart_blog_comment\", \"extension/module/dockercart_blog_install\", \"extension/module/dockercart_blog_latest\", \"extension/module/dockercart_blog_post\", \"extension/module/dockercart_brand_carousel\", \"extension/module/dockercart_category_tree\", \"extension/module/dockercart_checkout\", \"extension/module/dockercart_newsletter\", \"extension/module/dockercart_search\", \"extension/module/dockercart_seo_description\", \"extension/module/dockercart_shop_features\", \"extension/module/dockercart_theme\", \"extension/module/dockercart_viewed\", \"extension/module/featured\", \"extension/module/html\", \"extension/module/latest\", \"extension/module/slideshow\", \"extension/module/special\", \"extension/module/store\", \"extension/payment/dockercart_universal\", \"extension/report/customer_activity\", \"extension/report/customer_order\", \"extension/report/customer_reward\", \"extension/report/customer_search\", \"extension/report/customer_transaction\", \"extension/report/dockercart_analytics\", \"extension/report/marketing\", \"extension/report/product_purchased\", \"extension/report/product_viewed\", \"extension/report/sale_coupon\", \"extension/report/sale_order\", \"extension/report/sale_return\", \"extension/report/sale_shipping\", \"extension/report/sale_tax\", \"extension/shipping/dockercart_universal\", \"extension/shipping/dockercart_warehouse_pickup\", \"extension/store\", \"extension/theme/dockercart\", \"extension/total/coupon\", \"extension/total/credit\", \"extension/total/handling\", \"extension/total/low_order_fee\", \"extension/total/reward\", \"extension/total/shipping\", \"extension/total/sub_total\", \"extension/total/tax\", \"extension/total/total\", \"extension/total/voucher\", \"localisation/country\", \"localisation/currency\", \"localisation/geo_zone\", \"localisation/language\", \"localisation/length_class\", \"localisation/order_status\", \"localisation/return_action\", \"localisation/return_reason\", \"localisation/return_status\", \"localisation/tax_class\", \"localisation/tax_rate\", \"localisation/weight_class\", \"localisation/zone\", \"mail/affiliate\", \"mail/customer\", \"mail/forgotten\", \"mail/order\", \"mail/return\", \"mail/reward\", \"mail/transaction\", \"marketing/abandoned_stats\", \"marketing/contact\", \"marketing/coupon\", \"marketing/marketing\", \"marketplace/event\", \"marketplace/extension\", \"marketplace/install\", \"marketplace/installer\", \"marketplace/modification\", \"report/report\", \"sale/order\", \"sale/order_abandoned\", \"sale/order_detail\", \"sale/order_flow\", \"sale/return\", \"sale/voucher\", \"sale/voucher_theme\", \"setting/invoice_image\", \"setting/setting\", \"setting/store\", \"startup/error\", \"startup/event\", \"startup/login\", \"startup/permission\", \"startup/router\", \"startup/sass\", \"startup/startup\", \"tool/backup\", \"tool/dockercart_scheduler\", \"tool/log\", \"tool/recycle_bin\", \"tool/update\", \"tool/upload\", \"user/user\", \"user/user_permission\", \"warehouse/movement\", \"warehouse/stock\", \"warehouse/supplier_orders\", \"warehouse/transfer\", \"warehouse/warehouse\", \"extension/report/supplier_profit\"]}');
 /*!40000 ALTER TABLE `oc_user_group` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23892,7 +23970,7 @@ CREATE TABLE `oc_warehouse` (
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`warehouse_id`),
   KEY `idx_warehouse_status_priority` (`status`,`priority`)
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23903,8 +23981,46 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_warehouse` WRITE;
 /*!40000 ALTER TABLE `oc_warehouse` DISABLE KEYS */;
 INSERT INTO `oc_warehouse` VALUES
-(1,'Основной склад','physical',1,100,1,0,'','','','',0,0,0.00000000,0.00000000,'','','',0,0.0000,0,0.0000,NULL,'','','',0,NULL,'2026-08-23 10:13:15','2026-08-23 10:13:15');
+(1,'Основной склад','physical',1,100,1,0,'','','','',0,0,0.00000000,0.00000000,'','','',0,0.0000,1,0.0000,'','','','',0,'','2026-08-23 10:13:15','2026-08-23 11:57:00'),
+(101,'Dropship: GadgetHub','dropship',0,0,1,0,'','','Hong Kong','',224,0,0.00000000,0.00000000,'+852 5801 4432','orders@gadgethub.example','',0,0.0000,0,0.0000,NULL,'GadgetHub Wholesale Ltd.','+852 5801 4432','orders@gadgethub.example',7,NULL,'2026-08-23 21:11:30','2026-08-23 21:11:30'),
+(102,'Dropship: MobileParts','dropship',0,0,1,0,'','','Warsaw','',220,0,0.00000000,0.00000000,'+48 22 118 44 90','b2b@mobileparts.example','',0,0.0000,0,0.0000,NULL,'MobileParts Direct Sp. z o.o.','+48 22 118 44 90','b2b@mobileparts.example',3,NULL,'2026-08-23 21:11:30','2026-08-23 21:11:30'),
+(103,'Dropship: ShenzhenTech','dropship',0,0,1,0,'','','Shenzhen','',223,0,0.00000000,0.00000000,'+86 755 8899 1200','sales@sztech.example','',0,0.0000,0,0.0000,NULL,'ShenzhenTech Supply Co.','+86 755 8899 1200','sales@sztech.example',14,NULL,'2026-08-23 21:11:30','2026-08-23 21:11:30');
 /*!40000 ALTER TABLE `oc_warehouse` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_warehouse_description`
+--
+
+DROP TABLE IF EXISTS `oc_warehouse_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_warehouse_description` (
+  `warehouse_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `city` varchar(255) NOT NULL DEFAULT '',
+  `address_1` varchar(255) NOT NULL DEFAULT '',
+  `address_2` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`warehouse_id`,`language_id`),
+  KEY `idx_warehouse_description_language` (`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_warehouse_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_warehouse_description` WRITE;
+/*!40000 ALTER TABLE `oc_warehouse_description` DISABLE KEYS */;
+INSERT INTO `oc_warehouse_description` VALUES
+(1,1,'Main Warehouse','','',''),
+(1,2,'Основний склад','','',''),
+(1,3,'Основной склад','','','');
+/*!40000 ALTER TABLE `oc_warehouse_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -23940,6 +24056,34 @@ COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 
 --
+-- Table structure for table `oc_warehouse_holiday_description`
+--
+
+DROP TABLE IF EXISTS `oc_warehouse_holiday_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_warehouse_holiday_description` (
+  `holiday_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`holiday_id`,`language_id`),
+  KEY `idx_holiday_desc_lang` (`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_warehouse_holiday_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_warehouse_holiday_description` WRITE;
+/*!40000 ALTER TABLE `oc_warehouse_holiday_description` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_warehouse_holiday_description` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
 -- Table structure for table `oc_warehouse_schedule`
 --
 
@@ -23953,7 +24097,7 @@ CREATE TABLE `oc_warehouse_schedule` (
   `is_open` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`schedule_id`),
   UNIQUE KEY `ux_warehouse_schedule` (`warehouse_id`,`day_of_week`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23964,11 +24108,13 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_warehouse_schedule` WRITE;
 /*!40000 ALTER TABLE `oc_warehouse_schedule` DISABLE KEYS */;
 INSERT INTO `oc_warehouse_schedule` VALUES
-(1,1,1,1),
-(2,1,2,1),
-(3,1,3,1),
-(4,1,4,1),
-(5,1,5,1);
+(22,1,1,1),
+(23,1,2,1),
+(24,1,3,1),
+(25,1,4,1),
+(26,1,5,1),
+(27,1,6,1),
+(28,1,7,1);
 /*!40000 ALTER TABLE `oc_warehouse_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23988,7 +24134,7 @@ CREATE TABLE `oc_warehouse_schedule_window` (
   `time_to` time NOT NULL,
   PRIMARY KEY (`window_id`),
   KEY `idx_schedule` (`schedule_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23998,6 +24144,17 @@ CREATE TABLE `oc_warehouse_schedule_window` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_warehouse_schedule_window` WRITE;
 /*!40000 ALTER TABLE `oc_warehouse_schedule_window` DISABLE KEYS */;
+INSERT INTO `oc_warehouse_schedule_window` VALUES
+(1,15,'09:00:00','18:00:00'),
+(2,16,'09:00:00','18:00:00'),
+(3,17,'09:00:00','18:00:00'),
+(4,18,'09:00:00','18:00:00'),
+(5,19,'09:00:00','18:00:00'),
+(6,22,'09:00:00','18:00:00'),
+(7,23,'09:00:00','18:00:00'),
+(8,24,'09:00:00','18:00:00'),
+(9,25,'09:00:00','18:00:00'),
+(10,26,'09:00:00','18:00:00');
 /*!40000 ALTER TABLE `oc_warehouse_schedule_window` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -24021,7 +24178,7 @@ CREATE TABLE `oc_warehouse_stock` (
   PRIMARY KEY (`stock_id`),
   UNIQUE KEY `ux_warehouse_stock` (`warehouse_id`,`product_id`,`variant_id`),
   KEY `idx_stock_product` (`product_id`,`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=648 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=676 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -24032,97 +24189,12 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_warehouse_stock` WRITE;
 /*!40000 ALTER TABLE `oc_warehouse_stock` DISABLE KEYS */;
 INSERT INTO `oc_warehouse_stock` VALUES
-(1,1,5001,0,25.0000,0,0),
-(2,1,5002,0,25.0000,0,0),
-(3,1,5003,0,32.0000,0,0),
-(4,1,5004,0,40.0000,0,0),
-(5,1,5005,0,46.0000,0,0),
-(6,1,5006,0,53.0000,0,0),
-(7,1,5007,0,60.0000,0,0),
-(8,1,5008,0,67.0000,0,0),
-(9,1,5009,0,74.0000,0,0),
-(10,1,5010,0,81.0000,0,0),
-(11,1,5011,0,0.0000,0,0),
-(12,1,5012,0,28.0000,0,0),
-(13,1,5013,0,35.0000,0,0),
-(14,1,5014,0,42.0000,0,0),
-(15,1,5015,0,48.0000,0,0),
-(16,1,5016,0,56.0000,0,0),
-(17,1,5017,0,63.0000,0,0),
-(18,1,5018,0,70.0000,0,0),
-(19,1,5019,0,77.0000,0,0),
-(20,1,5020,0,84.0000,0,0),
-(21,1,5021,0,24.0000,0,0),
-(22,1,5022,0,31.0000,0,0),
-(23,1,5023,0,15.0000,0,0),
-(24,1,5024,0,45.0000,0,0),
-(25,1,5025,0,52.0000,0,0),
-(26,1,5026,0,59.0000,0,0),
-(27,1,5027,0,66.0000,0,0),
-(28,1,5028,0,73.0000,0,0),
-(29,1,5029,0,80.0000,0,0),
-(30,1,5030,0,87.0000,0,0),
-(31,1,5031,0,27.0000,0,0),
-(32,1,5032,0,34.0000,0,0),
-(33,1,5033,0,41.0000,0,0),
-(34,1,5034,0,0.0000,0,0),
-(35,1,5035,0,55.0000,0,0),
-(36,1,5036,0,62.0000,0,0),
-(37,1,5037,0,68.0000,0,0),
-(38,1,5038,0,76.0000,0,0),
-(39,1,5039,0,83.0000,0,0),
-(40,1,5040,0,90.0000,0,0),
-(41,1,5041,0,30.0000,0,0),
-(42,1,5042,0,37.0000,0,0),
-(43,1,5043,0,43.0000,0,0),
-(44,1,5044,0,51.0000,0,0),
-(45,1,5045,0,58.0000,0,0),
-(46,1,5046,0,65.0000,0,0),
-(47,1,5047,0,72.0000,0,0),
-(48,1,5048,0,0.0000,0,0),
-(49,1,5049,0,86.0000,0,0),
-(50,1,5050,0,0.0000,0,0),
-(51,1,5051,0,33.0000,0,0),
-(52,1,5052,0,32.0000,0,0),
-(53,1,5053,0,47.0000,0,0),
-(54,1,5054,0,54.0000,0,0),
-(55,1,5055,0,61.0000,0,0),
-(56,1,5056,0,68.0000,0,0),
-(57,1,5057,0,75.0000,0,0),
-(58,1,5058,0,82.0000,0,0),
-(59,1,5059,0,89.0000,0,0),
-(60,1,5060,0,96.0000,0,0),
-(61,1,5061,0,36.0000,0,0),
-(62,1,5062,0,43.0000,0,0),
-(63,1,5063,0,47.0000,0,0),
-(64,1,5064,0,55.0000,0,0),
-(65,1,5065,0,64.0000,0,0),
-(66,1,5066,0,71.0000,0,0),
-(67,1,5067,0,78.0000,0,0),
-(68,1,5068,0,85.0000,0,0),
-(69,1,5069,0,92.0000,0,0),
-(70,1,5070,0,0.0000,0,0),
-(71,1,5071,0,39.0000,0,0),
-(72,1,5072,0,46.0000,0,0),
-(73,1,5073,0,53.0000,0,0),
-(74,1,5074,0,60.0000,0,0),
-(75,1,5075,0,67.0000,0,0),
-(76,1,5076,0,74.0000,0,0),
-(77,1,5077,0,25.0000,0,0),
-(78,1,5078,0,88.0000,0,0),
-(79,1,5079,0,95.0000,0,0),
 (80,1,5080,0,17.0000,0,0),
 (81,1,5081,0,42.0000,0,0),
 (82,1,5082,0,49.0000,0,0),
 (83,1,5083,0,56.0000,0,0),
-(84,1,5085,0,70.0000,0,0),
-(85,1,5086,0,77.0000,0,0),
-(86,1,5087,0,84.0000,0,0),
-(87,1,5088,0,91.0000,0,0),
-(88,1,5089,0,98.0000,0,0),
-(89,1,5090,0,20.0000,0,0),
-(128,1,5001,579,37.0000,0,0),
-(129,1,5001,580,24.0000,0,0),
+(128,1,5001,579,35.0000,0,1),
+(129,1,5001,580,11.0000,0,0),
 (130,1,5001,581,21.0000,0,0),
 (131,1,5001,582,29.0000,0,0),
 (132,1,5001,583,20.0000,0,0),
@@ -24153,7 +24225,7 @@ INSERT INTO `oc_warehouse_stock` VALUES
 (157,1,5001,608,21.0000,0,0),
 (158,1,5001,609,27.0000,0,0),
 (159,1,5001,610,23.0000,0,0),
-(160,1,5001,611,28.0000,0,0),
+(160,1,5001,611,25.0000,0,0),
 (161,1,5001,612,28.0000,0,0),
 (162,1,5001,613,27.0000,0,0),
 (163,1,5001,614,27.0000,0,0),
@@ -24196,7 +24268,7 @@ INSERT INTO `oc_warehouse_stock` VALUES
 (200,1,5006,651,51.0000,0,0),
 (201,1,5006,652,51.0000,0,0),
 (202,1,5006,653,57.0000,0,0),
-(203,1,5006,654,57.0000,0,0),
+(203,1,5006,654,56.0000,0,0),
 (204,1,5007,655,60.0000,0,0),
 (205,1,5007,656,68.0000,0,0),
 (206,1,5007,657,60.0000,0,0),
@@ -24244,7 +24316,7 @@ INSERT INTO `oc_warehouse_stock` VALUES
 (248,1,5022,700,39.0000,0,0),
 (249,1,5022,701,35.0000,0,0),
 (250,1,5022,702,31.0000,0,0),
-(251,1,5023,703,14.0000,0,0),
+(251,1,5023,703,11.0000,0,0),
 (252,1,5023,704,11.0000,0,0),
 (253,1,5023,705,16.0000,0,0),
 (254,1,5023,706,20.0000,0,0),
@@ -24369,7 +24441,7 @@ INSERT INTO `oc_warehouse_stock` VALUES
 (373,1,5060,826,102.0000,0,0),
 (374,1,5061,827,40.0000,0,0),
 (375,1,5061,828,39.0000,0,0),
-(376,1,5062,829,51.0000,0,0),
+(376,1,5062,829,50.0000,0,0),
 (377,1,5062,830,46.0000,0,0),
 (378,1,5063,831,53.0000,0,0),
 (379,1,5063,832,45.0000,0,0),
@@ -24398,7 +24470,7 @@ INSERT INTO `oc_warehouse_stock` VALUES
 (402,1,5075,856,68.0000,0,0),
 (403,1,5076,857,78.0000,0,0),
 (404,1,5076,858,69.0000,0,0),
-(405,1,5077,859,22.0000,0,0),
+(405,1,5077,859,25.0000,0,0),
 (406,1,5077,860,21.0000,0,0),
 (407,1,5078,861,83.0000,0,0),
 (408,1,5078,862,83.0000,0,0),
@@ -24446,7 +24518,7 @@ CREATE TABLE `oc_warehouse_stock_movement` (
   KEY `idx_movement_product` (`product_id`,`variant_id`),
   KEY `idx_movement_order` (`order_id`),
   KEY `idx_movement_date` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -24457,8 +24529,25 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_warehouse_stock_movement` WRITE;
 /*!40000 ALTER TABLE `oc_warehouse_stock_movement` DISABLE KEYS */;
 INSERT INTO `oc_warehouse_stock_movement` VALUES
-(1,1,5001,579,'inbound',5.0000,'test',0,0,0,'','2026-08-23 10:26:16'),
-(2,1,5001,579,'inbound',5.0000,'test',0,0,0,'','2026-08-23 10:26:24');
+(3,1,5001,579,'adjustment',-2.0000,'admin-cell',0,0,1,'','2026-08-23 12:43:43'),
+(4,1,5023,0,'adjustment',135.0000,'admin-cell',0,0,1,'','2026-08-23 12:52:05'),
+(5,1,5023,0,'adjustment',-135.0000,'admin-cell',0,0,1,'','2026-08-23 12:52:14'),
+(7,1,5006,654,'order_subtract',-1.0000,'order-99619',99619,0,0,'','2026-08-23 20:27:46'),
+(8,1,5062,829,'order_subtract',-1.0000,'order-99619',99619,0,0,'','2026-08-23 20:27:46'),
+(18,1,5004,639,'order_subtract',-1.0000,'order-99617',99617,0,0,'','2026-08-24 10:24:37'),
+(19,1,5004,639,'order_restock',1.0000,'order-99617',99617,0,0,'','2026-08-24 10:24:37'),
+(20,1,5077,859,'adjustment',1.0000,'variant-form',0,0,0,'','2026-08-24 10:27:41'),
+(21,1,5077,859,'adjustment',2.0000,'variant-form',0,0,0,'','2026-08-24 10:27:54'),
+(22,1,5001,580,'adjustment',1.0000,'admin-cell',0,0,1,'','2026-08-24 10:32:53'),
+(23,1,5001,580,'adjustment',-5.0000,'admin-cell',0,0,1,'','2026-08-24 10:33:17'),
+(24,1,5023,703,'adjustment',2.0000,'variant-form',0,0,0,'','2026-08-24 11:19:37'),
+(27,1,5023,703,'adjustment',-5.0000,'variant-form',0,0,0,'','2026-08-24 11:44:54'),
+(28,1,5001,580,'adjustment',-10.0000,'variant-form',0,0,0,'','2026-08-24 11:53:56'),
+(29,1,5001,580,'adjustment',1.0000,'variant-form',0,0,0,'','2026-08-24 12:02:28'),
+(30,1,5001,611,'adjustment',-3.0000,'variant-form',0,0,0,'','2026-08-24 12:04:39'),
+(31,1,5001,580,'adjustment',1.0000,'variant-form',0,0,0,'','2026-08-24 12:18:14'),
+(32,1,5001,580,'adjustment',-2.0000,'admin-cell',0,0,1,'','2026-08-24 12:31:03'),
+(33,1,5001,580,'adjustment',1.0000,'variant-form',0,0,0,'','2026-08-24 12:31:11');
 /*!40000 ALTER TABLE `oc_warehouse_stock_movement` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -33041,4 +33130,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-08-23 10:41:58
+-- Dump completed on 2026-08-24 13:41:59

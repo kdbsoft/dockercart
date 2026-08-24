@@ -9,6 +9,7 @@ $_['text_pagination'] = 'Показано з %d по %d із %d (%d сторін
 $_['text_types'] = [];
 $_['text_recalculate'] = 'Перерахувати підсумки';
 $_['text_recalculated'] = 'Перераховано товарів: %d, виправлено дрейфів: %d.';
+$_['text_recalculated_backfill'] = 'Залишок із кешу перенесено на склад за замовчуванням для %d позицій товарів.';
 $_['text_unlimited'] = 'Безліміт';
 $_['button_update'] = 'Оновити';
 $_['button_recalculate'] = 'Перерахувати';
@@ -68,9 +69,15 @@ $_['text_card_total_quantity'] = 'Всього на складі';
 $_['button_edit'] = 'Редагувати';
 
 // Картка товару (модальне вікно)
-$_['text_pcard_here'] = 'На цьому складі';
+$_['text_pcard_here_wh'] = 'На складі «%s»';
 $_['text_pcard_total'] = 'По всіх складах';
 $_['text_pcard_reserved'] = 'У резерві';
 $_['text_pcard_available'] = 'Доступно';
+$_['text_pcard_variants'] = 'Залишки за варіантами';
+$_['text_pcard_by_warehouse'] = 'По складах';
+$_['text_pcard_set_total'] = 'Встановити підсумок';
+$_['text_saved_total'] = 'Підсумок оновлено.';
+$_['error_quantity'] = 'Вкажіть коректну кількість';
+$_['button_set_total'] = 'Зберегти';
 $_['text_pcard_attributes'] = 'Атрибути';
 $_['text_pcard_description'] = 'Опис';

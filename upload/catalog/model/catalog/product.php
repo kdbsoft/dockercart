@@ -228,6 +228,20 @@ class ModelCatalogProduct extends Model {
 			if (isset($default_variant['weight']) && (float)$default_variant['weight'] > 0) {
 				$product_data['weight'] = (float)$default_variant['weight'];
 			}
+			if (!empty($product_data['is_configurable'])) {
+				// Per-variant dimensions: override head values when the default
+				// variant carries non-zero ones. Length/weight classes stay
+				// global on the product row (shared across variants).
+				if (isset($default_variant['length']) && (float)$default_variant['length'] > 0) {
+					$product_data['length'] = (float)$default_variant['length'];
+				}
+				if (isset($default_variant['width']) && (float)$default_variant['width'] > 0) {
+					$product_data['width'] = (float)$default_variant['width'];
+				}
+				if (isset($default_variant['height']) && (float)$default_variant['height'] > 0) {
+					$product_data['height'] = (float)$default_variant['height'];
+				}
+			}
 			if (isset($default_variant['weight_class_id']) && (int)$default_variant['weight_class_id'] > 0) {
 				$product_data['weight_class_id'] = (int)$default_variant['weight_class_id'];
 			}
