@@ -146,13 +146,16 @@ class DockercartStockReservation {
 	/**
 	 * Reserved quantities keyed by "product_id:variant_id:warehouse_id" for
 	 * the given lines (used to recompute per-warehouse availability on the
-	 * storefront). All active holds count except the caller's own unbound
-	 * session holds, mirroring getReservedByProductIds semantics.
+	 * storefront and to show reserved amounts in the admin stock UI). By
+	 * default all active holds count except the caller's own unbound session
+	 * holds, mirroring getReservedByProductIds semantics. Pass
+	 * $exclude_session = false to count every active hold — used by the
+	 * admin, which inspects stock from the seller's perspective.
 	 *
 	 * @param array $lines each line: ['product_id'=>int,'variant_id'=>int,'warehouse_id'=>int]
 	 * @return array<string, float>
 	 */
-	public function getReservedByLines(array $lines, ?string $session_id = null): array {
+	public function getReservedByLines(array $lines, ?string $session_id = null, bool $exclude_session = true): array {
 		if (!$lines) {
 			return [];
 		}
@@ -167,7 +170,11 @@ class DockercartStockReservation {
 
 		$where = implode(' OR ', $conditions);
 
-		$query = $this->db->query("SELECT product_id, variant_id, warehouse_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE (order_id IS NOT NULL OR expires_at > NOW()) AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "') AND (" . $where . ") GROUP BY product_id, variant_id, warehouse_id");
+		$session_filter = $exclude_session
+			? " AND (order_id IS NOT NULL OR session_id <> '" . $this->db->escape($session_id) . "')"
+			: '';
+
+		$query = $this->db->query("SELECT product_id, variant_id, warehouse_id, SUM(quantity) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE (order_id IS NOT NULL OR expires_at > NOW())" . $session_filter . " AND (" . $where . ") GROUP BY product_id, variant_id, warehouse_id");
 
 		$map = [];
 
@@ -317,14 +324,27 @@ class DockercartStockReservation {
 				return true;
 			}
 
-			$warehouse = new \DockercartWarehouse($this->registry);
+			// Lock the stock row so two concurrent checkouts of the last
+			// item serialize here instead of both inserting a hold. The
+			// reservation SUM is a locking read too, so it sees holds
+			// committed by a concurrent transaction.
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` (`warehouse_id`, `product_id`, `variant_id`, `quantity`, `unlimited`, `lead_time`)
+				VALUES ('" . (int)$warehouse_id . "', '" . (int)$product_id . "', '" . (int)$variant_id . "', '0', '0', '0')
+				ON DUPLICATE KEY UPDATE `stock_id` = LAST_INSERT_ID(`stock_id`)");
 
-			$available = $warehouse->getAvailableForLine($product_id, $variant_id, $warehouse_id);
+			$stock_row = $this->db->query("SELECT `quantity`, `unlimited` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "' FOR UPDATE");
+
+			$stock = (float)$stock_row->row['quantity'];
+			$unlimited = (bool)$stock_row->row['unlimited'];
 
 			// Dropship rows resolve to +INF: always available, no finite hold.
-			if ($available >= PHP_FLOAT_MAX * 0.5) {
+			if ($unlimited) {
 				return true;
 			}
+
+			$reserved_query = $this->db->query("SELECT COALESCE(SUM(`quantity`), 0) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "' AND (order_id IS NOT NULL OR expires_at > NOW()) FOR UPDATE");
+
+			$available = $stock - (float)$reserved_query->row['reserved'];
 
 			if ($available < $quantity) {
 				return false;

@@ -231,6 +231,7 @@ $_['text_panel_pricing_subtitle']     = 'Базова ціна, ціни для 
 $_['text_panel_inventory_title']      = 'Запаси';
 $_['text_panel_inventory_subtitle']   = 'Кількість на складі, мінімальне замовлення та опції наявності';
 $_['text_variant_qty_title']          = 'Кіл-ть за варіантами';
+$_['text_reserved_quantity']          = 'У резерві';
 $_['text_variant_qty_total']          = 'Всього %s';
 $_['text_panel_media_title']          = 'Медіа';
 $_['text_panel_media_subtitle']       = 'Головне зображення, додаткові фото, відео, 3D-модель та 360°-огляд';
