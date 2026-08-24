@@ -193,6 +193,18 @@ class ControllerMailOrder extends Controller {
 		$this->load->model('tool/upload');
 
 		// Products
+		$warehouse_types = array();
+
+		if ($this->config->get('config_warehouse_enabled')) {
+			$this->load->language('product/product');
+
+			$warehouse = new \DockercartWarehouse($this->registry);
+
+			foreach ($warehouse->getWarehouses() as $wh) {
+				$warehouse_types[(int)$wh['warehouse_id']] = (string)$wh['type'];
+			}
+		}
+
 		$data['products'] = array();
 
 		foreach ($order_products as $order_product) {
@@ -226,7 +238,7 @@ class ControllerMailOrder extends Controller {
 				'quantity' => $order_product['quantity'],
 				'price'    => $this->currency->format($order_product['price'] + ($this->config->get('config_tax') ? $order_product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 				'total'    => $this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'warehouse' => (string)($order_product['warehouse_name'] ?? ''),
+				'warehouse' => (($warehouse_types[(int)($order_product['warehouse_id'] ?? 0)] ?? '') === 'dropship') ? sprintf($this->language->get('text_warehouse_dropship'), (int)($order_product['warehouse_id'] ?? 0)) : (string)($order_product['warehouse_name'] ?? ''),
 				'estimate_date' => !empty($order_product['estimate_date']) ? $order_product['estimate_date'] : null,
 			);
 		}
