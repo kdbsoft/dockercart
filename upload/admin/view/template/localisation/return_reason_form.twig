@@ -45,7 +45,7 @@
                 <div class="dcx-field required">
                   <label class="dcx-label">{{ entry_name }}</label>
                   {% for language in languages %}
-                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="return_reason[{{ language.language_id }}][name]" value="{{ return_reason[language.language_id] ? return_reason[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
                   </div>
                   {% if error_name[language.language_id] %}
