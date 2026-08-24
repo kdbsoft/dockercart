@@ -971,35 +971,59 @@ that warehouse.
 ### Checkout & orders
 
 - Reservation holds are scoped per warehouse (`dockercart_stock_reservation`
-  `reserve()` threads `warehouse_id` through each line).
+  `reserve()` threads `warehouse_id` through each line); the availability
+  check locks the stock row `FOR UPDATE`, so two concurrent checkouts of the
+  last unit serialize instead of both holding it.
 - Order creation (`catalog/model/checkout/order.php addOrder()` / `editOrder()`)
   snapshots `warehouse_id`/`name`/`estimate_date` into `oc_order_product`.
 - Stock is **subtracted / restocked via `adjustStock()`** on the order line's
   warehouse (processing/complete → subtract, reversal → restock; returns use
-  the original `oc_order_product.warehouse_id`). When warehouses are disabled
-  the legacy `oc_product`/`oc_product_variant` path runs unchanged.
+  the original `oc_order_product.warehouse_id`). This is the **single write
+  path** — the legacy direct `oc_product`/`oc_product_variant` cache updates
+  were removed, so the caches always equal the warehouse sums and can never
+  drift (the daily audit only confirms the invariant). Non-tracked lines
+  (`subtract = 0`, e.g. preorders) are skipped via
+  `DockercartWarehouse::tracksStock()`.
 - Admin can move a line to another warehouse in order detail → `moveStock()`
   + a movement journal entry (reference = order number) + updated snapshot.
+- Enabling `config_warehouse_enabled` backfills `oc_order_product.warehouse_id
+  = 0` rows onto the default warehouse so restocks/returns of pre-enable
+  orders land on an explicit warehouse.
 
 ### Catalog-side quantity edits
 
-When `config_warehouse_enabled=1`, every catalog editor routes its quantity
-through the warehouse layer instead of writing the denormalised cache:
+Every catalog editor routes its quantity through the warehouse layer
+**regardless of `config_warehouse_enabled`** (the flag only controls
+allocation/UI, not the write path):
 
 - product form / list inline-edit (`ModelCatalogProduct`) and variant qty
   (`ProductConfigurable::updateVariantQuantity` / `addVariant` /
   `updateVariant`) call
   `DockercartWarehouse::setTotalQuantity($product_id, $new_total, $variant_id)`
-  — the difference vs the current `oc_warehouse_stock` sum is applied as an
-  `adjustment` movement (`reference` `product-form` / `product-inline` /
-  `variant-form`) on the **default warehouse**, then caches recompute;
-- deleting a variant purges its stock rows + holds (no ghost quantities);
+  — with warehouses backed by a single "default" row this behaves like the
+  legacy field; with multiple warehouses the difference vs the current
+  `oc_warehouse_stock` sum is applied as an `adjustment` movement
+  (`reference` `product-form` / `product-inline` / `variant-form`) on the
+  **default warehouse first**; when a negative delta saturates that row at 0
+  the remainder is spread over the other warehouses, so the requested total
+  is always reached (returned by the method) — never silently dropped.
+  Caches recompute afterwards.
+- deleting a variant purges its stock rows + holds always (no ghost
+  quantities, also when warehouses are off);
 - the product form shows a hint under Qty linking to the stock card modal.
 
 Multi-warehouse distribution stays a Warehouses-section task: catalog edits
-only ever move the default-warehouse line. With the feature disabled, legacy
-direct writes run unchanged; re-enabling resyncs caches from warehouses on the
-next audit (legacy-era manual edits are absorbed).
+only ever move the default-warehouse line.
+
+### Availability display
+
+- Admin stock matrix (Warehouses → Stock) shows **Qty / Reserved / Available**
+  per cell; the product card modal and the product form Qty area show the
+  same three numbers (`available = quantity − active holds`, unlimited rows
+  render ∞).
+- Storefront product page subtracts other buyers' active checkout holds from
+  the displayed "In stock" figure (listings keep the plain cache badge —
+  holds expire within the reserve window anyway).
 
 ### Self-pickup
 
