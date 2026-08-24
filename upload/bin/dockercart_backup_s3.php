@@ -9,11 +9,13 @@
  * staging files. Old S3 objects older than BACKUP_S3_RETENTION_DAYS are
  * deleted automatically.
  *
- * Registered by migration 20260706_register_backup_s3_task.sql as a
- * singleton scheduler task `backup_s3`. Toggle/schedule in admin:
- * System → Scheduler. Credentials come from BACKUP_S3_* env vars (see
- * .env.example); rclone config is generated at container start by
- * docker/entrypoint.sh (ensure_rclone_config).
+ * Triggered by host cron (/etc/cron.d/dockercart-backup, written by
+ * install-backup-cron.sh) or manually via `make backup-s3`. Run status/results
+ * are upserted into oc_dockercart_scheduler_task as a singleton row
+ * (task_type 'backup_s3', source_id 0) with cron_enabled=0, so the scheduler
+ * daemon never executes it — host cron is the only trigger. Credentials come
+ * from BACKUP_S3_* env vars (see .env.example); rclone config is generated at
+ * container start by docker/entrypoint.sh (ensure_rclone_config).
  *
  * Exit codes:
  *   0 — success (or no-op when BACKUP_S3_ENABLED != true)
@@ -53,10 +55,18 @@ $log = static function (string $msg): void {
 $set_result = static function (array $data) use ($db): void {
 	$json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	$db->query(
-		"UPDATE `" . DB_PREFIX . "dockercart_scheduler_task`
-		 SET `last_result` = '" . $db->escape($json) . "',
-			 `date_modified` = NOW()
-		 WHERE `task_type` = 'backup_s3'"
+		"INSERT INTO `" . DB_PREFIX . "dockercart_scheduler_task`
+			(`task_type`, `task_name`, `source_id`, `cron_enabled`, `cron_schedule`,
+			 `last_run`, `last_result`, `date_added`, `date_modified`,
+			 `worker_command`, `status`, `is_system`)
+		 VALUES
+			('backup_s3', 'S3 Backup', 0, 0, '',
+			 NOW(), '" . $db->escape($json) . "', NOW(), NOW(),
+			 '', 1, 1)
+		 ON DUPLICATE KEY UPDATE
+			`last_run` = NOW(),
+			`last_result` = VALUES(`last_result`),
+			`date_modified` = NOW()"
 	);
 };
 
