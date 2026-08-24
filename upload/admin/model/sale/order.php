@@ -454,7 +454,7 @@ class ModelSaleOrder extends Model {
 
 		switch ($status) {
 			case 'unpaid':
-				return " AND " . $paid_amount . " <= 0";
+				return " AND " . $payment_difference . " < 0";
 			case 'partial':
 				return " AND " . $paid_amount . " > 0 AND " . $payment_difference . " < 0";
 			case 'paid':
@@ -475,7 +475,7 @@ class ModelSaleOrder extends Model {
 
 		switch ($status) {
 			case 'none':
-				return " AND " . $ordered . " > 0 AND " . $shipped . " <= 0";
+				return " AND " . $ordered . " > 0 AND " . $shipped . " < " . $ordered;
 			case 'partial':
 				return " AND " . $shipped . " > 0 AND " . $shipped . " < " . $ordered;
 			case 'shipped':
@@ -1490,22 +1490,27 @@ class ModelSaleOrder extends Model {
 			}
 
 			if ($axis_ids) {
-				$variant = $pc->resolveVariant($product_id, $axis_selection);
+				// Вариант резолвим только при полном выборе осей: пока
+				// пользователь ещё выбирает опции, неполная комбинация —
+				// не ошибка, считаем от базовых цены/остатка товара.
+				if (count($axis_selection) === count($axis_ids)) {
+					$variant = $pc->resolveVariant($product_id, $axis_selection);
 
-				if (empty($variant)) {
-					throw new \RuntimeException('error_variant_not_found');
-				}
+					if (empty($variant)) {
+						throw new \RuntimeException('error_variant_not_found');
+					}
 
-				$variant_id = (int)$variant['variant_id'];
-				$variant_sku = $variant['sku'] ?? '';
-				$variant_model = $variant['model'] ?? '';
-				$stock = (float)($variant['quantity'] ?? 0);
-				$subtract = (bool)($variant['subtract'] ?? true);
+					$variant_id = (int)$variant['variant_id'];
+					$variant_sku = $variant['sku'] ?? '';
+					$variant_model = $variant['model'] ?? '';
+					$stock = (float)($variant['quantity'] ?? 0);
+					$subtract = (bool)($variant['subtract'] ?? true);
 
-				if (!empty($variant_model)) {
-					$model = $variant_model;
-				} elseif (!empty($variant_sku)) {
-					$model = $variant_sku;
+					if (!empty($variant_model)) {
+						$model = $variant_model;
+					} elseif (!empty($variant_sku)) {
+						$model = $variant_sku;
+					}
 				}
 			}
 		}
@@ -1672,6 +1677,15 @@ class ModelSaleOrder extends Model {
 
 		if (!$pricing) {
 			return false;
+		}
+
+		// calculateProductPricing() больше не падает при неполном выборе осей
+		// (это нужно для живого превью), поэтому запрещаем вставку строки
+		// настраиваемого товара без резолвнутого варианта здесь.
+		$pc = new \ProductConfigurable($this->registry);
+
+		if ((int)$pricing['variant_id'] === 0 && $pc->isConfigurable((int)$product_id)) {
+			throw new \RuntimeException('error_variant_not_found');
 		}
 
 		$order_id = (int)$order_id;
