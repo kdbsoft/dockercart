@@ -62,7 +62,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered table-hover dcx-table">
+      <table class="table table-bordered table-hover">
         <thead>
           <tr>
             <td>{{ column_date }}</td>
@@ -81,7 +81,7 @@
           <tr>
             <td class="text-left text-nowrap">{{ movement.date }}</td>
             <td class="text-left">
-              <div class="dc-entity-name">{{ movement.product_name ?: '#' ~ movement.product_id }}</div>
+              <div>{{ movement.product_name ?: '#' ~ movement.product_id }}</div>
               <small class="text-muted">{{ movement.product_model }}{% if movement.variant_sku %} &middot; {{ movement.variant_sku }}{% endif %}</small>
             </td>
             <td class="text-left">{{ movement.warehouse }}</td>
