@@ -1,0 +1,70 @@
+<?php
+declare(strict_types=1);
+
+class ControllerExtensionAnalyticsTiktok extends Controller {
+	private $error = array();
+
+	public function index() {
+		$this->load->language('extension/analytics/tiktok');
+
+		$this->document->setTitle($this->language->get('heading_title'));
+
+		$this->load->model('setting/setting');
+
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+			$this->model_setting_setting->editSetting('analytics_tiktok', $this->request->post, $this->request->get['store_id']);
+
+			$this->session->data['success'] = $this->language->get('text_success');
+
+			$this->response->redirect($this->buildExtensionBackUrl('analytics'));
+		}
+
+		if (isset($this->error['warning'])) {
+			$data['error_warning'] = $this->error['warning'];
+		} else {
+			$data['error_warning'] = '';
+		}
+
+		if (isset($this->error['code'])) {
+			$data['error_code'] = $this->error['code'];
+		} else {
+			$data['error_code'] = '';
+		}
+
+		$data['action'] = $this->url->link('extension/analytics/tiktok', 'user_token=' . $this->session->data['user_token'] . '&store_id=' . $this->request->get['store_id'], true);
+
+		$data['cancel'] = $this->buildExtensionBackUrl('analytics');
+
+		$data['user_token'] = $this->session->data['user_token'];
+
+		if (isset($this->request->post['analytics_tiktok_code'])) {
+			$data['analytics_tiktok_code'] = $this->request->post['analytics_tiktok_code'];
+		} else {
+			$data['analytics_tiktok_code'] = $this->model_setting_setting->getSettingValue('analytics_tiktok_code', $this->request->get['store_id']);
+		}
+
+		if (isset($this->request->post['analytics_tiktok_status'])) {
+			$data['analytics_tiktok_status'] = $this->request->post['analytics_tiktok_status'];
+		} else {
+			$data['analytics_tiktok_status'] = $this->model_setting_setting->getSettingValue('analytics_tiktok_status', $this->request->get['store_id']);
+		}
+
+		$data['header'] = $this->load->controller('common/header');
+		$data['column_left'] = $this->load->controller('common/column_left');
+		$data['footer'] = $this->load->controller('common/footer');
+
+		$this->response->setOutput($this->load->view('extension/analytics/tiktok', $data));
+	}
+
+	protected function validate() {
+		if (!$this->user->hasPermission('modify', 'extension/analytics/tiktok')) {
+			$this->error['warning'] = $this->language->get('error_permission');
+		}
+
+		if (!$this->request->post['analytics_tiktok_code']) {
+			$this->error['code'] = $this->language->get('error_code');
+		}
+
+		return !$this->error;
+	}
+}
