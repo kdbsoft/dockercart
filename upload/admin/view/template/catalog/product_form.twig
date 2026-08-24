@@ -303,6 +303,9 @@
                           {% if warehouse_enabled %}
                           <div class="dc-wh-hint" id="dc-wh-hint-simple"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
                           {% endif %}
+                          {% if reserved_quantity > 0 %}
+                          <div class="dc-wh-hint dc-wh-hint--reserved"><i data-lucide="lock" width="14" height="14"></i> <span>{{ text_reserved_quantity }}: {{ reserved_quantity }}</span></div>
+                          {% endif %}
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
@@ -321,7 +324,7 @@
                       </div>
                       <div class="col-sm-12 col-lg-6 col-xl-8" style="display:none" id="dc-inventory-variants-col">
                         <div class="dcx-field">
-                          <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span></label>
+                          <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span>{% if reserved_quantity > 0 %}<span class="dc-inv-reserved" id="dc-inv-reserved">{{ text_reserved_quantity }}: {{ reserved_quantity }}</span>{% endif %}</label>
                           {% if warehouse_enabled %}
                           <div class="dc-axis-info-banner dc-wh-hint-banner" id="dc-note-warehouse-inventory" style="display:none"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
                           {% endif %}

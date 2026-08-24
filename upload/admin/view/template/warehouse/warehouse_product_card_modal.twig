@@ -30,6 +30,7 @@
         <span class="pcm-stock{% if qty_here > 0 or unlimited %} pcm-stock--in{% else %} pcm-stock--out{% endif %}">{{ text_pcard_here }}: {% if unlimited %}&infin;{% else %}{{ qty_here }}{% endif %}</span>
         <span class="pcm-badge">{{ text_pcard_total }}: {{ qty_total }}</span>
         {% if reserved > 0 %}<span class="pcm-stock pcm-stock--reserved">{{ text_pcard_reserved }}: {{ reserved }}</span>{% endif %}
+        {% if available is not null %}<span class="pcm-badge">{{ text_pcard_available }}: {{ available }}</span>{% endif %}
         {% if unlimited %}<span class="pcm-badge pcm-badge--accent">{{ text_unlimited }}</span>{% endif %}
         &middot; {% if status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}
       </div>

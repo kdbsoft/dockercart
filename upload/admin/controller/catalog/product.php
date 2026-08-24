@@ -1322,6 +1322,17 @@ class ControllerCatalogProduct extends Controller {
 		// layer — show the hint and reuse the stock card modal.
 		$data['warehouse_enabled'] = $this->config->get('config_warehouse_enabled');
 
+		// Quantity held by active checkout reservations (admin perspective:
+		// counted against the product's stock so the seller sees what is
+		// actually still sellable).
+		$data['reserved_quantity'] = 0.0;
+
+		if (!empty($product_info['product_id'])) {
+			$stock_reservation = new \DockercartStockReservation($this->registry);
+			$reserved_map = $stock_reservation->getReservedTotalByProductIds([(int)$product_info['product_id']]);
+			$data['reserved_quantity'] = (float)($reserved_map[(int)$product_info['product_id']] ?? 0);
+		}
+
 		if (isset($this->request->post['minimum'])) {
 			$data['minimum'] = $this->request->post['minimum'];
 		} elseif (!empty($product_info)) {

@@ -222,6 +222,7 @@ $_['text_panel_pricing_subtitle']     = 'Base price, customer group prices and t
 $_['text_panel_inventory_title']      = 'Inventory';
 $_['text_panel_inventory_subtitle']   = 'Stock quantity, minimum order and availability options';
 $_['text_variant_qty_title']          = 'Qty by variants';
+$_['text_reserved_quantity']          = 'Reserved';
 $_['text_variant_qty_total']          = 'Total %s';
 $_['text_panel_media_title']          = 'Media';
 $_['text_panel_media_subtitle']       = 'Main image, additional photos, video, 3D model and 360° view';
