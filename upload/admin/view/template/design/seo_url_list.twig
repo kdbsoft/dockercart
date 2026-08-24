@@ -53,7 +53,7 @@
             <td class="text-left">
               {% for language in languages %}
               <div class="dc-keyword-row">
-                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                 {% if seo_url.keywords[language.language_id] %}
                 <span class="inline-edit" data-query="{{ seo_url.query|e('html_attr') }}" data-store-id="{{ seo_url.store_id }}" data-language-id="{{ language.language_id }}" data-value="{{ seo_url.keywords[language.language_id].keyword|e('html_attr') }}">{{ seo_url.keywords[language.language_id].keyword }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 {% else %}
@@ -88,6 +88,7 @@
   display: inline-block; min-width: 26px; font-weight: 700; font-size: 11px;
   color: #7b8ead; margin-right: 6px;
 }
+.dc-keyword-row .lang-name { margin-right: 6px; }
 .dc-keyword-empty { color: #999; font-style: italic; }
 .inline-edit { cursor: pointer; }
 .inline-edit .inline-edit-icon { margin-left: 4px; color: #a0aec0; }

@@ -51,7 +51,7 @@
                   <label class="dcx-label">{{ entry_name }}</label>
                   {% for language in languages %}
                   <div class="dc-attr-row__value">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="download_description[{{ language.language_id }}][name]" value="{{ (download_description[language.language_id] ? download_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_name }}" class="form-control" />
                   </div>
                   {% if error_name[language.language_id] %}
