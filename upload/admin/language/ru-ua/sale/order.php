@@ -459,3 +459,8 @@ $_['text_empty_description'] = 'Заказы покупателей и их ст
 $_['text_buyer_orders_one']          = '%s заказ';
 $_['text_buyer_orders_few']          = '%s заказа';
 $_['text_buyer_orders_many']         = '%s заказов';
+
+// Warehouse move
+$_['text_move_warehouse']        = 'Перенести на склад';
+$_['text_warehouse_moved']       = 'Товар перенесён на склад.';
+$_['text_warehouse_move_failed'] = 'Не удалось перенести товар.';

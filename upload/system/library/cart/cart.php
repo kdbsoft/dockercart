@@ -673,8 +673,20 @@ class Cart
                         $product_query["row"]["price"] = (float)$variant_query["row"]["price"];
                         $product_query["row"]["quantity"] = (float)$variant_query["row"]["quantity"];
                         $product_query["row"]["subtract"] = (int)$variant_query["row"]["subtract"];
-                        $product_query["row"]["weight"] = (float)$variant_query["row"]["weight"];
-                        $product_query["row"]["weight_class_id"] = (int)$variant_query["row"]["weight_class_id"];
+
+                        // Per-variant physical data: weight + L/W/H override the
+                        // head row only when the variant carries a non-zero value.
+                        // Class ids stay global on the product row (shared across
+                        // variants), so a zero on the variant keeps the head class.
+                        foreach (["weight", "length", "width", "height"] as $phys_key) {
+                            if (isset($variant_query["row"][$phys_key]) && (float)$variant_query["row"][$phys_key] > 0) {
+                                $product_query["row"][$phys_key] = (float)$variant_query["row"][$phys_key];
+                            }
+                        }
+
+                        if (!empty($variant_query["row"]["weight_class_id"])) {
+                            $product_query["row"]["weight_class_id"] = (int)$variant_query["row"]["weight_class_id"];
+                        }
 
                         if (!empty($variant_model)) {
                             $product_query["row"]["model"] = $variant_model;

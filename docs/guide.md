@@ -935,7 +935,7 @@ Existing tables altered:
   the line was allocated to.
 - `oc_order_product` + `warehouse_id`, `warehouse_name`, `estimate_date`
   (snapshot per line), and dropship-supplier fields `supplier_status`,
-  `supplier_ordered_date`, `supplier_tracking`.
+  `supplier_ordered_date`, `supplier_tracking`, `supplier_cost`.
 
 `oc_product.quantity` / `oc_product_variant.quantity` remain the denormalised
 **SUM cache** across warehouses (rewritten on every mutation via
@@ -1021,6 +1021,22 @@ only ever move the default-warehouse line.
   per cell; the product card modal and the product form Qty area show the
   same three numbers (`available = quantity − active holds`, unlimited rows
   render ∞).
+- The product card modal: opened from a matrix row it labels the cell as
+  `On warehouse "<name>"`; opened without a warehouse context it renders a
+  **per-warehouse breakdown** (simple products) or a **per-variant**
+  breakdown (configurable products — their head row has no stock of its own,
+  so a plain "total" would be a misleading zero).
+- For simple products the modal offers **Set total stock**: routed through
+  `setTotalQuantity()` (rebalance semantics) so the field in the product form
+  stays in sync. The product form Qty field is **read-only for configurable
+  products** (stock is managed per variant in the inventory block / variant
+  matrix) and editable for simple ones.
+- **Manual legacy backfill**: the stock screen's *Recalculate totals*
+  materialises cache-only leftovers (simple products and active variants
+  with `subtract=1` + `quantity>0` that have no `oc_warehouse_stock` rows
+  yet) onto the default warehouse, journaled as `recalculate-backfill`
+  movements. It runs only when a human clicks the button — read paths never
+  write.
 - Storefront product page subtracts other buyers' active checkout holds from
   the displayed "In stock" figure (listings keep the plain cache badge —
   holds expire within the reserve window anyway).
@@ -1037,7 +1053,15 @@ nearest pickup slot.
 Top-level **Warehouses** menu (ACL `warehouse/*`): warehouse CRUD (incl.
 schedule + holidays + pickup + dropship), stock matrix with AJAX cell editing,
 movement journal + per-position running balance, transfers, and dropship
-supplier orders (deadlines + CSV export).
+supplier orders (deadlines + CSV export). Supplier Orders rows carry an inline
+per-unit **purchase price** (`oc_order_product.supplier_cost`, store default
+currency; empty = not set) saved via `updateLine()` `action=set_cost`.
+
+The **Analytics** page has a *Dropshipping Supplier Profit* report
+(`extension/report/supplier_profit`): revenue = Σ `order_product.total`,
+purchase = Σ `supplier_cost × quantity` over lines with a known price; lines
+without a price are excluded from purchase/profit and shown in a separate
+"No Price" column. Filters: order-date range + supplier status.
 
 ### Configuration
 

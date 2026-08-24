@@ -57,6 +57,41 @@ class ControllerWarehouseStock extends Controller {
 	}
 
 	/**
+	 * AJAX: set the total stock of a product line (product-card modal "Set
+	 * total"). Routed through the warehouse layer with rebalance — the admin
+	 * never writes the denormalised cache directly.
+	 */
+	public function updateTotal() {
+		$this->load->language('warehouse/stock');
+
+		$json = ['success' => false];
+
+		if ($this->user->hasPermission('modify', 'warehouse/stock')) {
+			$input = $this->request->post;
+			$product_id = (int)($input['product_id'] ?? 0);
+			$quantity = (float)($input['quantity'] ?? 0);
+			$variant_id = (int)($input['variant_id'] ?? 0);
+
+			if ($product_id && $quantity >= 0) {
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$actual = $warehouse->setTotalQuantity($product_id, $quantity, $variant_id, [
+					'reference' => 'product-card',
+					'user_id' => (int)($this->user ? $this->user->getId() : 0),
+				]);
+
+				$json = ['success' => true, 'total' => $actual];
+			} else {
+				$json['error'] = $this->language->get('error_quantity');
+			}
+		} else {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
 	 * AJAX: add a missing product row to a warehouse (from the product picker).
 	 */
 	public function addProduct() {
@@ -95,11 +130,19 @@ class ControllerWarehouseStock extends Controller {
 
 		if ($this->user->hasPermission('modify', 'warehouse/stock')) {
 			$result = $this->model_warehouse_stock->recalculate();
+
+			$message = sprintf($this->language->get('text_recalculated'), $result['total'], $result['drifted']);
+
+			if ($result['backfilled'] > 0) {
+				$message .= ' ' . sprintf($this->language->get('text_recalculated_backfill'), $result['backfilled']);
+			}
+
 			$json = [
 				'success' => true,
 				'total' => $result['total'],
 				'drifted' => $result['drifted'],
-				'totals_message' => sprintf($this->language->get('text_recalculated'), $result['total'], $result['drifted']),
+				'backfilled' => $result['backfilled'],
+				'totals_message' => $message,
 			];
 		} else {
 			$json['error'] = $this->language->get('error_permission');
@@ -630,25 +673,149 @@ class ControllerWarehouseStock extends Controller {
 						}
 					}
 
-					// Stock in this warehouse (the clicked matrix row).
+					// Product identity: configurable products own stock per variant, the
+					// head row has none of its own.
+					$pc = new \ProductConfigurable($this->registry);
+					$is_configurable = $pc->isConfigurable($product_id);
+
+					// All stock rows of the product, aggregated per
+					// (variant, warehouse) for the card view.
+					$stock_rows = $this->db->query("SELECT `warehouse_id`, `variant_id`, `quantity`, `unlimited` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `product_id` = '" . (int)$product_id . "'");
+
+					$warehouse_names = [];
+					$warehouse = new \DockercartWarehouse($this->registry);
+
+					foreach ($warehouse->getAllWarehouses() as $w) {
+						$warehouse_names[(int)$w['warehouse_id']] = (string)$w['name'];
+					}
+
+					$variant_totals = [];
+					$per_warehouse = [];
+					$lines = [];
+
+					foreach ($stock_rows->rows as $row) {
+						$vid = (int)$row['variant_id'];
+						$wid = (int)$row['warehouse_id'];
+
+						if (!isset($variant_totals[$vid])) {
+							$variant_totals[$vid] = ['quantity' => 0.0, 'unlimited' => false];
+						}
+
+						$unlimited = (bool)$row['unlimited'];
+
+						if ($unlimited) {
+							$variant_totals[$vid]['unlimited'] = true;
+						} else {
+							$variant_totals[$vid]['quantity'] += (float)$row['quantity'];
+						}
+
+						$per_warehouse[$vid][$wid] = [
+							'quantity' => (float)$row['quantity'],
+							'unlimited' => $unlimited,
+							'warehouse_name' => $warehouse_names[$wid] ?? ('#' . $wid),
+						];
+
+						$lines[] = [
+							'product_id' => $product_id,
+							'variant_id' => $vid,
+							'warehouse_id' => $wid,
+						];
+					}
+
+					// Active holds for the product's lines (seller perspective:
+					// every session counts, matching the matrix columns).
+					$reservation = new \DockercartStockReservation($this->registry);
+					$reserved_map = $reservation->getReservedByLines($lines, null, false);
+
+					foreach ($per_warehouse as $vid => &$cells) {
+						foreach ($cells as $wid => &$cell) {
+							$reserved = (float)($reserved_map[$product_id . ':' . $vid . ':' . $wid] ?? 0);
+
+							$cell['reserved'] = $reserved;
+							$cell['available'] = $cell['unlimited'] ? null : max(0.0, $cell['quantity'] - $reserved);
+						}
+						unset($cell);
+					}
+					unset($cells);
+
+					// Reserved/available per variant (sum of its cells).
+					foreach ($variant_totals as $vid => &$total) {
+						$cells = $per_warehouse[$vid] ?? [];
+						$reserved = 0.0;
+
+						foreach ($cells as $cell) {
+							$reserved += (float)$cell['reserved'];
+						}
+
+						$total['reserved'] = $reserved;
+						$total['available'] = $total['unlimited'] ? null : max(0.0, $total['quantity'] - $reserved);
+					}
+					unset($total);
+
 					$qty_here = 0.0;
-					$unlimited = false;
+					$unlimited_here = false;
+					$here_label = '';
 
-					if ($warehouse_id) {
-						$here = $this->db->query("SELECT `quantity`, `unlimited` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
+					if ($warehouse_id && isset($per_warehouse[$variant_id][$warehouse_id])) {
+						$here = $per_warehouse[$variant_id][$warehouse_id];
+						$qty_here = (float)$here['quantity'];
+						$unlimited_here = (bool)$here['unlimited'];
+						$here_label = sprintf($this->language->get('text_pcard_here_wh'), $here['warehouse_name']);
+					}
 
-						if ($here->num_rows) {
-							$qty_here = (float)$here->row['quantity'];
-							$unlimited = (bool)$here->row['unlimited'];
+					$summary_vid = ($variant_id && isset($variant_totals[$variant_id])) ? $variant_id : 0;
+					$head_total = $variant_totals[$summary_vid] ?? ['quantity' => 0.0, 'unlimited' => false];
+					$head_reserved = (float)($head_total['reserved'] ?? 0);
+
+					// Configurable products opened without a variant context:
+					// render one row per active variant (head has no stock).
+					$variant_lines = [];
+
+					if ($is_configurable && !$variant_id) {
+						foreach ($pc->getVariants($product_id) as $variant) {
+							$vid = (int)$variant['variant_id'];
+							$total = $variant_totals[$vid] ?? ['quantity' => 0.0, 'unlimited' => false, 'reserved' => 0.0];
+
+							$labels = [];
+
+							foreach (($variant['values'] ?? []) as $value) {
+								if (!empty($value['name'])) {
+									$labels[] = (string)$value['name'];
+								}
+							}
+
+							$variant_lines[] = [
+								'label' => implode(' / ', $labels),
+								'sku' => (string)($variant['sku'] ?? ''),
+								'model' => (string)($variant['model'] ?? ''),
+								'quantity' => $total['quantity'],
+								'unlimited' => (bool)$total['unlimited'],
+								'reserved' => (float)($total['reserved'] ?? 0),
+								'available' => $total['unlimited'] ? null : max(0.0, $total['quantity'] - (float)($total['reserved'] ?? 0)),
+							];
 						}
 					}
 
-					// Total across all warehouses + reserved by active checkouts.
-					$total = $this->db->query("SELECT COALESCE(SUM(`quantity`), 0) AS total_quantity FROM `" . DB_PREFIX . "warehouse_stock` WHERE `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
+					// Simple product opened without a warehouse context:
+					// render one row per warehouse instead of a bogus "here".
+					$warehouse_lines = [];
 
-					$reservation = new \DockercartStockReservation($this->registry);
-					$reserved_map = $reservation->getReservedByProductIds([$product_id], null, false);
-					$reserved = $reserved_map[(int)$product_id . ':' . $variant_id] ?? 0.0;
+					if (!$is_configurable && !$warehouse_id) {
+						foreach (($per_warehouse[0] ?? []) as $wid => $cell) {
+							$warehouse_lines[] = [
+								'name' => $cell['warehouse_name'],
+								'quantity' => $cell['quantity'],
+								'unlimited' => $cell['unlimited'],
+								'reserved' => $cell['reserved'],
+								'available' => $cell['available'],
+							];
+						}
+					}
+
+					$qty_total = $variant_lines ? null : (float)$head_total['quantity'];
+					$unlimited_total = $variant_lines ? false : (bool)$head_total['unlimited'];
+					$reserved_total = $variant_lines ? null : $head_reserved;
+					$available_total = $variant_lines || $unlimited_total ? null : max(0.0, (float)$head_total['quantity'] - $head_reserved);
 
 					$description = strip_tags(htmlspecialchars_decode($product_info['description'] ?? '', ENT_QUOTES));
 					$description = trim(preg_replace('/\s+/', ' ', $description));
@@ -660,11 +827,19 @@ class ControllerWarehouseStock extends Controller {
 						'gallery' => $gallery,
 						'codes' => $codes,
 						'status' => !empty($product_info['status']),
+						'is_configurable' => $is_configurable,
+						'here_label' => $here_label,
 						'qty_here' => $qty_here,
-						'unlimited' => $unlimited,
-						'qty_total' => (float)$total->row['total_quantity'],
-						'reserved' => (float)$reserved,
-						'available' => $unlimited ? null : max(0.0, (float)$total->row['total_quantity'] - (float)$reserved),
+						'unlimited_here' => $unlimited_here,
+						'qty_total' => $qty_total,
+						'unlimited_total' => $unlimited_total,
+						'reserved_total' => $reserved_total,
+						'available_total' => $available_total,
+						'variant_lines' => $variant_lines,
+						'warehouse_lines' => $warehouse_lines,
+						'can_set_total' => !$is_configurable,
+						'product_id' => $product_id,
+						'user_token' => $this->session->data['user_token'],
 						'attributes' => $attr_data,
 						'description' => $description,
 						'href' => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product_id, true),
