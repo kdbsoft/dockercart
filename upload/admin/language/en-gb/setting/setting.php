@@ -5,6 +5,7 @@ $_['heading_title']                  = 'Settings';
 // Text
 $_['text_stores']                    = 'Stores';
 $_['text_success']                   = 'Success: You have modified settings!';
+$_['text_warehouse_backfill']        = 'Success: You have modified settings! %s order lines were assigned to the default warehouse for stock tracking.';
 $_['text_edit']                      = 'Edit Setting';
 $_['text_configuration']             = 'Configuration';
 $_['text_product']                   = 'Products';

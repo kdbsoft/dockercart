@@ -14,6 +14,27 @@ class ControllerSettingSetting extends Controller {
 			// (e.g. config_order_flow_*, config_reward_*, config_cart_abandoned_*) intact
 			$this->model_setting_setting->updateSetting('config', $this->request->post);
 
+			// Warehouse feature toggled on: backfill order lines created while
+			// it was off (warehouse_id = 0) so later restocks / returns land on
+			// an explicit warehouse instead of the fallback branch.
+			$was_enabled = (int)$this->config->get('config_warehouse_enabled');
+			$now_enabled = (int)(isset($this->request->post['config_warehouse_enabled']) ? $this->request->post['config_warehouse_enabled'] : 0);
+
+			if (!$was_enabled && $now_enabled) {
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+
+				$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET `warehouse_id` = '" . (int)$default_warehouse_id . "' WHERE `warehouse_id` = '0' AND `order_product_id` > 0");
+
+				$backfilled = $this->db->countAffected();
+
+				if ($backfilled > 0) {
+					$this->session->data['success'] = sprintf($this->language->get('text_warehouse_backfill'), $backfilled);
+				}
+			} else {
+				$this->session->data['success'] = $this->language->get('text_success');
+			}
+
 //			if ($this->config->get('config_currency_auto')) {
 //				$this->load->model('localisation/currency');
 //
