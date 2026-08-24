@@ -41,7 +41,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-hover dcx-table">
+      <table class="table table-bordered table-hover">
         <thead>
           <tr>
             <td>{{ column_order }}</td>
@@ -59,10 +59,10 @@
         <tbody>
           {% for order in orders %}
           <tr data-href="{{ order.order_href }}">
-            <td class="text-nowrap"><a href="{{ order.order_href }}" class="row-title-link dc-entity-name">#{{ order.order_id }}</a></td>
-            <td><span class="dc-entity-name">{{ order.supplier_name ?: '—' }}</span></td>
+            <td class="text-nowrap"><a href="{{ order.order_href }}" class="row-title-link">#{{ order.order_id }}</a></td>
+            <td>{{ order.supplier_name ?: '—' }}</td>
             <td>
-              <a href="{{ order.product_href }}" class="row-title-link dc-entity-name">{{ order.name }}</a>
+              <a href="{{ order.product_href }}" class="row-title-link">{{ order.name }}</a>
               {% if order.model or order.variant_sku %}
               <small class="text-muted dc-so-sub">{{ order.model }}{% if order.model and order.variant_sku %} · {% endif %}{{ order.variant_sku }}</small>
               {% endif %}
