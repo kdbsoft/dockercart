@@ -165,7 +165,7 @@ class ControllerWarehouseMovement extends Controller {
 				}
 
 				$data['lines'][] = [
-					'date' => $line['date_added'],
+					'date' => date($this->language->get('datetime_format'), strtotime($line['date_added'])),
 					'warehouse' => $line['warehouse_name'] ?? '',
 					'type_key' => $line['type'],
 					'type' => $this->language->get('text_type_' . $line['type']),
@@ -348,7 +348,7 @@ class ControllerWarehouseMovement extends Controller {
 		foreach ($results as $result) {
 			$data['movements'][] = [
 				'movement_id' => $result['movement_id'],
-				'date' => $result['date_added'],
+				'date' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'warehouse' => $result['warehouse_name'] ?? '',
 				'warehouse_id' => $result['warehouse_id'],
 				'product_id' => $result['product_id'],

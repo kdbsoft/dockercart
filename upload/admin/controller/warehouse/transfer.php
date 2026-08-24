@@ -124,7 +124,7 @@ class ControllerWarehouseTransfer extends Controller {
 		$data['from'] = $from['name'] ?? '—';
 		$data['to'] = $to['name'] ?? '—';
 		$data['note'] = $transfer_info['note'];
-		$data['date_added'] = $transfer_info['date_added'];
+		$data['date_added'] = date($this->language->get('datetime_format'), strtotime($transfer_info['date_added']));
 
 		$creator = '';
 
@@ -296,7 +296,7 @@ class ControllerWarehouseTransfer extends Controller {
 				'items_count' => (int)$result['items_count'],
 				'total_quantity' => $this->formatQuantity((string)$result['total_quantity']),
 				'creator' => $result['creator'] ?? '',
-				'date' => $result['date_added'],
+				'date' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 			];
 		}
 
