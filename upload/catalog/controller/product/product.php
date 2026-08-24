@@ -448,9 +448,15 @@ class ControllerProductProduct extends Controller {
 
 					$unlimited = $available >= PHP_FLOAT_MAX * 0.5;
 
+					if ($wh['type'] === 'dropship') {
+						$display_name = sprintf($this->language->get('text_warehouse_dropship'), (int)$wh['warehouse_id']);
+					} else {
+						$display_name = (string)$wh['name'];
+					}
+
 					$data['warehouse_stock'][] = [
 						'warehouse_id' => (int)$wh['warehouse_id'],
-						'name' => (string)$wh['name'],
+						'name' => $display_name,
 						'type' => (string)$wh['type'],
 						'quantity' => $unlimited ? null : (float)$available,
 						'unlimited' => $unlimited,
@@ -462,7 +468,6 @@ class ControllerProductProduct extends Controller {
 				$data['text_in_stock'] = $this->language->get('text_instock');
 				$data['text_out_of_stock'] = $this->language->get('text_out_of_stock');
 				$data['text_warehouse_available'] = $this->language->get('text_warehouse_available');
-				$data['text_warehouse_dropship'] = $this->language->get('text_warehouse_dropship');
 				$data['text_warehouse_pickup'] = $this->language->get('text_warehouse_pickup');
 				$data['text_warehouse_lead'] = $this->language->get('text_warehouse_lead');
 			}

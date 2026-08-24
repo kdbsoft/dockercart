@@ -2711,9 +2711,23 @@ class ControllerCheckoutDockercartCheckout extends Controller
         if ($this->config->get('config_warehouse_enabled')) {
             $allocation = $this->getWarehouseAllocation($cart_products);
 
+            $this->load->language("product/product");
+
             $wh = new \DockercartWarehouse($this->registry);
             foreach ($wh->getWarehouses() as $w) {
-                $warehouse_pool_by_id[(int)$w["warehouse_id"]] = (string)$w["name"];
+                if ((string)$w["type"] === "dropship") {
+                    $display_name = sprintf(
+                        $this->language->get("text_warehouse_dropship"),
+                        (int)$w["warehouse_id"],
+                    );
+                } else {
+                    $display_name = (string)$w["name"];
+                }
+
+                $warehouse_pool_by_id[(int)$w["warehouse_id"]] = [
+                    "name" => $display_name,
+                    "type" => (string)$w["type"],
+                ];
             }
         }
 
@@ -2722,7 +2736,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
             $cart_key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
             $wh_id = (int)($allocation[$cart_key] ?? 0);
-            $wh_name = $wh_id > 0 ? (string)($warehouse_pool_by_id[$wh_id] ?? '') : '';
+            $wh_info = $wh_id > 0 ? ($warehouse_pool_by_id[$wh_id] ?? null) : null;
+            $wh_name = $wh_info ? $wh_info["name"] : '';
 
             foreach ($product["option"] as $option) {
                 if ($option["type"] != "file") {

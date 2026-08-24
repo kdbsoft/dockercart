@@ -7,3 +7,4 @@
 $_['text_title']       = 'Доставка';
 $_['text_description'] = 'Стандартная доставка';
 $_['text_free']        = 'Бесплатно';
+$_['text_days_suffix'] = 'дн.';
