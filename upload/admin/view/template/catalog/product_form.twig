@@ -197,6 +197,10 @@
                       <button type="button" id="toggle-articles" class="btn btn-default btn-sm"><i data-lucide="toggle-left" width="14" height="14"></i> <span id="toggle-articles-text">{{ button_show_articles }}</span></button>
                     </div>
                   </div>
+                  <div class="dcx-field" style="display:none" id="dc-codes-variants-col">
+                    <label class="dcx-label dc-price-head"><i data-lucide="scan-line" width="14" height="14"></i> {{ text_variant_codes_title }} <span class="dc-price-badge" id="dc-codes-badge">0</span></label>
+                    <div class="dc-price-block" id="dc-codes-variants"></div>
+                  </div>
                 </div>
               </div>
               <div class="dcx-panel" style="margin-top: 16px;">
@@ -212,15 +216,18 @@
                   <div class="dcx-fields">
                     <div class="row">
                       <div class="col-sm-12 col-lg-6 col-xl-3">
-                        <div class="dcx-field">
-                          <label class="dcx-label" for="input-price">{{ entry_price }}</label>
-                          <input type="text" name="price" value="{{ price }}" placeholder="{{ entry_price }}" id="input-price" class="form-control"/>
+                        <div class="dcx-field" id="dc-price-main">
+                          <label class="dcx-label" for="input-price">{{ entry_price }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_price_range_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
+                          <input type="text" name="price" value="{% if is_configurable %}{% if price_range_text %}{{ price_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ price }}{% endif %}" placeholder="{{ entry_price }}" id="input-price" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="call_for_price" value="1" id="input-call-for-price"{% if call_for_price %} checked{% endif %} /> {{ entry_call_for_price }}
                               <span data-toggle="tooltip" title="{{ help_call_for_price }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
+                          {% if is_configurable and price_range_text %}
+                          <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_pricing }}</div>
+                          {% endif %}
                         </div>
                       </div>
                       <div class="col-sm-12 col-lg-6 col-xl-4">
@@ -239,28 +246,30 @@
                         </div>
                       </div>
                     </div>
-                    <div class="dcx-field">
+                    <div class="dcx-field" id="dc-cgp-field"{% if is_configurable %} style="display:none"{% endif %}>
                       <label class="dcx-label">{{ entry_customer_group_price }}</label>
-                      <div id="customer-group-prices">
-                        {% set customer_group_price_row = 0 %}
-                        {% for product_customer_group_price in product_customer_group_prices %}
-                        <div class="dc-cgp-row" id="customer-group-price-row{{ customer_group_price_row }}">
-                          <select name="product_customer_group_price[{{ customer_group_price_row }}][customer_group_id]" class="form-control dc-cgp-select">
-                            {% for customer_group in customer_groups %}
-                              {% if customer_group.customer_group_id == product_customer_group_price.customer_group_id %}
-                                <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
-                              {% else %}
-                                <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                          <input type="text" name="product_customer_group_price[{{ customer_group_price_row }}][price]" value="{{ product_customer_group_price.price }}" placeholder="{{ entry_price }}" class="form-control dc-cgp-price"/>
-                          <button type="button" onclick="$('#customer-group-price-row{{ customer_group_price_row }}').remove();" class="btn btn-link dc-cgp-remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                      <div id="dc-cgp-editable">
+                        <div id="customer-group-prices">
+                          {% set customer_group_price_row = 0 %}
+                          {% for product_customer_group_price in product_customer_group_prices %}
+                          <div class="dc-cgp-row" id="customer-group-price-row{{ customer_group_price_row }}">
+                            <select name="product_customer_group_price[{{ customer_group_price_row }}][customer_group_id]" class="form-control dc-cgp-select">
+                              {% for customer_group in customer_groups %}
+                                {% if customer_group.customer_group_id == product_customer_group_price.customer_group_id %}
+                                  <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                                {% else %}
+                                  <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                                {% endif %}
+                              {% endfor %}
+                            </select>
+                            <input type="text" name="product_customer_group_price[{{ customer_group_price_row }}][price]" value="{{ product_customer_group_price.price }}" placeholder="{{ entry_price }}" class="form-control dc-cgp-price"/>
+                            <button type="button" onclick="$('#customer-group-price-row{{ customer_group_price_row }}').remove();" class="btn btn-link dc-cgp-remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                          </div>
+                          {% set customer_group_price_row = customer_group_price_row + 1 %}
+                          {% endfor %}
                         </div>
-                        {% set customer_group_price_row = customer_group_price_row + 1 %}
-                        {% endfor %}
+                        <button type="button" onclick="addCustomerGroupPrice();" id="dc-cgp-add-btn" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_customer_group_price_add }}</button>
                       </div>
-                      <button type="button" onclick="addCustomerGroupPrice();" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_customer_group_price_add }}</button>
                     </div>
                     {% if tax_classes %}
                     <div class="row">
@@ -281,6 +290,10 @@
                       </div>
                     </div>
                     {% endif %}
+                    <div class="dcx-field" style="display:none" id="dc-pricing-variants-col">
+                      <label class="dcx-label dc-price-head"><i data-lucide="tag" width="14" height="14"></i> {{ text_variant_price_title }} <span class="dc-price-badge" id="dc-price-badge">0</span><span class="dc-price-range" id="dc-price-range"></span></label>
+                      <div class="dc-price-block" id="dc-pricing-variants"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -296,43 +309,30 @@
                   <div class="dc-axis-info-banner" id="dc-note-configurable-inventory" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_inventory }}</div>
                   <div class="dcx-fields">
                     <div class="row">
-                      <div class="col-sm-12 col-lg-6 col-xl-3">
+                      <div class="col-sm-12 col-lg-4 col-xl-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
-                          <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
-                          {% if warehouse_enabled %}
+                          <label class="dcx-label" for="input-quantity">{{ entry_quantity }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_quantity_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
+                          <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
                           <div class="dc-wh-hint" id="dc-wh-hint-simple"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
-                          {% endif %}
                           {% if reserved_quantity > 0 %}
                           <div class="dc-wh-hint dc-wh-hint--reserved"><i data-lucide="lock" width="14" height="14"></i> <span>{{ text_reserved_quantity }}: {{ reserved_quantity }}</span></div>
                           {% endif %}
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
-                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
-                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
-                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                             </label>
                           </div>
                         </div>
                       </div>
-                      <div class="col-sm-12 col-lg-6 col-xl-8" style="display:none" id="dc-inventory-variants-col">
-                        <div class="dcx-field">
-                          <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span>{% if reserved_quantity > 0 %}<span class="dc-inv-reserved" id="dc-inv-reserved">{{ text_reserved_quantity }}: {{ reserved_quantity }}</span>{% endif %}</label>
-                          {% if warehouse_enabled %}
-                          <div class="dc-axis-info-banner dc-wh-hint-banner" id="dc-note-warehouse-inventory" style="display:none"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
-                          {% endif %}
-                          <div class="dc-inv-block" id="dc-inventory-variants"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
                       <div class="col-sm-6 col-lg-4 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-minimum">{{ entry_minimum }}</label>
@@ -352,6 +352,11 @@
                         </div>
                       </div>
                     </div>
+                    <div class="dcx-field" style="display:none" id="dc-inventory-variants-col">
+                      <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span>{% if reserved_quantity > 0 %}<span class="dc-inv-reserved" id="dc-inv-reserved">{{ text_reserved_quantity }}: {{ reserved_quantity }}</span>{% endif %}</label>
+                      <div class="dc-axis-info-banner dc-wh-hint-banner" id="dc-note-warehouse-inventory" style="display:none"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
+                      <div class="dc-inv-block" id="dc-inventory-variants"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -367,16 +372,16 @@
                   <div class="dc-axis-info-banner" id="dc-note-configurable-dimensions" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_dimensions }}</div>
                   <div class="dcx-fields">
                     <div class="dcx-field">
-                      <label class="dcx-label" for="input-length">{{ entry_dimension }}</label>
-                      <div class="row{% if is_configurable %} dc-opts-axis-hidden{% endif %}">
+                      <label class="dcx-label" for="input-length">{{ entry_dimension }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_dimension_range_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
+                      <div class="row">
                         <div class="col-sm-6 col-lg-3">
-                          <input type="text" name="length" value="{{ length }}" placeholder="{{ entry_length }}" id="input-length" class="form-control"/>
+                          <input type="text" name="length" value="{% if is_configurable %}{% if length_range_text %}{{ length_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ length }}{% endif %}" placeholder="{{ entry_length }}" id="input-length" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                          <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control"/>
+                          <input type="text" name="width" value="{% if is_configurable %}{% if width_range_text %}{{ width_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ width }}{% endif %}" placeholder="{{ entry_width }}" id="input-width" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                          <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control"/>
+                          <input type="text" name="height" value="{% if is_configurable %}{% if height_range_text %}{{ height_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ height }}{% endif %}" placeholder="{{ entry_height }}" id="input-height" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
                         </div>
                         <div class="col-sm-6 col-lg-3">
                           <select name="length_class_id" id="input-length-class" class="form-control">
@@ -390,12 +395,18 @@
                           </select>
                         </div>
                       </div>
+                      {% if is_configurable and dimensions_range_text %}
+                      <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_dimensions }}</div>
+                      {% endif %}
                     </div>
-                    <div class="dcx-field">
-                      <label class="dcx-label" for="input-weight">{{ entry_weight }}</label>
+                    <div class="dcx-field" id="dc-weight-main">
+                      <label class="dcx-label" for="input-weight">{{ entry_weight }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_weight_range_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
                       <div class="row">
                         <div class="col-sm-6 col-lg-3">
-                          <input type="text" name="weight" value="{{ weight }}" placeholder="{{ entry_weight }}" id="input-weight" class="form-control"/>
+                          <input type="text" name="weight" value="{% if is_configurable %}{% if weight_range_text %}{{ weight_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ weight }}{% endif %}" placeholder="{{ entry_weight }}" id="input-weight" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
+                          {% if is_configurable and weight_range_text %}
+                          <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_dimensions }}</div>
+                          {% endif %}
                         </div>
                         <div class="col-sm-6 col-lg-3">
                           <select name="weight_class_id" id="input-weight-class" class="form-control">
@@ -410,6 +421,10 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div class="dcx-field" style="display:none;margin-top:12px" id="dc-dimensions-variants-col">
+                    <label class="dcx-label dc-dim-label"><i data-lucide="ruler" width="14" height="14"></i> {{ text_variant_dimensions_title }} <span class="dc-dim-badge" id="dc-dim-badge">0</span><span class="dc-dim-range" id="dc-dim-range"></span></label>
+                    <div class="dc-dim-block" id="dc-dimensions-variants"></div>
                   </div>
                 </div>
               </div>
@@ -648,11 +663,26 @@
                       {% set option_row = 0 %}
                       {% set option_value_row = 0 %}
                       {% for product_option in product_options %}
-                        <div class="dc-option-section{% if product_option.is_axis %} dc-option-axis{% endif %}" id="option-section{{ option_row }}">
+                        <div class="dc-option-section{% if product_option.is_axis %} dc-option-axis{% endif %}{% if product_option.is_axis and is_configurable %} dc-option-section--collapsed{% endif %}" id="option-section{{ option_row }}">
                           <div class="dc-option-section__header">
                             <span class="dc-option-section__title">{{ product_option.name }}</span>
                             <span class="dc-option-section__type">({{ product_option.type }})</span>
                             {% if product_option.is_axis %}<span class="dc-axis-badge" title="{{ entry_axis_lock_warning|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_variant|e('html') }}</span>{% endif %}
+                            {% if product_option.is_axis and is_configurable %}
+                            <span class="dc-option-section__values">
+                              {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
+                                {% set _axis_value_names = [] %}
+                                {% for product_option_value in product_option.product_option_value %}
+                                  {% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{% set _axis_value_names = _axis_value_names|merge([ov.name]) %}{% endif %}{% endfor %}
+                                {% endfor %}
+                                {% if _axis_value_names|length %}{{ _axis_value_names|join(', ') }}{% else %}<span class="text-muted">—</span>{% endif %}
+                              {% elseif product_option.value is not empty %}
+                                {{ product_option.value }}
+                              {% else %}
+                                <span class="text-muted">—</span>
+                              {% endif %}
+                            </span>
+                            {% endif %}
                             <div class="dc-option-section__controls">
                               <label class="dc-option-section__required">
                                 <span>{{ entry_required }}:</span>
@@ -673,11 +703,30 @@
                               {% endif %}
                             </div>
                           </div>
-                          {% if product_option.is_axis %}
-                          <div class="dc-axis-info-banner"><i data-lucide="info" width="14" height="14"></i> {{ entry_axis_lock_warning }}</div>
-                          {% endif %}
                           {% if error_option[product_option.option_id] is defined %}
                           <div class="alert alert-danger" style="margin:5px 15px"><i data-lucide="circle-alert" width="14" height="14"></i> {{ error_option[product_option.option_id] }}</div>
+                          {% endif %}
+                          {% if product_option.is_axis and is_configurable %}
+                          <div style="display:none">
+                            <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
+                            <input type="hidden" name="product_option[{{ option_row }}][name]" value="{{ product_option.name|e('html_attr') }}"/>
+                            <input type="hidden" name="product_option[{{ option_row }}][option_id]" value="{{ product_option.option_id }}"/>
+                            <input type="hidden" name="product_option[{{ option_row }}][type]" value="{{ product_option.type }}"/>
+                            <input type="hidden" name="product_option[{{ option_row }}][required]" value="{{ product_option.required }}"/>
+                            {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
+                              {% for product_option_value in product_option.product_option_value %}
+                                <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
+                                <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" value="{{ product_option_value.option_value_id }}"/>
+                                <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][sort_order]" value="{{ option_value_row }}"/>
+                                {% set option_value_row = option_value_row + 1 %}
+                              {% endfor %}
+                            {% else %}
+                              <input type="hidden" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}"/>
+                            {% endif %}
+                          </div>
+                          {% else %}
+                          {% if product_option.is_axis %}
+                          <div class="dc-axis-info-banner"><i data-lucide="info" width="14" height="14"></i> {{ entry_axis_lock_warning }}</div>
                           {% endif %}
                           <div class="dc-option-section__body">
                             <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
@@ -864,6 +913,7 @@
                             </select>
                           {% endif %}
                         </div>
+                          {% endif %}
                       </div>
                       {% set option_row = option_row + 1 %}
                     {% endfor %}
@@ -901,9 +951,35 @@
                 </div>
                 <div class="dcx-panel-body">
                   <div class="dc-axis-info-banner" id="dc-special-note-configurable" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_specials }}</div>
+                  <div class="dc-promo-tabs" id="promo-tabs">
+                    <button type="button" class="dc-promo-tab dc-promo-tab--active" data-promo-tab="discount"><i data-lucide="percent" width="12" height="12"></i><span>{{ text_promo_discount }}</span><span class="dc-promo-tab__count" id="promo-count-discount">0</span></button>
+                    <button type="button" class="dc-promo-tab" data-promo-tab="special"><i data-lucide="star" width="12" height="12"></i><span>{{ text_promo_special }}</span><span class="dc-promo-tab__count" id="promo-count-special">0</span></button>
+                    <button type="button" class="dc-promo-tab" data-promo-tab="gift"><i data-lucide="gift" width="12" height="12"></i><span>{{ text_promo_gift }}</span><span class="dc-promo-tab__count" id="promo-count-gift">0</span></button>
+                    <button type="button" class="dc-promo-tab" data-promo-tab="bxgy"><i data-lucide="repeat" width="12" height="12"></i><span>{{ text_promo_bxgy }}</span><span class="dc-promo-tab__count" id="promo-count-bxgy">0</span></button>
+                    <button type="button" class="dc-promo-tab" data-promo-tab="bundle"><i data-lucide="layers" width="12" height="12"></i><span>{{ text_promo_bundle }}</span><span class="dc-promo-tab__count" id="promo-count-bundle">0</span></button>
+                  </div>
                   <div id="promo-container">
                     {% for promo in all_promotions %}
                       {% if promo.promo_type == 'discount' %}
+                      {% if is_configurable and promo_variants and not promo.variant_id %}
+                      <div class="dc-promo-card dc-promo-card--locked" id="discount-row{{ promo.row_index }}">
+                        <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
+                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                        {% set locked_cg_name = '' %}
+                        {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
+                        <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_quantity }}: {{ promo.quantity }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
+                        <div class="dc-promo-card__actions">
+                          <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        </div>
+                      </div>
+                      {% else %}
                     <div class="dc-promo-card" id="discount-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
@@ -913,8 +989,21 @@
                         <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
                       <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <span class="dc-promo-badge dc-promo-badge--discount">{{ text_promo_discount }}</span>
                       <div class="dc-promo-card__grid">
+                        {% if is_configurable and promo_variants %}
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_variant }}</label>
+                          <select name="product_discount[{{ promo.row_index }}][variant_id]" class="form-control">
+                            {% for pv in promo_variants %}
+                              {% if promo.variant_id == pv.variant_id %}
+                                <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                              {% else %}
+                                <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                        </div>
+                        {% endif %}
                         <div class="dc-promo-card__field">
                           <label>{{ entry_customer_group }}</label>
                           <select name="product_discount[{{ promo.row_index }}][customer_group_id]" class="form-control">
@@ -955,7 +1044,26 @@
                         </div>
                       </div>
                     </div>
+                      {% endif %}
                       {% elseif promo.promo_type == 'special' %}
+                      {% if is_configurable and promo_variants and not promo.variant_id %}
+                      <div class="dc-promo-card dc-promo-card--locked" id="special-row{{ promo.row_index }}">
+                        <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
+                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                        {% set locked_cg_name = '' %}
+                        {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
+                        <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
+                        <div class="dc-promo-card__actions">
+                          <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                        </div>
+                      </div>
+                      {% else %}
                     <div class="dc-promo-card" id="special-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
                         <label class="dc-promo-card__toggle">
@@ -965,8 +1073,21 @@
                         <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
                       <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <span class="dc-promo-badge dc-promo-badge--special">{{ text_promo_special }}</span>
                       <div class="dc-promo-card__grid">
+                        {% if is_configurable and promo_variants %}
+                        <div class="dc-promo-card__field">
+                          <label>{{ entry_variant }}</label>
+                          <select name="product_special[{{ promo.row_index }}][variant_id]" class="form-control">
+                            {% for pv in promo_variants %}
+                              {% if promo.variant_id == pv.variant_id %}
+                                <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                              {% else %}
+                                <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                        </div>
+                        {% endif %}
                         <div class="dc-promo-card__field">
                           <label>{{ entry_customer_group }}</label>
                           <select name="product_special[{{ promo.row_index }}][customer_group_id]" class="form-control">
@@ -1003,6 +1124,7 @@
                         </div>
                       </div>
                     </div>
+                      {% endif %}
                       {% elseif promo.promo_type == 'gift' %}
                     <div class="dc-promo-card" id="gift-row{{ promo.row_index }}">
                       <div class="dc-promo-card__actions">
@@ -1013,7 +1135,6 @@
                         <button type="button" onclick="removePromoCard('gift-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
                       <input type="hidden" name="product_gift[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <span class="dc-promo-badge dc-promo-badge--gift">{{ text_promo_gift }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_gift_product }}</label>
@@ -1052,7 +1173,6 @@
                         <button type="button" onclick="removePromoCard('bxgy-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
                       <input type="hidden" name="product_bxgy[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_bxgy_reward_product }}</label>
@@ -1095,7 +1215,6 @@
                         <button type="button" onclick="removeBundleCard('bundle-row{{ promo.row_index }}', {{ promo.bundle_id }})" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
                       </div>
                       <input type="hidden" name="product_bundle[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <span class="dc-promo-badge dc-promo-badge--bundle">{{ text_promo_bundle }}</span>
                       <div class="dc-promo-card__grid">
                         <div class="dc-promo-card__field" style="display:none;">
                           <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_id]" value="{{ promo.bundle_id }}" />
@@ -1127,7 +1246,7 @@
                           <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
                         </div>
                       </div>
-                      <label style="font-size:12px;font-weight:500;color:var(--dc-text-muted);">{{ text_bundle_selected_products }}</label>
+                      <label class="dc-bundle-products-label">{{ text_bundle_selected_products }}</label>
                       <div class="bundle-selected-products" id="bundle-selected-{{ promo.row_index }}">
                         {% for bp in promo.products %}
                         <span class="dc-chip" data-product-id="{{ bp.product_id }}">{{ bp.name|escape }} ({{ bp.price }}) <button type="button" onclick="removeBundleProduct(this, {{ bp.product_id }})" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
@@ -1137,23 +1256,12 @@
                       {% endif %}
                     {% endfor %}
 
-                    {% if all_promotions is empty %}
-                    <div class="dc-promo-empty" id="promo-empty"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>
-                    {% endif %}
+                    <div class="dc-promo-empty" id="promo-empty" style="display:none"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>
                   </div>
-                  <div style="position:relative; display:inline-block;">
+                  <div class="dc-promo-actions">
                     <button type="button" class="dc-promo-add-btn" id="promo-add-btn">
-                      <i data-lucide="plus" width="14" height="14"></i> {{ button_promo_add }} <i data-lucide="chevron-down" width="12" height="12"></i>
+                      <i data-lucide="plus" width="14" height="14"></i> {{ button_add }}
                     </button>
-                    <div id="promo-add-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#fff;border:1px solid var(--dc-border);border-radius:var(--dc-radius-md);box-shadow:var(--dc-shadow-lg);z-index:1050;min-width:220px;">
-                      <div style="padding:6px 0;">
-                        <a href="javascript:void(0)" onclick="addPromoCard('discount');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--discount" style="margin-right:6px;">{{ text_promo_discount }}</span></a>
-                        <a href="javascript:void(0)" onclick="addPromoCard('special');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--special" style="margin-right:6px;">{{ text_promo_special }}</span></a>
-                        <a href="javascript:void(0)" onclick="addPromoCard('gift');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--gift" style="margin-right:6px;">{{ text_promo_gift }}</span></a>
-                        <a href="javascript:void(0)" onclick="addPromoCard('bxgy');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--bxgy" style="margin-right:6px;">{{ text_promo_bxgy }}</span></a>
-                        <a href="javascript:void(0)" onclick="addPromoCard('bundle');$('#promo-add-dropdown').hide();" style="display:block;padding:8px 14px;font-size:13px;color:var(--dc-text-dark);text-decoration:none;"><span class="dc-promo-badge dc-promo-badge--bundle" style="margin-right:6px;">{{ text_promo_bundle }}</span></a>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1667,6 +1775,81 @@
   var dcOptionMode = {{ is_configurable ? "'combined'" : "'simple'" }};
   var dcAxisOptionIds = {{ axis_option_ids|json_encode|raw }};
 
+  function dcUpdatePricingMode(show) {
+    var $priceInput = $('#input-price');
+    var textNoVariants = '{{ text_no_variants|e("js") }}';
+    if (show) {
+      $priceInput.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_price_range_computed|e("js") }}');
+      $('#dc-cgp-field').hide();
+      $priceInput.closest('#dc-price-main').find('label').find('[data-toggle="tooltip"]').tooltip({container:'body',html:true});
+    } else {
+      $priceInput.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+      $('#dc-cgp-field').show();
+      $('#dc-pricing-variants-col').hide();
+      $('#dc-inventory-variants-col').hide();
+      $('#dc-dimensions-variants-col').hide();
+      $('#dc-codes-variants-col').hide();
+      if (typeof removeMediaVariantSelects === 'function') {
+        removeMediaVariantSelects();
+      }
+    }
+    dcUpdateDimensionsMode(show);
+    // refresh tooltip
+    $('[data-toggle="tooltip"]').tooltip({container:'body',html:true});
+  }
+
+  function dcUpdateDimensionsMode(show) {
+    var textNoVariants = '{{ text_no_variants|e("js") }}';
+    var $length = $('#input-length');
+    var $width = $('#input-width');
+    var $height = $('#input-height');
+    var $weight = $('#input-weight');
+    if (show) {
+      $length.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_dimension_range_computed|e("js") }}');
+      $width.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_dimension_range_computed|e("js") }}');
+      $height.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_dimension_range_computed|e("js") }}');
+      $weight.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_weight_range_computed|e("js") }}');
+    } else {
+      // restore editable state (values will be whatever was before switching; keep user-editable)
+      // We do not restore original product values here — simple mode reload will be done via page reload or manual edit
+      $length.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+      $width.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+      $height.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+      $weight.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+    }
+  }
+
+  function dcUpdatePricingRanges(json) {
+    if (!json) return;
+    var $priceInput = $('#input-price');
+    if (typeof json.price_range_text !== 'undefined') {
+      var txt = json.price_range_text ? json.price_range_text : '{{ text_no_variants|e("js") }}';
+      // Only overwrite when in combined mode; in simple mode keep user price
+      if (dcOptionMode === 'combined') {
+        $priceInput.val(txt);
+      }
+    }
+    $('[data-toggle="tooltip"]').tooltip({container:'body',html:true});
+  }
+
+  function dcUpdateDimensionsRanges(json) {
+    if (!json) return;
+    var textNoVariants = '{{ text_no_variants|e("js") }}';
+    if (typeof json.length_range_text !== 'undefined' && dcOptionMode === 'combined') {
+      $('#input-length').val(json.length_range_text ? json.length_range_text : textNoVariants);
+    }
+    if (typeof json.width_range_text !== 'undefined' && dcOptionMode === 'combined') {
+      $('#input-width').val(json.width_range_text ? json.width_range_text : textNoVariants);
+    }
+    if (typeof json.height_range_text !== 'undefined' && dcOptionMode === 'combined') {
+      $('#input-height').val(json.height_range_text ? json.height_range_text : textNoVariants);
+    }
+    if (typeof json.weight_range_text !== 'undefined' && dcOptionMode === 'combined') {
+      $('#input-weight').val(json.weight_range_text ? json.weight_range_text : textNoVariants);
+    }
+    $('[data-toggle="tooltip"]').tooltip({container:'body',html:true});
+  }
+
   function dcUpdateSpecialNote() {
     var notes = [
       '#dc-note-configurable-identifiers',
@@ -1683,6 +1866,7 @@
     // Simple mode keeps the hint under the Qty field; combined mode moves it
     // into the banner above the variant stock matrix.
     $('#dc-wh-hint-simple').toggle(!show);
+    dcUpdatePricingMode(show);
   }
 
   $(document).ready(function() {
@@ -1747,6 +1931,21 @@
           $('#dc-option-mode-label').removeClass('label-primary label-default').addClass(newSpanClass).html('<i data-lucide="circle" width="10" height="10"></i> ' + newLabel);
           lucide.createIcons();
           dcUpdateSpecialNote();
+          if (typeof json.price_range_text !== 'undefined') {
+            dcUpdatePricingRanges(json);
+          } else if (newMode === 'combined') {
+            // Fallback: refresh pricing from matrix endpoint
+            $.getJSON('index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId, function(mj) {
+              if (mj && typeof mj.price_range_text !== 'undefined') dcUpdatePricingRanges(mj);
+            });
+          }
+          if (typeof json.weight_range_text !== 'undefined' || typeof json.length_range_text !== 'undefined') {
+            dcUpdateDimensionsRanges(json);
+          } else if (newMode === 'combined') {
+            $.getJSON('index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId, function(mj) {
+              if (mj && typeof mj.weight_range_text !== 'undefined') dcUpdateDimensionsRanges(mj);
+            });
+          }
         }
       });
     });
@@ -2231,18 +2430,79 @@
 	  }
   }
 
-  function removePromoCard(cardId) {
-	  var $card = $('#' + cardId);
-	  $card.remove();
-	  var $container = $('#promo-container');
-	  if ($container.find('.dc-promo-card').length === 0) {
-		  if ($('#promo-empty').length === 0) {
-			  $container.html('<div class="dc-promo-empty" id="promo-empty"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>');
-			  lucide.createIcons();
-		  } else {
-			  $('#promo-empty').show();
-		  }
+  var dcPromoTypes = ['discount', 'special', 'gift', 'bxgy', 'bundle'];
+  var dcPromoActiveTab = 'discount';
+
+  function switchPromoTab(type) {
+	  if (dcPromoTypes.indexOf(type) === -1) {
+		  return;
 	  }
+
+	  dcPromoActiveTab = type;
+	  $('#promo-tabs .dc-promo-tab').removeClass('dc-promo-tab--active');
+	  $('#promo-tabs .dc-promo-tab[data-promo-tab="' + type + '"]').addClass('dc-promo-tab--active');
+	  $('#promo-container .dc-promo-pane').hide();
+	  $('#promo-pane-' + type).show();
+	  dcUpdatePromoEmptyState();
+  }
+
+  // Group server-rendered promo cards into per-type panes (tabs).
+  function dcGroupPromoCards() {
+	  dcPromoTypes.forEach(function(type) {
+		  if ($('#promo-pane-' + type).length === 0) {
+			  $('#promo-container').append('<div class="dc-promo-pane" id="promo-pane-' + type + '"></div>');
+		  }
+	  });
+
+	  $('#promo-container > .dc-promo-card').each(function() {
+		  var m = ($(this).attr('id') || '').match(/^(discount|special|gift|bxgy|bundle)-row/);
+
+		  if (m) {
+			  $(this).appendTo('#promo-pane-' + m[1]);
+		  }
+	  });
+  }
+
+  function dcRefreshPromoTabs() {
+	  dcPromoTypes.forEach(function(type) {
+		  var n = $('#promo-pane-' + type + ' > .dc-promo-card').length;
+		  var $count = $('#promo-count-' + type);
+		  $count.text(n);
+
+		  if (n > 0) {
+			  $count.show();
+		  } else {
+			  $count.hide();
+		  }
+	  });
+
+	  dcUpdatePromoEmptyState();
+  }
+
+  function dcUpdatePromoEmptyState() {
+	  var $pane = $('#promo-pane-' + dcPromoActiveTab);
+	  var $empty = $('#promo-empty');
+
+	  if ($pane.length && $pane.children('.dc-promo-card').length === 0) {
+		  $pane.append($empty);
+		  $empty.show();
+	  } else {
+		  $empty.hide();
+	  }
+  }
+
+  $(document).on('click', '.dc-promo-tab', function() {
+	  switchPromoTab($(this).data('promo-tab'));
+  });
+
+  dcGroupPromoCards();
+  dcRefreshPromoTabs();
+  switchPromoTab('discount');
+  lucide.createIcons();
+
+  function removePromoCard(cardId) {
+	  $('#' + cardId).remove();
+	  dcRefreshPromoTabs();
   }
 
   function addPromoCard(type) {
@@ -2251,28 +2511,48 @@
 	  else if (type === 'gift') addGift();
 	  else if (type === 'bxgy') addBxgy();
 	  else if (type === 'bundle') addBundle();
-	  $('#promo-add-dropdown').hide();
+	  dcRefreshPromoTabs();
   }
 
   $('#promo-add-btn').on('click', function(e) {
 	  e.stopPropagation();
-	  $('#promo-add-dropdown').toggle();
+	  addPromoCard(dcPromoActiveTab);
   });
-  $(document).on('click', function() { $('#promo-add-dropdown').hide(); });
+
+  var dcPromoVariants = {{ promo_variants|json_encode|raw }};
+  var dcIsConfigurable = {{ is_configurable ? 'true' : 'false' }};
+
+  function dcPromoVariantFieldHtml(inputName) {
+    if (!dcIsConfigurable || !dcPromoVariants.length) {
+      return '';
+    }
+
+    var html = '    <div class="dc-promo-card__field">';
+    html += '      <label>{{ entry_variant }}</label>';
+    html += '      <select name="' + inputName + '" class="form-control">';
+
+    for (var i = 0; i < dcPromoVariants.length; i++) {
+      var vLabel = dcPromoVariants[i].label + (dcPromoVariants[i].is_default ? ' {{ text_variant_is_default|escape('js') }}' : '');
+      html += '        <option value="' + dcPromoVariants[i].variant_id + '">' + $('<i>').text(vLabel).html() + '</option>';
+    }
+
+    html += '      </select>';
+    html += '    </div>';
+
+    return html;
+  }
 
   var discount_row = {{ discount_row }};
 
   function addDiscount() {
-	  $('#promo-empty').hide();
 	  var html = '<div class="dc-promo-card" id="discount-row' + discount_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_discount[' + discount_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'discount-row' + discount_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_discount[' + discount_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
-	  html += '  <span class="dc-promo-badge dc-promo-badge--discount">{{ text_promo_discount }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
-	  html += '    <div class="dc-promo-card__field">';
+	  html += dcPromoVariantFieldHtml('product_discount[' + discount_row + '][variant_id]');	  html += '    <div class="dc-promo-card__field">';
 	  html += '      <label>{{ entry_customer_group }}</label>';
 	  html += '      <select name="product_discount[' + discount_row + '][customer_group_id]" class="form-control">';
     {% for customer_group in customer_groups %}
@@ -2303,7 +2583,7 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-container').append(html);
+	  $('#promo-pane-discount').append(html);
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ pickTime: false });
 	  discount_row++;
@@ -2312,15 +2592,14 @@
   var special_row = {{ special_row }};
 
   function addSpecial() {
-	  $('#promo-empty').hide();
 	  var html = '<div class="dc-promo-card" id="special-row' + special_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_special[' + special_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'special-row' + special_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_special[' + special_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
-	  html += '  <span class="dc-promo-badge dc-promo-badge--special">{{ text_promo_special }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
+	  html += dcPromoVariantFieldHtml('product_special[' + special_row + '][variant_id]');
 	  html += '    <div class="dc-promo-card__field">';
 	  html += '      <label>{{ entry_customer_group }}</label>';
 	  html += '      <select name="product_special[' + special_row + '][customer_group_id]" class="form-control">';
@@ -2348,7 +2627,7 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-container').append(html);
+	  $('#promo-pane-special').append(html);
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  special_row++;
@@ -2357,14 +2636,12 @@
   var gift_row = {{ gift_row }};
 
   function addGift() {
-	  $('#promo-empty').hide();
 	  var html = '<div class="dc-promo-card" id="gift-row' + gift_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_gift[' + gift_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'gift-row' + gift_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_gift[' + gift_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
-	  html += '  <span class="dc-promo-badge dc-promo-badge--gift">{{ text_promo_gift }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
 	  html += '      <label>{{ entry_gift_product }}</label>';
@@ -2388,7 +2665,7 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-container').append(html);
+	  $('#promo-pane-gift').append(html);
 	  lucide.createIcons();
 	  giftAutocomplete(gift_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
@@ -2438,14 +2715,12 @@
   var bxgy_row = {{ bxgy_row }};
 
   function addBxgy() {
-	  $('#promo-empty').hide();
 	  var html = '<div class="dc-promo-card" id="bxgy-row' + bxgy_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_bxgy[' + bxgy_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removePromoCard(\'bxgy-row' + bxgy_row + '\')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_bxgy[' + bxgy_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
-	  html += '  <span class="dc-promo-badge dc-promo-badge--bxgy">{{ text_promo_bxgy }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
 	  html += '      <label>{{ entry_bxgy_reward_product }}</label>';
@@ -2473,7 +2748,7 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-container').append(html);
+	  $('#promo-pane-bxgy').append(html);
 	  lucide.createIcons();
 	  bxgyAutocomplete(bxgy_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
@@ -2523,14 +2798,12 @@
   var bundle_row = {{ bundle_row }};
 
   function addBundle() {
-	  $('#promo-empty').hide();
 	  var html = '<div class="dc-promo-card dc-promo-card--bundle" id="bundle-row' + bundle_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_bundle[' + bundle_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
 	  html += '    <button type="button" onclick="removeBundleCard(\'bundle-row' + bundle_row + '\', 0)" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_bundle[' + bundle_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
-	  html += '  <span class="dc-promo-badge dc-promo-badge--bundle">{{ text_promo_bundle }}</span>';
 	  html += '  <div class="dc-promo-card__grid">';
 	  html += '    <div class="dc-promo-card__field" style="display:none;"><input type="hidden" name="product_bundle[' + bundle_row + '][bundle_id]" value="" /></div>';
 	  html += '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
@@ -2560,11 +2833,11 @@
 	  html += '      <div class="input-group date"><input type="text" name="product_bundle[' + bundle_row + '][date_end]" value="" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
 	  html += '    </div>';
 	  html += '  </div>';
-	  html += '  <label style="font-size:12px;font-weight:500;color:var(--dc-text-muted);">{{ text_bundle_selected_products }}</label>';
+	  html += '  <label class="dc-bundle-products-label">{{ text_bundle_selected_products|escape("js") }}</label>';
 	  html += '  <div class="bundle-selected-products" id="bundle-selected-' + bundle_row + '"></div>';
 	  html += '</div>';
 
-	  $('#promo-container').append(html);
+	  $('#promo-pane-bundle').append(html);
 	  lucide.createIcons();
 	  bundleAutocomplete(bundle_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
@@ -2629,15 +2902,11 @@
 		  if (!confirm('{{ text_bundle_delete_confirm }}')) return;
 		  $.post('index.php?route=catalog/product/deleteBundle&user_token={{ user_token }}', { bundle_id: bundleId }, function(json) {
 			  $('#' + cardId).remove();
-			  if ($('#promo-container .dc-promo-card').length === 0) {
-				  $('#promo-empty').show();
-			  }
+			  dcRefreshPromoTabs();
 		  }, 'json');
 	  } else {
 		  $('#' + cardId).remove();
-		  if ($('#promo-container .dc-promo-card').length === 0) {
-			  $('#promo-empty').show();
-		  }
+		  dcRefreshPromoTabs();
 	  }
   }
 
@@ -2681,11 +2950,24 @@
     html += '</div>';
     $container.append(html);
     lucide.createIcons();
+    if (typeof decorateMediaCards === 'function') {
+      decorateMediaCards();
+    }
     image_row++;
   }
 
   function removeImage(row) {
     var $card = $('.product-images .dc-img-card[data-row="' + row + '"]');
+    var $select = $card.find('.dc-img-variant select');
+    var prevVid = parseInt($select.attr('data-prev-vid')) || 0;
+
+    if (prevVid) {
+      $.post('index.php?route=catalog/product_configurable/saveVariantImage&user_token={{ user_token }}', {product_id: getDcProductId(), variant_id: prevVid, image: ''}, function() {}, 'json');
+      if (typeof syncMatrixVariantThumb === 'function') {
+        syncMatrixVariantThumb(prevVid, '', '{{ placeholder|e("js") }}');
+      }
+    }
+
     $card.remove();
   }
 
@@ -2701,7 +2983,8 @@
     $('.product-images').each(function() {
       Sortable.create(this, {
         animation: 150,
-        filter: '.dc-img-remove, input',
+        filter: '.dc-img-remove, input, select',
+        preventOnFilter: false,
         ghostClass: 'dc-img-ghost',
         chosenClass: 'dc-img-chosen',
         onEnd: function() {
@@ -3055,6 +3338,16 @@ function escapeHtml(text) {
 .pcm-attrs td { padding:5px 0; border-bottom:1px solid #f3f4f6; vertical-align:top; }
 .pcm-attrs tr:last-child td { border-bottom:none; }
 .pcm-attrs__name { font-weight:500; color:#374151; white-space:nowrap; padding-right:12px; }
+.pcm-stock-table { width:100%; font-size:12px; border-collapse:collapse; }
+.pcm-stock-table th { font-weight:600; color:#999; text-align:left; padding:4px 6px; border-bottom:1px solid #f3f4f6; }
+.pcm-stock-table td { padding:5px 6px; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.pcm-stock-table tr:last-child td { border-bottom:none; }
+.pcm-stock-table .text-right { text-align:right; }
+.pcm-set-total { display:flex; gap:8px; align-items:center; }
+.pcm-set-total input { flex:1; width:120px; }
+.pcm-set-total-feedback { margin-top:8px; font-size:12px; }
+.text-success { color:#15803d; }
+.text-danger { color:#b91c1c; }
 </style>
 <script type="text/javascript"><!--
 (function() {

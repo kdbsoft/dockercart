@@ -3,6 +3,18 @@ class ModelCatalogProduct extends Model
 {
     public function addProduct($data)
     {
+        // For configurable products the head price is derived from variants (readonly range in form) — ignore posted price
+        if (!empty($data['product_configurable']['is_configurable'])) {
+            $data['price'] = 0;
+            // Weight/dimensions are readonly ranges from variants in the form —
+            // never persist the range text into the head row.
+            $data['weight'] = 0;
+            $data['length'] = 0;
+            $data['width'] = 0;
+            $data['height'] = 0;
+            unset($data['product_customer_group_price']);
+        }
+
         $this->db->query(
             "INSERT INTO " .
                 DB_PREFIX .
@@ -323,59 +335,9 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        if (isset($data["product_discount"])) {
-            foreach ($data["product_discount"] as $product_discount) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_discount SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_discount["customer_group_id"] .
-                        "', quantity = '" .
-                        (int) $product_discount["quantity"] .
-                        "', priority = '" .
-                        (int) $product_discount["priority"] .
-                        "', price = '" .
-                        (float) $product_discount["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_discount["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_discount["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
-
-        if (isset($data["product_special"])) {
-            foreach ($data["product_special"] as $product_special) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_special SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_special["customer_group_id"] .
-                        "', priority = '" .
-                        (int) $product_special["priority"] .
-                        "', price = '" .
-                        (float) $product_special["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_special["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_special["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
+        // Promotions: rows bound to a variant go to the variant promo tables,
+        // the rest stay product-level (see saveProductPromotions()).
+        $this->saveProductPromotions($product_id, $data);
 
         if (isset($data["product_gift"])) {
             foreach ($data["product_gift"] as $product_gift) {
@@ -725,84 +687,6 @@ class ModelCatalogProduct extends Model
                 }
             }
         }
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_discount WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        if (isset($data["product_discount"])) {
-            foreach ($data["product_discount"] as $product_discount) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_discount SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_discount["customer_group_id"] .
-                        "', quantity = '" .
-                        (int) $product_discount["quantity"] .
-                        "', priority = '" .
-                        (int) $product_discount["priority"] .
-                        "', price = '" .
-                        (float) $product_discount["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_discount["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_discount["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_special WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        if (isset($data["product_special"])) {
-            foreach ($data["product_special"] as $product_special) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_special SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_special["customer_group_id"] .
-                        "', priority = '" .
-                        (int) $product_special["priority"] .
-                        "', price = '" .
-                        (float) $product_special["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_special["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_special["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_gift WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
 
         if (isset($data["product_gift"])) {
             foreach ($data["product_gift"] as $product_gift) {
@@ -1194,6 +1078,41 @@ class ModelCatalogProduct extends Model
 
     public function editProduct($product_id, $data)
     {
+        // For configurable products the head price / CG prices are readonly (range from variants) — keep existing value
+        $is_configurable_guard = false;
+
+        if (!empty($data['product_configurable']['is_configurable'])) {
+            $is_configurable_guard = true;
+        } else {
+            $cg_check = $this->db->query("SELECT is_configurable FROM " . DB_PREFIX . "product_configurable WHERE product_id = '" . (int)$product_id . "' AND is_configurable = '1'");
+
+            if ($cg_check->num_rows) {
+                $is_configurable_guard = true;
+            }
+        }
+
+        if ($is_configurable_guard) {
+            $existing = $this->db->query("SELECT price, weight, length, width, height FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+
+            if ($existing->num_rows) {
+                $data['price'] = $existing->row['price'];
+                // Weight/dimensions are readonly ranges from variants in the form —
+                // keep the existing head values instead of persisting range text.
+                $data['weight'] = $existing->row['weight'];
+                $data['length'] = $existing->row['length'];
+                $data['width'] = $existing->row['width'];
+                $data['height'] = $existing->row['height'];
+            } else {
+                $data['price'] = 0;
+                $data['weight'] = 0;
+                $data['length'] = 0;
+                $data['width'] = 0;
+                $data['height'] = 0;
+            }
+
+            unset($data['product_customer_group_price']);
+        }
+
         $this->db->query(
             "UPDATE " .
                 DB_PREFIX .
@@ -1568,83 +1487,9 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_discount WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        if (isset($data["product_discount"])) {
-            foreach ($data["product_discount"] as $product_discount) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_discount SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_discount["customer_group_id"] .
-                        "', quantity = '" .
-                        (int) $product_discount["quantity"] .
-                        "', priority = '" .
-                        (int) $product_discount["priority"] .
-                        "', price = '" .
-                        (float) $product_discount["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_discount["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_discount["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_discount["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_discount['date_added']) ? $product_discount['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_special WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
-
-        if (isset($data["product_special"])) {
-            foreach ($data["product_special"] as $product_special) {
-                $this->db->query(
-                    "INSERT INTO " .
-                        DB_PREFIX .
-                        "product_special SET product_id = '" .
-                        (int) $product_id .
-                        "', customer_group_id = '" .
-                        (int) $product_special["customer_group_id"] .
-                        "', priority = '" .
-                        (int) $product_special["priority"] .
-                        "', price = '" .
-                        (float) $product_special["price"] .
-                        "', date_start = '" .
-                        $this->db->escape($product_special["date_start"]) .
-                        "', date_end = '" .
-                        $this->db->escape($product_special["date_end"]) .
-                        "', auto_renew = '" .
-                        (int) (!empty($product_special["auto_renew"])) .
-                        "', date_added = '" .
-						$this->db->escape(!empty($product_special['date_added']) ? $product_special['date_added'] : date('Y-m-d H:i:s')) .
-						"'",
-                );
-            }
-        }
-
-        $this->db->query(
-            "DELETE FROM " .
-                DB_PREFIX .
-                "product_gift WHERE product_id = '" .
-                (int) $product_id .
-                "'",
-        );
+		// Promotions: rows bound to a variant go to the variant promo tables,
+		// the rest stay product-level (see saveProductPromotions()).
+		$this->saveProductPromotions($product_id, $data);
 
         if (isset($data["product_gift"])) {
             foreach ($data["product_gift"] as $product_gift) {
@@ -1706,6 +1551,9 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        if (empty($is_configurable_guard)) {
+
+
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
@@ -1733,6 +1581,9 @@ class ModelCatalogProduct extends Model
                         "'",
                 );
             }
+        }
+
+
         }
 
         $this->db->query(
@@ -2176,8 +2027,11 @@ class ModelCatalogProduct extends Model
                         $pc->setConfigurableOptions($new_product_id, $option_ids);
                     }
 
+                    $variant_id_map = array();
+
                     foreach ($source_variants as $variant) {
                         $variant_data = array(
+                            'model'           => isset($variant['model']) ? $variant['model'] : '',
                             'sku'             => $variant['sku'],
                             'upc'             => $variant['upc'],
                             'ean'             => $variant['ean'],
@@ -2202,12 +2056,80 @@ class ModelCatalogProduct extends Model
                             }
                         }
 
-                        $pc->addVariant($new_product_id, $variant_data);
+                        $variant_id_map[(int)$variant['variant_id']] = (int)$pc->addVariant($new_product_id, $variant_data);
+                    }
+
+                    // Copy variant-scoped pricing/promotions onto the new variants.
+                    $old_specials = $pc->getVariantsSpecials($product_id);
+                    $old_discounts = $pc->getVariantsDiscounts($product_id);
+                    $old_cg_prices = $pc->getVariantCustomerGroupPrices($product_id);
+
+                    foreach ($variant_id_map as $old_variant_id => $new_variant_id) {
+                        if (!$new_variant_id) {
+                            continue;
+                        }
+
+                        if (!empty($old_specials[$old_variant_id])) {
+                            $pc->setVariantSpecials($new_variant_id, $old_specials[$old_variant_id]);
+                        }
+
+                        if (!empty($old_discounts[$old_variant_id])) {
+                            $pc->setVariantDiscounts($new_variant_id, $old_discounts[$old_variant_id]);
+                        }
+
+                        foreach (isset($old_cg_prices[$old_variant_id]) ? $old_cg_prices[$old_variant_id] : array() as $cg_price) {
+                            $pc->setVariantCustomerGroupPrice($new_variant_id, (int)$cg_price['customer_group_id'], $cg_price['price']);
+                        }
                     }
                 }
             }
         }
     }
+
+	/**
+	 * Persist product promotions from a form submission.
+	 *
+	 * Specials/discounts bound to a specific variant (variant_id set) go to
+	 * the variant promo tables via ProductConfigurable::applyVariantPromotions(),
+	 * the remaining rows are stored in oc_product_special / oc_product_discount
+	 * with the classic delete-all-then-reinsert contract.
+	 */
+	private function saveProductPromotions($product_id, array $data) {
+		list($special_parent, $special_variant) = isset($data['product_special']) ? $this->splitVariantPromotions((array)$data['product_special']) : array(array(), array());
+		list($discount_parent, $discount_variant) = isset($data['product_discount']) ? $this->splitVariantPromotions((array)$data['product_discount']) : array(array(), array());
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
+
+		foreach ($discount_parent as $discount) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "product_discount SET product_id = '" . (int)$product_id . "', customer_group_id = '" . (int)$discount['customer_group_id'] . "', quantity = '" . (int)$discount['quantity'] . "', priority = '" . (int)$discount['priority'] . "', price = '" . (float)$discount['price'] . "', date_start = '" . $this->db->escape($discount['date_start']) . "', date_end = '" . $this->db->escape($discount['date_end']) . "', auto_renew = '" . (int)(!empty($discount['auto_renew'])) . "', date_added = '" . $this->db->escape(!empty($discount['date_added']) ? $discount['date_added'] : date('Y-m-d H:i:s')) . "'");
+		}
+
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "'");
+
+		foreach ($special_parent as $special) {
+			$this->db->query("INSERT INTO " . DB_PREFIX . "product_special SET product_id = '" . (int)$product_id . "', customer_group_id = '" . (int)$special['customer_group_id'] . "', priority = '" . (int)$special['priority'] . "', price = '" . (float)$special['price'] . "', date_start = '" . $this->db->escape($special['date_start']) . "', date_end = '" . $this->db->escape($special['date_end']) . "', auto_renew = '" . (int)(!empty($special['auto_renew'])) . "', date_added = '" . $this->db->escape(!empty($special['date_added']) ? $special['date_added'] : date('Y-m-d H:i:s')) . "'");
+		}
+
+		if ($special_variant || $discount_variant) {
+			$pc = new ProductConfigurable($this->registry);
+			$pc->applyVariantPromotions((int)$product_id, $special_variant, $discount_variant);
+		}
+	}
+
+	private function splitVariantPromotions(array $rows) {
+		$parent = array();
+		$variant = array();
+
+		foreach ($rows as $row) {
+			if (!empty($row['variant_id'])) {
+				$variant[] = $row;
+			} else {
+				$parent[] = $row;
+			}
+		}
+
+		return array($parent, $variant);
+	}
 
     private function getUniqueCopyName($original, $table, $column)
     {

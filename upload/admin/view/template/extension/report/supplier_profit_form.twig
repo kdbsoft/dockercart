@@ -1,0 +1,72 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">
+              {{ heading_title }}
+              {% if report_supplier_profit_status is defined %}
+              <span class="page-header__badge {{ report_supplier_profit_status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+                {{ report_supplier_profit_status ? text_active : text_inactive }}
+              </span>
+              {% endif %}
+            </span>
+          </a>
+          <div class="pull-right">
+            <button type="submit" form="form-report" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="reply" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-offset-2 col-lg-8 col-xl-offset-2 col-xl-8">
+        <div class="dcx-shell">
+          {% if error_warning %}
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+          {% endif %}
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="16" height="16"></i></div>
+              <div>
+                <h3 class="dcx-panel-title">{{ text_edit }}</h3>
+                <div class="dcx-panel-head__subtitle">{{ text_edit_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-report">
+                <div class="dcx-fields">
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
+                    <input type="text" name="report_supplier_profit_sort_order" value="{{ report_supplier_profit_sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+                  </div>
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                    <select name="report_supplier_profit_status" id="input-status" class="form-control">
+                      {% if report_supplier_profit_status %}
+                      <option value="1" selected="selected">{{ text_enabled }}</option>
+                      <option value="0">{{ text_disabled }}</option>
+                      {% else %}
+                      <option value="1">{{ text_enabled }}</option>
+                      <option value="0" selected="selected">{{ text_disabled }}</option>
+                      {% endif %}
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

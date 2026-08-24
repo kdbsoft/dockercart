@@ -474,6 +474,14 @@ class ControllerProductProduct extends Controller {
 					$unlimited = $available >= PHP_FLOAT_MAX * 0.5;
 
 					if ($wh['type'] === 'dropship') {
+						// Advertise supplier sourcing only when the product
+						// actually has an unlimited/stocked row here AND
+						// dropship checkout is enabled — otherwise the line
+						// can never be fulfilled from this warehouse.
+						if ((!$unlimited && $available <= 0) || !$this->config->get('config_warehouse_dropship_checkout')) {
+							continue;
+						}
+
 						$display_name = sprintf($this->language->get('text_warehouse_dropship'), (int)$wh['warehouse_id']);
 					} else {
 						$display_name = (string)$wh['name'];

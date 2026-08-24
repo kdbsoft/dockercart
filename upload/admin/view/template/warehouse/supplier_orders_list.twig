@@ -88,17 +88,18 @@
             </td>
             <td class="text-nowrap">{% if order.tracking %}<code>{{ order.tracking }}</code>{% else %}<span class="text-muted">—</span>{% endif %}</td>
             <td class="text-right text-nowrap">
-              {% if order.supplier_status == 'shipped' %}
-              <span class="text-muted"><i data-lucide="circle-check" width="14" height="14" style="vertical-align:-2px;"></i> {{ text_line_shipped }}</span>
-              {% else %}
               <span class="supplier-actions dc-so-actions" data-order-product-id="{{ order.order_product_id }}">
+                <input type="text" class="form-control input-sm input-cost" placeholder="{{ entry_line_cost }}" value="{{ order.cost }}" data-toggle="tooltip" title="{{ help_line_cost }}" />
+                {% if order.supplier_status == 'shipped' %}
+                <span class="text-muted"><i data-lucide="circle-check" width="14" height="14" style="vertical-align:-2px;"></i> {{ text_line_shipped }}</span>
+                {% else %}
                 {% if order.supplier_status != 'ordered' %}
                 <button type="button" class="btn btn-default btn-xs btn-mark-ordered" data-toggle="tooltip" title="{{ text_mark_ordered }}"><i data-lucide="package-check" width="14" height="14"></i></button>
                 {% endif %}
                 <input type="text" class="form-control input-sm input-tracking" placeholder="{{ entry_tracking }}" value="{{ order.tracking }}" />
                 <button type="button" class="btn btn-primary btn-xs btn-mark-shipped" data-toggle="tooltip" title="{{ text_mark_shipped }}"><i data-lucide="truck" width="14" height="14"></i></button>
+                {% endif %}
               </span>
-              {% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -119,6 +120,7 @@
 <style>
 .dc-so-sub { display: block; }
 .dc-so-actions .input-tracking { width: 120px; display: inline-block; vertical-align: middle; }
+.dc-so-actions .input-cost { width: 90px; display: inline-block; vertical-align: middle; text-align: right; }
 </style>
 <script type="text/javascript"><!--
 var userToken = '{{ user_token }}';
@@ -127,7 +129,7 @@ var userToken = '{{ user_token }}';
 $(document).on('click', '.btn-mark-ordered', function(e) {
 	e.stopPropagation();
 
-	updateLine($(this).closest('.supplier-actions'), 'ordered', '');
+	updateLine($(this).closest('.supplier-actions'), 'ordered', '', '');
 });
 
 $(document).on('click', '.btn-mark-shipped', function(e) {
@@ -135,29 +137,38 @@ $(document).on('click', '.btn-mark-shipped', function(e) {
 
 	var $row = $(this).closest('.supplier-actions');
 
-	updateLine($row, 'shipped', $row.find('.input-tracking').val());
+	updateLine($row, 'shipped', $row.find('.input-tracking').val(), '');
 });
 
-function updateLine($row, action, tracking) {
-	var $buttons = $row.find('button');
+// Save the per-unit purchase price on change (blur / Enter)
+$(document).on('change', '.input-cost', function(e) {
+	e.stopPropagation();
 
-	$buttons.prop('disabled', true);
+	var $row = $(this).closest('.supplier-actions');
+
+	updateLine($row, 'set_cost', '', $(this).val());
+});
+
+function updateLine($row, action, tracking, cost) {
+	var $controls = $row.find('button, input');
+
+	$controls.prop('disabled', true);
 
 	$.ajax({
 		url: 'index.php?route=warehouse/supplier_orders/updateLine&user_token=' + userToken,
 		type: 'post',
 		dataType: 'json',
-		data: { order_product_id: $row.data('order-product-id'), action: action, tracking: tracking },
+		data: { order_product_id: $row.data('order-product-id'), action: action, tracking: tracking, cost: cost },
 		success: function(json) {
 			if (json['error']) {
-				$buttons.prop('disabled', false);
+				$controls.prop('disabled', false);
 				alert(json['error']);
 				return;
 			}
 			location.reload();
 		},
 		error: function() {
-			$buttons.prop('disabled', false);
+			$controls.prop('disabled', false);
 			alert('{{ text_network_error }}');
 		}
 	});

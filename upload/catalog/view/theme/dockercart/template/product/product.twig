@@ -228,7 +228,7 @@
         <div id="dc-warehouse-stock" class="mb-3 space-y-1.5">
           {% for wh in warehouse_stock %}
           {% if wh.type == 'dropship' %}
-          <div class="flex items-center gap-2 text-sm text-gray-600" data-warehouse-id="{{ wh.warehouse_id }}" data-unlimited="1">
+          <div class="flex items-center gap-2 text-sm text-gray-600" data-warehouse-id="{{ wh.warehouse_id }}" data-unlimited="{% if wh.unlimited %}1{% else %}0{% endif %}">
             <i data-lucide="truck" class="w-4 h-4 text-amber-500 flex-shrink-0"></i>
             <span><strong>{{ wh.name }}</strong>{% if wh.lead_time > 0 %} {{ text_warehouse_lead }} ~{{ wh.lead_time }} {{ text_timer_days }}{% endif %}</span>
           </div>

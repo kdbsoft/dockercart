@@ -318,11 +318,16 @@ class ModelWarehouseStock extends Model {
 
 	/**
 	 * Recompute denormalised product/variant caches and report drift vs the
-	 * warehouse source of truth.
+	 * warehouse source of truth. Runs after a manual legacy backfill: tracked
+	 * products that still carry stock only in the cache (no warehouse rows)
+	 * have their cache materialised on the default warehouse first, so the
+	 * card modal / matrix never show phantom zeros.
 	 *
-	 * @return array{total:int, drifted:int, details:array}
+	 * @return array{total:int, drifted:int, details:array, backfilled:int}
 	 */
 	public function recalculate(): array {
+		$backfilled = $this->backfillMissingRows();
+
 		$products = $this->db->query("SELECT DISTINCT `product_id` FROM `" . DB_PREFIX . "warehouse_stock`");
 
 		$warehouse = new \DockercartWarehouse($this->registry);
@@ -346,7 +351,69 @@ class ModelWarehouseStock extends Model {
 			}
 		}
 
-		return ['total' => count($products->rows), 'drifted' => $drifted, 'details' => $details];
+		return ['total' => count($products->rows), 'drifted' => $drifted, 'details' => $details, 'backfilled' => $backfilled];
+	}
+
+	/**
+	 * Materialise cache-only legacy stock as default-warehouse rows. Seeds:
+	 * - simple tracked products (subtract=1) with quantity > 0 but no rows;
+	 * - configurable products' active tracked variants with quantity > 0 but
+	 *   no rows for that variant.
+	 * Each seed writes an 'adjustment' movement (reference
+	 * 'recalculate-backfill') and the product caches recompute afterwards.
+	 *
+	 * @return int number of rows created
+	 */
+	protected function backfillMissingRows(): int {
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+		$user_id = (int)($this->user ? $this->user->getId() : 0);
+
+		$backfilled = 0;
+		$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
+			WHERE p.`subtract` = '1' AND p.`quantity` > 0
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_configurable` pc WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1')
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = p.`product_id`)
+			ORDER BY p.`product_id` ASC");
+
+		foreach ($products->rows as $row) {
+			$product_id = (int)$row['product_id'];
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . $product_id . "', `variant_id` = '0', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+			$this->recordBackfillMovement($default_warehouse_id, $product_id, 0, (float)$row['quantity'], $user_id);
+
+			$backfilled++;
+		}
+
+		$variants = $this->db->query("SELECT pv.`product_id`, pv.`variant_id`, pv.`quantity` FROM `" . DB_PREFIX . "product_variant` pv
+			INNER JOIN `" . DB_PREFIX . "product_configurable` pc ON (pc.`product_id` = pv.`product_id` AND pc.`is_configurable` = '1')
+			WHERE pv.`status` = '1' AND pv.`subtract` = '1' AND pv.`quantity` > 0
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = pv.`product_id` AND ws.`variant_id` = pv.`variant_id`)
+			ORDER BY pv.`product_id` ASC, pv.`variant_id` ASC");
+
+		foreach ($variants->rows as $row) {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . (int)$row['product_id'] . "', `variant_id` = '" . (int)$row['variant_id'] . "', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+			$this->recordBackfillMovement($default_warehouse_id, (int)$row['product_id'], (int)$row['variant_id'], (float)$row['quantity'], $user_id);
+
+			$backfilled++;
+		}
+
+		return $backfilled;
+	}
+
+	/**
+	 * Journal row for a manual backfill seed.
+	 */
+	protected function recordBackfillMovement(int $warehouse_id, int $product_id, int $variant_id, float $quantity, int $user_id): void {
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock_movement` SET
+			`warehouse_id` = '" . (int)$warehouse_id . "',
+			`product_id` = '" . (int)$product_id . "',
+			`variant_id` = '" . (int)$variant_id . "',
+			`type` = 'adjustment',
+			`quantity` = '" . (float)$quantity . "',
+			`reference` = 'recalculate-backfill',
+			`user_id` = '" . (int)$user_id . "',
+			`date_added` = NOW()");
 	}
 
 	protected function getCachedQuantities(int $product_id): array {

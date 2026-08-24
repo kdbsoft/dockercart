@@ -471,3 +471,8 @@ $_['text_empty_description'] = 'Customer orders and their fulfilment status show
 $_['text_buyer_orders_one']          = '%s order';
 $_['text_buyer_orders_few']          = '%s orders';
 $_['text_buyer_orders_many']         = '%s orders';
+
+// Warehouse move
+$_['text_move_warehouse']        = 'Move to warehouse';
+$_['text_warehouse_moved']       = 'Product moved to warehouse.';
+$_['text_warehouse_move_failed'] = 'Failed to move product to warehouse.';

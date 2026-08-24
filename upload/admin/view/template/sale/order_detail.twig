@@ -132,11 +132,11 @@
                     {% if warehouses %}
                       <span class="order-product-card__option warehouse-line">
                         · <i data-lucide="warehouse" width="12" height="12"></i>
-                        <span class="warehouse-name" data-warehouse-id="{{ product.warehouse_id }}">{{ product.warehouse ? product.warehouse : '-' }}</span>
+                        <span class="warehouse-name" data-warehouse-id="{{ product.warehouse_id }}"><span class="warehouse-name__text">{{ product.warehouse ? product.warehouse : '-' }}</span> <i data-lucide="chevron-down" width="10" height="10" class="warehouse-caret"></i></span>
                         <select class="form-control input-xs warehouse-move-select" style="display:none;width:auto;" data-order-product-id="{{ product.order_product_id }}" data-order-id="{{ product.order_id is defined ? product.order_id : order_id }}">
                           <option value="">{{ text_move_warehouse }}</option>
                           {% for warehouse in warehouses %}
-                          <option value="{{ warehouse.warehouse_id }}"{% if warehouse.warehouse_id == product.warehouse_id %} disabled="true"{% endif %}>{{ warehouse.name }}</option>
+                          <option value="{{ warehouse.warehouse_id }}"{% if warehouse.warehouse_id == product.warehouse_id %} selected{% endif %}>{{ warehouse.name }}</option>
                           {% endfor %}
                         </select>
                       </span>
@@ -615,6 +615,10 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-product-card__meta { font-size:11px; color:#888; margin-top:1px; }
 .order-product-card__model { color:#999; }
 .order-product-card__option { color:#888; }
+.order-product-card__meta .warehouse-line { cursor:pointer; }
+.warehouse-line .warehouse-name { display:inline-flex; align-items:center; gap:2px; }
+.warehouse-line:hover .warehouse-name { color:#2563eb; }
+.warehouse-caret { opacity:.55; }
 .order-product-card__discount { font-size:11px; color:#e65100; margin-top:1px; }
 .order-product-card__price { width:90px; text-align:right; font-size:13px; color:#555; }
 .order-product-card__price input { width:90px; text-align:center; }
@@ -3007,14 +3011,38 @@ document.addEventListener('click', function(e) {
 <div id="pcm-overlay" class="pcm-overlay" style="display:none"></div>
 <script type="text/javascript"><!--
 // Warehouse: reveal the move-to-warehouse selector, then submit the move.
-$(document).on('click', '.warehouse-name', function() {
-	$(this).hide();
-	$(this).closest('.warehouse-line').find('.warehouse-move-select').show();
+function warehouseCloseSelect($select) {
+	var $name = $select.closest('.warehouse-line').find('.warehouse-name');
+	var currentId = String($name.attr('data-warehouse-id') || '0');
+	$select.val(currentId !== '0' && currentId !== '' ? currentId : '').hide();
+	$name.show();
+}
+$(document).on('click', '.warehouse-line .warehouse-name', function() {
+	var $name = $(this);
+	var $select = $name.closest('.warehouse-line').find('.warehouse-move-select');
+	if ($select.is(':visible')) {
+		warehouseCloseSelect($select);
+		return;
+	}
+	$('.warehouse-move-select').filter(':visible').each(function() { warehouseCloseSelect($(this)); });
+	var currentId = String($name.attr('data-warehouse-id') || '0');
+	$select.val(currentId !== '0' && currentId !== '' ? currentId : '');
+	$name.hide();
+	$select.show();
+});
+$(document).on('click', function(e) {
+	if ($(e.target).closest('.warehouse-line').length) {
+		return;
+	}
+	$('.warehouse-move-select').filter(':visible').each(function() { warehouseCloseSelect($(this)); });
 });
 $(document).on('change', '.warehouse-move-select', function() {
 	var $select = $(this);
 	var warehouseId = $select.val();
-	if (!warehouseId) { $select.hide(); $select.closest('.warehouse-line').find('.warehouse-name').show(); return; }
+	if (!warehouseId) { warehouseCloseSelect($select); return; }
+
+	var $name = $select.closest('.warehouse-line').find('.warehouse-name');
+	if (String(warehouseId) === String($name.attr('data-warehouse-id'))) { warehouseCloseSelect($select); return; }
 
 	$.ajax({
 		url: '{{ move_warehouse_url }}',
@@ -3027,8 +3055,10 @@ $(document).on('change', '.warehouse-move-select', function() {
 		},
 		success: function(json) {
 			if (json['error']) { alert(json['error']); return; }
-			$select.hide();
-			$select.closest('.warehouse-line').find('.warehouse-name').attr('data-warehouse-id', json['warehouse_id']).text(json['warehouse_name']).show();
+			$name.attr('data-warehouse-id', json['warehouse_id']);
+			$name.find('.warehouse-name__text').text(json['warehouse_name']);
+			$select.val(String(json['warehouse_id']));
+			warehouseCloseSelect($select);
 			if (window.lucide) lucide.createIcons();
 		},
 		error: function() { alert('{{ text_warehouse_move_failed }}'); }

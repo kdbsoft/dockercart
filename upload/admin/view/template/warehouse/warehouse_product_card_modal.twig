@@ -27,15 +27,84 @@
       {% endif %}
 
       <div class="pcm-sub">
-        <span class="pcm-stock{% if qty_here > 0 or unlimited %} pcm-stock--in{% else %} pcm-stock--out{% endif %}">{{ text_pcard_here }}: {% if unlimited %}&infin;{% else %}{{ qty_here }}{% endif %}</span>
-        <span class="pcm-badge">{{ text_pcard_total }}: {{ qty_total }}</span>
-        {% if reserved > 0 %}<span class="pcm-stock pcm-stock--reserved">{{ text_pcard_reserved }}: {{ reserved }}</span>{% endif %}
-        {% if available is not null %}<span class="pcm-badge">{{ text_pcard_available }}: {{ available }}</span>{% endif %}
-        {% if unlimited %}<span class="pcm-badge pcm-badge--accent">{{ text_unlimited }}</span>{% endif %}
+        {% if here_label %}
+        <span class="pcm-stock{% if qty_here > 0 or unlimited_here %} pcm-stock--in{% else %} pcm-stock--out{% endif %}">{{ here_label }}: {% if unlimited_here %}&infin;{% else %}{{ qty_here }}{% endif %}</span>
+        {% endif %}
+        {% if qty_total is not null %}
+        <span class="pcm-badge">{{ text_pcard_total }}: {% if unlimited_total %}&infin;{% else %}{{ qty_total }}{% endif %}</span>
+        {% endif %}
+        {% if reserved_total > 0 %}<span class="pcm-stock pcm-stock--reserved">{{ text_pcard_reserved }}: {{ reserved_total }}</span>{% endif %}
+        {% if available_total is not null %}<span class="pcm-badge">{{ text_pcard_available }}: {% if unlimited_total %}&infin;{% else %}{{ available_total }}{% endif %}</span>{% endif %}
+        {% if unlimited_here %}<span class="pcm-badge pcm-badge--accent">{{ text_unlimited }}</span>{% endif %}
         &middot; {% if status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}
       </div>
     </div>
   </div>
+
+  {% if variant_lines %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_pcard_variants }}</div>
+    <table class="pcm-stock-table">
+      <thead>
+        <tr>
+          <th>{{ column_variant }}</th>
+          <th class="text-right">{{ column_quantity }}</th>
+          <th class="text-right">{{ column_reserved }}</th>
+          <th class="text-right">{{ column_available }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in variant_lines %}
+        <tr>
+          <td>
+            {% if line.label %}{{ line.label }}{% endif %}
+            {% if line.sku %}<span class="pcm-code__label"> {{ line.sku }}</span>{% endif %}
+            {% if line.unlimited %}<span class="pcm-badge pcm-badge--accent">{{ text_unlimited }}</span>{% endif %}
+          </td>
+          <td class="text-right">{% if line.unlimited %}&infin;{% else %}{{ line.quantity }}{% endif %}</td>
+          <td class="text-right">{{ line.reserved }}</td>
+          <td class="text-right">{% if line.available is null %}&infin;{% else %}{{ line.available }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elseif warehouse_lines %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_pcard_by_warehouse }}</div>
+    <table class="pcm-stock-table">
+      <thead>
+        <tr>
+          <th>{{ column_warehouse }}</th>
+          <th class="text-right">{{ column_quantity }}</th>
+          <th class="text-right">{{ column_reserved }}</th>
+          <th class="text-right">{{ column_available }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in warehouse_lines %}
+        <tr>
+          <td>{{ line.name }}{% if line.unlimited %} <span class="pcm-badge pcm-badge--accent">{{ text_unlimited }}</span>{% endif %}</td>
+          <td class="text-right">{% if line.unlimited %}&infin;{% else %}{{ line.quantity }}{% endif %}</td>
+          <td class="text-right">{{ line.reserved }}</td>
+          <td class="text-right">{% if line.available is null %}&infin;{% else %}{{ line.available }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if can_set_total %}
+  <div class="pcm-section">
+    <div class="pcm-section__title">{{ text_pcard_set_total }}</div>
+    <div class="pcm-set-total">
+      <input type="number" step="any" min="0" class="form-control input-sm" id="pcm-set-total-input" value="{{ qty_total }}" />
+      <button type="button" class="btn btn-primary btn-sm" id="pcm-set-total-btn"><i data-lucide="save" width="14" height="14"></i> {{ button_set_total }}</button>
+    </div>
+    <div class="pcm-set-total-feedback" id="pcm-set-total-feedback" style="display:none"></div>
+  </div>
+  {% endif %}
 
   {% if attributes %}
   <div class="pcm-section">
@@ -62,3 +131,86 @@
     <a href="{{ href }}" target="_blank" class="btn btn-primary btn-sm btn-block"><i data-lucide="pencil" width="14" height="14"></i> {{ button_edit }}</a>
   </div>
 </div>
+{% if can_set_total %}
+<script type="text/javascript"><!--
+(function() {
+  var btn = document.getElementById('pcm-set-total-btn');
+  var input = document.getElementById('pcm-set-total-input');
+  var feedback = document.getElementById('pcm-set-total-feedback');
+  var cardUrl = 'index.php?route=warehouse/stock/getProductCard&user_token={{ user_token }}&product_id={{ product_id }}';
+
+  function refreshCard() {
+    if (typeof dcWhLoadCard === 'function') {
+      dcWhLoadCard(cardUrl);
+    } else if (typeof loadCard === 'function') {
+      loadCard(cardUrl);
+    }
+  }
+
+  var saving = false;
+
+  function saveTotal() {
+    if (saving) return;
+    var value = parseFloat(String(input.value).replace(',', '.'));
+
+    if (isNaN(value) || value < 0) {
+      feedback.style.display = 'block';
+      feedback.className = 'text-danger';
+      feedback.textContent = '{{ error_quantity|e("js") }}';
+      return;
+    }
+
+    saving = true;
+    btn.disabled = true;
+    feedback.style.display = 'none';
+
+    $.ajax({
+      url: 'index.php?route=warehouse/stock/updateTotal&user_token={{ user_token }}',
+      type: 'post',
+      dataType: 'json',
+      data: {
+        product_id: {{ product_id }},
+        quantity: value
+      },
+      success: function(json) {
+        saving = false;
+        btn.disabled = false;
+
+        if (json['error']) {
+          feedback.style.display = 'block';
+          feedback.className = 'text-danger';
+          feedback.textContent = json['error'];
+          return;
+        }
+
+        feedback.style.display = 'block';
+        feedback.className = 'text-success';
+        feedback.textContent = '{{ text_saved_total|e("js") }}';
+
+        // Sync the product-form quantity field when this modal is open on
+        // the product edit page.
+        var $inputQty = $('#input-quantity');
+
+        if ($inputQty.length && typeof json['total'] !== 'undefined') {
+          $inputQty.val(json['total']);
+        }
+
+        setTimeout(refreshCard, 600);
+      },
+      error: function() {
+        saving = false;
+        btn.disabled = false;
+        feedback.style.display = 'block';
+        feedback.className = 'text-danger';
+        feedback.textContent = '{{ text_network_error|e("js") }}';
+      }
+    });
+  }
+
+  btn.addEventListener('click', saveTotal);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') saveTotal();
+  });
+})();
+//--></script>
+{% endif %}

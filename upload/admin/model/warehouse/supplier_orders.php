@@ -58,7 +58,7 @@ class ModelWarehouseSupplierOrders extends Model {
 				SUM(op.`supplier_status` = 'pending') AS pending,
 				SUM(op.`supplier_status` = 'ordered') AS ordered,
 				SUM(op.`supplier_status` = 'shipped') AS shipped,
-				SUM(op.`supplier_status` <> 'shipped' AND op.`supplier_ordered_date` IS NOT NULL AND " . $this->sqlDeadline() . " < CURDATE()) AS overdue
+				SUM(op.`supplier_status` <> 'shipped' AND op.`supplier_ordered_date` IS NOT NULL AND COALESCE(NULLIF(w.`supplier_lead_time`, 0), ws.`lead_time`, 0) > 0 AND " . $this->sqlDeadline() . " < CURDATE()) AS overdue
 			FROM `" . DB_PREFIX . "order_product` op
 			JOIN `" . DB_PREFIX . "warehouse` w ON (w.warehouse_id = op.warehouse_id AND w.`type` = 'dropship')
 			LEFT JOIN `" . DB_PREFIX . "warehouse_stock` ws ON (ws.warehouse_id = op.warehouse_id AND ws.product_id = op.product_id AND ws.variant_id = op.variant_id)");
@@ -127,6 +127,26 @@ class ModelWarehouseSupplierOrders extends Model {
 	}
 
 	/**
+	 * Set or clear the per-unit supplier purchase price (store default
+	 * currency) on a dropship line. NULL clears the price.
+	 */
+	public function setLineCost(int $order_product_id, ?float $cost): void {
+		$value = $cost === null ? 'NULL' : "'" . round($cost, 4) . "'";
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET `supplier_cost` = " . $value . " WHERE `order_product_id` = '" . (int)$order_product_id . "'");
+	}
+
+	public function isDropshipLine(int $order_product_id): bool {
+		if ($order_product_id <= 0) {
+			return false;
+		}
+
+		$query = $this->db->query("SELECT 1 FROM `" . DB_PREFIX . "order_product` op JOIN `" . DB_PREFIX . "warehouse` w ON (w.warehouse_id = op.warehouse_id AND w.`type` = 'dropship') WHERE op.`order_product_id` = '" . (int)$order_product_id . "' LIMIT 1");
+
+		return isset($query->row) && !empty($query->row);
+	}
+
+	/**
 	 * Deadline date expression: supplier_ordered_date + lead_time, warehouse
 	 * supplier_lead_time takes priority over the per-product stock row.
 	 */
@@ -161,7 +181,7 @@ class ModelWarehouseSupplierOrders extends Model {
 		}
 
 		if (!empty($data['filter_overdue'])) {
-			$sql .= " AND op.`supplier_status` <> 'shipped' AND op.`supplier_ordered_date` IS NOT NULL AND " . $this->sqlDeadline() . " < CURDATE()";
+			$sql .= " AND op.`supplier_status` <> 'shipped' AND op.`supplier_ordered_date` IS NOT NULL AND COALESCE(NULLIF(w.`supplier_lead_time`, 0), ws.`lead_time`, 0) > 0 AND " . $this->sqlDeadline() . " < CURDATE()";
 		}
 
 		return $sql;
@@ -169,8 +189,8 @@ class ModelWarehouseSupplierOrders extends Model {
 
 	/**
 	 * Deadline = supplier_ordered_date + lead_time (warehouse supplier_lead_time
-	 * OR per-line lead_time from the stock row), as deadline for the supplier to
-	 * dispatch. Returns '' when not yet ordered.
+	 * OR per-line lead_time from the stock row). Returns '' when not yet ordered
+	 * or when no lead time is configured (no deadline).
 	 */
 	protected function computeDeadline(array $row): string {
 		if (empty($row['supplier_ordered_date'])) {
@@ -180,7 +200,7 @@ class ModelWarehouseSupplierOrders extends Model {
 		$lead_time = (int)($row['supplier_lead_time'] ?? 0);
 
 		if ($lead_time <= 0) {
-			return $row['supplier_ordered_date'];
+			return '';
 		}
 
 		return date('Y-m-d', strtotime($row['supplier_ordered_date'] . ' + ' . (int)$lead_time . ' days'));

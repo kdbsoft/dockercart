@@ -9,6 +9,7 @@ $_['text_pagination'] = 'Показано с %d по %d из %d (%d страни
 $_['text_types'] = [];
 $_['text_recalculate'] = 'Пересчитать итоги';
 $_['text_recalculated'] = 'Пересчитано товаров: %d, исправлено дрейфов: %d.';
+$_['text_recalculated_backfill'] = 'Остаток из кэша перенесён на склад по умолчанию для %d позиций товаров.';
 $_['text_unlimited'] = 'Безлимит';
 $_['button_update'] = 'Обновить';
 $_['button_recalculate'] = 'Пересчитать';
@@ -68,9 +69,15 @@ $_['text_card_total_quantity'] = 'Всего на складе';
 $_['button_edit'] = 'Редактировать';
 
 // Карточка товара (модальное окно)
-$_['text_pcard_here'] = 'На этом складе';
+$_['text_pcard_here_wh'] = 'На складе «%s»';
 $_['text_pcard_total'] = 'По всем складам';
 $_['text_pcard_reserved'] = 'В резерве';
 $_['text_pcard_available'] = 'Доступно';
+$_['text_pcard_variants'] = 'Остатки по вариантам';
+$_['text_pcard_by_warehouse'] = 'По складам';
+$_['text_pcard_set_total'] = 'Установить итого';
+$_['text_saved_total'] = 'Итого обновлено.';
+$_['error_quantity'] = 'Укажите корректное количество';
+$_['button_set_total'] = 'Сохранить';
 $_['text_pcard_attributes'] = 'Атрибуты';
 $_['text_pcard_description'] = 'Описание';

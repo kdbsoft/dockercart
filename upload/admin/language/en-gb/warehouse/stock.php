@@ -9,6 +9,7 @@ $_['text_pagination'] = 'Showing %d to %d of %d (%d pages)';
 $_['text_types'] = [];
 $_['text_recalculate'] = 'Recalculate totals';
 $_['text_recalculated'] = 'Recalculated %d product(s), %d drift(s) corrected.';
+$_['text_recalculated_backfill'] = 'Cache-only stock materialised on the default warehouse for %d product line(s).';
 $_['text_unlimited'] = 'Unlimited';
 $_['button_update'] = 'Update';
 $_['button_recalculate'] = 'Recalculate';
@@ -68,9 +69,15 @@ $_['text_card_total_quantity'] = 'Total Quantity';
 $_['button_edit'] = 'Edit';
 
 // Product card modal
-$_['text_pcard_here'] = 'In this warehouse';
+$_['text_pcard_here_wh'] = 'On warehouse "%s"';
 $_['text_pcard_total'] = 'All warehouses';
 $_['text_pcard_reserved'] = 'Reserved';
 $_['text_pcard_available'] = 'Available';
+$_['text_pcard_variants'] = 'Stock by variants';
+$_['text_pcard_by_warehouse'] = 'By warehouse';
+$_['text_pcard_set_total'] = 'Set total stock';
+$_['text_saved_total'] = 'Total stock updated.';
+$_['error_quantity'] = 'Enter a valid quantity';
+$_['button_set_total'] = 'Save';
 $_['text_pcard_attributes'] = 'Attributes';
 $_['text_pcard_description'] = 'Description';

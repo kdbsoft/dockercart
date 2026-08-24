@@ -3687,6 +3687,34 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     margin-bottom: 10px;
 }
 
+.dc-option-section--collapsed .dc-option-section__header {
+    border-bottom: none;
+    border-radius: 4px;
+}
+
+.dc-option-section__values {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 55%;
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--dc-gray-600);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .dc-option-section__values {
+        max-width: 100%;
+        white-space: normal;
+        flex-basis: 100%;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+}
+
 /* Admin Search Bar */
 .admin-search-wrap {
     position: relative;

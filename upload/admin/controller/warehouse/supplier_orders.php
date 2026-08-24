@@ -28,13 +28,35 @@ class ControllerWarehouseSupplierOrders extends Controller {
 			$order_product_id = (int)($input['order_product_id'] ?? 0);
 			$action = (string)($input['action'] ?? '');
 
-			if ($action === 'ordered') {
-				$this->model_warehouse_supplier_orders->markOrdered($order_product_id);
-			} elseif ($action === 'shipped') {
-				$this->model_warehouse_supplier_orders->markShipped($order_product_id, (string)($input['tracking'] ?? ''));
-			}
+			if (!in_array($action, ['ordered', 'shipped', 'set_cost'], true)) {
+				$json['error'] = $this->language->get('error_action');
+			} elseif ($order_product_id <= 0 || !$this->model_warehouse_supplier_orders->isDropshipLine($order_product_id)) {
+				$json['error'] = $this->language->get('error_not_dropship');
+			} else {
+				if ($action === 'ordered') {
+					$this->model_warehouse_supplier_orders->markOrdered($order_product_id);
 
-			$json['success'] = true;
+					$json['success'] = true;
+				} elseif ($action === 'shipped') {
+					$this->model_warehouse_supplier_orders->markShipped($order_product_id, (string)($input['tracking'] ?? ''));
+
+					$json['success'] = true;
+				} else {
+					$raw = str_replace(',', '.', trim((string)($input['cost'] ?? '')));
+
+					if ($raw === '') {
+						$this->model_warehouse_supplier_orders->setLineCost($order_product_id, null);
+
+						$json['success'] = true;
+					} elseif (!is_numeric($raw) || (float)$raw < 0 || (float)$raw > 99999999.9999) {
+						$json['error'] = $this->language->get('error_cost');
+					} else {
+						$this->model_warehouse_supplier_orders->setLineCost($order_product_id, (float)$raw);
+
+						$json['success'] = true;
+					}
+				}
+			}
 		} else {
 			$json['error'] = $this->language->get('error_permission');
 		}
@@ -140,6 +162,8 @@ class ControllerWarehouseSupplierOrders extends Controller {
 		]);
 
 		foreach ($rows as $row) {
+			$csv_status = (string)($row['supplier_status'] ?? '') !== '' ? (string)$row['supplier_status'] : 'pending';
+
 			fputcsv($out, [
 				$row['order_id'],
 				$row['supplier_name'],
@@ -147,7 +171,7 @@ class ControllerWarehouseSupplierOrders extends Controller {
 				$row['model'],
 				$row['variant_sku'],
 				$row['quantity'],
-				$this->language->get('text_line_' . $row['supplier_status']),
+				$this->language->get('text_line_' . $csv_status),
 				$row['supplier_ordered_date'],
 				$row['deadline'],
 				$row['supplier_tracking'],
@@ -325,6 +349,7 @@ class ControllerWarehouseSupplierOrders extends Controller {
 		$today = date('Y-m-d');
 
 		foreach ($results as $result) {
+			$status = (string)($result['supplier_status'] ?? '') !== '' ? (string)$result['supplier_status'] : 'pending';
 			$deadline_days = null;
 
 			if (!empty($result['deadline'])) {
@@ -333,7 +358,7 @@ class ControllerWarehouseSupplierOrders extends Controller {
 
 			$overdue = false;
 
-			if ($result['supplier_status'] !== 'shipped' && $deadline_days !== null && $deadline_days < 0) {
+			if ($status !== 'shipped' && $deadline_days !== null && $deadline_days < 0) {
 				$overdue = true;
 			}
 
@@ -348,9 +373,10 @@ class ControllerWarehouseSupplierOrders extends Controller {
 				'model' => $result['model'],
 				'variant_sku' => $result['variant_sku'],
 				'quantity' => $result['quantity'],
-				'supplier_status' => $result['supplier_status'],
-				'supplier_status_text' => $this->language->get('text_line_' . $result['supplier_status']),
-				'status_badge' => $this->getStatusBadgeClass((string)$result['supplier_status']),
+				'cost' => $result['supplier_cost'] !== null ? rtrim(rtrim(number_format((float)$result['supplier_cost'], 4, '.', ''), '0'), '.') : '',
+				'supplier_status' => $status,
+				'supplier_status_text' => $this->language->get('text_line_' . $status),
+				'status_badge' => $this->getStatusBadgeClass($status),
 				'ordered_date' => $result['supplier_ordered_date'] ? date($this->language->get('datetime_format'), strtotime($result['supplier_ordered_date'])) : '',
 				'deadline' => $result['deadline'] ? date($this->language->get('date_format_short'), strtotime($result['deadline'])) : '',
 				'deadline_days' => $deadline_days,
