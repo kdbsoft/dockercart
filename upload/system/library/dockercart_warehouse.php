@@ -120,6 +120,41 @@ class DockercartWarehouse {
 	}
 
 	/**
+	 * Total stock of a product line across all warehouses (source of truth).
+	 * Unlimited rows contribute the UNLIMITED sentinel.
+	 */
+	public function getStockSum(int $product_id, int $variant_id = 0): float {
+		$query = $this->db->query("SELECT SUM(`quantity`) AS total, MIN(`unlimited`) AS unlimited FROM `" . DB_PREFIX . "warehouse_stock` WHERE `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
+
+		if (!$query->num_rows) {
+			return 0.0;
+		}
+
+		if ((int)$query->row['unlimited']) {
+			return (float)self::UNLIMITED;
+		}
+
+		return (float)($query->row['total'] ?? 0);
+	}
+
+	/**
+	 * Catalog-facing quantity edit: set the total stock of a line by applying
+	 * the difference to the DEFAULT warehouse. Keeps product-form / inline-edit
+	 * / variant-matrix writes consistent with the warehouse source of truth
+	 * instead of touching the denormalised cache directly. No-op when the
+	 * total already matches; the stock row is auto-created by adjustStock().
+	 */
+	public function setTotalQuantity(int $product_id, float $new_total, int $variant_id = 0, array $context = []): void {
+		$delta = $new_total - $this->getStockSum($product_id, $variant_id);
+
+		if (abs($delta) < 0.0001) {
+			return;
+		}
+
+		$this->adjustStock($this->getDefaultWarehouseId(), $product_id, $variant_id, $delta, 'adjustment', $context);
+	}
+
+	/**
 	 * Allocation of cart lines to warehouses.
 	 *
 	 * Lines: array of ['product_id'=>int,'variant_id'=>int,'quantity'=>float,

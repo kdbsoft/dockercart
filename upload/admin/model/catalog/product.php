@@ -1179,6 +1179,14 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        // Warehouses enabled: the quantity from the form lands as a delta on
+        // the default warehouse (journal + cache recompute), not as a direct
+        // cache write that the next recomputeTotals() would silently revert.
+        if ($this->config->get("config_warehouse_enabled")) {
+            $warehouse = new DockercartWarehouse($this->registry);
+            $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
+        }
+
         $this->cache->delete("product");
 
         return $product_id;
@@ -2063,6 +2071,13 @@ class ModelCatalogProduct extends Model
             } else {
                 $pc->setConfigurable($product_id, 0);
             }
+        }
+
+        // Warehouses enabled: route the form quantity through the warehouse
+        // layer (see addProduct) instead of leaving the direct cache write.
+        if ($this->config->get("config_warehouse_enabled")) {
+            $warehouse = new DockercartWarehouse($this->registry);
+            $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
         }
 
         $this->cache->delete("product");
@@ -3387,6 +3402,15 @@ class ModelCatalogProduct extends Model
 
     public function updateProductField($product_id, $data)
     {
+        // Warehouses enabled: the inline-edited quantity becomes a delta on
+        // the default warehouse instead of a direct cache write.
+        if (isset($data["quantity"]) && $this->config->get("config_warehouse_enabled")) {
+            $warehouse = new DockercartWarehouse($this->registry);
+            $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-inline"));
+
+            unset($data["quantity"]);
+        }
+
         $float_fields = array('price', 'quantity');
         $int_fields = array('status');
         $string_fields = array('model');

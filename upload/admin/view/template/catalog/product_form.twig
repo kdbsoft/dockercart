@@ -300,6 +300,9 @@
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-quantity">{{ entry_quantity }}</label>
                           <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"/>
+                          {% if warehouse_enabled %}
+                          <div class="dc-wh-hint" id="dc-wh-hint-simple"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
+                          {% endif %}
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
@@ -319,6 +322,9 @@
                       <div class="col-sm-12 col-lg-6 col-xl-8" style="display:none" id="dc-inventory-variants-col">
                         <div class="dcx-field">
                           <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span></label>
+                          {% if warehouse_enabled %}
+                          <div class="dc-axis-info-banner dc-wh-hint-banner" id="dc-note-warehouse-inventory" style="display:none"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
+                          {% endif %}
                           <div class="dc-inv-block" id="dc-inventory-variants"></div>
                         </div>
                       </div>
@@ -1664,12 +1670,16 @@
       '#dc-note-configurable-pricing',
       '#dc-note-configurable-inventory',
       '#dc-note-configurable-dimensions',
-      '#dc-special-note-configurable'
+      '#dc-special-note-configurable',
+      '#dc-note-warehouse-inventory'
     ];
     var show = (dcOptionMode === 'combined');
     $.each(notes, function(i, selector) {
       $(selector).toggle(show);
     });
+    // Simple mode keeps the hint under the Qty field; combined mode moves it
+    // into the banner above the variant stock matrix.
+    $('#dc-wh-hint-simple').toggle(!show);
   }
 
   $(document).ready(function() {
@@ -2999,5 +3009,111 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 //--></script>
+
+{% if warehouse_enabled %}
+<style>
+.dc-wh-hint { display:flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#868e96; line-height:1.4; }
+.dc-wh-hint svg { flex-shrink:0; color:#868e96; }
+.dc-wh-hint__link { white-space:nowrap; }
+.dcx-field .dc-axis-info-banner.dc-wh-hint-banner { margin:6px 0 0; flex-wrap:wrap; }
+.dc-wh-hint-banner svg { color:#1e40af; }
+.pcm-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; padding:24px; }
+.pcm-modal { position:relative; background:var(--dc-surface,#fff); border-radius:var(--dc-radius-xl,10px); box-shadow:0 8px 30px rgba(0,0,0,.18); max-width:520px; width:100%; max-height:80vh; overflow-y:auto; padding:24px; }
+.pcm-close { position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; color:#999; padding:4px; border-radius:6px; transition:background .15s,color .15s; }
+.pcm-close:hover { background:#f3f4f6; color:#333; }
+.pcm-spinner { display:flex; align-items:center; justify-content:center; padding:40px; }
+.spinner { width:24px; height:24px; border:3px solid #e5e7eb; border-top-color:#2563eb; border-radius:50%; animation:wcm-spin .6s linear infinite; }
+@keyframes wcm-spin { to { transform:rotate(360deg); } }
+.pcm-gallery { flex-shrink:0; }
+.pcm-main-img { width:120px; height:120px; border-radius:8px; overflow:hidden; background:#f9fafb; }
+.pcm-main-img img { width:120px; height:120px; object-fit:cover; display:block; }
+.pcm-thumbs { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.pcm-thumb { width:32px; height:32px; border-radius:4px; object-fit:cover; border:1px solid var(--dc-border,#e5e7eb); cursor:pointer; transition:border-color .15s; }
+.pcm-thumb--active { border-color:#2563eb; box-shadow:0 0 0 1px #2563eb; }
+.pcm-header { display:flex; gap:16px; }
+.pcm-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.pcm-name { font-size:15px; font-weight:600; color:var(--dc-text-heading,#111); text-decoration:none; }
+.pcm-name:hover { color:#2563eb; }
+.pcm-sub { font-size:11px; color:#999; margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.pcm-stock { font-weight:600; padding:1px 7px; border-radius:8px; }
+.pcm-stock--in { color:#15803d; background:#dcfce7; }
+.pcm-stock--out { color:#b91c1c; background:#fee2e2; }
+.pcm-stock--reserved { color:#6d28d9; background:#ede9fe; }
+.pcm-badge { font-weight:600; padding:1px 7px; border-radius:8px; background:#f3f4f6; color:#4b5563; }
+.pcm-badge--accent { background:#fef3c7; color:#92400e; }
+.pcm-model { font-size:12px; color:var(--dc-text-muted,#999); }
+.pcm-codes { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:4px; }
+.pcm-code { font-size:11px; color:#666; }
+.pcm-code__label { font-weight:600; color:#999; }
+.pcm-section { margin-top:16px; padding-top:14px; border-top:1px solid var(--dc-border,#e5e7eb); }
+.pcm-section__title { font-size:12px; font-weight:600; color:#374151; margin-bottom:8px; }
+.pcm-desc { font-size:13px; color:#555; line-height:1.6; }
+.pcm-attrs { width:100%; font-size:12px; border-collapse:collapse; }
+.pcm-attrs td { padding:5px 0; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.pcm-attrs tr:last-child td { border-bottom:none; }
+.pcm-attrs__name { font-weight:500; color:#374151; white-space:nowrap; padding-right:12px; }
+</style>
+<script type="text/javascript"><!--
+(function() {
+  var matches = /[&?]product_id=(\d+)/.exec(window.location.href);
+  if (!matches) {
+    $('.dc-wh-stock-link').hide();
+  }
+})();
+
+function dcWhCardOverlay() {
+  var overlay = document.getElementById('dc-wh-card-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'dc-wh-card-overlay';
+    overlay.className = 'pcm-overlay';
+    document.body.appendChild(overlay);
+  }
+  return overlay;
+}
+
+function dcWhCloseCard() {
+  var o = document.getElementById('dc-wh-card-overlay');
+  if (o) o.style.display = 'none';
+}
+
+function dcWhLoadCard(url) {
+  var overlay = dcWhCardOverlay();
+  overlay.innerHTML = '<div class="pcm-spinner"><div class="spinner"></div></div>';
+  overlay.style.display = 'flex';
+  overlay.onclick = function(e) { if (!e.target.closest('.pcm-modal')) dcWhCloseCard(); };
+
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    success: function(json) {
+      if (json['html']) {
+        overlay.innerHTML = '<div class="pcm-modal">' + json['html'] + '<button type="button" class="pcm-close" onclick="dcWhCloseCard()"><i data-lucide="x" width="18" height="18"></i></button></div>';
+        lucide.createIcons();
+      } else {
+        dcWhCloseCard();
+      }
+    },
+    error: function() { dcWhCloseCard(); }
+  });
+}
+
+function pcmSwitchImage(thumb) {
+  var full = thumb.dataset.full;
+  if (!full) return;
+  var mainImg = document.getElementById('pcm-main-img');
+  if (mainImg) mainImg.innerHTML = '<img src="' + full + '">';
+  document.querySelectorAll('.pcm-thumb').forEach(function(t) { t.classList.remove('pcm-thumb--active'); });
+  thumb.classList.add('pcm-thumb--active');
+}
+
+$(document).on('click', '.dc-wh-stock-link', function(e) {
+  e.preventDefault();
+  var matches = /[&?]product_id=(\d+)/.exec(window.location.href);
+  if (!matches) return;
+  dcWhLoadCard('index.php?route=warehouse/stock/getProductCard&user_token={{ user_token }}&product_id=' + matches[1]);
+});
+//--></script>
+{% endif %}
 
 {{ footer }}

@@ -981,6 +981,26 @@ that warehouse.
 - Admin can move a line to another warehouse in order detail → `moveStock()`
   + a movement journal entry (reference = order number) + updated snapshot.
 
+### Catalog-side quantity edits
+
+When `config_warehouse_enabled=1`, every catalog editor routes its quantity
+through the warehouse layer instead of writing the denormalised cache:
+
+- product form / list inline-edit (`ModelCatalogProduct`) and variant qty
+  (`ProductConfigurable::updateVariantQuantity` / `addVariant` /
+  `updateVariant`) call
+  `DockercartWarehouse::setTotalQuantity($product_id, $new_total, $variant_id)`
+  — the difference vs the current `oc_warehouse_stock` sum is applied as an
+  `adjustment` movement (`reference` `product-form` / `product-inline` /
+  `variant-form`) on the **default warehouse**, then caches recompute;
+- deleting a variant purges its stock rows + holds (no ghost quantities);
+- the product form shows a hint under Qty linking to the stock card modal.
+
+Multi-warehouse distribution stays a Warehouses-section task: catalog edits
+only ever move the default-warehouse line. With the feature disabled, legacy
+direct writes run unchanged; re-enabling resyncs caches from warehouses on the
+next audit (legacy-era manual edits are absorbed).
+
 ### Self-pickup
 
 The `dockercart_warehouse_pickup` shipping extension offers one quote per
