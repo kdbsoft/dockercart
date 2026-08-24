@@ -182,12 +182,10 @@ class ProductConfigurable {
 			}
 		}
 
-		// Warehouses enabled: mirror the requested variant stock onto the
-		// default warehouse so the cache write above survives recomputes.
-		if ($this->config->get('config_warehouse_enabled')) {
-			$warehouse = new \DockercartWarehouse($this->registry);
-			$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
-		}
+		// Mirror the requested variant stock onto the default warehouse so
+		// the cache write above survives recomputes (single write path).
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
 
 		$this->touchProduct($product_id);
 
@@ -229,12 +227,10 @@ class ProductConfigurable {
 			}
 		}
 
-		// Warehouses enabled: the UPDATE above always rewrites quantity, so
-		// mirror its effective value onto the default warehouse as well.
-		if ($this->config->get('config_warehouse_enabled')) {
-			$warehouse = new \DockercartWarehouse($this->registry);
-			$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
-		}
+		// The UPDATE above always rewrites quantity, so mirror its effective
+		// value onto the default warehouse as well (single write path).
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
 
 		$this->touchProduct($product_id);
 	}
@@ -246,18 +242,10 @@ class ProductConfigurable {
 			return;
 		}
 
-		if ($this->config->get('config_warehouse_enabled')) {
-			// Warehouses enabled: the requested total becomes a delta on the
-			// default warehouse instead of a direct cache write.
-			$warehouse = new \DockercartWarehouse($this->registry);
-			$warehouse->setTotalQuantity((int)$variant_query->row['product_id'], (float)$quantity, (int)$variant_id, array('reference' => 'variant-form'));
-
-			$this->touchProduct((int)$variant_query->row['product_id']);
-
-			return;
-		}
-
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = '" . (float)$quantity . "' WHERE variant_id = '" . (int)$variant_id . "'");
+		// Single write path: the requested total becomes a delta on the
+		// default warehouse (journal + cache recompute).
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$warehouse->setTotalQuantity((int)$variant_query->row['product_id'], (float)$quantity, (int)$variant_id, array('reference' => 'variant-form'));
 
 		$this->touchProduct((int)$variant_query->row['product_id']);
 	}
@@ -293,16 +281,13 @@ class ProductConfigurable {
 				}
 			}
 
-			// Warehouses enabled: drop the variant's stock rows and holds so
-			// no ghost quantities survive in the source of truth, then refresh
-			// the denormalised caches.
-			if ($this->config->get('config_warehouse_enabled')) {
-				$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
-				$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
+			// Drop the variant's stock rows and holds so no ghost quantities
+			// survive in the source of truth, then refresh the caches.
+			$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
 
-				$warehouse = new \DockercartWarehouse($this->registry);
-				$warehouse->recomputeTotals((int)$product_id);
-			}
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$warehouse->recomputeTotals((int)$product_id);
 
 			$this->touchProduct($product_id);
 		}
@@ -322,12 +307,10 @@ class ProductConfigurable {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "'");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
 
-			// Warehouses enabled: the deleted variants' stock rows and holds
-			// must not survive as ghost quantities.
-			if ($this->config->get('config_warehouse_enabled')) {
-				$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
-				$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
-			}
+			// The deleted variants' stock rows and holds must not survive as
+			// ghost quantities in the source of truth.
+			$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");

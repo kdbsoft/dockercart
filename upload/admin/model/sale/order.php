@@ -3116,28 +3116,25 @@ class ModelSaleOrder extends Model {
 
 				$order_products = $this->getOrderProducts($order_id);
 
-				if ($this->config->get('config_warehouse_enabled')) {
-					$warehouse = new \DockercartWarehouse($this->registry);
-					$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+				// Stock subtraction: single write path through the warehouse
+				// source of truth (legacy direct cache writes removed — the
+				// caches are SUMs rewritten by recomputeTotals()).
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					foreach ($order_products as $order_product) {
-						$warehouse->adjustStock(
-							(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
-							(int)$order_product['product_id'],
-							(int)$order_product['variant_id'],
-							-(float)$order_product['quantity'],
-							'order_subtract',
-							['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
-						);
+				foreach ($order_products as $order_product) {
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
-				} else {
-					foreach ($order_products as $order_product) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
 
-						if ((int)$order_product['variant_id'] > 0) {
-							$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
-						}
-					}
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						-(float)$order_product['quantity'],
+						'order_subtract',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release checkout holds bound to this order: stock was just subtracted.
@@ -3176,28 +3173,24 @@ class ModelSaleOrder extends Model {
 			if ($was_processing && !$is_processing) {
 				$order_products = $this->getOrderProducts($order_id);
 
-				if ($this->config->get('config_warehouse_enabled')) {
-					$warehouse = new \DockercartWarehouse($this->registry);
-					$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+				// Restock: single write path through the warehouse source
+				// of truth (legacy direct cache writes removed).
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					foreach ($order_products as $order_product) {
-						$warehouse->adjustStock(
-							(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
-							(int)$order_product['product_id'],
-							(int)$order_product['variant_id'],
-							(float)$order_product['quantity'],
-							'order_restock',
-							['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
-						);
+				foreach ($order_products as $order_product) {
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
-				} else {
-					foreach ($order_products as $order_product) {
-						$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
 
-						if ((int)$order_product['variant_id'] > 0) {
-							$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
-						}
-					}
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						(float)$order_product['quantity'],
+						'order_restock',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release any remaining checkout holds bound to this order (restock).
