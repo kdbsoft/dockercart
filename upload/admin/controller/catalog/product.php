@@ -1318,6 +1318,10 @@ class ControllerCatalogProduct extends Controller {
 			$data['quantity'] = 1;
 		}
 
+		// Multi-warehouse mode: the quantity field is backed by the warehouse
+		// layer — show the hint and reuse the stock card modal.
+		$data['warehouse_enabled'] = $this->config->get('config_warehouse_enabled');
+
 		if (isset($this->request->post['minimum'])) {
 			$data['minimum'] = $this->request->post['minimum'];
 		} elseif (!empty($product_info)) {
