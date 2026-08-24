@@ -2399,6 +2399,13 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     color: var(--dc-text-dark);
 }
 
+.lang-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dc-text-muted);
+    white-space: nowrap;
+}
+
 .well.filter {
     background-color: var(--dc-surface)fff;
 }

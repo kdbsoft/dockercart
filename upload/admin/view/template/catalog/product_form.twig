@@ -574,7 +574,7 @@
                       <div class="dc-attr-row__values">
                         {% for language in languages %}
                         <div class="dc-attr-row__value">
-                          <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                          <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                           <input type="text" name="product_attribute[{{ attribute_row }}][product_attribute_description][{{ language.language_id }}][text]" value="{{ (product_attribute.product_attribute_description[language.language_id] ? product_attribute.product_attribute_description[language.language_id].text)|e('html_attr') }}" placeholder="{{ entry_text }}" class="form-control"/>
                         </div>
                         {% endfor %}
@@ -1565,7 +1565,7 @@
 	  html += '  <div class="dc-attr-row__values">';
     {% for language in languages %}
 	  html += '    <div class="dc-attr-row__value">';
-	  html += '      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>';
+	  html += '      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>';
 	  html += '      <input type="text" name="product_attribute[' + attribute_row + '][product_attribute_description][{{ language.language_id }}][text]" value="" placeholder="{{ entry_text }}" class="form-control"/>';
 	  html += '    </div>';
     {% endfor %}
