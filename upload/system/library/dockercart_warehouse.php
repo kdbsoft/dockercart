@@ -7,9 +7,11 @@
  * are kept as denormalised SUM caches across warehouses and rewritten on every
  * mutation via recomputeTotals(); the source of truth is always oc_warehouse_stock.
  *
- * config_warehouse_enabled=0 => getWarehouses()/getDefaultWarehouseId() still
- * work (so admin can configure the feature) but allocation returns the legacy
- * single logical warehouse and adjustStock() short-circuits.
+ * All stock writes go through this library regardless of
+ * config_warehouse_enabled: with the feature off, allocation/estimates return
+ * the legacy single logical warehouse but adjustStock() still journalises into
+ * oc_warehouse_stock and rewrites the caches, so the caches can never drift
+ * from the stock rows (the daily audit simply confirms the invariant).
  *
  * Dropship warehouses are "unlimited": an owned row with unlimited=1 never
  * blocks allocation (available = +INF). A per-line lead_time can override the
@@ -139,19 +141,69 @@ class DockercartWarehouse {
 
 	/**
 	 * Catalog-facing quantity edit: set the total stock of a line by applying
-	 * the difference to the DEFAULT warehouse. Keeps product-form / inline-edit
-	 * / variant-matrix writes consistent with the warehouse source of truth
-	 * instead of touching the denormalised cache directly. No-op when the
-	 * total already matches; the stock row is auto-created by adjustStock().
+	 * the difference as an 'adjustment' movement. The delta hits the DEFAULT
+	 * warehouse first; when that row cannot absorb the whole delta (a negative
+	 * delta meeting a 0-qty row), the remainder is spread over the other
+	 * warehouses (in their configured order) so the requested total is always
+	 * reached — never silently dropped. Returns the actual resulting total.
+	 *
+	 * No-op for configurable products (their variants own the stock) and when
+	 * the total already matches; missing stock rows are auto-created.
 	 */
-	public function setTotalQuantity(int $product_id, float $new_total, int $variant_id = 0, array $context = []): void {
-		$delta = $new_total - $this->getStockSum($product_id, $variant_id);
+	public function setTotalQuantity(int $product_id, float $new_total, int $variant_id = 0, array $context = []): float {
+		$product_id = (int)$product_id;
+		$variant_id = (int)$variant_id;
 
-		if (abs($delta) < 0.0001) {
-			return;
+		// Configurable products carry no head-level stock: their variants do.
+		if (!$variant_id && $this->isConfigurableProduct($product_id)) {
+			return 0.0;
 		}
 
-		$this->adjustStock($this->getDefaultWarehouseId(), $product_id, $variant_id, $delta, 'adjustment', $context);
+		$target = max(0.0, (float)$new_total);
+		$current = $this->getStockSum($product_id, $variant_id);
+
+		if (abs($target - $current) < 0.0001) {
+			return $current;
+		}
+
+		$delta = $target - $current;
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+			$default_warehouse_id = $this->getDefaultWarehouseId();
+
+			// The default warehouse absorbs as much of the delta as it can
+			// (quantities are clamped at 0, so a negative delta may saturate).
+			$applied = $this->applyStockDelta($default_warehouse_id, $product_id, $variant_id, $delta, $context, 'adjustment');
+			$delta -= $applied['applied'];
+
+			// Negative remainder: take it from the other warehouses so the
+			// requested total is actually reached.
+			if (abs($delta) > 0.0001) {
+				foreach ($this->getAllWarehouses() as $warehouse) {
+					if ((int)$warehouse['warehouse_id'] === $default_warehouse_id) {
+						continue;
+					}
+
+					$applied = $this->applyStockDelta((int)$warehouse['warehouse_id'], $product_id, $variant_id, $delta, $context, 'adjustment');
+					$delta -= $applied['applied'];
+
+					if (abs($delta) <= 0.0001) {
+						break;
+					}
+				}
+			}
+
+			$this->recomputeTotals($product_id);
+
+			$this->db->query("COMMIT");
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+			throw $e;
+		}
+
+		return $target - $delta;
 	}
 
 	/**
@@ -464,10 +516,10 @@ class DockercartWarehouse {
 
 	/**
 	 * Atomic stock mutation. Locks the stock row, applies a signed delta,
-	 * writes a movement journal entry and, when tracking is enabled, rewrites
-	 * the denormalised product/variant quantity caches.
+	 * writes a movement journal entry and rewrites the denormalised
+	 * product/variant quantity caches from the stock source of truth.
 	 *
-	 * @return float resulting quantity
+	 * @return float resulting quantity of the target warehouse row
 	 */
 	public function adjustStock(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context = []): float {
 		$warehouse_id = (int)$warehouse_id;
@@ -488,22 +540,11 @@ class DockercartWarehouse {
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` (`warehouse_id`, `product_id`, `variant_id`, `quantity`, `unlimited`, `lead_time`)
-				VALUES ('" . (int)$warehouse_id . "', '" . (int)$product_id . "', '" . (int)$variant_id . "', '0', '0', '0')
-				ON DUPLICATE KEY UPDATE `stock_id` = LAST_INSERT_ID(`stock_id`)");
+			$result = $this->applyStockDelta($warehouse_id, $product_id, $variant_id, $delta, $context, $type);
 
-			$lock = $this->db->query("SELECT `stock_id`, `quantity`, `unlimited` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "' FOR UPDATE");
-
-			$new_qty = max(0.0, (float)$lock->row['quantity'] + $delta);
-
-			$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$new_qty . "' WHERE `stock_id` = '" . (int)$lock->row['stock_id'] . "'");
-
-			$this->recordMovement($warehouse_id, $product_id, $variant_id, $delta, $type, $context);
-
-			// Denormalised cache.
-			if ($this->isEnabled()) {
-				$this->recomputeTotals($product_id);
-			}
+			// Denormalised cache: always rewritten from the stock source of
+			// truth, so cache drift can never accumulate between modes.
+			$this->recomputeTotals($product_id);
 
 			$this->db->query("COMMIT");
 		} catch (\Throwable $e) {
@@ -512,7 +553,67 @@ class DockercartWarehouse {
 			throw $e;
 		}
 
-		return $new_qty;
+		return $result['quantity'];
+	}
+
+	/**
+	 * Apply a signed delta to a single warehouse stock row (clamped at 0),
+	 * inside the calling transaction. The row is created on demand and locked
+	 * FOR UPDATE so concurrent mutations serialize on it. Writes a movement
+	 * journal entry for the actually-applied amount.
+	 *
+	 * @return array{applied: float, quantity: float} applied delta and resulting row quantity
+	 */
+	protected function applyStockDelta(int $warehouse_id, int $product_id, int $variant_id, float $delta, array $context, string $type = 'adjustment'): array {
+		if (abs($delta) < 0.0001) {
+			return ['applied' => 0.0, 'quantity' => $this->getRowQuantity($warehouse_id, $product_id, $variant_id)];
+		}
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` (`warehouse_id`, `product_id`, `variant_id`, `quantity`, `unlimited`, `lead_time`)
+			VALUES ('" . (int)$warehouse_id . "', '" . (int)$product_id . "', '" . (int)$variant_id . "', '0', '0', '0')
+			ON DUPLICATE KEY UPDATE `stock_id` = LAST_INSERT_ID(`stock_id`)");
+
+		$lock = $this->db->query("SELECT `stock_id`, `quantity`, `unlimited` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "' FOR UPDATE");
+
+		$new_qty = max(0.0, (float)$lock->row['quantity'] + $delta);
+		$applied = $new_qty - (float)$lock->row['quantity'];
+
+		if (abs($applied) < 0.0001) {
+			return ['applied' => 0.0, 'quantity' => $new_qty];
+		}
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$new_qty . "' WHERE `stock_id` = '" . (int)$lock->row['stock_id'] . "'");
+
+		$this->recordMovement($warehouse_id, $product_id, $variant_id, $applied, $type, $context);
+
+		return ['applied' => (float)$applied, 'quantity' => (float)$new_qty];
+	}
+
+	/**
+	 * Does stock tracking apply to a catalog line? Mirrors the legacy
+	 * `AND subtract = '1'` guards: variants carry their own flag, simple
+	 * products use the head row's. Non-tracked lines (e.g. preorders with
+	 * subtract off) must never hit the stock rows.
+	 */
+	public function tracksStock(int $product_id, int $variant_id = 0): bool {
+		if ($variant_id > 0) {
+			$query = $this->db->query("SELECT `subtract` FROM `" . DB_PREFIX . "product_variant` WHERE `variant_id` = '" . (int)$variant_id . "' AND `product_id` = '" . (int)$product_id . "'");
+
+			return $query->num_rows > 0 && (int)$query->row['subtract'] === 1;
+		}
+
+		$query = $this->db->query("SELECT `subtract` FROM `" . DB_PREFIX . "product` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		return $query->num_rows > 0 && (int)$query->row['subtract'] === 1;
+	}
+
+	/**
+	 * Quantity of a single warehouse stock row (0 when missing).
+	 */
+	protected function getRowQuantity(int $warehouse_id, int $product_id, int $variant_id): float {
+		$query = $this->db->query("SELECT `quantity` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
+
+		return $query->num_rows ? (float)$query->row['quantity'] : 0.0;
 	}
 
 	/**

@@ -330,41 +330,35 @@ class ModelSaleReturn extends Model {
 		$order_id = (int)$return_info['order_id'];
 		$products = $this->getReturnProducts($return_id);
 
-		// Restock
+		// Restock: single write path through the warehouse source of truth.
 		if ($restock) {
-			if ($this->config->get('config_warehouse_enabled')) {
-				$warehouse = new \DockercartWarehouse($this->registry);
-				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-				foreach ($products as $product) {
-					$warehouse_id = $default_warehouse_id;
-
-					// Return to the warehouse the original order line came from.
-					if (!empty($product['order_product_id'])) {
-						$op = $this->db->query("SELECT `warehouse_id` FROM `" . DB_PREFIX . "order_product` WHERE `order_product_id` = '" . (int)$product['order_product_id'] . "'");
-
-						if ($op->num_rows && (int)$op->row['warehouse_id'] > 0) {
-							$warehouse_id = (int)$op->row['warehouse_id'];
-						}
-					}
-
-					$warehouse->adjustStock(
-						$warehouse_id,
-						(int)$product['product_id'],
-						(int)$product['variant_id'],
-						(float)$product['quantity'],
-						'return',
-						['order_id' => (int)$order_id, 'reference' => 'return-' . (int)$return_id]
-					);
+			foreach ($products as $product) {
+				if (!$warehouse->tracksStock((int)$product['product_id'], (int)$product['variant_id'])) {
+					continue;
 				}
-			} else {
-				foreach ($products as $product) {
-					$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE product_id = '" . (int)$product['product_id'] . "' AND subtract = '1'");
 
-					if ((int)$product['variant_id'] > 0) {
-						$this->db->query("UPDATE `" . DB_PREFIX . "product_variant` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE variant_id = '" . (int)$product['variant_id'] . "' AND subtract = '1'");
+				$warehouse_id = $default_warehouse_id;
+
+				// Return to the warehouse the original order line came from.
+				if (!empty($product['order_product_id'])) {
+					$op = $this->db->query("SELECT `warehouse_id` FROM `" . DB_PREFIX . "order_product` WHERE `order_product_id` = '" . (int)$product['order_product_id'] . "'");
+
+					if ($op->num_rows && (int)$op->row['warehouse_id'] > 0) {
+						$warehouse_id = (int)$op->row['warehouse_id'];
 					}
 				}
+
+				$warehouse->adjustStock(
+					$warehouse_id,
+					(int)$product['product_id'],
+					(int)$product['variant_id'],
+					(float)$product['quantity'],
+					'return',
+					['order_id' => (int)$order_id, 'reference' => 'return-' . (int)$return_id]
+				);
 			}
 		}
 

@@ -1179,13 +1179,13 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        // Warehouses enabled: the quantity from the form lands as a delta on
-        // the default warehouse (journal + cache recompute), not as a direct
-        // cache write that the next recomputeTotals() would silently revert.
-        if ($this->config->get("config_warehouse_enabled")) {
-            $warehouse = new DockercartWarehouse($this->registry);
-            $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
-        }
+        // Route the quantity from the form through the warehouse layer: it lands
+        // as an adjustment delta on the default warehouse (journal + cache
+        // recompute), so the cache can never diverge from the source of truth.
+        // For configurable products the head row is skipped (their variants
+        // own the stock) and setTotalQuantity() is a no-op.
+        $warehouse = new DockercartWarehouse($this->registry);
+        $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
 
         $this->cache->delete("product");
 
@@ -1215,8 +1215,10 @@ class ModelCatalogProduct extends Model
                 $this->db->escape($data["mpn"]) .
                 "', location = '" .
                 $this->db->escape($data["location"]) .
-                "', quantity = '" .
-                (float) $data["quantity"] .
+                // quantity is owned by the warehouse layer below — the cache is
+                // a SUM rewritten by recomputeTotals(), so writing it here
+                // directly would be overwritten, or (configurable products)
+                // drift as a phantom value until the next recompute.
                 "', minimum = '" .
                 (float) $data["minimum"] .
                 "', quantity_step = '" .
@@ -2073,12 +2075,11 @@ class ModelCatalogProduct extends Model
             }
         }
 
-        // Warehouses enabled: route the form quantity through the warehouse
-        // layer (see addProduct) instead of leaving the direct cache write.
-        if ($this->config->get("config_warehouse_enabled")) {
-            $warehouse = new DockercartWarehouse($this->registry);
-            $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
-        }
+        // Route the form quantity through the warehouse layer (see addProduct):
+// it lands as an adjustment delta and the cache recomputes, so the
+// source of truth and the displayed quantity can never diverge.
+        $warehouse = new DockercartWarehouse($this->registry);
+        $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
 
         $this->cache->delete("product");
     }
@@ -3402,9 +3403,9 @@ class ModelCatalogProduct extends Model
 
     public function updateProductField($product_id, $data)
     {
-        // Warehouses enabled: the inline-edited quantity becomes a delta on
-        // the default warehouse instead of a direct cache write.
-        if (isset($data["quantity"]) && $this->config->get("config_warehouse_enabled")) {
+        // The quantity is owned by the warehouse layer: the inline-edited
+        // value becomes an adjustment delta and the cache recomputes.
+        if (isset($data["quantity"])) {
             $warehouse = new DockercartWarehouse($this->registry);
             $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-inline"));
 
