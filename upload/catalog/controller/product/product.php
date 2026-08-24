@@ -408,12 +408,37 @@ class ControllerProductProduct extends Controller {
 			$data['points'] = $product_info['points'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
-			if ($product_info['quantity'] <= 0) {
+			// Reservation-aware "in stock" figure: active checkout holds of
+			// other buyers (their sessions) are subtracted, so the badge never
+			// promises stock that is locked in a checkout flow.
+			$display_quantity = (float)$product_info['quantity'];
+			$stock_reservation = new \DockercartStockReservation($this->registry);
+
+			if ($stock_reservation->isEnabled()) {
+				$reserved_qty = 0.0;
+				$reserved_map = $stock_reservation->getReservedByProductIds([(int)$product_info['product_id']]);
+
+				if (!empty($product_info['is_configurable']) && !empty($product_info['default_variant_id'])) {
+					// The page shows the default variant's stock: only its
+					// own holds count.
+					$reserved_qty = (float)($reserved_map[(int)$product_info['product_id'] . ':' . (int)$product_info['default_variant_id']] ?? 0);
+				} else {
+					foreach ($reserved_map as $key => $qty) {
+						if ((int)strtok($key, ':') === (int)$product_info['product_id']) {
+							$reserved_qty += (float)$qty;
+						}
+					}
+				}
+
+				$display_quantity = max(0.0, $display_quantity - $reserved_qty);
+			}
+
+			if ($display_quantity <= 0) {
 				$data['stock'] = $product_info['preorder']
 					? $this->language->get('text_preorder')
 					: $this->language->get('text_out_of_stock');
 			} elseif ($this->config->get('config_stock_display')) {
-				$data['stock'] = $product_info['quantity'];
+				$data['stock'] = $display_quantity;
 			} else {
 				$data['stock'] = $this->language->get('text_instock');
 			}
@@ -421,8 +446,8 @@ class ControllerProductProduct extends Controller {
 			// "In stock" label for the JS variant switcher
 			$data['stock_status_instock'] = $this->language->get('text_instock');
 
-			$data['is_in_stock'] = ((int)$product_info['quantity'] > 0) || !empty($product_info['preorder']);
-			$data['is_preorder'] = empty($product_info['quantity']) && !empty($product_info['preorder']);
+			$data['is_in_stock'] = ($display_quantity > 0) || !empty($product_info['preorder']);
+			$data['is_preorder'] = empty($display_quantity) && !empty($product_info['preorder']);
 
 			$data['is_discontinued'] = !empty($product_info['discontinued'])
 				&& (float)$product_info['quantity'] <= 0

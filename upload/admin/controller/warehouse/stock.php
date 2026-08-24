@@ -664,6 +664,7 @@ class ControllerWarehouseStock extends Controller {
 						'unlimited' => $unlimited,
 						'qty_total' => (float)$total->row['total_quantity'],
 						'reserved' => (float)$reserved,
+						'available' => $unlimited ? null : max(0.0, (float)$total->row['total_quantity'] - (float)$reserved),
 						'attributes' => $attr_data,
 						'description' => $description,
 						'href' => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product_id, true),
@@ -812,7 +813,31 @@ class ControllerWarehouseStock extends Controller {
 		$stock_total = $this->model_warehouse_stock->getTotalStock($filter_data);
 		$results = $this->model_warehouse_stock->getStockMatrix($filter_data);
 
+		// Reserved per cell (all active holds — the admin sees the stock from
+		// the seller's perspective) for the available = quantity - reserved
+		// column, in one query.
+		$lines = [];
+
 		foreach ($results as $result) {
+			$lines[] = [
+				'product_id' => (int)$result['product_id'],
+				'variant_id' => (int)$result['variant_id'],
+				'warehouse_id' => (int)$result['warehouse_id'],
+			];
+		}
+
+		$reserved_map = [];
+
+		if ($lines) {
+			$reservation = new \DockercartStockReservation($this->registry);
+			$reserved_map = $reservation->getReservedByLines($lines, null, false);
+		}
+
+		foreach ($results as $result) {
+			$quantity = (float)$result['quantity'];
+			$unlimited = (int)$result['unlimited'] === 1;
+			$reserved = (float)($reserved_map[(int)$result['product_id'] . ':' . (int)$result['variant_id'] . ':' . (int)$result['warehouse_id']] ?? 0);
+
 			$data['rows'][] = [
 				'stock_id' => $result['stock_id'],
 				'warehouse_id' => $result['warehouse_id'],
@@ -822,8 +847,10 @@ class ControllerWarehouseStock extends Controller {
 				'product_model' => $result['product_model'],
 				'variant_id' => $result['variant_id'],
 				'variant_sku' => $result['variant_sku'],
-				'quantity' => $result['quantity'],
+				'quantity' => $quantity,
 				'unlimited' => $result['unlimited'],
+				'reserved' => $reserved,
+				'available' => $unlimited ? null : max(0.0, $quantity - $reserved),
 				'lead_time' => $result['lead_time'],
 			];
 		}

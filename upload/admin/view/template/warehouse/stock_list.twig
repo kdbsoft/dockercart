@@ -29,6 +29,8 @@
             <td>{{ column_model }}</td>
             <td>{{ column_variant }}</td>
             <td class="text-right">{{ column_quantity }}</td>
+            <td class="text-right">{{ column_reserved }}</td>
+            <td class="text-right">{{ column_available }}</td>
             <td class="text-center">{{ column_unlimited }}</td>
             <td class="text-right">{{ column_lead_time }}</td>
           </tr>
@@ -47,6 +49,8 @@
             <td class="text-right">
               <span class="editable-stock inline-edit" data-stock-id="{{ row.stock_id }}" data-mode="quantity" data-value="{{ row.quantity }}">{{ row.quantity }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
             </td>
+            <td class="text-right">{{ row.reserved }}</td>
+            <td class="text-right">{% if row.available is null %}&infin;{% else %}{{ row.available }}{% endif %}</td>
             <td class="text-center">
               <input type="checkbox" class="editable-stock-toggle" data-stock-id="{{ row.stock_id }}" data-mode="unlimited"{% if row.unlimited %} checked="checked"{% endif %} />
             </td>
