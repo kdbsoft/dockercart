@@ -191,18 +191,6 @@ class DockercartWarehouse {
 
 		if (!$any_forced || $forced_all_good) {
 			foreach ($candidates as $w) {
-				if ($this->lineFits($line, (int)$w['warehouse_id'], $candidates) === false && $this->cartFits($lines, $w) === true) {
-					$warehouse_id = (int)$w['warehouse_id'];
-					$split = false;
-
-					foreach ($lines as $idx => $line) {
-						$alloc[$idx] = $warehouse_id;
-						$estimate[$idx] = $this->estimateShipDate((int)$warehouse_id, $line, null);
-					}
-
-					return ['alloc' => $alloc, 'lines' => $lines, 'split' => $split, 'estimate' => $estimate];
-				}
-
 				if ($this->cartFits($lines, $w)) {
 					$warehouse_id = (int)$w['warehouse_id'];
 					$split = false;
@@ -304,19 +292,10 @@ class DockercartWarehouse {
 			return $from;
 		}
 
-		// Lead time = per-line override > supplier lead time > 0.
-		$lead_time = 0;
+		// Lead time = stock-row override > supplier lead time > 0.
+		$stock = $this->db->query("SELECT `lead_time` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$line['product_id'] . "' AND `variant_id` = '" . (int)$line['variant_id'] . "'");
 
-		if ($line['variant_id'] > 0) {
-			$lead = $this->getLineLeadTime((int)$line['product_id'], (int)$line['variant_id'], $warehouse_id);
-			$lead_time = $lead > 0 ? $lead : 0;
-		}
-
-		if ($lead_time <= 0) {
-			$stock = $this->db->query("SELECT `lead_time` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$line['product_id'] . "' AND `variant_id` = '" . (int)$line['variant_id'] . "'");
-
-			$lead_time = $stock->num_rows ? (int)$stock->row['lead_time'] : 0;
-		}
+		$lead_time = $stock->num_rows ? max(0, (int)$stock->row['lead_time']) : 0;
 
 		if ($lead_time <= 0) {
 			$lead_time = (int)$warehouse['supplier_lead_time'];
@@ -336,16 +315,6 @@ class DockercartWarehouse {
 		}
 
 		return $dt->format('Y-m-d');
-	}
-
-	protected function getLineLeadTime(int $product_id, int $variant_id, int $warehouse_id): int {
-		if ($variant_id <= 0) {
-			return 0;
-		}
-
-		$query = $this->db->query("SELECT `lead_time` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
-
-		return $query->num_rows ? (int)$query->row['lead_time'] : 0;
 	}
 
 	/**
@@ -492,7 +461,7 @@ class DockercartWarehouse {
 
 			$new_qty = max(0.0, (float)$lock->row['quantity'] + $delta);
 
-			$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$new_qty . "', `unlimited` = '0' WHERE `stock_id` = '" . (int)$lock->row['stock_id'] . "'");
+			$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$new_qty . "' WHERE `stock_id` = '" . (int)$lock->row['stock_id'] . "'");
 
 			$this->recordMovement($warehouse_id, $product_id, $variant_id, $delta, $type, $context);
 
@@ -539,9 +508,9 @@ class DockercartWarehouse {
 
 	/**
 	 * Recompute the denormalised product/variant quantity cache from the stock
-	 * source of truth and detect drift from the previous cached value. Drift is
-	 * written back as an adjustment movement (audit) so the journal stays a
-	 * faithful audit trail.
+	 * source of truth. Drift detection lives in auditAll() and the admin stock
+	 * screen "Recalculate"; this method only rewrites the caches and never
+	 * writes movement rows.
 	 */
 	public function recomputeTotals(int $product_id): void {
 		$product_id = (int)$product_id;
@@ -645,8 +614,11 @@ class DockercartWarehouse {
 	}
 
 	/**
-	 * Daily audit: recompute every product cache and write drift adjustments.
-	 * Pure recompute (no view on drift) is done via stock screen "Recalculate".
+	 * Daily audit: recompute every product cache and report how many cached
+	 * values drifted from the warehouse source of truth. Report-only: drift is
+	 * healed by the recompute but never journaled — the movement log is a
+	 * physical-stock history, not a cache-changelog. The same check on demand:
+	 * admin stock screen "Recalculate" (ModelWarehouseStock::recalculate()).
 	 *
 	 * @return array{checked:int, drifted:int}
 	 */
@@ -657,10 +629,44 @@ class DockercartWarehouse {
 		$drifted = 0;
 
 		foreach ($products->rows as $row) {
-			$this->recomputeTotals((int)$row['product_id']);
+			$product_id = (int)$row['product_id'];
+
+			$before = $this->getCachedQuantities($product_id);
+
+			$this->recomputeTotals($product_id);
+
+			$after = $this->getCachedQuantities($product_id);
+
+			foreach ($after as $vid => $qty) {
+				if (!isset($before[$vid]) || abs((float)$before[$vid] - (float)$qty) > 0.0001) {
+					$drifted++;
+				}
+			}
+
 			$checked++;
 		}
 
 		return ['checked' => $checked, 'drifted' => $drifted];
+	}
+
+	/**
+	 * Cached product/variant quantities keyed by variant id (0 = head row).
+	 *
+	 * @return array<int, float>
+	 */
+	protected function getCachedQuantities(int $product_id): array {
+		$query = $this->db->query("SELECT p.`quantity` AS product_qty, pv.`variant_id`, pv.`quantity` AS variant_qty FROM `" . DB_PREFIX . "product` p LEFT JOIN `" . DB_PREFIX . "product_variant` pv ON (pv.product_id = p.product_id) WHERE p.`product_id` = '" . (int)$product_id . "'");
+
+		$map = [];
+
+		foreach ($query->rows as $row) {
+			if ((int)$row['variant_id']) {
+				$map[(int)$row['variant_id']] = (float)$row['variant_qty'];
+			} else {
+				$map[0] = (float)$row['product_qty'];
+			}
+		}
+
+		return $map;
 	}
 }
