@@ -3370,3 +3370,161 @@ div.dcx-field.required > .dcx-label:before {
         width: auto;
     }
 }
+
+/* Pickup warehouses — card grid (replaces the table) */
+.dcx-wh-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    padding: 12px;
+}
+.dcx-wh-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--dc-border);
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-surface);
+    transition: border-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.dcx-wh-card:hover {
+    border-color: var(--dc-primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+}
+.dcx-wh-card--off {
+    opacity: .65;
+}
+.dcx-wh-card__stretch {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+.dcx-wh-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.dcx-wh-card__icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--dc-primary-light);
+    color: var(--dc-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+.dcx-wh-card--off .dcx-wh-card__icon {
+    background: var(--dc-border);
+    color: var(--dc-text-muted);
+}
+.dcx-wh-card__title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.dcx-wh-card__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dc-text-dark);
+    word-break: break-word;
+}
+.dcx-wh-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.dcx-wh-card__badge {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 3px 7px;
+    border-radius: var(--dc-radius-full);
+}
+.dcx-wh-card__badge--on {
+    background: var(--dc-success-light);
+    color: var(--dc-success-text);
+}
+.dcx-wh-card__badge--off {
+    background: var(--dc-danger-light);
+    color: var(--dc-danger-text);
+}
+.dcx-wh-card__badge--accent {
+    background: var(--dc-warning-light);
+    color: var(--dc-warning-text);
+}
+.dcx-wh-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--dc-text-muted);
+}
+.dcx-wh-card__line {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+.dcx-wh-card__line svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+a.dcx-wh-card__line--link {
+    color: var(--dc-primary);
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
+}
+a.dcx-wh-card__line--link:hover span {
+    text-decoration: underline;
+}
+.dcx-wh-card__attrs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--dc-border);
+}
+.dcx-wh-card__attr {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+    background: var(--dc-surface-alt);
+    border-radius: var(--dc-radius-full);
+    padding: 3px 8px;
+}
+.dcx-wh-card__note {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--dc-text-muted);
+    font-style: italic;
+    overflow-wrap: break-word;
+}
+.dcx-wh-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--dc-text-muted);
+}
+.dcx-wh-empty p {
+    margin: 0;
+    font-size: 13px;
+}
+.dcx-wh-empty a {
+    font-size: 13px;
+    font-weight: 500;
+}
