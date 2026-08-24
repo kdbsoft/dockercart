@@ -64,6 +64,7 @@ class ControllerCommonUserFilter extends Controller {
 			'uf_operators_json'   => json_encode($operators),
 			'uf_save_url'         => $this->url->link('common/user_filter/save', 'user_token=' . $this->session->data['user_token'], true),
 			'uf_delete_url'       => $this->url->link('common/user_filter/delete', 'user_token=' . $this->session->data['user_token'], true),
+			'uf_redirect_url'     => (string)($args['redirect_url'] ?? ''),
 			'uf_user_token'       => $this->session->data['user_token']
 		);
 
