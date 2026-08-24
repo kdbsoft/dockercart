@@ -59,7 +59,6 @@ $_['text_select_file'] = 'Выберите CSV файл';
 $_['text_stats_customer'] = 'Покупатели с рассылкой';
 $_['text_stats_guest'] = 'Гостевые подписки';
 $_['text_stats_total'] = 'Всего подписчиков';
-$_['text_name_card'] = 'Название';
 $_['text_status_card'] = 'Статус';
 $_['text_subscribers'] = 'Подписчики';
 $_['text_success'] = 'Настройки модуля подписки успешно сохранены!';

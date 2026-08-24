@@ -63,7 +63,6 @@ $_['text_select_file'] = 'Виберіть CSV-файл';
 $_['text_stats_customer'] = 'Покупці з розсилкою';
 $_['text_stats_guest'] = 'Гість-передплатники';
 $_['text_stats_total'] = 'Загальна кількість підписників';
-$_['text_name_card'] = 'Назва';
 $_['text_active'] = 'Активно';
 $_['text_csv_tools'] = 'Імпорт / Експорт';
 $_['text_subscribers'] = 'Передплатники';
