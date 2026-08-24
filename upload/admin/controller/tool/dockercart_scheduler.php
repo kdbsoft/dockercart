@@ -114,6 +114,9 @@ class ControllerToolDockercartScheduler extends Controller {
 			$task['task_name'] = isset($translations[$currentLanguageId]) && $translations[$currentLanguageId] !== ''
 				? $translations[$currentLanguageId]
 				: $task['task_name_fallback'];
+			$task['last_run'] = !empty($task['last_run']) && $task['last_run'] !== '0000-00-00 00:00:00'
+				? date($this->language->get('datetime_format'), strtotime($task['last_run']))
+				: '';
 		}
 
 		unset($task);

@@ -211,7 +211,7 @@ class ControllerExtensionModuleDockercartNewsletter extends Controller {
                 'source' => $result['source'],
                 'subscriber_type' => $result['subscriber_type'],
                 'status' => (int)$result['status'],
-                'date_added' => $result['date_added'],
+                'date_added' => $result['date_added'] ? date($this->language->get('datetime_format'), strtotime($result['date_added'])) : '',
                 'delete' => $delete_link
             );
         }

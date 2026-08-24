@@ -433,7 +433,8 @@ class ControllerSaleOrderDetail extends Controller {
 		try {
 			$this->sendPdf(
 				$this->load->view('sale/order_detail_print', [
-					'orders' => [$this->buildPrintData($order_id)],
+					'orders'     => [$this->buildPrintData($order_id)],
+					'print_date' => date($this->language->get('datetime_format')),
 				]),
 				'order-' . $order_id . '.pdf'
 			);
@@ -483,6 +484,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$pdf = $this->renderPdf($this->load->view('sale/order_invoice', [
 				'orders'        => [$invoice_data],
 				'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
+				'print_date'    => date($this->language->get('datetime_format')),
 			]));
 
 			$directory = DIR_STORAGE . 'documents/invoices/';
@@ -548,7 +550,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		try {
 			$this->sendPdf(
-				$this->load->view('sale/order_detail_print', ['orders' => $orders]),
+				$this->load->view('sale/order_detail_print', ['orders' => $orders, 'print_date' => date($this->language->get('datetime_format'))]),
 				$filename
 			);
 		} finally {
