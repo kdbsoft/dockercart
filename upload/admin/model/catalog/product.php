@@ -34,8 +34,6 @@ class ModelCatalogProduct extends Model
                 $this->db->escape($data["isbn"]) .
                 "', mpn = '" .
                 $this->db->escape($data["mpn"]) .
-                "', location = '" .
-                $this->db->escape($data["location"]) .
                 "', quantity = '" .
                 (float) $data["quantity"] .
                 "', minimum = '" .
@@ -1132,8 +1130,6 @@ class ModelCatalogProduct extends Model
                 $this->db->escape($data["isbn"]) .
                 "', mpn = '" .
                 $this->db->escape($data["mpn"]) .
-                "', location = '" .
-                $this->db->escape($data["location"]) .
                 // quantity is owned by the warehouse layer below — the cache is
                 // a SUM rewritten by recomputeTotals(), so writing it here
                 // directly would be overwritten, or (configurable products)
