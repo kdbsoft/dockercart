@@ -15,6 +15,7 @@ $_['column_order_id'] = 'Номер заказа';
 $_['column_price'] = 'Цена за ед.';
 $_['column_product'] = 'Товар';
 $_['column_quantity'] = 'Количество';
+$_['column_qty'] = 'Кол-во';
 $_['column_reference'] = 'Ссылка';
 $_['column_status'] = 'Статус';
 $_['column_tracking_number'] = 'Номер отслеживания';

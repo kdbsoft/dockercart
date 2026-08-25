@@ -164,6 +164,7 @@ $_['column_paid']                = 'Paid';
 $_['column_product']             = 'Product';
 $_['column_model']               = 'Product Code';
 $_['column_quantity']            = 'Quantity';
+$_['column_qty']                 = 'Qty';
 $_['column_price']               = 'Unit Price';
 $_['column_comment']             = 'Comment';
 $_['column_notify']              = 'Customer Notified';

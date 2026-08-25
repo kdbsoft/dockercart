@@ -137,7 +137,7 @@
                   <input type="checkbox" name="selected[]" value="{{ order.order_id }}" />
                   {% endif %}
                   <input type="hidden" name="shipping_code[]" value="{{ order.shipping_code }}" /></td>
-                <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><a href="{{ order.view }}" class="row-title-link">{{ order.order_id }}</a></td>
+                <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><a href="{{ order.view }}" class="row-title-link">{{ order.order_id }}</a>{% if order.invoice_no %}<br><small class="text-muted" style="white-space:nowrap"><span data-toggle="tooltip" title="{{ text_invoice_no }}"><i data-lucide="file-text" width="11" height="11"></i></span> {{ order.invoice_no }}</small>{% endif %}</td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
