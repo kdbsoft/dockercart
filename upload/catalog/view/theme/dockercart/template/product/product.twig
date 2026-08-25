@@ -355,8 +355,7 @@
               </div>
               <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-1.5 py-0.5 rounded-full">
                 <i data-lucide="percent" class="w-3 h-3"></i>
-                <span class="text-violet-900 text-sm font-extrabold leading-none">{{ rule.trigger_quantity }}</span>
-                <span class="font-semibold">{{ text_bxgy_trigger_pcs|default('шт.') }}</span>
+                <span class="font-semibold">{{ text_bxgy_trigger|format(rule.trigger_quantity) }}</span>
               </span>
             </div>
             <button type="button" onclick="cart.add('{{ rule.reward_product_id }}', 1);" class="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition bg-transparent hover:bg-violet-600 active:bg-violet-700 text-violet-600 hover:text-white" title="{{ button_cart }}">
