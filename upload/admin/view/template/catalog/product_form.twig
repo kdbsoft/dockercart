@@ -971,7 +971,7 @@
                       <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <div class="dc-promo-card__grid">
                         {% if is_configurable and promo_variants %}
-                        <div class="dc-promo-card__field">
+                        <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_variant }}</label>
                           <select name="product_discount[{{ promo.row_index }}][variant_id]" class="form-control">
                             {% for pv in promo_variants %}
@@ -1055,7 +1055,7 @@
                       <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
                       <div class="dc-promo-card__grid">
                         {% if is_configurable and promo_variants %}
-                        <div class="dc-promo-card__field">
+                        <div class="dc-promo-card__field dc-promo-card__field--wide">
                           <label>{{ entry_variant }}</label>
                           <select name="product_special[{{ promo.row_index }}][variant_id]" class="form-control">
                             {% for pv in promo_variants %}
@@ -1757,13 +1757,16 @@
 
   function dcUpdatePricingMode(show) {
     var $priceInput = $('#input-price');
+    var $qtyInput = $('#input-quantity');
     var textNoVariants = '{{ text_no_variants|e("js") }}';
     if (show) {
       $priceInput.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_price_range_computed|e("js") }}');
+      $qtyInput.prop('readonly', true).attr('data-toggle', 'tooltip').attr('title', '{{ help_quantity_computed|e("js") }}');
       $('#dc-cgp-field').hide();
       $priceInput.closest('#dc-price-main').find('label').find('[data-toggle="tooltip"]').tooltip({container:'body',html:true});
     } else {
       $priceInput.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
+      $qtyInput.prop('readonly', false).removeAttr('data-toggle').removeAttr('title');
       $('#dc-cgp-field').show();
       $('#dc-pricing-variants-col').hide();
       $('#dc-inventory-variants-col').hide();
@@ -2502,7 +2505,7 @@
       return '';
     }
 
-    var html = '    <div class="dc-promo-card__field">';
+    var html = '    <div class="dc-promo-card__field dc-promo-card__field--wide">';
     html += '      <label>{{ entry_variant }}</label>';
     html += '      <select name="' + inputName + '" class="form-control">';
 
