@@ -2,37 +2,33 @@
 <div class="alert alert-danger alert-dismissible">{{ error }}</div>
 {% endif %}
 {% if success %}
-<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="14" height="14"></i> {{ success }}
   <button type="button" class="close" data-dismiss="alert">&times;</button>
 </div>
 {% endif %}
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <td class="text-left">{{ column_date_added }}</td>
-      <td class="text-left">{{ column_comment }}</td>
-      <td class="text-left">{{ column_status }}</td>
-      <td class="text-left">{{ column_notify }}</td>
-    </tr>
-  </thead>
-  <tbody>
-    {% if histories %}
-    {% for history in histories %}
-    <tr>
-      <td class="text-left">{{ history.date_added }}</td>
-      <td class="text-left">{{ history.comment }}</td>
-      <td class="text-left">{{ history.status }}</td>
-      <td class="text-left">{{ history.notify }}</td>
-    </tr>
-    {% endfor %}
-    {% else %}
-    <tr>
-      <td class="text-center" colspan="4">{{ text_no_results }}</td>
-    </tr>
-    {% endif %}
-  </tbody>
-</table>
-<div class="row">
-  <div class="col-sm-6 text-left">{{ pagination }}</div>
-  <div class="col-sm-6 text-right">{{ results }}</div>
-</div>
+{% if histories %}
+  <div class="timeline-entries">
+  {% for history in histories %}
+  <div class="timeline-entry">
+    <div class="timeline-icon timeline-icon--system"><i data-lucide="refresh-cw" width="14" height="14"></i></div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <span class="timeline-status">{{ history.status }}</span>
+        <span class="timeline-date">{{ history.date_added }}</span>
+      </div>
+      {% if history.comment %}
+      <div class="timeline-comment">{{ history.comment|raw }}</div>
+      {% endif %}
+      {% if history.notify %}
+      <span class="dcx-badge dcx-badge--info" style="font-size:10px;padding:1px 5px">{{ history.notify }}</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center" style="padding:16px;color:#999;font-size:13px">{{ text_no_results }}</div>
+{% endif %}
+{% if pagination %}
+<div class="timeline-load-more">{{ pagination }}</div>
+{% endif %}
