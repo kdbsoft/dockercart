@@ -1224,14 +1224,6 @@ class ControllerCatalogProduct extends Controller {
 			$data['mpn'] = '';
 		}
 
-		if (isset($this->request->post['location'])) {
-			$data['location'] = $this->request->post['location'];
-		} elseif (!empty($product_info)) {
-			$data['location'] = $product_info['location'];
-		} else {
-			$data['location'] = '';
-		}
-
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();

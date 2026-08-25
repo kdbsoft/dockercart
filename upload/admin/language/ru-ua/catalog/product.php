@@ -49,7 +49,6 @@ $_['entry_keyword'] = 'Ключевое слово';
 $_['entry_layout'] = 'Переопределение макета';
 $_['entry_length'] = 'Длина';
 $_['entry_length_class'] = 'Класс длины';
-$_['entry_location'] = 'Расположение';
 $_['entry_manufacturer'] = 'Производитель';
 $_['entry_meta_description'] = 'Мета-описание';
 $_['entry_meta_keyword'] = 'Мета-ключевые слова';
