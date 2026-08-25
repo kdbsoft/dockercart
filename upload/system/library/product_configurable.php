@@ -212,12 +212,10 @@ class ProductConfigurable {
 
 		$product_id = (int)$variant_query->row['product_id'];
 
-		$hash_update = '';
 		$variant_hash = '';
 
 		if (isset($data['values'])) {
 			$variant_hash = $this->buildVariantHashFromValues($data['values']);
-			$hash_update = ", variant_hash = '" . $this->db->escape($variant_hash) . "'";
 
 			if ($variant_hash !== '') {
 				$conflict = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($variant_hash) . "' AND variant_id != '" . (int)$variant_id . "'");
@@ -228,19 +226,50 @@ class ProductConfigurable {
 			}
 		}
 
-		// Length/width/height are managed from the Dimensions & Weight variants
-		// table which posts them explicitly; other writers (variant matrix
-		// autosave) don't send them, so absent keys must keep current values
-		// instead of zeroing them out.
-		$dim_update = '';
+		// Partial update: only columns present in $data are written. The
+		// variant matrix autosave posts just model/status/values, while codes,
+		// pricing, quantity, weight and image are managed by their dedicated
+		// panels — absent keys must keep current values instead of zeroing
+		// them out.
+		$set = array();
 
-		foreach (array('length', 'width', 'height') as $dim_col) {
-			if (array_key_exists($dim_col, $data)) {
-				$dim_update .= ', ' . $dim_col . " = '" . (float)$data[$dim_col] . "'";
+		$int_columns = array('subtract', 'weight_class_id', 'sort_order', 'status');
+		$float_columns = array('price', 'quantity', 'weight');
+		$decimal_columns = array('length', 'width', 'height');
+
+		foreach (array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn', 'image') as $text_column) {
+			if (array_key_exists($text_column, $data)) {
+				$set[] = $text_column . " = '" . $this->db->escape((string)$data[$text_column]) . "'";
 			}
 		}
 
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', jan = '" . $this->db->escape(isset($data['jan']) ? $data['jan'] : '') . "', isbn = '" . $this->db->escape(isset($data['isbn']) ? $data['isbn'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "'" . $dim_update . ", image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "'" . $hash_update . ", sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "' WHERE variant_id = '" . (int)$variant_id . "'");
+		foreach ($float_columns as $float_column) {
+			if (array_key_exists($float_column, $data)) {
+				$set[] = $float_column . " = '" . (float)$data[$float_column] . "'";
+			}
+		}
+
+		foreach ($decimal_columns as $decimal_column) {
+			if (array_key_exists($decimal_column, $data)) {
+				$set[] = $decimal_column . " = '" . (float)$data[$decimal_column] . "'";
+			}
+		}
+
+		foreach ($int_columns as $int_column) {
+			if (array_key_exists($int_column, $data)) {
+				$set[] = $int_column . " = '" . (int)$data[$int_column] . "'";
+			}
+		}
+
+		if (isset($data['values'])) {
+			$set[] = "variant_hash = '" . $this->db->escape($variant_hash) . "'";
+		}
+
+		if (!$set) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET " . implode(', ', $set) . " WHERE variant_id = '" . (int)$variant_id . "'");
 
 		if (isset($data['values'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
@@ -250,10 +279,12 @@ class ProductConfigurable {
 			}
 		}
 
-		// The UPDATE above always rewrites quantity, so mirror its effective
-		// value onto the default warehouse as well (single write path).
-		$warehouse = new \DockercartWarehouse($this->registry);
-		$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
+		// When the update rewrote quantity, mirror its effective value onto
+		// the default warehouse as well (single write path).
+		if (array_key_exists('quantity', $data)) {
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$warehouse->setTotalQuantity((int)$product_id, (float)$data['quantity'], (int)$variant_id, array('reference' => 'variant-form'));
+		}
 
 		$this->touchProduct($product_id);
 	}
@@ -613,7 +644,7 @@ class ProductConfigurable {
 			return;
 		}
 
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET" . substr($update, 2) . " WHERE variant_id = '" . (int)$variant_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET " . substr($update, 2) . " WHERE variant_id = '" . (int)$variant_id . "'");
 
 		$this->touchProduct((int)$variant_query->row['product_id']);
 	}

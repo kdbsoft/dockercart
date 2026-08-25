@@ -931,13 +931,6 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['text_drag_to_reorder'] = $this->language->get('text_drag_to_reorder');
 
-		// Configurable-product notes shown in panel bodies when combined variants are enabled
-		$data['help_configurable_specials']    = $this->language->get('help_configurable_specials');
-		$data['help_configurable_identifiers'] = $this->language->get('help_configurable_identifiers');
-		$data['help_configurable_pricing']     = $this->language->get('help_configurable_pricing');
-		$data['help_configurable_inventory']   = $this->language->get('help_configurable_inventory');
-		$data['help_configurable_dimensions']  = $this->language->get('help_configurable_dimensions');
-
 		// Panel titles
 		$data['text_panel_description_title']    = $this->language->get('text_panel_description_title');
 		$data['text_panel_description_subtitle'] = $this->language->get('text_panel_description_subtitle');

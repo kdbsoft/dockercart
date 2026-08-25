@@ -109,7 +109,6 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-axis-info-banner" id="dc-note-configurable-identifiers" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_identifiers }}</div>
                   <div class="row">
                     <div class="col-sm-3">
                       <div class="dcx-field required">
@@ -212,7 +211,6 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-axis-info-banner" id="dc-note-configurable-pricing" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_pricing }}</div>
                   <div class="dcx-fields">
                     <div class="row">
                       <div class="col-sm-12 col-lg-6 col-xl-3">
@@ -225,9 +223,6 @@
                               <span data-toggle="tooltip" title="{{ help_call_for_price }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
-                          {% if is_configurable and price_range_text %}
-                          <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_pricing }}</div>
-                          {% endif %}
                         </div>
                       </div>
                       <div class="col-sm-12 col-lg-6 col-xl-4">
@@ -306,14 +301,12 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-axis-info-banner" id="dc-note-configurable-inventory" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_inventory }}</div>
                   <div class="dcx-fields">
                     <div class="row">
                       <div class="col-sm-12 col-lg-4 col-xl-3">
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-quantity">{{ entry_quantity }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_quantity_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
                           <input type="text" name="quantity" value="{{ quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
-                          <div class="dc-wh-hint" id="dc-wh-hint-simple"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
                           {% if reserved_quantity > 0 %}
                           <div class="dc-wh-hint dc-wh-hint--reserved"><i data-lucide="lock" width="14" height="14"></i> <span>{{ text_reserved_quantity }}: {{ reserved_quantity }}</span></div>
                           {% endif %}
@@ -352,6 +345,7 @@
                         </div>
                       </div>
                     </div>
+                    <div class="dc-wh-hint dc-wh-hint--wide" id="dc-wh-hint-simple"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
                     <div class="dcx-field" style="display:none" id="dc-inventory-variants-col">
                       <label class="dcx-label dc-inv-label"><i data-lucide="layers" width="14" height="14"></i> {{ text_variant_qty_title }} <span class="dc-inv-badge" id="dc-inv-badge">0</span><span class="dc-inv-total" id="dc-inv-total"></span>{% if reserved_quantity > 0 %}<span class="dc-inv-reserved" id="dc-inv-reserved">{{ text_reserved_quantity }}: {{ reserved_quantity }}</span>{% endif %}</label>
                       <div class="dc-axis-info-banner dc-wh-hint-banner" id="dc-note-warehouse-inventory" style="display:none"><i data-lucide="warehouse" width="14" height="14"></i> <span>{{ help_warehouse_quantity }}</span>{% if product_id %} <a href="javascript:void(0);" class="dc-wh-hint__link dc-wh-stock-link">{{ text_warehouse_stock }}</a>{% endif %}</div>
@@ -369,7 +363,6 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-axis-info-banner" id="dc-note-configurable-dimensions" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_dimensions }}</div>
                   <div class="dcx-fields">
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-length">{{ entry_dimension }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_dimension_range_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
@@ -395,18 +388,12 @@
                           </select>
                         </div>
                       </div>
-                      {% if is_configurable and dimensions_range_text %}
-                      <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_dimensions }}</div>
-                      {% endif %}
                     </div>
                     <div class="dcx-field" id="dc-weight-main">
                       <label class="dcx-label" for="input-weight">{{ entry_weight }}{% if is_configurable %} <span data-toggle="tooltip" title="{{ help_weight_range_computed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>{% endif %}</label>
                       <div class="row">
                         <div class="col-sm-6 col-lg-3">
                           <input type="text" name="weight" value="{% if is_configurable %}{% if weight_range_text %}{{ weight_range_text }}{% else %}{{ text_no_variants }}{% endif %}{% else %}{{ weight }}{% endif %}" placeholder="{{ entry_weight }}" id="input-weight" class="form-control"{% if is_configurable %} readonly="readonly"{% endif %}/>
-                          {% if is_configurable and weight_range_text %}
-                          <div class="help-block" style="font-size:12px;color:#6b7280;margin-top:4px"><i data-lucide="info" width="12" height="12"></i> {{ help_configurable_dimensions }}</div>
-                          {% endif %}
                         </div>
                         <div class="col-sm-6 col-lg-3">
                           <select name="weight_class_id" id="input-weight-class" class="form-control">
@@ -950,7 +937,6 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-axis-info-banner" id="dc-special-note-configurable" style="display:none"><i data-lucide="info" width="14" height="14"></i> {{ help_configurable_specials }}</div>
                   <div class="dc-promo-tabs" id="promo-tabs">
                     <button type="button" class="dc-promo-tab dc-promo-tab--active" data-promo-tab="discount"><i data-lucide="percent" width="12" height="12"></i><span>{{ text_promo_discount }}</span><span class="dc-promo-tab__count" id="promo-count-discount">0</span></button>
                     <button type="button" class="dc-promo-tab" data-promo-tab="special"><i data-lucide="star" width="12" height="12"></i><span>{{ text_promo_special }}</span><span class="dc-promo-tab__count" id="promo-count-special">0</span></button>
@@ -1852,19 +1838,14 @@
 
   function dcUpdateSpecialNote() {
     var notes = [
-      '#dc-note-configurable-identifiers',
-      '#dc-note-configurable-pricing',
-      '#dc-note-configurable-inventory',
-      '#dc-note-configurable-dimensions',
-      '#dc-special-note-configurable',
       '#dc-note-warehouse-inventory'
     ];
     var show = (dcOptionMode === 'combined');
     $.each(notes, function(i, selector) {
       $(selector).toggle(show);
     });
-    // Simple mode keeps the hint under the Qty field; combined mode moves it
-    // into the banner above the variant stock matrix.
+    // Simple mode keeps the hint below the inventory row; combined mode moves
+    // it into the banner above the variant stock matrix.
     $('#dc-wh-hint-simple').toggle(!show);
     dcUpdatePricingMode(show);
   }
@@ -2963,9 +2944,6 @@
 
     if (prevVid) {
       $.post('index.php?route=catalog/product_configurable/saveVariantImage&user_token={{ user_token }}', {product_id: getDcProductId(), variant_id: prevVid, image: ''}, function() {}, 'json');
-      if (typeof syncMatrixVariantThumb === 'function') {
-        syncMatrixVariantThumb(prevVid, '', '{{ placeholder|e("js") }}');
-      }
     }
 
     $card.remove();
@@ -3300,6 +3278,8 @@ function escapeHtml(text) {
 <style>
 .dc-wh-hint { display:flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; color:#868e96; line-height:1.4; }
 .dc-wh-hint svg { flex-shrink:0; color:#868e96; }
+.dc-wh-hint--wide { max-width:95%; }
+@media (max-width: 767px) { .dc-wh-hint--wide { max-width:100%; } }
 .dc-wh-hint__link { white-space:nowrap; }
 .dcx-field .dc-axis-info-banner.dc-wh-hint-banner { margin:6px 0 0; flex-wrap:wrap; }
 .dc-wh-hint-banner svg { color:#1e40af; }
