@@ -1188,6 +1188,7 @@ class ControllerSaleReturn extends Controller {
 
 		foreach ($results as $result) {
 			$data['histories'][] = array(
+				'return_status_id' => (int)$result['return_status_id'],
 				'notify'     => $result['notify'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
 				'status'     => $result['status'],
 				'comment'    => nl2br($result['comment']),
