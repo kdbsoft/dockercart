@@ -653,6 +653,14 @@ class DockercartWarehouse {
 		$sentinel = (int)(string)self::UNLIMITED;
 		$is_configurable = $this->isConfigurableProduct($product_id);
 
+		// Cache invalidation stamp: when the recompute actually changes cached
+		// values, oc_product.date_modified is bumped so the Redis product cache
+		// (getProduct()/getProductsByIds(), keyed on the date_modified stamp)
+		// rotates for every warehouse write path — orders, stock matrix edits,
+		// transfers, supplier orders. Catalog-side paths already touch via
+		// ProductConfigurable::touchProduct().
+		$before = $this->getCachedQuantities($product_id);
+
 		// Sum per variant across warehouses (join for variant status).
 		$variant_rows = $this->db->query("SELECT ws.`variant_id`, MIN(ws.`unlimited`) AS has_unlimited, SUM(ws.`quantity`) AS total, MAX(pv.`status`) AS variant_status FROM `" . DB_PREFIX . "warehouse_stock` ws LEFT JOIN `" . DB_PREFIX . "product_variant` pv ON (pv.`variant_id` = ws.`variant_id`) WHERE ws.`product_id` = '" . (int)$product_id . "' GROUP BY ws.`variant_id`");
 
@@ -719,6 +727,16 @@ class DockercartWarehouse {
 			}
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "product_variant` SET `quantity` = '" . (float)$info['total'] . "' WHERE `variant_id` = '" . (int)$vid . "'");
+		}
+
+		$after = $this->getCachedQuantities($product_id);
+
+		foreach ($after as $vid => $qty) {
+			if (!isset($before[$vid]) || abs((float)$before[$vid] - (float)$qty) > 0.0001) {
+				$this->db->query("UPDATE `" . DB_PREFIX . "product` SET `date_modified` = NOW() WHERE `product_id` = '" . $product_id . "'");
+
+				break;
+			}
 		}
 	}
 
