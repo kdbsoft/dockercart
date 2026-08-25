@@ -119,10 +119,10 @@
                     <input type="hidden" name="products[{{ loop.index0 }}][ordered]" value="{{ rp.ordered }}" />
                     <input type="hidden" name="products[{{ loop.index0 }}][price]" value="{{ rp.price }}" />
                     <label class="return-item-row__check">
-                      <input type="checkbox" class="return-item-check" {% if rp.checked %}checked{% endif %} onchange="returnItemChanged(this)" />
+                      <input type="checkbox" class="return-item-check" name="products[{{ loop.index0 }}][checked]" value="1" {% if rp.checked %}checked{% endif %} onchange="returnItemChanged(this)" />
                     </label>
                     <span class="return-item-row__name">{{ rp.name }}{% if rp.model %} <span class="text-muted">({{ rp.model }})</span>{% endif %}</span>
-                    <input type="number" class="form-control return-item-qty" min="0" max="{{ rp.ordered }}" value="{{ rp.quantity }}" {% if not rp.checked %}disabled{% endif %} onchange="returnItemChanged(this)" oninput="returnItemChanged(this)" />
+                    <input type="number" class="form-control return-item-qty" name="products[{{ loop.index0 }}][quantity]" min="0" max="{{ rp.ordered }}" value="{{ rp.quantity }}" {% if not rp.checked %}disabled{% endif %} onchange="returnItemChanged(this)" oninput="returnItemChanged(this)" />
                     <span class="return-item-row__ordered">/ {{ rp.ordered }}</span>
                   </div>
                   {% endfor %}
@@ -493,6 +493,9 @@ $('.date').datetimepicker({
 .timeline-entry:last-child { border-bottom:none; }
 .timeline-icon { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .timeline-icon--system { background:#e8f4fd; color:#2563eb; }
+.timeline-icon--pending { background:#fef9ec; color:#b45309; }
+.timeline-icon--awaiting { background:#f3e8ff; color:#7c3aed; }
+.timeline-icon--complete { background:#e8f8ee; color:#16a34a; }
 .timeline-content { flex:1; min-width:0; }
 .timeline-header { display:flex; justify-content:space-between; gap:8px; font-size:11px; }
 .timeline-status { min-width:0; overflow:hidden; font-weight:500; text-overflow:ellipsis; white-space:nowrap; }
