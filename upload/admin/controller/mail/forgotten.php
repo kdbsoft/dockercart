@@ -7,7 +7,16 @@ class ControllerMailForgotten extends Controller {
 		
 		$data['reset'] = str_replace('&amp;', '&', $this->url->link('common/reset', 'code=' . $args[1], true));
 		$data['ip'] = $this->request->server['REMOTE_ADDR'];
-		
+
+		$data['text_button_reset'] = $this->language->get('text_button_reset');
+		$data['store_name'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+		$data['store_url'] = HTTP_CATALOG;
+		$data['logo'] = '';
+
+		if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$data['logo'] = HTTP_CATALOG . 'image/' . $this->config->get('config_logo');
+		}
+
 		$mail = new Mail($this->config->get('config_mail_engine'));
 		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
@@ -24,7 +33,7 @@ class ControllerMailForgotten extends Controller {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')), ENT_QUOTES, 'UTF-8'));
-		$mail->setText($this->load->view('mail/forgotten', $data));
+		$mail->setHtml($this->load->view('mail/forgotten', $data));
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};

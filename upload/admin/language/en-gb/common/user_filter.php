@@ -26,6 +26,7 @@ $_['text_to']                 = 'To';
 $_['button_save']             = 'Save';
 $_['button_cancel']           = 'Cancel';
 $_['button_remove']           = 'Remove';
+$_['button_clear_search']     = 'Clear search';
 
 $_['error_permission']        = 'Warning: You do not have permission to modify this!';
 $_['error_action']            = 'Warning: Could not complete this action!';

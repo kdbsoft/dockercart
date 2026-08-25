@@ -427,18 +427,6 @@ class ControllerSettingStore extends Controller {
 			$data['config_comment'] = '';
 		}
 
-		$this->load->model('localisation/location');
-
-		$data['locations'] = $this->model_localisation_location->getLocations();
-
-		if (isset($this->request->post['config_location'])) {
-			$data['config_location'] = $this->request->post['config_location'];
-		} elseif (isset($store_info['config_location'])) {
-			$data['config_location'] = $store_info['config_location'];
-		} else {
-			$data['config_location'] = array();
-		}
-
 		if (isset($this->request->post['config_country_id'])) {
 			$data['config_country_id'] = $this->request->post['config_country_id'];
 		} elseif (isset($store_info['config_country_id'])) {

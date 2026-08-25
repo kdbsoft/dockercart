@@ -1,0 +1,101 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  {% set type_badges = {
+    'inbound': 'label-success',
+    'outbound': 'label-danger',
+    'adjustment': 'label-warning',
+    'transfer_in': 'label-info',
+    'transfer_out': 'label-info',
+    'order_subtract': 'label-default',
+    'order_restock': 'label-primary',
+    'return': 'label-primary'
+  } %}
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+            <span class="page-header__title">{{ heading_title }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="dcx-shell">
+      <div class="dcx-context-bar">
+        <div class="dcx-context-bar__icon"><i data-lucide="package" width="20" height="20"></i></div>
+        <div class="dcx-context-bar__meta">
+          <div class="dcx-context-bar__title">{{ position_product ?: ('#' ~ position_product_id) }}</div>
+          <div class="dcx-context-bar__subtitle">
+            {% if position_model %}<span class="dcx-context-bar__meta-item"><i data-lucide="tag" width="12" height="12"></i>{{ position_model }}</span>{% endif %}
+            {% if position_variant_sku %}<span class="dcx-context-bar__meta-item"><i data-lucide="barcode" width="12" height="12"></i>{{ position_variant_sku }}</span>{% endif %}
+            {% if warehouse_name %}<span class="dcx-context-bar__meta-item"><i data-lucide="warehouse" width="12" height="12"></i>{{ warehouse_name }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="dcx-context-bar__balance">
+          <span class="dcx-context-bar__balance-label">{{ entry_balance }}</span>
+          <span class="dcx-context-bar__balance-value dcx-context-bar__balance-value--{% if final_balance > 0 %}success{% elseif final_balance < 0 %}danger{% else %}muted{% endif %}">{{ final_balance }}</span>
+        </div>
+      </div>
+      {% if lines %}
+      <div class="dcx-kpis">
+        <div class="dcx-kpi dcx-stat-card dcx-stat-card--success">
+          <div class="dcx-kpi__head"><i data-lucide="package-plus" width="15" height="15"></i><span>{{ text_summary_inbound }}</span></div>
+          <div class="dcx-kpi__value">+{{ summary.inbound }}</div>
+          <div class="dcx-kpi__sub">{{ text_summary_units_in }}</div>
+        </div>
+        <div class="dcx-kpi dcx-stat-card dcx-stat-card--danger">
+          <div class="dcx-kpi__head"><i data-lucide="package-minus" width="15" height="15"></i><span>{{ text_summary_outbound }}</span></div>
+          <div class="dcx-kpi__value">&minus;{{ summary.outbound }}</div>
+          <div class="dcx-kpi__sub">{{ text_summary_units_out }}</div>
+        </div>
+        <div class="dcx-kpi dcx-stat-card{% if summary.net_positive %} dcx-stat-card--success{% elseif summary.net_negative %} dcx-stat-card--danger{% endif %}">
+          <div class="dcx-kpi__head"><i data-lucide="scale" width="15" height="15"></i><span>{{ text_summary_net }}</span></div>
+          <div class="dcx-kpi__value">{{ summary.net_sign }}{{ summary.net }}</div>
+          <div class="dcx-kpi__sub">{{ text_summary_net_sub }}</div>
+        </div>
+        <div class="dcx-kpi dcx-stat-card dcx-stat-card--info">
+          <div class="dcx-kpi__head"><i data-lucide="activity" width="15" height="15"></i><span>{{ text_summary_movements }}</span></div>
+          <div class="dcx-kpi__value">{{ summary.total }}</div>
+          <div class="dcx-kpi__sub">{{ text_summary_entries }}</div>
+        </div>
+      </div>
+      {% endif %}
+      <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <td>{{ column_date }}</td>
+                <td>{{ column_warehouse }}</td>
+                <td>{{ column_type }}</td>
+                <td class="text-right">{{ column_quantity }}</td>
+                <td class="text-right">{{ entry_balance }}</td>
+                <td>{{ column_reference }}</td>
+                <td>{{ column_comment }}</td>
+              </tr>
+            </thead>
+            <tbody>
+              {% if lines %}
+              {% for line in lines %}
+              <tr{% if loop.last %} style="background:var(--dc-surface-alt);"{% endif %}>
+                <td class="text-left text-nowrap">{{ line.date }}</td>
+                <td class="text-left">{{ line.warehouse }}</td>
+                <td class="text-left"><span class="label {{ type_badges[line.type_key]|default('label-default') }}">{{ line.type }}</span></td>
+                <td class="text-right">{% if line.quantity > 0 %}<span class="label label-success">+{{ line.quantity }}</span>{% else %}<span class="label label-danger">{{ line.quantity }}</span>{% endif %}</td>
+                <td class="text-right"><strong>{{ line.balance }}</strong></td>
+                <td class="text-left">{% if line.reference %}{{ line.reference }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+                <td class="text-left">{% if line.comment %}{{ line.comment }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              {% include 'common/empty_state.twig' with { icon: 'warehouse_movement', colspan: 7 } %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

@@ -15,3 +15,4 @@ $_['text_telephone'] = 'Телефон:';
 $_['text_thanks'] = 'Спасибо,';
 $_['text_website'] = 'Веб-сайт:';
 $_['text_welcome'] = 'Спасибо за участие в партнерской программе %s!';
+$_['text_button_login'] = 'Войти';

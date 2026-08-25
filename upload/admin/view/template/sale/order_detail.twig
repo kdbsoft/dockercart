@@ -10,6 +10,9 @@
               {{ heading_title }}
               <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
               <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
+              {% if shipping_status %}
+              <span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span>
+              {% endif %}
             </span>
           </a>
           <div class="pull-right" id="header-actions">
@@ -125,6 +128,18 @@
                       {% for option in product.option %}
                         <span class="order-product-card__option">· {{ option.name }}: {{ option.value }}</span>
                       {% endfor %}
+                    {% endif %}
+                    {% if warehouses %}
+                      <span class="order-product-card__option warehouse-line">
+                        · <i data-lucide="warehouse" width="12" height="12"></i>
+                        <span class="warehouse-name" data-warehouse-id="{{ product.warehouse_id }}"><span class="warehouse-name__text">{{ product.warehouse ? product.warehouse : '-' }}</span> <i data-lucide="chevron-down" width="10" height="10" class="warehouse-caret"></i></span>
+                        <select class="form-control input-xs warehouse-move-select" style="display:none;width:auto;" data-order-product-id="{{ product.order_product_id }}" data-order-id="{{ product.order_id is defined ? product.order_id : order_id }}">
+                          <option value="">{{ text_move_warehouse }}</option>
+                          {% for warehouse in warehouses %}
+                          <option value="{{ warehouse.warehouse_id }}"{% if warehouse.warehouse_id == product.warehouse_id %} selected{% endif %}>{{ warehouse.name }}</option>
+                          {% endfor %}
+                        </select>
+                      </span>
                     {% endif %}
                   </div>
                   {% if product.discount_percent > 0 %}
@@ -600,6 +615,10 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-product-card__meta { font-size:11px; color:#888; margin-top:1px; }
 .order-product-card__model { color:#999; }
 .order-product-card__option { color:#888; }
+.order-product-card__meta .warehouse-line { cursor:pointer; }
+.warehouse-line .warehouse-name { display:inline-flex; align-items:center; gap:2px; }
+.warehouse-line:hover .warehouse-name { color:#2563eb; }
+.warehouse-caret { opacity:.55; }
 .order-product-card__discount { font-size:11px; color:#e65100; margin-top:1px; }
 .order-product-card__price { width:90px; text-align:right; font-size:13px; color:#555; }
 .order-product-card__price input { width:90px; text-align:center; }
@@ -813,6 +832,9 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .dcx-shipment-item__items { margin-top:4px; display:flex; flex-direction:column; gap:2px; }
 .dcx-shipment-item__line { font-size:11px; color:#555; }
 .dcx-shipment-progress { margin-top:12px; border-top:1px solid #f0f0f0; padding-top:12px; }
+.dcx-shipment-status { display:flex; align-items:center; gap:8px; }
+.dcx-shipment-status__count { font-size:12px; font-weight:600; color:#2563eb; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.dcx-shipment-status .payment-progress { flex:1; margin-top:0; }
 .dcx-shipment-progress__row { margin-top:6px; font-size:12px; }
 .dcx-shipment-progress__name { color:#374151; font-weight:500; display:block; margin-bottom:2px; }
 .dcx-shipment-progress__count { color:#2563eb; font-weight:600; font-size:11px; }
@@ -1708,7 +1730,7 @@ function confirmFlowTransition() {
 			'POST', { tracking_number: tracking, comment: '', items: JSON.stringify(items), notify: notify ? '1' : '0' })
 			.then(j => {
 				if (j.success) {
-					if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+					if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 					doTransition(false);
 				} else if (j.error) {
 					showAlert(j.error, 'danger');
@@ -1719,10 +1741,28 @@ function confirmFlowTransition() {
 	}
 }
 
-function refreshShipmentsCard(html) {
+function refreshShipmentsCard(html, j) {
 	const container = document.getElementById('shipments-card');
 	if (container && html) container.innerHTML = html;
+	if (j) updateHeaderShippingBadge(j);
 	lucide.createIcons();
+}
+
+function updateHeaderShippingBadge(j) {
+	let badge = document.getElementById('header-shipping-badge');
+	if (!badge && j.shipping_status) {
+		badge = document.createElement('span');
+		badge.id = 'header-shipping-badge';
+		const payment = document.querySelector('.page-header__title .page-header__badge:nth-of-type(2)');
+		if (payment) payment.after(badge); else return;
+	}
+	if (!badge) return;
+	if (!j.shipping_status) {
+		badge.remove();
+		return;
+	}
+	badge.className = 'page-header__badge ' + j.shipping_status_header_badge_class;
+	badge.textContent = j.shipping_status_text;
 }
 
 function addShipment() {
@@ -1746,7 +1786,7 @@ function addShipment() {
 		'POST', { tracking_number: tracking, comment: comment, items: JSON.stringify(items), notify: notify ? '1' : '0' })
 		.then(j => {
 			if (j.success) {
-				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 				showAlert(j.success);
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
@@ -1760,7 +1800,7 @@ function deleteShipment(shipmentId) {
 		'POST', { shipment_id: shipmentId })
 		.then(j => {
 			if (j.success) {
-				if (j.shipments_html) refreshShipmentsCard(j.shipments_html);
+				if (j.shipments_html) refreshShipmentsCard(j.shipments_html, j);
 				showAlert(j.success);
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
@@ -2969,4 +3009,60 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 <div id="pcm-overlay" class="pcm-overlay" style="display:none"></div>
+<script type="text/javascript"><!--
+// Warehouse: reveal the move-to-warehouse selector, then submit the move.
+function warehouseCloseSelect($select) {
+	var $name = $select.closest('.warehouse-line').find('.warehouse-name');
+	var currentId = String($name.attr('data-warehouse-id') || '0');
+	$select.val(currentId !== '0' && currentId !== '' ? currentId : '').hide();
+	$name.show();
+}
+$(document).on('click', '.warehouse-line .warehouse-name', function() {
+	var $name = $(this);
+	var $select = $name.closest('.warehouse-line').find('.warehouse-move-select');
+	if ($select.is(':visible')) {
+		warehouseCloseSelect($select);
+		return;
+	}
+	$('.warehouse-move-select').filter(':visible').each(function() { warehouseCloseSelect($(this)); });
+	var currentId = String($name.attr('data-warehouse-id') || '0');
+	$select.val(currentId !== '0' && currentId !== '' ? currentId : '');
+	$name.hide();
+	$select.show();
+});
+$(document).on('click', function(e) {
+	if ($(e.target).closest('.warehouse-line').length) {
+		return;
+	}
+	$('.warehouse-move-select').filter(':visible').each(function() { warehouseCloseSelect($(this)); });
+});
+$(document).on('change', '.warehouse-move-select', function() {
+	var $select = $(this);
+	var warehouseId = $select.val();
+	if (!warehouseId) { warehouseCloseSelect($select); return; }
+
+	var $name = $select.closest('.warehouse-line').find('.warehouse-name');
+	if (String(warehouseId) === String($name.attr('data-warehouse-id'))) { warehouseCloseSelect($select); return; }
+
+	$.ajax({
+		url: '{{ move_warehouse_url }}',
+		type: 'post',
+		dataType: 'json',
+		data: {
+			order_id: $select.data('order-id'),
+			order_product_id: $select.data('order-product-id'),
+			warehouse_id: warehouseId
+		},
+		success: function(json) {
+			if (json['error']) { alert(json['error']); return; }
+			$name.attr('data-warehouse-id', json['warehouse_id']);
+			$name.find('.warehouse-name__text').text(json['warehouse_name']);
+			$select.val(String(json['warehouse_id']));
+			warehouseCloseSelect($select);
+			if (window.lucide) lucide.createIcons();
+		},
+		error: function() { alert('{{ text_warehouse_move_failed }}'); }
+	});
+});
+//--></script>
 {{ footer }}

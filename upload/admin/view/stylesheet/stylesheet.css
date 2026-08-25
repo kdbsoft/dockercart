@@ -106,6 +106,11 @@ a {
     color: var(--dc-yellow-700, #b45309);
 }
 
+.page-header__badge--pending {
+    background: var(--dc-amber-500);
+    color: #fff;
+}
+
 .page-header__badge--danger {
     background: var(--dc-red-100);
     color: var(--dc-red-800);
@@ -114,6 +119,11 @@ a {
 .page-header__badge--default {
     background: var(--dc-gray-900, #111827);
     color: #fff;
+}
+
+.page-header__badge--info {
+    background: var(--dc-blue-100, #dbeafe);
+    color: var(--dc-blue-700, #1d4ed8);
 }
 
 .page-header__badge--unfilled::before {
@@ -2389,6 +2399,13 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     color: var(--dc-text-dark);
 }
 
+.lang-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dc-text-muted);
+    white-space: nowrap;
+}
+
 .well.filter {
     background-color: var(--dc-surface)fff;
 }
@@ -2543,6 +2560,28 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     pointer-events: none;
     animation: spin 1s linear infinite;
     z-index: 2;
+}
+
+.search-input-wrap.has-value .order-search-spinner {
+    right: 30px;
+}
+
+.order-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    padding: 4px;
+    line-height: 0;
+    color: var(--dc-text-muted);
+    cursor: pointer;
+    z-index: 3;
+}
+
+.order-search-clear:hover {
+    color: var(--dc-text-dark, #1f2937);
 }
 
 .order-search-dropdown {
@@ -3646,6 +3685,34 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .dc-option-section__body > .form-group {
     margin-bottom: 10px;
+}
+
+.dc-option-section--collapsed .dc-option-section__header {
+    border-bottom: none;
+    border-radius: 4px;
+}
+
+.dc-option-section__values {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 55%;
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--dc-gray-600);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .dc-option-section__values {
+        max-width: 100%;
+        white-space: normal;
+        flex-basis: 100%;
+        margin-left: 0;
+        margin-top: 4px;
+    }
 }
 
 /* Admin Search Bar */

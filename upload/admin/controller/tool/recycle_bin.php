@@ -232,7 +232,7 @@ class ControllerToolRecycleBin extends Controller
                 'entity_label'  => $this->language->get($label),
                 'name'          => $result['name'],
                 'deleted_by'    => $result['deleted_username'] !== null ? $result['deleted_username'] : $this->language->get('text_unknown_user'),
-                'deleted_at'    => $result['deleted_at'],
+                'deleted_at'    => $result['deleted_at'] ? date($this->language->get('datetime_format'), strtotime($result['deleted_at'])) : '',
                 'restore'       => $this->url->link('tool/recycle_bin/restore', 'user_token=' . $this->session->data['user_token'] . '&trash_id=' . $result['trash_id'], true),
                 'purge'         => $this->url->link('tool/recycle_bin/purge', 'user_token=' . $this->session->data['user_token'] . '&trash_id=' . $result['trash_id'], true),
             );

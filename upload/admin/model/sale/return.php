@@ -330,15 +330,36 @@ class ModelSaleReturn extends Model {
 		$order_id = (int)$return_info['order_id'];
 		$products = $this->getReturnProducts($return_id);
 
-		// Restock
+		// Restock: single write path through the warehouse source of truth.
 		if ($restock) {
-		foreach ($products as $product) {
-			$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE product_id = '" . (int)$product['product_id'] . "' AND subtract = '1'");
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-			if ((int)$product['variant_id'] > 0) {
-				$this->db->query("UPDATE `" . DB_PREFIX . "product_variant` SET quantity = (quantity + " . (float)$product['quantity'] . ") WHERE variant_id = '" . (int)$product['variant_id'] . "' AND subtract = '1'");
+			foreach ($products as $product) {
+				if (!$warehouse->tracksStock((int)$product['product_id'], (int)$product['variant_id'])) {
+					continue;
+				}
+
+				$warehouse_id = $default_warehouse_id;
+
+				// Return to the warehouse the original order line came from.
+				if (!empty($product['order_product_id'])) {
+					$op = $this->db->query("SELECT `warehouse_id` FROM `" . DB_PREFIX . "order_product` WHERE `order_product_id` = '" . (int)$product['order_product_id'] . "'");
+
+					if ($op->num_rows && (int)$op->row['warehouse_id'] > 0) {
+						$warehouse_id = (int)$op->row['warehouse_id'];
+					}
+				}
+
+				$warehouse->adjustStock(
+					$warehouse_id,
+					(int)$product['product_id'],
+					(int)$product['variant_id'],
+					(float)$product['quantity'],
+					'return',
+					['order_id' => (int)$order_id, 'reference' => 'return-' . (int)$return_id]
+				);
 			}
-		}
 		}
 
 		$this->cache->delete('product');
@@ -376,7 +397,7 @@ class ModelSaleReturn extends Model {
 			$limit = 10;
 		}
 
-		$query = $this->db->query("SELECT rh.date_added, rs.name AS status, rh.comment, rh.notify FROM " . DB_PREFIX . "return_history rh LEFT JOIN " . DB_PREFIX . "return_status rs ON rh.return_status_id = rs.return_status_id WHERE rh.return_id = '" . (int)$return_id . "' AND rs.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY rh.date_added DESC LIMIT " . (int)$start . "," . (int)$limit);
+		$query = $this->db->query("SELECT rh.date_added, rs.return_status_id, rs.name AS status, rh.comment, rh.notify FROM " . DB_PREFIX . "return_history rh LEFT JOIN " . DB_PREFIX . "return_status rs ON rh.return_status_id = rs.return_status_id WHERE rh.return_id = '" . (int)$return_id . "' AND rs.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY rh.date_added DESC LIMIT " . (int)$start . "," . (int)$limit);
 
 		return $query->rows;
 	}

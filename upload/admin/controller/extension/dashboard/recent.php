@@ -76,6 +76,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 		$data['text_no_products']     = $this->language->get('text_no_products');
 		$data['text_no_results']      = $this->language->get('text_no_results');
 		$data['text_view']            = $this->language->get('text_view');
+		$data['text_shipping_status'] = $this->language->get('text_shipping_status');
 		$data['user_token']           = $this->session->data['user_token'];
 		$data['orders_link']          = $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true);
 
@@ -118,6 +119,8 @@ class ControllerExtensionDashboardRecent extends Controller {
 			}
 		}
 
+		$order_shipping_sums = $this->model_sale_order->getShippingSumsByOrderIds($order_ids);
+
 		$processing_statuses = (array)$this->config->get('config_processing_status');
 		$complete_statuses   = (array)$this->config->get('config_complete_status');
 		$fraud_status        = (int)$this->config->get('config_fraud_status_id');
@@ -130,6 +133,9 @@ class ControllerExtensionDashboardRecent extends Controller {
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+
+			$shipping_sums = isset($order_shipping_sums[(int)$order_id]) ? $order_shipping_sums[(int)$order_id] : array('ordered' => 0, 'shipped' => 0);
+			$shipping_status = $this->model_sale_order->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
 
 			// Products summary
 			$products = isset($order_products[$order_id]) ? $order_products[$order_id] : array();
@@ -164,6 +170,9 @@ class ControllerExtensionDashboardRecent extends Controller {
 				'payment_status'            => $payment_status,
 				'payment_status_text'       => $this->language->get('text_payment_status_' . $payment_status),
 				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
+				'shipping_status'           => $shipping_status,
+				'shipping_status_text'      => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
+				'shipping_status_badge_class' => $this->getShippingStatusBadgeClass($shipping_status),
 				'date_added'                => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'total'                     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
 				'view'                      => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true),
@@ -236,6 +245,17 @@ class ControllerExtensionDashboardRecent extends Controller {
 				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 			case 'overpaid':
 				return 'page-header__badge page-header__badge--danger';
+			default:
+				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+		}
+	}
+
+	private function getShippingStatusBadgeClass($shipping_status) {
+		switch ($shipping_status) {
+			case 'shipped':
+				return 'page-header__badge page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge page-header__badge--warning page-header__badge--unfilled';
 			default:
 				return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
 		}

@@ -1,9 +1,17 @@
-{{ text_greeting }}
-
-{{ text_change }}
-
-{{ reset }}
-
-{{ text_ip }} 
-
-{{ ip }}
+{% include 'mail/partials/_head.twig' %}
+{% include 'mail/partials/_header.twig' %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_greeting }}</p>
+            <p style="margin: 0 0 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_change }}</p>
+            {% include 'mail/partials/_button.twig' with {href: reset, label: text_button_reset|default(reset)} %}
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td bgcolor="#f9fafb" style="padding: 14px 16px; border-radius: 6px;">
+                  <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; line-height: 20px; color: #6b7280;">{{ text_ip }} <span style="font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; color: #111827;">{{ ip }}</span></p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+{% include 'mail/partials/_footer.twig' %}

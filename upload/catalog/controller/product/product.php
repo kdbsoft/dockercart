@@ -408,12 +408,37 @@ class ControllerProductProduct extends Controller {
 			$data['points'] = $product_info['points'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
-			if ($product_info['quantity'] <= 0) {
+			// Reservation-aware "in stock" figure: active checkout holds of
+			// other buyers (their sessions) are subtracted, so the badge never
+			// promises stock that is locked in a checkout flow.
+			$display_quantity = (float)$product_info['quantity'];
+			$stock_reservation = new \DockercartStockReservation($this->registry);
+
+			if ($stock_reservation->isEnabled()) {
+				$reserved_qty = 0.0;
+				$reserved_map = $stock_reservation->getReservedByProductIds([(int)$product_info['product_id']]);
+
+				if (!empty($product_info['is_configurable']) && !empty($product_info['default_variant_id'])) {
+					// The page shows the default variant's stock: only its
+					// own holds count.
+					$reserved_qty = (float)($reserved_map[(int)$product_info['product_id'] . ':' . (int)$product_info['default_variant_id']] ?? 0);
+				} else {
+					foreach ($reserved_map as $key => $qty) {
+						if ((int)strtok($key, ':') === (int)$product_info['product_id']) {
+							$reserved_qty += (float)$qty;
+						}
+					}
+				}
+
+				$display_quantity = max(0.0, $display_quantity - $reserved_qty);
+			}
+
+			if ($display_quantity <= 0) {
 				$data['stock'] = $product_info['preorder']
 					? $this->language->get('text_preorder')
 					: $this->language->get('text_out_of_stock');
 			} elseif ($this->config->get('config_stock_display')) {
-				$data['stock'] = $product_info['quantity'];
+				$data['stock'] = $display_quantity;
 			} else {
 				$data['stock'] = $this->language->get('text_instock');
 			}
@@ -421,13 +446,64 @@ class ControllerProductProduct extends Controller {
 			// "In stock" label for the JS variant switcher
 			$data['stock_status_instock'] = $this->language->get('text_instock');
 
-			$data['is_in_stock'] = ((int)$product_info['quantity'] > 0) || !empty($product_info['preorder']);
-			$data['is_preorder'] = empty($product_info['quantity']) && !empty($product_info['preorder']);
+			$data['is_in_stock'] = ($display_quantity > 0) || !empty($product_info['preorder']);
+			$data['is_preorder'] = empty($display_quantity) && !empty($product_info['preorder']);
 
 			$data['is_discontinued'] = !empty($product_info['discontinued'])
 				&& (float)$product_info['quantity'] <= 0
 				&& (empty($product_info['is_configurable']) || (int)($product_info['variants_in_stock'] ?? 0) === 0);
 			$data['text_discontinued'] = $this->language->get('text_discontinued');
+
+			// Warehouse availability (multi-warehouse feature).
+			$data['warehouse_enabled'] = (bool)$this->config->get('config_warehouse_enabled');
+
+			if ($data['warehouse_enabled'] && ($this->config->get('config_warehouse_stock_display') || $this->config->get('config_warehouse_show_pickup'))) {
+				$warehouse = new \DockercartWarehouse($this->registry);
+
+				if (!empty($product_info['is_configurable']) && !empty($product_info['default_variant_id'])) {
+					$warehouse_variant_id = (int)$product_info['default_variant_id'];
+				} else {
+					$warehouse_variant_id = 0;
+				}
+
+				$data['warehouse_stock'] = [];
+
+				foreach ($warehouse->getWarehouses() as $wh) {
+					$available = $warehouse->getAvailableForLine((int)$product_info['product_id'], $warehouse_variant_id, (int)$wh['warehouse_id']);
+
+					$unlimited = $available >= PHP_FLOAT_MAX * 0.5;
+
+					if ($wh['type'] === 'dropship') {
+						// Advertise supplier sourcing only when the product
+						// actually has an unlimited/stocked row here AND
+						// dropship checkout is enabled — otherwise the line
+						// can never be fulfilled from this warehouse.
+						if ((!$unlimited && $available <= 0) || !$this->config->get('config_warehouse_dropship_checkout')) {
+							continue;
+						}
+
+						$display_name = sprintf($this->language->get('text_warehouse_dropship'), (int)$wh['warehouse_id']);
+					} else {
+						$display_name = (string)$wh['name'];
+					}
+
+					$data['warehouse_stock'][] = [
+						'warehouse_id' => (int)$wh['warehouse_id'],
+						'name' => $display_name,
+						'type' => (string)$wh['type'],
+						'quantity' => $unlimited ? null : (float)$available,
+						'unlimited' => $unlimited,
+						'lead_time' => (int)$wh['supplier_lead_time'],
+						'allow_pickup' => (bool)$wh['allow_pickup'],
+					];
+				}
+
+				$data['text_in_stock'] = $this->language->get('text_instock');
+				$data['text_out_of_stock'] = $this->language->get('text_out_of_stock');
+				$data['text_warehouse_available'] = $this->language->get('text_warehouse_available');
+				$data['text_warehouse_pickup'] = $this->language->get('text_warehouse_pickup');
+				$data['text_warehouse_lead'] = $this->language->get('text_warehouse_lead');
+			}
 
 			$this->load->model('tool/image');
 
@@ -1203,14 +1279,20 @@ class ControllerProductProduct extends Controller {
 
 						$data['dc_base_price_value'] = $sv_base_price;
 						$data['dc_full_price_value'] = $sv_full_price;
-						$data['price'] = $this->currency->format($sv_full_price, $this->session->data['currency']);
+						// Variant prices above are already tax-included display
+						// values (converted by Currency::format(..., false) in
+						// the variants loop), so format them with rate 1 —
+						// passing no rate would apply the currency value a
+						// second time (e.g. 0.20 USD → $0.00).
+						$data['price'] = $this->currency->format($sv_full_price, $this->session->data['currency'], 1);
 
 						if (isset($selected_variant['special'])) {
 							$sv_special = (float)$selected_variant['special'];
-							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency']);
+							$data['special'] = $this->currency->format($sv_special, $this->session->data['currency'], 1);
 							$data['you_save_amount'] = $this->currency->format(
 								$sv_full_price - $sv_special,
-								$this->session->data['currency']
+								$this->session->data['currency'],
+								1
 							);
 
 							// Скидка выбранного варианта (спеццена против полной

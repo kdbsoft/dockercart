@@ -50,7 +50,8 @@
                 <div class="dcx-fields">
                   <div class="dcx-field required">
                     <label class="dcx-label">{{ entry_name }}</label>
-                    <ul class="nav nav-tabs" style="margin-bottom:10px;">
+                    <div class="dc-lang-frame">
+                    <ul class="nav nav-tabs">
                       {% for language in languages %}
                       <li{% if loop.first %} class="active"{% endif %}><a href="#name-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                       {% endfor %}
@@ -61,6 +62,7 @@
                         <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
                       </div>
                       {% endfor %}
+                    </div>
                     </div>
                     {% if error_name %}
                     <div class="text-danger">{{ error_name }}</div>

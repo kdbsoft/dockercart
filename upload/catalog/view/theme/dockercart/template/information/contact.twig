@@ -279,62 +279,6 @@
       </div>
       {% endif %}
 
-      {# ── Additional locations ── #}
-      {% if locations %}
-      <div class="mb-6">
-        <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3 px-1">{{ text_store }}</p>
-        <div class="space-y-3" id="accordion-locations">
-          {% for location in locations %}
-          <details class="bg-white rounded-2xl border border-gray-100 shadow-sm group">
-            <summary class="flex items-center justify-between px-5 py-4 cursor-pointer list-none font-semibold text-gray-800 text-sm">
-              {{ location.name }}
-              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"></i>
-            </summary>
-            <div class="px-5 pb-5 border-t border-gray-50">
-              <div class="flex flex-col sm:flex-row gap-6 pt-4">
-                {% if location.image %}
-                <div class="flex-shrink-0">
-                  <img src="{{ location.image }}" alt="{{ location.name }}" class="w-20 h-20 object-cover rounded-xl border border-gray-100" />
-                </div>
-                {% endif %}
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1 text-sm">
-                  <div>
-                    <p class="font-bold text-gray-900 mb-1">{{ location.name }}</p>
-                    <address class="not-italic text-gray-500 leading-relaxed">{{ location.address }}</address>
-                    {% if location.geocode_url %}
-                    <a href="{{ location.geocode_url }}" target="_blank"
-                      class="inline-flex items-center gap-1.5 mt-3 text-blue-600 hover:text-blue-700 text-xs font-medium border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
-                      <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-                      {{ button_map }}
-                    </a>
-                    {% endif %}
-                  </div>
-                  <div>
-                    <p class="font-semibold text-gray-500 text-xs uppercase tracking-widest mb-1">{{ text_telephone }}</p>
-                    <p class="text-gray-800">{{ location.telephone }}</p>
-                    {% if location.fax %}
-                    <p class="text-gray-800 mt-3">{{ location.fax }}</p>
-                    {% endif %}
-                  </div>
-                  <div>
-                    {% if location.open %}
-                    <p class="font-semibold text-gray-500 text-xs uppercase tracking-widest mb-1">{{ text_open }}</p>
-                    <p class="text-gray-800 leading-relaxed">{{ location.open }}</p>
-                    {% endif %}
-                    {% if location.comment %}
-                    <p class="font-semibold text-gray-500 text-xs uppercase tracking-widest mb-1 mt-3">{{ text_comment }}</p>
-                    <p class="text-gray-800 leading-relaxed">{{ location.comment }}</p>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </details>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-
       {# ── Contact form ── #}
       {% if contact_form_status %}
       <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">

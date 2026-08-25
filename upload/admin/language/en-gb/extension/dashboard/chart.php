@@ -25,6 +25,10 @@ $_['text_edit_subtitle'] = 'Configure extension settings and options';
 
 $_['text_chart_subtitle'] = 'Revenue and order trends over time';
 
+// Names for chart axes (comma-separated, index = calendar position)
+$_['text_month_names_short'] = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec';
+$_['text_day_names_short'] = 'Sun,Mon,Tue,Wed,Thu,Fri,Sat';
+
 
 
 

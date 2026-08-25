@@ -119,10 +119,10 @@
                     <input type="hidden" name="products[{{ loop.index0 }}][ordered]" value="{{ rp.ordered }}" />
                     <input type="hidden" name="products[{{ loop.index0 }}][price]" value="{{ rp.price }}" />
                     <label class="return-item-row__check">
-                      <input type="checkbox" class="return-item-check" {% if rp.checked %}checked{% endif %} onchange="returnItemChanged(this)" />
+                      <input type="checkbox" class="return-item-check" name="products[{{ loop.index0 }}][checked]" value="1" {% if rp.checked %}checked{% endif %} onchange="returnItemChanged(this)" />
                     </label>
                     <span class="return-item-row__name">{{ rp.name }}{% if rp.model %} <span class="text-muted">({{ rp.model }})</span>{% endif %}</span>
-                    <input type="number" class="form-control return-item-qty" min="0" max="{{ rp.ordered }}" value="{{ rp.quantity }}" {% if not rp.checked %}disabled{% endif %} onchange="returnItemChanged(this)" oninput="returnItemChanged(this)" />
+                    <input type="number" class="form-control return-item-qty" name="products[{{ loop.index0 }}][quantity]" min="0" max="{{ rp.ordered }}" value="{{ rp.quantity }}" {% if not rp.checked %}disabled{% endif %} onchange="returnItemChanged(this)" oninput="returnItemChanged(this)" />
                     <span class="return-item-row__ordered">/ {{ rp.ordered }}</span>
                   </div>
                   {% endfor %}
@@ -194,45 +194,6 @@
               </div>
             </div>
           </div>
-          {% if return_id %}
-          <div class="dcx-panel" id="history-panel" style="margin-top: 16px;">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="clock" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_history }}</div>
-              </div>
-            </div>
-            <div class="dcx-panel-body">
-              <div id="history"></div>
-              <hr/>
-              <div class="dcx-fields dcx-fields--row">
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-history-status">{{ entry_return_status }}</label>
-                  <select name="return_status_id" id="input-history-status" class="form-control">
-                    {% for return_status in return_statuses %}
-                    {% if return_status.return_status_id == return_status_id %}
-                    <option value="{{ return_status.return_status_id }}" selected="selected">{{ return_status.name }}</option>
-                    {% else %}
-                    <option value="{{ return_status.return_status_id }}">{{ return_status.name }}</option>
-                    {% endif %}
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-notify">{{ entry_notify }}</label>
-                  <input type="checkbox" name="notify" value="1" id="input-notify" />
-                </div>
-              </div>
-              <div class="dcx-field">
-                <label class="dcx-label" for="input-history-comment">{{ entry_comment }}</label>
-                <textarea name="comment" rows="6" id="input-history-comment" class="form-control"></textarea>
-              </div>
-              <div class="text-right" style="margin-top: 12px;">
-                <button id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_history_add }}</button>
-              </div>
-            </div>
-          </div>
-          {% endif %}
         </div>
       </div>
       <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
@@ -296,6 +257,36 @@
               </div>
             </div>
           </div>
+          {% if return_id %}
+          <div class="dcx-sidebar-card" id="history-panel">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="clock" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_history }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body return-history-card__body">
+              <div id="history-alerts"></div>
+              <div id="history"></div>
+              <div class="timeline-note-form">
+                <div class="dcx-fields">
+                  <select id="input-history-status" class="form-control" aria-label="{{ entry_return_status }}">
+                    {% for return_status in return_statuses %}
+                    {% if return_status.return_status_id == return_status_id %}
+                    <option value="{{ return_status.return_status_id }}" selected="selected">{{ return_status.name }}</option>
+                    {% else %}
+                    <option value="{{ return_status.return_status_id }}">{{ return_status.name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <textarea id="input-history-comment" rows="2" class="form-control" placeholder="{{ entry_comment }}"></textarea>
+                  <div class="return-history-actions">
+                    <label class="dcx-sidebar-card__checkbox"><input type="checkbox" id="input-notify" /> {{ entry_notify }}</label>
+                    <button type="button" id="button-history" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-xs"><i data-lucide="send" width="12" height="12"></i> {{ button_history_add }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -358,10 +349,14 @@ $('input[name=\'product\']').autocomplete({
 
 $('#history').delegate('.pagination a', 'click', function(e) {
 	e.preventDefault();
-	$('#history').load(this.href);
+	$('#history').load(this.href, function() {
+		lucide.createIcons({ nodes: document.getElementById('history') });
+	});
 });
 
-$('#history').load('index.php?route=sale/return/history&user_token={{ user_token }}&return_id={{ return_id }}');
+$('#history').load('index.php?route=sale/return/history&user_token={{ user_token }}&return_id={{ return_id }}', function() {
+	lucide.createIcons({ nodes: document.getElementById('history') });
+});
 
 $('#button-history').on('click', function(e) {
 	e.preventDefault();
@@ -378,16 +373,18 @@ $('#button-history').on('click', function(e) {
 			$('#button-history').button('reset');
 		},
 		success: function(json) {
-			$('#history-panel .alert-dismissible').remove();
+			$('#history-alerts .alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#history-panel').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#history-alerts').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 			}
 
 			if (json['success']) {
-				$('#history').load('index.php?route=sale/return/history&user_token={{ user_token }}&return_id={{ return_id }}');
+				$('#history').load('index.php?route=sale/return/history&user_token={{ user_token }}&return_id={{ return_id }}', function() {
+					lucide.createIcons({ nodes: document.getElementById('history') });
+				});
 
-				$('#history-panel').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#history-alerts').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
 
 				$('#input-history-comment').val('');
 			}
@@ -400,18 +397,6 @@ $('#button-history').on('click', function(e) {
 const PAID_AMOUNT = {{ paid_amount_raw }};
 
 function returnItemChanged() {
-	const type = document.querySelector('input[name="type"]:checked');
-	if (type && type.value === 'full') {
-		document.querySelectorAll('.return-item-row').forEach(row => {
-			const check = row.querySelector('.return-item-check');
-			const qty = row.querySelector('.return-item-qty');
-			if (!check.checked) {
-				check.checked = true;
-				qty.disabled = false;
-				qty.value = qty.max;
-			}
-		});
-	}
 	document.querySelectorAll('.return-item-row').forEach(row => {
 		const check = row.querySelector('.return-item-check');
 		const qty = row.querySelector('.return-item-qty');
@@ -482,6 +467,11 @@ function recalcRefund() {
 
 	amount.value = PAID_AMOUNT > 0 ? Math.min(sum, PAID_AMOUNT).toFixed(2) : sum.toFixed(2);
 }
+
+(function() {
+	const checked = document.querySelector('input[name="type"]:checked');
+	if (checked) returnTypeChanged(checked);
+})();
 //--></script>
   <script type="text/javascript"><!--
 $('.date').datetimepicker({
@@ -496,6 +486,27 @@ $('.date').datetimepicker({
 .return-item-row .return-item-qty { width:76px; flex-shrink:0; }
 .return-item-row__ordered { flex-shrink:0; font-size:12px; color:#9ca3af; }
 .return-type-row { display:flex; flex-wrap:wrap; gap:12px; }
+.return-history-card__body { gap:0; }
+#history-alerts .alert { margin:0 0 12px; padding:8px 10px; font-size:12px; }
+#history { min-width:0; }
+.timeline-entry { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid #f3f4f6; }
+.timeline-entry:last-child { border-bottom:none; }
+.timeline-icon { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.timeline-icon--system { background:#e8f4fd; color:#2563eb; }
+.timeline-icon--pending { background:#fef9ec; color:#b45309; }
+.timeline-icon--awaiting { background:#f3e8ff; color:#7c3aed; }
+.timeline-icon--complete { background:#e8f8ee; color:#16a34a; }
+.timeline-content { flex:1; min-width:0; }
+.timeline-header { display:flex; justify-content:space-between; gap:8px; font-size:11px; }
+.timeline-status { min-width:0; overflow:hidden; font-weight:500; text-overflow:ellipsis; white-space:nowrap; }
+.timeline-date { color:#999; white-space:nowrap; }
+.timeline-comment { font-size:12px; color:#555; margin-top:2px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.timeline-load-more { text-align:center; padding:6px; }
+.timeline-load-more .pagination { margin:0; }
+.timeline-load-more .results { display:none; }
+.timeline-note-form { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
+.return-history-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.return-history-actions .btn { display:inline-flex; align-items:center; gap:5px; }
 </style>
 </div>
 {{ footer }}

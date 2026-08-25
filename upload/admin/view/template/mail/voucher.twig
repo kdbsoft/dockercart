@@ -1,52 +1,51 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>{{ title }}</title>
-<style type="text/css">
-body {
-	color: #000000;
-	font-family: Arial, Helvetica, sans-serif;
-}
-body, td, th, input, textarea, select, a {
-	font-size: 12px;
-}
-p {
-	margin-top: 0px;
-	margin-bottom: 20px;
-}
-a, a:visited, a b {
-	color: #378DC1;
-	text-decoration: underline;
-	cursor: pointer;
-}
-a:hover {
-	text-decoration: none;
-}
-a img {
-	border: none;
-}
-#container {
-	width: 680px;
-}
-</style>
-</head>
-<body>
-<div id="container">
-  {% if image %}
-  <div style="float: right; margin-left: 20px;"><a href="{{ store_url }}" title="{{ store_name }}"><img src="{{ image }}" alt="{{ store_name }}" /></a></div>
-  {% endif %}
-  <div>
-    <p>{{ text_greeting }}</p>
-    <p>{{ text_from }}</p>
-    {% if message %}
-    <p>{{ text_message }}</p>
-    <p>{{ message }}</p>
-    {% endif %}
-    <p>{{ text_redeem }}</p>
-    <p><a href="{{ store_url }}" title="{{ store_name }}">{{ store_url }}</a></p>
-    <p>{{ text_footer }}</p>
-  </div>
-</div>
-</body>
-</html>
+{% include 'mail/partials/_head.twig' %}
+{% include 'mail/partials/_header.twig' %}
+        {% if image %}
+        <tr>
+          <td class="ec-px" style="padding: 0 32px 24px;">
+            <img src="{{ image }}" alt="{{ store_name }}" style="display: block; width: 100%; max-width: 536px; height: auto; border-radius: 6px; border: 0;">
+          </td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_greeting }}</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" bgcolor="#eef2ff" style="padding: 24px 20px; border-radius: 6px;">
+                  <p style="margin: 0 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280;">{{ text_gift_voucher|default('') }}</p>
+                  {% if amount %}
+                  <p style="margin: 0 0 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 30px; line-height: 38px; font-weight: 700; color: #111827;">{{ amount }}</p>
+                  {% endif %}
+                  {% if code %}
+                  <p style="margin: 0; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: 2px; color: #4f46e5;">{{ code }}</p>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="ec-px" style="padding: 0 32px 24px;">
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_from }}</p>
+            {% if message %}
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="border-left: 3px solid #4f46e5; padding: 2px 0 2px 16px;">
+                  <p style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280;">{{ text_message }}</p>
+                  <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 22px; color: #374151;">{{ message }}</p>
+                </td>
+              </tr>
+            </table>
+            <br>
+            {% endif %}
+            <p style="margin: 0 0 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_redeem }}</p>
+            {% include 'mail/partials/_button.twig' with {href: store_url, label: text_button_shop|default(store_url)} %}
+          </td>
+        </tr>
+        <tr>
+          <td class="ec-px" style="padding: 0 32px 8px;">
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 22px; color: #6b7280;">{{ text_footer }}</p>
+          </td>
+        </tr>
+{% include 'mail/partials/_footer.twig' %}

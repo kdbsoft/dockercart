@@ -80,7 +80,9 @@ class ControllerExtensionDashboardChart extends Controller {
 
 		$range = isset($this->request->get['range']) ? $this->request->get['range'] : 'month';
 
-		$cache_key = 'dash_chart_' . $range;
+		$language_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_admin_language');
+
+		$cache_key = 'dash_chart_' . $range . '_' . $language_code;
 		$cached = $this->cache->get($cache_key);
 		if ($cached !== false) {
 			$this->response->addHeader('Content-Type: application/json');
@@ -89,6 +91,9 @@ class ControllerExtensionDashboardChart extends Controller {
 		}
 
 		$this->load->model('extension/dashboard/chart');
+
+		$month_names_short = explode(',', $this->language->get('text_month_names_short'));
+		$day_names_short = explode(',', $this->language->get('text_day_names_short'));
 
 		$currency_code = $this->config->get('config_currency');
 		$currency_query = $this->db->query("SELECT symbol_left, symbol_right FROM `" . DB_PREFIX . "currency` WHERE code = '" . $this->db->escape($currency_code) . "'");
@@ -118,7 +123,7 @@ class ControllerExtensionDashboardChart extends Controller {
 					$c = !empty($completed[$bucket]) ? $completed[$bucket]['total'] : 0;
 					$p = !empty($pending[$bucket]) ? $pending[$bucket]['total'] : 0;
 
-					$json['labels'][] = date('M y', strtotime($bucket . '-01'));
+					$json['labels'][] = $month_names_short[(int)date('n', strtotime($bucket . '-01')) - 1] . ' ' . date('y', strtotime($bucket . '-01'));
 					$json['completed'][] = $c;
 					$json['pending'][] = $p;
 					$json['total'][] = $c + $p;
@@ -154,7 +159,7 @@ class ControllerExtensionDashboardChart extends Controller {
 					$date = date('Y-m-d', $date_start + ($i * 86400));
 					$w = (int)date('w', strtotime($date));
 
-					$json['labels'][] = date('D', strtotime($date));
+					$json['labels'][] = $day_names_short[$w];
 					$json['completed'][] = $completed[$w]['total'];
 					$json['pending'][] = $pending[$w]['total'];
 					$json['total'][] = $completed[$w]['total'] + $pending[$w]['total'];
@@ -187,7 +192,7 @@ class ControllerExtensionDashboardChart extends Controller {
 				$returns = $this->model_extension_dashboard_chart->getReturnsByYear();
 
 				for ($i = 1; $i <= 12; $i++) {
-					$json['labels'][] = date('M', mktime(0, 0, 0, $i));
+					$json['labels'][] = $month_names_short[$i - 1];
 					$json['completed'][] = $completed[$i]['total'];
 					$json['pending'][] = $pending[$i]['total'];
 					$json['total'][] = $completed[$i]['total'] + $pending[$i]['total'];

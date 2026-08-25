@@ -192,7 +192,24 @@ class DockercartBlog {
 		$message .= "Author: " . $comment_data['author'] . "\n";
 		$message .= "Email: " . $comment_data['email'] . "\n";
 		$message .= "Comment:\n" . $comment_data['text'] . "\n\n";
-		$message .= "View post: " . $this->url->link('blog/post', 'blog_post_id=' . $post_id) . "\n";
+		$message .= "View post: " . str_replace('&amp;', '&', $this->url->link('blog/post', 'blog_post_id=' . $post_id)) . "\n";
+
+		$html = '';
+
+		$loader = $this->registry->get('load');
+
+		if ($loader) {
+			$html = $loader->view('mail/blog_alert', array(
+				'post_name'    => $post_name,
+				'author'       => $comment_data['author'],
+				'author_email' => $comment_data['email'],
+				'comment_text' => nl2br($comment_data['text']),
+				'post_url'     => str_replace('&amp;', '&', $this->url->link('blog/post', 'blog_post_id=' . $post_id)),
+				'store_name'   => html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'),
+				'store_url'    => $this->config->get('config_url'),
+				'logo'         => '',
+			));
+		}
 
 		// Send to admin
 		$mail = new Mail($this->config->get('config_mail_engine'));
@@ -211,7 +228,13 @@ class DockercartBlog {
 		$mail->setFrom($this->config->get('config_email'));
 		$mail->setSender($this->config->get('config_name'));
 		$mail->setSubject($subject);
-		$mail->setText($message);
+
+		if ($html) {
+			$mail->setHtml($html);
+		} else {
+			$mail->setText($message);
+		}
+
 		$mail->on_token_refresh = function ($token) {
 			$this->db->query("UPDATE " . DB_PREFIX . "setting SET `value` = '" . $this->db->escape($token) . "' WHERE `key` = 'config_mail_smtp_oauth_token' AND `store_id` = '" . (int)$this->config->get('config_store_id') . "'");
 		};

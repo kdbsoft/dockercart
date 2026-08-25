@@ -11,8 +11,8 @@ $_['text_disabled']     = 'Disabled';
 $_['text_home']         = 'Home';
 
 // Entry labels
-$_['entry_call_for_price_status'] = 'Show "Call for Price" button';
-$_['entry_call_for_price_mode'] = '"Call for Price" button mode';
+$_['entry_call_for_price_status'] = 'Show "Price on request" button';
+$_['entry_call_for_price_mode'] = '"Price on request" button mode';
 $_['entry_sale_timer_status'] = 'Show sale timers';
 $_['entry_logo_dark']   = 'Footer Logo (dark background)';
 $_['entry_logo_light']  = 'Header Logo (light background)';
@@ -40,7 +40,7 @@ $_['help_logo_light']   = 'Upload a logo version optimised for light backgrounds
 $_['help_favicon_master'] = 'Single source image for all favicon sizes (16x16 to 128x128 + Apple touch icon).';
 $_['help_favicon_master_hint'] = 'Recommended upload: square 128x128 PNG. The theme will auto-generate favicon sizes and insert them into the site header.';
 $_['help_menu_type']    = 'Choose how categories are shown in the header: classic horizontal bar or vertical dropdown button.';
-$_['help_call_for_price_status'] = 'When enabled, products with zero price show a "Call for Price" button instead of a price. Individual products can override this with the per-product setting in the Data tab.';
+$_['help_call_for_price_status'] = 'When enabled, products with zero price show a "Price on request" button instead of a price. Individual products can override this with the per-product setting in the Data tab.';
 $_['help_call_for_price_mode'] = 'Call: the button dials the store phone number (tel: link). Request: the button opens a modal with a request form (name, phone, comment) and creates a one-click order with the "Awaiting request" status.';
 $_['text_call_for_price_mode_call'] = 'Call (phone link)';
 $_['text_call_for_price_mode_request'] = 'Request (one-click order form)';
