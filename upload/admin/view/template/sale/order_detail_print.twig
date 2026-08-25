@@ -27,11 +27,14 @@
     .meta-grid td:last-child { padding-right: 0; }
     .meta-grid .person { font-size: 9pt; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
     .meta-grid .addr { font-size: 8.5pt; color: #334155; line-height: 1.6; }
-    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; }
+    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; white-space: nowrap; }
+    .items th.text-right { text-align: right; }
+    .items th.text-center { text-align: center; }
     .items td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 8.5pt; vertical-align: top; color: #1e293b; }
     .items tr:last-child td { border-bottom-color: #cbd5e1; }
     .items .opt { color: #64748b; font-size: 7.5pt; margin-top: 2px; line-height: 1.4; }
     .text-right { text-align: right; }
+    .text-center { text-align: center; }
     .no-wrap { white-space: nowrap; }
     .totals { width: 260px; margin-left: auto; margin-top: 10px; }
     .totals td { padding: 4px 9px; font-size: 8.5pt; color: #334155; }
@@ -98,11 +101,11 @@
     <table class="items">
       <thead>
         <tr>
-          <th style="width: 46%;">{{ column_product }}</th>
-          <th style="width: 18%;">{{ column_model }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_quantity }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_price }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_total }}</th>
+          <th style="width: 42%;">{{ column_product }}</th>
+          <th style="width: 15%;">{{ column_model }}</th>
+          <th class="text-center" style="width: 11%;">{{ column_qty }}</th>
+          <th class="text-right" style="width: 16%;">{{ column_price }}</th>
+          <th class="text-right" style="width: 16%;">{{ column_total }}</th>
         </tr>
       </thead>
       <tbody>
@@ -110,7 +113,7 @@
         <tr>
           <td>{{ product.name }}{% if product.option %}<div class="opt">{{ product.option }}</div>{% endif %}</td>
           <td style="color: #64748b; font-size: 8pt;">{{ product.model }}</td>
-          <td class="text-right no-wrap">{{ product.quantity }}</td>
+          <td class="text-center no-wrap">{{ product.quantity }}</td>
           <td class="text-right no-wrap">{{ product.price }}</td>
           <td class="text-right no-wrap" style="font-weight: 700;">{{ product.total }}</td>
         </tr>
