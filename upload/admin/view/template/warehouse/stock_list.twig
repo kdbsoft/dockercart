@@ -1,0 +1,346 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <button type="button" id="button-import-csv" class="btn btn-default"><i data-lucide="upload" width="16" height="16"></i> {{ button_import_csv }}</button>
+            <a href="{{ export_url }}" class="btn btn-default"><i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}</a>
+            <button type="button" id="btn-recalculate" class="btn btn-warning"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_recalculate }}</button>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="alert alert-info alert-dismissible dcx-flash" style="display:none;"></div>
+    {{ user_filter }}
+
+    {% if rows %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <td>{{ column_warehouse }}</td>
+            <td>{{ column_product }}</td>
+            <td>{{ column_model }}</td>
+            <td>{{ column_variant }}</td>
+            <td class="text-right">{{ column_quantity }}</td>
+            <td class="text-right">{{ column_reserved }}</td>
+            <td class="text-right">{{ column_available }}</td>
+            <td class="text-center">{{ column_unlimited }}</td>
+            <td class="text-right">{{ column_lead_time }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td>
+              <a href="{{ warehouse_edit_url }}&warehouse_id={{ row.warehouse_id }}" target="_blank" class="js-wh-card" data-wh-id="{{ row.warehouse_id }}">{{ row.warehouse_name }}</a>
+            </td>
+            <td>
+              <a href="{{ product_edit_url }}&product_id={{ row.product_id }}" target="_blank" class="js-p-card" data-product-id="{{ row.product_id }}" data-variant-id="{{ row.variant_id }}" data-wh-id="{{ row.warehouse_id }}">{{ row.product_name }}</a>
+            </td>
+            <td>{{ row.product_model }}</td>
+            <td>{{ row.variant_sku }}</td>
+            <td class="text-right">
+              <input type="number" step="any" min="0" class="form-control input-sm editable-stock-input" data-stock-id="{{ row.stock_id }}" data-mode="quantity" data-value="{{ row.quantity }}" value="{{ row.quantity }}" style="width:110px;display:inline-block;text-align:right;" />
+            </td>
+            <td class="text-right">{{ row.reserved }}</td>
+            <td class="text-right">{% if row.available is null %}&infin;{% else %}{{ row.available }}{% endif %}</td>
+            <td class="text-center">
+              <input type="checkbox" class="editable-stock-toggle" data-stock-id="{{ row.stock_id }}" data-mode="unlimited"{% if row.unlimited %} checked="checked"{% endif %} />
+            </td>
+            <td class="text-right">
+              <input type="number" step="any" min="0" class="form-control input-sm editable-stock-input" data-stock-id="{{ row.stock_id }}" data-mode="lead_time" data-value="{{ row.lead_time }}" value="{{ row.lead_time }}" style="width:110px;display:inline-block;text-align:right;" />
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-muted text-center" style="padding:40px;">{{ text_no_results }}</div>
+    {% endif %}
+  </div>
+</div>
+<div id="import-modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i data-lucide="upload" width="18" height="18" style="margin-right:8px;"></i>{{ heading_import_csv }}</h4>
+      </div>
+      <div class="modal-body">
+        <form id="form-import-csv" enctype="multipart/form-data">
+          <input type="file" name="file" id="import-file" accept=".csv,text/csv" class="form-control" />
+          <div class="alert alert-info" style="margin-top:12px;">
+            <i data-lucide="info" width="16" height="16" style="vertical-align:middle;margin-right:4px;"></i> {{ text_import_format }}
+          </div>
+          <div id="import-result"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="button-import-submit"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.pcm-overlay { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; padding:24px; }
+.pcm-modal { position:relative; background:var(--dc-surface,#fff); border-radius:var(--dc-radius-xl,10px); box-shadow:0 8px 30px rgba(0,0,0,.18); max-width:520px; width:100%; max-height:80vh; overflow-y:auto; padding:24px; }
+.pcm-close { position:absolute; top:12px; right:12px; background:none; border:none; cursor:pointer; color:#999; padding:4px; border-radius:6px; transition:background .15s,color .15s; }
+.pcm-close:hover { background:#f3f4f6; color:#333; }
+.pcm-spinner { display:flex; align-items:center; justify-content:center; padding:40px; }
+.spinner { width:24px; height:24px; border:3px solid #e5e7eb; border-top-color:#2563eb; border-radius:50%; animation:wcm-spin .6s linear infinite; }
+@keyframes wcm-spin { to { transform:rotate(360deg); } }
+.pcm-avatar { width:56px; height:56px; flex-shrink:0; border-radius:50%; background:#eef2ff; color:#2563eb; display:flex; align-items:center; justify-content:center; user-select:none; }
+.pcm-header { display:flex; gap:16px; }
+.pcm-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.pcm-name { font-size:15px; font-weight:600; color:var(--dc-text-heading,#111); text-decoration:none; }
+.pcm-name:hover { color:#2563eb; }
+.pcm-sub { font-size:11px; color:#999; margin-top:2px; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.pcm-stock { font-weight:600; padding:1px 7px; border-radius:8px; }
+.pcm-stock--in { color:#15803d; background:#dcfce7; }
+.pcm-stock--out { color:#b91c1c; background:#fee2e2; }
+.pcm-stock--reserved { color:#6d28d9; background:#ede9fe; }
+.pcm-badge { font-weight:600; padding:1px 7px; border-radius:8px; background:#f3f4f6; color:#4b5563; }
+.pcm-badge--accent { background:#fef3c7; color:#92400e; }
+.pcm-model { font-size:12px; color:var(--dc-text-muted,#999); }
+.pcm-codes { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:4px; }
+.pcm-code { font-size:11px; color:#666; }
+.pcm-code__label { font-weight:600; color:#999; }
+.pcm-gallery { flex-shrink:0; }
+.pcm-main-img { width:120px; height:120px; border-radius:8px; overflow:hidden; background:#f9fafb; }
+.pcm-main-img img { width:120px; height:120px; object-fit:cover; display:block; }
+.pcm-thumbs { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.pcm-thumb { width:32px; height:32px; border-radius:4px; object-fit:cover; border:1px solid var(--dc-border,#e5e7eb); cursor:pointer; transition:border-color .15s; }
+.pcm-thumb--active { border-color:#2563eb; box-shadow:0 0 0 1px #2563eb; }
+.pcm-desc { font-size:13px; color:#555; line-height:1.6; }
+.pcm-section { margin-top:16px; padding-top:14px; border-top:1px solid var(--dc-border,#e5e7eb); }
+.pcm-section__title { font-size:12px; font-weight:600; color:#374151; margin-bottom:8px; }
+.whc-line { display:flex; align-items:center; gap:8px; font-size:13px; color:#555; padding:3px 0; }
+.whc-line svg { flex-shrink:0; color:#9ca3af; }
+.whc-line--link { color:#2563eb; text-decoration:none; }
+.whc-line--link svg { color:#2563eb; }
+.whc-line--link:hover span { text-decoration:underline; }
+.whc-closed { color:#b91c1c; font-size:11px; font-weight:600; }
+.pcm-attrs { width:100%; font-size:12px; border-collapse:collapse; }
+.pcm-attrs td { padding:5px 0; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.pcm-attrs tr:last-child td { border-bottom:none; }
+.pcm-attrs__name { font-weight:500; color:#374151; white-space:nowrap; padding-right:12px; }
+.pcm-stock-table { width:100%; font-size:12px; border-collapse:collapse; }
+.pcm-stock-table th { font-weight:600; color:#999; text-align:left; padding:4px 6px; border-bottom:1px solid #f3f4f6; }
+.pcm-stock-table td { padding:5px 6px; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.pcm-stock-table tr:last-child td { border-bottom:none; }
+.pcm-stock-table .text-right { text-align:right; }
+.pcm-set-total { display:flex; gap:8px; align-items:center; }
+.pcm-set-total input { flex:1; width:120px; }
+.pcm-set-total-feedback { margin-top:8px; font-size:12px; }
+.text-success { color:#15803d; }
+.text-danger { color:#b91c1c; }
+.whc-stats { display:flex; gap:12px; }
+.whc-stat { flex:1; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; }
+.whc-stat__value { font-size:18px; font-weight:700; color:#111; font-variant-numeric:tabular-nums; }
+.whc-stat__label { font-size:11px; color:#999; margin-top:2px; }
+</style>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+
+function flashMessage(msg) {
+	$('.dcx-flash').text(msg).fadeIn(200).delay(2500).fadeOut(400);
+}
+
+function pushCellUpdate(data, onSuccess) {
+	$.ajax({
+		url: 'index.php?route=warehouse/stock/updateCell&user_token=' + userToken,
+		type: 'post',
+		dataType: 'json',
+		data: data,
+		success: function(json) {
+			if (json['error']) { flashMessage(json['error']); return; }
+			if (onSuccess) onSuccess();
+		},
+		error: function() { flashMessage('{{ text_network_error }}'); }
+	});
+}
+
+// Inline edit quantity / lead_time
+$(document).on('change', '.editable-stock-input', function() {
+	var $input = $(this);
+	pushCellUpdate({
+		stock_id: $input.data('stock-id'),
+		mode: $input.data('mode'),
+		value: $input.val()
+	}, function() {
+		$input.data('value', $input.val());
+	});
+});
+$(document).on('keydown', '.editable-stock-input', function(ev) {
+	var $input = $(this);
+	if (ev.which === 13) { ev.preventDefault(); $input.blur(); }
+	if (ev.which === 27) { $input.val($input.data('value')).blur(); }
+});
+
+// Unlimited toggle
+$(document).on('change', '.editable-stock-toggle', function() {
+	var self = this;
+	pushCellUpdate({
+		stock_id: $(this).data('stock-id'),
+		mode: 'unlimited',
+		value: this.checked ? 1 : 0
+	}, function() {});
+});
+
+// Recalculate
+$('#btn-recalculate').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=warehouse/stock/recalculate&user_token=' + userToken,
+		dataType: 'json',
+		success: function(json) {
+			if (json['error']) { flashMessage(json['error']); return; }
+			flashMessage(json['totals_message']);
+		}
+	});
+});
+
+// CSV import (update-only, validated server-side)
+$('#button-import-csv').on('click', function() {
+	$('#import-file').val('');
+	$('#import-result').empty();
+	$('#import-modal').modal('show');
+});
+
+function escapeHtml(text) {
+	return $('<div/>').text(String(text)).html();
+}
+
+function renderImportErrors(errors) {
+	var html = '<div class="alert alert-danger" style="margin-top:12px;"><ul class="list-unstyled" style="margin-bottom:0;">';
+	for (var i = 0; i < errors.length; i++) {
+		html += '<li><i data-lucide="circle-alert" width="14" height="14"></i> ' + escapeHtml(errors[i]) + '</li>';
+	}
+	html += '</ul></div>';
+	$('#import-result').html(html);
+	lucide.createIcons();
+}
+
+$('#button-import-submit').on('click', function() {
+	if (!$('#import-file')[0].files.length) {
+		renderImportErrors(['{{ error_import_upload }}']);
+		return;
+	}
+
+	var formData = new FormData($('#form-import-csv')[0]);
+
+	$.ajax({
+		url: '{{ import_url }}',
+		type: 'post',
+		data: formData,
+		dataType: 'json',
+		cache: false,
+		contentType: false,
+		processData: false,
+		beforeSend: function() {
+			$('#button-import-submit').prop('disabled', true);
+			$('#import-result').empty();
+		},
+		complete: function() {
+			$('#button-import-submit').prop('disabled', false);
+		},
+		success: function(json) {
+			if (json['errors']) {
+				renderImportErrors(json['errors']);
+				return;
+			}
+
+			$('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible dcx-flash-import"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['message'] + '</div>');
+			lucide.createIcons();
+			$('#import-modal').modal('hide');
+			setTimeout(function() { location.reload(); }, 900);
+		},
+		error: function() { renderImportErrors(['{{ text_network_error }}']); }
+	});
+});
+
+// Card modals (mirror sale/order_detail product/customer cards)
+function getCardOverlay() {
+	var overlay = document.getElementById('wcm-overlay');
+	if (!overlay) {
+		overlay = document.createElement('div');
+		overlay.id = 'wcm-overlay';
+		overlay.className = 'pcm-overlay';
+		document.body.appendChild(overlay);
+	}
+	return overlay;
+}
+
+function closeCardModal() {
+	var o = document.getElementById('wcm-overlay');
+	if (o) o.style.display = 'none';
+}
+
+function loadCard(url) {
+	var overlay = getCardOverlay();
+	overlay.innerHTML = '<div class="pcm-spinner"><div class="spinner"></div></div>';
+	overlay.style.display = 'flex';
+	overlay.onclick = function(e) { if (!e.target.closest('.pcm-modal')) closeCardModal(); };
+
+	$.ajax({
+		url: url,
+		dataType: 'json',
+		success: function(json) {
+			if (json['html']) {
+				overlay.innerHTML = '<div class="pcm-modal">' + json['html'] + '<button type="button" class="pcm-close" onclick="closeCardModal()"><i data-lucide="x" width="18" height="18"></i></button></div>';
+				lucide.createIcons();
+			} else {
+				closeCardModal();
+				if (json['error']) flashMessage(json['error']);
+			}
+		},
+		error: function() { closeCardModal(); flashMessage('{{ text_network_error }}'); }
+	});
+}
+
+function showWarehouseCard(warehouseId) {
+	if (!warehouseId) return;
+	loadCard('index.php?route=warehouse/stock/getWarehouseCard&user_token=' + userToken + '&warehouse_id=' + warehouseId);
+}
+
+function showProductCard(productId, variantId, warehouseId) {
+	if (!productId) return;
+	loadCard('index.php?route=warehouse/stock/getProductCard&user_token=' + userToken + '&product_id=' + productId + '&variant_id=' + (variantId || 0) + '&warehouse_id=' + (warehouseId || 0));
+}
+
+function pcmSwitchImage(thumb) {
+	var full = thumb.dataset.full;
+	if (!full) return;
+	var mainImg = document.getElementById('pcm-main-img');
+	if (mainImg) mainImg.innerHTML = '<img src="' + full + '">';
+	document.querySelectorAll('.pcm-thumb').forEach(function(t) { t.classList.remove('pcm-thumb--active'); });
+	thumb.classList.add('pcm-thumb--active');
+}
+
+$(document).on('click', '.js-wh-card', function(e) {
+	e.preventDefault();
+	showWarehouseCard($(this).data('wh-id'));
+});
+
+$(document).on('click', '.js-p-card', function(e) {
+	e.preventDefault();
+	showProductCard($(this).data('product-id'), $(this).data('variant-id'), $(this).data('wh-id'));
+});
+
+$(document).on('keydown', function(e) { if (e.key === 'Escape') closeCardModal(); });
+//--></script>
+{{ footer }}

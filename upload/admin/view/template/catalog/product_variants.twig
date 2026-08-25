@@ -48,6 +48,10 @@ function loadVariantMatrix() {
 		container.html('<div class="alert alert-info">{{ text_save_product_first|e("js") }}</div>');
 		$('#dc-variant-axes-section').hide();
 		$('#dc-variant-matrix-section').hide();
+		$('#dc-inventory-variants-col').hide();
+		$('#dc-pricing-variants-col').hide();
+		$('#dc-dimensions-variants-col').hide();
+		$('#dc-codes-variants-col').hide();
 		return;
 	}
 
@@ -62,18 +66,39 @@ function loadVariantMatrix() {
 
 			if (json.error) {
 				container.html('<div class="alert alert-danger">' + json.error + '</div>');
+				$('#dc-inventory-variants-col').hide();
+				$('#dc-pricing-variants-col').hide();
+				$('#dc-dimensions-variants-col').hide();
+				$('#dc-codes-variants-col').hide();
 				return;
 			}
 
 			dcCurrentDefaultId = json.default_variant_id || 0;
 			renderVariantMatrix(productId, json);
 			renderAxesSelector(productId, json);
+			renderInventoryVariants(json);
+			renderPricingVariants(json);
+			renderDimensionsVariants(json);
+			renderCodesVariants(json);
+			renderMediaVariantAssignments(json);
 
 			var axes = json.configurable_options || [];
 			dcAxisOptionIds = axes.map(function(a) { return parseInt(a.option_id); });
+			if (typeof dcUpdatePricingRanges === 'function') {
+				dcUpdatePricingRanges(json);
+			}
+			if (typeof dcUpdateDimensionsRanges === 'function') {
+				dcUpdateDimensionsRanges(json);
+			} else if (typeof dcUpdateDimensionsRangesInternal === 'function') {
+				dcUpdateDimensionsRangesInternal(json);
+			}
 		},
 		error: function() {
 			container.html('<div class="alert alert-danger">{{ text_load_error|e("js") }}</div>');
+			$('#dc-inventory-variants-col').hide();
+			$('#dc-pricing-variants-col').hide();
+			$('#dc-dimensions-variants-col').hide();
+			$('#dc-codes-variants-col').hide();
 		}
 	});
 }
@@ -269,10 +294,6 @@ function renderVariantMatrix(productId, json) {
 		html += '<th class="dc-th-axis">' + axes[a].name + '</th>';
 	}
 
-	html += '<th class="dc-th-price">{{ column_price|e("js") }}</th>';
-	html += '<th class="dc-th-qty">{{ column_quantity|e("js") }}</th>';
-	html += '<th class="dc-th-weight">{{ column_weight|e("js") }}</th>';
-	html += '<th class="dc-th-image">{{ column_image|e("js") }}</th>';
 	html += '<th class="dc-th-default text-center">{{ column_default|e("js") }}</th>';
 	html += '<th class="dc-th-status text-center">{{ column_status|e("js") }}</th>';
 	html += '<th class="dc-th-action text-center"></th>';
@@ -286,9 +307,11 @@ function renderVariantMatrix(productId, json) {
 	html += '</tbody>';
 	html += '</table>';
 	html += '</div>';
+	html += '<div class="dc-hscroll" id="dc-hscroll"><div class="dc-hscroll__spacer"></div></div>';
 
 	section.html(html);
 	lucide.createIcons();
+	bindHScrollProxy();
 }
 
 function buildVariantRow(productId, variant, axes, defaultVariantId) {
@@ -296,24 +319,9 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	var rowIdx = dcVariantRowIdx;
 	var isDefault = variant.variant_id == defaultVariantId;
 	var isActive = variant.status == 1;
-	var image = variant.image || '';
-	var thumb = variant.thumb || '{{ placeholder|e("js") }}';
 	var variantId = variant.variant_id || 0;
 	var isNew = variantId === 0;
 	var optionValues = {};
-	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
-	var hasArticles = variant.sku || variant.upc || variant.ean || variant.jan || variant.isbn || variant.mpn;
-	var hasSpecials = variant.variant_specials && variant.variant_specials.length;
-	var hasDiscounts = variant.variant_discounts && variant.variant_discounts.length;
-	var articlesVisible = hasArticles;
-	var cgVisible = cgHasPrices;
-	var specialsVisible = hasSpecials;
-	var discountsVisible = hasDiscounts;
-	var subrowVisible = articlesVisible || cgVisible || specialsVisible || discountsVisible;
-	var artBtnClass = articlesVisible ? 'btn-primary' : 'btn-default';
-	var cgBtnClass = cgVisible ? 'btn-primary' : 'btn-default';
-	var specialBtnClass = specialsVisible ? 'btn-primary' : 'btn-default';
-	var discountBtnClass = discountsVisible ? 'btn-primary' : 'btn-default';
 
 	if (variant.values) {
 		for (var j = 0; j < variant.values.length; j++) {
@@ -327,7 +335,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + rowClasses + '" data-variant-id="' + variantId + '" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="' + (variant.model || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><input type="text" class="form-control input-sm dc-variant-model" value="' + (variant.model || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		var axeOptionId = axes[a].option_id;
@@ -344,148 +352,12 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 		html += '</select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button><button type="button" class="btn ' + specialBtnClass + ' btn-xs dc-special-toggle" onclick="toggleVariantSpecials(' + rowIdx + ')" title="{{ entry_special|e("js") }}"><i data-lucide="star"></i></button></div></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="' + (variant.weight || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td>';
-	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
-	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
-	html += '<img src="' + thumb + '" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
-	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value="' + image + '"/>';
-	html += '</div>';
-	html += '</td>';
 	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status"' + (isActive ? ' checked="checked"' : '') + ' onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
-
-	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:' + (subrowVisible ? '' : 'none') + '">';
-	html += '<td colspan="' + (axes.length + 8) + '">';
-	html += '<div class="dc-cg-inner">';
-
-	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (specialsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (discountsVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="discounts" data-row="' + rowIdx + '"><i data-lucide="percent"></i> {{ entry_discount|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (articlesVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-articles-' + rowIdx + '"' + (articlesVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-subrow-fields">';
-	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="' + (variant.sku || '') + '" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="' + (variant.jan || '') + '" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="' + (variant.isbn || '') + '" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '</div>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (cgVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-cg-' + rowIdx + '"' + (cgVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-cg-header">';
-	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
-	html += '<span class="dc-cg-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '">';
-
-	if (variant.customer_group_prices) {
-		for (var c = 0; c < variant.customer_group_prices.length; c++) {
-			var cg = variant.customer_group_prices[c];
-			html += '<div class="dc-cg-row">';
-			html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-			{% for customer_group in customer_groups %}
-			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == cg.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
-			{% endfor %}
-			html += '</select>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" value="' + (cg.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-			html += '</div>';
-		}
-	}
-
-	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (specialsVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-specials-' + rowIdx + '"' + (specialsVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-special-header">';
-	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
-	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
-	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
-	html += '<span class="dc-special-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '">';
-
-	if (variant.variant_specials) {
-		for (var s = 0; s < variant.variant_specials.length; s++) {
-			var sp = variant.variant_specials[s];
-			html += '<div class="dc-special-row">';
-			html += '<select class="form-control input-sm dc-special-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-			{% for customer_group in customer_groups %}
-			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == sp.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
-			{% endfor %}
-			html += '</select>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-priority" value="' + (sp.priority || '1') + '" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-price" value="' + (sp.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
-			html += '<input type="date" class="form-control input-sm dc-special-date-start" value="' + (sp.date_start && sp.date_start != '0000-00-00' ? sp.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-			html += '<input type="date" class="form-control input-sm dc-special-date-end" value="' + (sp.date_end && sp.date_end != '0000-00-00' ? sp.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-			html += '<input type="checkbox" class="dc-special-auto-renew"' + (sp.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-			html += '</div>';
-		}
-	}
-
-	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (discountsVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-discounts-' + rowIdx + '"' + (discountsVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-special-header">';
-	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-special-header-quantity">{{ entry_quantity|e("js") }}</span>';
-	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
-	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
-	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
-	html += '<span class="dc-special-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-special-prices" id="dc-discount-prices-' + rowIdx + '">';
-
-	if (variant.variant_discounts) {
-		for (var d = 0; d < variant.variant_discounts.length; d++) {
-			var disc = variant.variant_discounts[d];
-			html += '<div class="dc-special-row">';
-			html += '<select class="form-control input-sm dc-discount-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-			{% for customer_group in customer_groups %}
-			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == disc.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
-			{% endfor %}
-			html += '</select>';
-			html += '<input type="number" class="form-control input-sm dc-discount-quantity" value="' + (disc.quantity || '1') + '" placeholder="{{ entry_quantity|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-priority" value="' + (disc.priority || '1') + '" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-price" value="' + (disc.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
-			html += '<input type="date" class="form-control input-sm dc-discount-date-start" value="' + (disc.date_start && disc.date_start != '0000-00-00' ? disc.date_start : '') + '" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-			html += '<input type="date" class="form-control input-sm dc-discount-date-end" value="' + (disc.date_end && disc.date_end != '0000-00-00' ? disc.date_end : '') + '" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-			html += '<input type="checkbox" class="dc-discount-auto-renew"' + (disc.auto_renew ? ' checked="checked"' : '') + ' onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-			html += '</div>';
-		}
-	}
-
-	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-discount-add-btn" onclick="addVariantDiscountRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_discount_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '</div></td></tr>';
 
 	return html;
 }
@@ -497,94 +369,18 @@ function addVariantRow(productId) {
 	var rowIdx = ++dcVariantRowIdx;
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="dc-state-dirty dc-new" data-variant-id="0" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><input type="text" class="form-control input-sm dc-variant-model" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axes[a].option_id + '" onchange="onVariantAxisChange(' + rowIdx + ')"><option value="">{{ text_select|e("js") }}</option></select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn btn-default btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button></div></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td>';
-	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
-	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
-	html += '<img src="{{ placeholder|e("js") }}" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
-	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value=""/>';
-	html += '</div>';
-	html += '</td>';
 	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status" checked="checked" onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
-
-	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:none">';
-	html += '<td colspan="' + (axes.length + 8) + '">';
-	html += '<div class="dc-cg-inner">';
-
-	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="specials" data-row="' + rowIdx + '"><i data-lucide="star"></i> {{ entry_special|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="discounts" data-row="' + rowIdx + '"><i data-lucide="percent"></i> {{ entry_discount|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel dc-subrow-panel--active" id="dc-panel-articles-' + rowIdx + '">';
-	html += '<div class="dc-subrow-fields">';
-	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '</div>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel" id="dc-panel-cg-' + rowIdx + '" style="display:none">';
-	html += '<div class="dc-cg-header">';
-	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
-	html += '<span class="dc-cg-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel" id="dc-panel-specials-' + rowIdx + '" style="display:none">';
-	html += '<div class="dc-special-header">';
-	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
-	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
-	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
-	html += '<span class="dc-special-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-special-prices" id="dc-special-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-special-add-btn" onclick="addVariantSpecialRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_special_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel" id="dc-panel-discounts-' + rowIdx + '" style="display:none">';
-	html += '<div class="dc-special-header">';
-	html += '<span class="dc-special-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-special-header-quantity">{{ entry_quantity|e("js") }}</span>';
-	html += '<span class="dc-special-header-priority">{{ entry_priority|e("js") }}</span>';
-	html += '<span class="dc-special-header-price">{{ entry_price|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_start|e("js") }}</span>';
-	html += '<span class="dc-special-header-date">{{ entry_date_end|e("js") }}</span>';
-	html += '<span class="dc-special-header-renew">{{ entry_auto_renew|e("js") }}</span>';
-	html += '<span class="dc-special-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-special-prices" id="dc-discount-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-discount-add-btn" onclick="addVariantDiscountRow(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_discount_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '</div></td></tr>';
 
 	$('#dc-variant-tbody').prepend(html);
 	lucide.createIcons();
@@ -634,117 +430,6 @@ function onVariantAxisChange(rowIdx) {
 
 function onVariantFieldInput(rowIdx) {
 	scheduleAutoSave(rowIdx);
-	updateSubrowBadges(rowIdx);
-}
-
-function toggleVariantArticles(rowIdx) {
-	switchSubrowTab(rowIdx, 'articles');
-}
-
-function toggleVariantCgPrices(rowIdx) {
-	switchSubrowTab(rowIdx, 'cg');
-}
-
-function toggleVariantSpecials(rowIdx) {
-	switchSubrowTab(rowIdx, 'specials');
-}
-
-function closeSubrow(rowIdx) {
-	$('#dc-variant-cg-row-' + rowIdx).hide();
-}
-
-function switchSubrowTab(rowIdx, tab) {
-	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
-	$subrow.show();
-	$subrow.find('.dc-subrow-panel').hide().removeClass('dc-subrow-panel--active');
-	$subrow.find('.dc-subrow-tab').removeClass('dc-subrow-tab--active');
-	$('#dc-panel-' + tab + '-' + rowIdx).show().addClass('dc-subrow-panel--active');
-	$subrow.find('.dc-subrow-tab[data-tab="' + tab + '"]').addClass('dc-subrow-tab--active');
-}
-
-$(document).on('click', '.dc-subrow-tab', function() {
-	var tab = $(this).data('tab');
-	var rowIdx = $(this).data('row');
-	switchSubrowTab(rowIdx, tab);
-});
-
-function updateSubrowBadges(rowIdx) {
-	var $row = $('#dc-variant-row-' + rowIdx);
-	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
-
-	var articles = 0;
-	$row.find('.dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn').each(function() {
-		if ($(this).val()) articles++;
-	});
-	var cgCount = $subrow.find('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').length;
-	var specCount = $subrow.find('#dc-special-prices-' + rowIdx + ' .dc-special-row').length;
-	var discCount = $subrow.find('#dc-discount-prices-' + rowIdx + ' .dc-special-row').length;
-
-	$row.find('.dc-articles-toggle').toggleClass('btn-primary', articles > 0).toggleClass('btn-default', articles === 0);
-	$row.find('.dc-cg-toggle').toggleClass('btn-primary', cgCount > 0).toggleClass('btn-default', cgCount === 0);
-	$row.find('.dc-special-toggle').toggleClass('btn-primary', specCount > 0).toggleClass('btn-default', specCount === 0);
-
-	var $tabs = $subrow.find('.dc-subrow-tab');
-	$tabs.each(function() {
-		var t = $(this).data('tab');
-		var count = t === 'articles' ? articles : (t === 'cg' ? cgCount : (t === 'specials' ? specCount : discCount));
-		var $badge = $(this).find('.dc-subrow-tab__badge');
-		if (count > 0) { $badge.text(count).show(); } else { $badge.hide(); }
-	});
-}
-
-function addVariantCgPrice(rowIdx) {
-	var html = '<div class="dc-cg-row">';
-	html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-	{% for customer_group in customer_groups %}
-	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
-	{% endfor %}
-	html += '</select>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-	html += '</div>';
-	$('#dc-cg-prices-' + rowIdx).append(html);
-	lucide.createIcons();
-	updateSubrowBadges(rowIdx);
-}
-
-function addVariantSpecialRow(rowIdx) {
-	var html = '<div class="dc-special-row">';
-	html += '<select class="form-control input-sm dc-special-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-	{% for customer_group in customer_groups %}
-	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
-	{% endfor %}
-	html += '</select>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-priority" value="1" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-special-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
-	html += '<input type="date" class="form-control input-sm dc-special-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-	html += '<input type="date" class="form-control input-sm dc-special-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-	html += '<input type="checkbox" class="dc-special-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-	html += '</div>';
-	$('#dc-special-prices-' + rowIdx).append(html);
-	lucide.createIcons();
-	updateSubrowBadges(rowIdx);
-}
-
-function addVariantDiscountRow(rowIdx) {
-	var html = '<div class="dc-special-row">';
-	html += '<select class="form-control input-sm dc-discount-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-	{% for customer_group in customer_groups %}
-	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
-	{% endfor %}
-	html += '</select>';
-	html += '<input type="number" class="form-control input-sm dc-discount-quantity" value="1" placeholder="{{ entry_quantity|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-priority" value="1" placeholder="{{ entry_priority|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:70px"/>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-discount-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:100px"/>';
-	html += '<input type="date" class="form-control input-sm dc-discount-date-start" placeholder="{{ entry_date_start|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-	html += '<input type="date" class="form-control input-sm dc-discount-date-end" placeholder="{{ entry_date_end|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')" style="width:120px"/>';
-	html += '<input type="checkbox" class="dc-discount-auto-renew" onchange="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-special-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-	html += '</div>';
-	$('#dc-discount-prices-' + rowIdx).append(html);
-	lucide.createIcons();
-	updateSubrowBadges(rowIdx);
 }
 
 function onVariantStatusChange(rowIdx) {
@@ -823,81 +508,19 @@ function saveVariantRow(rowIdx, onSuccess) {
 
 	row.data('state', 'saving').removeClass('dc-state-dirty dc-state-error dc-state-flash').addClass('dc-state-saving');
 
-	var cgRow = $('#dc-variant-cg-row-' + rowIdx);
+	// The matrix only manages model, axis values and status. Codes, pricing,
+	// quantity, weight and image are owned by their dedicated panels and are
+	// intentionally not sent — the backend keeps absent fields untouched.
 	var data = {
 		product_id: pid,
 		variant_id: vid,
 		model: row.find('.dc-variant-model').val() || '',
-		sku: cgRow.find('.dc-variant-sku-article').val() || '',
-		upc: cgRow.find('.dc-variant-upc').val() || '',
-		ean: cgRow.find('.dc-variant-ean').val() || '',
-		jan: cgRow.find('.dc-variant-jan').val() || '',
-		isbn: cgRow.find('.dc-variant-isbn').val() || '',
-		mpn: cgRow.find('.dc-variant-mpn').val() || '',
-		price: row.find('.dc-variant-price').val() || 0,
-		quantity: row.find('.dc-variant-qty').val() || 0,
-		subtract: 1,
-		weight: row.find('.dc-variant-weight').val() || 0,
-		weight_class_id: {{ weight_class_id|e("js") }},
-		image: row.find('.dc-variant-image').val() || '',
-		sort_order: 0,
 		status: row.find('.dc-variant-status').is(':checked') ? 1 : 0,
 		values: values
 	};
 
-	var cgPrices = [];
-	$('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').each(function() {
-		var groupId = $(this).find('.dc-cg-group').val();
-		var price = $(this).find('.dc-cg-price').val();
-		if (groupId && price !== '' && price !== undefined) {
-			cgPrices.push({customer_group_id: groupId, price: price});
-		}
-	});
-	data.customer_group_prices = cgPrices;
-
-	var specialPrices = [];
-	$('#dc-special-prices-' + rowIdx + ' .dc-special-row').each(function() {
-		var groupId = $(this).find('.dc-special-group').val();
-		var price = $(this).find('.dc-special-price').val();
-		var priority = $(this).find('.dc-special-priority').val();
-		var dateStart = $(this).find('.dc-special-date-start').val();
-		var dateEnd = $(this).find('.dc-special-date-end').val();
-		var autoRenew = $(this).find('.dc-special-auto-renew').is(':checked') ? 1 : 0;
-		if (groupId && price !== '' && price !== undefined) {
-			specialPrices.push({
-				customer_group_id: groupId,
-				price: price,
-				priority: priority || 1,
-				date_start: dateStart || '0000-00-00',
-				date_end: dateEnd || '0000-00-00',
-				auto_renew: autoRenew
-			});
-		}
-	});
-	data.variant_specials = specialPrices;
-
-	var discountPrices = [];
-	$('#dc-discount-prices-' + rowIdx + ' .dc-special-row').each(function() {
-		var groupId = $(this).find('.dc-discount-group').val();
-		var price = $(this).find('.dc-discount-price').val();
-		var quantity = $(this).find('.dc-discount-quantity').val();
-		var priority = $(this).find('.dc-discount-priority').val();
-		var dateStart = $(this).find('.dc-discount-date-start').val();
-		var dateEnd = $(this).find('.dc-discount-date-end').val();
-		var autoRenew = $(this).find('.dc-discount-auto-renew').is(':checked') ? 1 : 0;
-		if (groupId && price !== '' && price !== undefined) {
-			discountPrices.push({
-				customer_group_id: groupId,
-				quantity: quantity || 1,
-				price: price,
-				priority: priority || 1,
-				date_start: dateStart || '0000-00-00',
-				date_end: dateEnd || '0000-00-00',
-				auto_renew: autoRenew
-			});
-		}
-	});
-	data.variant_discounts = discountPrices;
+	// Variant specials/discounts are managed in the product form Promotions
+	// panel and saved together with the form submit — not here.
 
 	$.ajax({
 		url: 'index.php?route=catalog/product_configurable/saveVariant&user_token={{ user_token }}',
@@ -937,6 +560,38 @@ function saveVariantRow(rowIdx, onSuccess) {
 				setTimeout(function() {
 					row.removeClass('dc-state-flash');
 				}, 1500);
+
+				var newVid = parseInt(row.data('variant-id')) || 0;
+				var $invRow = $('#dc-inventory-variants .dc-inv-row[data-variant-id="' + newVid + '"]');
+				if ($invRow.length) {
+					$invRow.toggleClass('dc-inv-row--off', status === 0);
+				}
+				var $priceRow = $('#dc-pricing-variants .dc-price-row[data-variant-id="' + newVid + '"]');
+				if ($priceRow.length) {
+					$priceRow.toggleClass('dc-price-row--off', status === 0);
+				}
+				var $codeRow = $('#dc-codes-variants .dc-code-row[data-variant-id="' + newVid + '"]');
+				if ($codeRow.length) {
+					$codeRow.toggleClass('dc-code-row--off', status === 0);
+				}
+				if (vid === 0 && newVid) {
+					loadVariantMatrix();
+				}
+
+				if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) {
+					dcUpdatePricingRanges(json);
+				}
+				if (typeof updatePricingHeader === 'function' && json.price_range_text !== undefined) {
+					updatePricingHeader(json);
+				}
+				if (typeof dcUpdateDimensionsRangesInternal === 'function') {
+					dcUpdateDimensionsRangesInternal(json);
+				} else if (typeof dcUpdateDimensionsRanges === 'function') {
+					dcUpdateDimensionsRanges(json);
+				}
+				if (typeof updateDimensionsHeader === 'function') {
+					updateDimensionsHeader(json);
+				}
 
 				if (typeof onSuccess === 'function') {
 					onSuccess();
@@ -1002,9 +657,25 @@ function deleteVariant(rowIdx) {
 	var pid = getDcProductId();
 
 	if (!vid) {
+		var tmpVid = parseInt(row.data('variant-id')) || 0;
+		var $tmpInv = tmpVid ? $('#dc-inventory-variants .dc-inv-row[data-variant-id="' + tmpVid + '"]') : $();
+		var $tmpPrice = tmpVid ? $('#dc-pricing-variants .dc-price-row[data-variant-id="' + tmpVid + '"]') : $();
+		var $tmpDim = tmpVid ? $('#dc-dimensions-variants .dc-dim-row[data-variant-id="' + tmpVid + '"]') : $();
 		row.fadeOut(200, function() {
 			$(this).remove();
 			updateRowCount();
+			if ($tmpInv.length) {
+				$tmpInv.remove();
+				updateInventoryTotal();
+			}
+			if ($tmpPrice.length) {
+				$tmpPrice.remove();
+				updatePricingHeader({variants: $('#dc-pricing-variants .dc-price-row').map(function(){return {};}).get()});
+			}
+			if ($tmpDim.length) {
+				$tmpDim.remove();
+				updateDimensionsHeader({variants: $('#dc-dimensions-variants .dc-dim-row').map(function(){return {};}).get()});
+			}
 		});
 		return;
 	}
@@ -1027,9 +698,36 @@ function deleteVariant(rowIdx) {
 					updateRowCount();
 				});
 
+				var $invRow = $('#dc-inventory-variants .dc-inv-row[data-variant-id="' + vid + '"]');
+				if ($invRow.length) {
+					$invRow.remove();
+					updateInventoryTotal();
+				}
+
+				var $priceRowDel = $('#dc-pricing-variants .dc-price-row[data-variant-id="' + vid + '"]');
+				if ($priceRowDel.length) {
+					$priceRowDel.remove();
+					updatePricingHeader(json);
+				}
+
+				var $dimRowDel = $('#dc-dimensions-variants .dc-dim-row[data-variant-id="' + vid + '"]');
+				if ($dimRowDel.length) {
+					$dimRowDel.remove();
+					updateDimensionsHeader(json);
+				}
+
 				if (json.default_variant_id !== undefined) {
 					dcCurrentDefaultId = json.default_variant_id;
 					rebuildDefaultStars();
+				}
+
+				if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) {
+					dcUpdatePricingRanges(json);
+				}
+				if (typeof dcUpdateDimensionsRangesInternal === 'function') {
+					dcUpdateDimensionsRangesInternal(json);
+				} else if (typeof dcUpdateDimensionsRanges === 'function') {
+					dcUpdateDimensionsRanges(json);
 				}
 
 				showToast('{{ text_saved|e("js") }}', 'success', 1500);
@@ -1065,50 +763,948 @@ function generateVariants(productId) {
 	});
 }
 
-function openVariantImagePicker(rowIdx) {
-	var $input = $('#dc-variant-input-' + rowIdx);
-	var originalValue = $input.val();
-
-	$('#modal-image').remove();
-
-	$.ajax({
-		url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token') + '&target=dc-variant-input-' + rowIdx + '&thumb=dc-variant-thumb-' + rowIdx + '&type=image',
-		dataType: 'html',
-		success: function(html) {
-			$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
-			$('#modal-image').modal('show');
-			$('#modal-image').on('hidden.bs.modal', function() {
-				if ($input.val() !== originalValue) {
-					scheduleAutoSave(rowIdx);
-				}
-				$('#modal-image').off('hidden.bs.modal');
-			});
-		}
-	});
-}
-
-function clearVariantImage(rowIdx) {
-	var $input = $('#dc-variant-input-' + rowIdx);
-	var placeholder = '{{ placeholder|e("js") }}';
-
-	if (!$input.val()) {
-		return;
-	}
-
-	$('#dc-variant-thumb-' + rowIdx).find('img').attr('src', placeholder);
-	$input.val('');
-	scheduleAutoSave(rowIdx);
-}
-
 function updateRowCount() {
 	var count = $('#dc-variant-tbody tr').length;
 	$('#dc-variant-count').text('(' + count + ')');
 }
 
 $(window).on('beforeunload', function() {
-	if ($('#dc-variant-tbody').find('tr.dc-state-dirty, tr.dc-state-saving').length) {
+	if ($('#dc-variant-tbody').find('tr.dc-state-dirty, tr.dc-state-saving').length || $('#dc-pricing-variants .dc-price-row.dc-price-dirty, #dc-pricing-variants .dc-price-row.dc-price-saving').length || $('#dc-inventory-variants .dc-inv-row.dc-inv-dirty, #dc-inventory-variants .dc-inv-row.dc-inv-saving').length || $('#dc-dimensions-variants .dc-dim-row.dc-dim-dirty, #dc-dimensions-variants .dc-dim-row.dc-dim-saving').length) {
 		return '{{ text_unsaved_changes|e("js") }}';
 	}
+});
+
+var dcInvTimers = {};
+var dcPriceTimers = {};
+var dcDimTimers = {};
+var dcCodesTimers = {};
+var dcHScrollLock = false;
+var dcHScrollRO = null;
+var dcCustomerGroups = [{% for customer_group in customer_groups %}{id: {{ customer_group.customer_group_id }}, name: "{{ customer_group.name|escape('js') }}"}{% if not loop.last %}, {% endif %}{% endfor %}];
+
+function dcEscapeHtml(text) {
+	return $('<span></span>').text(text === undefined || text === null ? '' : String(text)).html();
+}
+
+function renderInventoryVariants(json) {
+	var col = $('#dc-inventory-variants-col');
+	var container = $('#dc-inventory-variants');
+	var axes = json.configurable_options || [];
+	var variants = json.variants || [];
+
+	if (!axes.length || !variants.length) {
+		container.html('');
+		col.hide();
+		updateInventoryTotal();
+		return;
+	}
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	var html = '';
+	for (var v = 0; v < variants.length; v++) {
+		var variant = variants[v];
+		var labels = [];
+		if (variant.values) {
+			for (var j = 0; j < variant.values.length; j++) {
+				labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+			}
+		}
+
+		var vid = parseInt(variant.variant_id) || 0;
+		var qty = String(variant.quantity || '0');
+		var model = String(variant.model || '');
+
+		html += '<div class="dc-inv-row' + (variant.status == 1 ? '' : ' dc-inv-row--off') + '" data-variant-id="' + vid + '">';
+		if (model) {
+			html += '<span class="dc-inv-model" title="' + dcEscapeHtml(model) + '">' + dcEscapeHtml(model) + '</span>';
+		}
+		html += '<span class="dc-inv-name" title="' + dcEscapeHtml(labels.join(' / ')) + '">' + dcEscapeHtml(labels.join(' / ')) + '</span>';
+		html += '<input type="text" inputmode="decimal" class="form-control input-sm dc-inv-qty' + (parseFloat(qty) == 0 ? ' dc-zero' : '') + '" value="' + dcEscapeHtml(qty) + '" data-variant-id="' + vid + '" />';
+		html += '</div>';
+	}
+
+	container.html(html);
+	col.show();
+	updateInventoryTotal();
+}
+
+function renderPricingVariants(json) {
+	var col = $('#dc-pricing-variants-col');
+	var container = $('#dc-pricing-variants');
+	var axes = json.configurable_options || [];
+	var variants = json.variants || [];
+
+	if (!axes.length || !variants.length) {
+		container.html('');
+		col.hide();
+		updatePricingHeader(json);
+		return;
+	}
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	var cgMap = {};
+	for (var g = 0; g < dcCustomerGroups.length; g++) {
+		cgMap[dcCustomerGroups[g].id] = dcCustomerGroups[g].name;
+	}
+
+	var hasCg = dcCustomerGroups.length > 0;
+
+	var html = '<div class="dc-price-scroll"><div class="dc-price-table">';
+	html += '<div class="dc-price-header">';
+	html += '<span class="dc-price-header-name">{{ column_model|e("js") }} / {{ entry_option_value|e("js") }}</span>';
+	html += '<span class="dc-price-header-price">{{ column_price|e("js") }}</span>';
+	if (hasCg) {
+		for (var cg = 0; cg < dcCustomerGroups.length; cg++) {
+			html += '<span class="dc-price-header-cg" title="' + dcEscapeHtml(dcCustomerGroups[cg].name) + '">' + dcEscapeHtml(dcCustomerGroups[cg].name) + '</span>';
+		}
+	}
+	html += '</div>';
+
+	for (var v = 0; v < variants.length; v++) {
+		var variant = variants[v];
+		var labels = [];
+		if (variant.values) {
+			for (var j = 0; j < variant.values.length; j++) {
+				labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+			}
+		}
+		var vid = parseInt(variant.variant_id) || 0;
+		var price = String(variant.price !== undefined && variant.price !== null ? variant.price : '0');
+		var model = String(variant.model || '');
+		var cgPrices = {};
+		if (variant.customer_group_prices) {
+			for (var c = 0; c < variant.customer_group_prices.length; c++) {
+				cgPrices[parseInt(variant.customer_group_prices[c].customer_group_id)] = String(variant.customer_group_prices[c].price);
+			}
+		}
+		html += '<div class="dc-price-row' + (variant.status == 1 ? '' : ' dc-price-row--off') + '" data-variant-id="' + vid + '">';
+		html += '<span class="dc-price-name" title="' + dcEscapeHtml((model ? model + ' — ' : '') + labels.join(' / ')) + '">';
+		if (model) {
+			html += '<span class="dc-price-model" title="' + dcEscapeHtml(model) + '">' + dcEscapeHtml(model) + '</span>';
+		}
+		html += '<span class="dc-price-label">' + dcEscapeHtml(labels.join(' / ')) + '</span></span>';
+		html += '<input type="text" inputmode="decimal" class="form-control input-sm dc-price-base' + (parseFloat(price) == 0 ? ' dc-zero' : '') + '" value="' + dcEscapeHtml(price) + '" data-variant-id="' + vid + '" data-field="price" />';
+		if (hasCg) {
+			for (var cg2 = 0; cg2 < dcCustomerGroups.length; cg2++) {
+				var cgId = dcCustomerGroups[cg2].id;
+				var cgVal = cgPrices[cgId] !== undefined ? cgPrices[cgId] : '';
+				html += '<input type="text" inputmode="decimal" class="form-control input-sm dc-price-cg' + (cgVal !== '' && parseFloat(cgVal) == 0 ? ' dc-zero' : '') + '" value="' + dcEscapeHtml(cgVal) + '" data-variant-id="' + vid + '" data-cg-id="' + cgId + '" placeholder="-" />';
+			}
+		}
+		html += '</div>';
+	}
+
+	html += '</div></div>';
+	container.html(html);
+	col.show();
+	updatePricingHeader(json);
+}
+
+function updatePricingHeader(json) {
+	var count = (json && json.variants) ? json.variants.length : $('#dc-pricing-variants .dc-price-row').length;
+	$('#dc-price-badge').text(count || 0);
+	var rangeText = '';
+	if (json && json.price_range_text) {
+		rangeText = json.price_range_text;
+	} else if (json && json.price_range && (parseFloat(json.price_range.min) > 0 || parseFloat(json.price_range.max) > 0)) {
+		rangeText = String(json.price_range.min) + ' - ' + String(json.price_range.max);
+	}
+	if (rangeText) {
+		$('#dc-price-range').text('{{ text_variant_price_range|e("js") }}'.replace('%s', rangeText));
+	} else {
+		$('#dc-price-range').text(count ? '{{ text_no_variants|e("js") }}' : '');
+	}
+}
+
+function renderDimensionsVariants(json) {
+	var col = $('#dc-dimensions-variants-col');
+	var container = $('#dc-dimensions-variants');
+	var axes = json.configurable_options || [];
+	var variants = json.variants || [];
+
+	if (!axes.length || !variants.length) {
+		container.html('');
+		col.hide();
+		updateDimensionsHeader(json);
+		if (typeof dcUpdateDimensionsRangesInternal === 'function') {
+			dcUpdateDimensionsRangesInternal(json);
+		}
+		return;
+	}
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	var html = '<div class="dc-dim-scroll"><div class="dc-dim-table">';
+	html += '<div class="dc-dim-header">';
+	html += '<span class="dc-dim-header-name">{{ column_model|e("js") }} / {{ entry_option_value|e("js") }}</span>';
+	html += '<span class="dc-dim-header-field">{{ entry_length|e("js") }}</span>';
+	html += '<span class="dc-dim-header-field">{{ entry_width|e("js") }}</span>';
+	html += '<span class="dc-dim-header-field">{{ entry_height|e("js") }}</span>';
+	html += '<span class="dc-dim-header-field">{{ entry_weight|e("js") }}</span>';
+	html += '</div>';
+
+	for (var v = 0; v < variants.length; v++) {
+		var variant = variants[v];
+		var labels = [];
+		if (variant.values) {
+			for (var j = 0; j < variant.values.length; j++) {
+				labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+			}
+		}
+		var vid = parseInt(variant.variant_id) || 0;
+		// Zero means "not set": render an empty input with a dash placeholder;
+		// an empty field is saved back as 0.
+		var length = variant.length !== undefined && variant.length !== null && parseFloat(variant.length) != 0 ? String(variant.length) : '';
+		var width = variant.width !== undefined && variant.width !== null && parseFloat(variant.width) != 0 ? String(variant.width) : '';
+		var height = variant.height !== undefined && variant.height !== null && parseFloat(variant.height) != 0 ? String(variant.height) : '';
+		var weight = variant.weight !== undefined && variant.weight !== null && parseFloat(variant.weight) != 0 ? String(variant.weight) : '';
+		var model = String(variant.model || '');
+		html += '<div class="dc-dim-row' + (variant.status == 1 ? '' : ' dc-dim-row--off') + '" data-variant-id="' + vid + '">';
+		html += '<span class="dc-dim-name" title="' + dcEscapeHtml((model ? model + ' — ' : '') + labels.join(' / ')) + '">';
+		if (model) {
+			html += '<span class="dc-dim-model" title="' + dcEscapeHtml(model) + '">' + dcEscapeHtml(model) + '</span>';
+		}
+		html += '<span class="dc-dim-label">' + dcEscapeHtml(labels.join(' / ')) + '</span></span>';
+		html += '<input type="text" inputmode="decimal" placeholder="-" class="form-control input-sm dc-dim-length" value="' + dcEscapeHtml(length) + '" data-variant-id="' + vid + '" data-field="length" />';
+		html += '<input type="text" inputmode="decimal" placeholder="-" class="form-control input-sm dc-dim-width" value="' + dcEscapeHtml(width) + '" data-variant-id="' + vid + '" data-field="width" />';
+		html += '<input type="text" inputmode="decimal" placeholder="-" class="form-control input-sm dc-dim-height" value="' + dcEscapeHtml(height) + '" data-variant-id="' + vid + '" data-field="height" />';
+		html += '<input type="text" inputmode="decimal" placeholder="-" class="form-control input-sm dc-dim-weight" value="' + dcEscapeHtml(weight) + '" data-variant-id="' + vid + '" data-field="weight" />';
+		html += '</div>';
+	}
+
+	html += '</div></div>';
+	container.html(html);
+	col.show();
+	updateDimensionsHeader(json);
+	if (typeof dcUpdateDimensionsRangesInternal === 'function') {
+		dcUpdateDimensionsRangesInternal(json);
+	}
+}
+
+function updateDimensionsHeader(json) {
+	var count = (json && json.variants) ? json.variants.length : $('#dc-dimensions-variants .dc-dim-row').length;
+	$('#dc-dim-badge').text(count || 0);
+	var rangeText = '';
+	if (json && json.dimensions_range_text) {
+		rangeText = json.dimensions_range_text;
+		if (json.weight_range_text) {
+			rangeText += ' / ' + json.weight_range_text;
+		}
+	} else if (json && json.weight_range_text) {
+		rangeText = json.weight_range_text;
+	}
+	if (rangeText) {
+		$('#dc-dim-range').text(rangeText);
+	} else {
+		$('#dc-dim-range').text(count ? '{{ text_no_variants|e("js") }}' : '');
+	}
+}
+
+function dcUpdateDimensionsRangesInternal(json) {
+	if (!json) return;
+	// Update global readonly inputs in Dimensions panel when configurable
+	if (typeof json.length_range_text !== 'undefined') {
+		var $len = $('#input-length');
+		var $wid = $('#input-width');
+		var $hei = $('#input-height');
+		var $weight = $('#input-weight');
+		var textNoVariants = '{{ text_no_variants|e("js") }}';
+		if ($len.length) {
+			var txt = json.length_range_text ? json.length_range_text : textNoVariants;
+			if ($len.prop('readonly')) { $len.val(txt); }
+		}
+		if ($wid.length) {
+			var txt2 = json.width_range_text ? json.width_range_text : textNoVariants;
+			if ($wid.prop('readonly')) { $wid.val(txt2); }
+		}
+		if ($hei.length) {
+			var txt3 = json.height_range_text ? json.height_range_text : textNoVariants;
+			if ($hei.prop('readonly')) { $hei.val(txt3); }
+		}
+		if ($weight.length) {
+			var txt4 = json.weight_range_text ? json.weight_range_text : textNoVariants;
+			if ($weight.prop('readonly')) { $weight.val(txt4); }
+		}
+	}
+}
+
+function dcDimensionsSync(variantId, data) {
+	if (!variantId) return;
+	var $row = $('#dc-dimensions-variants .dc-dim-row[data-variant-id="' + variantId + '"]');
+	if ($row.length) {
+		// Zeros arrive as "not set" — show the empty/placeholder state.
+		var normalize = function(val) { return (val === undefined || val === null || val === '' || parseFloat(val) == 0) ? '' : String(val); };
+		if (data.length !== undefined) {
+			var $l = $row.find('.dc-dim-length');
+			if ($l.length && $l[0] !== document.activeElement) { $l.val(normalize(data.length)); }
+		}
+		if (data.width !== undefined) {
+			var $w = $row.find('.dc-dim-width');
+			if ($w.length && $w[0] !== document.activeElement) { $w.val(normalize(data.width)); }
+		}
+		if (data.height !== undefined) {
+			var $h = $row.find('.dc-dim-height');
+			if ($h.length && $h[0] !== document.activeElement) { $h.val(normalize(data.height)); }
+		}
+		if (data.weight !== undefined) {
+			var $wg = $row.find('.dc-dim-weight');
+			if ($wg.length && $wg[0] !== document.activeElement) { $wg.val(normalize(data.weight)); }
+		}
+	}
+}
+
+function onDimensionsInput(input) {
+	var $row = $(input).closest('.dc-dim-row');
+	var vid = $(input).data('variant-id');
+	$row.removeClass('dc-dim-saving dc-dim-error dc-dim-flash').addClass('dc-dim-dirty');
+	if (!vid) return;
+	if (dcDimTimers[vid]) { clearTimeout(dcDimTimers[vid]); }
+	dcDimTimers[vid] = setTimeout(function() { delete dcDimTimers[vid]; saveDimensionsRow(vid); }, 600);
+}
+
+function saveDimensionsRow(variantId) {
+	var $row = $('#dc-dimensions-variants .dc-dim-row[data-variant-id="' + variantId + '"]');
+	if (!$row.length) return;
+	// Empty input = "not set" and is saved as 0.
+	var length = $row.find('.dc-dim-length').val();
+	var width = $row.find('.dc-dim-width').val();
+	var height = $row.find('.dc-dim-height').val();
+	var weight = $row.find('.dc-dim-weight').val();
+	if (length === '' || length === null) { length = '0'; } else { length = String(length).replace(',', '.'); }
+	if (width === '' || width === null) { width = '0'; } else { width = String(width).replace(',', '.'); }
+	if (height === '' || height === null) { height = '0'; } else { height = String(height).replace(',', '.'); }
+	if (weight === '' || weight === null) { weight = '0'; } else { weight = String(weight).replace(',', '.'); }
+	$row.removeClass('dc-dim-dirty dc-dim-error dc-dim-flash').addClass('dc-dim-saving');
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantDimensions&user_token={{ user_token }}',
+		type: 'POST',
+		data: { product_id: getDcProductId(), variant_id: variantId, length: length, width: width, height: height, weight: weight },
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				$row.removeClass('dc-dim-saving dc-dim-dirty').addClass('dc-dim-error');
+				showToast(json.error, 'error');
+				return;
+			}
+			$row.removeClass('dc-dim-saving dc-dim-dirty dc-dim-error').addClass('dc-dim-flash');
+			showToast('{{ text_saved|e("js") }}', 'success');
+			setTimeout(function() { $row.removeClass('dc-dim-flash'); }, 1500);
+			if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) { dcUpdatePricingRanges(json); }
+			if (typeof dcUpdateDimensionsRangesInternal === 'function') { dcUpdateDimensionsRangesInternal(json); }
+			if (typeof dcUpdateDimensionsRanges === 'function' && json.dimensions_range_text !== undefined) { dcUpdateDimensionsRanges(json); }
+			updateDimensionsHeader(json);
+			if (typeof updatePricingHeader === 'function' && json.price_range_text !== undefined) { updatePricingHeader(json); }
+		},
+		error: function() {
+			$row.removeClass('dc-dim-saving dc-dim-dirty').addClass('dc-dim-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
+		}
+	});
+}
+
+function dcUpdateDimensionsRanges(json) { return dcUpdateDimensionsRangesInternal(json); }
+
+var dcCodeFields = ['sku', 'upc', 'ean', 'jan', 'isbn', 'mpn'];
+var dcCodeFieldLabels = {
+	sku: '{{ entry_sku|e("js") }}',
+	upc: '{{ entry_upc|e("js") }}',
+	ean: '{{ entry_ean|e("js") }}',
+	jan: '{{ entry_jan|e("js") }}',
+	isbn: '{{ entry_isbn|e("js") }}',
+	mpn: '{{ entry_mpn|e("js") }}'
+};
+
+function renderCodesVariants(json) {
+	var col = $('#dc-codes-variants-col');
+	var container = $('#dc-codes-variants');
+	var axes = json.configurable_options || [];
+	var variants = json.variants || [];
+
+	if (!axes.length || !variants.length) {
+		container.html('');
+		col.hide();
+		updateCodesHeader(json);
+		return;
+	}
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	var html = '<div class="dc-price-scroll"><div class="dc-code-table">';
+	html += '<div class="dc-code-header">';
+	html += '<span class="dc-code-header-name">{{ column_model|e("js") }} / {{ entry_option_value|e("js") }}</span>';
+	for (var f = 0; f < dcCodeFields.length; f++) {
+		html += '<span class="dc-code-header-field" title="' + dcEscapeHtml(dcCodeFieldLabels[dcCodeFields[f]]) + '">' + dcEscapeHtml(dcCodeFieldLabels[dcCodeFields[f]]) + '</span>';
+	}
+	html += '</div>';
+
+	for (var v = 0; v < variants.length; v++) {
+		var variant = variants[v];
+		var labels = [];
+		if (variant.values) {
+			for (var j = 0; j < variant.values.length; j++) {
+				labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+			}
+		}
+		var vid = parseInt(variant.variant_id) || 0;
+		var model = String(variant.model || '');
+		html += '<div class="dc-code-row' + (variant.status == 1 ? '' : ' dc-code-row--off') + '" data-variant-id="' + vid + '">';
+		html += '<span class="dc-price-name" title="' + dcEscapeHtml((model ? model + ' — ' : '') + labels.join(' / ')) + '">';
+		if (model) {
+			html += '<span class="dc-price-model" title="' + dcEscapeHtml(model) + '">' + dcEscapeHtml(model) + '</span>';
+		}
+		html += '<span class="dc-price-label">' + dcEscapeHtml(labels.join(' / ')) + '</span></span>';
+		for (var f2 = 0; f2 < dcCodeFields.length; f2++) {
+			var field = dcCodeFields[f2];
+			html += '<input type="text" class="form-control input-sm dc-code-' + field + '" value="' + dcEscapeHtml(variant[field] || '') + '" data-variant-id="' + vid + '" data-field="' + field + '" />';
+		}
+		html += '</div>';
+	}
+
+	html += '</div></div>';
+	container.html(html);
+	col.show();
+	updateCodesHeader(json);
+}
+
+function updateCodesHeader(json) {
+	var count = (json && json.variants) ? json.variants.length : $('#dc-codes-variants .dc-code-row').length;
+	$('#dc-codes-badge').text(count || 0);
+}
+
+function onCodesInput(input) {
+	var $row = $(input).closest('.dc-code-row');
+	var vid = $(input).data('variant-id');
+	$row.removeClass('dc-code-saving dc-code-error dc-code-flash').addClass('dc-code-dirty');
+	if (!vid) return;
+	if (dcCodesTimers[vid]) { clearTimeout(dcCodesTimers[vid]); }
+	dcCodesTimers[vid] = setTimeout(function() { delete dcCodesTimers[vid]; saveCodesRow(vid); }, 600);
+}
+
+function saveCodesRow(variantId) {
+	var $row = $('#dc-codes-variants .dc-code-row[data-variant-id="' + variantId + '"]');
+	if (!$row.length) return;
+	var codes = {};
+	for (var i = 0; i < dcCodeFields.length; i++) {
+		codes[dcCodeFields[i]] = String($row.find('.dc-code-' + dcCodeFields[i]).val() || '');
+	}
+	$row.removeClass('dc-code-dirty dc-code-error dc-code-flash').addClass('dc-code-saving');
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantCodes&user_token={{ user_token }}',
+		type: 'POST',
+		data: $.extend({ product_id: getDcProductId(), variant_id: variantId }, codes),
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				$row.removeClass('dc-code-saving dc-code-dirty').addClass('dc-code-error');
+				showToast(json.error, 'error');
+				return;
+			}
+			$row.removeClass('dc-code-saving dc-code-dirty dc-code-error').addClass('dc-code-flash');
+			showToast('{{ text_saved|e("js") }}', 'success');
+			setTimeout(function() { $row.removeClass('dc-code-flash'); }, 1500);
+		},
+		error: function() {
+			$row.removeClass('dc-code-saving dc-code-dirty').addClass('dc-code-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
+		}
+	});
+}
+
+function dcCodesSync(variantId, codes) {
+	if (!variantId || !codes) return;
+	var $row = $('#dc-codes-variants .dc-code-row[data-variant-id="' + variantId + '"]');
+	if (!$row.length) return;
+	for (var field in codes) {
+		if (!codes.hasOwnProperty(field)) continue;
+		var $input = $row.find('.dc-code-' + field);
+		if ($input.length && $input[0] !== document.activeElement) {
+			$input.val(codes[field]);
+		}
+	}
+}
+
+var dcMediaVariants = null;
+
+function renderMediaVariantAssignments(json) {
+	var variants = (json && json.variants) ? json.variants : [];
+	var axes = (json && json.configurable_options) ? json.configurable_options : [];
+
+	var valueNames = {};
+	for (var a = 0; a < axes.length; a++) {
+		var axisValues = axes[a].values || [];
+		for (var k in axisValues) {
+			valueNames[axisValues[k].option_value_id] = axisValues[k].name;
+		}
+	}
+
+	dcMediaVariants = { list: variants, names: valueNames };
+	decorateMediaCards();
+}
+
+function removeMediaVariantSelects() {
+	dcMediaVariants = null;
+	$('.dc-img-variant').remove();
+}
+
+function mediaVariantLabel(variant, valueNames) {
+	var labels = [];
+	if (variant.values) {
+		for (var j = 0; j < variant.values.length; j++) {
+			labels.push(valueNames[variant.values[j].option_value_id] || ('#' + variant.values[j].option_value_id));
+		}
+	}
+	return String(variant.model || '') + (labels.length ? ' — ' + labels.join(' / ') : '');
+}
+
+function decorateMediaCards() {
+	var $cards = $('.product-images .dc-img-card');
+
+	if (!dcMediaVariants || !dcMediaVariants.list || !dcMediaVariants.list.length) {
+		$('.dc-img-variant').remove();
+		return;
+	}
+
+	$cards.each(function() {
+		var $card = $(this);
+
+		if ($card.hasClass('dc-img-card--main') || $card.find('.dc-img-variant').length) {
+			return;
+		}
+
+		var $wrap = $('<div class="dc-img-variant"></div>');
+		$wrap.append('<select class="form-control input-sm" title="{{ help_media_variant_assign|e("js") }}"></select>');
+		$card.append($wrap);
+	});
+
+	var $selects = $cards.find('.dc-img-variant select');
+	$selects.each(function() {
+		var html = '<option value="0">— {{ entry_variant|e("js") }}</option>';
+		for (var i = 0; i < dcMediaVariants.list.length; i++) {
+			html += '<option value="' + parseInt(dcMediaVariants.list[i].variant_id) + '">' + dcEscapeHtml(mediaVariantLabel(dcMediaVariants.list[i], dcMediaVariants.names)) + '</option>';
+		}
+		$(this).html(html);
+	});
+
+	// Assign current variant images to matching cards (each card at most once).
+	var claimed = {};
+	for (var n = 0; n < dcMediaVariants.list.length; n++) {
+		var path = String(dcMediaVariants.list[n].image || '');
+
+		if (!path) {
+			continue;
+		}
+
+		$cards.each(function(c) {
+			if (claimed[c]) {
+				return;
+			}
+
+			var $card = $(this);
+			var cardPath = String($card.find('input[id^="input-image"]').val() || '');
+
+			if (cardPath && cardPath === path) {
+				var vid = parseInt(dcMediaVariants.list[n].variant_id);
+				$card.find('.dc-img-variant select').val(String(vid)).attr('data-prev-vid', vid);
+				claimed[c] = true;
+				return false;
+			}
+		});
+	}
+}
+
+function onMediaVariantSelectChange(select) {
+	var $select = $(select);
+	var $card = $select.closest('.dc-img-card');
+	var newVid = parseInt($select.val()) || 0;
+	var prevVid = parseInt($select.attr('data-prev-vid')) || 0;
+
+	// "—" on an unassigned card: nothing changed.
+	if (!newVid && !prevVid) {
+		return;
+	}
+
+	// Clearing keeps writing to the previous owner with an empty image;
+	// assigning writes the card image path to the chosen variant.
+	var targetVid = newVid ? newVid : prevVid;
+	var imagePath = newVid ? String($card.find('input[id^="input-image"]').val() || '') : '';
+
+	// Reassign: reset any other card pointing at the same variant.
+	if (newVid) {
+		$('.dc-img-variant select').not($select).each(function() {
+			if ((parseInt($(this).val()) || 0) === newVid) {
+				$(this).val('0').removeAttr('data-prev-vid');
+			}
+		});
+	}
+
+	var restore = function() {
+		$select.val(prevVid ? String(prevVid) : '0');
+		if (prevVid) {
+			$select.attr('data-prev-vid', prevVid);
+		} else {
+			$select.removeAttr('data-prev-vid');
+		}
+	};
+
+	$select.prop('disabled', true);
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantImage&user_token={{ user_token }}',
+		type: 'POST',
+		data: { product_id: getDcProductId(), variant_id: targetVid, image: imagePath },
+		dataType: 'json',
+		success: function(json) {
+			$select.prop('disabled', false);
+			if (json.error) {
+				showToast(json.error, 'error');
+				restore();
+				return;
+			}
+			if (newVid) {
+				$select.attr('data-prev-vid', newVid);
+			} else {
+				$select.removeAttr('data-prev-vid');
+			}
+			showToast('{{ text_saved|e("js") }}', 'success');
+		},
+		error: function() {
+			$select.prop('disabled', false);
+			showToast('{{ text_load_error|e("js") }}', 'error');
+			restore();
+		}
+	});
+}
+
+function dcPricingSync(variantId, price, cgPrices) {
+	if (!variantId) return;
+	var $row = $('#dc-pricing-variants .dc-price-row[data-variant-id="' + variantId + '"]');
+	if ($row.length) {
+		var $base = $row.find('.dc-price-base');
+		if ($base.length && $base[0] !== document.activeElement) {
+			$base.val(price !== undefined ? price : $base.val()).toggleClass('dc-zero', parseFloat(price) == 0);
+		}
+		if (cgPrices) {
+			for (var cgId in cgPrices) {
+				if (!cgPrices.hasOwnProperty(cgId)) continue;
+				var $cg = $row.find('.dc-price-cg[data-cg-id="' + cgId + '"]');
+				if ($cg.length && $cg[0] !== document.activeElement) {
+					$cg.val(cgPrices[cgId]);
+					$cg.toggleClass('dc-zero', cgPrices[cgId] !== '' && parseFloat(cgPrices[cgId]) == 0);
+				}
+			}
+		}
+	}
+}
+
+function onPricingInput(input) {
+	var $row = $(input).closest('.dc-price-row');
+	var vid = $(input).data('variant-id');
+	$row.removeClass('dc-price-saving dc-price-error dc-price-flash').addClass('dc-price-dirty');
+	$(input).toggleClass('dc-zero', $(input).val() !== '' && parseFloat(String($(input).val()).replace(',', '.')) == 0);
+	if (!vid) return;
+	if (dcPriceTimers[vid]) {
+		clearTimeout(dcPriceTimers[vid]);
+	}
+	dcPriceTimers[vid] = setTimeout(function() {
+		delete dcPriceTimers[vid];
+		savePricingRow(vid);
+	}, 600);
+}
+
+function savePricingRow(variantId) {
+	var $row = $('#dc-pricing-variants .dc-price-row[data-variant-id="' + variantId + '"]');
+	if (!$row.length) return;
+	var price = $row.find('.dc-price-base').val();
+	if (price !== '' && price !== null) {
+		price = String(price).replace(',', '.');
+	}
+	var cgPrices = [];
+	$row.find('.dc-price-cg').each(function() {
+		var cgId = $(this).data('cg-id');
+		var val = $(this).val();
+		if (val !== '' && val !== null) {
+			val = String(val).replace(',', '.');
+		}
+		if (cgId && val !== '' && val !== undefined && val !== null) {
+			// Only send non-empty; empty means remove override (handled by DELETE then re-insert)
+			cgPrices.push({customer_group_id: cgId, price: val});
+		} else if (cgId) {
+			// empty still needs to be represented as omitted — server will delete; to explicitly clear, don't push
+		}
+	});
+	$row.removeClass('dc-price-dirty dc-price-error dc-price-flash').addClass('dc-price-saving');
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantPricing&user_token={{ user_token }}',
+		type: 'POST',
+		data: {
+			product_id: getDcProductId(),
+			variant_id: variantId,
+			price: price,
+			customer_group_prices: cgPrices
+		},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				$row.removeClass('dc-price-saving dc-price-dirty').addClass('dc-price-error');
+				showToast(json.error, 'error');
+				return;
+			}
+			$row.removeClass('dc-price-saving dc-price-dirty dc-price-error').addClass('dc-price-flash');
+			showToast('{{ text_saved|e("js") }}', 'success');
+			setTimeout(function() {
+				$row.removeClass('dc-price-flash');
+			}, 1500);
+			if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) {
+				dcUpdatePricingRanges(json);
+			}
+			updatePricingHeader(json);
+		},
+		error: function() {
+			$row.removeClass('dc-price-saving dc-price-dirty').addClass('dc-price-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
+		}
+	});
+}
+
+function dcInventorySync(variantId, quantity) {
+	if (!variantId) return;
+
+	var $input = $('#dc-inventory-variants .dc-inv-qty[data-variant-id="' + variantId + '"]');
+
+	if ($input.length) {
+		if ($input[0] !== document.activeElement) {
+			$input.val(quantity);
+		}
+		updateInventoryTotal();
+	} else if (typeof updateInventoryTotal === 'function') {
+		updateInventoryTotal();
+	}
+}
+
+function updateInventoryTotal(syncMain) {
+	if (syncMain === undefined) syncMain = true;
+	var total = 0;
+	var count = 0;
+
+	$('#dc-inventory-variants .dc-inv-row').each(function() {
+		var $row = $(this);
+		var $input = $row.find('.dc-inv-qty');
+		var num = parseFloat(String($input.val()).replace(',', '.')) || 0;
+
+		count++;
+		$input.toggleClass('dc-zero', num == 0);
+
+		if (!$row.hasClass('dc-inv-row--off')) {
+			total += num;
+		}
+	});
+
+	$('#dc-inv-badge').text(count);
+	$('#dc-inv-total').text(count ? '{{ text_variant_qty_total|e("js") }}'.replace('%s', Math.round(total * 100) / 100) : '');
+	if (syncMain) {
+		var $qtyInput = $('#input-quantity');
+		if ($qtyInput.length && $qtyInput.prop('readonly')) {
+			var formatted = String(Math.round(total * 100) / 100);
+			if (formatted.indexOf('.') !== -1) {
+				formatted = formatted.replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+			}
+			if (!count) {
+				formatted = '0';
+			}
+			$qtyInput.val(formatted);
+		}
+	}
+}
+
+function onInventoryQtyInput(input) {
+	var $row = $(input).closest('.dc-inv-row');
+	var vid = $(input).data('variant-id');
+
+	$row.removeClass('dc-inv-saving dc-inv-error dc-inv-flash').addClass('dc-inv-dirty');
+	updateInventoryTotal(false);
+
+	if (!vid) return;
+
+	if (dcInvTimers[vid]) {
+		clearTimeout(dcInvTimers[vid]);
+	}
+
+	dcInvTimers[vid] = setTimeout(function() {
+		delete dcInvTimers[vid];
+		saveInventoryQty(vid);
+	}, 600);
+}
+
+function saveInventoryQty(variantId) {
+	var $row = $('#dc-inventory-variants .dc-inv-row[data-variant-id="' + variantId + '"]');
+
+	if (!$row.length) return;
+
+	var quantity = $row.find('.dc-inv-qty').val();
+
+	$row.removeClass('dc-inv-dirty dc-inv-error dc-inv-flash').addClass('dc-inv-saving');
+
+	$.ajax({
+		url: 'index.php?route=catalog/product_configurable/saveVariantQuantity&user_token={{ user_token }}',
+		type: 'POST',
+		data: {
+			product_id: getDcProductId(),
+			variant_id: variantId,
+			quantity: quantity
+		},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				$row.removeClass('dc-inv-saving dc-inv-dirty').addClass('dc-inv-error');
+				showToast(json.error, 'error');
+				return;
+			}
+
+			$row.removeClass('dc-inv-saving dc-inv-dirty dc-inv-error').addClass('dc-inv-flash');
+			showToast('{{ text_saved|e("js") }}', 'success');
+			setTimeout(function() {
+				$row.removeClass('dc-inv-flash');
+			}, 1500);
+
+			updateInventoryTotal();
+		},
+		error: function() {
+			$row.removeClass('dc-inv-saving dc-inv-dirty').addClass('dc-inv-error');
+			showToast('{{ text_load_error|e("js") }}', 'error');
+		}
+	});
+}
+
+function bindHScrollProxy() {
+	var proxy = $('#dc-hscroll');
+	var wrapper = $('.dc-variant-scroll-wrapper');
+	var table = $('#dc-variant-table');
+
+	if (!proxy.length || !wrapper.length || !table.length) return;
+
+	function syncSpacer() {
+		proxy.find('.dc-hscroll__spacer').width(table.outerWidth());
+		proxy.scrollLeft(wrapper.scrollLeft());
+	}
+
+	wrapper.off('scroll.dchscroll').on('scroll.dchscroll', function() {
+		if (dcHScrollLock) return;
+		dcHScrollLock = true;
+		proxy.scrollLeft(wrapper.scrollLeft());
+		dcHScrollLock = false;
+	});
+
+	proxy.off('scroll.dchscroll').on('scroll.dchscroll', function() {
+		if (dcHScrollLock) return;
+		dcHScrollLock = true;
+		wrapper.scrollLeft(proxy.scrollLeft());
+		dcHScrollLock = false;
+	});
+
+	if (dcHScrollRO) {
+		dcHScrollRO.disconnect();
+	}
+
+	if (window.ResizeObserver) {
+		dcHScrollRO = new ResizeObserver(syncSpacer);
+		dcHScrollRO.observe(table[0]);
+	}
+
+	$(window).off('resize.dchscroll').on('resize.dchscroll', syncSpacer);
+
+	syncSpacer();
+}
+
+function dcAutoWidth(input, expand) {
+	var $input = $(input);
+
+	if (!expand) {
+		$input.css('width', '');
+		return;
+	}
+
+	var value = String($input.val() || $input.attr('placeholder') || '');
+
+	if (!value) {
+		$input.css('width', '');
+		return;
+	}
+
+	var $sizer = $('<span></span>').css({
+		position: 'absolute',
+		visibility: 'hidden',
+		whiteSpace: 'pre',
+		fontFamily: $input.css('fontFamily'),
+		fontSize: $input.css('fontSize'),
+		fontWeight: $input.css('fontWeight'),
+		letterSpacing: $input.css('letterSpacing')
+	}).appendTo('body').text(value);
+
+	var width = Math.ceil($sizer.width())
+		+ (parseFloat($input.css('paddingLeft')) || 0)
+		+ (parseFloat($input.css('paddingRight')) || 0)
+		+ (parseFloat($input.css('borderLeftWidth')) || 0)
+		+ (parseFloat($input.css('borderRightWidth')) || 0)
+		+ 2;
+
+	$sizer.remove();
+
+	$input.css('width', Math.max(width, 44) + 'px');
+}
+
+var dcAutoWidthSelector = '.dc-variant-model, .dc-inv-qty, .dc-price-base, .dc-price-cg, .dc-dim-length, .dc-dim-width, .dc-dim-height, .dc-dim-weight, .dc-code-sku, .dc-code-upc, .dc-code-ean, .dc-code-jan, .dc-code-isbn, .dc-code-mpn';
+
+$(document).on('focusin input', dcAutoWidthSelector, function() {
+	dcAutoWidth(this, true);
+});
+
+$(document).on('focusout', dcAutoWidthSelector, function() {
+	dcAutoWidth(this, false);
+});
+
+$(document).on('input', '.dc-inv-qty', function() {
+	onInventoryQtyInput(this);
+});
+
+$(document).on('input', '.dc-price-base, .dc-price-cg', function() {
+	onPricingInput(this);
+});
+
+$(document).on('input', '.dc-dim-length, .dc-dim-width, .dc-dim-height, .dc-dim-weight', function() {
+	onDimensionsInput(this);
+});
+
+$(document).on('input', '.dc-code-sku, .dc-code-upc, .dc-code-ean, .dc-code-jan, .dc-code-isbn, .dc-code-mpn', function() {
+	onCodesInput(this);
+});
+
+$(document).on('change', '.dc-img-variant select', function() {
+	onMediaVariantSelectChange(this);
 });
 //--></script>
 
@@ -1131,10 +1727,6 @@ $(window).on('beforeunload', function() {
 .dc-variant-table td.dc-col-sku { box-shadow: 2px 0 4px rgba(0,0,0,0.08); }
 .dc-variant-table th.dc-th-axis { min-width: 140px; }
 .dc-variant-table th.dc-th-sku { min-width: 150px; }
-.dc-variant-table th.dc-th-price { min-width: 180px; }
-.dc-variant-table th.dc-th-qty { min-width: 110px; }
-.dc-variant-table th.dc-th-weight { min-width: 110px; }
-.dc-variant-table th.dc-th-image { min-width: 60px; }
 .dc-variant-table th.dc-th-default { min-width: 40px; }
 .dc-variant-table th.dc-th-status { min-width: 50px; }
 .dc-variant-table th.dc-th-action { min-width: 40px; }
@@ -1173,67 +1765,13 @@ $(window).on('beforeunload', function() {
 .dc-star-btn.dc-star-active { color: #f0ad4e; }
 .dc-star-btn.dc-star-active:hover { color: #e09800; }
 
-.dc-variant-table .dc-img-remove { position: absolute; width: 16px; height: 16px; font-size: 10px; top: 2px; right: 2px; padding: 0; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-.dc-img-remove i { margin: 0; }
-.dc-variant-table div:hover > .dc-img-remove { opacity: 1; }
-
-.dc-variant-cg-subrow td { padding: 0 !important; }
-.dc-cg-inner { padding: 0; background: #fff; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 6px 6px; margin: 0 12px 8px; }
-
-.dc-subrow-tabs { display: flex; gap: 0; border-bottom: 1px solid #e9ecef; padding: 0 16px; }
-.dc-subrow-tab { padding: 10px 16px; border: none; background: none; font-size: 12px; font-weight: 500; color: #6c757d; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; position: relative; }
-.dc-subrow-tab:hover { color: #495057; background: #f8f9fa; }
-.dc-subrow-tab--active { color: #007bff; border-bottom-color: #007bff; font-weight: 600; }
-.dc-subrow-tab i,
-.dc-subrow-tab svg { width: 12px; height: 12px; }
-.dc-subrow-tab__badge { background: #6c757d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 16px; text-align: center; line-height: 1.3; }
-.dc-subrow-tab--active .dc-subrow-tab__badge { background: #007bff; }
-.dc-subrow-close { margin-left: auto; padding: 8px 12px; border: none; background: none; color: #6c757d; cursor: pointer; display: flex; align-items: center; transition: color 0.15s; }
-.dc-subrow-close:hover { color: #dc3545; }
-.dc-subrow-close i, .dc-subrow-close svg { width: 14px; height: 14px; }
-.dc-subrow-panel { padding: 16px; }
-.dc-subrow-panel:empty { display: none; }
-
-.dc-subrow-empty { text-align: center; padding: 20px; color: #adb5bd; font-size: 12px; font-style: italic; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.dc-subrow-empty i { font-size: 24px; opacity: 0.3; }
-
-.dc-subrow-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-.dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: normal; color: #6c757d; margin: 0; }
-.dc-subrow-fields label span { font-weight: 600; display: flex; align-items: center; gap: 4px; }
-.dc-subrow-fields input { width: 120px; }
-
-.dc-cg-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
-.dc-cg-header-group { width: 180px; flex-shrink: 0; }
-.dc-cg-header-price { width: 110px; flex-shrink: 0; }
-.dc-cg-header-action { flex: 1; }
+/* Group-price rows are shared with the option-value CG blocks in
+   product_form.twig — do not remove. */
 .dc-cg-prices { margin-bottom: 4px; }
 .dc-cg-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
 .dc-cg-row:last-of-type { margin-bottom: 0; }
 .dc-cg-row select { width: 180px; flex-shrink: 0; }
 .dc-cg-row input { width: 110px; flex-shrink: 0; }
-.dc-cg-add-btn { margin-top: 4px; }
-.dc-articles-toggle { border-color: #ced4da; }
-.dc-articles-toggle svg { width: 12px; height: 12px; }
-.dc-articles-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
-.dc-cg-toggle { border-color: #ced4da; }
-.dc-cg-toggle svg { width: 12px; height: 12px; }
-.dc-cg-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
-.dc-special-toggle { border-color: #ced4da; }
-.dc-special-toggle svg { width: 12px; height: 12px; }
-.dc-special-toggle.btn-primary { color: #fff; background-color: #f0ad4e; border-color: #eea236; }
-.dc-special-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
-.dc-special-header-group { width: 140px; flex-shrink: 0; }
-.dc-special-header-priority { width: 70px; flex-shrink: 0; }
-.dc-special-header-quantity { width: 70px; flex-shrink: 0; }
-.dc-special-header-price { width: 100px; flex-shrink: 0; }
-.dc-special-header-date { width: 120px; flex-shrink: 0; }
-.dc-special-header-renew { width: 50px; flex-shrink: 0; text-align: center; }
-.dc-special-header-action { flex: 1; }
-.dc-special-prices { margin-bottom: 4px; }
-.dc-special-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
-.dc-special-row:last-of-type { margin-bottom: 0; }
-.dc-special-row select { width: 140px; flex-shrink: 0; }
-.dc-special-add-btn { margin-top: 4px; }
 
 .dc-variant-table .btn-sm i[data-lucide],
 .dc-variant-table .btn-sm svg { width: 14px; height: 14px; }
@@ -1241,4 +1779,118 @@ $(window).on('beforeunload', function() {
 .dc-variant-table .btn-xs svg { width: 12px; height: 12px; }
 #dc-variant-matrix-section > .row .btn i[data-lucide],
 #dc-variant-matrix-section > .row .btn svg { width: 14px; height: 14px; }
+
+.dc-hscroll { position: sticky; bottom: 0; height: 14px; overflow-x: auto; overflow-y: hidden; z-index: 9; margin-top: -1px; }
+.dc-hscroll__spacer { height: 1px; }
+.dc-hscroll::-webkit-scrollbar { height: 12px; -webkit-appearance: none; }
+.dc-hscroll::-webkit-scrollbar-track { background: #eef1f5; border-radius: 6px; }
+.dc-hscroll::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 6px; border: 2px solid #eef1f5; }
+.dc-hscroll::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+
+.dc-inv-label { display: flex; align-items: center; gap: 6px; }
+.dc-inv-label svg { flex-shrink: 0; color: #868e96; }
+.dc-inv-badge { background: #eef2ff; color: #4c6ef5; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; line-height: 1.4; }
+.dc-inv-total { margin-left: auto; font-size: 12px; color: #495057; font-weight: 600; white-space: nowrap; }
+
+.dc-inv-block { border: 1px solid #dee2e6; border-radius: 6px; background: #fff; max-height: min(320px, 38vh); overflow-y: scroll; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #b6bec9 #eef1f5; }
+.dc-inv-block::-webkit-scrollbar { width: 10px; -webkit-appearance: none; }
+.dc-inv-block::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-inv-block::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-inv-block::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+
+.dc-inv-row { display: flex; align-items: center; gap: 8px; padding: 3px 10px; border-bottom: 1px solid #f1f3f5; border-left: 3px solid transparent; transition: background-color 0.15s, border-left-color 0.3s; }
+.dc-inv-row:last-child { border-bottom: none; }
+.dc-inv-row:hover { background: #f0f4ff; }
+.dc-inv-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #343a40; cursor: default; }
+.dc-inv-model { flex-shrink: 0; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #868e96; background: #f1f3f5; border-radius: 3px; padding: 1px 6px; cursor: default; }
+.dc-inv-row--off { opacity: 0.55; }
+.dc-inv-row--off .dc-inv-name { color: #adb5bd; }
+.dc-inv-qty { width: 70px; min-width: 70px; flex-shrink: 0; text-align: right; height: 26px; line-height: 1.4; padding: 2px 6px; font-size: 12px; }
+.dc-inv-qty.dc-zero { color: #dc3545; font-weight: 600; }
+
+.dc-inv-row.dc-inv-dirty { border-left-color: #ffc107; }
+.dc-inv-row.dc-inv-saving { border-left-color: #6c757d; opacity: 0.75; pointer-events: none; }
+.dc-inv-row.dc-inv-error { border-left-color: #dc3545; }
+.dc-inv-row.dc-inv-flash { border-left-color: #28a745; }
+
+.dc-price-head { display: flex; align-items: center; gap: 6px; }
+.dc-price-head svg { flex-shrink: 0; color: #868e96; }
+.dc-price-badge { background: #eef2ff; color: #4c6ef5; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; line-height: 1.4; }
+.dc-price-range { margin-left: auto; font-size: 12px; color: #495057; font-weight: 600; white-space: nowrap; }
+.dc-price-block { border: 1px solid #dee2e6; border-radius: 6px; background: #fff; max-height: min(380px, 42vh); overflow: auto; scrollbar-width: thin; scrollbar-color: #b6bec9 #eef1f5; }
+.dc-price-block::-webkit-scrollbar { width: 10px; -webkit-appearance: none; }
+.dc-price-block::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-price-block::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-price-block::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+.dc-price-scroll { overflow-x: auto; overflow-y: hidden; }
+.dc-price-scroll::-webkit-scrollbar { height: 10px; -webkit-appearance: none; }
+.dc-price-scroll::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-price-scroll::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-price-scroll::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+.dc-price-table { min-width: 100%; display: table; border-collapse: collapse; }
+.dc-price-header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; font-size: 11px; font-weight: 600; color: #6c757d; position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+.dc-price-header-name { flex: 1; min-width: 140px; }
+.dc-price-header-price { width: 95px; flex-shrink: 0; text-align: right; }
+.dc-price-header-cg { width: 95px; flex-shrink: 0; text-align: right; overflow: hidden; text-overflow: ellipsis; }
+.dc-price-row { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-bottom: 1px solid #f1f3f5; border-left: 3px solid transparent; transition: background-color 0.15s, border-left-color 0.3s; }
+.dc-price-row:last-child { border-bottom: none; }
+.dc-price-row:hover { background: #f0f4ff; }
+.dc-price-name { flex: 1; min-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #343a40; cursor: default; display: flex; align-items: center; gap: 6px; }
+.dc-price-label { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-price-model { flex-shrink: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #868e96; background: #f1f3f5; border-radius: 3px; padding: 1px 6px; cursor: default; }
+.dc-price-row--off { opacity: 0.55; }
+.dc-price-row--off .dc-price-name { color: #adb5bd; }
+.dc-price-base, .dc-price-cg { width: 95px; min-width: 95px; flex-shrink: 0; text-align: right; height: 26px; line-height: 1.4; padding: 2px 6px; font-size: 12px; }
+.dc-price-base.dc-zero, .dc-price-cg.dc-zero { color: #dc3545; font-weight: 600; }
+.dc-price-row.dc-price-dirty { border-left-color: #ffc107; }
+.dc-price-row.dc-price-saving { border-left-color: #6c757d; opacity: 0.75; pointer-events: none; }
+.dc-price-row.dc-price-error { border-left-color: #dc3545; }
+.dc-price-row.dc-price-flash { border-left-color: #28a745; }
+
+.dc-dim-label { display: flex; align-items: center; gap: 6px; }
+.dc-dim-label svg { flex-shrink: 0; color: #868e96; }
+.dc-dim-badge { background: #eef2ff; color: #4c6ef5; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; line-height: 1.4; }
+.dc-dim-range { margin-left: auto; font-size: 12px; color: #495057; font-weight: 600; white-space: nowrap; }
+.dc-dim-block { border: 1px solid #dee2e6; border-radius: 6px; background: #fff; max-height: min(380px, 42vh); overflow: auto; scrollbar-width: thin; scrollbar-color: #b6bec9 #eef1f5; }
+.dc-dim-block::-webkit-scrollbar { width: 10px; -webkit-appearance: none; }
+.dc-dim-block::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-dim-block::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-dim-block::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+.dc-dim-scroll { overflow-x: auto; overflow-y: hidden; }
+.dc-dim-scroll::-webkit-scrollbar { height: 10px; -webkit-appearance: none; }
+.dc-dim-scroll::-webkit-scrollbar-track { background: #eef1f5; }
+.dc-dim-scroll::-webkit-scrollbar-thumb { background: #b6bec9; border-radius: 5px; border: 2px solid #eef1f5; }
+.dc-dim-scroll::-webkit-scrollbar-thumb:hover { background: #98a3b1; }
+.dc-dim-table { min-width: 100%; display: table; border-collapse: collapse; }
+.dc-dim-header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; font-size: 11px; font-weight: 600; color: #6c757d; position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+.dc-dim-header-name { flex: 1; min-width: 140px; }
+.dc-dim-header-field { width: 85px; flex-shrink: 0; text-align: right; }
+.dc-dim-row { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-bottom: 1px solid #f1f3f5; border-left: 3px solid transparent; transition: background-color 0.15s, border-left-color 0.3s; }
+.dc-dim-row:last-child { border-bottom: none; }
+.dc-dim-row:hover { background: #f0f4ff; }
+.dc-dim-name { flex: 1; min-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #343a40; cursor: default; display: flex; align-items: center; gap: 6px; }
+.dc-dim-label { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-dim-model { flex-shrink: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #868e96; background: #f1f3f5; border-radius: 3px; padding: 1px 6px; cursor: default; }
+.dc-dim-row--off { opacity: 0.55; }
+.dc-dim-row--off .dc-dim-name { color: #adb5bd; }
+.dc-dim-length, .dc-dim-width, .dc-dim-height, .dc-dim-weight { width: 85px; min-width: 85px; flex-shrink: 0; text-align: right; height: 26px; line-height: 1.4; padding: 2px 6px; font-size: 12px; }
+.dc-dim-row.dc-dim-dirty { border-left-color: #ffc107; }
+.dc-dim-row.dc-dim-saving { border-left-color: #6c757d; opacity: 0.75; pointer-events: none; }
+.dc-dim-row.dc-dim-error { border-left-color: #dc3545; }
+.dc-dim-row.dc-dim-flash { border-left-color: #28a745; }
+
+.dc-code-table { min-width: 100%; display: table; border-collapse: collapse; }
+.dc-code-header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #f8f9fa; border-bottom: 1px solid #dee2e6; font-size: 11px; font-weight: 600; color: #6c757d; position: sticky; top: 0; z-index: 1; white-space: nowrap; }
+.dc-code-header-name { flex: 1; min-width: 140px; }
+.dc-code-header-field { width: 105px; flex-shrink: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; }
+.dc-code-row { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-bottom: 1px solid #f1f3f5; border-left: 3px solid transparent; transition: background-color 0.15s, border-left-color 0.3s; }
+.dc-code-row:last-child { border-bottom: none; }
+.dc-code-row:hover { background: #f0f4ff; }
+.dc-code-row--off { opacity: 0.55; }
+.dc-code-row--off .dc-price-name { color: #adb5bd; }
+.dc-code-sku, .dc-code-upc, .dc-code-ean, .dc-code-jan, .dc-code-isbn, .dc-code-mpn { width: 105px; min-width: 105px; flex-shrink: 0; height: 26px; line-height: 1.4; padding: 2px 6px; font-size: 12px; }
+.dc-code-row.dc-code-dirty { border-left-color: #ffc107; }
+.dc-code-row.dc-code-saving { border-left-color: #6c757d; opacity: 0.75; pointer-events: none; }
+.dc-code-row.dc-code-error { border-left-color: #dc3545; }
+.dc-code-row.dc-code-flash { border-left-color: #28a745; }
 </style>

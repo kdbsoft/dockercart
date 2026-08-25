@@ -158,6 +158,15 @@ function library($class) {
 		DIR_SYSTEM . 'library/' . $prefix . $lowerCase . '.php',
 	];
 
+	// DockerCart custom libraries live in library/dockercart/, named after the
+	// class without its Dockercart prefix: DockercartLicensing and
+	// Dockercart\Licensing both resolve to library/dockercart/licensing.php.
+	if ($namespace === 'dockercart' || ($namespace === '' && str_starts_with($className, 'Dockercart'))) {
+		$short = $namespace === '' ? substr($snakeCase, strlen('dockercart_')) : $snakeCase;
+
+		$files[] = DIR_SYSTEM . 'library/dockercart/' . $short . '.php';
+	}
+
 	foreach ($files as $file) {
 		if (is_file($file)) {
 			include_once(modification($file));

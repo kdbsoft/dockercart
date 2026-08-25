@@ -14,6 +14,27 @@ class ControllerSettingSetting extends Controller {
 			// (e.g. config_order_flow_*, config_reward_*, config_cart_abandoned_*) intact
 			$this->model_setting_setting->updateSetting('config', $this->request->post);
 
+			// Warehouse feature toggled on: backfill order lines created while
+			// it was off (warehouse_id = 0) so later restocks / returns land on
+			// an explicit warehouse instead of the fallback branch.
+			$was_enabled = (int)$this->config->get('config_warehouse_enabled');
+			$now_enabled = (int)(isset($this->request->post['config_warehouse_enabled']) ? $this->request->post['config_warehouse_enabled'] : 0);
+
+			if (!$was_enabled && $now_enabled) {
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
+
+				$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET `warehouse_id` = '" . (int)$default_warehouse_id . "' WHERE `warehouse_id` = '0' AND `order_product_id` > 0");
+
+				$backfilled = $this->db->countAffected();
+
+				if ($backfilled > 0) {
+					$this->session->data['success'] = sprintf($this->language->get('text_warehouse_backfill'), $backfilled);
+				}
+			} else {
+				$this->session->data['success'] = $this->language->get('text_success');
+			}
+
 //			if ($this->config->get('config_currency_auto')) {
 //				$this->load->model('localisation/currency');
 //
@@ -396,18 +417,6 @@ class ControllerSettingSetting extends Controller {
 			$data['config_comment'] = $this->config->get('config_comment');
 		}
 
-		$this->load->model('localisation/location');
-
-		$data['locations'] = $this->model_localisation_location->getLocations();
-
-		if (isset($this->request->post['config_location'])) {
-			$data['config_location'] = $this->request->post['config_location'];
-		} elseif ($this->config->get('config_location')) {
-			$data['config_location'] = $this->config->get('config_location');
-		} else {
-			$data['config_location'] = array();
-		}
-
 		if (isset($this->request->post['config_country_id'])) {
 			$data['config_country_id'] = $this->request->post['config_country_id'];
 		} else {
@@ -739,6 +748,16 @@ class ControllerSettingSetting extends Controller {
 			$data['config_stock_reserve_stale_days'] = (int)$this->config->get('config_stock_reserve_stale_days');
 		} else {
 			$data['config_stock_reserve_stale_days'] = 14;
+		}
+
+		foreach (['config_warehouse_enabled', 'config_warehouse_split_allowed', 'config_warehouse_stock_display', 'config_warehouse_show_pickup', 'config_warehouse_estimate_enabled', 'config_warehouse_dropship_checkout'] as $key) {
+			if (isset($this->request->post[$key])) {
+				$data[$key] = $this->request->post[$key];
+			} elseif ($this->config->has($key)) {
+				$data[$key] = (int)$this->config->get($key);
+			} else {
+				$data[$key] = 0;
+			}
 		}
 
 		if (isset($this->request->post['config_affiliate_group_id'])) {

@@ -1,0 +1,147 @@
+<div class="row">
+  <div id="filter-report" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="funnel" width="14" height="14"></i></div>
+        <div>
+          <h3 class="dcx-panel-title">{{ text_filter }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <div class="dcx-fields">
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-date-start">{{ entry_date_start }}</label>
+            <div class="input-group date">
+              <input type="text" name="filter_date_start" value="{{ filter_date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" id="input-date-start" class="form-control" />
+              <span class="input-group-btn">
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+              </span></div>
+          </div>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-date-end">{{ entry_date_end }}</label>
+            <div class="input-group date">
+              <input type="text" name="filter_date_end" value="{{ filter_date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" id="input-date-end" class="form-control" />
+              <span class="input-group-btn">
+              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
+              </span></div>
+          </div>
+          <div class="dcx-field">
+            <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+            <select name="filter_status" id="input-status" class="form-control">
+              <option value="">{{ text_all_status }}</option>
+              {% for status in statuses %}
+              {% if status.value == filter_status %}
+              <option value="{{ status.value }}" selected="selected">{{ status.text }}</option>
+              {% else %}
+              <option value="{{ status.value }}">{{ status.text }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="dcx-field text-right">
+            <button type="button" id="button-filter" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-9 col-md-pull-3 col-sm-12">
+    <div class="dcx-panel">
+      <div class="dcx-panel-head">
+        <div class="dcx-panel-head__icon"><i data-lucide="trending-up" width="16" height="16"></i></div>
+        <div>
+          <h3 class="dcx-panel-title">{{ heading_title }}</h3>
+          <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+        </div>
+      </div>
+      <div class="dcx-panel-body">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <td class="text-left">{{ column_supplier }}</td>
+                <td class="text-right">{{ column_lines }}</td>
+                <td class="text-right">{{ column_units }}</td>
+                <td class="text-right">{{ column_revenue }}</td>
+                <td class="text-right">{{ column_purchase }}</td>
+                <td class="text-right">{{ column_profit }}</td>
+                <td class="text-right">{{ column_margin }}</td>
+                <td class="text-right" data-toggle="tooltip" title="{{ help_no_cost }}">{{ column_no_cost }}</td>
+              </tr>
+            </thead>
+            <tbody>
+            {% if suppliers %}
+            {% for supplier in suppliers %}
+            <tr>
+              <td class="text-left">{{ supplier.supplier ?: '—' }}</td>
+              <td class="text-right">{{ supplier.lines_total }}</td>
+              <td class="text-right">{{ supplier.units }}</td>
+              <td class="text-right">{{ supplier.revenue }}</td>
+              <td class="text-right">{{ supplier.purchase }}</td>
+              <td class="text-right{{ supplier.profit_negative ? ' text-danger' : '' }}">{{ supplier.profit }}</td>
+              <td class="text-right">{{ supplier.margin }}</td>
+              <td class="text-right{% if supplier.no_cost %} text-warning{% endif %}">{% if supplier.no_cost %}{{ supplier.no_cost }}{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="8">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+            {% if suppliers %}
+            <tfoot>
+              <tr>
+                <td class="text-left"><strong>{{ column_totals }}</strong></td>
+                <td class="text-right"><strong>{{ totals.lines_total }}</strong></td>
+                <td class="text-right"><strong>{{ totals.units }}</strong></td>
+                <td class="text-right"><strong>{{ totals.revenue }}</strong></td>
+                <td class="text-right"><strong>{{ totals.purchase }}</strong></td>
+                <td class="text-right{{ totals.profit_negative ? ' text-danger' : '' }}"><strong>{{ totals.profit }}</strong></td>
+                <td class="text-right"><strong>{{ totals.margin }}</strong></td>
+                <td class="text-right{% if totals.no_cost %} text-warning{% endif %}"><strong>{% if totals.no_cost %}{{ totals.no_cost }}{% else %}—{% endif %}</strong></td>
+              </tr>
+            </tfoot>
+            {% endif %}
+          </table>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 text-left"><div class="pagination-wrap">{{ pagination }}</div></div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+
+	var filter_date_start = $('input[name=\'filter_date_start\']').val();
+
+	if (filter_date_start) {
+		url += '&filter_date_start=' + encodeURIComponent(filter_date_start);
+	}
+
+	var filter_date_end = $('input[name=\'filter_date_end\']').val();
+
+	if (filter_date_end) {
+		url += '&filter_date_end=' + encodeURIComponent(filter_date_end);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status) {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=report/report&code=supplier_profit&user_token={{ user_token }}' + url;
+});
+//--></script>
+<script type="text/javascript"><!--
+$('.date').datetimepicker({
+	language: '{{ datepicker }}',
+	pickTime: false
+});
+//--></script>

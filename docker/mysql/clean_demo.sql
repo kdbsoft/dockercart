@@ -4,6 +4,7 @@
 -- KEEPING: schema, localisation reference data (countries, zones, languages,
 -- currencies, order/return/stock statuses, tax classes/rates/rules, geo zones,
 -- length/weight classes, customer groups, review criteria, voucher themes),
+-- the primary warehouse (id=1) with its schedule and delivery windows,
 -- store settings (oc_setting), extensions/events/layouts/modules, information
 -- pages, admin user and applied migrations.
 --
@@ -96,6 +97,13 @@ DELETE FROM `oc_dockercart_newsletter_description`;
 DELETE FROM `oc_dockercart_newsletter_subscriber`;
 DELETE FROM `oc_marketing`;
 
+-- Demo payment/shipping methods created via the universal method editor
+-- (fixed-price demo shipping rates, demo payment methods).
+DELETE FROM `oc_dockercart_universal_payment`;
+DELETE FROM `oc_dockercart_universal_payment_description`;
+DELETE FROM `oc_dockercart_universal_shipping`;
+DELETE FROM `oc_dockercart_universal_shipping_description`;
+
 -- Blog
 DELETE FROM `oc_blog_author`;
 DELETE FROM `oc_blog_category`;
@@ -113,6 +121,18 @@ DELETE FROM `oc_blog_comment`;
 DELETE FROM `oc_blog_event`;
 DELETE FROM `oc_blog_seo_url`;
 -- oc_blog_setting holds module settings — keep it.
+
+-- Warehouses: keep the primary warehouse (id=1) with its schedule/windows,
+-- remove demo dropship warehouses and all stock/movement/holiday/transfer data
+-- (stock rows reference deleted demo products; no FK constraints on these tables).
+DELETE FROM `oc_warehouse_stock`;
+DELETE FROM `oc_warehouse_stock_movement`;
+DELETE FROM `oc_warehouse_holiday`;
+DELETE FROM `oc_warehouse_holiday_description`;
+DELETE FROM `oc_warehouse_transfer`;
+DELETE FROM `oc_warehouse_transfer_item`;
+DELETE FROM `oc_warehouse_description` WHERE `warehouse_id` <> 1;
+DELETE FROM `oc_warehouse` WHERE `warehouse_id` <> 1;
 
 -- Customers, orders, and activity
 DELETE FROM `oc_customer`;
@@ -144,6 +164,8 @@ DELETE FROM `oc_order_total`;
 DELETE FROM `oc_order_voucher`;
 DELETE FROM `oc_order_claim`;
 DELETE FROM `oc_order_document`;
+-- Trash holds soft-deleted records (incl. demo orders with full JSON payload).
+DELETE FROM `oc_trash`;
 DELETE FROM `oc_return`;
 DELETE FROM `oc_return_history`;
 DELETE FROM `oc_return_product`;
@@ -206,5 +228,9 @@ ALTER TABLE `oc_blog_author` AUTO_INCREMENT = 1;
 ALTER TABLE `oc_blog_category` AUTO_INCREMENT = 1;
 ALTER TABLE `oc_blog_post` AUTO_INCREMENT = 1;
 ALTER TABLE `oc_blog_comment` AUTO_INCREMENT = 1;
+ALTER TABLE `oc_warehouse` AUTO_INCREMENT = 1;
+ALTER TABLE `oc_dockercart_universal_payment` AUTO_INCREMENT = 1;
+ALTER TABLE `oc_dockercart_universal_shipping` AUTO_INCREMENT = 1;
+ALTER TABLE `oc_trash` AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;

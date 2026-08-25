@@ -105,6 +105,11 @@ class ModelExtensionModuleDockerCartCheckout extends Model {
     /**
      * Get checkout funnel statistics
      *
+     * A session's funnel position is the deepest step it reached and each
+     * step counts sessions that got at least that far, so the counts stay
+     * monotonic even when steps are skipped or hit without loading the
+     * checkout page first.
+     *
      * @param array $filter Filter options
      * @return array
      */
@@ -119,9 +124,29 @@ class ModelExtensionModuleDockerCartCheckout extends Model {
             'completed' => 0
         );
 
-        $sql = "SELECT step, COUNT(DISTINCT session_id) as count
-                FROM `" . DB_PREFIX . "dockercart_checkout_analytics`
-                WHERE 1=1";
+        // Rank per event; payment_address shares shipping_address's rank so
+        // sessions that only saved a payment address stay in funnel.
+        $sql = "SELECT SUM(t.max_ord >= 1) AS cart,
+                       SUM(t.max_ord >= 2) AS customer,
+                       SUM(t.max_ord >= 3) AS shipping_address,
+                       SUM(t.max_ord >= 4) AS shipping_method,
+                       SUM(t.max_ord >= 5) AS payment_method,
+                       SUM(t.max_ord >= 6) AS confirm,
+                       SUM(t.max_ord >= 7) AS completed
+                FROM (
+                    SELECT session_id,
+                           MAX(CASE step
+                               WHEN 'cart' THEN 1
+                               WHEN 'customer' THEN 2
+                               WHEN 'shipping_address' THEN 3
+                               WHEN 'payment_address' THEN 3
+                               WHEN 'shipping_method' THEN 4
+                               WHEN 'payment_method' THEN 5
+                               WHEN 'confirm' THEN 6
+                               WHEN 'completed' THEN 7
+                               ELSE 0 END) AS max_ord
+                    FROM `" . DB_PREFIX . "dockercart_checkout_analytics`
+                    WHERE 1=1";
 
         if (!empty($filter['date_start'])) {
             $sql .= " AND DATE(date_added) >= '" . $this->db->escape($filter['date_start']) . "'";
@@ -131,13 +156,14 @@ class ModelExtensionModuleDockerCartCheckout extends Model {
             $sql .= " AND DATE(date_added) <= '" . $this->db->escape($filter['date_end']) . "'";
         }
 
-        $sql .= " GROUP BY step";
+        $sql .= " GROUP BY session_id
+                ) t";
 
         $query = $this->db->query($sql);
 
-        foreach ($query->rows as $row) {
-            if (isset($steps[$row['step']])) {
-                $steps[$row['step']] = (int)$row['count'];
+        if ($query->num_rows) {
+            foreach ($steps as $step => $count) {
+                $steps[$step] = (int)$query->row[$step];
             }
         }
 
@@ -285,30 +311,36 @@ class ModelExtensionModuleDockerCartCheckout extends Model {
     /**
      * Get average checkout time
      *
+     * Measured per session from its first cart step to its completed step;
+     * sessions missing either event are ignored.
+     *
      * @param array $filter Filter options
      * @return int Seconds
      */
     public function getAverageCheckoutTime($filter = array()) {
-        $sql = "SELECT AVG(TIMESTAMPDIFF(SECOND,
-                    (SELECT MIN(a2.date_added)
-                     FROM `" . DB_PREFIX . "dockercart_checkout_analytics` a2
-                     WHERE a2.session_id = a.session_id AND a2.step = 'cart'),
-                    a.date_added
-                )) as avg_time
-                FROM `" . DB_PREFIX . "dockercart_checkout_analytics` a
-                WHERE a.step = 'completed'";
+        $sql = "SELECT AVG(t.duration) AS avg_time
+                FROM (
+                    SELECT TIMESTAMPDIFF(SECOND,
+                        MIN(CASE WHEN step = 'cart' THEN date_added END),
+                        MIN(CASE WHEN step = 'completed' THEN date_added END)
+                    ) AS duration
+                    FROM `" . DB_PREFIX . "dockercart_checkout_analytics`
+                    WHERE 1=1";
 
         if (!empty($filter['date_start'])) {
-            $sql .= " AND DATE(a.date_added) >= '" . $this->db->escape($filter['date_start']) . "'";
+            $sql .= " AND DATE(date_added) >= '" . $this->db->escape($filter['date_start']) . "'";
         }
 
         if (!empty($filter['date_end'])) {
-            $sql .= " AND DATE(a.date_added) <= '" . $this->db->escape($filter['date_end']) . "'";
+            $sql .= " AND DATE(date_added) <= '" . $this->db->escape($filter['date_end']) . "'";
         }
+
+        $sql .= " GROUP BY session_id
+                ) t";
 
         $query = $this->db->query($sql);
 
-        return (int)$query->row['avg_time'];
+        return (int)($query->row['avg_time'] ?? 0);
     }
 
     /**

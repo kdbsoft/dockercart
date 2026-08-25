@@ -64,7 +64,7 @@
                   <label class="dcx-label">{{ entry_keyword }}</label>
                   {% for language in languages %}
                   <div class="dc-attr-row__value">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="seo_url[{{ store_id }}][{{ language.language_id }}]" value="{% if seo_url[store_id][language.language_id] %}{{ seo_url[store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyword }}" class="form-control" />
                   </div>
                   {% if error_keyword[store_id][language.language_id] %}

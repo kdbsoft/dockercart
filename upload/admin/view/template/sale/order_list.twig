@@ -3,6 +3,8 @@
   <style>
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .ship-progress { height:5px; background:#eee; border-radius:3px; overflow:hidden; margin-top:4px; max-width:120px; }
+    .ship-progress__bar { height:100%; background:#22c55e; border-radius:3px; }
   </style>
   <div class="page-header">
     <div class="container-fluid">
@@ -81,6 +83,15 @@
                 </select>
               </div>
               <div class="filter-field">
+                <label for="input-shipping-status">{{ text_shipping_status }}</label>
+                <select name="filter_shipping_status" id="input-shipping-status" class="form-control">
+                  <option value=""></option>
+                  {% for value, text in shipping_statuses %}
+                  <option value="{{ value }}" {% if filter_shipping_status == value %}selected="selected"{% endif %}>{{ text }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="filter-field">
                 <label for="input-total">{{ entry_total }}</label>
                 <input type="text" name="filter_total" value="{{ filter_total }}" placeholder="{{ entry_total }}" id="input-total" class="form-control" />
               </div>
@@ -126,14 +137,14 @@
                   <input type="checkbox" name="selected[]" value="{{ order.order_id }}" />
                   {% endif %}
                   <input type="hidden" name="shipping_code[]" value="{{ order.shipping_code }}" /></td>
-                <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><a href="{{ order.view }}" class="row-title-link">{{ order.order_id }}</a></td>
+                <td class="text-right" style="padding-top:8px;padding-bottom:8px;"><a href="{{ order.view }}" class="row-title-link">{{ order.order_id }}</a>{% if order.invoice_no %}<br><small class="text-muted" style="white-space:nowrap"><span data-toggle="tooltip" title="{{ text_invoice_no }}"><i data-lucide="file-text" width="11" height="11"></i></span> {{ order.invoice_no }}</small>{% endif %}</td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
                   <span class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
                 </td>
                 <td class="text-left"><span class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px">{{ order.paid_amount }}</div>{% endif %}</td>
-                <td class="text-left" style="font-size:12px;color:#555">{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
+                <td class="text-left" style="font-size:12px;color:#555">{% if order.shipping_status %}<span class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ order.shipping_shipped_quantity }} / {{ order.shipping_ordered_quantity }}">{{ order.shipping_status_text }}</span><div class="ship-progress"><div class="ship-progress__bar" style="width: {{ order.shipping_progress_percent }}%"></div></div>{% endif %}{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
                 <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
               </tr>
@@ -186,6 +197,12 @@ $('#button-filter').on('click', function() {
 
 	if (filter_payment_status) {
 		url += '&filter_payment_status=' + encodeURIComponent(filter_payment_status);
+	}
+
+	var filter_shipping_status = $('select[name=\'filter_shipping_status\']').val();
+
+	if (filter_shipping_status) {
+		url += '&filter_shipping_status=' + encodeURIComponent(filter_shipping_status);
 	}
 
 	var filter_total = $('input[name=\'filter_total\']').val();

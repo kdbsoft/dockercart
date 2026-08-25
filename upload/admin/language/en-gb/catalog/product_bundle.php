@@ -1,10 +1,9 @@
 <?php
-$_['heading_title']         = 'Bundle Discounts';
-
-$_['text_success']          = 'Success: You have modified product bundles!';
-$_['text_list']             = 'Bundle List';
-$_['text_add']              = 'Add Bundle';
-$_['text_edit']             = 'Edit Bundle';
+// Bundle-specific strings only. Keys shared with catalog/product.php
+// (heading_title, entry_name, text_add/edit, error_name, ...) must not be
+// defined here: this file is loaded after catalog/product by the product
+// form controller and would override them (e.g. the product Name label
+// showing "Bundle Name"). The standalone bundle CRUD pages are unused.
 $_['text_percentage']       = 'Percentage';
 $_['text_fixed']            = 'Fixed Amount';
 $_['text_enabled']          = 'Enabled';
@@ -13,9 +12,6 @@ $_['text_no_results']       = 'No results!';
 $_['text_no_name']          = '(No Name)';
 $_['text_confirm']          = 'Are you sure?';
 $_['text_select_product']   = 'Search product by name...';
-// Subtitle
-
-$_['text_list_subtitle'] = 'Manage product bundles';
 
 $_['text_add_product_bundle_subtitle'] = 'Create a new product bundle';
 
@@ -23,7 +19,6 @@ $_['text_edit_product_bundle_subtitle'] = 'Edit product bundle contents';
 
 
 
-$_['column_name']           = 'Bundle Name';
 $_['column_products']       = 'Products';
 $_['column_discount']       = 'Discount';
 $_['column_status']         = 'Status';
@@ -32,7 +27,6 @@ $_['column_date_end']       = 'Date End';
 $_['column_sort_order']     = 'Sort Order';
 $_['column_action']         = 'Action';
 
-$_['entry_name']            = 'Bundle Name';
 $_['entry_product']         = 'Products';
 $_['entry_discount_type']   = 'Discount Type';
 $_['entry_discount_value']  = 'Discount Value';
@@ -52,8 +46,6 @@ $_['help_date_start']       = 'Start date for bundle availability';
 $_['help_date_end']         = 'End date for bundle availability';
 
 $_['error_warning']         = 'Warning: Please check the form carefully for errors!';
-$_['error_permission']      = 'Warning: You do not have permission to modify product bundles!';
-$_['error_name']            = 'Bundle Name must be between 0 and 255 characters!';
 $_['error_products']        = 'You must select at least 2 products!';
 $_['error_discount_value']  = 'Discount Value must be greater than 0!';
 $_['error_date']            = 'Date End must be after Date Start!';

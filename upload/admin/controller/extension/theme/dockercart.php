@@ -41,9 +41,7 @@ class ControllerExtensionThemeDockercart extends Controller {
 				'theme_dockercart_image_compare_width'        => 90,
 				'theme_dockercart_image_compare_height'       => 90,
 				'theme_dockercart_image_cart_width'           => 47,
-				'theme_dockercart_image_cart_height'          => 47,
-				'theme_dockercart_image_location_width'       => 268,
-				'theme_dockercart_image_location_height'      => 50
+				'theme_dockercart_image_cart_height'          => 47
 			), $dockercart_settings);
 
 			$dockercart_settings['theme_dockercart_directory'] = 'dockercart';
@@ -120,12 +118,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['error_image_cart'] = $this->error['image_cart'];
 		} else {
 			$data['error_image_cart'] = '';
-		}
-
-		if (isset($this->error['image_location'])) {
-			$data['error_image_location'] = $this->error['image_location'];
-		} else {
-			$data['error_image_location'] = '';
 		}
 
 		$data['action'] = $this->url->link('extension/theme/dockercart', 'user_token=' . $this->session->data['user_token'] . '&store_id=' . $this->request->get['store_id'], true);
@@ -296,22 +288,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 			$data['theme_dockercart_image_cart_height'] = 47;
 		}
 
-		if (isset($this->request->post['theme_dockercart_image_location_width'])) {
-			$data['theme_dockercart_image_location_width'] = $this->request->post['theme_dockercart_image_location_width'];
-		} elseif (isset($setting_info['theme_dockercart_image_location_width'])) {
-			$data['theme_dockercart_image_location_width'] = $setting_info['theme_dockercart_image_location_width'];
-		} else {
-			$data['theme_dockercart_image_location_width'] = 268;
-		}
-
-		if (isset($this->request->post['theme_dockercart_image_location_height'])) {
-			$data['theme_dockercart_image_location_height'] = $this->request->post['theme_dockercart_image_location_height'];
-		} elseif (isset($setting_info['theme_dockercart_image_location_height'])) {
-			$data['theme_dockercart_image_location_height'] = $setting_info['theme_dockercart_image_location_height'];
-		} else {
-			$data['theme_dockercart_image_location_height'] = 50;
-		}
-
 		$data['text_edit_subtitle'] = $this->language->get('text_edit_subtitle');
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
@@ -355,10 +331,6 @@ class ControllerExtensionThemeDockercart extends Controller {
 
 		if (!$this->request->post['theme_dockercart_image_cart_width'] || !$this->request->post['theme_dockercart_image_cart_height']) {
 			$this->error['image_cart'] = $this->language->get('error_image_cart');
-		}
-
-		if (!$this->request->post['theme_dockercart_image_location_width'] || !$this->request->post['theme_dockercart_image_location_height']) {
-			$this->error['image_location'] = $this->language->get('error_image_location');
 		}
 
 		if (isset($this->request->post['theme_dockercart_image_webp_quality'])) {

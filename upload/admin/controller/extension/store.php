@@ -2,12 +2,8 @@
 
 declare(strict_types=1);
 
-require_once DIR_SYSTEM . 'library/dockercart/install_helper.php';
-
 class ControllerExtensionStore extends Controller {
 	private function loadStore(): DockercartExtensionStore {
-		require_once DIR_SYSTEM . 'library/dockercart/extension_store.php';
-
 		return new DockercartExtensionStore($this->registry);
 	}
 
@@ -833,8 +829,7 @@ class ControllerExtensionStore extends Controller {
 			$store->removeInstalledMeta($code);
 
 			// Remove license
-			if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-				require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
+			if (class_exists('DockercartLicensing')) {
 				$licensing = new DockercartLicensing($this->registry);
 				$licensing->removeLicense($code);
 			}
@@ -904,8 +899,6 @@ class ControllerExtensionStore extends Controller {
 
 			return;
 		}
-
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 
 		$code = 'dockercart_' . preg_replace('/^dockercart_/', '', $sku);
 
@@ -989,7 +982,6 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 		$licensing = new DockercartLicensing($this->registry);
 		$licensing->setLicenseKey($module_code, $sku, $license_key);
 
@@ -1042,7 +1034,6 @@ class ControllerExtensionStore extends Controller {
 			return;
 		}
 
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 		$licensing = new DockercartLicensing($this->registry);
 
 		$result = $licensing->validate($module_code, true);
@@ -1082,7 +1073,6 @@ class ControllerExtensionStore extends Controller {
 		$store->clearCache();
 
 		if (is_file(DIR_SYSTEM . 'library/dockercart/licensing.php')) {
-			require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 			$licensing = new DockercartLicensing($this->registry);
 			$licensing->autoPopulate();
 		}
@@ -1096,7 +1086,6 @@ class ControllerExtensionStore extends Controller {
 			return array();
 		}
 
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
 		$licensing = new DockercartLicensing($this->registry);
 
 		$licenses = $licensing->getAllLicenses();

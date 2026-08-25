@@ -1,0 +1,509 @@
+{{ header }}{{ column_left }}
+<div id="content">
+	<div class="page-header">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+					<a href="{{ cancel }}" class="page-header__link">
+						<span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
+						<span class="page-header__title">
+							{% if warehouse_name %}
+							{{ warehouse_name }}
+							<span class="page-header__badge {{ status ? 'page-header__badge--active' : 'page-header__badge--inactive' }}">
+								{{ status ? text_active : text_inactive }}
+							</span>
+							{% else %}
+							{{ text_form }}
+							{% endif %}
+						</span>
+					</a>
+					<div class="pull-right">
+						<button type="submit" form="form-warehouse" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+						<a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+					</div>
+				</div>
+			</div>
+			{% if error_warning %}
+			<div class="row">
+				<div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+					<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+					</div>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+	<div class="container-fluid">
+		<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-warehouse">
+			<div class="row">
+				<div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+					<div class="dcx-shell">
+						{# Warehouse #}
+						<div class="dcx-panel">
+							<div class="dcx-panel-head">
+								<div class="dcx-panel-head__icon"><i data-lucide="warehouse" width="18" height="18"></i></div>
+								<div><div class="dcx-panel-title">{{ tab_warehouse }}</div></div>
+							</div>
+							<div class="dcx-panel-body">
+								<div class="dcx-fields">
+									<div class="dcx-field required">
+										<label class="dcx-label">{{ entry_name }}</label>
+										{% for language in languages %}
+										<div class="dc-attr-row__value">
+											<span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
+											<input type="text" name="warehouse_description[{{ language.language_id }}][name]" value="{{ warehouse_description[language.language_id].name }}" placeholder="{{ entry_name }}" id="input-name{{ language.language_id }}" class="form-control{% if error_name[language.language_id] %} is-invalid{% endif %}" />
+										</div>
+										{% if error_name[language.language_id] %}
+										<div class="text-danger">{{ error_name[language.language_id] }}</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>
+								<div class="dcx-fields">
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-type">{{ entry_type }}</label>
+										<select name="type" id="input-type" class="form-control">
+											<option value="physical"{% if type == 'physical' %} selected="selected"{% endif %}>{{ text_type_physical }}</option>
+											<option value="virtual"{% if type == 'virtual' %} selected="selected"{% endif %}>{{ text_type_virtual }}</option>
+											<option value="dropship"{% if type == 'dropship' %} selected="selected"{% endif %}>{{ text_type_dropship }}</option>
+										</select>
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-prepare-days">{{ entry_prepare_days }} <span data-toggle="tooltip" title="{{ help_prepare_days }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+										<input type="number" name="prepare_days" id="input-prepare-days" value="{{ prepare_days }}" class="form-control" style="max-width:160px;" min="0" />
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-low-stock">{{ entry_low_stock }} <span data-toggle="tooltip" title="{{ help_low_stock }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+										<input type="number" name="low_stock" id="input-low-stock" value="{{ low_stock }}" class="form-control" style="max-width:160px;" min="0" step="any" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{# Address #}
+						<div class="dcx-panel">
+							<div class="dcx-panel-head">
+								<div class="dcx-panel-head__icon"><i data-lucide="map-pin" width="18" height="18"></i></div>
+								<div><div class="dcx-panel-title">{{ tab_address }}</div></div>
+							</div>
+							<div class="dcx-panel-body">
+								<div class="dcx-fields">
+									<div class="dc-lang-frame">
+									<ul class="nav nav-tabs" id="language-address">
+										{% for language in languages %}
+										<li{% if loop.first %} class="active"{% endif %}><a href="#language-address{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
+										{% endfor %}
+									</ul>
+									<div class="tab-content">
+										{% for language in languages %}
+										<div class="tab-pane{% if loop.first %} active{% endif %}" id="language-address{{ language.language_id }}">
+											<div class="dcx-fields">
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-city{{ language.language_id }}">{{ entry_city }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][city]" value="{{ warehouse_description[language.language_id].city }}" placeholder="{{ entry_city }}" id="input-city{{ language.language_id }}" class="form-control" />
+												</div>
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-address-1{{ language.language_id }}">{{ entry_address_1 }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][address_1]" value="{{ warehouse_description[language.language_id].address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1{{ language.language_id }}" class="form-control" />
+												</div>
+												<div class="dcx-field">
+													<label class="dcx-label" for="input-address-2{{ language.language_id }}">{{ entry_address_2 }}</label>
+													<input type="text" name="warehouse_description[{{ language.language_id }}][address_2]" value="{{ warehouse_description[language.language_id].address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2{{ language.language_id }}" class="form-control" />
+												</div>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-postcode">{{ entry_postcode }}</label>
+										<input type="text" name="postcode" id="input-postcode" value="{{ postcode }}" class="form-control" style="max-width:160px;" />
+									</div>
+									<div class="dcx-fields dcx-fields--row">
+										<div class="dcx-field">
+											<label class="dcx-label" for="input-country">{{ entry_country }}</label>
+											<select name="country_id" id="input-country" class="form-control">
+												<option value="0">{{ text_none }}</option>
+												{% for country in countries %}
+												{% if country.country_id == country_id %}
+												<option value="{{ country.country_id }}" selected="selected">{{ country.name }}</option>
+												{% else %}
+												<option value="{{ country.country_id }}">{{ country.name }}</option>
+												{% endif %}
+												{% endfor %}
+											</select>
+										</div>
+										<div class="dcx-field">
+											<label class="dcx-label" for="input-zone">{{ entry_zone }}</label>
+											<select name="zone_id" id="input-zone" class="form-control">
+												<option value="0">{{ text_none }}</option>
+												{% for zone in zones %}
+												{% if zone.zone_id == zone_id %}
+												<option value="{{ zone.zone_id }}" selected="selected">{{ zone.name }}</option>
+												{% else %}
+												<option value="{{ zone.zone_id }}">{{ zone.name }}</option>
+												{% endif %}
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+									<div class="dcx-fields dcx-fields--row">
+										<div class="dcx-field">
+											<label class="dcx-label" for="input-latitude">{{ entry_latitude }}</label>
+											<input type="text" name="latitude" id="input-latitude" value="{{ latitude }}" class="form-control" />
+										</div>
+										<div class="dcx-field">
+											<label class="dcx-label" for="input-longitude">{{ entry_longitude }}</label>
+											<input type="text" name="longitude" id="input-longitude" value="{{ longitude }}" class="form-control" />
+										</div>
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-phone">{{ entry_phone }}</label>
+										<input type="text" name="phone" id="input-phone" value="{{ phone }}" class="form-control" />
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-email">{{ entry_email }}</label>
+										<input type="text" name="email" id="input-email" value="{{ email }}" class="form-control" />
+									</div>
+									<div class="dcx-field">
+										<label class="dcx-label" for="input-map-url">{{ entry_map_url }}</label>
+										<input type="text" name="map_url" id="input-map-url" value="{{ map_url }}" class="form-control" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{# Schedule #}
+						<div class="dcx-panel">
+							<div class="dcx-panel-head">
+								<div class="dcx-panel-head__icon"><i data-lucide="calendar-clock" width="18" height="18"></i></div>
+								<div><div class="dcx-panel-title">{{ tab_schedule }}</div></div>
+								<div class="dcx-panel-head__actions">
+									<button type="button" id="btn-schedule-apply-all" class="btn btn-default btn-sm"><i data-lucide="copy-check" width="14" height="14"></i> {{ button_apply_all }}</button>
+									<button type="button" id="btn-schedule-clear" class="btn btn-default btn-sm"><i data-lucide="eraser" width="14" height="14"></i> {{ button_clear_intervals }}</button>
+								</div>
+							</div>
+							<div class="dcx-panel-body">
+								<div class="dcx-schedule">
+									{% for day_num, day_name in days %}
+									<div class="dcx-schedule__row" data-day="{{ day_num }}">
+										<label class="dcx-schedule__day">
+											<input type="checkbox" name="schedule[{{ day_num }}][is_open]" value="1"{% if schedule[day_num].is_open %} checked="checked"{% endif %}>
+											<span>{{ day_name }}</span>
+										</label>
+										<div class="dcx-schedule__windows">
+											{% for window in schedule[day_num].windows %}
+											<div class="dcx-schedule__window">
+												<input type="time" name="schedule[{{ day_num }}][windows][{{ loop.index0 }}][time_from]" value="{{ window.time_from }}" class="form-control dcx-schedule__time time-from" />
+												<span class="dcx-schedule__sep">&ndash;</span>
+												<input type="time" name="schedule[{{ day_num }}][windows][{{ loop.index0 }}][time_to]" value="{{ window.time_to }}" class="form-control dcx-schedule__time time-to" />
+												<button type="button" class="dcx-schedule__remove remove-window"><i data-lucide="x" width="14" height="14"></i></button>
+											</div>
+											{% endfor %}
+											<button type="button" class="dcx-schedule__add add-window"><i data-lucide="plus" width="14" height="14"></i></button>
+										</div>
+									</div>
+									{% endfor %}
+								</div>
+							</div>
+						</div>
+
+						{# Holidays #}
+						<div class="dcx-panel">
+							<div class="dcx-panel-head">
+								<div class="dcx-panel-head__icon"><i data-lucide="calendar-off" width="18" height="18"></i></div>
+								<div>
+									<div class="dcx-panel-title">{{ tab_holidays }}</div>
+								</div>
+								<div class="dcx-panel-head__actions">
+									<button type="button" id="btn-copy-shared" class="btn btn-default btn-sm"><i data-lucide="copy" width="14" height="14"></i> {{ text_copy_shared }}</button>
+								</div>
+							</div>
+							<div class="dcx-panel-body">
+								<div class="dcx-holiday-list holiday-rows">
+									{% for holiday in holiday %}
+									<div class="dcx-holiday-card" data-idx="{{ loop.index0 }}">
+										<div class="dcx-holiday-card__main">
+											<div class="dcx-field">
+												<label class="dcx-label" for="input-holiday-date-{{ loop.index0 }}">{{ entry_holiday_date }}</label>
+												<input type="date" name="holiday[{{ loop.index0 }}][date]" value="{{ holiday.date }}" id="input-holiday-date-{{ loop.index0 }}" class="form-control" />
+											</div>
+											<label class="dcx-checkbox-label">
+												<input type="checkbox" name="holiday[{{ loop.index0 }}][is_open]" value="1"{% if holiday.is_open %} checked="checked"{% endif %} /> {{ entry_working_holiday }}
+											</label>
+											<button type="button" class="dcx-holiday-card__remove remove-holiday" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+										</div>
+										<div class="dcx-holiday-card__names">
+											{% for language in languages %}
+											<div class="dc-attr-row__value">
+												<span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
+												<input type="text" name="holiday[{{ loop.parent.loop.index0 }}][description][{{ language.language_id }}][name]" value="{{ holiday.description[language.language_id].name }}" placeholder="{{ entry_holiday_name }}" class="form-control" />
+											</div>
+											{% endfor %}
+										</div>
+									</div>
+									{% endfor %}
+								</div>
+								<button type="button" id="btn-add-holiday" class="btn btn-default btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add }}</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+					{# Status #}
+					<div class="dcx-sidebar-card">
+						<div class="dcx-sidebar-card__header">
+							<div class="dcx-sidebar-card__header-icon"><i data-lucide="toggle-right" width="16" height="16"></i></div>
+							<h3 class="dcx-sidebar-card__title">{{ entry_status }}</h3>
+						</div>
+						<div class="dcx-sidebar-card__body">
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+								<select name="status" id="input-status" class="form-control">
+									{% if status %}
+									<option value="1" selected="selected">{{ text_enabled }}</option>
+									<option value="0">{{ text_disabled }}</option>
+									{% else %}
+									<option value="1">{{ text_enabled }}</option>
+									<option value="0" selected="selected">{{ text_disabled }}</option>
+									{% endif %}
+								</select>
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<div class="dcx-checkbox-group">
+									<label class="dcx-checkbox-label">
+										<input type="hidden" name="is_default" value="0" />
+										<input type="checkbox" name="is_default" value="1"{% if is_default %} checked="checked"{% endif %}> {{ entry_default }}
+										<span data-toggle="tooltip" title="{{ help_default }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+									</label>
+								</div>
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-priority">{{ entry_priority }} <span data-toggle="tooltip" title="{{ help_priority }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+								<input type="number" name="priority" id="input-priority" value="{{ priority }}" class="form-control" min="0" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+								<input type="number" name="sort_order" id="input-sort-order" value="{{ sort_order }}" class="form-control" />
+							</div>
+						</div>
+					</div>
+
+					{# Pickup #}
+					<div class="dcx-sidebar-card">
+						<div class="dcx-sidebar-card__header">
+							<div class="dcx-sidebar-card__header-icon"><i data-lucide="package-open" width="16" height="16"></i></div>
+							<h3 class="dcx-sidebar-card__title">{{ tab_pickup }}</h3>
+						</div>
+						<div class="dcx-sidebar-card__body">
+							<div class="dcx-sidebar-card__field">
+								<div class="dcx-checkbox-group">
+									<label class="dcx-checkbox-label">
+										<input type="hidden" name="allow_pickup" value="0" />
+										<input type="checkbox" name="allow_pickup" value="1"{% if allow_pickup %} checked="checked"{% endif %}> {{ entry_allow_pickup }}
+										<span data-toggle="tooltip" title="{{ help_pickup }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+									</label>
+								</div>
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-pickup-cost">{{ entry_pickup_cost }}</label>
+								<input type="number" name="pickup_cost" id="input-pickup-cost" value="{{ pickup_cost }}" class="form-control" min="0" step="any" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-pickup-note">{{ entry_pickup_note }}</label>
+								<textarea name="pickup_note" id="input-pickup-note" class="form-control" rows="3">{{ pickup_note }}</textarea>
+							</div>
+						</div>
+					</div>
+
+					{# Dropship #}
+					<div class="dcx-sidebar-card">
+						<div class="dcx-sidebar-card__header">
+							<div class="dcx-sidebar-card__header-icon"><i data-lucide="truck" width="16" height="16"></i></div>
+							<h3 class="dcx-sidebar-card__title">{{ tab_dropship }}</h3>
+						</div>
+						<div class="dcx-sidebar-card__body">
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-supplier-name">{{ entry_supplier_name }}</label>
+								<input type="text" name="supplier_name" id="input-supplier-name" value="{{ supplier_name }}" class="form-control" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-supplier-phone">{{ entry_supplier_phone }}</label>
+								<input type="text" name="supplier_phone" id="input-supplier-phone" value="{{ supplier_phone }}" class="form-control" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-supplier-email">{{ entry_supplier_email }}</label>
+								<input type="text" name="supplier_email" id="input-supplier-email" value="{{ supplier_email }}" class="form-control" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-supplier-lead-time">{{ entry_supplier_lead_time }} <span data-toggle="tooltip" title="{{ help_supplier_lead_time }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+								<input type="number" name="supplier_lead_time" id="input-supplier-lead-time" value="{{ supplier_lead_time }}" class="form-control" min="0" />
+							</div>
+							<div class="dcx-sidebar-card__field">
+								<label class="dcx-sidebar-card__label" for="input-supplier-note">{{ entry_supplier_note }}</label>
+								<textarea name="supplier_note" id="input-supplier-note" class="form-control" rows="3">{{ supplier_note }}</textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<script type="text/javascript"><!--
+// Country -> zone cascade
+$('#input-country').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=localisation/country/country&user_token={{ user_token }}&country_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() { $('#input-country').after('<span class="waiting">&nbsp;<img src="catalog/view/theme/default/image/loading.gif" alt="" /></span>'); },
+		success: function(json) {
+			html = '<option value="0">{{ text_none }}</option>';
+			if (json['zone'] && json['zone'] != '') {
+				for (i = 0; i < json['zone'].length; i++) {
+					html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+					if (json['zone'][i]['zone_id'] == {{ zone_id }}) {
+						html += ' selected="selected"';
+					}
+					html += '>' + json['zone'][i]['name'] + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected">{{ text_none }}</option>';
+			}
+			$('#input-zone').html(html);
+		},
+		complete: function() { $('.waiting').remove(); }
+	});
+});
+
+// Compact schedule: windows add / remove / renumber
+function buildWindowHtml(day, idx, from, to) {
+	return '<div class="dcx-schedule__window">'
+		+ '<input type="time" name="schedule[' + day + '][windows][' + idx + '][time_from]" value="' + from + '" class="form-control dcx-schedule__time time-from" />'
+		+ '<span class="dcx-schedule__sep">&ndash;</span>'
+		+ '<input type="time" name="schedule[' + day + '][windows][' + idx + '][time_to]" value="' + to + '" class="form-control dcx-schedule__time time-to" />'
+		+ '<button type="button" class="dcx-schedule__remove remove-window"><i data-lucide="x" width="14" height="14"></i></button>'
+		+ '</div>';
+}
+function renumberWindows() {
+	$('.dcx-schedule__row').each(function() {
+		var day = $(this).data('day');
+		$(this).find('.dcx-schedule__window').each(function(i) {
+			$(this).find('.time-from').attr('name', 'schedule[' + day + '][windows][' + i + '][time_from]');
+			$(this).find('.time-to').attr('name', 'schedule[' + day + '][windows][' + i + '][time_to]');
+		});
+	});
+}
+$('.add-window').on('click', function() {
+	var $wrap = $(this).closest('.dcx-schedule__windows');
+	var day = $wrap.closest('.dcx-schedule__row').data('day');
+	var html = buildWindowHtml(day, $wrap.find('.dcx-schedule__window').length, '09:00', '18:00');
+	$(this).before(html);
+	lucide.createIcons();
+});
+$(document).on('click', '.remove-window', function() {
+	$(this).closest('.dcx-schedule__window').remove();
+	renumberWindows();
+});
+
+// Apply the first day's intervals to all days
+$('#btn-schedule-apply-all').on('click', function() {
+	var windows = $('.dcx-schedule__row').first().find('.dcx-schedule__window').map(function() {
+		return {from: $(this).find('.time-from').val(), to: $(this).find('.time-to').val()};
+	}).get();
+	if (!windows.length) return;
+	$('.dcx-schedule__row').each(function() {
+		var day = $(this).data('day');
+		var $wrap = $(this).find('.dcx-schedule__windows');
+		var $add = $wrap.find('.add-window');
+		$wrap.find('.dcx-schedule__window').remove();
+		$.each(windows, function(i, w) {
+			$add.before(buildWindowHtml(day, i, w.from || '09:00', w.to || '18:00'));
+		});
+	});
+	renumberWindows();
+	lucide.createIcons();
+});
+
+// Clear all intervals
+$('#btn-schedule-clear').on('click', function() {
+	$('.dcx-schedule__window').remove();
+});
+
+// Holidays: cards (date + working-day + per-language name rows)
+var dcLanguages = {{ languages|json_encode()|raw }};
+
+function buildHolidayCard(idx, date, isOpen, descriptions) {
+	descriptions = descriptions || {};
+	var checked = isOpen ? ' checked="checked"' : '';
+	var names = '';
+	$.each(dcLanguages, function(i, lang) {
+		var code = lang.code.split('-')[0].toUpperCase();
+		var lname = $('<div/>').text(lang.name || '').html();
+		var val = (descriptions[lang.language_id] && descriptions[lang.language_id].name) ? descriptions[lang.language_id].name : '';
+		val = $('<div/>').text(val).html();
+		names += '<div class="dc-attr-row__value">'
+			+ '<span class="lang-code">' + code + '</span><span class="lang-name">' + lname + '</span>'
+			+ '<input type="text" name="holiday[' + idx + '][description][' + lang.language_id + '][name]" value="' + val + '" placeholder="{{ entry_holiday_name }}" class="form-control" />'
+			+ '</div>';
+	});
+	return '<div class="dcx-holiday-card" data-idx="' + idx + '">'
+		+ '<div class="dcx-holiday-card__main">'
+		+ '<div class="dcx-field"><label class="dcx-label" for="input-holiday-date-' + idx + '">{{ entry_holiday_date }}</label>'
+		+ '<input type="date" name="holiday[' + idx + '][date]" value="' + date + '" id="input-holiday-date-' + idx + '" class="form-control" /></div>'
+		+ '<label class="dcx-checkbox-label"><input type="checkbox" name="holiday[' + idx + '][is_open]" value="1"' + checked + ' /> {{ entry_working_holiday }}</label>'
+		+ '<button type="button" class="dcx-holiday-card__remove remove-holiday" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>'
+		+ '</div>'
+		+ '<div class="dcx-holiday-card__names">' + names + '</div>'
+		+ '</div>';
+}
+
+function renumberHolidays() {
+	$('.holiday-rows .dcx-holiday-card').each(function(i) {
+		var $card = $(this);
+		$card.attr('data-idx', i);
+		$card.find('input[type="date"]').attr('name', 'holiday[' + i + '][date]').attr('id', 'input-holiday-date-' + i);
+		$card.find('input[type="checkbox"]').attr('name', 'holiday[' + i + '][is_open]');
+		$.each(dcLanguages, function(j, lang) {
+			$card.find('input[name*="[description][' + lang.language_id + ']"]').attr('name', 'holiday[' + i + '][description][' + lang.language_id + '][name]');
+		});
+	});
+}
+
+$('#btn-add-holiday').on('click', function() {
+	var idx = $('.holiday-rows .dcx-holiday-card').length;
+	var $card = $(buildHolidayCard(idx, '', false, {}));
+	$('.holiday-rows').append($card);
+	renumberHolidays();
+	lucide.createIcons();
+});
+
+$(document).on('click', '.remove-holiday', function() {
+	$(this).closest('.dcx-holiday-card').remove();
+	renumberHolidays();
+});
+
+// Copy shared holidays (incl. translations)
+$('#btn-copy-shared').on('click', function() {
+	$.ajax({
+		url: '{{ shared_holidays_url }}',
+		dataType: 'json',
+		success: function(json) {
+			if (!json['success']) return;
+			var idx = $('.holiday-rows .dcx-holiday-card').length;
+			$.each(json['holidays'], function(k, h) {
+				var $card = $(buildHolidayCard(idx, h.date, h.is_open, h.description || {}));
+				$('.holiday-rows').append($card);
+				idx++;
+			});
+			renumberHolidays();
+			lucide.createIcons();
+		}
+	});
+});
+
+$('#language-address a:first').tab('show');
+//--></script>
+{{ footer }}

@@ -100,6 +100,7 @@ $_['text_search_no_results']  = 'No orders found';
 $_['text_filter_all']         = 'All';
 $_['text_filter_unfulfilled'] = 'Unfulfilled';
 $_['text_filter_unpaid']      = 'Unpaid';
+$_['text_filter_unshipped']   = 'Unshipped';
 $_['text_filter_abandoned']   = 'Abandoned carts';
 $_['text_add_filter']         = 'Add filter';
 $_['text_add_condition']      = 'Add condition';
@@ -163,6 +164,7 @@ $_['column_paid']                = 'Paid';
 $_['column_product']             = 'Product';
 $_['column_model']               = 'Product Code';
 $_['column_quantity']            = 'Quantity';
+$_['column_qty']                 = 'Qty';
 $_['column_price']               = 'Unit Price';
 $_['column_comment']             = 'Comment';
 $_['column_notify']              = 'Customer Notified';
@@ -413,6 +415,12 @@ $_['text_payment_status_overpaid']   = 'Overpaid';
 $_['text_payment_paid_of']           = 'Paid:';
 $_['text_payment_remaining']         = 'Remaining';
 $_['text_no_payments']               = 'No payments recorded';
+
+// Shipments
+$_['text_shipping_status']           = 'Shipping';
+$_['text_shipping_status_none']      = 'Not Shipped';
+$_['text_shipping_status_partial']   = 'Partially Shipped';
+$_['text_shipping_status_shipped']   = 'Shipped';
 $_['text_reference']                 = 'Trans.';
 $_['text_payment_note_received']     = 'Payment received: %s (paid %s of %s)';
 $_['text_payment_note_reversed']     = 'Payment reversed: -%s';
@@ -464,3 +472,8 @@ $_['text_empty_description'] = 'Customer orders and their fulfilment status show
 $_['text_buyer_orders_one']          = '%s order';
 $_['text_buyer_orders_few']          = '%s orders';
 $_['text_buyer_orders_many']         = '%s orders';
+
+// Warehouse move
+$_['text_move_warehouse']        = 'Move to warehouse';
+$_['text_warehouse_moved']       = 'Product moved to warehouse.';
+$_['text_warehouse_move_failed'] = 'Failed to move product to warehouse.';

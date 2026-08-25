@@ -19,6 +19,7 @@
 13. [Order Multilingual Display](#13-order-multilingual-display)
 14. [Order Flow](#14-order-flow)
 15. [Product Returns (full / partial / exchange)](#15-product-returns-full--partial--exchange)
+16. [Warehouses & Dropshipping](#16-warehouses--dropshipping)
 
 ---
 
@@ -908,3 +909,164 @@ details in admin.
   descriptive field.
 - Emails to the customer still go through the `admin_mail_return` event when
   a return history entry is added with `notify = 1`.
+
+---
+
+## 16. Warehouses & Dropshipping
+
+Multi-warehouse stock, self-pickup and dropshipping (migration
+`20260823_warehouses.sql`, core library `system/library/dockercart_warehouse.php`).
+
+### Data model
+
+| Table | Purpose |
+|---|---|
+| `oc_warehouse` | Warehouse registry: type (`physical`/`virtual`/`dropship`), `is_default`, `priority`, `status`, address + geo, `prepare_days`, `low_stock`, self-pickup (`allow_pickup`, `pickup_cost`, `pickup_note`), dropship supplier block |
+| `oc_warehouse_schedule` | 7-weekday open flag per warehouse (`day_of_week` 1=Mon..7=Sun) |
+| `oc_warehouse_schedule_window` | Multiple pickup windows per weekday (`time_from`/`time_to`) |
+| `oc_warehouse_holiday` | `warehouse_id` 0 = shared holiday for all warehouses; `is_open` marks a "working holiday" |
+| `oc_warehouse_stock` | **Source of truth**: `warehouse_id` × `product_id` × `variant_id` (0 = base), `quantity`, `unlimited` (dropship), `lead_time` override |
+| `oc_warehouse_stock_movement` | Journal: signed `quantity`, `type` (`inbound`/`outbound`/`adjustment`/`transfer_in`/`transfer_out`/`order_subtract`/`order_restock`/`return`), `reference`, `order_id`, `transfer_id`, `user_id`, `comment` |
+| `oc_warehouse_transfer` / `_item` | Transfers between warehouses; `status` `pending → in_transit → completed/cancelled`; stock moves on `completed` |
+
+Existing tables altered:
+
+- `oc_stock_reservation` + `warehouse_id` — holds are scoped to the warehouse
+  the line was allocated to.
+- `oc_order_product` + `warehouse_id`, `warehouse_name`, `estimate_date`
+  (snapshot per line), and dropship-supplier fields `supplier_status`,
+  `supplier_ordered_date`, `supplier_tracking`, `supplier_cost`.
+
+`oc_product.quantity` / `oc_product_variant.quantity` remain the denormalised
+**SUM cache** across warehouses (rewritten on every mutation via
+`recomputeTotals()`). All legacy reads (cart, lists, sorting, `hasStock`,
+badges) keep working. A dropship `unlimited` line contributes the sentinel
+`999999`.
+
+### Allocation
+
+`DockercartWarehouse::allocate($lines)`:
+
+- candidates = active warehouses whose `available ≥ qty` (dropship rows
+  participate only when `config_warehouse_dropship_checkout`), ordered
+  `priority DESC, sort_order ASC, id ASC`.
+- Default is **one warehouse per order**: the first candidate covering the
+  whole cart wins.
+- `config_warehouse_split_allowed=1` falls back to per-line allocation.
+- A forced warehouse (pickup choice, or a seller move) is preferred.
+- Returns `[line_key => warehouse_id]` + per-line estimated ship dates.
+
+`available = stock − SUM(active holds for that warehouse)`, with dropship
+rows returning `+INF`. Forced pickup (`pickup@W`) recomputes allocation onto
+that warehouse.
+
+### Schedule, holidays & estimates
+
+- `isWorkingDay(warehouse, dt)`: a specific holiday beats a shared holiday,
+  else the weekday schedule row; no row → default open Mon–Sat.
+- `estimateShipDate(warehouse, line, from)`: advance `prepare_days + lead_time`
+  **working days**, skipping closed days and holidays.
+- `nextPickupSlot(warehouse, from)`: nearest open day + window for self-pickup.
+
+### Checkout & orders
+
+- Reservation holds are scoped per warehouse (`dockercart_stock_reservation`
+  `reserve()` threads `warehouse_id` through each line); the availability
+  check locks the stock row `FOR UPDATE`, so two concurrent checkouts of the
+  last unit serialize instead of both holding it.
+- Order creation (`catalog/model/checkout/order.php addOrder()` / `editOrder()`)
+  snapshots `warehouse_id`/`name`/`estimate_date` into `oc_order_product`.
+- Stock is **subtracted / restocked via `adjustStock()`** on the order line's
+  warehouse (processing/complete → subtract, reversal → restock; returns use
+  the original `oc_order_product.warehouse_id`). This is the **single write
+  path** — the legacy direct `oc_product`/`oc_product_variant` cache updates
+  were removed, so the caches always equal the warehouse sums and can never
+  drift (the daily audit only confirms the invariant). Non-tracked lines
+  (`subtract = 0`, e.g. preorders) are skipped via
+  `DockercartWarehouse::tracksStock()`.
+- Admin can move a line to another warehouse in order detail → `moveStock()`
+  + a movement journal entry (reference = order number) + updated snapshot.
+- Enabling `config_warehouse_enabled` backfills `oc_order_product.warehouse_id
+  = 0` rows onto the default warehouse so restocks/returns of pre-enable
+  orders land on an explicit warehouse.
+
+### Catalog-side quantity edits
+
+Every catalog editor routes its quantity through the warehouse layer
+**regardless of `config_warehouse_enabled`** (the flag only controls
+allocation/UI, not the write path):
+
+- product form / list inline-edit (`ModelCatalogProduct`) and variant qty
+  (`ProductConfigurable::updateVariantQuantity` / `addVariant` /
+  `updateVariant`) call
+  `DockercartWarehouse::setTotalQuantity($product_id, $new_total, $variant_id)`
+  — with warehouses backed by a single "default" row this behaves like the
+  legacy field; with multiple warehouses the difference vs the current
+  `oc_warehouse_stock` sum is applied as an `adjustment` movement
+  (`reference` `product-form` / `product-inline` / `variant-form`) on the
+  **default warehouse first**; when a negative delta saturates that row at 0
+  the remainder is spread over the other warehouses, so the requested total
+  is always reached (returned by the method) — never silently dropped.
+  Caches recompute afterwards.
+- deleting a variant purges its stock rows + holds always (no ghost
+  quantities, also when warehouses are off);
+- the product form shows a hint under Qty linking to the stock card modal.
+
+Multi-warehouse distribution stays a Warehouses-section task: catalog edits
+only ever move the default-warehouse line.
+
+### Availability display
+
+- Admin stock matrix (Warehouses → Stock) shows **Qty / Reserved / Available**
+  per cell; the product card modal and the product form Qty area show the
+  same three numbers (`available = quantity − active holds`, unlimited rows
+  render ∞).
+- The product card modal: opened from a matrix row it labels the cell as
+  `On warehouse "<name>"`; opened without a warehouse context it renders a
+  **per-warehouse breakdown** (simple products) or a **per-variant**
+  breakdown (configurable products — their head row has no stock of its own,
+  so a plain "total" would be a misleading zero).
+- For simple products the modal offers **Set total stock**: routed through
+  `setTotalQuantity()` (rebalance semantics) so the field in the product form
+  stays in sync. The product form Qty field is **read-only for configurable
+  products** (stock is managed per variant in the inventory block / variant
+  matrix) and editable for simple ones.
+- **Manual legacy backfill**: the stock screen's *Recalculate totals*
+  materialises cache-only leftovers (simple products and active variants
+  with `subtract=1` + `quantity>0` that have no `oc_warehouse_stock` rows
+  yet) onto the default warehouse, journaled as `recalculate-backfill`
+  movements. It runs only when a human clicks the button — read paths never
+  write.
+- Storefront product page subtracts other buyers' active checkout holds from
+  the displayed "In stock" figure (listings keep the plain cache badge —
+  holds expire within the reserve window anyway).
+
+### Self-pickup
+
+The `dockercart_warehouse_pickup` shipping extension offers one quote per
+warehouse with `allow_pickup=1` that covers the cart. Choosing it forces the
+allocation to that warehouse. Quoted title includes address/phone and the
+nearest pickup slot.
+
+### Admin section
+
+Top-level **Warehouses** menu (ACL `warehouse/*`): warehouse CRUD (incl.
+schedule + holidays + pickup + dropship), stock matrix with AJAX cell editing,
+movement journal + per-position running balance, transfers, and dropship
+supplier orders (deadlines + CSV export). Supplier Orders rows carry an inline
+per-unit **purchase price** (`oc_order_product.supplier_cost`, store default
+currency; empty = not set) saved via `updateLine()` `action=set_cost`.
+
+The **Analytics** page has a *Dropshipping Supplier Profit* report
+(`extension/report/supplier_profit`): revenue = Σ `order_product.total`,
+purchase = Σ `supplier_cost × quantity` over lines with a known price; lines
+without a price are excluded from purchase/profit and shown in a separate
+"No Price" column. Filters: order-date range + supplier status.
+
+### Configuration
+
+`config_warehouse_enabled`, `_split_allowed`, `_stock_display`, `_show_pickup`,
+`_estimate_enabled`, `_dropship_checkout` (seeded in the migration, editable in
+Settings → Options → Warehouses). A daily scheduler task `warehouse_audit`
+(`bin/dockercart_warehouse_audit.php`) recomputes the caches and self-heals
+drift; the stock screen offers a manual "Recalculate totals" run.

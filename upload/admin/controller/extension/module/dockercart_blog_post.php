@@ -248,7 +248,7 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				'comments'      => isset($result['comment_count']) ? $result['comment_count'] : 0,
 				'status'        => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 				'status_raw'    => $result['status'],
-				'date_created'  => isset($result['date_published']) && $result['date_published'] ? date('Y-m-d H:i:s', strtotime($result['date_published'])) : '—',
+				'date_created'  => isset($result['date_published']) && $result['date_published'] ? date($this->language->get('datetime_format'), strtotime($result['date_published'])) : '—',
 				'featured'      => $result['featured'] ? $this->language->get('text_yes') : $this->language->get('text_no'),
 				'selected'      => isset($this->request->post['selected']) && in_array($result['post_id'], $this->request->post['selected']),
 				'edit'          => $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $this->session->data['user_token'] . '&post_id=' . $result['post_id'] . $url, true),

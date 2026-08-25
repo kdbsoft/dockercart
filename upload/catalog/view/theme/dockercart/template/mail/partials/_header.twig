@@ -1,0 +1,15 @@
+<div style="display: none; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: #f3f4f6;">{{ preheader|default('') }}&#847; &zwnj; &nbsp;&#847; &zwnj; &nbsp;&#847; &zwnj; &nbsp;</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6;">
+  <tr>
+    <td align="center" style="padding: 24px 12px;">
+      <!--[if mso]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center"><tr><td><![endif]-->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="ec-container" style="width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 8px;">
+        <tr>
+          <td class="ec-px" style="padding: 28px 32px 24px;">
+            {% if logo %}
+            <a href="{{ store_url }}" title="{{ store_name }}"><img src="{{ logo }}" alt="{{ store_name }}" style="display: block; width: auto; max-height: 44px; border: 0;"></a>
+            {% else %}
+            <a href="{{ store_url }}" title="{{ store_name }}" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 19px; line-height: 26px; font-weight: 700; color: #111827; text-decoration: none;">{{ store_name }}</a>
+            {% endif %}
+          </td>
+        </tr>

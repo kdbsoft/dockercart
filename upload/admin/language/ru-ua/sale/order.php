@@ -15,6 +15,7 @@ $_['column_order_id'] = 'Номер заказа';
 $_['column_price'] = 'Цена за ед.';
 $_['column_product'] = 'Товар';
 $_['column_quantity'] = 'Количество';
+$_['column_qty'] = 'Кол-во';
 $_['column_reference'] = 'Ссылка';
 $_['column_status'] = 'Статус';
 $_['column_tracking_number'] = 'Номер отслеживания';
@@ -180,6 +181,7 @@ $_['text_search_no_results']  = 'Заказы не найдены';
 $_['text_filter_all']         = 'Все';
 $_['text_filter_unfulfilled'] = 'Не выполненные';
 $_['text_filter_unpaid']      = 'Не оплаченные';
+$_['text_filter_unshipped']   = 'Не отгруженные';
 $_['text_filter_abandoned']   = 'Брошенные корзины';
 $_['text_add_filter']         = 'Добавить фильтр';
 $_['text_add_condition']      = 'Добавить условие';
@@ -267,16 +269,16 @@ $_['text_tracking_max']          = 'До 10 номеров';
 
 $_['error_comment']              = 'Пожалуйста, введите комментарий!';
 $_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
-$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками Flow заказов!';
+$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками хода выполнения заказа!';
 
-$_['text_order_flow']            = 'Flow заказов';
+$_['text_order_flow']            = 'Ход выполнения заказа';
 $_['text_flow_change_status']    = 'Сменить статус';
-$_['text_flow_override']         = 'Принудительно (без проверки Flow)';
+$_['text_flow_override']         = 'Принудительно (без проверки)';
 $_['text_flow_notify_customer']  = 'Уведомить покупателя';
 $_['text_flow_transition_to']    = 'Перевести заказ в статус:';
-$_['text_flow_confirm_terminal'] = 'Этот статус завершает Flow заказов. Продолжить?';
-$_['text_flow_terminal_state']   = 'Flow заказов для этого заказа завершён.';
-$_['text_flow_completed_state']  = 'Flow заказов для этого заказа успешно пройден.';
+$_['text_flow_confirm_terminal'] = 'Этот статус завершает Ход выполнения заказа. Продолжить?';
+$_['text_flow_terminal_state']   = 'Ход выполнения этого заказа завершён.';
+$_['text_flow_completed_state']  = 'Ход выполнения этого заказа успешно пройден.';
 $_['button_flow_apply']          = 'Применить';
 $_['text_comment_optional']      = 'Комментарий (необязательно)';
 $_['text_return_refund_note']    = 'Возврат средств по возврату #%s';
@@ -401,6 +403,12 @@ $_['text_payment_status_overpaid']   = 'Переплата';
 $_['text_payment_paid_of']           = 'Оплачено:';
 $_['text_payment_remaining']         = 'Остаток';
 $_['text_no_payments']               = 'Платежи не записаны';
+
+// Отгрузки
+$_['text_shipping_status']           = 'Отгрузка';
+$_['text_shipping_status_none']      = 'Не отгружен';
+$_['text_shipping_status_partial']   = 'Отгружен частично';
+$_['text_shipping_status_shipped']   = 'Отгружен';
 $_['text_reference']                 = 'Транз.';
 $_['text_payment_note_received']     = 'Платёж получен: %s (оплачено %s из %s)';
 $_['text_payment_note_reversed']     = 'Платёж отменён: -%s';
@@ -452,3 +460,8 @@ $_['text_empty_description'] = 'Заказы покупателей и их ст
 $_['text_buyer_orders_one']          = '%s заказ';
 $_['text_buyer_orders_few']          = '%s заказа';
 $_['text_buyer_orders_many']         = '%s заказов';
+
+// Warehouse move
+$_['text_move_warehouse']        = 'Перенести на склад';
+$_['text_warehouse_moved']       = 'Товар перенесён на склад.';
+$_['text_warehouse_move_failed'] = 'Не удалось перенести товар.';

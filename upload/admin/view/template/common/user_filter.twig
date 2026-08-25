@@ -20,9 +20,12 @@
     </div>
     {% if uf_search %}
     <div class="order-search-wrap">
-      <div class="search-input-wrap">
+      <div class="search-input-wrap{% if uf_search.value %} has-value{% endif %}">
         <i data-lucide="search" width="14" height="14" class="search-input-icon"></i>
-        <input type="search" id="uf-search-input" class="form-control" placeholder="{{ uf_search.placeholder }}" autocomplete="off" data-search-url="{{ uf_search.url }}" />
+        <input type="search" id="uf-search-input" class="form-control" placeholder="{{ uf_search.placeholder }}" autocomplete="off" value="{{ uf_search.value|default('') }}" data-search-url="{{ uf_search.url }}" />
+        {% if uf_search.clear_url %}
+        <button type="button" class="order-search-clear" data-toggle="tooltip" title="{{ uf_text_clear }}" data-clear-url="{{ uf_search.clear_url }}"><i data-lucide="x" width="14" height="14"></i></button>
+        {% endif %}
         <i data-lucide="loader" width="14" height="14" class="order-search-spinner" style="display:none"></i>
       </div>
       <ul class="order-search-dropdown"></ul>
@@ -69,7 +72,7 @@
 	var rowsWrap = document.getElementById('uf-condition-rows');
 	var saveUrl = '{{ uf_save_url }}';
 	var deleteUrl = '{{ uf_delete_url }}';
-	var token = '{{ uf_user_token }}';
+	var redirectUrl = '{{ uf_redirect_url }}';
 
 	var fields = {{ uf_fields_json|raw }};
 	var operatorLabels = {{ uf_operators_json|raw }};
@@ -452,6 +455,19 @@
 	}
 
 	document.addEventListener('click', function(e) {
+		var clearBtn = e.target.closest('.order-search-clear');
+
+		if (!clearBtn || !clearBtn.closest('#uf-filter-tabs')) {
+			return;
+		}
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		window.location.href = clearBtn.getAttribute('data-clear-url');
+	});
+
+	document.addEventListener('click', function(e) {
 		var removeBtn = e.target.closest('.order-filter-tab__remove');
 
 		if (!removeBtn || !removeBtn.closest('#uf-filter-tabs')) {
@@ -556,9 +572,12 @@
 			success: function(json) {
 				if (json['error']) {
 					alert(json['error']);
+				} else if (redirectUrl) {
+					$('#uf-filter-modal').modal('hide');
+					location = redirectUrl + '&filter_id=' + json['filter_id'];
 				} else {
 					$('#uf-filter-modal').modal('hide');
-					location = 'index.php?route=' + entity + '&user_token=' + token + '&filter_id=' + json['filter_id'];
+					location.reload();
 				}
 			},
 			error: function(xhr, ajaxOptions, thrownError) {

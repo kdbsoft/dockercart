@@ -1,19 +1,18 @@
-{{ text_welcome }}
-
-{% if not approval %}
-{{ text_login }}
-
-{{ login }}
-
-{{ text_service }}
-
-{{ text_thanks }}
-{{ store }}
-{% else %}
-{{ text_approval }}
-
-{{ login }}
-
-{{ text_thanks }}
-{{ store }}
-{% endif %}
+{% include 'dockercart/template/mail/partials/_head.twig' %}
+{% include 'dockercart/template/mail/partials/_header.twig' %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <p style="margin: 0 0 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; line-height: 26px; font-weight: 600; color: #111827;">{{ text_welcome }}</p>
+            {% if not approval %}
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_login }}</p>
+            {% else %}
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_approval }}</p>
+            {% endif %}
+            {% include 'dockercart/template/mail/partials/_button.twig' with {href: login, label: text_button_login|default(login)} %}
+            <p style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; line-height: 20px; color: #9ca3af;"><a href="{{ login }}" style="color: #4f46e5; text-decoration: none;">{{ login }}</a></p>
+            {% if not approval %}
+            <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_service }}</p>
+            {% endif %}
+          </td>
+        </tr>
+{% include 'dockercart/template/mail/partials/_footer.twig' %}

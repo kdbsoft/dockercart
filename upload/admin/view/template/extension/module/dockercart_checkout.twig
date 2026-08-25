@@ -197,7 +197,7 @@
                         {% for language in languages %}
                         <li{% if loop.first %} class="active"{% endif %}>
                           <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                           </a>
                         </li>
                         {% endfor %}
@@ -300,7 +300,7 @@
                         {% for language in languages %}
                         <li{% if loop.first %} class="active"{% endif %}>
                           <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                           </a>
                         </li>
                         {% endfor %}

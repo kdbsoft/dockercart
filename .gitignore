@@ -12,7 +12,7 @@ node_modules/
 .opencode/
 .commandcode/
 .clinerules/
-AGENTS.md
+PLAN.md
 
 # Config and Htaccess Files
 /upload/.htaccess

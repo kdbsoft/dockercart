@@ -132,12 +132,16 @@ class ControllerAccountOrder extends Controller {
 		$vouchers_count = $order_ids ? $this->model_account_order->getTotalOrderVouchersByOrderIds($order_ids) : array();
 		$images_map = $order_ids ? $this->model_account_order->getOrderProductsImagesByOrderIds($order_ids) : array();
 		$returns_map = $order_ids ? $this->model_account_order->getReturnStatusByOrderIds($order_ids) : array();
+		$shipping_sums_map = $order_ids ? $this->model_account_order->getShippingSumsByOrderIds($order_ids) : array();
 		$this->load->model('tool/image');
 
 		foreach ($results as $result) {
 			$product_total = isset($products_count[(int)$result['order_id']]) ? $products_count[(int)$result['order_id']] : 0;
 			$voucher_total = isset($vouchers_count[(int)$result['order_id']]) ? $vouchers_count[(int)$result['order_id']] : 0;
 			$payment_status = $this->model_account_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+
+			$shipping_sums = isset($shipping_sums_map[(int)$result['order_id']]) ? $shipping_sums_map[(int)$result['order_id']] : array('ordered' => 0, 'shipped' => 0);
+			$shipping_status = $this->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
 
 			$thumbs = array();
 			$raw_images = isset($images_map[(int)$result['order_id']]) ? $images_map[(int)$result['order_id']] : array();
@@ -160,6 +164,8 @@ class ControllerAccountOrder extends Controller {
 				'status'     => $result['status'],
 				'payment_status' => $payment_status,
 				'payment_status_text' => $this->language->get('text_payment_status_' . $payment_status),
+				'shipping_status' => $shipping_status,
+				'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
 				'tracking_number' => $result['tracking_number'],
 				'date_added' => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'products'   => ($product_total + $voucher_total),
@@ -318,6 +324,11 @@ class ControllerAccountOrder extends Controller {
 			$data['payment_status'] = $this->model_account_order->getPaymentStatus($order_info['total'], $order_info['paid_amount'], $this->currency->getDecimalPlace($order_info['currency_code']), $order_info['currency_value']);
 			$data['payment_status_text'] = $this->language->get('text_payment_status_' . $data['payment_status']);
 			$data['payment_remaining'] = $this->currency->format(max(0, (float)$order_info['total'] - (float)$order_info['paid_amount']), $order_info['currency_code'], $order_info['currency_value']);
+
+			$shipping_sums = $this->model_account_order->getShippingSumsByOrderIds(array((int)$order_info['order_id']));
+			$shipping_sums = isset($shipping_sums[(int)$order_info['order_id']]) ? $shipping_sums[(int)$order_info['order_id']] : array('ordered' => 0, 'shipped' => 0);
+			$data['shipping_status'] = $this->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
+			$data['shipping_status_text'] = $data['shipping_status'] ? $this->language->get('text_shipping_status_' . $data['shipping_status']) : '';
 
 			$data['payments'] = array();
 
@@ -624,6 +635,22 @@ class ControllerAccountOrder extends Controller {
 
 		// Status not in the chain: treat as completed when it sits past the flow
 		return 100;
+	}
+
+	private function getShippingStatus(float $ordered, float $shipped) {
+		if ($ordered <= 0) {
+			return '';
+		}
+
+		if ($shipped <= 0) {
+			return 'none';
+		}
+
+		if ($shipped >= $ordered) {
+			return 'shipped';
+		}
+
+		return 'partial';
 	}
 
 	public function reorder() {

@@ -26,6 +26,38 @@ class ModelCatalogProductConfigurable extends Model {
 		return $this->lib()->updateVariant($variant_id, $data);
 	}
 
+	public function updateVariantQuantity($variant_id, $quantity) {
+		$this->lib()->updateVariantQuantity($variant_id, $quantity);
+	}
+
+	public function updateVariantPrice($variant_id, $price) {
+		$this->lib()->updateVariantPrice($variant_id, $price);
+	}
+
+	public function updateVariantPricing($variant_id, $price, array $cg_prices = array()) {
+		$this->lib()->updateVariantPricing($variant_id, $price, $cg_prices);
+	}
+
+	public function updateVariantDimensions($variant_id, $length, $width, $height, $weight) {
+		$this->lib()->updateVariantDimensions($variant_id, $length, $width, $height, $weight);
+	}
+
+	public function updateVariantCodes($variant_id, array $codes) {
+		$this->lib()->updateVariantCodes($variant_id, $codes);
+	}
+
+	public function updateVariantImage($variant_id, $image) {
+		$this->lib()->updateVariantImage($variant_id, $image);
+	}
+
+	public function getAggregatedWeightRange($product_id) {
+		return $this->lib()->getAggregatedWeightRange($product_id);
+	}
+
+	public function getAggregatedDimensionsRange($product_id) {
+		return $this->lib()->getAggregatedDimensionsRange($product_id);
+	}
+
 	public function deleteVariant($variant_id) {
 		return $this->lib()->deleteVariant($variant_id);
 	}
@@ -104,5 +136,9 @@ class ModelCatalogProductConfigurable extends Model {
 
 	public function deleteAllVariantDiscounts($variant_id) {
 		$this->lib()->deleteAllVariantDiscounts($variant_id);
+	}
+
+	public function applyVariantPromotions($product_id, array $special_rows = array(), array $discount_rows = array()) {
+		$this->lib()->applyVariantPromotions($product_id, $special_rows, $discount_rows);
 	}
 }

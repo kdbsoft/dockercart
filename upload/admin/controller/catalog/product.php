@@ -931,13 +931,6 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['text_drag_to_reorder'] = $this->language->get('text_drag_to_reorder');
 
-		// Configurable-product notes shown in panel bodies when combined variants are enabled
-		$data['help_configurable_specials']    = $this->language->get('help_configurable_specials');
-		$data['help_configurable_identifiers'] = $this->language->get('help_configurable_identifiers');
-		$data['help_configurable_pricing']     = $this->language->get('help_configurable_pricing');
-		$data['help_configurable_inventory']   = $this->language->get('help_configurable_inventory');
-		$data['help_configurable_dimensions']  = $this->language->get('help_configurable_dimensions');
-
 		// Panel titles
 		$data['text_panel_description_title']    = $this->language->get('text_panel_description_title');
 		$data['text_panel_description_subtitle'] = $this->language->get('text_panel_description_subtitle');
@@ -953,6 +946,19 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_panel_pricing_subtitle']     = $this->language->get('text_panel_pricing_subtitle');
 		$data['text_panel_inventory_title']      = $this->language->get('text_panel_inventory_title');
 		$data['text_panel_inventory_subtitle']   = $this->language->get('text_panel_inventory_subtitle');
+		$data['text_variant_qty_title']          = $this->language->get('text_variant_qty_title');
+		$data['text_variant_qty_total']          = $this->language->get('text_variant_qty_total');
+		$data['text_variant_price_title']        = $this->language->get('text_variant_price_title');
+		$data['text_variant_codes_title']        = $this->language->get('text_variant_codes_title');
+		$data['text_variant_price_range']        = $this->language->get('text_variant_price_range');
+		$data['help_variant_price_computed']     = $this->language->get('help_variant_price_computed');
+
+		// Make all product_configurable language keys available to product_variants.twig
+		foreach ($this->language->all() as $lang_key => $lang_value) {
+			if (!isset($data[$lang_key])) {
+				$data[$lang_key] = $lang_value;
+			}
+		}
 		$data['text_panel_media_title']          = $this->language->get('text_panel_media_title');
 		$data['text_panel_media_subtitle']       = $this->language->get('text_panel_media_subtitle');
 		$data['text_panel_attributes_title']     = $this->language->get('text_panel_attributes_title');
@@ -1218,14 +1224,6 @@ class ControllerCatalogProduct extends Controller {
 			$data['mpn'] = '';
 		}
 
-		if (isset($this->request->post['location'])) {
-			$data['location'] = $this->request->post['location'];
-		} elseif (!empty($product_info)) {
-			$data['location'] = $product_info['location'];
-		} else {
-			$data['location'] = '';
-		}
-
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
@@ -1316,6 +1314,21 @@ class ControllerCatalogProduct extends Controller {
 			$data['quantity'] = 1;
 		}
 
+		// Multi-warehouse mode: the quantity field is backed by the warehouse
+		// layer — show the hint and reuse the stock card modal.
+		$data['warehouse_enabled'] = $this->config->get('config_warehouse_enabled');
+
+		// Quantity held by active checkout reservations (admin perspective:
+		// counted against the product's stock so the seller sees what is
+		// actually still sellable).
+		$data['reserved_quantity'] = 0.0;
+
+		if (!empty($product_info['product_id'])) {
+			$stock_reservation = new \DockercartStockReservation($this->registry);
+			$reserved_map = $stock_reservation->getReservedTotalByProductIds([(int)$product_info['product_id']]);
+			$data['reserved_quantity'] = (float)($reserved_map[(int)$product_info['product_id']] ?? 0);
+		}
+
 		if (isset($this->request->post['minimum'])) {
 			$data['minimum'] = $this->request->post['minimum'];
 		} elseif (!empty($product_info)) {
@@ -1375,7 +1388,7 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['weight'])) {
 			$data['weight'] = $this->request->post['weight'];
 		} elseif (!empty($product_info)) {
-			$data['weight'] = $product_info['weight'];
+			$data['weight'] = \ProductConfigurable::formatDecimal($product_info['weight']);
 		} else {
 			$data['weight'] = '';
 		}
@@ -1395,7 +1408,7 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['length'])) {
 			$data['length'] = $this->request->post['length'];
 		} elseif (!empty($product_info)) {
-			$data['length'] = $product_info['length'];
+			$data['length'] = \ProductConfigurable::formatDecimal($product_info['length']);
 		} else {
 			$data['length'] = '';
 		}
@@ -1403,7 +1416,7 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['width'])) {
 			$data['width'] = $this->request->post['width'];
 		} elseif (!empty($product_info)) {
-			$data['width'] = $product_info['width'];
+			$data['width'] = \ProductConfigurable::formatDecimal($product_info['width']);
 		} else {
 			$data['width'] = '';
 		}
@@ -1411,7 +1424,7 @@ class ControllerCatalogProduct extends Controller {
 		if (isset($this->request->post['height'])) {
 			$data['height'] = $this->request->post['height'];
 		} elseif (!empty($product_info)) {
-			$data['height'] = $product_info['height'];
+			$data['height'] = \ProductConfigurable::formatDecimal($product_info['height']);
 		} else {
 			$data['height'] = '';
 		}
@@ -1614,6 +1627,121 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['customer_groups'] = $this->model_customer_customer_group->getCustomerGroups();
 
+		// Price range for configurable products (readonly display in Pricing panel)
+		$data['price_range'] = null;
+		$data['price_range_text'] = '';
+
+		if ($data['is_configurable'] && $product_id_for_form) {
+			$pc_for_range = new \ProductConfigurable($this->registry);
+			$range = $pc_for_range->getAggregatedPriceRange($product_id_for_form, null);
+			$format_currency = $this->config->get('config_currency');
+
+			if (isset($range['min']) && isset($range['max']) && ((float)$range['min'] > 0 || (float)$range['max'] > 0)) {
+				$p_min = (float)$this->currency->convertProductPrice((float)$range['min'], (int)$data['currency_id']);
+				$p_max = (float)$this->currency->convertProductPrice((float)$range['max'], (int)$data['currency_id']);
+				$data['price_range_text'] = $this->currency->format($p_min, $format_currency);
+
+				if ($p_max > $p_min) {
+					$data['price_range_text'] .= ' – ' . $this->currency->format($p_max, $format_currency);
+				}
+
+				$data['price_range'] = $range;
+			}
+		}
+
+		$data['help_price_range_computed'] = $this->language->get('help_price_range_computed');
+		$data['help_weight_range_computed'] = $this->language->get('help_weight_range_computed');
+		$data['help_dimension_range_computed'] = $this->language->get('help_dimension_range_computed');
+		$data['text_no_variants'] = $this->language->get('text_no_variants');
+		$data['text_price_range'] = $this->language->get('text_price_range');
+
+		// Weight / Dimensions ranges for configurable products (readonly ranges like price)
+		$data['weight_range_text'] = '';
+		$data['dimensions_range_text'] = '';
+		$data['length_range_text'] = '';
+		$data['width_range_text'] = '';
+		$data['height_range_text'] = '';
+		$data['weight_range'] = null;
+		$data['dimensions_range'] = null;
+
+		if ($data['is_configurable'] && $product_id_for_form) {
+			$pc_for_dim = new \ProductConfigurable($this->registry);
+
+			$this->load->model('localisation/weight_class');
+			$this->load->model('localisation/length_class');
+
+			$weight_range = $pc_for_dim->getAggregatedWeightRange($product_id_for_form);
+			$dim_range = $pc_for_dim->getAggregatedDimensionsRange($product_id_for_form);
+
+			$weight_class_id_for_range = isset($data['weight_class_id']) ? (int)$data['weight_class_id'] : (int)$this->config->get('config_weight_class_id');
+			$length_class_id_for_range = isset($data['length_class_id']) ? (int)$data['length_class_id'] : (int)$this->config->get('config_length_class_id');
+
+			$weight_unit = '';
+
+			if ($weight_class_id_for_range) {
+				$wc = $this->model_localisation_weight_class->getWeightClass($weight_class_id_for_range);
+				if ($wc && !empty($wc['unit'])) {
+					$weight_unit = $wc['unit'];
+				}
+			}
+
+			if (isset($weight_range['min'], $weight_range['max']) && ((float)$weight_range['min'] > 0 || (float)$weight_range['max'] > 0)) {
+				$w_min_str = rtrim(rtrim(number_format((float)$weight_range['min'], 4, '.', ''), '0'), '.');
+				$w_max_str = rtrim(rtrim(number_format((float)$weight_range['max'], 4, '.', ''), '0'), '.');
+				if ($w_min_str === '') { $w_min_str = '0'; }
+				if ($w_max_str === '') { $w_max_str = '0'; }
+
+				if ((float)$weight_range['max'] > (float)$weight_range['min']) {
+					$data['weight_range_text'] = $w_min_str . ' – ' . $w_max_str;
+				} else {
+					$data['weight_range_text'] = $w_min_str;
+				}
+
+				if ($weight_unit) {
+					$data['weight_range_text'] .= ' ' . $weight_unit;
+				}
+
+				$data['weight_range'] = $weight_range;
+			}
+
+			$length_unit = '';
+
+			if ($length_class_id_for_range) {
+				$lc = $this->model_localisation_length_class->getLengthClass($length_class_id_for_range);
+				if ($lc && !empty($lc['unit'])) {
+					$length_unit = $lc['unit'];
+				}
+			}
+
+			$format_dim = function($val) {
+				$s = rtrim(rtrim(number_format((float)$val, 4, '.', ''), '0'), '.');
+				return $s === '' ? '0' : $s;
+			};
+
+			$dim_texts = array();
+			$dim_has_data = false;
+
+			foreach (array('length', 'width', 'height') as $k) {
+				$min = isset($dim_range[$k]['min']) ? (float)$dim_range[$k]['min'] : 0;
+				$max = isset($dim_range[$k]['max']) ? (float)$dim_range[$k]['max'] : 0;
+				if ($min > 0 || $max > 0) { $dim_has_data = true; }
+				if ($max > $min) {
+					$dim_texts[$k] = $format_dim($min) . ' – ' . $format_dim($max);
+				} else {
+					$dim_texts[$k] = $format_dim($min);
+				}
+			}
+
+			if ($dim_has_data) {
+				$data['dimensions_range_text'] = $dim_texts['length'] . ' × ' . $dim_texts['width'] . ' × ' . $dim_texts['height'];
+				if ($length_unit) { $data['dimensions_range_text'] .= ' ' . $length_unit; }
+				$data['length_range_text'] = $dim_texts['length'] . ($length_unit ? ' ' . $length_unit : '');
+				$data['width_range_text'] = $dim_texts['width'] . ($length_unit ? ' ' . $length_unit : '');
+				$data['height_range_text'] = $dim_texts['height'] . ($length_unit ? ' ' . $length_unit : '');
+				$data['dimensions_range'] = $dim_range;
+			}
+		}
+
 		if (isset($this->request->post['product_discount'])) {
 			$product_discounts = $this->request->post['product_discount'];
 		} elseif (isset($this->request->get['product_id'])) {
@@ -1626,6 +1754,7 @@ class ControllerCatalogProduct extends Controller {
 
 		foreach ($product_discounts as $product_discount) {
 			$data['product_discounts'][] = array(
+				'variant_id'        => isset($product_discount['variant_id']) ? (int)$product_discount['variant_id'] : 0,
 				'customer_group_id' => $product_discount['customer_group_id'],
 				'quantity'          => $product_discount['quantity'],
 				'priority'          => $product_discount['priority'],
@@ -1649,6 +1778,7 @@ class ControllerCatalogProduct extends Controller {
 
 		foreach ($product_specials as $product_special) {
 			$data['product_specials'][] = array(
+				'variant_id'        => isset($product_special['variant_id']) ? (int)$product_special['variant_id'] : 0,
 				'customer_group_id' => $product_special['customer_group_id'],
 				'priority'          => $product_special['priority'],
 				'price'             => $product_special['price'],
@@ -1657,6 +1787,99 @@ class ControllerCatalogProduct extends Controller {
 				'auto_renew'        => !empty($product_special['auto_renew']),
 				'date_added'        => $product_special['date_added'] ?? '0000-00-00 00:00:00'
 			);
+		}
+
+		// Variant-scoped promotions for configurable products are merged into
+		// the same lists so the Promotions panel manages everything in one
+		// place. Rows carry variant_id; on save saveProductPromotions() routes
+		// them to the variant promo tables, rows without stay product-level.
+		$data['promo_variants'] = array();
+
+		if ($data['is_configurable'] && $product_id_for_form) {
+			$configurable_row = $this->model_catalog_product_configurable->getConfigurable($product_id_for_form);
+			$default_variant_id = !empty($configurable_row['default_variant_id']) ? (int)$configurable_row['default_variant_id'] : 0;
+
+			foreach ($this->model_catalog_product_configurable->getVariants($product_id_for_form) as $promo_variant) {
+				$label_parts = array();
+
+				foreach ($promo_variant['values'] as $promo_variant_value) {
+					if (!empty($promo_variant_value['name'])) {
+						$label_parts[] = $promo_variant_value['name'];
+					}
+				}
+
+				$data['promo_variants'][] = array(
+					'variant_id' => (int)$promo_variant['variant_id'],
+					'label'      => $label_parts ? implode(' / ', $label_parts) : ('#' . (int)$promo_variant['variant_id']),
+					'sku'        => $promo_variant['sku'],
+					'is_default' => (int)$promo_variant['variant_id'] === $default_variant_id
+				);
+			}
+
+			$variant_label_map = array();
+
+			foreach ($data['promo_variants'] as $promo_variant) {
+				$variant_label_map[$promo_variant['variant_id']] = $promo_variant['label'];
+			}
+
+			// Labels for variant rows that came from POST after validation failure.
+			foreach (array('product_specials', 'product_discounts') as $promo_list_key) {
+				foreach ($data[$promo_list_key] as &$promo_list_row) {
+					if (!empty($promo_list_row['variant_id'])) {
+						$promo_list_row['variant_label'] = isset($variant_label_map[$promo_list_row['variant_id']]) ? $variant_label_map[$promo_list_row['variant_id']] : ('#' . (int)$promo_list_row['variant_id']);
+					} else {
+						$promo_list_row['variant_label'] = '';
+					}
+				}
+			}
+
+			unset($promo_list_row);
+
+			$variants_specials_map = $this->model_catalog_product_configurable->getVariantsSpecials($product_id_for_form);
+
+			foreach ($variants_specials_map as $map_variant_id => $map_rows) {
+				foreach ($map_rows as $map_row) {
+					$data['product_specials'][] = array(
+						'variant_id'        => (int)$map_variant_id,
+						'variant_label'     => isset($variant_label_map[$map_variant_id]) ? $variant_label_map[$map_variant_id] : ('#' . (int)$map_variant_id),
+						'customer_group_id' => $map_row['customer_group_id'],
+						'priority'          => $map_row['priority'],
+						'price'             => $map_row['price'],
+						'date_start'        => ($map_row['date_start'] != '0000-00-00') ? $map_row['date_start'] : '',
+						'date_end'          => ($map_row['date_end'] != '0000-00-00') ? $map_row['date_end'] : '',
+						'auto_renew'        => !empty($map_row['auto_renew']),
+						'date_added'        => $map_row['date_added']
+					);
+				}
+			}
+
+			$variants_discounts_map = $this->model_catalog_product_configurable->getVariantsDiscounts($product_id_for_form);
+
+			foreach ($variants_discounts_map as $map_variant_id => $map_rows) {
+				foreach ($map_rows as $map_row) {
+					$data['product_discounts'][] = array(
+						'variant_id'        => (int)$map_variant_id,
+						'variant_label'     => isset($variant_label_map[$map_variant_id]) ? $variant_label_map[$map_variant_id] : ('#' . (int)$map_variant_id),
+						'customer_group_id' => $map_row['customer_group_id'],
+						'quantity'          => $map_row['quantity'],
+						'priority'          => $map_row['priority'],
+						'price'             => $map_row['price'],
+						'date_start'        => ($map_row['date_start'] != '0000-00-00') ? $map_row['date_start'] : '',
+						'date_end'          => ($map_row['date_end'] != '0000-00-00') ? $map_row['date_end'] : '',
+						'auto_renew'        => !empty($map_row['auto_renew']),
+						'date_added'        => $map_row['date_added']
+					);
+				}
+			}
+		} else {
+			foreach (array('product_specials', 'product_discounts') as $promo_list_key) {
+				foreach ($data[$promo_list_key] as &$promo_list_row) {
+					$promo_list_row['variant_id'] = 0;
+					$promo_list_row['variant_label'] = '';
+				}
+			}
+
+			unset($promo_list_row);
 		}
 
 		if (isset($this->request->post['product_gift'])) {

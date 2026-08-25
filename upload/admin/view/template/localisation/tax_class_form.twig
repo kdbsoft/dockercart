@@ -44,7 +44,7 @@
                 <div class="dcx-field required">
                   <label class="dcx-label">{{ entry_title }}</label>
                   {% for language in languages %}
-                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="tax_class_description[{{ language.language_id }}][title]" value="{{ tax_class_description[language.language_id] ? tax_class_description[language.language_id].title }}" placeholder="{{ entry_title }}" class="form-control" />
                   </div>
                   {% if error_title[language.language_id] %}
@@ -55,7 +55,7 @@
                 <div class="dcx-field required">
                   <label class="dcx-label">{{ entry_description }}</label>
                   {% for language in languages %}
-                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="tax_class_description[{{ language.language_id }}][description]" value="{{ tax_class_description[language.language_id] ? tax_class_description[language.language_id].description }}" placeholder="{{ entry_description }}" class="form-control" />
                   </div>
                   {% if error_description[language.language_id] %}

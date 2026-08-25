@@ -54,7 +54,7 @@
                     <label class="dcx-label">{{ entry_name }}</label>
                     {% for language in languages %}
                     <div class="dc-attr-row__value">
-                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                       <input type="text" name="option_description[{{ language.language_id }}][name]" value="{{ (option_description[language.language_id] ? option_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_name }}" class="form-control" />
                     </div>
                     {% if error_name[language.language_id] %}
@@ -190,7 +190,7 @@
                         <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
                         {% for language in languages %}
                           <div class="dc-opt-card__lang-row">
-                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                             <input type="text" name="option_value[{{ option_value_row }}][option_value_description][{{ language.language_id }}][name]" value="{{ (option_value.option_value_description[language.language_id] ? option_value.option_value_description[language.language_id].name)|e('html_attr') }}" placeholder="{{ entry_option_value }}" class="form-control" />
                           </div>
                         {% endfor %}
@@ -253,7 +253,7 @@ function addOptionValue() {
 	html += '      <div class="dc-opt-card__languages" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">';
 	{% for language in languages %}
 	html += '        <div class="dc-opt-card__lang-row">';
-	html += '          <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>';
+	html += '          <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>';
 	html += '          <input type="text" name="option_value[' + option_value_row + '][option_value_description][{{ language.language_id }}][name]" value="" placeholder="{{ entry_option_value }}" class="form-control" />';
 	html += '        </div>';
 	{% endfor %}

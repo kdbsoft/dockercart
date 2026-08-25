@@ -21,3 +21,4 @@ $_['text_transaction_subject'] = '%s - партнерські комісійні
 $_['text_transaction_total'] = 'Ваш баланс комісійних %s.';
 $_['text_website'] = 'Веб-сайт:';
 $_['text_welcome'] = 'Дякуємо, що приєдналися до партнерської програми %s!';
+$_['text_button_login'] = 'Увійти';

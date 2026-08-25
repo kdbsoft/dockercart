@@ -25,3 +25,7 @@ $_['text_shipping_method'] = 'Способ доставки:';
 $_['text_subject'] = '%s - Заказ %s';
 $_['text_telephone'] = 'Телефон:';
 $_['text_total'] = 'Итого';
+$_['text_pickup_warehouse'] = 'Склад / Самовывоз';
+$_['text_estimate'] = 'Выдача/оценка';
+$_['text_button_order'] = 'Просмотреть заказ';
+$_['text_button_download'] = 'Скачать файлы';

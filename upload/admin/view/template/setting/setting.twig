@@ -59,6 +59,7 @@
                 </ul>
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-store">
+                    <div class="dc-lang-frame">
                     <ul class="nav nav-tabs" id="language">
                       {% for language in languages %}
                       <li><a href="#language-store{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -100,6 +101,7 @@
                         </div>
                       </div>
                       {% endfor %}
+                    </div>
                     </div>
                     <hr>
                     <div class="dcx-fields">
@@ -173,27 +175,10 @@
                         </div>
                         <p class="help-block">{{ help_images }}</p>
                       </div>
-                      {% if locations %}
-                      <div class="dcx-field">
-                        <label class="dcx-label">{{ entry_location }} <span data-toggle="tooltip" title="{{ help_location }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                        {% for location in locations %}
-                        <div class="checkbox">
-                          <label>
-                            {% if location.location_id in config_location %}
-                            <input type="checkbox" name="config_location[]" value="{{ location.location_id }}" checked="checked" />
-                            {{ location.name }}
-                            {% else %}
-                            <input type="checkbox" name="config_location[]" value="{{ location.location_id }}" />
-                            {{ location.name }}
-                            {% endif %}
-                          </label>
-                        </div>
-                        {% endfor %}
-                      </div>
-                      {% endif %}
                     </div>
                   </div>
                   <div class="tab-pane" id="tab-seo">
+                    <div class="dc-lang-frame">
                     <ul class="nav nav-tabs" id="language-seo">
                       {% for language in languages %}
                       <li><a href="#language-seo{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -221,6 +206,7 @@
                         </div>
                       </div>
                       {% endfor %}
+                    </div>
                     </div>
                   </div>
                   <div class="tab-pane" id="tab-local">
@@ -682,6 +668,43 @@
                       </div>
                     </div>
                     <div class="dcx-section">
+                      <div class="dcx-section-header"><h4><i data-lucide="warehouse" width="16" height="16"></i> {{ text_warehouse }}</h4></div>
+                      <div class="dcx-fields">
+                        <div class="dcx-checkbox-group">
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_enabled" value="0" />
+                            <input type="checkbox" name="config_warehouse_enabled" value="1"{% if config_warehouse_enabled %} checked="checked"{% endif %}> {{ entry_warehouse_enabled }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_enabled }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_split_allowed" value="0" />
+                            <input type="checkbox" name="config_warehouse_split_allowed" value="1"{% if config_warehouse_split_allowed %} checked="checked"{% endif %}> {{ entry_warehouse_split_allowed }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_split_allowed }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_stock_display" value="0" />
+                            <input type="checkbox" name="config_warehouse_stock_display" value="1"{% if config_warehouse_stock_display %} checked="checked"{% endif %}> {{ entry_warehouse_stock_display }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_stock_display }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_show_pickup" value="0" />
+                            <input type="checkbox" name="config_warehouse_show_pickup" value="1"{% if config_warehouse_show_pickup %} checked="checked"{% endif %}> {{ entry_warehouse_show_pickup }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_show_pickup }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_estimate_enabled" value="0" />
+                            <input type="checkbox" name="config_warehouse_estimate_enabled" value="1"{% if config_warehouse_estimate_enabled %} checked="checked"{% endif %}> {{ entry_warehouse_estimate_enabled }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_estimate_enabled }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="hidden" name="config_warehouse_dropship_checkout" value="0" />
+                            <input type="checkbox" name="config_warehouse_dropship_checkout" value="1"{% if config_warehouse_dropship_checkout %} checked="checked"{% endif %}> {{ entry_warehouse_dropship_checkout }}
+                            <span data-toggle="tooltip" title="{{ help_warehouse_dropship_checkout }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dcx-section">
                       <div class="dcx-section-header"><h4><i data-lucide="handshake" width="16" height="16"></i> {{ text_affiliate }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-checkbox-group">
@@ -1058,6 +1081,7 @@
                     </div>
                     <div class="dcx-section">
                       <div class="dcx-section-header"><h4><i data-lucide="building-2" width="16" height="16"></i> {{ text_invoice_seller }}</h4></div>
+                        <div class="dc-lang-frame">
                         <ul class="nav nav-tabs" id="language-invoice">
                           {% for language in languages %}
                           <li><a href="#language-invoice{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -1078,6 +1102,7 @@
                             </div>
                           </div>
                           {% endfor %}
+                        </div>
                         </div>
                         <div class="dcx-fields" style="margin-top: 15px;">
                           <div class="dcx-field">

@@ -15,8 +15,6 @@ class ControllerEventDockercartLicenseAdmin extends Controller {
 			return null;
 		}
 
-		require_once DIR_SYSTEM . 'library/dockercart/licensing.php';
-
 		$licensing = new DockercartLicensing($this->registry);
 
 		$license = $licensing->getLicense($module_code);

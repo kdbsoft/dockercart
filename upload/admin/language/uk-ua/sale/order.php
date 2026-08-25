@@ -15,6 +15,7 @@ $_['column_order_id'] = 'Номер замовлення';
 $_['column_price'] = 'Ціна за одиницю';
 $_['column_product'] = 'Товар';
 $_['column_quantity'] = 'Кількість';
+$_['column_qty'] = 'К-сть';
 $_['column_reference'] = 'Довідка';
 $_['column_status'] = 'Статус';
 $_['column_tracking_number'] = 'Номер відстеження';
@@ -181,6 +182,7 @@ $_['text_search_no_results']  = 'Замовлення не знайдено';
 $_['text_filter_all']         = 'Всі';
 $_['text_filter_unfulfilled'] = 'Не виконані';
 $_['text_filter_unpaid']      = 'Не оплачені';
+$_['text_filter_unshipped']   = 'Не відвантажені';
 $_['text_filter_abandoned']   = 'Покинуті кошики';
 $_['text_add_filter']         = 'Додати фільтр';
 $_['text_add_condition']      = 'Додати умову';
@@ -268,16 +270,16 @@ $_['text_tracking_max']          = 'До 10 номерів';
 
 $_['error_comment']              = 'Будь ласка, введіть коментар!';
 $_['error_order_status']         = 'Будь ласка, виберіть статус замовлення!';
-$_['error_invalid_transition']   = 'Ця зміна статусу заборонена налаштуваннями Flow замовлень!';
+$_['error_invalid_transition']   = 'Ця зміна статусу заборонена налаштуваннями ходу виконання замовлення!';
 
-$_['text_order_flow']            = 'Flow замовлень';
+$_['text_order_flow']            = 'Хід виконання замовлення';
 $_['text_flow_change_status']    = 'Змінити статус';
-$_['text_flow_override']         = 'Примусово (без перевірки Flow)';
+$_['text_flow_override']         = 'Примусово (без перевірки)';
 $_['text_flow_notify_customer']  = 'Повідомити покупця';
 $_['text_flow_transition_to']    = 'Перевести замовлення у статус:';
-$_['text_flow_confirm_terminal'] = 'Цей статус завершує Flow замовлень. Продовжити?';
-$_['text_flow_terminal_state']   = 'Flow замовлень для цього замовлення завершено.';
-$_['text_flow_completed_state']  = 'Flow замовлень для цього замовлення успішно пройдено.';
+$_['text_flow_confirm_terminal'] = 'Цей статус завершує Хід виконання замовлення. Продовжити?';
+$_['text_flow_terminal_state']   = 'Хід виконання цього замовлення завершено.';
+$_['text_flow_completed_state']  = 'Хід виконання цього замовлення успішно пройдено.';
 $_['button_flow_apply']          = 'Застосувати';
 $_['text_comment_optional']      = 'Коментар (необов\'язково)';
 $_['text_return_refund_note']    = 'Повернення коштів за поверненням #%s';
@@ -402,6 +404,12 @@ $_['text_payment_status_overpaid']   = 'Переплата';
 $_['text_payment_paid_of']           = 'Оплачено:';
 $_['text_payment_remaining']         = 'Залишок';
 $_['text_no_payments']               = 'Платежі не записані';
+
+// Відвантаження
+$_['text_shipping_status']           = 'Відвантаження';
+$_['text_shipping_status_none']      = 'Не відвантажено';
+$_['text_shipping_status_partial']   = 'Відвантажено частково';
+$_['text_shipping_status_shipped']   = 'Відвантажено';
 $_['text_reference']                 = 'Транз.';
 $_['text_payment_note_received']     = 'Платіж отримано: %s (оплачено %s з %s)';
 $_['text_payment_note_reversed']     = 'Платіж скасовано: -%s';
@@ -453,3 +461,8 @@ $_['text_empty_description'] = 'Замовлення покупців та їх�
 $_['text_buyer_orders_one']          = '%s замовлення';
 $_['text_buyer_orders_few']          = '%s замовлення';
 $_['text_buyer_orders_many']         = '%s замовлень';
+
+// Warehouse move
+$_['text_move_warehouse']        = 'Перенести на склад';
+$_['text_warehouse_moved']       = 'Товар перенесено на склад.';
+$_['text_warehouse_move_failed'] = 'Не вдалося перенести товар.';

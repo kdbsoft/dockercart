@@ -325,7 +325,7 @@ class ControllerDesignBanner extends Controller {
 		// Localization keys for banner_form.twig
 		$data['text_tab_general']        = $this->language->get('text_tab_general');
 		$data['text_tab_slides']         = $this->language->get('text_tab_slides');
-		$data['text_general_settings']   = $this->language->get('text_general_settings');
+		$data['text_status_card']   = $this->language->get('text_status_card');
 		$data['text_slides_by_language'] = $this->language->get('text_slides_by_language');
 		$data['text_slide']              = $this->language->get('text_slide');
 		$data['text_new_slide']          = $this->language->get('text_new_slide');

@@ -747,6 +747,11 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 $this->cart->remove($cart_id);
             }
 
+            // The cart changed — the warehouse allocation (and any selected
+            // shipping method / pickup choice) is stale and must be recomputed.
+            unset($this->session->data["warehouse_allocation"]);
+            unset($this->session->data["pickup_warehouse_id"]);
+
             // DockerCart: refresh checkout holds after a cart change; a failed
             // hold means the requested quantity is no longer available.
             if (!empty($this->refreshStockReservations())) {
@@ -1072,6 +1077,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // saveShippingAddress/savePaymentAddress) so abandoned carts keep the
         // customer email even before the confirm flow calls the customer endpoint.
         $this->persistContactData($data);
+        $this->trackContactStep($data);
 
         // Apply default country/zone from module config when not provided by user
         if (
@@ -1370,6 +1376,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // Persist contact identifiers sent with the address (see frontend
         // savePaymentAddress/savePaymentAddressSameAsShipping).
         $this->persistContactData($data);
+        $this->trackContactStep($data);
 
         // If payment country/zone fields are hidden in module settings, use store defaults.
         if (
@@ -1597,6 +1604,20 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     $this->session->data["shipping_methods"][$shipping[0]][
                         "quote"
                     ][$shipping[1]];
+
+                // Self-pickup: capture the chosen pickup warehouse and force
+                // the cart allocation onto it, then refresh holds accordingly.
+                if ($shipping[0] === "dockercart_warehouse_pickup" && strpos((string)$shipping[1], "pickup_") === 0) {
+                    $pickup_wh = (int)substr((string)$shipping[1], strlen("pickup_"));
+                    $this->session->data["pickup_warehouse_id"] = $pickup_wh;
+                    unset($this->session->data["warehouse_allocation"]);
+                    $this->refreshStockReservations();
+                } else {
+                    $this->session->data["pickup_warehouse_id"] = 0;
+                    unset($this->session->data["warehouse_allocation"]);
+                    $this->refreshStockReservations();
+                }
+
                 $json["success"] = true;
                 $json["totals"] = $this->getCartTotals();
 
@@ -1845,13 +1866,18 @@ class ControllerCheckoutDockercartCheckout extends Controller
             return [];
         }
 
+        $cart_products = $this->cart->getProducts();
+        $allocation = $this->getWarehouseAllocation($cart_products);
         $reserve_lines = [];
 
-        foreach ($this->cart->getProducts() as $reserve_product) {
+        foreach ($cart_products as $reserve_product) {
+            $cart_key = $reserve_product["cart_id"] ?? ($reserve_product["product_id"] . ':' . (int)($reserve_product["variant_id"] ?? 0));
+
             $reserve_lines[] = [
                 "product_id" => (int) $reserve_product["product_id"],
                 "variant_id" => (int) ($reserve_product["variant_id"] ?? 0),
                 "quantity" => (float) $reserve_product["quantity"],
+                "warehouse_id" => (int) ($allocation[$cart_key] ?? 0),
             ];
         }
 
@@ -1873,6 +1899,104 @@ class ControllerCheckoutDockercartCheckout extends Controller
         }
 
         return $stock_reservation->reserve($reserve_lines, $reserve_ttl);
+    }
+
+    /**
+     * Compute (and cache in session) the warehouse each cart line is shipped
+     * from. Returns allocation keyed by cart_id  (or "product_id:variant_id"
+     * fallback), plus an 'estimate' sub-array of per-line ship dates.
+     *
+     * Invalidation: the session slot is cleared wherever cart-changes reset
+     * shipping methods (updateCart). A validated self-pickup choice forces the
+     * whole cart onto the pickup warehouse.
+     */
+    private function getWarehouseAllocation(array $cart_products): array
+    {
+        // Pickup choice forces the allocation onto the pickup warehouse.
+        if (!empty($this->session->data["shipping_method"]["code"]) && strpos((string)$this->session->data["shipping_method"]["code"], "pickup") !== false) {
+            $pickup_wh = (int)($this->session->data["pickup_warehouse_id"] ?? 0);
+
+            if ($pickup_wh > 0) {
+                $result = [];
+
+                foreach ($cart_products as $product) {
+                    $key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
+                    $result[$key] = $pickup_wh;
+                }
+
+                return $result;
+            }
+        }
+
+        if (empty($this->session->data["warehouse_allocation"])) {
+            $this->session->data["warehouse_allocation"] = $this->computeWarehouseAllocation($cart_products);
+        }
+
+        return $this->session->data["warehouse_allocation"];
+    }
+
+    private function computeWarehouseAllocation(array $cart_products): array
+    {
+        $warehouse = new \DockercartWarehouse($this->registry);
+
+        if (!$warehouse->isEnabled()) {
+            $default = $warehouse->getDefaultWarehouseId();
+            $alloc = [];
+
+            foreach ($cart_products as $product) {
+                $key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
+                $alloc[$key] = $default;
+
+                $alloc["estimate"][$key] = $warehouse->estimateShipDate($default, ['product_id' => (int)$product["product_id"], 'variant_id' => (int)($product["variant_id"] ?? 0)], null);
+            }
+
+            return $alloc;
+        }
+
+        $lines = [];
+
+        foreach ($cart_products as $i => $product) {
+            $key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
+
+            $lines[$i] = [
+                "key" => $key,
+                "product_id" => (int)$product["product_id"],
+                "variant_id" => (int)($product["variant_id"] ?? 0),
+                "quantity" => (float)$product["quantity"],
+                "subtract" => !empty($product["subtract"]),
+            ];
+        }
+
+        $result = $warehouse->allocate(array_values($lines));
+
+        $alloc = [];
+        $keys_by_position = array_values($lines);
+
+        foreach ($keys_by_position as $i => $line_spec) {
+            $alloc[$line_spec["key"]] = (int)($result["alloc"][$i] ?? $warehouse->getDefaultWarehouseId());
+            $alloc["estimate"][$line_spec["key"]] = $result["estimate"][$i] ?? null;
+        }
+
+        return $alloc;
+    }
+
+    /**
+     * Lightweight in-memory warehouse pool: id => warehouse row.
+     */
+    private function getWarehousePool(): array
+    {
+        static $pool = null;
+
+        if ($pool === null) {
+            $warehouse = new \DockercartWarehouse($this->registry);
+            $pool = [];
+
+            foreach ($warehouse->getWarehouses() as $w) {
+                $pool[(int)$w["warehouse_id"]] = $w;
+            }
+        }
+
+        return $pool;
     }
 
     /**
@@ -2220,9 +2344,22 @@ class ControllerCheckoutDockercartCheckout extends Controller
         // totals pipeline (below) both work off the discounted prices.
         $cart_products = $this->cart->getProducts();
 
+        $allocation = $this->getWarehouseAllocation($cart_products);
+
         foreach ($cart_products as $product) {
             $price = (float) $product["price"];
             $tax = $this->tax->getTax($price, (int) ($product["tax_class_id"] ?? 0));
+
+            $cart_key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
+            $wh_id = (int)($allocation[$cart_key] ?? 0);
+            $wh_name = '';
+            $wh_estimate = null;
+
+            if ($wh_id > 0) {
+                $wh = $this->getWarehousePool();
+                $wh_name = (string)($wh[$wh_id]['name'] ?? '');
+                $wh_estimate = ($allocation['estimate'][$cart_key] ?? null) ?: null;
+            }
 
             $order_data["products"][] = [
                 "product_id"  => $product["product_id"],
@@ -2236,6 +2373,9 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 "tax"         => $tax,
                 "reward"      => isset($product["reward"]) ? $product["reward"] : 0,
                 "option"      => isset($product["option"]) ? $product["option"] : [],
+                "warehouse_id"  => $wh_id,
+                "warehouse_name" => $wh_name,
+                "estimate_date" => $wh_estimate,
             ];
         }
 
@@ -2565,9 +2705,39 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $cart_products = $this->cart->getProducts();
 
         $products = [];
+        $allocation = [];
+        $warehouse_pool_by_id = [];
+
+        if ($this->config->get('config_warehouse_enabled')) {
+            $allocation = $this->getWarehouseAllocation($cart_products);
+
+            $this->load->language("product/product");
+
+            $wh = new \DockercartWarehouse($this->registry);
+            foreach ($wh->getWarehouses() as $w) {
+                if ((string)$w["type"] === "dropship") {
+                    $display_name = sprintf(
+                        $this->language->get("text_warehouse_dropship"),
+                        (int)$w["warehouse_id"],
+                    );
+                } else {
+                    $display_name = (string)$w["name"];
+                }
+
+                $warehouse_pool_by_id[(int)$w["warehouse_id"]] = [
+                    "name" => $display_name,
+                    "type" => (string)$w["type"],
+                ];
+            }
+        }
 
         foreach ($cart_products as $product) {
             $option_data = [];
+
+            $cart_key = $product["cart_id"] ?? ($product["product_id"] . ':' . (int)($product["variant_id"] ?? 0));
+            $wh_id = (int)($allocation[$cart_key] ?? 0);
+            $wh_info = $wh_id > 0 ? ($warehouse_pool_by_id[$wh_id] ?? null) : null;
+            $wh_name = $wh_info ? $wh_info["name"] : '';
 
             foreach ($product["option"] as $option) {
                 if ($option["type"] != "file") {
@@ -2605,6 +2775,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
                     self::IMAGE_THUMB_WIDTH,
                     self::IMAGE_THUMB_HEIGHT,
                 ),
+                "warehouse_id" => $wh_id,
+                "warehouse_name" => $wh_name,
                 "option" => $option_data,
                 "quantity" => $product["quantity"],
                 "preorder" => !empty($product["preorder"]),
@@ -4582,6 +4754,8 @@ class ControllerCheckoutDockercartCheckout extends Controller
 
         if (!empty($data["email"])) {
             $this->persistContactData($data);
+            $this->trackContactStep($data);
+
             $this->saveAbandonedCart(
                 "customer",
                 $data["email"],
@@ -4647,6 +4821,25 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 "custom_field" => [],
             ];
         }
+    }
+
+    /**
+     * Track the customer funnel step once a valid contact email is present.
+     * The frontend usually submits contact data together with the address
+     * payloads instead of calling the customer endpoint, so every handler
+     * that persists contact data reports this step too.
+     */
+    private function trackContactStep($data)
+    {
+        if (
+            empty($data["email"]) ||
+            !filter_var($data["email"], FILTER_VALIDATE_EMAIL)
+        ) {
+            return;
+        }
+
+        $this->load->model("checkout/dockercart_checkout");
+        $this->model_checkout_dockercart_checkout->trackStep("customer");
     }
 
     /**

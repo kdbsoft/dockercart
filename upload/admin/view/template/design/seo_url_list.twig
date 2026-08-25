@@ -6,6 +6,8 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
+            <a href="{{ export }}" class="btn btn-default"><i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}</a>
+            <button type="button" class="btn btn-default" onclick="$('#import-modal').modal('show');"><i data-lucide="upload" width="16" height="16"></i> {{ button_import_csv }}</button>
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-url-alias').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
@@ -51,7 +53,7 @@
             <td class="text-left">
               {% for language in languages %}
               <div class="dc-keyword-row">
-                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                 {% if seo_url.keywords[language.language_id] %}
                 <span class="inline-edit" data-query="{{ seo_url.query|e('html_attr') }}" data-store-id="{{ seo_url.store_id }}" data-language-id="{{ language.language_id }}" data-value="{{ seo_url.keywords[language.language_id].keyword|e('html_attr') }}">{{ seo_url.keywords[language.language_id].keyword }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
                 {% else %}
@@ -86,6 +88,7 @@
   display: inline-block; min-width: 26px; font-weight: 700; font-size: 11px;
   color: #7b8ead; margin-right: 6px;
 }
+.dc-keyword-row .lang-name { margin-right: 6px; }
 .dc-keyword-empty { color: #999; font-style: italic; }
 .inline-edit { cursor: pointer; }
 .inline-edit .inline-edit-icon { margin-left: 4px; color: #a0aec0; }
@@ -201,6 +204,80 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	$input.on('keydown', function(e) {
 		if (e.which === 13) { e.preventDefault(); $input.trigger('blur'); }
 		if (e.which === 27) { revert(); }
+	});
+});
+//--></script>
+<div id="import-modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title"><i data-lucide="upload" width="18" height="18"></i> {{ heading_import }}</h4>
+      </div>
+      <div class="modal-body">
+        <form id="form-import" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="control-label">{{ text_select_file }}</label>
+            <input type="file" name="file" accept=".csv,text/csv" class="form-control" />
+          </div>
+          <div id="import-error" class="alert alert-danger" style="display:none; margin-bottom:0;"></div>
+          <div class="alert alert-info" style="margin-top:12px; margin-bottom:0;">
+            <i data-lucide="info" width="16" height="16"></i> {{ text_import_format }}
+            <pre style="margin-top:8px; margin-bottom:0;">store_id,language,query,keyword
+0,en-gb,product_id=50,laptop</pre>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="button-import"><i data-lucide="upload" width="14" height="14"></i> {{ button_import }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#import-modal').on('change', '#form-import input[name=\'file\']', function() {
+	$('#import-error').hide();
+});
+
+$('#button-import').on('click', function() {
+	if (!$('#form-import input[name=\'file\']')[0].files.length) {
+		$('#import-error').text('{{ text_select_file|e("js") }}').show();
+		return;
+	}
+
+	var formData = new FormData($('#form-import')[0]);
+
+	$.ajax({
+		url: '{{ import }}',
+		type: 'post',
+		data: formData,
+		dataType: 'json',
+		cache: false,
+		contentType: false,
+		processData: false,
+		beforeSend: function() {
+			$('#button-import').prop('disabled', true);
+		},
+		complete: function() {
+			$('#button-import').prop('disabled', false);
+		},
+		success: function(json) {
+			$('.alert-dismissible').remove();
+			if (json.error) {
+				$('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json.error + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				lucide.createIcons();
+			}
+			if (json.success) {
+				$('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json.success + '</div>');
+				lucide.createIcons();
+				$('#import-modal').modal('hide');
+				setTimeout(function() { location.reload(); }, 900);
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
 	});
 });
 //--></script>

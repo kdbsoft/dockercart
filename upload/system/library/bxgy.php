@@ -265,13 +265,13 @@ class Bxgy {
 	private function formatDiscountText($discount_type, $discount_value) {
 		if ($discount_type === 'free') {
 			$text = $this->language->get('text_bxgy_free_badge');
-			return $text ?: 'BXGY: Free';
+			return $text ?: 'Second item: free';
 		} elseif ($discount_type === 'percentage') {
 			$format = $this->language->get('text_bxgy_percent_badge');
-			$format = $format ?: 'BXGY: -%d%%';
+			$format = $format ?: 'Second item: -%d%%';
 			return sprintf($format, (int) $discount_value);
 		}
 
-		return 'BXGY';
+		return 'Second item discount';
 	}
 }
