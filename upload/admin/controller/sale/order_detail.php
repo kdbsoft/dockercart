@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
-	private const INVOICE_RENDER_VERSION = 'qr-v4';
+	private const INVOICE_RENDER_VERSION = 'qr-v8';
 
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;

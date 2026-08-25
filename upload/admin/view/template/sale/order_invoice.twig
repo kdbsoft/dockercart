@@ -12,9 +12,9 @@
     .accent { height: 2.5px; background: #0f172a; margin: 0 0 18px 0; }
     .doc-head td { vertical-align: top; padding: 0; }
     .brand-logo { max-height: 30px; max-width: 200px; margin-bottom: 8px; display: block; }
-    .brand-fallback { font-size: 12pt; font-weight: 700; color: #0f172a; letter-spacing: 0.2px; margin-bottom: 2px; }
     .doc-title { font-size: 17pt; font-weight: 700; color: #0f172a; line-height: 1; letter-spacing: 0.6px; text-transform: uppercase; }
     .doc-number { font-size: 11pt; font-weight: 700; color: #0f172a; margin-top: 4px; }
+    .doc-order-no { font-size: 12pt; font-weight: 700; color: #0f172a; }
     .doc-meta { text-align: right; font-size: 7.5pt; color: #64748b; line-height: 1.6; }
     .doc-meta strong { color: #334155; font-weight: 700; }
     .doc-meta .store-name { font-size: 8.5pt; color: #0f172a; font-weight: 700; }
@@ -43,7 +43,9 @@
     .pay-order-body td.label { color: #64748b; white-space: nowrap; width: 132px; text-transform: uppercase; letter-spacing: 0.3px; font-size: 7pt; padding-top: 4px; }
     .pay-order-body td.value { color: #0f172a; font-weight: 400; }
     .pay-order-body td.value strong { font-weight: 700; }
-    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; }
+    .items th { background: #0f172a; color: #ffffff; font-weight: 700; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 9px; text-align: left; white-space: nowrap; }
+    .items th.text-right { text-align: right; }
+    .items th.text-center { text-align: center; }
     .items td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 8.5pt; vertical-align: top; color: #1e293b; }
     .items tr:last-child td { border-bottom-color: #cbd5e1; }
     .items .opt { color: #64748b; font-size: 7.5pt; margin-top: 2px; line-height: 1.4; }
@@ -79,18 +81,21 @@
     <table class="doc-head">
       <tr>
         <td>
-          {% if order.seller_logo %}<img src="{{ order.seller_logo }}" class="brand-logo" alt="">{% else %}<div class="brand-fallback">{{ order.seller_name ?: order.store_name }}</div>{% endif %}
-          {% if order.seller_logo and order.seller_name %}<div style="font-size: 7.5pt; color: #64748b; margin-bottom: 1px;">{{ order.seller_name }}</div>{% endif %}
+          {% if order.seller_logo %}<img src="{{ order.seller_logo }}" class="brand-logo" alt="">{% endif %}
           <div class="doc-title">{{ text_invoice }}</div>
           {% if order.invoice_no %}<div class="doc-number">№ {{ order.invoice_no }}</div>{% endif %}
           <div class="doc-left-meta">
             <div><strong>{{ text_date_added }}:</strong> {{ order.date_added }}</div>
             {% if order.invoice_valid_until %}<div><strong>{{ text_invoice_valid_until }}:</strong> {{ order.invoice_valid_until }}</div>{% endif %}
-            <div><strong>{{ text_order }}:</strong> #{{ order.order_id }}</div>
           </div>
         </td>
         <td class="doc-meta">
           {% if order.invoice_qr_code %}<img src="{{ order.invoice_qr_code }}" class="invoice-qr" alt="">{% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td><div class="doc-order-no">{{ text_order }}: #{{ order.order_id }}</div></td>
+        <td class="doc-meta">
           <div class="store-name">{{ order.store_name }}</div>
           <div>{{ order.store_url }}</div>
         </td>
@@ -168,11 +173,11 @@
     <table class="items">
       <thead>
         <tr>
-          <th style="width: 46%;">{{ column_product }}</th>
-          <th style="width: 18%;">{{ column_model }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_quantity }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_price }}</th>
-          <th class="text-right" style="width: 12%;">{{ column_total }}</th>
+          <th style="width: 42%;">{{ column_product }}</th>
+          <th style="width: 15%;">{{ column_model }}</th>
+          <th class="text-center" style="width: 11%;">{{ column_qty }}</th>
+          <th class="text-right" style="width: 16%;">{{ column_price }}</th>
+          <th class="text-right" style="width: 16%;">{{ column_total }}</th>
         </tr>
       </thead>
       <tbody>
@@ -180,7 +185,7 @@
         <tr>
           <td>{{ product.name }}{% if product.option %}<div class="opt">{{ product.option }}</div>{% endif %}</td>
           <td class="muted" style="color: #64748b; font-size: 8pt;">{{ product.model }}</td>
-          <td class="text-right no-wrap">{{ product.quantity }}</td>
+          <td class="text-center no-wrap">{{ product.quantity }}</td>
           <td class="text-right no-wrap">{{ product.price }}</td>
           <td class="text-right no-wrap" style="font-weight: 700;">{{ product.total }}</td>
         </tr>
