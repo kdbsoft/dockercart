@@ -114,7 +114,6 @@ class ModelCatalogProduct extends Model {
 			'jan'              => $row['jan'],
 			'isbn'             => $row['isbn'],
 			'mpn'              => $row['mpn'],
-			'location'         => $row['location'],
 			'quantity'         => (float)$row['quantity'],
 			'preorder'         => (int)$row['preorder'],
 			'image'            => $row['image'],

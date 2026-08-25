@@ -52,7 +52,6 @@ $_['entry_keyword'] = 'Ключове слово';
 $_['entry_layout'] = 'Перевизначення макета';
 $_['entry_length'] = 'Довжина';
 $_['entry_length_class'] = 'Клас довжини';
-$_['entry_location'] = 'Розташування';
 $_['entry_main_category'] = 'Головна категорія';
 $_['entry_manufacturer'] = 'Виробник';
 $_['entry_max'] = 'До';

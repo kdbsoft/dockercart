@@ -73,7 +73,6 @@ $_['entry_ean']              = 'EAN';
 $_['entry_jan']              = 'JAN';
 $_['entry_isbn']             = 'ISBN';
 $_['entry_mpn']              = 'MPN';
-$_['entry_location']         = 'Location';
 $_['entry_shipping']         = 'Requires Shipping';
 $_['entry_manufacturer']     = 'Manufacturer';
 $_['entry_date_available']   = 'Date Available';
