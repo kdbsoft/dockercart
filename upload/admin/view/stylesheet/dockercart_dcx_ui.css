@@ -365,7 +365,6 @@
     margin-top: 0;
 }
 .dcx-fields--row .dcx-field {
-    flex: 1 1 0;
     min-width: 140px;
 }
 .dcx-fields--row .dcx-field--half {
