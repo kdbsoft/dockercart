@@ -15,10 +15,16 @@ class ControllerMailAbandoned extends Controller {
 
 		$data['store_name'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
 		$data['store_url'] = $this->config->get('config_url');
-		$data['logo'] = $this->config->get('config_logo');
+		$data['logo'] = '';
+
+		if ($this->config->get('config_logo') && is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
+			$data['logo'] = $data['store_url'] . 'image/' . $this->config->get('config_logo');
+		}
 
 		$data['text_greeting'] = sprintf($this->language->get('text_greeting'), $data['store_name']);
 		$data['text_items_heading'] = $this->language->get('text_items_heading');
+		$data['text_quantity'] = $this->language->get('text_quantity');
+		$data['text_total'] = $this->language->get('text_total');
 		$data['text_restore'] = $this->language->get('text_restore');
 		$data['text_expires'] = $this->language->get('text_expires');
 		$data['text_thanks'] = $this->language->get('text_thanks');

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
-	private const INVOICE_RENDER_VERSION = 'qr-v4';
+	private const INVOICE_RENDER_VERSION = 'qr-v8';
 
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;
@@ -62,6 +62,15 @@ class ControllerSaleOrderDetail extends Controller {
 
 	public function index(): void {
 		$this->load->language('sale/order');
+
+		// Pin the shared "text_success" key from sale/order before any other
+		// language file (sale/return, payment/shipping extensions loaded by
+		// getAvailablePaymentMethods()/getAvailableShippingMethods()) can
+		// overwrite it in the global language namespace. The template uses it
+		// in JS alerts after Flow status changes, and the event/language view
+		// handler injects whatever is left in the global namespace.
+		$data['text_success'] = $this->language->get('text_success');
+
 		$this->load->language('sale/return');
 
 		if (isset($this->session->data['success'])) {
@@ -305,6 +314,8 @@ class ControllerSaleOrderDetail extends Controller {
 				'name'             => $order_localizer->productName($product),
 				'model'            => $product['model'],
 				'variant_sku'      => $product['variant_sku'] ?? '',
+				'warehouse_id'     => (int)($product['warehouse_id'] ?? 0),
+				'warehouse'        => (string)($product['warehouse_name'] ?? ''),
 				'option'           => $option_data,
 				'quantity'         => $product['quantity'],
 				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
@@ -387,6 +398,14 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['buyer_orders_count'] = $buyer_orders_count;
 		$data['buyer_orders_text'] = $buyer_orders_count > 1 ? $this->getBuyerOrdersCountText($buyer_orders_count) : '';
 
+		// Warehouses: list for the per-line "move to warehouse" control.
+		$data['warehouses'] = [];
+		if ($this->config->get('config_warehouse_enabled')) {
+			$this->load->model('warehouse/warehouse');
+			$data['warehouses'] = $this->model_warehouse_warehouse->getWarehouses(['sort' => 'priority', 'order' => 'DESC', 'limit' => 1000]);
+		}
+		$data['move_warehouse_url'] = $this->url->link('sale/order_detail/moveWarehouse', 'user_token=' . $this->session->data['user_token'], true);
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
@@ -414,7 +433,8 @@ class ControllerSaleOrderDetail extends Controller {
 		try {
 			$this->sendPdf(
 				$this->load->view('sale/order_detail_print', [
-					'orders' => [$this->buildPrintData($order_id)],
+					'orders'     => [$this->buildPrintData($order_id)],
+					'print_date' => date($this->language->get('datetime_format')),
 				]),
 				'order-' . $order_id . '.pdf'
 			);
@@ -464,6 +484,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$pdf = $this->renderPdf($this->load->view('sale/order_invoice', [
 				'orders'        => [$invoice_data],
 				'text_tax_type' => $invoice_data['text_tax_type'] ?? [],
+				'print_date'    => date($this->language->get('datetime_format')),
 			]));
 
 			$directory = DIR_STORAGE . 'documents/invoices/';
@@ -529,7 +550,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		try {
 			$this->sendPdf(
-				$this->load->view('sale/order_detail_print', ['orders' => $orders]),
+				$this->load->view('sale/order_detail_print', ['orders' => $orders, 'print_date' => date($this->language->get('datetime_format'))]),
 				$filename
 			);
 		} finally {
@@ -1626,6 +1647,41 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
+	/**
+	 * Move one order line to another warehouse: moves the stock between the
+	 * warehouses, records a movement (reference = order number) and updates the
+	 * order_product snapshot + estimated ship date.
+	 */
+	public function moveWarehouse(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->post['order_id'] ?? 0);
+			$order_product_id = (int)($this->request->post['order_product_id'] ?? 0);
+			$to_warehouse_id = (int)($this->request->post['warehouse_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$result = $this->model_sale_order->moveOrderProductToWarehouse($order_id, $order_product_id, $to_warehouse_id);
+
+			if ($result) {
+				$json['success'] = $this->language->get('text_warehouse_moved');
+				$json['warehouse_id'] = $result['warehouse_id'];
+				$json['warehouse_name'] = $result['warehouse_name'];
+				$json['estimate_date'] = $result['estimate_date'];
+			} else {
+				$json['error'] = $this->language->get('text_warehouse_move_failed');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function previewProduct(): void {
 		$this->load->language('sale/order');
 
@@ -1798,8 +1854,6 @@ class ControllerSaleOrderDetail extends Controller {
 			} elseif ((int)$order_info['reward'] <= 0) {
 				$json['error'] = $this->language->get('error_reward_no_points');
 			} else {
-				require_once DIR_SYSTEM . 'library/dockercart_reward.php';
-
 				$this->db->query('START TRANSACTION');
 
 				try {
@@ -1956,7 +2010,13 @@ class ControllerSaleOrderDetail extends Controller {
 					}
 
 					$json['success'] = $this->language->get('text_shipment_added');
-					$json['shipments_html'] = $this->load->view('sale/order_shipments', $this->getShipmentsPartialData($order_id));
+
+					$shipments_data = $this->getShipmentsPartialData($order_id);
+
+					$json['shipments_html'] = $this->load->view('sale/order_shipments', $shipments_data);
+					$json['shipping_status'] = $shipments_data['shipping_status'];
+					$json['shipping_status_text'] = $shipments_data['shipping_status_text'];
+					$json['shipping_status_header_badge_class'] = $shipments_data['shipping_status_header_badge_class'];
 				}
 			}
 		}
@@ -1987,7 +2047,13 @@ class ControllerSaleOrderDetail extends Controller {
 				$this->model_sale_order->deleteOrderShipment($shipment_id);
 
 				$json['success'] = $this->language->get('text_shipment_removed');
-				$json['shipments_html'] = $this->load->view('sale/order_shipments', $this->getShipmentsPartialData($order_id));
+
+				$shipments_data = $this->getShipmentsPartialData($order_id);
+
+				$json['shipments_html'] = $this->load->view('sale/order_shipments', $shipments_data);
+				$json['shipping_status'] = $shipments_data['shipping_status'];
+				$json['shipping_status_text'] = $shipments_data['shipping_status_text'];
+				$json['shipping_status_header_badge_class'] = $shipments_data['shipping_status_header_badge_class'];
 			}
 		}
 
@@ -2228,10 +2294,28 @@ class ControllerSaleOrderDetail extends Controller {
 			];
 		}
 
+		$ordered_total = 0;
+		$shipped_total = 0;
+
+		foreach ($products_view as $product) {
+			$ordered_total += (float)$product['ordered'];
+			$shipped_total += (float)$product['shipped'];
+		}
+
+		$shipping_status = $this->model_sale_order->getShippingStatus($ordered_total, $shipped_total);
+		$shipping_progress_percent = $ordered_total > 0 ? (int)round(min($shipped_total, $ordered_total) / $ordered_total * 100) : 0;
+
 		return [
 			'shipments'          => $shipments_view,
 			'shipment_products'  => $products_view,
 			'shipping_status_id' => (int)$this->config->get('config_order_flow_shipping_status'),
+			'shipping_status'    => $shipping_status,
+			'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
+			'shipping_status_badge_class' => $this->getShippingStatusBadgeClass($shipping_status),
+			'shipping_status_header_badge_class' => $this->getShippingStatusHeaderBadgeClass($shipping_status),
+			'shipping_ordered_total' => $ordered_total,
+			'shipping_shipped_total' => $shipped_total,
+			'shipping_progress_percent' => $shipping_progress_percent,
 		];
 	}
 
@@ -2305,6 +2389,28 @@ class ControllerSaleOrderDetail extends Controller {
 				return 'page-header__badge--warning page-header__badge--unfilled';
 			case 'overpaid':
 				return 'page-header__badge--danger';
+			default:
+				return 'page-header__badge--default page-header__badge--unfilled';
+		}
+	}
+
+	private function getShippingStatusBadgeClass(string $status): string {
+		switch ($status) {
+			case 'shipped':
+				return 'badge badge-success';
+			case 'partial':
+				return 'badge badge-warning';
+			default:
+				return 'badge badge-default';
+		}
+	}
+
+	private function getShippingStatusHeaderBadgeClass(string $status): string {
+		switch ($status) {
+			case 'shipped':
+				return 'page-header__badge--success';
+			case 'partial':
+				return 'page-header__badge--warning page-header__badge--unfilled';
 			default:
 				return 'page-header__badge--default page-header__badge--unfilled';
 		}
@@ -2467,8 +2573,12 @@ class ControllerSaleOrderDetail extends Controller {
 		foreach ($extensions as $code) {
 			$status = $this->config->get('payment_' . $code . '_status');
 			if ($status) {
-				$this->load->language('extension/payment/' . $code);
-				$default_title = $this->language->get('heading_title');
+				// Load into an isolated, keyed language namespace so shared
+				// keys (text_success, heading_title, ...) do not leak into
+				// the global namespace and pollute the page's own strings.
+				$this->load->language('extension/payment/' . $code, 'payment_' . $code);
+				$extension_lang = $this->language->get('payment_' . $code);
+				$default_title = $extension_lang->get('heading_title');
 				if (empty($default_title) || $default_title === 'heading_title') {
 					$default_title = ucfirst(str_replace('_', ' ', $code));
 				}
@@ -2525,8 +2635,10 @@ class ControllerSaleOrderDetail extends Controller {
 		foreach ($extensions as $code) {
 			$status = $this->config->get('shipping_' . $code . '_status');
 			if ($status) {
-				$this->load->language('extension/shipping/' . $code);
-				$default_title = $this->language->get('heading_title');
+				// Isolated namespace — same reason as in getAvailablePaymentMethods().
+				$this->load->language('extension/shipping/' . $code, 'shipping_' . $code);
+				$extension_lang = $this->language->get('shipping_' . $code);
+				$default_title = $extension_lang->get('heading_title');
 				if (empty($default_title) || $default_title === 'heading_title') {
 					$default_title = ucfirst(str_replace('_', ' ', $code));
 				}
@@ -2573,7 +2685,8 @@ class ControllerSaleOrderDetail extends Controller {
 		}
 
 		if ($code === 'dockercart_novapost') {
-			$this->load->language('extension/shipping/dockercart_novapost');
+			$this->load->language('extension/shipping/dockercart_novapost', 'shipping_dockercart_novapost');
+			$novapost_lang = $this->language->get('shipping_dockercart_novapost');
 
 			$delivery_types = [
 				'branch'  => 'delivery_branch',
@@ -2583,7 +2696,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 			foreach ($delivery_types as $key => $lang_key) {
 				$method_code = 'dockercart_novapost.' . $key;
-				$title = $this->language->get($lang_key);
+				$title = $novapost_lang->get($lang_key);
 				if (empty($title) || $title === $lang_key) {
 					$title = ucfirst($key);
 				}

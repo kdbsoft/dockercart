@@ -59,10 +59,12 @@ class ControllerCommonUserFilter extends Controller {
 			'uf_text_save'        => $this->language->get('button_save'),
 			'uf_text_cancel'      => $this->language->get('button_cancel'),
 			'uf_text_remove'      => $this->language->get('button_remove'),
+			'uf_text_clear'       => $this->language->get('button_clear_search'),
 			'uf_operators'        => $operators,
 			'uf_operators_json'   => json_encode($operators),
 			'uf_save_url'         => $this->url->link('common/user_filter/save', 'user_token=' . $this->session->data['user_token'], true),
 			'uf_delete_url'       => $this->url->link('common/user_filter/delete', 'user_token=' . $this->session->data['user_token'], true),
+			'uf_redirect_url'     => (string)($args['redirect_url'] ?? ''),
 			'uf_user_token'       => $this->session->data['user_token']
 		);
 
@@ -183,7 +185,11 @@ class ControllerCommonUserFilter extends Controller {
 			'marketing'         => 'marketing/marketing',
 			'seo_url'           => 'design/seo_url',
 			'blog_comment'      => 'extension/module/dockercart_blog',
-			'abandoned_cart'    => 'sale/order'
+			'abandoned_cart'    => 'sale/order',
+			'warehouse_stock'   => 'warehouse/stock',
+			'warehouse_movement' => 'warehouse/movement',
+			'warehouse_transfer' => 'warehouse/transfer',
+			'warehouse_supplier_orders' => 'warehouse/supplier_orders'
 		);
 
 		return $map[$entity] ?? '';

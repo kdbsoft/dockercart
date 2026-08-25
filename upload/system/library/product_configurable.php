@@ -12,6 +12,17 @@ class ProductConfigurable {
 		return $this->registry->get($key);
 	}
 
+	// Trim DECIMAL(15,8) noise: "100.00000000" -> "100", "10.50000000" -> "10.5"
+	public static function formatDecimal($value) {
+		if ($value === null || $value === '') {
+			return '';
+		}
+
+		$s = rtrim(rtrim(number_format((float)$value, 8, '.', ''), '0'), '.');
+
+		return $s === '' ? '0' : $s;
+	}
+
 	public function setConfigurableOptions($product_id, $option_ids) {
 		$old_option_ids = array();
 		$old_query = $this->db->query("SELECT option_id FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
@@ -172,7 +183,7 @@ class ProductConfigurable {
 			}
 		}
 
-		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', jan = '" . $this->db->escape(isset($data['jan']) ? $data['jan'] : '') . "', isbn = '" . $this->db->escape(isset($data['isbn']) ? $data['isbn'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', variant_hash = '" . $this->db->escape($variant_hash) . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant SET product_id = '" . (int)$product_id . "', model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', jan = '" . $this->db->escape(isset($data['jan']) ? $data['jan'] : '') . "', isbn = '" . $this->db->escape(isset($data['isbn']) ? $data['isbn'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', length = '" . (float)(isset($data['length']) ? $data['length'] : 0) . "', width = '" . (float)(isset($data['width']) ? $data['width'] : 0) . "', height = '" . (float)(isset($data['height']) ? $data['height'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "', variant_hash = '" . $this->db->escape($variant_hash) . "', sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "'");
 
 		$variant_id = $this->db->getLastId();
 
@@ -181,6 +192,11 @@ class ProductConfigurable {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant_value SET variant_id = '" . (int)$variant_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$value['option_id'] . "', option_value_id = '" . (int)$value['option_value_id'] . "'");
 			}
 		}
+
+		// Mirror the requested variant stock onto the default warehouse so
+		// the cache write above survives recomputes (single write path).
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$warehouse->setTotalQuantity((int)$product_id, (float)(isset($data['quantity']) ? $data['quantity'] : 0), (int)$variant_id, array('reference' => 'variant-form'));
 
 		$this->touchProduct($product_id);
 
@@ -196,12 +212,10 @@ class ProductConfigurable {
 
 		$product_id = (int)$variant_query->row['product_id'];
 
-		$hash_update = '';
 		$variant_hash = '';
 
 		if (isset($data['values'])) {
 			$variant_hash = $this->buildVariantHashFromValues($data['values']);
-			$hash_update = ", variant_hash = '" . $this->db->escape($variant_hash) . "'";
 
 			if ($variant_hash !== '') {
 				$conflict = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND variant_hash = '" . $this->db->escape($variant_hash) . "' AND variant_id != '" . (int)$variant_id . "'");
@@ -212,7 +226,50 @@ class ProductConfigurable {
 			}
 		}
 
-		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET model = '" . $this->db->escape(isset($data['model']) ? $data['model'] : '') . "', sku = '" . $this->db->escape(isset($data['sku']) ? $data['sku'] : '') . "', upc = '" . $this->db->escape(isset($data['upc']) ? $data['upc'] : '') . "', ean = '" . $this->db->escape(isset($data['ean']) ? $data['ean'] : '') . "', jan = '" . $this->db->escape(isset($data['jan']) ? $data['jan'] : '') . "', isbn = '" . $this->db->escape(isset($data['isbn']) ? $data['isbn'] : '') . "', mpn = '" . $this->db->escape(isset($data['mpn']) ? $data['mpn'] : '') . "', price = '" . (float)(isset($data['price']) ? $data['price'] : 0) . "', quantity = '" . (float)(isset($data['quantity']) ? $data['quantity'] : 0) . "', subtract = '" . (int)(isset($data['subtract']) ? $data['subtract'] : 1) . "', weight = '" . (float)(isset($data['weight']) ? $data['weight'] : 0) . "', weight_class_id = '" . (int)(isset($data['weight_class_id']) ? $data['weight_class_id'] : 0) . "', image = '" . $this->db->escape(isset($data['image']) ? $data['image'] : '') . "'" . $hash_update . ", sort_order = '" . (int)(isset($data['sort_order']) ? $data['sort_order'] : 0) . "', status = '" . (int)(isset($data['status']) ? $data['status'] : 1) . "' WHERE variant_id = '" . (int)$variant_id . "'");
+		// Partial update: only columns present in $data are written. The
+		// variant matrix autosave posts just model/status/values, while codes,
+		// pricing, quantity, weight and image are managed by their dedicated
+		// panels — absent keys must keep current values instead of zeroing
+		// them out.
+		$set = array();
+
+		$int_columns = array('subtract', 'weight_class_id', 'sort_order', 'status');
+		$float_columns = array('price', 'quantity', 'weight');
+		$decimal_columns = array('length', 'width', 'height');
+
+		foreach (array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn', 'image') as $text_column) {
+			if (array_key_exists($text_column, $data)) {
+				$set[] = $text_column . " = '" . $this->db->escape((string)$data[$text_column]) . "'";
+			}
+		}
+
+		foreach ($float_columns as $float_column) {
+			if (array_key_exists($float_column, $data)) {
+				$set[] = $float_column . " = '" . (float)$data[$float_column] . "'";
+			}
+		}
+
+		foreach ($decimal_columns as $decimal_column) {
+			if (array_key_exists($decimal_column, $data)) {
+				$set[] = $decimal_column . " = '" . (float)$data[$decimal_column] . "'";
+			}
+		}
+
+		foreach ($int_columns as $int_column) {
+			if (array_key_exists($int_column, $data)) {
+				$set[] = $int_column . " = '" . (int)$data[$int_column] . "'";
+			}
+		}
+
+		if (isset($data['values'])) {
+			$set[] = "variant_hash = '" . $this->db->escape($variant_hash) . "'";
+		}
+
+		if (!$set) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET " . implode(', ', $set) . " WHERE variant_id = '" . (int)$variant_id . "'");
 
 		if (isset($data['values'])) {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE variant_id = '" . (int)$variant_id . "'");
@@ -220,6 +277,69 @@ class ProductConfigurable {
 			foreach ($data['values'] as $value) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_variant_value SET variant_id = '" . (int)$variant_id . "', product_id = '" . (int)$product_id . "', option_id = '" . (int)$value['option_id'] . "', option_value_id = '" . (int)$value['option_value_id'] . "'");
 			}
+		}
+
+		// When the update rewrote quantity, mirror its effective value onto
+		// the default warehouse as well (single write path).
+		if (array_key_exists('quantity', $data)) {
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$warehouse->setTotalQuantity((int)$product_id, (float)$data['quantity'], (int)$variant_id, array('reference' => 'variant-form'));
+		}
+
+		$this->touchProduct($product_id);
+	}
+
+	public function updateVariantQuantity($variant_id, $quantity) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		// Single write path: the requested total becomes a delta on the
+		// default warehouse (journal + cache recompute).
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$warehouse->setTotalQuantity((int)$variant_query->row['product_id'], (float)$quantity, (int)$variant_id, array('reference' => 'variant-form'));
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
+	public function updateVariantPrice($variant_id, $price) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET price = '" . (float)$price . "' WHERE variant_id = '" . (int)$variant_id . "'");
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
+	public function updateVariantPricing($variant_id, $price, array $cg_prices = array()) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$product_id = (int)$variant_query->row['product_id'];
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET price = '" . (float)$price . "' WHERE variant_id = '" . (int)$variant_id . "'");
+
+		// Replace customer group prices atomically.
+		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_customer_group_price WHERE variant_id = '" . (int)$variant_id . "'");
+
+		foreach ($cg_prices as $cg) {
+			if (empty($cg['customer_group_id']) || !isset($cg['price']) || $cg['price'] === '' || $cg['price'] === null) {
+				continue;
+			}
+
+			if (!is_numeric($cg['price'])) {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_customer_group_price SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$cg['customer_group_id'] . "', price = '" . (float)$cg['price'] . "'");
 		}
 
 		$this->touchProduct($product_id);
@@ -256,6 +376,14 @@ class ProductConfigurable {
 				}
 			}
 
+			// Drop the variant's stock rows and holds so no ghost quantities
+			// survive in the source of truth, then refresh the caches.
+			$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id = '" . (int)$variant_id . "'");
+
+			$warehouse = new \DockercartWarehouse($this->registry);
+			$warehouse->recomputeTotals((int)$product_id);
+
 			$this->touchProduct($product_id);
 		}
 	}
@@ -273,6 +401,11 @@ class ProductConfigurable {
 			$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_special WHERE variant_id IN (" . implode(',', $variant_ids) . ")");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant_value WHERE product_id = '" . (int)$product_id . "'");
 			$this->db->query("DELETE FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "'");
+
+			// The deleted variants' stock rows and holds must not survive as
+			// ghost quantities in the source of truth.
+			$this->db->query("DELETE FROM " . DB_PREFIX . "warehouse_stock WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "stock_reservation WHERE product_id = '" . (int)$product_id . "' AND variant_id > 0");
 		}
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_configurable_option WHERE product_id = '" . (int)$product_id . "'");
@@ -476,6 +609,89 @@ class ProductConfigurable {
 		return array('total_stock' => 0, 'variants_in_stock' => 0, 'total_variants' => 0);
 	}
 
+	public function updateVariantDimensions($variant_id, $length, $width, $height, $weight) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET length = '" . (float)$length . "', width = '" . (float)$width . "', height = '" . (float)$height . "', weight = '" . (float)$weight . "' WHERE variant_id = '" . (int)$variant_id . "'");
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
+	// Partial update of code columns only — unlike updateVariant(), absent
+	// keys keep their current values instead of wiping the row.
+	public function updateVariantCodes($variant_id, array $codes) {
+		$allowed = array('sku', 'upc', 'ean', 'jan', 'isbn', 'mpn');
+
+		$update = '';
+
+		foreach ($allowed as $col) {
+			if (array_key_exists($col, $codes)) {
+				$update .= ', ' . $col . " = '" . $this->db->escape((string)$codes[$col]) . "'";
+			}
+		}
+
+		if (!$update) {
+			return;
+		}
+
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET " . substr($update, 2) . " WHERE variant_id = '" . (int)$variant_id . "'");
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
+	public function updateVariantImage($variant_id, $image) {
+		$variant_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "'");
+
+		if (!$variant_query->num_rows) {
+			return;
+		}
+
+		$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET image = '" . $this->db->escape((string)$image) . "' WHERE variant_id = '" . (int)$variant_id . "'");
+
+		$this->touchProduct((int)$variant_query->row['product_id']);
+	}
+
+	public function getAggregatedWeightRange($product_id) {
+		$query = $this->db->query("SELECT MIN(weight) AS min_weight, MAX(weight) AS max_weight FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
+
+		if ($query->num_rows) {
+			return array(
+				'min' => (float)$query->row['min_weight'],
+				'max' => (float)$query->row['max_weight'],
+			);
+		}
+
+		return array('min' => 0, 'max' => 0);
+	}
+
+	public function getAggregatedDimensionsRange($product_id) {
+		$query = $this->db->query("SELECT MIN(length) AS min_length, MAX(length) AS max_length, MIN(width) AS min_width, MAX(width) AS max_width, MIN(height) AS min_height, MAX(height) AS max_height FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . (int)$product_id . "' AND status = '1'");
+
+		if ($query->num_rows) {
+			return array(
+				'length' => array('min' => (float)$query->row['min_length'], 'max' => (float)$query->row['max_length']),
+				'width'  => array('min' => (float)$query->row['min_width'], 'max' => (float)$query->row['max_width']),
+				'height' => array('min' => (float)$query->row['min_height'], 'max' => (float)$query->row['max_height']),
+			);
+		}
+
+		return array(
+			'length' => array('min' => 0, 'max' => 0),
+			'width'  => array('min' => 0, 'max' => 0),
+			'height' => array('min' => 0, 'max' => 0),
+		);
+	}
+
 	/**
 	 * Collect the set of product_option_value rows that belong to at least one
 	 * ENABLED variant (status = 1) of a configurable product. Used to filter
@@ -604,12 +820,14 @@ class ProductConfigurable {
 		foreach ($query->rows as $row) {
 			$result[(int)$row['variant_id']][] = array(
 				'variant_special_id' => (int)$row['variant_special_id'],
+				'variant_id'         => (int)$row['variant_id'],
 				'customer_group_id'  => (int)$row['customer_group_id'],
 				'priority'           => (int)$row['priority'],
 				'price'              => $row['price'],
 				'date_start'         => $row['date_start'],
 				'date_end'           => $row['date_end'],
 				'auto_renew'         => (int)$row['auto_renew'],
+				'date_added'         => isset($row['date_added']) ? $row['date_added'] : '0000-00-00 00:00:00',
 			);
 		}
 
@@ -648,7 +866,7 @@ class ProductConfigurable {
 				continue;
 			}
 
-			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_special SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$special['customer_group_id'] . "', priority = '" . (int)(isset($special['priority']) ? $special['priority'] : 1) . "', price = '" . (float)$special['price'] . "', date_start = '" . $this->db->escape(isset($special['date_start']) ? $special['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($special['date_end']) ? $special['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($special['auto_renew'])) . "'");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_special SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$special['customer_group_id'] . "', priority = '" . (int)(isset($special['priority']) ? $special['priority'] : 1) . "', price = '" . (float)$special['price'] . "', date_start = '" . $this->db->escape(isset($special['date_start']) ? $special['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($special['date_end']) ? $special['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($special['auto_renew'])) . "', date_added = '" . $this->db->escape(!empty($special['date_added']) ? $special['date_added'] : date('Y-m-d H:i:s')) . "'");
 		}
 	}
 
@@ -872,6 +1090,7 @@ class ProductConfigurable {
 		foreach ($query->rows as $row) {
 			$result[(int)$row['variant_id']][] = array(
 				'variant_discount_id' => (int)$row['variant_discount_id'],
+				'variant_id'          => (int)$row['variant_id'],
 				'customer_group_id'   => (int)$row['customer_group_id'],
 				'quantity'            => (int)$row['quantity'],
 				'priority'            => (int)$row['priority'],
@@ -879,6 +1098,7 @@ class ProductConfigurable {
 				'date_start'          => $row['date_start'],
 				'date_end'            => $row['date_end'],
 				'auto_renew'          => (int)$row['auto_renew'],
+				'date_added'          => isset($row['date_added']) ? $row['date_added'] : '0000-00-00 00:00:00',
 			);
 		}
 
@@ -903,12 +1123,84 @@ class ProductConfigurable {
 				continue;
 			}
 
-			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_discount SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$discount['customer_group_id'] . "', quantity = '" . (int)(isset($discount['quantity']) ? $discount['quantity'] : 0) . "', priority = '" . (int)(isset($discount['priority']) ? $discount['priority'] : 1) . "', price = '" . (float)$discount['price'] . "', date_start = '" . $this->db->escape(isset($discount['date_start']) ? $discount['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($discount['date_end']) ? $discount['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($discount['auto_renew'])) . "'");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "dockercart_product_variant_discount SET variant_id = '" . (int)$variant_id . "', customer_group_id = '" . (int)$discount['customer_group_id'] . "', quantity = '" . (int)(isset($discount['quantity']) ? $discount['quantity'] : 0) . "', priority = '" . (int)(isset($discount['priority']) ? $discount['priority'] : 1) . "', price = '" . (float)$discount['price'] . "', date_start = '" . $this->db->escape(isset($discount['date_start']) ? $discount['date_start'] : '0000-00-00') . "', date_end = '" . $this->db->escape(isset($discount['date_end']) ? $discount['date_end'] : '0000-00-00') . "', auto_renew = '" . (int)(!empty($discount['auto_renew'])) . "', date_added = '" . $this->db->escape(!empty($discount['date_added']) ? $discount['date_added'] : date('Y-m-d H:i:s')) . "'");
 		}
 	}
 
 	public function deleteAllVariantDiscounts($variant_id) {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "dockercart_product_variant_discount WHERE variant_id = '" . (int)$variant_id . "'");
+	}
+
+	/**
+	 * Persist variant-scoped promotions submitted by the admin product form.
+	 *
+	 * Each row must carry a variant_id; rows referencing variants that do not
+	 * belong to the product are dropped. Variants that currently have promos
+	 * but are absent from the submitted rows get their promos cleared, so
+	 * removing a promo card in the form really deletes the row on save.
+	 *
+	 * @param int   $product_id
+	 * @param array $special_rows  flat list of product_special-style rows with variant_id
+	 * @param array $discount_rows  flat list of product_discount-style rows with variant_id
+	 */
+	public function applyVariantPromotions($product_id, array $special_rows = array(), array $discount_rows = array()) {
+		$product_id = (int)$product_id;
+
+		if (!$product_id) {
+			return;
+		}
+
+		$query = $this->db->query("SELECT variant_id FROM " . DB_PREFIX . "product_variant WHERE product_id = '" . $product_id . "'");
+
+		$owned = array();
+
+		foreach ($query->rows as $row) {
+			$owned[(int)$row['variant_id']] = true;
+		}
+
+		if (!$owned && !$special_rows && !$discount_rows) {
+			return;
+		}
+
+		$specials_by_variant = array();
+		$discounts_by_variant = array();
+		$touched = array();
+
+		foreach ($special_rows as $row) {
+			$variant_id = isset($row['variant_id']) ? (int)$row['variant_id'] : 0;
+
+			if ($variant_id > 0 && isset($owned[$variant_id])) {
+				$specials_by_variant[$variant_id][] = $row;
+				$touched[$variant_id] = true;
+			}
+		}
+
+		foreach ($discount_rows as $row) {
+			$variant_id = isset($row['variant_id']) ? (int)$row['variant_id'] : 0;
+
+			if ($variant_id > 0 && isset($owned[$variant_id])) {
+				$discounts_by_variant[$variant_id][] = $row;
+				$touched[$variant_id] = true;
+			}
+		}
+
+		// Variants whose existing promos are not present in the submission
+		// must be cleared as well (card removed in the UI).
+		$existing_specials = $this->getVariantsSpecials($product_id);
+		$existing_discounts = $this->getVariantsDiscounts($product_id);
+
+		foreach ($existing_specials as $variant_id => $rows) {
+			$touched[(int)$variant_id] = true;
+		}
+
+		foreach ($existing_discounts as $variant_id => $rows) {
+			$touched[(int)$variant_id] = true;
+		}
+
+		foreach (array_keys($touched) as $variant_id) {
+			$this->setVariantSpecials($variant_id, isset($specials_by_variant[$variant_id]) ? $specials_by_variant[$variant_id] : array());
+			$this->setVariantDiscounts($variant_id, isset($discounts_by_variant[$variant_id]) ? $discounts_by_variant[$variant_id] : array());
+		}
 	}
 
 	private function touchProduct($product_id) {

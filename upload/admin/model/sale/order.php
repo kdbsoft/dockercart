@@ -313,7 +313,7 @@ class ModelSaleOrder extends Model {
 	}
 
 	public function getOrders($data = array()) {
-		$sql = "SELECT o.order_id, o.customer_id, o.payment_code, o.payment_method, o.shipping_method, CONCAT(o.firstname, ' ', o.lastname) AS customer, o.order_status_id, (SELECT os.name FROM " . DB_PREFIX . "order_status os WHERE os.order_status_id = o.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "') AS order_status, o.shipping_code, o.tracking_number, o.total, o.paid_amount, o.currency_code, o.currency_value, o.date_added, o.date_modified FROM `" . DB_PREFIX . "order` o";
+		$sql = "SELECT o.order_id, o.customer_id, o.payment_code, o.payment_method, o.shipping_method, o.invoice_no, o.invoice_prefix, CONCAT(o.firstname, ' ', o.lastname) AS customer, o.order_status_id, (SELECT os.name FROM " . DB_PREFIX . "order_status os WHERE os.order_status_id = o.order_status_id AND os.language_id = '" . (int)$this->config->get('config_language_id') . "') AS order_status, o.shipping_code, o.tracking_number, o.total, o.paid_amount, o.currency_code, o.currency_value, o.date_added, o.date_modified FROM `" . DB_PREFIX . "order` o";
 
 		if (!empty($data['filter_order_status'])) {
 			$implode = array();
@@ -403,6 +403,10 @@ class ModelSaleOrder extends Model {
 			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status'], 'o');
 		}
 
+		if (!empty($data['filter_shipping_status'])) {
+			$sql .= $this->getShippingStatusFilterSql((string)$data['filter_shipping_status'], 'o');
+		}
+
 		$sort_data = array(
 			'o.order_id',
 			'customer',
@@ -450,13 +454,32 @@ class ModelSaleOrder extends Model {
 
 		switch ($status) {
 			case 'unpaid':
-				return " AND " . $paid_amount . " <= 0";
+				return " AND " . $payment_difference . " < 0";
 			case 'partial':
 				return " AND " . $paid_amount . " > 0 AND " . $payment_difference . " < 0";
 			case 'paid':
 				return " AND " . $payment_difference . " >= 0";
 			case 'overpaid':
 				return " AND " . $payment_difference . " > 0 AND " . $prefix . "total > 0";
+			default:
+				return "";
+		}
+	}
+
+	private function getShippingStatusFilterSql(string $status, string $alias = ''): string {
+		// Qualify with the real table name when no alias is used, otherwise the
+		// bare column inside the subqueries would resolve to order_product instead.
+		$order_id = $alias ? $alias . '.order_id' : '`' . DB_PREFIX . 'order`.`order_id`';
+		$ordered = "(SELECT COALESCE(SUM(op.quantity), 0) FROM " . DB_PREFIX . "order_product op WHERE op.order_id = " . $order_id . ")";
+		$shipped = "(SELECT COALESCE(SUM(LEAST(si.quantity, op.quantity)), 0) FROM " . DB_PREFIX . "order_shipment_item si LEFT JOIN " . DB_PREFIX . "order_product op ON op.order_product_id = si.order_product_id WHERE op.order_id = " . $order_id . ")";
+
+		switch ($status) {
+			case 'none':
+				return " AND " . $ordered . " > 0 AND " . $shipped . " < " . $ordered;
+			case 'partial':
+				return " AND " . $shipped . " > 0 AND " . $shipped . " < " . $ordered;
+			case 'shipped':
+				return " AND " . $ordered . " > 0 AND " . $shipped . " >= " . $ordered;
 			default:
 				return "";
 		}
@@ -647,6 +670,10 @@ class ModelSaleOrder extends Model {
 
 		if (!empty($data['filter_payment_status'])) {
 			$sql .= $this->getPaymentStatusFilterSql((string)$data['filter_payment_status']);
+		}
+
+		if (!empty($data['filter_shipping_status'])) {
+			$sql .= $this->getShippingStatusFilterSql((string)$data['filter_shipping_status']);
 		}
 
 		$query = $this->db->query($sql);
@@ -1463,22 +1490,27 @@ class ModelSaleOrder extends Model {
 			}
 
 			if ($axis_ids) {
-				$variant = $pc->resolveVariant($product_id, $axis_selection);
+				// Вариант резолвим только при полном выборе осей: пока
+				// пользователь ещё выбирает опции, неполная комбинация —
+				// не ошибка, считаем от базовых цены/остатка товара.
+				if (count($axis_selection) === count($axis_ids)) {
+					$variant = $pc->resolveVariant($product_id, $axis_selection);
 
-				if (empty($variant)) {
-					throw new \RuntimeException('error_variant_not_found');
-				}
+					if (empty($variant)) {
+						throw new \RuntimeException('error_variant_not_found');
+					}
 
-				$variant_id = (int)$variant['variant_id'];
-				$variant_sku = $variant['sku'] ?? '';
-				$variant_model = $variant['model'] ?? '';
-				$stock = (float)($variant['quantity'] ?? 0);
-				$subtract = (bool)($variant['subtract'] ?? true);
+					$variant_id = (int)$variant['variant_id'];
+					$variant_sku = $variant['sku'] ?? '';
+					$variant_model = $variant['model'] ?? '';
+					$stock = (float)($variant['quantity'] ?? 0);
+					$subtract = (bool)($variant['subtract'] ?? true);
 
-				if (!empty($variant_model)) {
-					$model = $variant_model;
-				} elseif (!empty($variant_sku)) {
-					$model = $variant_sku;
+					if (!empty($variant_model)) {
+						$model = $variant_model;
+					} elseif (!empty($variant_sku)) {
+						$model = $variant_sku;
+					}
 				}
 			}
 		}
@@ -1647,6 +1679,15 @@ class ModelSaleOrder extends Model {
 			return false;
 		}
 
+		// calculateProductPricing() больше не падает при неполном выборе осей
+		// (это нужно для живого превью), поэтому запрещаем вставку строки
+		// настраиваемого товара без резолвнутого варианта здесь.
+		$pc = new \ProductConfigurable($this->registry);
+
+		if ((int)$pricing['variant_id'] === 0 && $pc->isConfigurable((int)$product_id)) {
+			throw new \RuntimeException('error_variant_not_found');
+		}
+
 		$order_id = (int)$order_id;
 		$product_info = $pricing['product_info'];
 
@@ -1661,7 +1702,9 @@ class ModelSaleOrder extends Model {
 			tax = '" . (float)$pricing['tax_total'] . "',
 			reward = '" . (int)($pricing['reward'] ?? 0) . "',
 			variant_id = '" . (int)$pricing['variant_id'] . "',
-			variant_sku = '" . $this->db->escape($pricing['variant_sku']) . "'
+			variant_sku = '" . $this->db->escape($pricing['variant_sku']) . "',
+			warehouse_id = '" . (int)$this->getOrderWarehouseId() . "',
+			warehouse_name = '" . $this->db->escape($this->getOrderWarehouseName()) . "'
 		");
 
 		$order_product_id = $this->db->getLastId();
@@ -1684,6 +1727,89 @@ class ModelSaleOrder extends Model {
 		}
 
 		return $order_product_id;
+	}
+
+	/**
+	 * Default warehouse id for admin-added order lines (legacy source).
+	 */
+	protected function getOrderWarehouseId(): int {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return 0;
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+
+		return $warehouse->getDefaultWarehouseId();
+	}
+
+	protected function getOrderWarehouseName(): string {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return '';
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$info = $warehouse->getWarehouse($warehouse->getDefaultWarehouseId());
+
+		return $info ? (string)$info['name'] : '';
+	}
+
+	/**
+	 * Move one order line to another warehouse: move the stock, record a
+	 * movement referencing the order, and update the order_product snapshot.
+	 * Returns the new snapshot or null on failure / disabled warehouses.
+	 */
+	public function moveOrderProductToWarehouse(int $order_id, int $order_product_id, int $to_warehouse_id): ?array {
+		if (!$this->config->get('config_warehouse_enabled')) {
+			return null;
+		}
+
+		$warehouse = new \DockercartWarehouse($this->registry);
+
+		if (!$warehouse->getWarehouse($to_warehouse_id)) {
+			return null;
+		}
+
+		$line = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_product` WHERE `order_product_id` = '" . (int)$order_product_id . "' AND `order_id` = '" . (int)$order_id . "'");
+
+		if (!$line->num_rows) {
+			return null;
+		}
+
+		$line = $line->row;
+		$from_warehouse_id = (int)($line['warehouse_id'] ?: $warehouse->getDefaultWarehouseId());
+
+		if ($from_warehouse_id === $to_warehouse_id) {
+			return ['warehouse_id' => $to_warehouse_id, 'warehouse_name' => (string)$line['warehouse_name'], 'estimate_date' => $line['estimate_date']];
+		}
+
+		$target_info = $warehouse->getWarehouse($to_warehouse_id);
+
+		$warehouse->moveStock(
+			$from_warehouse_id,
+			$to_warehouse_id,
+			(int)$line['product_id'],
+			(int)$line['variant_id'],
+			(float)$line['quantity'],
+			[
+				'reference' => 'order-' . $order_id,
+				'order_id' => $order_id,
+				'user_id' => (int)($this->user ? $this->user->getId() : 0),
+			]
+		);
+
+		$estimate = $warehouse->estimateShipDate($to_warehouse_id, ['product_id' => (int)$line['product_id'], 'variant_id' => (int)$line['variant_id']], null);
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET
+			`warehouse_id` = '" . (int)$to_warehouse_id . "',
+			`warehouse_name` = '" . $this->db->escape((string)$target_info['name']) . "',
+			`estimate_date` = '" . $this->db->escape($estimate) . "'
+			WHERE `order_product_id` = '" . (int)$order_product_id . "'");
+
+		return [
+			'warehouse_id' => $to_warehouse_id,
+			'warehouse_name' => (string)$target_info['name'],
+			'estimate_date' => $estimate,
+		];
 	}
 
 	/**
@@ -2667,6 +2793,43 @@ class ModelSaleOrder extends Model {
 		return $progress;
 	}
 
+	public function getShippingSumsByOrderIds(array $order_ids): array {
+		$order_ids = array_map('intval', $order_ids);
+
+		if (!$order_ids) {
+			return [];
+		}
+
+		$query = $this->db->query("SELECT op.order_id, SUM(op.quantity) AS ordered, SUM(LEAST(COALESCE(si.shipped, 0), op.quantity)) AS shipped FROM `" . DB_PREFIX . "order_product` op LEFT JOIN (SELECT order_product_id, SUM(quantity) AS shipped FROM `" . DB_PREFIX . "order_shipment_item` GROUP BY order_product_id) si ON si.order_product_id = op.order_product_id WHERE op.order_id IN (" . implode(',', $order_ids) . ") GROUP BY op.order_id");
+
+		$sums = [];
+
+		foreach ($query->rows as $row) {
+			$sums[(int)$row['order_id']] = [
+				'ordered' => (float)$row['ordered'],
+				'shipped' => (float)$row['shipped'],
+			];
+		}
+
+		return $sums;
+	}
+
+	public function getShippingStatus(float $ordered, float $shipped): string {
+		if ($ordered <= 0) {
+			return '';
+		}
+
+		if ($shipped <= 0) {
+			return 'none';
+		}
+
+		if ($shipped >= $ordered) {
+			return 'shipped';
+		}
+
+		return 'partial';
+	}
+
 	public function deleteOrder($order_id) {
 		$this->db->query("START TRANSACTION");
 
@@ -2953,12 +3116,25 @@ class ModelSaleOrder extends Model {
 
 				$order_products = $this->getOrderProducts($order_id);
 
-				foreach ($order_products as $order_product) {
-					$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+				// Stock subtraction: single write path through the warehouse
+				// source of truth (legacy direct cache writes removed — the
+				// caches are SUMs rewritten by recomputeTotals()).
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+				foreach ($order_products as $order_product) {
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
+
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						-(float)$order_product['quantity'],
+						'order_subtract',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release checkout holds bound to this order: stock was just subtracted.
@@ -2997,12 +3173,24 @@ class ModelSaleOrder extends Model {
 			if ($was_processing && !$is_processing) {
 				$order_products = $this->getOrderProducts($order_id);
 
-				foreach ($order_products as $order_product) {
-					$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
+				// Restock: single write path through the warehouse source
+				// of truth (legacy direct cache writes removed).
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+				foreach ($order_products as $order_product) {
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
+
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						(float)$order_product['quantity'],
+						'order_restock',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release any remaining checkout holds bound to this order (restock).

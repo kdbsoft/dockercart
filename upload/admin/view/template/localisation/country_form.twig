@@ -45,7 +45,7 @@
                 <div class="dcx-field required">
                   <label class="dcx-label">{{ entry_name }}</label>
                   {% for language in languages %}
-                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <input type="text" name="country_description[{{ language.language_id }}][name]" value="{{ country_description[language.language_id] ? country_description[language.language_id].name }}" placeholder="{{ entry_name }}" class="form-control" />
                   </div>
                   {% if error_name[language.language_id] %}
@@ -70,7 +70,7 @@
                 <div class="dcx-field">
                   <label class="dcx-label">{{ entry_address_format }} <span data-toggle="tooltip" data-html="true" title="{{ help_address_format|escape('html') }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   {% for language in languages %}
-                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                  <div class="dc-attr-row__value"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
                     <textarea name="country_description[{{ language.language_id }}][address_format]" rows="5" placeholder="{{ entry_address_format }}" class="form-control">{{ country_description[language.language_id] ? country_description[language.language_id].address_format }}</textarea>
                   </div>
                   {% endfor %}

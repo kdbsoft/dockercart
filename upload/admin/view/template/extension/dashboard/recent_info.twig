@@ -21,6 +21,7 @@
               <span class="dc-recent-order-card__id">#{{ order.order_id }}</span>
               <span class="{{ order.order_status_badge_class }}">{{ order.status }}</span>
               <span class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>
+              {% if order.shipping_status %}<span class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ text_shipping_status }}">{{ order.shipping_status_text }}</span>{% endif %}
             </div>
             <div class="dc-recent-order-card__customer">{{ order.customer }}</div>
             <div class="dc-recent-order-card__meta">

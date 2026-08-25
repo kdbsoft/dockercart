@@ -52,6 +52,12 @@ $_['text_payment_status_paid']     = 'Paid';
 $_['text_payment_status_overpaid'] = 'Overpaid';
 $_['text_payment_paid_of']         = 'Paid:';
 $_['text_payment_remaining']       = 'Remaining';
+
+// Shipments
+$_['text_shipping_status']         = 'Shipping Status';
+$_['text_shipping_status_none']    = 'Not Shipped';
+$_['text_shipping_status_partial'] = 'Partially Shipped';
+$_['text_shipping_status_shipped'] = 'Shipped';
 $_['column_payment_method']        = 'Payment Method';
 $_['column_payment_amount']        = 'Amount';
 // Order flow

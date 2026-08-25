@@ -64,7 +64,7 @@ $_['text_tab_general']        = 'General';
 $_['text_tab_slides']         = 'Slides';
 
 // Sections
-$_['text_general_settings']   = 'General Settings';
+$_['text_status_card']        = 'Status';
 $_['text_slides_by_language'] = 'Slides by Language';
 
 // Slides

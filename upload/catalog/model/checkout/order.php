@@ -78,7 +78,7 @@ class ModelCheckoutOrder extends Model {
 		// Products
 		if (isset($data['products'])) {
 			foreach ($data['products'] as $product) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', variant_id = '" . (int)(isset($product['variant_id']) ? $product['variant_id'] : 0) . "', variant_sku = '" . $this->db->escape(isset($product['variant_sku']) ? $product['variant_sku'] : '') . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (float)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', variant_id = '" . (int)(isset($product['variant_id']) ? $product['variant_id'] : 0) . "', variant_sku = '" . $this->db->escape(isset($product['variant_sku']) ? $product['variant_sku'] : '') . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (float)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "', warehouse_id = '" . (int)(isset($product['warehouse_id']) ? $product['warehouse_id'] : 0) . "', warehouse_name = '" . $this->db->escape(isset($product['warehouse_name']) ? $product['warehouse_name'] : '') . "', estimate_date = " . (!empty($product['estimate_date']) ? "'" . $this->db->escape($product['estimate_date']) . "'" : 'NULL') . "");
 
 				$order_product_id = $this->db->getLastId();
 
@@ -148,7 +148,7 @@ class ModelCheckoutOrder extends Model {
 		// Products
 		if (isset($data['products'])) {
 			foreach ($data['products'] as $product) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', variant_id = '" . (int)(isset($product['variant_id']) ? $product['variant_id'] : 0) . "', variant_sku = '" . $this->db->escape(isset($product['variant_sku']) ? $product['variant_sku'] : '') . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (float)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "order_product SET order_id = '" . (int)$order_id . "', product_id = '" . (int)$product['product_id'] . "', variant_id = '" . (int)(isset($product['variant_id']) ? $product['variant_id'] : 0) . "', variant_sku = '" . $this->db->escape(isset($product['variant_sku']) ? $product['variant_sku'] : '') . "', name = '" . $this->db->escape($product['name']) . "', model = '" . $this->db->escape($product['model']) . "', quantity = '" . (float)$product['quantity'] . "', price = '" . (float)$product['price'] . "', total = '" . (float)$product['total'] . "', tax = '" . (float)$product['tax'] . "', reward = '" . (int)$product['reward'] . "', warehouse_id = '" . (int)(isset($product['warehouse_id']) ? $product['warehouse_id'] : 0) . "', warehouse_name = '" . $this->db->escape(isset($product['warehouse_name']) ? $product['warehouse_name'] : '') . "', estimate_date = " . (!empty($product['estimate_date']) ? "'" . $this->db->escape($product['estimate_date']) . "'" : 'NULL') . "");
 
 				$order_product_id = $this->db->getLastId();
 
@@ -433,15 +433,26 @@ class ModelCheckoutOrder extends Model {
 					}
 				}
 
-				// Stock subtraction
+				// Stock subtraction: always routed through the warehouse source
+				// of truth (single write path — legacy direct cache writes were
+				// removed, the caches are SUMs rewritten by recomputeTotals).
 				$order_products = $this->getOrderProducts($order_id);
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
 				foreach ($order_products as $order_product) {
-					$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
-
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity - " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
+
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						-(float)$order_product['quantity'],
+						'order_subtract',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release checkout holds bound to this order: stock was just subtracted.
@@ -487,15 +498,24 @@ class ModelCheckoutOrder extends Model {
 
 			// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
 			if ($was_processing && !$is_processing) {
-				// Restock
+				// Restock: single write path through the warehouse source of truth.
 				$order_products = $this->getOrderProducts($order_id);
+				$warehouse = new \DockercartWarehouse($this->registry);
+				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
-				foreach($order_products as $order_product) {
-					$this->db->query("UPDATE `" . DB_PREFIX . "product` SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
-
-					if ((int)$order_product['variant_id'] > 0) {
-						$this->db->query("UPDATE " . DB_PREFIX . "product_variant SET quantity = (quantity + " . (float)$order_product['quantity'] . ") WHERE variant_id = '" . (int)$order_product['variant_id'] . "' AND subtract = '1'");
+				foreach ($order_products as $order_product) {
+					if (!$warehouse->tracksStock((int)$order_product['product_id'], (int)$order_product['variant_id'])) {
+						continue;
 					}
+
+					$warehouse->adjustStock(
+						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
+						(int)$order_product['product_id'],
+						(int)$order_product['variant_id'],
+						(float)$order_product['quantity'],
+						'order_restock',
+						['order_id' => (int)$order_id, 'reference' => 'order-' . (int)$order_id]
+					);
 				}
 
 				// Release any remaining checkout holds bound to this order (restock).

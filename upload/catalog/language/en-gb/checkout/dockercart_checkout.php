@@ -239,3 +239,5 @@ $_["text_please_fix_errors"] = "Please fix the following errors:";
 $_["text_order_unclear_response"] =
     "Order placed but response unclear. Please check your account.";
 $_["text_free"] = "Free";
+$_["text_ships_from"] = "Ships from:";
+$_["text_pickup_from"] = "Pickup:";

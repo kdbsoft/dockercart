@@ -1,17 +1,32 @@
-{{ text_shipped_greeting }}
-
-{{ text_shipped_tracking }} {{ tracking_number }}
-{% if link %}
-
-{{ text_link }}
-
-{{ link }}
-{% endif %}
-{% if comment %}
-
-{{ text_comment }}
-
-{{ comment }}
-{% endif %}
-
-{{ text_footer }}
+{% include 'mail/partials/_head.twig' %}
+{% include 'mail/partials/_header.twig' %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <h1 class="ec-h1" style="margin: 0 0 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; line-height: 30px; font-weight: 700; color: #111827;">{{ text_shipped_greeting }}</h1>
+            {% if tracking_number %}
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate; border-spacing: 0; background-color: #f9fafb; border-radius: 6px;">
+              <tr>
+                <td align="center" style="padding: 16px 20px;">
+                  <p style="margin: 0 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280;">{{ text_shipped_tracking }}</p>
+                  <p style="margin: 0; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 18px; line-height: 26px; font-weight: 700; letter-spacing: 1px; color: #111827;">{{ tracking_number }}</p>
+                </td>
+              </tr>
+            </table>
+            <br>
+            {% endif %}
+            {% if link %}
+            {% include 'mail/partials/_button.twig' with {href: link, label: text_button_order|default(text_link)} %}
+            {% endif %}
+            {% if comment %}
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="border-left: 3px solid #4f46e5; padding: 2px 0 2px 16px;">
+                  <p style="margin: 0 0 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280;">{{ text_comment }}</p>
+                  <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 22px; color: #374151;">{{ comment }}</p>
+                </td>
+              </tr>
+            </table>
+            {% endif %}
+          </td>
+        </tr>
+{% include 'mail/partials/_footer.twig' %}

@@ -28,6 +28,7 @@ class ControllerReportReport extends Controller {
 				
 				$report_icons = array(
 					'dockercart_analytics' => 'chart-no-axes-column',
+					'supplier_profit'      => 'trending-up',
 					'sale_order'           => 'shopping-cart',
 					'sale_tax'             => 'percent',
 					'sale_shipping'        => 'truck',

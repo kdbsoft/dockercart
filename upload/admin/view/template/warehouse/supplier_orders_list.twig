@@ -1,0 +1,186 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            <a href="{{ export_url }}" class="btn btn-default"><i data-lucide="download" width="16" height="16"></i> {{ button_export }}</a>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {{ user_filter }}
+
+    {% if orders %}
+    <div class="dcx-kpis">
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--warning">
+        <div class="dcx-kpi__head"><i data-lucide="clock" width="15" height="15"></i><span>{{ text_kpi_pending }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.pending }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_lines }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--info">
+        <div class="dcx-kpi__head"><i data-lucide="package-check" width="15" height="15"></i><span>{{ text_kpi_ordered }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.ordered }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_lines }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card dcx-stat-card--success">
+        <div class="dcx-kpi__head"><i data-lucide="truck" width="15" height="15"></i><span>{{ text_kpi_shipped }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.shipped }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_lines }}</div>
+      </div>
+      <div class="dcx-kpi dcx-stat-card{% if summary.overdue %} dcx-stat-card--danger{% endif %}">
+        <div class="dcx-kpi__head"><i data-lucide="circle-alert" width="15" height="15"></i><span>{{ text_kpi_overdue }}</span></div>
+        <div class="dcx-kpi__value">{{ summary.overdue }}</div>
+        <div class="dcx-kpi__sub">{{ text_kpi_lines }}</div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <td>{{ column_order }}</td>
+            <td>{{ column_supplier }}</td>
+            <td>{{ column_product }}</td>
+            <td>{{ column_customer }}</td>
+            <td class="text-right">{{ column_quantity }}</td>
+            <td>{{ column_status }}</td>
+            <td>{{ column_ordered }}</td>
+            <td>{{ column_deadline }}</td>
+            <td>{{ column_tracking }}</td>
+            <td class="text-right">{{ column_action }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr data-href="{{ order.order_href }}">
+            <td class="text-nowrap"><a href="{{ order.order_href }}" class="row-title-link">#{{ order.order_id }}</a></td>
+            <td>{{ order.supplier_name ?: '—' }}</td>
+            <td>
+              <a href="{{ order.product_href }}" class="row-title-link">{{ order.name }}</a>
+              {% if order.model or order.variant_sku %}
+              <small class="text-muted dc-so-sub">{{ order.model }}{% if order.model and order.variant_sku %} · {% endif %}{{ order.variant_sku }}</small>
+              {% endif %}
+            </td>
+            <td>{{ order.customer ?: '—' }}</td>
+            <td class="text-right text-nowrap">{{ order.quantity }}</td>
+            <td><span class="{{ order.status_badge }}">{{ order.supplier_status_text }}</span></td>
+            <td class="text-nowrap">{% if order.ordered_date %}{{ order.ordered_date }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+            <td class="text-nowrap">
+              {% if order.overdue %}
+              <div><span class="page-header__badge page-header__badge--danger">{{ order.deadline }}</span></div>
+              <small class="text-danger dc-so-sub">{{ text_days_overdue|format(order.deadline_days < 0 ? -order.deadline_days : 0) }}</small>
+              {% elseif order.deadline %}
+              <div>{{ order.deadline }}</div>
+              {% if order.deadline_days == 0 %}
+              <small class="text-warning dc-so-sub">{{ text_due_today }}</small>
+              {% elseif order.deadline_days > 0 and order.deadline_days <= 3 %}
+              <small class="text-muted dc-so-sub">{{ text_days_left|format(order.deadline_days) }}</small>
+              {% endif %}
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-nowrap">{% if order.tracking %}<code>{{ order.tracking }}</code>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+            <td class="text-right text-nowrap">
+              <span class="supplier-actions dc-so-actions" data-order-product-id="{{ order.order_product_id }}">
+                <input type="text" class="form-control input-sm input-cost" placeholder="{{ entry_line_cost }}" value="{{ order.cost }}" data-toggle="tooltip" title="{{ help_line_cost }}" />
+                {% if order.supplier_status == 'shipped' %}
+                <span class="text-muted"><i data-lucide="circle-check" width="14" height="14" style="vertical-align:-2px;"></i> {{ text_line_shipped }}</span>
+                {% else %}
+                {% if order.supplier_status != 'ordered' %}
+                <button type="button" class="btn btn-default btn-xs btn-mark-ordered" data-toggle="tooltip" title="{{ text_mark_ordered }}"><i data-lucide="package-check" width="14" height="14"></i></button>
+                {% endif %}
+                <input type="text" class="form-control input-sm input-tracking" placeholder="{{ entry_tracking }}" value="{{ order.tracking }}" />
+                <button type="button" class="btn btn-primary btn-xs btn-mark-shipped" data-toggle="tooltip" title="{{ text_mark_shipped }}"><i data-lucide="truck" width="14" height="14"></i></button>
+                {% endif %}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination-wrap">
+      <div class="row">
+        <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+      </div>
+    </div>
+    {% else %}
+    {% include 'common/empty_state.twig' with { icon: 'warehouse_supplier_orders', standalone: true, title: text_empty_title, description: text_empty_description } %}
+    {% endif %}
+  </div>
+</div>
+<style>
+.dc-so-sub { display: block; }
+.dc-so-actions .input-tracking { width: 120px; display: inline-block; vertical-align: middle; }
+.dc-so-actions .input-cost { width: 90px; display: inline-block; vertical-align: middle; text-align: right; }
+</style>
+<script type="text/javascript"><!--
+var userToken = '{{ user_token }}';
+
+// Quick status advance from a list row
+$(document).on('click', '.btn-mark-ordered', function(e) {
+	e.stopPropagation();
+
+	updateLine($(this).closest('.supplier-actions'), 'ordered', '', '');
+});
+
+$(document).on('click', '.btn-mark-shipped', function(e) {
+	e.stopPropagation();
+
+	var $row = $(this).closest('.supplier-actions');
+
+	updateLine($row, 'shipped', $row.find('.input-tracking').val(), '');
+});
+
+// Save the per-unit purchase price on change (blur / Enter)
+$(document).on('change', '.input-cost', function(e) {
+	e.stopPropagation();
+
+	var $row = $(this).closest('.supplier-actions');
+
+	updateLine($row, 'set_cost', '', $(this).val());
+});
+
+function updateLine($row, action, tracking, cost) {
+	var $controls = $row.find('button, input');
+
+	$controls.prop('disabled', true);
+
+	$.ajax({
+		url: 'index.php?route=warehouse/supplier_orders/updateLine&user_token=' + userToken,
+		type: 'post',
+		dataType: 'json',
+		data: { order_product_id: $row.data('order-product-id'), action: action, tracking: tracking, cost: cost },
+		success: function(json) {
+			if (json['error']) {
+				$controls.prop('disabled', false);
+				alert(json['error']);
+				return;
+			}
+			location.reload();
+		},
+		error: function() {
+			$controls.prop('disabled', false);
+			alert('{{ text_network_error }}');
+		}
+	});
+}
+
+// Whole-row navigation to the order
+$(document).on('click', 'tr[data-href]', function(e) {
+	if ($(e.target).closest('a, button, input, select, textarea').length) {
+		return;
+	}
+
+	window.location.href = $(this).data('href');
+});
+//--></script>
+{{ footer }}

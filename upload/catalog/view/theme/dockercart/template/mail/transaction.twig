@@ -1,9 +1,17 @@
-{{ text_received }} 
-
-{{ text_amount }} 
-
-{{ amount }}
-
-{{ text_total }}
-
-{{ total }}
+{% include 'dockercart/template/mail/partials/_head.twig' %}
+{% include 'dockercart/template/mail/partials/_header.twig' %}
+        <tr>
+          <td class="ec-px" style="padding: 8px 32px 24px;">
+            <p style="margin: 0 0 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 24px; color: #374151;">{{ text_received }}</p>
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate; border-spacing: 0; background-color: #f9fafb; border-radius: 6px;">
+              <tr>
+                <td style="padding: 16px 20px;">
+                  <p style="margin: 0 0 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #6b7280;">{{ text_amount }}</p>
+                  <p style="margin: 0 0 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 26px; line-height: 34px; font-weight: 700; color: #111827;">{{ amount }}</p>
+                  <p style="margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; line-height: 22px; color: #374151;">{{ text_total }} <strong style="color: #111827;">{{ total }}</strong></p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+{% include 'dockercart/template/mail/partials/_footer.twig' %}
