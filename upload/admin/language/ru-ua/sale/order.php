@@ -269,16 +269,16 @@ $_['text_tracking_max']          = 'До 10 номеров';
 
 $_['error_comment']              = 'Пожалуйста, введите комментарий!';
 $_['error_order_status']         = 'Пожалуйста, выберите статус заказа!';
-$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками Flow заказов!';
+$_['error_invalid_transition']   = 'Данное изменение статуса запрещено настройками хода выполнения заказа!';
 
-$_['text_order_flow']            = 'Flow заказов';
+$_['text_order_flow']            = 'Ход выполнения заказа';
 $_['text_flow_change_status']    = 'Сменить статус';
-$_['text_flow_override']         = 'Принудительно (без проверки Flow)';
+$_['text_flow_override']         = 'Принудительно (без проверки)';
 $_['text_flow_notify_customer']  = 'Уведомить покупателя';
 $_['text_flow_transition_to']    = 'Перевести заказ в статус:';
-$_['text_flow_confirm_terminal'] = 'Этот статус завершает Flow заказов. Продолжить?';
-$_['text_flow_terminal_state']   = 'Flow заказов для этого заказа завершён.';
-$_['text_flow_completed_state']  = 'Flow заказов для этого заказа успешно пройден.';
+$_['text_flow_confirm_terminal'] = 'Этот статус завершает Ход выполнения заказа. Продолжить?';
+$_['text_flow_terminal_state']   = 'Ход выполнения этого заказа завершён.';
+$_['text_flow_completed_state']  = 'Ход выполнения этого заказа успешно пройден.';
 $_['button_flow_apply']          = 'Применить';
 $_['text_comment_optional']      = 'Комментарий (необязательно)';
 $_['text_return_refund_note']    = 'Возврат средств по возврату #%s';
