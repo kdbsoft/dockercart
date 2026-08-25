@@ -176,14 +176,19 @@ class ControllerCatalogProductConfigurable extends Controller {
 				}
 
 				$variant_id = $json['variant_id'];
-				$this->model_catalog_product_configurable->deleteAllVariantCustomerGroupPrices($variant_id);
-				$cg_prices = isset($this->request->post['customer_group_prices']) ? $this->request->post['customer_group_prices'] : [];
 
-				foreach ($cg_prices as $cg) {
-					if (!empty($cg['customer_group_id']) && isset($cg['price']) && $cg['price'] !== '') {
-						$this->model_catalog_product_configurable->setVariantCustomerGroupPrice(
-							$variant_id, (int)$cg['customer_group_id'], (float)$cg['price']
-						);
+				// Group prices are managed from the Pricing variants panel
+				// which posts the complete list; writers that omit the key
+				// (variant matrix autosave) must keep existing rows.
+				if (isset($this->request->post['customer_group_prices'])) {
+					$this->model_catalog_product_configurable->deleteAllVariantCustomerGroupPrices($variant_id);
+
+					foreach ($this->request->post['customer_group_prices'] as $cg) {
+						if (!empty($cg['customer_group_id']) && isset($cg['price']) && $cg['price'] !== '') {
+							$this->model_catalog_product_configurable->setVariantCustomerGroupPrice(
+								$variant_id, (int)$cg['customer_group_id'], (float)$cg['price']
+							);
+						}
 					}
 				}
 

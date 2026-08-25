@@ -294,10 +294,6 @@ function renderVariantMatrix(productId, json) {
 		html += '<th class="dc-th-axis">' + axes[a].name + '</th>';
 	}
 
-	html += '<th class="dc-th-price">{{ column_price|e("js") }}</th>';
-	html += '<th class="dc-th-qty">{{ column_quantity|e("js") }}</th>';
-	html += '<th class="dc-th-weight">{{ column_weight|e("js") }}</th>';
-	html += '<th class="dc-th-image">{{ column_image|e("js") }}</th>';
 	html += '<th class="dc-th-default text-center">{{ column_default|e("js") }}</th>';
 	html += '<th class="dc-th-status text-center">{{ column_status|e("js") }}</th>';
 	html += '<th class="dc-th-action text-center"></th>';
@@ -323,18 +319,9 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 	var rowIdx = dcVariantRowIdx;
 	var isDefault = variant.variant_id == defaultVariantId;
 	var isActive = variant.status == 1;
-	var image = variant.image || '';
-	var thumb = variant.thumb || '{{ placeholder|e("js") }}';
 	var variantId = variant.variant_id || 0;
 	var isNew = variantId === 0;
 	var optionValues = {};
-	var cgHasPrices = variant.customer_group_prices && variant.customer_group_prices.length;
-	var hasArticles = variant.sku || variant.upc || variant.ean || variant.jan || variant.isbn || variant.mpn;
-	var articlesVisible = hasArticles;
-	var cgVisible = cgHasPrices;
-	var subrowVisible = articlesVisible || cgVisible;
-	var artBtnClass = articlesVisible ? 'btn-primary' : 'btn-default';
-	var cgBtnClass = cgVisible ? 'btn-primary' : 'btn-default';
 
 	if (variant.values) {
 		for (var j = 0; j < variant.values.length; j++) {
@@ -348,7 +335,7 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="' + rowClasses + '" data-variant-id="' + variantId + '" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="' + (variant.model || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn ' + artBtnClass + ' btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><input type="text" class="form-control input-sm dc-variant-model" value="' + (variant.model || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		var axeOptionId = axes[a].option_id;
@@ -365,74 +352,12 @@ function buildVariantRow(productId, variant, axes, defaultVariantId) {
 		html += '</select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="' + (variant.price || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn ' + cgBtnClass + ' btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button></div></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="' + (variant.quantity || '0') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="' + (variant.weight || '') + '" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td>';
-	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
-	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
-	html += '<img src="' + thumb + '" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
-	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value="' + image + '"/>';
-	html += '</div>';
-	html += '</td>';
 	html += '<td class="text-center"><button type="button" class="dc-star-btn' + (isDefault ? ' dc-star-active' : '') + '" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status"' + (isActive ? ' checked="checked"' : '') + ' onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
-
-	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:' + (subrowVisible ? '' : 'none') + '">';
-	html += '<td colspan="' + (axes.length + 8) + '">';
-	html += '<div class="dc-cg-inner">';
-
-	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab' + (articlesVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab' + (cgVisible ? ' dc-subrow-tab--active' : '') + '" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (articlesVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-articles-' + rowIdx + '"' + (articlesVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-subrow-fields">';
-	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="' + (variant.sku || '') + '" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="' + (variant.upc || '') + '" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="' + (variant.ean || '') + '" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="' + (variant.jan || '') + '" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="' + (variant.isbn || '') + '" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="' + (variant.mpn || '') + '" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '</div>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel' + (cgVisible ? ' dc-subrow-panel--active' : '') + '" id="dc-panel-cg-' + rowIdx + '"' + (cgVisible ? '' : ' style="display:none"') + '>';
-	html += '<div class="dc-cg-header">';
-	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
-	html += '<span class="dc-cg-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '">';
-
-	if (variant.customer_group_prices) {
-		for (var c = 0; c < variant.customer_group_prices.length; c++) {
-			var cg = variant.customer_group_prices[c];
-			html += '<div class="dc-cg-row">';
-			html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-			{% for customer_group in customer_groups %}
-			html += '<option value="{{ customer_group.customer_group_id }}"' + ({{ customer_group.customer_group_id }} == cg.customer_group_id ? ' selected="selected"' : '') + '>{{ customer_group.name|escape("js") }}</option>';
-			{% endfor %}
-			html += '</select>';
-			html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" value="' + (cg.price || '') + '" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-			html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-			html += '</div>';
-		}
-	}
-
-	html += '</div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '</div></td></tr>';
 
 	return html;
 }
@@ -444,63 +369,18 @@ function addVariantRow(productId) {
 	var rowIdx = ++dcVariantRowIdx;
 	var html = '<tr id="dc-variant-row-' + rowIdx + '" class="dc-state-dirty dc-new" data-variant-id="0" data-row-idx="' + rowIdx + '">';
 
-	html += '<td class="dc-col-sku"><div style="display:flex;gap:4px;align-items:center"><input type="text" class="form-control input-sm dc-variant-model" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/><button type="button" class="btn btn-default btn-xs dc-articles-toggle" onclick="toggleVariantArticles(' + rowIdx + ')" title="{{ entry_variant_articles|e("js") }}"><i data-lucide="scan-line"></i></button></div></td>';
+	html += '<td class="dc-col-sku"><input type="text" class="form-control input-sm dc-variant-model" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:90px"/></td>';
 
 	for (var a = 0; a < axes.length; a++) {
 		html += '<td><select class="form-control input-sm dc-variant-value" data-option-id="' + axes[a].option_id + '" onchange="onVariantAxisChange(' + rowIdx + ')"><option value="">{{ text_select|e("js") }}</option></select></td>';
 	}
 
-	html += '<td><div style="display:flex;gap:4px;align-items:center"><input type="number" step="0.0001" class="form-control input-sm dc-variant-price" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:80px"/><button type="button" class="btn btn-default btn-xs dc-cg-toggle" onclick="toggleVariantCgPrices(' + rowIdx + ')" title="{{ entry_cg_prices|e("js") }}"><i data-lucide="users"></i></button></div></td>';
-	html += '<td><input type="number" step="0.01" class="form-control input-sm dc-variant-qty" value="0" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td><input type="number" step="0.001" class="form-control input-sm dc-variant-weight" value="" oninput="onVariantFieldInput(' + rowIdx + ')" style="min-width:70px"/></td>';
-	html += '<td>';
-	html += '<div style="position:relative;width:50px;height:50px;display:inline-block">';
-	html += '<a href="" id="dc-variant-thumb-' + rowIdx + '" style="margin:0;display:block" onclick="openVariantImagePicker(' + rowIdx + '); return false">';
-	html += '<img src="{{ placeholder|e("js") }}" data-placeholder="{{ placeholder|e("js") }}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #ddd"/>';
-	html += '</a>';
-	html += '<button type="button" class="dc-img-remove" onclick="clearVariantImage(' + rowIdx + ')" title="{{ button_remove|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '<input type="hidden" class="dc-variant-image" id="dc-variant-input-' + rowIdx + '" value=""/>';
-	html += '</div>';
-	html += '</td>';
 	html += '<td class="text-center"><button type="button" class="dc-star-btn" onclick="onVariantStarClick(' + rowIdx + ')" title="{{ column_default|e("js") }}"><i data-lucide="star"></i></button></td>';
 	html += '<td class="text-center"><label class="dc-toggle"><input type="checkbox" class="dc-variant-status" checked="checked" onchange="onVariantStatusChange(' + rowIdx + ')"/><span class="dc-toggle-slider"></span></label></td>';
 	html += '<td class="text-center">';
-	html += '<button type="button" class="btn btn-danger btn-sm" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
+	html += '<button type="button" class="btn btn-danger btn-xs" onclick="deleteVariant(' + rowIdx + ')"><i data-lucide="trash-2"></i></button>';
 	html += '</td>';
 	html += '</tr>';
-
-	html += '<tr id="dc-variant-cg-row-' + rowIdx + '" class="dc-variant-cg-subrow" style="display:none">';
-	html += '<td colspan="' + (axes.length + 8) + '">';
-	html += '<div class="dc-cg-inner">';
-
-	html += '<div class="dc-subrow-tabs">';
-	html += '<button type="button" class="dc-subrow-tab dc-subrow-tab--active" data-tab="articles" data-row="' + rowIdx + '"><i data-lucide="scan-line"></i> {{ entry_variant_articles|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-tab" data-tab="cg" data-row="' + rowIdx + '"><i data-lucide="users"></i> {{ entry_cg_prices|e("js") }} <span class="dc-subrow-tab__badge" style="display:none"></span></button>';
-	html += '<button type="button" class="dc-subrow-close" onclick="closeSubrow(' + rowIdx + ')" title="{{ button_close|e("js") }}"><i data-lucide="x"></i></button>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel dc-subrow-panel--active" id="dc-panel-articles-' + rowIdx + '">';
-	html += '<div class="dc-subrow-fields">';
-	html += '<label><span><i data-lucide="package" width="12" height="12"></i> {{ entry_sku|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-sku-article" value="" placeholder="SKU" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="scan-line" width="12" height="12"></i> {{ entry_upc|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-upc" value="" placeholder="UPC" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_ean|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-ean" value="" placeholder="EAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="hash" width="12" height="12"></i> {{ entry_jan|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-jan" value="" placeholder="JAN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="book-open" width="12" height="12"></i> {{ entry_isbn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-isbn" value="" placeholder="ISBN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '<label><span><i data-lucide="tag" width="12" height="12"></i> {{ entry_mpn|e("js") }}</span><input type="text" class="form-control input-sm dc-variant-mpn" value="" placeholder="MPN" oninput="onVariantFieldInput(' + rowIdx + ')"/></label>';
-	html += '</div>';
-	html += '</div>';
-
-	html += '<div class="dc-subrow-panel" id="dc-panel-cg-' + rowIdx + '" style="display:none">';
-	html += '<div class="dc-cg-header">';
-	html += '<span class="dc-cg-header-group">{{ entry_cg_customer_group|e("js") }}</span>';
-	html += '<span class="dc-cg-header-price">{{ entry_cg_group_price|e("js") }}</span>';
-	html += '<span class="dc-cg-header-action"></span>';
-	html += '</div>';
-	html += '<div class="dc-cg-prices" id="dc-cg-prices-' + rowIdx + '"></div>';
-	html += '<button type="button" class="btn btn-primary btn-xs dc-cg-add-btn" onclick="addVariantCgPrice(' + rowIdx + ')"><i data-lucide="circle-plus"></i> {{ button_cg_add|e("js") }}</button>';
-	html += '</div>';
-
-	html += '</div></td></tr>';
 
 	$('#dc-variant-tbody').prepend(html);
 	lucide.createIcons();
@@ -550,71 +430,6 @@ function onVariantAxisChange(rowIdx) {
 
 function onVariantFieldInput(rowIdx) {
 	scheduleAutoSave(rowIdx);
-	updateSubrowBadges(rowIdx);
-}
-
-function toggleVariantArticles(rowIdx) {
-	switchSubrowTab(rowIdx, 'articles');
-}
-
-function toggleVariantCgPrices(rowIdx) {
-	switchSubrowTab(rowIdx, 'cg');
-}
-
-function closeSubrow(rowIdx) {
-	$('#dc-variant-cg-row-' + rowIdx).hide();
-}
-
-function switchSubrowTab(rowIdx, tab) {
-	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
-	$subrow.show();
-	$subrow.find('.dc-subrow-panel').hide().removeClass('dc-subrow-panel--active');
-	$subrow.find('.dc-subrow-tab').removeClass('dc-subrow-tab--active');
-	$('#dc-panel-' + tab + '-' + rowIdx).show().addClass('dc-subrow-panel--active');
-	$subrow.find('.dc-subrow-tab[data-tab="' + tab + '"]').addClass('dc-subrow-tab--active');
-}
-
-$(document).on('click', '.dc-subrow-tab', function() {
-	var tab = $(this).data('tab');
-	var rowIdx = $(this).data('row');
-	switchSubrowTab(rowIdx, tab);
-});
-
-function updateSubrowBadges(rowIdx) {
-	var $row = $('#dc-variant-row-' + rowIdx);
-	var $subrow = $('#dc-variant-cg-row-' + rowIdx);
-
-	var articles = 0;
-	$row.find('.dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn').each(function() {
-		if ($(this).val()) articles++;
-	});
-	var cgCount = $subrow.find('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').length;
-
-	$row.find('.dc-articles-toggle').toggleClass('btn-primary', articles > 0).toggleClass('btn-default', articles === 0);
-	$row.find('.dc-cg-toggle').toggleClass('btn-primary', cgCount > 0).toggleClass('btn-default', cgCount === 0);
-
-	var $tabs = $subrow.find('.dc-subrow-tab');
-	$tabs.each(function() {
-		var t = $(this).data('tab');
-		var count = t === 'articles' ? articles : cgCount;
-		var $badge = $(this).find('.dc-subrow-tab__badge');
-		if (count > 0) { $badge.text(count).show(); } else { $badge.hide(); }
-	});
-}
-
-function addVariantCgPrice(rowIdx) {
-	var html = '<div class="dc-cg-row">';
-	html += '<select class="form-control input-sm dc-cg-group" onchange="scheduleAutoSave(' + rowIdx + ')">';
-	{% for customer_group in customer_groups %}
-	html += '<option value="{{ customer_group.customer_group_id }}">{{ customer_group.name|escape("js") }}</option>';
-	{% endfor %}
-	html += '</select>';
-	html += '<input type="number" step="0.0001" class="form-control input-sm dc-cg-price" placeholder="{{ entry_price|e("js") }}" oninput="scheduleAutoSave(' + rowIdx + ')"/>';
-	html += '<button type="button" class="btn btn-danger btn-xs" onclick="$(this).closest(\'.dc-cg-row\').remove();updateSubrowBadges(' + rowIdx + ');scheduleAutoSave(' + rowIdx + ')"><i data-lucide="circle-minus"></i></button>';
-	html += '</div>';
-	$('#dc-cg-prices-' + rowIdx).append(html);
-	lucide.createIcons();
-	updateSubrowBadges(rowIdx);
 }
 
 function onVariantStatusChange(rowIdx) {
@@ -693,37 +508,16 @@ function saveVariantRow(rowIdx, onSuccess) {
 
 	row.data('state', 'saving').removeClass('dc-state-dirty dc-state-error dc-state-flash').addClass('dc-state-saving');
 
-	var cgRow = $('#dc-variant-cg-row-' + rowIdx);
+	// The matrix only manages model, axis values and status. Codes, pricing,
+	// quantity, weight and image are owned by their dedicated panels and are
+	// intentionally not sent — the backend keeps absent fields untouched.
 	var data = {
 		product_id: pid,
 		variant_id: vid,
 		model: row.find('.dc-variant-model').val() || '',
-		sku: cgRow.find('.dc-variant-sku-article').val() || '',
-		upc: cgRow.find('.dc-variant-upc').val() || '',
-		ean: cgRow.find('.dc-variant-ean').val() || '',
-		jan: cgRow.find('.dc-variant-jan').val() || '',
-		isbn: cgRow.find('.dc-variant-isbn').val() || '',
-		mpn: cgRow.find('.dc-variant-mpn').val() || '',
-		price: row.find('.dc-variant-price').val() || 0,
-		quantity: row.find('.dc-variant-qty').val() || 0,
-		subtract: 1,
-		weight: row.find('.dc-variant-weight').val() || 0,
-		weight_class_id: {{ weight_class_id|e("js") }},
-		image: row.find('.dc-variant-image').val() || '',
-		sort_order: 0,
 		status: row.find('.dc-variant-status').is(':checked') ? 1 : 0,
 		values: values
 	};
-
-	var cgPrices = [];
-	$('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').each(function() {
-		var groupId = $(this).find('.dc-cg-group').val();
-		var price = $(this).find('.dc-cg-price').val();
-		if (groupId && price !== '' && price !== undefined) {
-			cgPrices.push({customer_group_id: groupId, price: price});
-		}
-	});
-	data.customer_group_prices = cgPrices;
 
 	// Variant specials/discounts are managed in the product form Promotions
 	// panel and saved together with the form submit — not here.
@@ -782,21 +576,6 @@ function saveVariantRow(rowIdx, onSuccess) {
 				}
 				if (vid === 0 && newVid) {
 					loadVariantMatrix();
-				} else {
-					if (typeof dcInventorySync === 'function') {
-						dcInventorySync(newVid, row.find('.dc-variant-qty').val());
-					} else if (typeof updateInventoryTotal === 'function') {
-						updateInventoryTotal();
-					}
-					if (typeof dcPricingSync === 'function') {
-						var cgMap = {};
-						$('#dc-cg-prices-' + rowIdx + ' .dc-cg-row').each(function() {
-							var gid = $(this).find('.dc-cg-group').val();
-							var p = $(this).find('.dc-cg-price').val();
-							if (gid) cgMap[gid] = p;
-						});
-						dcPricingSync(newVid, row.find('.dc-variant-price').val(), cgMap);
-					}
 				}
 
 				if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) {
@@ -812,19 +591,6 @@ function saveVariantRow(rowIdx, onSuccess) {
 				}
 				if (typeof updateDimensionsHeader === 'function') {
 					updateDimensionsHeader(json);
-				}
-				if (typeof dcDimensionsSync === 'function') {
-					dcDimensionsSync(newVid, {weight: row.find('.dc-variant-weight').val()});
-				}
-				if (typeof dcCodesSync === 'function') {
-					dcCodesSync(newVid, {
-						sku: row.find('.dc-variant-sku-article').val(),
-						upc: row.find('.dc-variant-upc').val(),
-						ean: row.find('.dc-variant-ean').val(),
-						jan: row.find('.dc-variant-jan').val(),
-						isbn: row.find('.dc-variant-isbn').val(),
-						mpn: row.find('.dc-variant-mpn').val()
-					});
 				}
 
 				if (typeof onSuccess === 'function') {
@@ -995,41 +761,6 @@ function generateVariants(productId) {
 			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
-}
-
-function openVariantImagePicker(rowIdx) {
-	var $input = $('#dc-variant-input-' + rowIdx);
-	var originalValue = $input.val();
-
-	$('#modal-image').remove();
-
-	$.ajax({
-		url: 'index.php?route=common/filemanager&user_token=' + getURLVar('user_token') + '&target=dc-variant-input-' + rowIdx + '&thumb=dc-variant-thumb-' + rowIdx + '&type=image',
-		dataType: 'html',
-		success: function(html) {
-			$('body').append('<div id="modal-image" class="modal">' + html + '</div>');
-			$('#modal-image').modal('show');
-			$('#modal-image').on('hidden.bs.modal', function() {
-				if ($input.val() !== originalValue) {
-					scheduleAutoSave(rowIdx);
-				}
-				$('#modal-image').off('hidden.bs.modal');
-			});
-		}
-	});
-}
-
-function clearVariantImage(rowIdx) {
-	var $input = $('#dc-variant-input-' + rowIdx);
-	var placeholder = '{{ placeholder|e("js") }}';
-
-	if (!$input.val()) {
-		return;
-	}
-
-	$('#dc-variant-thumb-' + rowIdx).find('img').attr('src', placeholder);
-	$input.val('');
-	scheduleAutoSave(rowIdx);
 }
 
 function updateRowCount() {
@@ -1342,15 +1073,6 @@ function dcDimensionsSync(variantId, data) {
 	}
 }
 
-function syncMatrixDimensions(variantId, data) {
-	var $row = $('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"]');
-	if (!$row.length) return;
-	if (data.weight !== undefined) {
-		var $weight = $row.find('.dc-variant-weight');
-		if ($weight.length && $weight[0] !== document.activeElement) { $weight.val(data.weight); }
-	}
-}
-
 function onDimensionsInput(input) {
 	var $row = $(input).closest('.dc-dim-row');
 	var vid = $(input).data('variant-id');
@@ -1387,7 +1109,6 @@ function saveDimensionsRow(variantId) {
 			$row.removeClass('dc-dim-saving dc-dim-dirty dc-dim-error').addClass('dc-dim-flash');
 			showToast('{{ text_saved|e("js") }}', 'success');
 			setTimeout(function() { $row.removeClass('dc-dim-flash'); }, 1500);
-			syncMatrixDimensions(variantId, {weight: weight, length: length, width: width, height: height});
 			if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) { dcUpdatePricingRanges(json); }
 			if (typeof dcUpdateDimensionsRangesInternal === 'function') { dcUpdateDimensionsRangesInternal(json); }
 			if (typeof dcUpdateDimensionsRanges === 'function' && json.dimensions_range_text !== undefined) { dcUpdateDimensionsRanges(json); }
@@ -1507,31 +1228,12 @@ function saveCodesRow(variantId) {
 			$row.removeClass('dc-code-saving dc-code-dirty dc-code-error').addClass('dc-code-flash');
 			showToast('{{ text_saved|e("js") }}', 'success');
 			setTimeout(function() { $row.removeClass('dc-code-flash'); }, 1500);
-			syncMatrixCodes(variantId, codes);
 		},
 		error: function() {
 			$row.removeClass('dc-code-saving dc-code-dirty').addClass('dc-code-error');
 			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
-}
-
-function syncMatrixCodes(variantId, codes) {
-	if (!codes) return;
-	var $row = $('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"]');
-	if (!$row.length) return;
-	var map = { sku: '.dc-variant-sku-article', upc: '.dc-variant-upc', ean: '.dc-variant-ean', jan: '.dc-variant-jan', isbn: '.dc-variant-isbn', mpn: '.dc-variant-mpn' };
-	for (var field in map) {
-		if (!codes.hasOwnProperty(field)) continue;
-		var $input = $row.find(map[field]);
-		if ($input.length && $input[0] !== document.activeElement) {
-			$input.val(codes[field]);
-		}
-	}
-	if (typeof updateSubrowBadges === 'function') {
-		var rowIdx = $row.data('row-idx');
-		if (rowIdx) updateSubrowBadges(rowIdx);
-	}
 }
 
 function dcCodesSync(variantId, codes) {
@@ -1689,7 +1391,6 @@ function onMediaVariantSelectChange(select) {
 				$select.removeAttr('data-prev-vid');
 			}
 			showToast('{{ text_saved|e("js") }}', 'success');
-			syncMatrixVariantThumb(targetVid, imagePath, json.thumb);
 		},
 		error: function() {
 			$select.prop('disabled', false);
@@ -1697,18 +1398,6 @@ function onMediaVariantSelectChange(select) {
 			restore();
 		}
 	});
-}
-
-function syncMatrixVariantThumb(variantId, imagePath, thumbUrl) {
-	if (!variantId) return;
-	var $row = $('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"]');
-	if (!$row.length) return;
-	var rowIdx = $row.data('row-idx');
-	if (!rowIdx) return;
-	$('#dc-variant-input-' + rowIdx).val(imagePath);
-	if (thumbUrl) {
-		$('#dc-variant-thumb-' + rowIdx).find('img').attr('src', thumbUrl);
-	}
 }
 
 function dcPricingSync(variantId, price, cgPrices) {
@@ -1728,29 +1417,6 @@ function dcPricingSync(variantId, price, cgPrices) {
 					$cg.toggleClass('dc-zero', cgPrices[cgId] !== '' && parseFloat(cgPrices[cgId]) == 0);
 				}
 			}
-		}
-	}
-}
-
-function syncMatrixPrice(variantId, price, cgPrices) {
-	var $row = $('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"]');
-	if (!$row.length) return;
-	var $price = $row.find('.dc-variant-price');
-	if ($price.length && $price[0] !== document.activeElement) {
-		$price.val(price);
-	}
-	if (cgPrices) {
-		var $subrow = $('#dc-variant-cg-row-' + $row.data('row-idx'));
-		if ($subrow.length) {
-			for (var cgId in cgPrices) {
-				if (!cgPrices.hasOwnProperty(cgId)) continue;
-				// Prices in matrix subrow are rebuilt only on full reload, so just mark dirty if cg price differs; full sync requires reload
-			}
-		}
-		// For matrix CG prices, trigger a soft reload hint: update badge count if needed
-		if (typeof updateSubrowBadges === 'function') {
-			var rowIdx = $row.data('row-idx');
-			if (rowIdx) updateSubrowBadges(rowIdx);
 		}
 	}
 }
@@ -1813,7 +1479,6 @@ function savePricingRow(variantId) {
 			setTimeout(function() {
 				$row.removeClass('dc-price-flash');
 			}, 1500);
-			syncMatrixPrice(variantId, price, null);
 			if (typeof dcUpdatePricingRanges === 'function' && json.price_range_text !== undefined) {
 				dcUpdatePricingRanges(json);
 			}
@@ -1926,7 +1591,6 @@ function saveInventoryQty(variantId) {
 				$row.removeClass('dc-inv-flash');
 			}, 1500);
 
-			syncMatrixQty(variantId, quantity);
 			updateInventoryTotal();
 		},
 		error: function() {
@@ -1934,10 +1598,6 @@ function saveInventoryQty(variantId) {
 			showToast('{{ text_load_error|e("js") }}', 'error');
 		}
 	});
-}
-
-function syncMatrixQty(variantId, quantity) {
-	$('#dc-variant-table tbody tr[data-variant-id="' + variantId + '"] .dc-variant-qty').val(quantity);
 }
 
 function bindHScrollProxy() {
@@ -2017,7 +1677,7 @@ function dcAutoWidth(input, expand) {
 	$input.css('width', Math.max(width, 44) + 'px');
 }
 
-var dcAutoWidthSelector = '.dc-variant-model, .dc-variant-price, .dc-variant-qty, .dc-variant-weight, .dc-inv-qty, .dc-price-base, .dc-price-cg, .dc-variant-sku-article, .dc-variant-upc, .dc-variant-ean, .dc-variant-jan, .dc-variant-isbn, .dc-variant-mpn, .dc-dim-length, .dc-dim-width, .dc-dim-height, .dc-dim-weight, .dc-code-sku, .dc-code-upc, .dc-code-ean, .dc-code-jan, .dc-code-isbn, .dc-code-mpn';
+var dcAutoWidthSelector = '.dc-variant-model, .dc-inv-qty, .dc-price-base, .dc-price-cg, .dc-dim-length, .dc-dim-width, .dc-dim-height, .dc-dim-weight, .dc-code-sku, .dc-code-upc, .dc-code-ean, .dc-code-jan, .dc-code-isbn, .dc-code-mpn';
 
 $(document).on('focusin input', dcAutoWidthSelector, function() {
 	dcAutoWidth(this, true);
@@ -2067,10 +1727,6 @@ $(document).on('change', '.dc-img-variant select', function() {
 .dc-variant-table td.dc-col-sku { box-shadow: 2px 0 4px rgba(0,0,0,0.08); }
 .dc-variant-table th.dc-th-axis { min-width: 140px; }
 .dc-variant-table th.dc-th-sku { min-width: 150px; }
-.dc-variant-table th.dc-th-price { min-width: 180px; }
-.dc-variant-table th.dc-th-qty { min-width: 110px; }
-.dc-variant-table th.dc-th-weight { min-width: 110px; }
-.dc-variant-table th.dc-th-image { min-width: 60px; }
 .dc-variant-table th.dc-th-default { min-width: 40px; }
 .dc-variant-table th.dc-th-status { min-width: 50px; }
 .dc-variant-table th.dc-th-action { min-width: 40px; }
@@ -2109,51 +1765,13 @@ $(document).on('change', '.dc-img-variant select', function() {
 .dc-star-btn.dc-star-active { color: #f0ad4e; }
 .dc-star-btn.dc-star-active:hover { color: #e09800; }
 
-.dc-variant-table .dc-img-remove { position: absolute; width: 16px; height: 16px; font-size: 10px; top: 2px; right: 2px; padding: 0; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-.dc-img-remove i { margin: 0; }
-.dc-variant-table div:hover > .dc-img-remove { opacity: 1; }
-
-.dc-variant-cg-subrow td { padding: 0 !important; }
-.dc-cg-inner { padding: 0; background: #fff; border: 1px solid #dee2e6; border-top: 0; border-radius: 0 0 6px 6px; margin: 0 12px 8px; }
-
-.dc-subrow-tabs { display: flex; gap: 0; border-bottom: 1px solid #e9ecef; padding: 0 16px; }
-.dc-subrow-tab { padding: 10px 16px; border: none; background: none; font-size: 12px; font-weight: 500; color: #6c757d; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; position: relative; }
-.dc-subrow-tab:hover { color: #495057; background: #f8f9fa; }
-.dc-subrow-tab--active { color: #007bff; border-bottom-color: #007bff; font-weight: 600; }
-.dc-subrow-tab i,
-.dc-subrow-tab svg { width: 12px; height: 12px; }
-.dc-subrow-tab__badge { background: #6c757d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 16px; text-align: center; line-height: 1.3; }
-.dc-subrow-tab--active .dc-subrow-tab__badge { background: #007bff; }
-.dc-subrow-close { margin-left: auto; padding: 8px 12px; border: none; background: none; color: #6c757d; cursor: pointer; display: flex; align-items: center; transition: color 0.15s; }
-.dc-subrow-close:hover { color: #dc3545; }
-.dc-subrow-close i, .dc-subrow-close svg { width: 14px; height: 14px; }
-.dc-subrow-panel { padding: 16px; }
-.dc-subrow-panel:empty { display: none; }
-
-.dc-subrow-empty { text-align: center; padding: 20px; color: #adb5bd; font-size: 12px; font-style: italic; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.dc-subrow-empty i { font-size: 24px; opacity: 0.3; }
-
-.dc-subrow-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-.dc-subrow-fields label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; font-weight: normal; color: #6c757d; margin: 0; }
-.dc-subrow-fields label span { font-weight: 600; display: flex; align-items: center; gap: 4px; }
-.dc-subrow-fields input { width: 120px; }
-
-.dc-cg-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #6c757d; }
-.dc-cg-header-group { width: 180px; flex-shrink: 0; }
-.dc-cg-header-price { width: 110px; flex-shrink: 0; }
-.dc-cg-header-action { flex: 1; }
+/* Group-price rows are shared with the option-value CG blocks in
+   product_form.twig — do not remove. */
 .dc-cg-prices { margin-bottom: 4px; }
 .dc-cg-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
 .dc-cg-row:last-of-type { margin-bottom: 0; }
 .dc-cg-row select { width: 180px; flex-shrink: 0; }
 .dc-cg-row input { width: 110px; flex-shrink: 0; }
-.dc-cg-add-btn { margin-top: 4px; }
-.dc-articles-toggle { border-color: #ced4da; }
-.dc-articles-toggle svg { width: 12px; height: 12px; }
-.dc-articles-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
-.dc-cg-toggle { border-color: #ced4da; }
-.dc-cg-toggle svg { width: 12px; height: 12px; }
-.dc-cg-toggle.btn-primary { color: #fff; background-color: #007bff; border-color: #007bff; }
 
 .dc-variant-table .btn-sm i[data-lucide],
 .dc-variant-table .btn-sm svg { width: 14px; height: 14px; }
