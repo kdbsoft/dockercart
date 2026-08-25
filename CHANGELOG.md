@@ -1,3 +1,45 @@
+## [3.11.0](https://github.com/kdbsoft/dockercart/compare/v3.10.0...v3.11.0) (2026-08-25)
+
+### Features
+
+* **admin:** add SEO URL CSV import and export ([b8c2d39](https://github.com/kdbsoft/dockercart/commit/b8c2d39535bf88509ab860582baca160044b131c))
+* **admin:** enhance common DCX UI and banner form ([27a4457](https://github.com/kdbsoft/dockercart/commit/27a4457edf8cad89025af7f30fc964bf2e951b84))
+* **admin:** redesign return history into a timeline card in sidebar ([22b9f14](https://github.com/kdbsoft/dockercart/commit/22b9f145acc1dd1b48f2ffca3e0ebe10d69a311c))
+* **analytics:** add tiktok analytics extension ([fffef4f](https://github.com/kdbsoft/dockercart/commit/fffef4f4c65dd387a1afba90c69dc031c4338684))
+* **dashboard:** localize chart axis month and day names ([2fd7cde](https://github.com/kdbsoft/dockercart/commit/2fd7cdeeae099e814da0fb64c92e3e83163a6917))
+* **i18n:** localize admin date and time formatting ([61d2e40](https://github.com/kdbsoft/dockercart/commit/61d2e4015a0f75aa91fc2647323fdd1f2debd6e5))
+* **product:** variant dimensions, promotions and supplier profit report ([8549086](https://github.com/kdbsoft/dockercart/commit/85490868157357b34e944dab68ab53c455729740))
+* **sale:** add shipping status to orders, dashboard and account ([369d68a](https://github.com/kdbsoft/dockercart/commit/369d68a1381c11709894da79ebaa468d7d392b85))
+* show invoice number on order list rows ([09b12e9](https://github.com/kdbsoft/dockercart/commit/09b12e9770bff974aeb35700b3d8e3864ae48548))
+* **stock:** show reserved and available quantities across admin and storefront ([308bc47](https://github.com/kdbsoft/dockercart/commit/308bc477109e4cac9a1307f645bb15cd7d109e97))
+* **warehouse:** add multilingual address and holiday translations ([670d968](https://github.com/kdbsoft/dockercart/commit/670d9686062f9ca7859271dd836baf1d99231a11))
+* **warehouse:** add warehouse management, stock reservations and pickup shipping ([3d9bf18](https://github.com/kdbsoft/dockercart/commit/3d9bf1874d0aa9ae8a57c6968d4290ba9d4e2c8b))
+* **warehouse:** backfill order lines when warehouse tracking is enabled ([7f299b7](https://github.com/kdbsoft/dockercart/commit/7f299b72d710e38961db184149a6291cdf1f09d5))
+* **warehouse:** enhance supplier orders list with KPIs, filters and search ([e55ba99](https://github.com/kdbsoft/dockercart/commit/e55ba991ebe6c6f5a0649cad9aac18693411adb9))
+* **warehouse:** improve movement and stock list UI ([1fcf01f](https://github.com/kdbsoft/dockercart/commit/1fcf01f26d90cc540947a5b909820233d09612e6))
+* **warehouse:** mask dropship warehouse names in storefront and emails ([9710380](https://github.com/kdbsoft/dockercart/commit/9710380c7042bdf0e52f512882ca48944ae79a0f))
+* **warehouse:** overhaul transfer list with modal, quick status and details ([eefe88b](https://github.com/kdbsoft/dockercart/commit/eefe88b8331744c3b381334ef2d910245fe7d288))
+* **warehouse:** route catalog quantity edits through warehouse layer ([0a573ee](https://github.com/kdbsoft/dockercart/commit/0a573ee6c33eda980113e4db516323741b28186e))
+
+### Bug Fixes
+
+* **admin:** add names to return item inputs and color-code status timeline ([fa1c3e0](https://github.com/kdbsoft/dockercart/commit/fa1c3e0a1747a9d61c5ba02b9642850285344db2))
+* **admin:** handle user filter save redirect via url ([dde1206](https://github.com/kdbsoft/dockercart/commit/dde1206edb6226c4e1370722f0b0c7c72d7f10fd))
+* **admin:** make quantity readonly for computed-range products ([4dcdab4](https://github.com/kdbsoft/dockercart/commit/4dcdab40e195b78fc553124a43176a1c0c3228d8))
+* **admin:** rename settings menu entry to stores ([95d3cc6](https://github.com/kdbsoft/dockercart/commit/95d3cc6c120101624c238d366e9db1c04a71e8a1))
+* **admin:** stop bundle language strings overriding product form labels ([0eba9f6](https://github.com/kdbsoft/dockercart/commit/0eba9f6538a47c3f7f81f71fa0965087ffb4abba))
+* **catalog:** avoid double currency-rate on variant prices ([5a4fda1](https://github.com/kdbsoft/dockercart/commit/5a4fda199d6e75f55ee5b9180624e32ef471d65b))
+* **db:** repair admin user-group permissions and grant new extensions ([a95cd4d](https://github.com/kdbsoft/dockercart/commit/a95cd4da99991912df9169ac7a8b92fae3ce36c5))
+* **lang:** correct upsell label translations in ru-ua and uk-ua ([cd955e1](https://github.com/kdbsoft/dockercart/commit/cd955e1ab1a6cb744106eb82ce40246a0af0b756))
+* **sale:** correct order status filters and configurable variant resolution ([d40790b](https://github.com/kdbsoft/dockercart/commit/d40790bde3e5022e00dc21dd53a1ee0d1cc8d21c))
+* **sale:** correct return full-refund quantity handling ([b30c090](https://github.com/kdbsoft/dockercart/commit/b30c090d9350ca68fdedf29758d561fe042a3f30))
+* **theme:** rename call-for-price labels to price-on-request ([5bdb141](https://github.com/kdbsoft/dockercart/commit/5bdb141869dd76b40e75e3cecb96a00da24213ee))
+* **warehouse:** correct allocation and lead-time logic in warehouse library ([08f42cb](https://github.com/kdbsoft/dockercart/commit/08f42cbdd4a8c610b911ff2e9f4aed6090423713))
+
+### Performance Improvements
+
+* bump date_modified only when quantities actually change in\n       warehouse recompute ([d946318](https://github.com/kdbsoft/dockercart/commit/d94631879fd01b8855f9f812965b7a95cb644b0a))
+
 ## [3.10.0](https://github.com/kdbsoft/dockercart/compare/v3.9.0...v3.10.0) (2026-08-22)
 
 ### Features
