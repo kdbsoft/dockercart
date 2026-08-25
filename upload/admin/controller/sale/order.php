@@ -511,6 +511,7 @@ class ControllerSaleOrder extends Controller {
 				'payment_status_text' => $this->language->get('text_payment_status_' . $payment_status),
 				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
 				'payment_method' => $order_localizer->paymentMethodTitle($result),
+				'invoice_no' => (int)$result['invoice_no'] > 0 ? $result['invoice_prefix'] . $result['invoice_no'] : '',
 				'paid_amount'   => $this->currency->format($result['paid_amount'], $result['currency_code'], $result['currency_value']),
 				'shipping_status' => $shipping_status,
 				'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
