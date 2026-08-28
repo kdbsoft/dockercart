@@ -21,13 +21,20 @@ class ModelCatalogReviewCriteria extends Model {
 			$candidate_ids[] = (int)$row['category_id'];
 		}
 
-		$candidate_ids = array_unique($candidate_ids);
+		$candidate_ids = array_values(array_unique(array_filter(array_map('intval', $candidate_ids))));
 
-		foreach ($candidate_ids as $category_id) {
-			$query = $this->db->query("SELECT review_criteria_group_id FROM " . DB_PREFIX . "category WHERE category_id = '" . $category_id . "' AND review_criteria_group_id IS NOT NULL AND review_criteria_group_id > 0 LIMIT 1");
-
-			if ($query->num_rows) {
-				return (int)$query->row['review_criteria_group_id'];
+		if ($candidate_ids) {
+			$ids_in = implode(',', $candidate_ids);
+			// Prioritize main_category_id first, then others by field order: try bulk fetch and return first match in original order
+			$q = $this->db->query("SELECT category_id, review_criteria_group_id FROM " . DB_PREFIX . "category WHERE category_id IN (" . $ids_in . ") AND review_criteria_group_id IS NOT NULL AND review_criteria_group_id > 0");
+			$map = array();
+			foreach ($q->rows as $row) {
+				$map[(int)$row['category_id']] = (int)$row['review_criteria_group_id'];
+			}
+			foreach ($candidate_ids as $cid) {
+				if (isset($map[$cid]) && $map[$cid] > 0) {
+					return $map[$cid];
+				}
 			}
 		}
 
@@ -102,25 +109,34 @@ class ModelCatalogReviewCriteria extends Model {
 
 		$groups = array();
 
-		foreach ($query->rows as $row) {
-			$group_id = (int)$row['criteria_group_id'];
-
-			$name_query = $this->db->query("SELECT name FROM " . DB_PREFIX . "review_criteria_group_description WHERE criteria_group_id = '" . $group_id . "' AND language_id = '" . $language_id . "' LIMIT 1");
-
-			$name = $name_query->num_rows ? $name_query->row['name'] : '';
-
-			if ($name === '') {
-				$name_query = $this->db->query("SELECT name FROM " . DB_PREFIX . "review_criteria_group_description WHERE criteria_group_id = '" . $group_id . "' ORDER BY language_id ASC LIMIT 1");
-				$name = $name_query->num_rows ? $name_query->row['name'] : '';
+		if ($query->num_rows) {
+			$group_ids = array_map('intval', array_column($query->rows, 'criteria_group_id'));
+			$desc_q = $this->db->query("SELECT criteria_group_id, language_id, name FROM " . DB_PREFIX . "review_criteria_group_description WHERE criteria_group_id IN (" . implode(',', $group_ids) . ")");
+			$desc_map = array();
+			foreach ($desc_q->rows as $drow) {
+				$gid = (int)$drow['criteria_group_id'];
+				$lid = (int)$drow['language_id'];
+				$desc_map[$gid][$lid] = $drow['name'];
 			}
 
-			$groups[] = array(
-				'criteria_group_id' => $group_id,
-				'name'              => $name,
-				'is_default'        => (int)$row['is_default'],
-				'sort_order'        => (int)$row['sort_order'],
-				'criteria_count'    => 0,
-			);
+			foreach ($query->rows as $row) {
+				$group_id = (int)$row['criteria_group_id'];
+
+				$name = '';
+				if (isset($desc_map[$group_id][$language_id])) {
+					$name = $desc_map[$group_id][$language_id];
+				} elseif (isset($desc_map[$group_id])) {
+					$name = reset($desc_map[$group_id]);
+				}
+
+				$groups[] = array(
+					'criteria_group_id' => $group_id,
+					'name'              => $name,
+					'is_default'        => (int)$row['is_default'],
+					'sort_order'        => (int)$row['sort_order'],
+					'criteria_count'    => 0,
+				);
+			}
 		}
 
 		if ($groups) {

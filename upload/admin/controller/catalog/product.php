@@ -2120,14 +2120,18 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_relateds'] = array();
 
-		foreach ($products as $product_id) {
-			$related_info = $this->model_catalog_product->getProduct($product_id);
+		if ($products) {
+			$related_map = $this->model_catalog_product->getProductsByIds($products);
 
-			if ($related_info) {
-				$data['product_relateds'][] = array(
-					'product_id' => $related_info['product_id'],
-					'name'       => $related_info['name']
-				);
+			foreach ($products as $product_id) {
+				$related_info = isset($related_map[(int)$product_id]) ? $related_map[(int)$product_id] : null;
+
+				if ($related_info) {
+					$data['product_relateds'][] = array(
+						'product_id' => $related_info['product_id'],
+						'name'       => $related_info['name']
+					);
+				}
 			}
 		}
 
@@ -2141,14 +2145,18 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_upsells'] = array();
 
-		foreach ($products as $product_id) {
-			$upsell_info = $this->model_catalog_product->getProduct($product_id);
+		if ($products) {
+			$upsell_map = $this->model_catalog_product->getProductsByIds($products);
 
-			if ($upsell_info) {
-				$data['product_upsells'][] = array(
-					'product_id' => $upsell_info['product_id'],
-					'name'       => $upsell_info['name']
-				);
+			foreach ($products as $product_id) {
+				$upsell_info = isset($upsell_map[(int)$product_id]) ? $upsell_map[(int)$product_id] : null;
+
+				if ($upsell_info) {
+					$data['product_upsells'][] = array(
+						'product_id' => $upsell_info['product_id'],
+						'name'       => $upsell_info['name']
+					);
+				}
 			}
 		}
 
@@ -2162,14 +2170,18 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_accessories'] = array();
 
-		foreach ($products as $product_id) {
-			$accessory_info = $this->model_catalog_product->getProduct($product_id);
+		if ($products) {
+			$accessory_map = $this->model_catalog_product->getProductsByIds($products);
 
-			if ($accessory_info) {
-				$data['product_accessories'][] = array(
-					'product_id' => $accessory_info['product_id'],
-					'name'       => $accessory_info['name']
-				);
+			foreach ($products as $product_id) {
+				$accessory_info = isset($accessory_map[(int)$product_id]) ? $accessory_map[(int)$product_id] : null;
+
+				if ($accessory_info) {
+					$data['product_accessories'][] = array(
+						'product_id' => $accessory_info['product_id'],
+						'name'       => $accessory_info['name']
+					);
+				}
 			}
 		}
 
@@ -2183,14 +2195,18 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_fbt'] = array();
 
-		foreach ($products as $product_id) {
-			$fbt_info = $this->model_catalog_product->getProduct($product_id);
+		if ($products) {
+			$fbt_map = $this->model_catalog_product->getProductsByIds($products);
 
-			if ($fbt_info) {
-				$data['product_fbt'][] = array(
-					'product_id' => $fbt_info['product_id'],
-					'name'       => $fbt_info['name']
-				);
+			foreach ($products as $product_id) {
+				$fbt_info = isset($fbt_map[(int)$product_id]) ? $fbt_map[(int)$product_id] : null;
+
+				if ($fbt_info) {
+					$data['product_fbt'][] = array(
+						'product_id' => $fbt_info['product_id'],
+						'name'       => $fbt_info['name']
+					);
+				}
 			}
 		}
 
@@ -2204,14 +2220,18 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['product_similars'] = array();
 
-		foreach ($products as $product_id) {
-			$similar_info = $this->model_catalog_product->getProduct($product_id);
+		if ($products) {
+			$similar_map = $this->model_catalog_product->getProductsByIds($products);
 
-			if ($similar_info) {
-				$data['product_similars'][] = array(
-					'product_id' => $similar_info['product_id'],
-					'name'       => $similar_info['name']
-				);
+			foreach ($products as $product_id) {
+				$similar_info = isset($similar_map[(int)$product_id]) ? $similar_map[(int)$product_id] : null;
+
+				if ($similar_info) {
+					$data['product_similars'][] = array(
+						'product_id' => $similar_info['product_id'],
+						'name'       => $similar_info['name']
+					);
+				}
 			}
 		}
 

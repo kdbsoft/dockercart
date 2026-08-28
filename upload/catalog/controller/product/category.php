@@ -77,14 +77,16 @@ class ControllerProductCategory extends Controller {
 
 			$category_id = (int)array_pop($parts);
 
-			foreach ($parts as $path_id) {
+			$path_ids = array_map('intval', $parts);
+			$categories_by_id = $this->model_catalog_category->getCategoriesByIds($path_ids);
+			foreach ($path_ids as $path_id) {
 				if (!$path) {
 					$path = (int)$path_id;
 				} else {
 					$path .= '_' . (int)$path_id;
 				}
 
-				$category_info = $this->model_catalog_category->getCategory($path_id);
+				$category_info = isset($categories_by_id[$path_id]) ? $categories_by_id[$path_id] : null;
 
 				if ($category_info) {
 					$data['breadcrumbs'][] = array(
@@ -97,7 +99,7 @@ class ControllerProductCategory extends Controller {
 			if ($path) {
 				$parent_path = $path;
 				$parent_id = (int)end($parts);
-				$parent_cat_info = $this->model_catalog_category->getCategory($parent_id);
+				$parent_cat_info = isset($categories_by_id[$parent_id]) ? $categories_by_id[$parent_id] : $this->model_catalog_category->getCategory($parent_id);
 				if ($parent_cat_info) {
 					$parent_category_name = $parent_cat_info['name'];
 				}

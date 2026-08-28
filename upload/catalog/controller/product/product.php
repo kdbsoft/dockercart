@@ -21,15 +21,17 @@ class ControllerProductProduct extends Controller {
 
 			$parts = explode('_', (string)$this->request->get['path']);
 
-			// For each part in path, add breadcrumb
-			foreach ($parts as $path_id) {
+			// For each part in path, add breadcrumb (bulk)
+			$path_ids = array_map('intval', $parts);
+			$categories_by_id = $this->model_catalog_category->getCategoriesByIds($path_ids);
+			foreach ($path_ids as $path_id) {
 				if (!$path) {
 					$path = $path_id;
 				} else {
 					$path .= '_' . $path_id;
 				}
 
-				$category_info = $this->model_catalog_category->getCategory($path_id);
+				$category_info = isset($categories_by_id[$path_id]) ? $categories_by_id[$path_id] : null;
 
 				if ($category_info) {
 					$breadcrumb_text = $category_info['name'];
@@ -210,18 +212,20 @@ class ControllerProductProduct extends Controller {
 						$this->request->get['path'] = $category_path;
 						$url .= '&path=' . $category_path;
 
-						// Rebuild breadcrumbs with category path
+						// Rebuild breadcrumbs with category path (bulk)
 						$path = '';
 						$path_parts = explode('_', $category_path);
+						$path_ids = array_map('intval', $path_parts);
+						$categories_by_id = $this->model_catalog_category->getCategoriesByIds($path_ids);
 
-						foreach ($path_parts as $path_id) {
+						foreach ($path_ids as $path_id) {
 							if (!$path) {
 								$path = $path_id;
 							} else {
 								$path .= '_' . $path_id;
 							}
 
-							$category_info = $this->model_catalog_category->getCategory($path_id);
+							$category_info = isset($categories_by_id[$path_id]) ? $categories_by_id[$path_id] : null;
 
 							if ($category_info) {
 								// Check if this breadcrumb already exists to avoid duplicates
