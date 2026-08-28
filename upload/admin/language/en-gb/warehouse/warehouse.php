@@ -97,3 +97,5 @@ $_['error_permission'] = 'Warning: You do not have permission to modify warehous
 $_['error_name'] = 'Warehouse name must be between 1 and 255 characters!';
 $_['error_default_exists'] = 'Warning: A default warehouse already exists. Unset it first.';
 $_['error_stock'] = 'Warning: Cannot delete the last remaining warehouse.';
+$_['error_warehouse_has_stock'] = 'Cannot delete warehouses that still hold stock. Move stock via transfers or adjustments first.';
+$_['error_warehouse_has_transfers'] = 'Cannot delete warehouses with pending or in-transit transfers.';

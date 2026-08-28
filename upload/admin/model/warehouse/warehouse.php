@@ -113,6 +113,21 @@ class ModelWarehouseWarehouse extends Model {
 			throw new \RuntimeException('Cannot delete the last warehouse');
 		}
 
+		// Guard: refuse to delete a warehouse that still holds stock (including
+		// unlimited/dropship rows). Move stock via transfers/adjustments first so
+		// the movement journal stays consistent and SUM caches do not silently drop.
+		$stock_check = $this->db->query("SELECT SUM(quantity) AS total, MIN(unlimited) AS has_unlimited FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "'");
+		$has_stock = $stock_check->num_rows && ((float)($stock_check->row['total'] ?? 0) > 0.0001 || (int)($stock_check->row['has_unlimited'] ?? 0) === 1);
+		if ($has_stock) {
+			throw new \RuntimeException('Cannot delete warehouse with stock. Move stock via transfers first.');
+		}
+
+		// Guard: pending / in_transit transfers referencing this warehouse.
+		$transfer_check = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "warehouse_transfer` WHERE `status` IN ('pending','in_transit') AND (`from_warehouse_id` = '" . (int)$warehouse_id . "' OR `to_warehouse_id` = '" . (int)$warehouse_id . "')");
+		if ((int)($transfer_check->row['total'] ?? 0) > 0) {
+			throw new \RuntimeException('Cannot delete warehouse with pending transfers');
+		}
+
 		if ($is_default->num_rows && (int)$is_default->row['is_default'] === 1) {
 			// Reassign default to the highest-priority remaining warehouse.
 			$next = $this->db->query("SELECT `warehouse_id` FROM `" . DB_PREFIX . "warehouse` WHERE `warehouse_id` <> '" . (int)$warehouse_id . "' ORDER BY `priority` DESC, `warehouse_id` ASC LIMIT 1");

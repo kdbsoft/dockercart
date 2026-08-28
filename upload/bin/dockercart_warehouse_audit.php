@@ -87,7 +87,9 @@ try {
 
 	$result = $warehouse->auditAll();
 
-	fwrite(STDOUT, "[warehouse-audit] Recalculated {$result['checked']} product(s), drift(s): {$result['drifted']}.\n");
+	$backfilled = $result['backfilled'] ?? 0;
+	$extra = $backfilled > 0 ? ", backfilled: {$backfilled}" : "";
+	fwrite(STDOUT, "[warehouse-audit] Recalculated {$result['checked']} product(s), drift(s): {$result['drifted']}{$extra}.\n");
 
 	exit(0);
 } catch (\Throwable $e) {
