@@ -226,11 +226,17 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	// Load category model for getting categories
 		$this->load->model('extension/module/dockercart_blog_category');
 
+		$post_ids = array_map('intval', array_column($results, 'post_id'));
+		$post_cats_map = array();
+		if ($post_ids) {
+			$pc_q = $this->db->query("SELECT bpc.post_id, GROUP_CONCAT(bcd.name SEPARATOR ', ') as names, GROUP_CONCAT(bpc.category_id SEPARATOR ',') as ids FROM `" . DB_PREFIX . "blog_post_to_category` bpc LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd ON (bpc.category_id = bcd.category_id AND bcd.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE bpc.post_id IN (" . implode(',', $post_ids) . ") GROUP BY bpc.post_id");
+			foreach ($pc_q->rows as $pc_row) {
+				$post_cats_map[(int)$pc_row['post_id']] = $pc_row;
+			}
+		}
+
 		foreach ($results as $result) {
-			// Get post categories for each post
-			$post_cats = $this->db->query("SELECT GROUP_CONCAT(bcd.name SEPARATOR ', ') as names, GROUP_CONCAT(bpc.category_id SEPARATOR ',') as ids FROM `" . DB_PREFIX . "blog_post_to_category` bpc
-				LEFT JOIN `" . DB_PREFIX . "blog_category_description` bcd ON (bpc.category_id = bcd.category_id)
-				WHERE bpc.post_id = '" . (int)$result['post_id'] . "' AND bcd.language_id = '" . (int)$this->config->get('config_language_id') . "'")->row;
+			$post_cats = isset($post_cats_map[(int)$result['post_id']]) ? $post_cats_map[(int)$result['post_id']] : array('names' => '', 'ids' => '');
 
 			$category_name = !empty($post_cats['names']) ? $post_cats['names'] : '—';
 			$category_ids = !empty($post_cats['ids']) ? explode(',', $post_cats['ids']) : array();

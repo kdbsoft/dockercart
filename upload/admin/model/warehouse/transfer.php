@@ -89,28 +89,73 @@ class ModelWarehouseTransfer extends Model {
 	}
 
 	/**
-	 * Advance a transfer status. On 'completed' the stock really moves.
+	 * Validate that source warehouse has enough available stock for all items.
+	 *
+	 * @return array<int, string> errors indexed by item offset
 	 */
-	public function updateStatus(int $transfer_id, string $status): void {
+	public function validateAvailable(int $from_warehouse_id, array $items): array {
+		$warehouse = new \DockercartWarehouse($this->registry);
+		$errors = [];
+
+		foreach ($items as $idx => $item) {
+			$product_id = (int)($item['product_id'] ?? 0);
+			$variant_id = (int)($item['variant_id'] ?? 0);
+			$quantity = (float)($item['quantity'] ?? 0);
+
+			if ($product_id <= 0 || $quantity <= 0) {
+				continue;
+			}
+
+			// Skip stock check for non-tracked / unlimited (dropship) lines.
+			if (!$warehouse->tracksStock($product_id, $variant_id)) {
+				continue;
+			}
+
+			$available = $warehouse->getAvailableForLine($product_id, $variant_id, $from_warehouse_id);
+
+			// Dropship unlimited rows report INF - always enough.
+			if ($available >= PHP_FLOAT_MAX * 0.5) {
+				continue;
+			}
+
+			if ($available + 0.0001 < $quantity) {
+				$errors[$idx] = sprintf('Insufficient stock: available %.4f, requested %.4f', $available, $quantity);
+			}
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Advance a transfer status. On 'completed' the stock really moves.
+	 * Returns false when completion is blocked by insufficient stock.
+	 */
+	public function updateStatus(int $transfer_id, string $status): bool {
 		$allowed = ['pending', 'in_transit', 'completed', 'cancelled'];
 
 		if (!in_array($status, $allowed, true)) {
-			return;
+			return false;
 		}
 
 		$transfer = $this->getTransfer($transfer_id);
 
 		if (!$transfer) {
-			return;
+			return false;
 		}
 
 		// A completed/cancelled transfer cannot be re-opened.
 		if (in_array($transfer['status'], ['completed', 'cancelled'], true) && $status !== $transfer['status']) {
-			return;
+			return false;
 		}
 
 		if ($status === 'completed' && $transfer['status'] !== 'completed') {
 			$items = $this->getTransferItems($transfer_id);
+
+			// Re-validate availability at completion time (stock may have changed
+			// since creation). Block completion if any line lacks stock.
+			if ($this->validateAvailable((int)$transfer['from_warehouse_id'], $items)) {
+				return false;
+			}
 
 			$warehouse = new \DockercartWarehouse($this->registry);
 
@@ -131,6 +176,8 @@ class ModelWarehouseTransfer extends Model {
 		}
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_transfer` SET `status` = '" . $this->db->escape($status) . "', `date_completed` = " . ($status === 'completed' ? 'NOW()' : 'NULL') . ", `date_modified` = NOW() WHERE `transfer_id` = '" . (int)$transfer_id . "'");
+
+		return true;
 	}
 
 	public function deleteTransfer(int $transfer_id): void {
