@@ -346,6 +346,28 @@ class ModelCheckoutOrder extends Model {
 		
 		return $query->rows;
 	}
+
+	/**
+	 * Bulk order options for many order product lines (N+1 killer).
+	 * Returns [order_product_id => [option rows]].
+	 */
+	public function getOrderOptionsByOrderProductIds($order_id, array $order_product_ids) {
+		if (empty($order_product_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_product_ids)));
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id IN (" . implode(',', $ids) . ")");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_product_id']][] = $row;
+		}
+
+		return $result;
+	}
 	
 	public function getOrderVouchers($order_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int)$order_id . "'");
@@ -445,7 +467,7 @@ class ModelCheckoutOrder extends Model {
 						continue;
 					}
 
-					$warehouse->adjustStock(
+					$warehouse->adjustStockWithoutTransaction(
 						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
 						(int)$order_product['product_id'],
 						(int)$order_product['variant_id'],
@@ -508,7 +530,7 @@ class ModelCheckoutOrder extends Model {
 						continue;
 					}
 
-					$warehouse->adjustStock(
+					$warehouse->adjustStockWithoutTransaction(
 						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
 						(int)$order_product['product_id'],
 						(int)$order_product['variant_id'],

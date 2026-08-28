@@ -169,9 +169,13 @@ class ControllerWarehouseTransfer extends Controller {
 			if ($transfer_id > 0 && in_array($status, ['pending', 'in_transit', 'completed', 'cancelled'], true)) {
 				$this->load->model('warehouse/transfer');
 
-				$this->model_warehouse_transfer->updateStatus($transfer_id, $status);
+				$ok = $this->model_warehouse_transfer->updateStatus($transfer_id, $status);
 
-				$json['success'] = true;
+				if ($ok) {
+					$json['success'] = true;
+				} else {
+					$json['error'] = $this->language->get('error_insufficient_stock');
+				}
 			} else {
 				$json['error'] = $this->language->get('error_warning');
 			}
@@ -329,6 +333,21 @@ class ControllerWarehouseTransfer extends Controller {
 
 		if ((int)($this->request->post['from_warehouse_id'] ?? 0) === (int)($this->request->post['to_warehouse_id'] ?? 0)) {
 			$this->error['warning'] = $this->language->get('error_same_warehouse');
+		}
+
+		// Stock availability check: block creation when source warehouse lacks available qty.
+		if (!$this->error && !empty($this->request->post['items'])) {
+			$this->load->model('warehouse/transfer');
+			$from_id = (int)($this->request->post['from_warehouse_id'] ?? 0);
+			$errors = $this->model_warehouse_transfer->validateAvailable($from_id, (array)$this->request->post['items']);
+
+			if ($errors) {
+				$this->error['warning'] = $this->language->get('error_insufficient_stock');
+			}
+		}
+
+		if (!$this->error && empty($this->request->post['items'])) {
+			$this->error['warning'] = $this->language->get('error_items_required');
 		}
 
 		return !$this->error;

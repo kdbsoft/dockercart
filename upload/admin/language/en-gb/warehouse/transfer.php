@@ -56,3 +56,5 @@ $_['error_warning'] = 'Warning: Please check the form carefully for errors!';
 $_['error_permission'] = 'Warning: You do not have permission to modify transfers!';
 $_['error_warehouse_required'] = 'Please select both warehouses.';
 $_['error_same_warehouse'] = 'Source and destination warehouses must differ.';
+$_['error_insufficient_stock'] = 'Insufficient available stock on the source warehouse (consider reserved quantities).';
+$_['error_items_required'] = 'Add at least one product to the transfer.';
