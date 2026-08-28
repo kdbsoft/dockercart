@@ -344,6 +344,24 @@ class ControllerWarehouseWarehouse extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
+		if (!$this->error && isset($this->request->post['selected'])) {
+			$this->load->model('warehouse/warehouse');
+			foreach ((array)$this->request->post['selected'] as $warehouse_id) {
+				$warehouse_id = (int)$warehouse_id;
+				$stock_check = $this->db->query("SELECT SUM(quantity) AS total, MIN(unlimited) AS has_unlimited FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . $warehouse_id . "'");
+				$has_stock = $stock_check->num_rows && ((float)($stock_check->row['total'] ?? 0) > 0.0001 || (int)($stock_check->row['has_unlimited'] ?? 0) === 1);
+				if ($has_stock) {
+					$this->error['warning'] = $this->language->get('error_warehouse_has_stock');
+					break;
+				}
+				$transfer_check = $this->db->query("SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "warehouse_transfer` WHERE `status` IN ('pending','in_transit') AND (`from_warehouse_id` = '" . $warehouse_id . "' OR `to_warehouse_id` = '" . $warehouse_id . "')");
+				if ((int)($transfer_check->row['total'] ?? 0) > 0) {
+					$this->error['warning'] = $this->language->get('error_warehouse_has_transfers');
+					break;
+				}
+			}
+		}
+
 		return !$this->error;
 	}
 }

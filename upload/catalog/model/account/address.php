@@ -29,33 +29,9 @@ class ModelAccountAddress extends Model {
 	}
 
 	public function getAddress($address_id) {
-		$address_query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "address WHERE address_id = '" . (int)$address_id . "' AND customer_id = '" . (int)$this->customer->getId() . "'");
+		$address_query = $this->db->query("SELECT a.*, c.name AS country_name, c.iso_code_2, c.iso_code_3, c.address_format, z.name AS zone_name, z.code AS zone_code FROM " . DB_PREFIX . "address a LEFT JOIN `" . DB_PREFIX . "country` c ON (c.country_id = a.country_id) LEFT JOIN `" . DB_PREFIX . "zone` z ON (z.zone_id = a.zone_id) WHERE a.address_id = '" . (int)$address_id . "' AND a.customer_id = '" . (int)$this->customer->getId() . "'");
 
 		if ($address_query->num_rows) {
-			$country_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "country` WHERE country_id = '" . (int)$address_query->row['country_id'] . "'");
-
-			if ($country_query->num_rows) {
-				$country = $country_query->row['name'];
-				$iso_code_2 = $country_query->row['iso_code_2'];
-				$iso_code_3 = $country_query->row['iso_code_3'];
-				$address_format = $country_query->row['address_format'];
-			} else {
-				$country = '';
-				$iso_code_2 = '';
-				$iso_code_3 = '';
-				$address_format = '';
-			}
-
-			$zone_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE zone_id = '" . (int)$address_query->row['zone_id'] . "'");
-
-			if ($zone_query->num_rows) {
-				$zone = $zone_query->row['name'];
-				$zone_code = $zone_query->row['code'];
-			} else {
-				$zone = '';
-				$zone_code = '';
-			}
-
 			$address_data = array(
 				'address_id'     => $address_query->row['address_id'],
 				'firstname'      => $address_query->row['firstname'],
@@ -66,13 +42,13 @@ class ModelAccountAddress extends Model {
 				'postcode'       => $address_query->row['postcode'],
 				'city'           => $address_query->row['city'],
 				'zone_id'        => $address_query->row['zone_id'],
-				'zone'           => $zone,
-				'zone_code'      => $zone_code,
+				'zone'           => $address_query->row['zone_name'] ?? '',
+				'zone_code'      => $address_query->row['zone_code'] ?? '',
 				'country_id'     => $address_query->row['country_id'],
-				'country'        => $country,
-				'iso_code_2'     => $iso_code_2,
-				'iso_code_3'     => $iso_code_3,
-				'address_format' => $address_format,
+				'country'        => $address_query->row['country_name'] ?? '',
+				'iso_code_2'     => $address_query->row['iso_code_2'] ?? '',
+				'iso_code_3'     => $address_query->row['iso_code_3'] ?? '',
+				'address_format' => $address_query->row['address_format'] ?? '',
 				'custom_field'   => json_decode($address_query->row['custom_field'], true)
 			);
 
@@ -85,33 +61,9 @@ class ModelAccountAddress extends Model {
 	public function getAddresses() {
 		$address_data = array();
 
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "address WHERE customer_id = '" . (int)$this->customer->getId() . "'");
+		$query = $this->db->query("SELECT a.*, c.name AS country_name, c.iso_code_2, c.iso_code_3, c.address_format, z.name AS zone_name, z.code AS zone_code FROM " . DB_PREFIX . "address a LEFT JOIN `" . DB_PREFIX . "country` c ON (c.country_id = a.country_id) LEFT JOIN `" . DB_PREFIX . "zone` z ON (z.zone_id = a.zone_id) WHERE a.customer_id = '" . (int)$this->customer->getId() . "'");
 
 		foreach ($query->rows as $result) {
-			$country_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "country` WHERE country_id = '" . (int)$result['country_id'] . "'");
-
-			if ($country_query->num_rows) {
-				$country = $country_query->row['name'];
-				$iso_code_2 = $country_query->row['iso_code_2'];
-				$iso_code_3 = $country_query->row['iso_code_3'];
-				$address_format = $country_query->row['address_format'];
-			} else {
-				$country = '';
-				$iso_code_2 = '';
-				$iso_code_3 = '';
-				$address_format = '';
-			}
-
-			$zone_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone` WHERE zone_id = '" . (int)$result['zone_id'] . "'");
-
-			if ($zone_query->num_rows) {
-				$zone = $zone_query->row['name'];
-				$zone_code = $zone_query->row['code'];
-			} else {
-				$zone = '';
-				$zone_code = '';
-			}
-
 			$address_data[$result['address_id']] = array(
 				'address_id'     => $result['address_id'],
 				'firstname'      => $result['firstname'],
@@ -122,15 +74,14 @@ class ModelAccountAddress extends Model {
 				'postcode'       => $result['postcode'],
 				'city'           => $result['city'],
 				'zone_id'        => $result['zone_id'],
-				'zone'           => $zone,
-				'zone_code'      => $zone_code,
+				'zone'           => $result['zone_name'] ?? '',
+				'zone_code'      => $result['zone_code'] ?? '',
 				'country_id'     => $result['country_id'],
-				'country'        => $country,
-				'iso_code_2'     => $iso_code_2,
-				'iso_code_3'     => $iso_code_3,
-				'address_format' => $address_format,
+				'country'        => $result['country_name'] ?? '',
+				'iso_code_2'     => $result['iso_code_2'] ?? '',
+				'iso_code_3'     => $result['iso_code_3'] ?? '',
+				'address_format' => $result['address_format'] ?? '',
 				'custom_field'   => json_decode($result['custom_field'], true)
-
 			);
 		}
 

@@ -181,18 +181,25 @@ class ModelCustomerCustomField extends Model {
 
 		$custom_field_value_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "custom_field_value WHERE custom_field_id = '" . (int)$custom_field_id . "'");
 
+		if (!$custom_field_value_query->num_rows) {
+			return $custom_field_value_data;
+		}
+
+		$ids = array_column($custom_field_value_query->rows, 'custom_field_value_id');
+		$ids = array_map('intval', $ids);
+		$desc_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "custom_field_value_description WHERE custom_field_value_id IN (" . implode(',', $ids) . ")");
+
+		$desc_map = array();
+		foreach ($desc_query->rows as $row) {
+			$vid = (int)$row['custom_field_value_id'];
+			$desc_map[$vid][$row['language_id']] = array('name' => $row['name']);
+		}
+
 		foreach ($custom_field_value_query->rows as $custom_field_value) {
-			$custom_field_value_description_data = array();
-
-			$custom_field_value_description_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "custom_field_value_description WHERE custom_field_value_id = '" . (int)$custom_field_value['custom_field_value_id'] . "'");
-
-			foreach ($custom_field_value_description_query->rows as $custom_field_value_description) {
-				$custom_field_value_description_data[$custom_field_value_description['language_id']] = array('name' => $custom_field_value_description['name']);
-			}
-
+			$vid = (int)$custom_field_value['custom_field_value_id'];
 			$custom_field_value_data[] = array(
-				'custom_field_value_id'          => $custom_field_value['custom_field_value_id'],
-				'custom_field_value_description' => $custom_field_value_description_data,
+				'custom_field_value_id'          => $vid,
+				'custom_field_value_description' => isset($desc_map[$vid]) ? $desc_map[$vid] : array(),
 				'sort_order'                     => $custom_field_value['sort_order']
 			);
 		}

@@ -122,6 +122,75 @@ class DockercartWarehouse {
 	}
 
 	/**
+	 * Batch version of getAvailableForLine(): one query for stocks and one
+	 * for reservations, keyed by "product_id:variant_id:warehouse_id".
+	 * Dropship unlimited rows map to PHP_FLOAT_MAX.
+	 *
+	 * @param array<int, array{product_id:int,variant_id:int}> $lines
+	 * @param array<int> $warehouse_ids
+	 * @return array<string,float>
+	 */
+	public function getAvailableBatch(array $lines, array $warehouse_ids): array {
+		if (!$lines || !$warehouse_ids) {
+			return [];
+		}
+
+		$warehouse_ids = array_values(array_unique(array_map('intval', $warehouse_ids)));
+		$in_warehouses = implode(',', $warehouse_ids);
+
+		// Unique product:variant pairs.
+		$pair_map = [];
+		foreach ($lines as $line) {
+			$key = (int)$line['product_id'] . ':' . (int)($line['variant_id'] ?? 0);
+			$pair_map[$key] = [(int)$line['product_id'], (int)($line['variant_id'] ?? 0)];
+		}
+
+		if (!$pair_map) {
+			return [];
+		}
+
+		$conditions = [];
+		foreach ($pair_map as [$pid, $vid]) {
+			$conditions[] = "(product_id = '" . (int)$pid . "' AND variant_id = '" . (int)$vid . "')";
+		}
+		$where_pairs = implode(' OR ', $conditions);
+
+		// Stock rows: warehouse_id + product_id + variant_id => quantity + unlimited.
+		$stock_map = [];
+		$stock_query = $this->db->query("SELECT warehouse_id, product_id, variant_id, quantity, unlimited FROM `" . DB_PREFIX . "warehouse_stock` WHERE warehouse_id IN (" . $in_warehouses . ") AND (" . $where_pairs . ")");
+		foreach ($stock_query->rows as $row) {
+			$key = (int)$row['product_id'] . ':' . (int)$row['variant_id'] . ':' . (int)$row['warehouse_id'];
+			$stock_map[$key] = $row;
+		}
+
+		// Reservations grouped by the same triple.
+		$reserved_map = [];
+		$res_query = $this->db->query("SELECT warehouse_id, product_id, variant_id, COALESCE(SUM(quantity),0) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE warehouse_id IN (" . $in_warehouses . ") AND (order_id IS NOT NULL OR expires_at > NOW()) AND (" . $where_pairs . ") GROUP BY warehouse_id, product_id, variant_id");
+		foreach ($res_query->rows as $row) {
+			$key = (int)$row['product_id'] . ':' . (int)$row['variant_id'] . ':' . (int)$row['warehouse_id'];
+			$reserved_map[$key] = (float)$row['reserved'];
+		}
+
+		$result = [];
+		foreach ($pair_map as [$pid, $vid]) {
+			foreach ($warehouse_ids as $wid) {
+				$key = $pid . ':' . $vid . ':' . $wid;
+				$stock_row = $stock_map[$key] ?? null;
+				$stock = $stock_row ? (float)$stock_row['quantity'] : 0.0;
+				$unlimited = $stock_row ? (bool)$stock_row['unlimited'] : false;
+				if ($unlimited) {
+					$result[$key] = PHP_FLOAT_MAX;
+				} else {
+					$reserved = $reserved_map[$key] ?? 0.0;
+					$result[$key] = max(0.0, $stock - $reserved);
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Total stock of a product line across all warehouses (source of truth).
 	 * Unlimited rows contribute the UNLIMITED sentinel.
 	 */
@@ -261,6 +330,46 @@ class DockercartWarehouse {
 			return ['alloc' => $alloc, 'lines' => $lines, 'split' => false, 'estimate' => $estimate];
 		}
 
+		// Batch availability for all (product, variant, warehouse) triples.
+		// Two queries total instead of N×M individual getAvailableForLine calls.
+		$warehouse_ids = array_column($candidates, 'warehouse_id');
+		foreach ($lines as $line) {
+			if (!empty($line['warehouse_id'])) {
+				$wid = (int)$line['warehouse_id'];
+				if (!in_array($wid, $warehouse_ids, true)) {
+					$warehouse_ids[] = $wid;
+				}
+			}
+		}
+		$available_batch = $this->getAvailableBatch($lines, $warehouse_ids);
+		$candidate_ids = array_flip(array_column($candidates, 'warehouse_id'));
+
+		$lineFitsBatch = function(array $line, int $warehouse_id) use ($available_batch, $candidate_ids): bool {
+			if (empty($line['subtract'])) {
+				return true;
+			}
+			if (!isset($candidate_ids[$warehouse_id])) {
+				// Warehouse not in candidates (e.g. disabled dropship) never fits.
+				return false;
+			}
+			$key = (int)$line['product_id'] . ':' . (int)($line['variant_id'] ?? 0) . ':' . $warehouse_id;
+			$available = $available_batch[$key] ?? 0.0;
+			return $available >= (float)$line['quantity'];
+		};
+
+		$cartFitsBatch = function(array $check_lines, array $warehouse) use ($lineFitsBatch): bool {
+			$wid = (int)$warehouse['warehouse_id'];
+			foreach ($check_lines as $l) {
+				if (!empty($l['warehouse_id']) && (int)$l['warehouse_id'] !== $wid) {
+					return false;
+				}
+				if (!empty($l['subtract']) && !$lineFitsBatch($l, $wid)) {
+					return false;
+				}
+			}
+			return true;
+		};
+
 		// Can one warehouse close the whole cart? Any line explicitly forced to
 		// a specific warehouse disables whole-cart satisfaction.
 		$forced_all_good = true;
@@ -270,7 +379,7 @@ class DockercartWarehouse {
 			if (!empty($line['warehouse_id'])) {
 				$any_forced = true;
 
-				if (!$this->lineFits($line, (int)$line['warehouse_id'], $candidates)) {
+				if (!$lineFitsBatch($line, (int)$line['warehouse_id'])) {
 					$forced_all_good = false;
 				}
 			}
@@ -278,7 +387,7 @@ class DockercartWarehouse {
 
 		if (!$any_forced || $forced_all_good) {
 			foreach ($candidates as $w) {
-				if ($this->cartFits($lines, $w)) {
+				if ($cartFitsBatch($lines, $w)) {
 					$warehouse_id = (int)$w['warehouse_id'];
 					$split = false;
 
@@ -290,6 +399,24 @@ class DockercartWarehouse {
 					return ['alloc' => $alloc, 'lines' => $lines, 'split' => $split, 'estimate' => $estimate];
 				}
 			}
+		}
+
+		// config_warehouse_split_allowed=0 => keep one warehouse per order.
+		// When no single warehouse can cover the whole cart and splitting is
+		// disabled, assign everything to the default (forced lines stay forced)
+		// and report split=false so the caller can handle the shortfall via
+		// hasStock / reservation checks instead of silently splitting.
+		if (!$this->config->get('config_warehouse_split_allowed')) {
+			$single = $this->getDefaultWarehouseId();
+
+			foreach ($lines as $idx => $line) {
+				$forced = (int)($line['warehouse_id'] ?? 0);
+				$target = $forced > 0 ? $forced : $single;
+				$alloc[$idx] = $target;
+				$estimate[$idx] = $this->estimateShipDate($target, $line, null);
+			}
+
+			return ['alloc' => $alloc, 'lines' => $lines, 'split' => false, 'estimate' => $estimate];
 		}
 
 		// Split mode invented per-line (or a forced warehouse that could not
@@ -308,7 +435,7 @@ class DockercartWarehouse {
 			$best = null;
 
 			foreach ($candidates as $w) {
-				if ($this->lineFits($line, (int)$w['warehouse_id'], $candidates)) {
+				if ($lineFitsBatch($line, (int)$w['warehouse_id'])) {
 					$best = (int)$w['warehouse_id'];
 					break;
 				}
@@ -519,6 +646,12 @@ class DockercartWarehouse {
 	 * writes a movement journal entry and rewrites the denormalised
 	 * product/variant quantity caches from the stock source of truth.
 	 *
+	 * This is the standalone entry point (manages its own transaction).
+	 * Callers that already hold an outer transaction (e.g. order status
+	 * transitions) must use adjustStockWithoutTransaction() to avoid
+	 * nested START TRANSACTION which implicitly commits the outer one in
+	 * MySQL.
+	 *
 	 * @return float resulting quantity of the target warehouse row
 	 */
 	public function adjustStock(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context = []): float {
@@ -552,6 +685,35 @@ class DockercartWarehouse {
 
 			throw $e;
 		}
+
+		return $result['quantity'];
+	}
+
+	/**
+	 * Same as adjustStock() but assumes the caller already holds a
+	 * transaction (no START/COMMIT/ROLLBACK). Use inside order status
+	 * transitions and other outer transactions to avoid MySQL's implicit
+	 * commit on nested START TRANSACTION.
+	 *
+	 * @return float resulting quantity of the target warehouse row
+	 */
+	public function adjustStockWithoutTransaction(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context = []): float {
+		$warehouse_id = (int)$warehouse_id;
+		$product_id = (int)$product_id;
+		$variant_id = (int)$variant_id;
+
+		if (!$variant_id && $this->isConfigurableProduct($product_id)) {
+			return 0.0;
+		}
+
+		$allowed = ['inbound', 'outbound', 'adjustment', 'transfer_in', 'transfer_out', 'order_subtract', 'order_restock', 'return'];
+
+		if (!in_array($type, $allowed, true)) {
+			$type = 'adjustment';
+		}
+
+		$result = $this->applyStockDelta($warehouse_id, $product_id, $variant_id, $delta, $context, $type);
+		$this->recomputeTotals($product_id);
 
 		return $result['quantity'];
 	}
@@ -620,17 +782,27 @@ class DockercartWarehouse {
 	 * Move stock between warehouses atomically (transfer completion / manual
 	 * order-line move). Writes transfer_out/transfer_in movements and, when a
 	 * transfer exists, marks its items fulfilled.
+	 *
+	 * Single transaction with direct applyStockDelta calls — never via
+	 * adjustStock() to avoid nested START TRANSACTION (which implicitly
+	 * commits the outer one in MySQL). Recompute is done once per product
+	 * after both deltas.
 	 */
 	public function moveStock(int $from_warehouse_id, int $to_warehouse_id, int $product_id, int $variant_id, float $quantity, array $context = []): bool {
 		if ($from_warehouse_id === $to_warehouse_id || $quantity <= 0) {
 			return false;
 		}
 
+		if (!$variant_id && $this->isConfigurableProduct($product_id)) {
+			return false;
+		}
+
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$this->adjustStock($from_warehouse_id, $product_id, $variant_id, -$quantity, 'transfer_out', $context);
-			$this->adjustStock($to_warehouse_id, $product_id, $variant_id, $quantity, 'transfer_in', $context);
+			$this->applyStockDelta($from_warehouse_id, $product_id, $variant_id, -$quantity, $context, 'transfer_out');
+			$this->applyStockDelta($to_warehouse_id, $product_id, $variant_id, $quantity, $context, 'transfer_in');
+			$this->recomputeTotals($product_id);
 
 			$this->db->query("COMMIT");
 		} catch (\Throwable $e) {
@@ -769,14 +941,17 @@ class DockercartWarehouse {
 
 	/**
 	 * Daily audit: recompute every product cache and report how many cached
-	 * values drifted from the warehouse source of truth. Report-only: drift is
-	 * healed by the recompute but never journaled — the movement log is a
-	 * physical-stock history, not a cache-changelog. The same check on demand:
-	 * admin stock screen "Recalculate" (ModelWarehouseStock::recalculate()).
+	 * values drifted from the warehouse source of truth. Drift is healed by
+	 * the recompute; legacy products that still carry quantity only in the
+	 * cache (no warehouse rows) are backfilled first so the audit does not
+	 * zero legitimate stock. Backfill rows are journaled as 'audit-backfill'.
+	 * The same check on demand: admin stock screen "Recalculate"
+	 * (ModelWarehouseStock::recalculate()).
 	 *
-	 * @return array{checked:int, drifted:int}
+	 * @return array{checked:int, drifted:int, backfilled:int}
 	 */
 	public function auditAll(): array {
+		$backfilled = $this->backfillMissingRowsForAudit();
 		$products = $this->db->query("SELECT DISTINCT `product_id` FROM `" . DB_PREFIX . "warehouse_stock`");
 
 		$checked = 0;
@@ -800,7 +975,44 @@ class DockercartWarehouse {
 			$checked++;
 		}
 
-		return ['checked' => $checked, 'drifted' => $drifted];
+		return ['checked' => $checked, 'drifted' => $drifted, 'backfilled' => $backfilled];
+	}
+
+	/**
+	 * Backfill cache-only legacy stock as default-warehouse rows for audit.
+	 * Mirrors ModelWarehouseStock::backfillMissingRows() but runs from the
+	 * library context (no admin user).
+	 *
+	 * @return int number of rows created
+	 */
+	protected function backfillMissingRowsForAudit(): int {
+		$default_warehouse_id = $this->getDefaultWarehouseId();
+		$backfilled = 0;
+
+		$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
+			WHERE p.`subtract` = '1' AND p.`quantity` > 0
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_configurable` pc WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1')
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = p.`product_id`)");
+
+		foreach ($products->rows as $row) {
+			$product_id = (int)$row['product_id'];
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . $product_id . "', `variant_id` = '0', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+			$this->recordMovement($default_warehouse_id, $product_id, 0, (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0]);
+			$backfilled++;
+		}
+
+		$variants = $this->db->query("SELECT pv.`product_id`, pv.`variant_id`, pv.`quantity` FROM `" . DB_PREFIX . "product_variant` pv
+			INNER JOIN `" . DB_PREFIX . "product_configurable` pc ON (pc.`product_id` = pv.`product_id` AND pc.`is_configurable` = '1')
+			WHERE pv.`status` = '1' AND pv.`subtract` = '1' AND pv.`quantity` > 0
+			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = pv.`product_id` AND ws.`variant_id` = pv.`variant_id`)");
+
+		foreach ($variants->rows as $row) {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . (int)$row['product_id'] . "', `variant_id` = '" . (int)$row['variant_id'] . "', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+			$this->recordMovement($default_warehouse_id, (int)$row['product_id'], (int)$row['variant_id'], (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0]);
+			$backfilled++;
+		}
+
+		return $backfilled;
 	}
 
 	/**

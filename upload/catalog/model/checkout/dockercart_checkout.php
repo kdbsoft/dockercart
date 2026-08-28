@@ -173,9 +173,12 @@ class ModelCheckoutDockerCartCheckout extends Model {
         $products = $this->cart->getProducts();
         $items = array();
 
+        $product_ids = array_values(array_unique(array_map('intval', array_column($products, 'product_id'))));
+        $product_map = $product_ids ? $this->model_catalog_product->getProductsByIds($product_ids) : array();
+
         foreach ($products as $product) {
-            // Get product info
-            $product_info = $this->model_catalog_product->getProduct($product['product_id']);
+            // Get product info (bulk)
+            $product_info = isset($product_map[(int)$product['product_id']]) ? $product_map[(int)$product['product_id']] : $this->model_catalog_product->getProduct($product['product_id']);
 
             if (!$product_info) {
                 continue;

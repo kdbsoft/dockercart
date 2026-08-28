@@ -777,15 +777,17 @@ class ControllerCatalogReview extends Controller {
 				$json['likes'] = (int)$review_info['likes'];
 				$json['dislikes'] = (int)$review_info['dislikes'];
 				$json['criteria'] = array();
+				$criteria_ids = array_map('intval', array_keys((array)$review_info['criteria_values']));
+				$criteria_map = array();
+				if ($criteria_ids) {
+					$cq = $this->db->query("SELECT criteria_id, name FROM " . DB_PREFIX . "review_criteria_description WHERE criteria_id IN (" . implode(',', $criteria_ids) . ") AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+					foreach ($cq->rows as $crow) {
+						$criteria_map[(int)$crow['criteria_id']] = $crow['name'];
+					}
+				}
 
 				foreach ((array)$review_info['criteria_values'] as $criteria_id => $value) {
-					$name = (string)$criteria_id;
-
-					$criteria = $this->db->query("SELECT name FROM " . DB_PREFIX . "review_criteria_description WHERE criteria_id = '" . (int)$criteria_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
-
-					if ($criteria->num_rows) {
-						$name = $criteria->row['name'];
-					}
+					$name = isset($criteria_map[(int)$criteria_id]) ? $criteria_map[(int)$criteria_id] : (string)$criteria_id;
 
 					$json['criteria'][] = array(
 						'name'  => $name,
