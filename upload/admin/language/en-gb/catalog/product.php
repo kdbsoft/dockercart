@@ -150,13 +150,13 @@ $_['entry_reward']           = 'Reward Points';
 $_['entry_layout']           = 'Layout Override';
 
 // Help
-$_['help_sku']               = 'Stock Keeping Unit';
-$_['help_model']             = 'Basic and main product article';
-$_['help_upc']               = 'Universal Product Code';
-$_['help_ean']               = 'European Article Number';
-$_['help_jan']               = 'Japanese Article Number';
-$_['help_isbn']              = 'International Standard Book Number';
-$_['help_mpn']               = 'Manufacturer Part Number';
+$_['help_model']              = 'Unique identifier for this product, used across your store and integrations.';
+$_['help_sku']                = 'Optional SKU used by an external inventory or fulfillment system, if different from your Product Code.';
+$_['help_upc']                = 'Universal Product Code — a 12-digit barcode used mainly in the US and Canada.';
+$_['help_ean']                = 'European Article Number — a 13-digit barcode used mainly in Europe.';
+$_['help_jan']                = 'Japanese Article Number — a barcode used for products sold in Japan.';
+$_['help_isbn']                = 'International Standard Book Number, used to identify books and publications.';
+$_['help_mpn']                = 'Manufacturer Part Number — the identifier assigned by the manufacturer, used mainly for electronics and parts.';
 $_['help_manufacturer']      = 'Select or search for a manufacturer';
 $_['help_minimum']           = 'Force a minimum ordered amount';
 $_['help_quantity_step']      = 'Quantity increment step. For example: 0.10 allows 0.10, 0.20, 0.30...';
