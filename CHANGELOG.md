@@ -1,3 +1,13 @@
+## [3.11.1](https://github.com/kdbsoft/dockercart/compare/v3.11.0...v3.11.1) (2026-08-28)
+
+### Bug Fixes
+
+* **warehouse:** enforce stock checks and guard warehouse transactions ([527185e](https://github.com/kdbsoft/dockercart/commit/527185e984c7e06cde45d151f1f3c81b4f81e39f))
+
+### Performance Improvements
+
+* eliminate N+1 queries across admin and catalog ([a1152f4](https://github.com/kdbsoft/dockercart/commit/a1152f4f44795fe2b95bf68f05a26d8abfe5c3a5))
+
 ## [3.11.0](https://github.com/kdbsoft/dockercart/compare/v3.10.0...v3.11.0) (2026-08-25)
 
 ### Features
