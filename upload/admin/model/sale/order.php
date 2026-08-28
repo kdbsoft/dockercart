@@ -534,6 +534,28 @@ class ModelSaleOrder extends Model {
 		return $query->rows;
 	}
 
+	/**
+	 * Bulk order options for many order product lines (N+1 killer).
+	 * Returns [order_product_id => [option rows]].
+	 */
+	public function getOrderOptionsByOrderProductIds($order_id, array $order_product_ids) {
+		if (empty($order_product_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $order_product_ids)));
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id IN (" . implode(',', $ids) . ") ORDER BY order_product_id ASC, order_option_id ASC");
+
+		$result = array();
+
+		foreach ($query->rows as $row) {
+			$result[(int)$row['order_product_id']][] = $row;
+		}
+
+		return $result;
+	}
+
 	public function getOrderVouchers($order_id) {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int)$order_id . "'");
 
@@ -1269,6 +1291,15 @@ class ModelSaleOrder extends Model {
 
 		$lines = array();
 
+		$all_opids = array_map('intval', array_column($lines_query->rows, 'order_product_id'));
+		$option_map = array();
+		if ($all_opids) {
+			$opt_q = $this->db->query("SELECT order_product_id, product_option_value_id FROM `" . DB_PREFIX . "order_option` WHERE order_product_id IN (" . implode(',', $all_opids) . ")");
+			foreach ($opt_q->rows as $opt_row) {
+				$option_map[(int)$opt_row['order_product_id']][] = (int)$opt_row['product_option_value_id'];
+			}
+		}
+
 		foreach ($lines_query->rows as $line) {
 			$opid = (int)$line['order_product_id'];
 
@@ -1278,13 +1309,7 @@ class ModelSaleOrder extends Model {
 				continue;
 			}
 
-			$line_options = array();
-
-			$line_option_query = $this->db->query("SELECT product_option_value_id FROM `" . DB_PREFIX . "order_option` WHERE order_product_id = '" . $opid . "'");
-
-			foreach ($line_option_query->rows as $lo) {
-				$line_options[] = (int)$lo['product_option_value_id'];
-			}
+			$line_options = isset($option_map[$opid]) ? $option_map[$opid] : array();
 
 			// All lines (including overridden ones) participate in the BXGY
 			// distribution — trigger quantities must count even when the line
@@ -1564,16 +1589,19 @@ class ModelSaleOrder extends Model {
 				)
 			);
 
+			$bxgy_opids = array_map('intval', array_column($bxgy_lines->rows, 'order_product_id'));
+			$bxgy_option_map = array();
+			if ($bxgy_opids) {
+				$bxgy_opt_q = $this->db->query("SELECT order_product_id, product_option_value_id FROM `" . DB_PREFIX . "order_option` WHERE order_product_id IN (" . implode(',', $bxgy_opids) . ")");
+				foreach ($bxgy_opt_q->rows as $bxgy_opt) {
+					$bxgy_option_map[(int)$bxgy_opt['order_product_id']][] = (int)$bxgy_opt['product_option_value_id'];
+				}
+			}
+
 			foreach ($bxgy_lines->rows as $line) {
 				// Recalculate each existing line's base price from catalog data
 				// (its stored price may already carry a BXGY discount).
-				$line_options = array();
-
-				$line_option_query = $this->db->query("SELECT product_option_value_id FROM `" . DB_PREFIX . "order_option` WHERE order_product_id = '" . (int)$line['order_product_id'] . "'");
-
-				foreach ($line_option_query->rows as $lo) {
-					$line_options[] = (int)$lo['product_option_value_id'];
-				}
+				$line_options = isset($bxgy_option_map[(int)$line['order_product_id']]) ? $bxgy_option_map[(int)$line['order_product_id']] : array();
 
 				$base_price = $this->recalculateOrderLineBasePrice(
 					(int)$line['product_id'],
@@ -3127,7 +3155,7 @@ class ModelSaleOrder extends Model {
 						continue;
 					}
 
-					$warehouse->adjustStock(
+					$warehouse->adjustStockWithoutTransaction(
 						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
 						(int)$order_product['product_id'],
 						(int)$order_product['variant_id'],
@@ -3174,7 +3202,9 @@ class ModelSaleOrder extends Model {
 				$order_products = $this->getOrderProducts($order_id);
 
 				// Restock: single write path through the warehouse source
-				// of truth (legacy direct cache writes removed).
+				// of truth (legacy direct cache writes removed). Uses the
+				// non-transactional variant because we are already inside the
+				// outer order status transaction.
 				$warehouse = new \DockercartWarehouse($this->registry);
 				$default_warehouse_id = $warehouse->getDefaultWarehouseId();
 
@@ -3183,7 +3213,7 @@ class ModelSaleOrder extends Model {
 						continue;
 					}
 
-					$warehouse->adjustStock(
+					$warehouse->adjustStockWithoutTransaction(
 						(int)($order_product['warehouse_id'] ?: $default_warehouse_id),
 						(int)$order_product['product_id'],
 						(int)$order_product['variant_id'],

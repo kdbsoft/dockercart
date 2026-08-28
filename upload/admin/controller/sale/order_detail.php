@@ -279,6 +279,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['total_quantity'] = array_sum(array_column($products, 'quantity'));
 
 		$order_localizer = $this->orderLocalizer();
+		$order_options_map = $this->model_sale_order->getOrderOptionsByOrderProductIds($order_id, array_column($products, 'order_product_id'));
 
 		foreach ($products as $product) {
 			$product_info = $this->model_catalog_product->getProduct($product['product_id']);
@@ -289,7 +290,7 @@ class ControllerSaleOrderDetail extends Controller {
 				$thumb = $this->model_tool_image->resize('no_image.png', 40, 40);
 			}
 
-			$options = $this->model_sale_order->getOrderOptions($order_id, $product['order_product_id']);
+			$options = isset($order_options_map[$product['order_product_id']]) ? $order_options_map[$product['order_product_id']] : array();
 			$option_data = [];
 
 			foreach ($options as $option) {
@@ -587,9 +588,10 @@ class ControllerSaleOrderDetail extends Controller {
 		$order_localizer = $this->orderLocalizer();
 		$products = $this->model_sale_order->getOrderProducts($order_id);
 		$data['products'] = [];
+		$order_options_map = $this->model_sale_order->getOrderOptionsByOrderProductIds($order_id, array_column($products, 'order_product_id'));
 
 		foreach ($products as $product) {
-			$options = $this->model_sale_order->getOrderOptions($order_id, $product['order_product_id']);
+			$options = isset($order_options_map[$product['order_product_id']]) ? $order_options_map[$product['order_product_id']] : array();
 			$option_data = [];
 
 			foreach ($options as $option) {
@@ -745,9 +747,10 @@ class ControllerSaleOrderDetail extends Controller {
 		$order_localizer = $this->orderLocalizer();
 		$products = $this->model_sale_order->getOrderProducts($order_id);
 		$data['products'] = [];
+		$order_options_map = $this->model_sale_order->getOrderOptionsByOrderProductIds($order_id, array_column($products, 'order_product_id'));
 
 		foreach ($products as $product) {
-			$options = $this->model_sale_order->getOrderOptions($order_id, $product['order_product_id']);
+			$options = isset($order_options_map[$product['order_product_id']]) ? $order_options_map[$product['order_product_id']] : array();
 			$option_data = [];
 
 			foreach ($options as $option) {

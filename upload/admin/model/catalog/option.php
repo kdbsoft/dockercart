@@ -234,18 +234,24 @@ class ModelCatalogOption extends Model {
 
 		$option_value_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "option_value WHERE option_id = '" . (int)$option_id . "' ORDER BY sort_order");
 
+		if (!$option_value_query->num_rows) {
+			return $option_value_data;
+		}
+
+		$ids = array_map('intval', array_column($option_value_query->rows, 'option_value_id'));
+		$desc_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "option_value_description WHERE option_value_id IN (" . implode(',', $ids) . ")");
+
+		$desc_map = array();
+		foreach ($desc_query->rows as $row) {
+			$vid = (int)$row['option_value_id'];
+			$desc_map[$vid][$row['language_id']] = array('name' => $row['name']);
+		}
+
 		foreach ($option_value_query->rows as $option_value) {
-			$option_value_description_data = array();
-
-			$option_value_description_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "option_value_description WHERE option_value_id = '" . (int)$option_value['option_value_id'] . "'");
-
-			foreach ($option_value_description_query->rows as $option_value_description) {
-				$option_value_description_data[$option_value_description['language_id']] = array('name' => $option_value_description['name']);
-			}
-
+			$vid = (int)$option_value['option_value_id'];
 			$option_value_data[] = array(
-				'option_value_id'          => $option_value['option_value_id'],
-				'option_value_description' => $option_value_description_data,
+				'option_value_id'          => $vid,
+				'option_value_description' => isset($desc_map[$vid]) ? $desc_map[$vid] : array(),
 				'color_code'               => $option_value['color_code'],
 				'sort_order'               => $option_value['sort_order']
 			);

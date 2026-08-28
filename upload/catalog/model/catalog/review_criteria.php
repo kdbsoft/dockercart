@@ -37,13 +37,19 @@ class ModelCatalogReviewCriteria extends Model {
 			$candidate_ids[] = (int)$row['category_id'];
 		}
 
-		$candidate_ids = array_unique($candidate_ids);
+		$candidate_ids = array_values(array_unique(array_filter(array_map('intval', $candidate_ids))));
 
-		foreach ($candidate_ids as $category_id) {
-			$query = $this->db->query("SELECT review_criteria_group_id FROM " . DB_PREFIX . "category WHERE category_id = '" . $category_id . "' AND review_criteria_group_id IS NOT NULL AND review_criteria_group_id > 0 LIMIT 1");
-
-			if ($query->num_rows) {
-				return (int)$query->row['review_criteria_group_id'];
+		if ($candidate_ids) {
+			$ids_in = implode(',', $candidate_ids);
+			$q = $this->db->query("SELECT category_id, review_criteria_group_id FROM " . DB_PREFIX . "category WHERE category_id IN (" . $ids_in . ") AND review_criteria_group_id IS NOT NULL AND review_criteria_group_id > 0");
+			$map = array();
+			foreach ($q->rows as $row) {
+				$map[(int)$row['category_id']] = (int)$row['review_criteria_group_id'];
+			}
+			foreach ($candidate_ids as $cid) {
+				if (isset($map[$cid]) && $map[$cid] > 0) {
+					return $map[$cid];
+				}
 			}
 		}
 

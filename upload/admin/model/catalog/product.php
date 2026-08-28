@@ -2358,6 +2358,33 @@ class ModelCatalogProduct extends Model
         return $query->row;
     }
 
+	/**
+	 * Bulk products by IDs (N+1 killer for admin forms)
+	 * Returns [product_id => row]
+	 */
+	public function getProductsByIds(array $product_ids)
+	{
+		if (empty($product_ids)) {
+			return array();
+		}
+
+		$ids = array_values(array_unique(array_map('intval', $product_ids)));
+		$ids = array_filter($ids, function($id) { return $id > 0; });
+
+		if (empty($ids)) {
+			return array();
+		}
+
+		$query = $this->db->query("SELECT DISTINCT p.*, pd.name FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p.product_id IN (" . implode(',', $ids) . ") AND pd.language_id = '" . (int)$this->config->get("config_language_id") . "'");
+
+		$result = array();
+		foreach ($query->rows as $row) {
+			$result[(int)$row['product_id']] = $row;
+		}
+
+		return $result;
+	}
+
     public function getProducts($data = [])
     {
         $sql =

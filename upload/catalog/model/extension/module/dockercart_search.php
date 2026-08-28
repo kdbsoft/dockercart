@@ -128,13 +128,15 @@ class ModelExtensionModuleDockercartSearch extends Model {
             }
         }
 
-        // Get full product data from DockerCart
+        // Get full product data from DockerCart (bulk)
         $products = [];
         if (!empty($product_ids)) {
             $this->load->model('catalog/product');
 
+            $product_map = $this->model_catalog_product->getProductsByIds($product_ids);
+
             foreach ($product_ids as $product_id) {
-                $product = $this->model_catalog_product->getProduct($product_id);
+                $product = isset($product_map[(int)$product_id]) ? $product_map[(int)$product_id] : null;
 
                 if ($product) {
                     // When the query matched a specific variant code, resolve the
@@ -150,10 +152,6 @@ class ModelExtensionModuleDockercartSearch extends Model {
                     $products[] = $product;
                 }
             }
-
-            // Hydrated via getProduct() (per-product cache), which does not
-            // carry the rating distribution used by listing-card popovers.
-            $products = $this->attachRatingDistribution($products);
         }
 
         return [
@@ -545,10 +543,19 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $result_data = $manticore->searchWithMeta('products', $query_text, $search_options);
         $raw_results = $result_data['results'];
 
-        // Get full product data
+        // Get full product data (bulk)
         $products = [];
 
         $this->load->model('catalog/product');
+
+        $suggest_ids = array();
+        foreach ($raw_results as $result) {
+            $pid = (int)floor($result['id'] / 100);
+            if ($pid > 0) {
+                $suggest_ids[] = $pid;
+            }
+        }
+        $suggest_map = $suggest_ids ? $this->model_catalog_product->getProductsByIds($suggest_ids) : array();
 
         foreach ($raw_results as $result) {
             $product_id = (int)floor($result['id'] / 100);
@@ -556,7 +563,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
                 continue;
             }
 
-            $product = $this->model_catalog_product->getProduct($product_id);
+            $product = isset($suggest_map[$product_id]) ? $suggest_map[$product_id] : null;
 
             if ($product) {
                 // Resolve the exact variant when the query matches a variant code
