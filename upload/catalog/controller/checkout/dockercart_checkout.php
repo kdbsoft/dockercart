@@ -39,11 +39,9 @@ class ControllerCheckoutDockercartCheckout extends Controller
      */
     public function index()
     {
-        // Check if module is enabled
-        if (!$this->config->get("module_dockercart_checkout_status")) {
-            $this->response->redirect($this->url->link("checkout/checkout"));
-            return;
-        }
+        // DockerCart Checkout is a system extension and is always active.
+        // Do not redirect to checkout/checkout when a legacy database is
+        // missing the status row; that route redirects back here.
 
         // Check cart has products
         if (

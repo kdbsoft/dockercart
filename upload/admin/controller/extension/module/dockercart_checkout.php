@@ -104,6 +104,12 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 }
             }
 
+            // The system status is intentionally not exposed as a form
+            // control, but editSetting() replaces the complete setting set.
+            // Include it explicitly so saving this page cannot delete the
+            // status row and reintroduce the checkout redirect loop.
+            $this->request->post["module_dockercart_checkout_status"] = "1";
+
             $this->model_setting_setting->editSetting(
                 "module_dockercart_checkout",
                 $this->request->post,
