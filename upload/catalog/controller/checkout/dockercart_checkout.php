@@ -170,6 +170,12 @@ class ControllerCheckoutDockercartCheckout extends Controller
             "module_dockercart_checkout_journal3_compat",
         );
 
+		$cfg_show_warehouse = $this->config->get("module_dockercart_checkout_show_warehouse");
+		$data["show_warehouse"] = $cfg_show_warehouse === null ? true : (bool)$cfg_show_warehouse;
+
+		$cfg_show_product_code = $this->config->get("module_dockercart_checkout_show_product_code");
+		$data["show_product_code"] = $cfg_show_product_code === null ? true : (bool)$cfg_show_product_code;
+
         // Load and process checkout blocks
         $blocksData = $this->config->get("module_dockercart_checkout_blocks");
         $data["blocks"] = $this->processBlocksForDisplay(
@@ -2706,7 +2712,13 @@ class ControllerCheckoutDockercartCheckout extends Controller
         $allocation = [];
         $warehouse_pool_by_id = [];
 
-        if ($this->config->get('config_warehouse_enabled')) {
+		$cfg_show_warehouse = $this->config->get('module_dockercart_checkout_show_warehouse');
+		$show_warehouse = $cfg_show_warehouse === null ? true : (bool)$cfg_show_warehouse;
+
+		$cfg_show_product_code = $this->config->get('module_dockercart_checkout_show_product_code');
+		$show_product_code = $cfg_show_product_code === null ? true : (bool)$cfg_show_product_code;
+
+        if ($this->config->get('config_warehouse_enabled') && $show_warehouse) {
             $allocation = $this->getWarehouseAllocation($cart_products);
 
             $this->load->language("product/product");
@@ -2767,7 +2779,7 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 "variant_id" => (int) ($product["variant_id"] ?? 0),
                 "variant_sku" => isset($product["variant_sku"]) ? $product["variant_sku"] : '',
                 "name" => $product["name"],
-                "model" => $product["model"],
+                "model" => $show_product_code ? $product["model"] : '',
                 "thumb" => $this->model_tool_image->resize(
                     $product["image"] ?? "placeholder.png",
                     self::IMAGE_THUMB_WIDTH,

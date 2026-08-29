@@ -76,6 +76,12 @@ $_["entry_require_postcode"] = "Require Postcode";
 $_["entry_require_company"] = "Require Company";
 $_["entry_show_company"] = "Show Company Field";
 $_["entry_show_tax_id"] = "Show Tax ID Field";
+$_["entry_show_warehouse"] = "Show Shipment Warehouse";
+$_["help_show_warehouse"] =
+    "Display the fulfillment warehouse (Ships from) for each product in the order summary at checkout. Disable to hide warehouse information from customers.";
+$_["entry_show_product_code"] = "Show Product Code (Model)";
+$_["help_show_product_code"] =
+    "Display the product code (Model) for each product in the order summary at checkout. Disable to hide product codes from customers.";
 
 $_["help_required_fields"] =
     "Configure which fields are required during checkout";

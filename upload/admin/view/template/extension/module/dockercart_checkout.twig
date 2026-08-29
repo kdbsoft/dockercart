@@ -397,6 +397,22 @@
                   <span data-toggle="tooltip" title="{{ help_guest_create_account }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                 </label>
               </div>
+              <div class="dcx-field dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="hidden" name="module_dockercart_checkout_show_warehouse" value="0">
+                  <input type="checkbox" name="module_dockercart_checkout_show_warehouse" value="1" id="input-show-warehouse" {% if module_dockercart_checkout_show_warehouse == 1 %}checked{% endif %}>
+                  {{ entry_show_warehouse }}
+                  <span data-toggle="tooltip" title="{{ help_show_warehouse }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
+              <div class="dcx-field dcx-checkbox-group">
+                <label class="dcx-checkbox-label">
+                  <input type="hidden" name="module_dockercart_checkout_show_product_code" value="0">
+                  <input type="checkbox" name="module_dockercart_checkout_show_product_code" value="1" id="input-show-product-code" {% if module_dockercart_checkout_show_product_code == 1 %}checked{% endif %}>
+                  {{ entry_show_product_code }}
+                  <span data-toggle="tooltip" title="{{ help_show_product_code }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
