@@ -36,6 +36,7 @@ DELETE FROM `oc_product_accessory`;
 DELETE FROM `oc_product_fbt`;
 DELETE FROM `oc_product_upsell`;
 DELETE FROM `oc_product_similar`;
+DELETE FROM `oc_product_related_category`;
 DELETE FROM `oc_product_bundle`;
 DELETE FROM `oc_product_bundle_product`;
 DELETE FROM `oc_product_bundle_store`;
