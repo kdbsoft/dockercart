@@ -52,6 +52,7 @@ $_['text_no_reviews']          = 'There are no reviews for this product.';
 $_['text_note']                = '<span class="text-danger">Note:</span> HTML is not translated!';
 $_['text_success']             = 'Thank you for your review. It has been submitted to the moderator for approval.';
 $_['text_related']             = 'Related Products';
+$_['text_related_categories'] = 'Related Categories';
 $_['text_upsell']              = 'Upsell Products';
 $_['text_you_may_upgrade']     = 'You might prefer these';
 $_['text_bundle_title']        = 'Buy Together Cheaper';

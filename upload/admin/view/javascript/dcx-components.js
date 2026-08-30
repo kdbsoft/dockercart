@@ -388,9 +388,12 @@ var DcxUI = (function() {
 		});
 
 		this.$input.on('focus click', function() {
-			if (self.mode !== 'multi') {
-				self.open();
-			}
+			self.open();
+		});
+
+		this.$el.find('.dcx-tree-select__input-wrap').on('click', function(e) {
+			if ($(e.target).closest('.dcx-tree-select__toggle, .dcx-tree-select__input').length) return;
+			self.open();
 		});
 
 		this.$search.on('input', function() {
