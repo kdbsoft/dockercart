@@ -637,6 +637,25 @@
       </div>
     </section>
 
+    {% if product_related_categories %}
+    <section class="mt-8" aria-labelledby="product-related-categories-heading">
+      <div class="bg-white border border-gray-100 rounded-3xl p-5 sm:p-6 shadow-sm">
+        <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-500 mb-1"><span class="w-4 h-px bg-blue-300"></span>{{ text_related_categories }}</p>
+        <h2 id="product-related-categories-heading" class="text-xl sm:text-2xl font-extrabold text-gray-900 mt-1 mb-4">{{ text_you_may_also_need }}</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {% for cat in product_related_categories %}
+          <a href="{{ cat.href }}" class="group flex flex-col items-center text-center p-3 rounded-2xl hover:bg-gray-50 transition">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 overflow-hidden">
+              {% if cat.thumb %}<img src="{{ cat.thumb }}" alt="{{ cat.name }}" class="w-full h-full object-cover" loading="lazy"/>{% else %}<i data-lucide="folder" class="w-6 h-6 text-gray-400"></i>{% endif %}
+            </div>
+            <span class="text-xs font-semibold text-gray-700 group-hover:text-blue-600">{{ cat.name }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
     {% if fbt_products %}
     <section class="mt-12" aria-labelledby="fbt-heading">
       <div class="flex items-end justify-between mb-6">

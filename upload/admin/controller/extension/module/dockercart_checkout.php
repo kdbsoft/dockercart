@@ -104,6 +104,12 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 }
             }
 
+            // The system status is intentionally not exposed as a form
+            // control, but editSetting() replaces the complete setting set.
+            // Include it explicitly so saving this page cannot delete the
+            // status row and reintroduce the checkout redirect loop.
+            $this->request->post["module_dockercart_checkout_status"] = "1";
+
             $this->model_setting_setting->editSetting(
                 "module_dockercart_checkout",
                 $this->request->post,
@@ -171,6 +177,8 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             "guest_create_account" => 1,
             "show_company" => 0,
             "show_tax_id" => 0,
+            "show_warehouse" => 1,
+            "show_product_code" => 1,
             "custom_css" => "",
             "custom_js" => "",
             "require_telephone" => 1,
@@ -775,6 +783,8 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
             "module_dockercart_checkout_guest_create_account" => 1,
             "module_dockercart_checkout_show_company" => 0,
             "module_dockercart_checkout_show_tax_id" => 0,
+            "module_dockercart_checkout_show_warehouse" => 1,
+            "module_dockercart_checkout_show_product_code" => 1,
             "module_dockercart_checkout_journal3_compat" => 1,
             "module_dockercart_checkout_debug" => 0,
             "module_dockercart_checkout_default_country_id" => "",

@@ -1413,6 +1413,25 @@
                 {% endfor %}</div>
             </div>
             <div class="dcx-sidebar-card__field">
+              <label class="dcx-sidebar-card__label">{{ entry_related_category }} <span data-toggle="tooltip" title="{{ help_related_category }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+              <div class="dcx-tree-select" data-url="index.php?route=catalog/category/tree&user_token={{ user_token }}" data-mode="multi" data-well="#product-related-category" data-input-name="product_related_category[]">
+                <div class="dcx-tree-select__input-wrap">
+                  <input type="text" class="dcx-tree-select__input form-control" placeholder="{{ text_select_category }}" />
+                  <span class="dcx-tree-select__toggle"><i data-lucide="chevron-down" width="16" height="16"></i></span>
+                </div>
+                <div class="dcx-tree-select__dropdown">
+                  <div class="dcx-tree-select__search">
+                    <input type="text" class="form-control" placeholder="{{ text_quick_find }}" />
+                    <i data-lucide="search" width="14" height="14"></i>
+                  </div>
+                  <div class="dcx-tree-select__list"></div>
+                </div>
+              </div>
+              <div id="product-related-category" class="dcx-tree-select__well" style="height: 150px; overflow: auto; margin-top: 6px;">{% for category in product_related_categories %}
+                  <div class="dcx-tree-select__well-item" data-id="{{ category.category_id }}"><i data-lucide="circle-minus" width="14" height="14" class="dcx-tree-select__well-remove"></i> <span class="dcx-tree-select__well-label">{{ category.name }}</span><input type="hidden" name="product_related_category[]" value="{{ category.category_id }}"/></div>
+                {% endfor %}</div>
+            </div>
+            <div class="dcx-sidebar-card__field">
               <label class="dcx-sidebar-card__label" for="input-upsell">{{ entry_upsell }} <span data-toggle="tooltip" title="{{ help_upsell }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-picker"
                    data-url="index.php?route=catalog/product/autocomplete&user_token={{ user_token }}"
@@ -1957,6 +1976,7 @@
     $('#product-category').toggle($('#product-category .dcx-tree-select__well-item').length > 0);
     $('#product-download').toggle($('#product-download .dcx-tree-select__well-item').length > 0);
     $('#product-related').toggle($('#product-related .dcx-picker__well-item').length > 0);
+    $('#product-related-category').toggle($('#product-related-category .dcx-tree-select__well-item').length > 0);
     $('#product-upsell').toggle($('#product-upsell .dcx-picker__well-item').length > 0);
     $('#product-accessory').toggle($('#product-accessory .dcx-picker__well-item').length > 0);
     $('#product-fbt').toggle($('#product-fbt .dcx-picker__well-item').length > 0);
@@ -2411,6 +2431,9 @@
   var dcPromoTypes = ['discount', 'special', 'gift', 'bxgy', 'bundle'];
   var dcPromoActiveTab = 'discount';
 
+  var dcPromoVariants = {{ promo_variants|json_encode|raw }};
+  var dcIsConfigurable = {{ is_configurable ? 'true' : 'false' }};
+
   function switchPromoTab(type) {
 	  if (dcPromoTypes.indexOf(type) === -1) {
 		  return;
@@ -2443,7 +2466,9 @@
 
   function dcRefreshPromoTabs() {
 	  dcPromoTypes.forEach(function(type) {
-		  var n = $('#promo-pane-' + type + ' > .dc-promo-card').length;
+		  var $pane = $('#promo-pane-' + type);
+		  // Count nested promo cards (inside variant groups or directly in pane)
+		  var n = $pane.find('.dc-promo-card').length;
 		  var $count = $('#promo-count-' + type);
 		  $count.text(n);
 
@@ -2455,13 +2480,26 @@
 	  });
 
 	  dcUpdatePromoEmptyState();
+	  if (dcIsConfigurable && dcPromoVariants.length) {
+		  dcUpdateVariantGroupCounts();
+	  }
   }
 
   function dcUpdatePromoEmptyState() {
 	  var $pane = $('#promo-pane-' + dcPromoActiveTab);
 	  var $empty = $('#promo-empty');
 
-	  if ($pane.length && $pane.children('.dc-promo-card').length === 0) {
+	  if (!$pane.length) { $empty.hide(); return; }
+
+	  // For variant-grouped tabs (discount/special when configurable) empty is handled per group
+	  var isGrouped = dcIsConfigurable && dcPromoVariants.length && (dcPromoActiveTab === 'discount' || dcPromoActiveTab === 'special');
+	  if (isGrouped) {
+		  $empty.hide();
+		  // Per-group empty placeholders already indicate empty variants; global empty is not needed
+		  return;
+	  }
+
+	  if ($pane.find('.dc-promo-card').length === 0) {
 		  $pane.append($empty);
 		  $empty.show();
 	  } else {
@@ -2474,12 +2512,27 @@
   });
 
   dcGroupPromoCards();
+  if (typeof dcBuildVariantGroups === 'function') { dcBuildVariantGroups(); }
   dcRefreshPromoTabs();
   switchPromoTab('discount');
   lucide.createIcons();
 
   function removePromoCard(cardId) {
-	  $('#' + cardId).remove();
+	  var $card = $('#' + cardId);
+	  var $pane = $card.closest('.dc-promo-pane');
+	  var $group = $card.closest('.dc-variant-promo-group');
+	  $card.remove();
+	  if ($group.length) {
+		  var $body = $group.find('.dc-variant-promo-group__body');
+		  var remaining = $body.find('.dc-promo-card').length;
+		  var $count = $group.find('.dc-variant-promo-group__count');
+		  $count.text(remaining);
+		  $count.toggleClass('dc-variant-promo-group__count--zero', remaining === 0);
+		  if (remaining === 0 && $body.find('.dc-variant-promo-group__empty').length === 0) {
+			  $body.prepend('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
+			  lucide.createIcons();
+		  }
+	  }
 	  dcRefreshPromoTabs();
   }
 
@@ -2497,10 +2550,7 @@
 	  addPromoCard(dcPromoActiveTab);
   });
 
-  var dcPromoVariants = {{ promo_variants|json_encode|raw }};
-  var dcIsConfigurable = {{ is_configurable ? 'true' : 'false' }};
-
-  function dcPromoVariantFieldHtml(inputName) {
+  function dcPromoVariantFieldHtml(inputName, selectedId) {
     if (!dcIsConfigurable || !dcPromoVariants.length) {
       return '';
     }
@@ -2511,7 +2561,8 @@
 
     for (var i = 0; i < dcPromoVariants.length; i++) {
       var vLabel = dcPromoVariants[i].label + (dcPromoVariants[i].is_default ? ' {{ text_variant_is_default|escape('js') }}' : '');
-      html += '        <option value="' + dcPromoVariants[i].variant_id + '">' + $('<i>').text(vLabel).html() + '</option>';
+      var sel = (selectedId && parseInt(selectedId) === parseInt(dcPromoVariants[i].variant_id)) ? ' selected="selected"' : '';
+      html += '        <option value="' + dcPromoVariants[i].variant_id + '"' + sel + '>' + $('<i>').text(vLabel).html() + '</option>';
     }
 
     html += '      </select>';
@@ -2520,9 +2571,205 @@
     return html;
   }
 
+  function dcGetVariantLabel(variantId) {
+    for (var i = 0; i < dcPromoVariants.length; i++) {
+      if (parseInt(dcPromoVariants[i].variant_id) === parseInt(variantId)) return dcPromoVariants[i].label;
+    }
+    return '#' + variantId;
+  }
+
+  function dcUpdateVariantGroupCounts() {
+    if (!dcIsConfigurable || !dcPromoVariants.length) return;
+    ['discount','special'].forEach(function(type) {
+      var $pane = $('#promo-pane-' + type);
+      $pane.find('.dc-variant-promo-group').each(function() {
+        var $group = $(this);
+        var $body = $group.find('.dc-variant-promo-group__body');
+        var n = $body.find('.dc-promo-card').length;
+        var $cnt = $group.find('.dc-variant-promo-group__count').first();
+        $cnt.text(n);
+        $cnt.toggleClass('dc-variant-promo-group__count--zero', n === 0);
+      });
+    });
+  }
+
+  function dcBuildVariantGroups() {
+    if (!dcIsConfigurable || !dcPromoVariants.length) return;
+    ['discount','special'].forEach(function(type) {
+      var $pane = $('#promo-pane-' + type);
+      if (!$pane.length) return;
+      if ($pane.find('.dc-variant-promo-group').length) return;
+      var $cards = $pane.children('.dc-promo-card');
+      // Also include locked cards that are direct children
+      if (!$cards.length && $pane.find('.dc-promo-card').length === 0) {
+        $cards = $pane.find('.dc-promo-card');
+      }
+      // Collect cards by variant
+      var groups = {};
+      var lockedCards = [];
+      $cards.each(function() {
+        var $card = $(this);
+        if ($card.hasClass('dc-promo-card--locked')) {
+          lockedCards.push($card);
+          return;
+        }
+        var $sel = $card.find('select[name$="[variant_id]"]');
+        var vid = $sel.length ? (parseInt($sel.val()) || 0) : 0;
+        // If card has variant select but val is 0 due to not yet selected, treat as first variant
+        if (vid === 0 && $sel.length && dcPromoVariants.length) {
+          vid = parseInt(dcPromoVariants[0].variant_id);
+          $sel.val(vid);
+        }
+        var key = String(vid);
+        if (!groups[key]) groups[key] = [];
+        groups[key].push($card);
+      });
+
+      // If pane was empty after previous grouping attempt (no cards), groups will be empty
+      // Clear pane for rebuilding but keep global empty placeholder aside
+      var $empty = $('#promo-empty').detach();
+      $pane.empty();
+
+      // Controls: expand / collapse all (only when there is at least one variant group)
+      if (dcPromoVariants.length > 1) {
+        var $controls = $('<div class="dc-variant-promo-controls"></div>');
+        $controls.append('<button type="button" class="btn btn-default btn-xs dc-variant-expand-all"><i data-lucide="chevron-down" width="12" height="12"></i> {{ text_variant_group_expand_all|e('js') }}</button>');
+        $controls.append('<button type="button" class="btn btn-default btn-xs dc-variant-collapse-all"><i data-lucide="chevron-up" width="12" height="12"></i> {{ text_variant_group_collapse_all|e('js') }}</button>');
+        $pane.append($controls);
+      }
+
+      if (lockedCards.length) {
+        var $lockedGroup = $('<div class="dc-variant-promo-group dc-variant-promo-group--locked" data-variant-id="0"></div>');
+        var lockedHeader = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title"><i data-lucide="lock" width="12" height="12"></i> {{ text_promo_scope_product|e('js') }} <span class="dc-variant-promo-group__count">' + lockedCards.length + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+        $lockedGroup.append(lockedHeader);
+        var $lockedBody = $('<div class="dc-variant-promo-group__body"></div>');
+        lockedCards.forEach(function($c){ $lockedBody.append($c); });
+        $lockedGroup.append($lockedBody);
+        // locked group collapsed by default if many variant groups
+        $lockedGroup.addClass('dc-variant-promo-group--collapsed');
+        $pane.append($lockedGroup);
+      }
+
+      dcPromoVariants.forEach(function(v) {
+        var vid = String(v.variant_id);
+        var list = groups[vid] || [];
+        var count = list.length;
+        var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + vid + '"></div>');
+        var labelEsc = $('<span>').text(v.label).html();
+        var isDef = v.is_default ? ' <span class="dc-variant-promo-group__default">{{ text_variant_is_default|e('js') }}</span>' : '';
+        var countClass = count ? '' : ' dc-variant-promo-group__count--zero';
+        var headerHtml = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">' + labelEsc + isDef + ' <span class="dc-variant-promo-group__count' + countClass + '">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+        $group.append(headerHtml);
+        var $body = $('<div class="dc-variant-promo-group__body"></div>');
+        if (count) {
+          list.forEach(function($c){ $body.append($c); });
+        } else {
+          $body.append('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
+        }
+        $body.append('<div class="dc-variant-promo-group__add"><button type="button" class="btn btn-default btn-xs" onclick="addPromoForVariant(\'' + type + '\',' + v.variant_id + ')"><i data-lucide="plus" width="12" height="12"></i> {{ button_add|e('js') }}</button></div>');
+        $group.append($body);
+        $group.addClass('dc-variant-promo-group--collapsed');
+        $pane.append($group);
+      });
+
+      // Orphan groups for variant_ids not in dcPromoVariants but with cards
+      Object.keys(groups).forEach(function(k){
+        var found = dcPromoVariants.some(function(v){ return String(v.variant_id)===k; });
+        if (!found && k!=='0') {
+          var list = groups[k];
+          var count = list.length;
+          var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + k + '"></div>');
+          var headerHtml2 = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">#' + k + ' <span class="dc-variant-promo-group__count">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+          $group.append(headerHtml2);
+          var $body2 = $('<div class="dc-variant-promo-group__body"></div>');
+          list.forEach(function($c){ $body2.append($c); });
+          $group.append($body2);
+          $group.addClass('dc-variant-promo-group--collapsed');
+          $pane.append($group);
+        }
+      });
+
+      // Re-append global empty if pane still has no cards overall (will be handled by dcUpdatePromoEmptyState)
+      // Keep groups even when empty; hide per-group empty placeholders if global empty shown is handled there
+      lucide.createIcons();
+    });
+
+    // Bind header toggle (delegated)
+    $(document).off('click.dcVariantGroup').on('click.dcVariantGroup', '.dc-variant-promo-group__header', function(){
+      $(this).closest('.dc-variant-promo-group').toggleClass('dc-variant-promo-group--collapsed');
+    });
+    // Expand / collapse all
+    $(document).off('click.dcVariantExpand').on('click.dcVariantExpand', '.dc-variant-expand-all', function(){
+      $(this).closest('.dc-promo-pane').find('.dc-variant-promo-group').removeClass('dc-variant-promo-group--collapsed');
+    });
+    $(document).off('click.dcVariantCollapse').on('click.dcVariantCollapse', '.dc-variant-collapse-all', function(){
+      $(this).closest('.dc-promo-pane').find('.dc-variant-promo-group').addClass('dc-variant-promo-group--collapsed');
+    });
+    // Handle moving card when variant selector changes
+    $(document).off('change.dcVariantMove').on('change.dcVariantMove', '#promo-pane-discount select[name$="[variant_id]"], #promo-pane-special select[name$="[variant_id]"]', function(){
+      var $sel = $(this);
+      var $card = $sel.closest('.dc-promo-card');
+      var newVid = parseInt($sel.val()) || 0;
+      var $pane = $card.closest('.dc-promo-pane');
+      var type = ($pane.attr('id')||'').replace('promo-pane-','');
+      var $targetGroup = $pane.find('.dc-variant-promo-group[data-variant-id="' + newVid + '"]');
+      if (!$targetGroup.length) return;
+      var $targetBody = $targetGroup.find('.dc-variant-promo-group__body');
+      var $targetAdd = $targetBody.find('.dc-variant-promo-group__add');
+      // Move card before the add button
+      if ($targetAdd.length) $card.insertBefore($targetAdd); else $targetBody.append($card);
+      // Cleanup source group empty state
+      var $sourceGroup = $card.data('sourceGroup'); // not needed
+      // Update counts for all groups in pane
+      $pane.find('.dc-variant-promo-group').each(function(){
+        var $g = $(this);
+        var cnt = $g.find('.dc-variant-promo-group__body .dc-promo-card').length;
+        var $cnt = $g.find('.dc-variant-promo-group__count').first();
+        $cnt.text(cnt);
+        $cnt.toggleClass('dc-variant-promo-group__count--zero', cnt===0);
+        var $empty = $g.find('.dc-variant-promo-group__empty');
+        if (cnt===0 && !$empty.length) {
+          $g.find('.dc-variant-promo-group__body').prepend('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
+        } else if (cnt>0) {
+          $empty.remove();
+        }
+      });
+      dcRefreshPromoTabs();
+      // Ensure target group is expanded
+      $targetGroup.removeClass('dc-variant-promo-group--collapsed');
+      lucide.createIcons();
+    });
+  }
+
+  function addPromoForVariant(type, variantId) {
+    // Switch to the correct promo tab first
+    switchPromoTab(type);
+    if (type === 'discount') addDiscount(variantId);
+    else if (type === 'special') addSpecial(variantId);
+    // Expand the target group
+    var $g = $('#promo-pane-' + type + ' .dc-variant-promo-group[data-variant-id="' + variantId + '"]');
+    $g.removeClass('dc-variant-promo-group--collapsed');
+    dcRefreshPromoTabs();
+  }
+
+  // Initial variant grouping – runs after all promo helpers are defined
+  // (the earlier dcGroupPromoCards() call already populated panes per type)
+  if (dcIsConfigurable && dcPromoVariants.length) {
+    // If groups not yet built (early call was before function definition), build now
+    if ($('#promo-pane-discount .dc-variant-promo-group').length === 0 && $('#promo-pane-special .dc-variant-promo-group').length === 0) {
+      dcBuildVariantGroups();
+      dcRefreshPromoTabs();
+      // Keep the initially active tab as discount after regrouping
+      switchPromoTab(dcPromoActiveTab);
+      lucide.createIcons();
+    }
+  }
+
+
   var discount_row = {{ discount_row }};
 
-  function addDiscount() {
+  function addDiscount(variantId) {
+	  var selVid = variantId ? parseInt(variantId) : (dcIsConfigurable && dcPromoVariants.length ? parseInt(dcPromoVariants[0].variant_id) : 0);
 	  var html = '<div class="dc-promo-card" id="discount-row' + discount_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_discount[' + discount_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
@@ -2530,7 +2777,7 @@
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_discount[' + discount_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <div class="dc-promo-card__grid">';
-	  html += dcPromoVariantFieldHtml('product_discount[' + discount_row + '][variant_id]');	  html += '    <div class="dc-promo-card__field">';
+	  html += dcPromoVariantFieldHtml('product_discount[' + discount_row + '][variant_id]', selVid);	  html += '    <div class="dc-promo-card__field">';
 	  html += '      <label>{{ entry_customer_group }}</label>';
 	  html += '      <select name="product_discount[' + discount_row + '][customer_group_id]" class="form-control">';
     {% for customer_group in customer_groups %}
@@ -2561,15 +2808,36 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-pane-discount').append(html);
+	  // Place card into variant group if grouping is active, otherwise directly into pane
+	  var $paneD = $('#promo-pane-discount');
+	  if (dcIsConfigurable && dcPromoVariants.length && $paneD.find('.dc-variant-promo-group').length) {
+		  var $targetGroupD = $paneD.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
+		  if ($targetGroupD.length) {
+			  var $bodyD = $targetGroupD.find('.dc-variant-promo-group__body');
+			  var $addBtnD = $bodyD.find('.dc-variant-promo-group__add');
+			  // Create jQuery element from html to insert before add button
+			  var $newCardD = $(html);
+			  if ($addBtnD.length) $newCardD.insertBefore($addBtnD); else $bodyD.append($newCardD);
+			  // Remove empty placeholder if exists
+			  $bodyD.find('.dc-variant-promo-group__empty').remove();
+			  html = null;
+			  $targetGroupD.removeClass('dc-variant-promo-group--collapsed');
+		  } else {
+			  $paneD.append(html);
+		  }
+	  } else {
+		  $paneD.append(html);
+	  }
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ pickTime: false });
 	  discount_row++;
+	  dcRefreshPromoTabs();
   }
 
   var special_row = {{ special_row }};
 
-  function addSpecial() {
+  function addSpecial(variantId) {
+	  var selVid = variantId ? parseInt(variantId) : (dcIsConfigurable && dcPromoVariants.length ? parseInt(dcPromoVariants[0].variant_id) : 0);
 	  var html = '<div class="dc-promo-card" id="special-row' + special_row + '">';
 	  html += '  <div class="dc-promo-card__actions">';
 	  html += '    <label class="dc-promo-card__toggle"><input type="checkbox" name="product_special[' + special_row + '][auto_renew]" value="1" class="auto-renew-cb" /><span>{{ entry_auto_renew }}</span></label>';
@@ -2577,7 +2845,7 @@
 	  html += '  </div>';
 	  html += '  <input type="hidden" name="product_special[' + special_row + '][date_added]" value="' + new Date().toISOString().slice(0, 19).replace('T', ' ') + '" />';
 	  html += '  <div class="dc-promo-card__grid">';
-	  html += dcPromoVariantFieldHtml('product_special[' + special_row + '][variant_id]');
+	  html += dcPromoVariantFieldHtml('product_special[' + special_row + '][variant_id]', selVid);
 	  html += '    <div class="dc-promo-card__field">';
 	  html += '      <label>{{ entry_customer_group }}</label>';
 	  html += '      <select name="product_special[' + special_row + '][customer_group_id]" class="form-control">';
@@ -2605,10 +2873,27 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-pane-special').append(html);
+	  var $paneS = $('#promo-pane-special');
+	  if (dcIsConfigurable && dcPromoVariants.length && $paneS.find('.dc-variant-promo-group').length) {
+		  var $targetGroupS = $paneS.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
+		  if ($targetGroupS.length) {
+			  var $bodyS = $targetGroupS.find('.dc-variant-promo-group__body');
+			  var $addBtnS = $bodyS.find('.dc-variant-promo-group__add');
+			  var $newCardS = $(html);
+			  if ($addBtnS.length) $newCardS.insertBefore($addBtnS); else $bodyS.append($newCardS);
+			  $bodyS.find('.dc-variant-promo-group__empty').remove();
+			  html = null;
+			  $targetGroupS.removeClass('dc-variant-promo-group--collapsed');
+		  } else {
+			  $paneS.append(html);
+		  }
+	  } else {
+		  $paneS.append(html);
+	  }
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  special_row++;
+	  dcRefreshPromoTabs();
   }
 
   var gift_row = {{ gift_row }};
