@@ -1,3 +1,14 @@
+## [3.12.0](https://github.com/kdbsoft/dockercart/compare/v3.11.1...v3.12.0) (2026-08-30)
+
+### Features
+
+* **checkout:** add toggles for warehouse and product code in order summary ([504b5d9](https://github.com/kdbsoft/dockercart/commit/504b5d93144cebd98dddf6452132df4c84b7ba8d))
+* **product:** add related categories and variant promo grouping ([6e500a5](https://github.com/kdbsoft/dockercart/commit/6e500a562fa6ab564860a5035c6501ff057c1a3a))
+
+### Bug Fixes
+
+* **checkout:** prevent redirect loop when checkout status is missing ([3f450e7](https://github.com/kdbsoft/dockercart/commit/3f450e766d88cf1fc453646fe38ad3f6da092dcb))
+
 ## [3.11.1](https://github.com/kdbsoft/dockercart/compare/v3.11.0...v3.11.1) (2026-08-28)
 
 ### Bug Fixes
