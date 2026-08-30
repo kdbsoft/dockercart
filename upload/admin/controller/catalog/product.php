@@ -2235,6 +2235,27 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
+		if (isset($this->request->post['product_related_category'])) {
+			$category_ids = $this->request->post['product_related_category'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$category_ids = $this->model_catalog_product->getProductRelatedCategories($this->request->get['product_id']);
+		} else {
+			$category_ids = array();
+		}
+
+		$data['product_related_categories'] = array();
+
+		foreach ($category_ids as $category_id) {
+			$category_info = $this->model_catalog_category->getCategory($category_id);
+
+			if ($category_info) {
+				$data['product_related_categories'][] = array(
+					'category_id' => $category_info['category_id'],
+					'name'        => ($category_info['path'] ? $category_info['path'] . ' &gt; ' . $category_info['name'] : $category_info['name'])
+				);
+			}
+		}
+
 		if (isset($this->request->post['points'])) {
 			$data['points'] = $this->request->post['points'];
 		} elseif (!empty($product_info)) {

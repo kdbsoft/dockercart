@@ -10,4 +10,4 @@ $_['text_instock'] = 'В наличии';
 $_['text_preorder'] = 'Предзаказ';
 $_['text_out_of_stock'] = 'Нет в наличии';
 $_['text_other'] = 'Другие';
-$_['text_all_categories'] = 'Все категории';
+$_['text_all_categories'] = 'Все';

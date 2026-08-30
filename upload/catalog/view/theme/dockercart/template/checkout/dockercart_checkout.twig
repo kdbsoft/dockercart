@@ -29,8 +29,8 @@
     theme: {
       extend: {
         colors: {
-          primary: '#635BFF',
-          'primary-dark': '#4F46E5',
+          primary: '#2563EB',
+          'primary-dark': '#1D4ED8',
           'text-primary': '#111',
           'text-secondary': '#475467',
           'bg-light': '#F8FAFC',
@@ -67,8 +67,8 @@
   --text-primary: #111;
   --text-secondary: #475467;
   --border-color: #E5E7EB;
-  --primary-color: #635BFF;
-  --primary-hover: #4F46E5;
+  --primary-color: #2563EB;
+  --primary-hover: #1D4ED8;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -79,8 +79,8 @@
   --text-primary: #F1F5F9;
   --text-secondary: #94A3B8;
   --border-color: #334155;
-  --primary-color: #818CF8;
-  --primary-hover: #6366F1;
+  --primary-color: #60A5FA;
+  --primary-hover: #3B82F6;
 }
 {% endif %}
 
@@ -143,7 +143,7 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--primary-color) !important;
-  box-shadow: 0 0 0 6px rgba(99,91,255,0.10) !important;
+  box-shadow: 0 0 0 6px rgba(37,99,235,0.10) !important;
   outline: none !important;
 }
 {% else %}
@@ -166,11 +166,11 @@ button { cursor: pointer; }
   box-shadow: 0 0 0 8px rgb(239 68 68 / 16%) !important;
 }
 
-.gradient-primary { background: linear-gradient(135deg, #635BFF, #4F46E5); }
+.gradient-primary { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
 
 .input-focus:focus {
-  border-color: #635BFF;
-  box-shadow: 0 0 0 4px rgb(99 91 255 / 10%);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 10%);
   outline: none;
 }
 
@@ -186,7 +186,7 @@ button { cursor: pointer; }
 
 .btn-hover:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgb(99 91 255 / 25%);
+  box-shadow: 0 8px 24px rgb(37 99 235 / 25%);
 }
 
 .btn-active:active { transform: translateY(0); }
@@ -224,9 +224,9 @@ button { cursor: pointer; }
 }
 
 .progress-step.active .step-circle {
-  background: #635BFF !important;
+  background: #2563EB !important;
   color: #fff;
-  border-color: #635BFF !important;
+  border-color: #2563EB !important;
 }
 
 .progress-step.completed .step-circle {
@@ -274,7 +274,7 @@ button { cursor: pointer; }
 input[type="radio"] {
   width: 20px;
   height: 20px;
-  accent-color: #635BFF;
+  accent-color: #2563EB;
   cursor: pointer;
 }
 .radio-card {
@@ -285,12 +285,12 @@ input[type="radio"] {
   transition: all 0.2s;
 }
 .radio-card:hover {
-  border-color: #635BFF;
+  border-color: #2563EB;
   background: #F9FAFB;
 }
 .radio-card.selected {
-  border-color: #635BFF;
-  background: rgba(99, 91, 255, 0.03);
+  border-color: #2563EB;
+  background: rgba(37, 99, 235, 0.03);
 }
 /* Readonly and disabled fields styling - gray background for visual distinction */
 input[readonly]:not([type="checkbox"]):not([type="radio"]),
@@ -672,14 +672,18 @@ select[disabled] {
                 <div class="flex-1 min-w-0">
                   <h4 class="font-medium text-text-primary text-sm mb-1 truncate">{{ product.name }}{% if product.preorder %} <span class="text-amber-500 text-xs font-semibold">({{ text_preorder }})</span>{% endif %}</h4>
                   <p class="text-sm text-text-secondary">{{ text_quantity }}: {{ product.quantity }}</p>
+                  {% if show_product_code is not defined or show_product_code %}
                   {% if product.model %}<p class="text-xs text-text-secondary">{{ text_model }} {{ product.model }}</p>{% endif %}
+                  {% endif %}
                   {% if product.option %}
                     {% for option in product.option %}
                     <p class="text-xs text-text-secondary">{{ option.name }}: {{ option.value }}</p>
                     {% endfor %}
                   {% endif %}
+                  {% if show_warehouse is not defined or show_warehouse %}
                   {% if product.warehouse_name %}
                   <p class="text-xs text-emerald-600"><i data-lucide="warehouse" width="12" height="12" class="inline-block align-middle"></i> {{ text_ships_from }} <strong>{{ product.warehouse_name }}</strong></p>
+                  {% endif %}
                   {% endif %}
                 </div>
                 <div class="text-right">
@@ -843,7 +847,9 @@ select[disabled] {
           <span class="text-text-secondary">{{ product.quantity }}x {{ product.name }}</span>
           <span class="text-text-primary font-medium">{{ product.total }}</span>
         </div>
+        {% if show_product_code is not defined or show_product_code %}
         {% if product.model %}<p class="text-xs text-text-secondary ml-4 -mt-1.5 mb-2">{{ text_model }} {{ product.model }}</p>{% endif %}
+        {% endif %}
         {% endfor %}
       {% endif %}
     </div>

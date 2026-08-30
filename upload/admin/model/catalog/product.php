@@ -877,6 +877,29 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_related_category WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $related_category_ids = array_unique(array_map("intval", (array) ($data["product_related_category"] ?? [])));
+        foreach ($related_category_ids as $related_category_id) {
+            if ($related_category_id > 0) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_related_category SET product_id = '" .
+                        (int) $product_id .
+                        "', category_id = '" .
+                        $related_category_id .
+                        "'",
+                );
+            }
+        }
+
 
         $this->db->query(
             "DELETE FROM " .
@@ -1487,6 +1510,14 @@ class ModelCatalogProduct extends Model
 		// the rest stay product-level (see saveProductPromotions()).
 		$this->saveProductPromotions($product_id, $data);
 
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_gift WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
         if (isset($data["product_gift"])) {
             foreach ($data["product_gift"] as $product_gift) {
                 $this->db->query(
@@ -1713,6 +1744,29 @@ class ModelCatalogProduct extends Model
             }
         }
 
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_related_category WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $related_category_ids = array_unique(array_map("intval", (array) ($data["product_related_category"] ?? [])));
+        foreach ($related_category_ids as $related_category_id) {
+            if ($related_category_id > 0) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_related_category SET product_id = '" .
+                        (int) $product_id .
+                        "', category_id = '" .
+                        $related_category_id .
+                        "'",
+                );
+            }
+        }
+
 
         $this->db->query(
             "DELETE FROM " .
@@ -1794,6 +1848,29 @@ class ModelCatalogProduct extends Model
                         (int) $product_id .
                         "', fbt_id = '" .
                         $fbt_id .
+                        "'",
+                );
+            }
+        }
+
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_related_category WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        $related_category_ids = array_unique(array_map("intval", (array) ($data["product_related_category"] ?? [])));
+        foreach ($related_category_ids as $related_category_id) {
+            if ($related_category_id > 0) {
+                $this->db->query(
+                    "INSERT INTO " .
+                        DB_PREFIX .
+                        "product_related_category SET product_id = '" .
+                        (int) $product_id .
+                        "', category_id = '" .
+                        $related_category_id .
                         "'",
                 );
             }
@@ -1929,6 +2006,7 @@ class ModelCatalogProduct extends Model
         $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
 
         $this->cache->delete("product");
+        $this->cache->delete('category.product_related.' . (int)$product_id);
     }
 
     public function copyProduct($product_id)
@@ -1979,6 +2057,9 @@ class ModelCatalogProduct extends Model
             $data["product_related"] = $this->getProductRelated($product_id);
             $data["product_upsell"] = $this->getProductUpsell($product_id);
             $data["product_accessory"] = $this->getProductAccessory($product_id);
+            $data["product_fbt"] = $this->getProductFbt($product_id);
+            $data["product_related_category"] = $this->getProductRelatedCategories($product_id);
+            $data["product_similar"] = $this->getProductSimilar($product_id);
             $data["product_reward"] = $this->getProductRewards($product_id);
             $data["product_special"] = $this->getProductSpecials($product_id);
             $data["product_gift"] = $this->getProductGifts($product_id);
@@ -2226,6 +2307,13 @@ class ModelCatalogProduct extends Model
         $this->db->query(
             "DELETE FROM " .
                 DB_PREFIX .
+                "product_related_category WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
                 "product_upsell WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -2234,6 +2322,13 @@ class ModelCatalogProduct extends Model
             "DELETE FROM " .
                 DB_PREFIX .
                 "product_accessory WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+        $this->db->query(
+            "DELETE FROM " .
+                DB_PREFIX .
+                "product_fbt WHERE product_id = '" .
                 (int) $product_id .
                 "'",
         );
@@ -2339,6 +2434,7 @@ class ModelCatalogProduct extends Model
         $pc->deleteAllVariants($product_id);
 
         $this->cache->delete("product");
+        $this->cache->delete('category.product_related.' . (int)$product_id);
     }
 
     public function getProduct($product_id)
@@ -3090,6 +3186,25 @@ class ModelCatalogProduct extends Model
         }
 
         return $product_similar_data;
+    }
+
+    public function getProductRelatedCategories($product_id)
+    {
+        $product_related_category_data = [];
+
+        $query = $this->db->query(
+            "SELECT * FROM " .
+                DB_PREFIX .
+                "product_related_category WHERE product_id = '" .
+                (int) $product_id .
+                "'",
+        );
+
+        foreach ($query->rows as $result) {
+            $product_related_category_data[] = (int) $result["category_id"];
+        }
+
+        return $product_related_category_data;
     }
 
     public function getTotalProducts($data = [])

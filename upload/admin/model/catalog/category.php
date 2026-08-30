@@ -235,6 +235,8 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'category_id=" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "category_related WHERE category_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "category_related WHERE related_id = '" . (int)$category_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_related_category WHERE category_id = '" . (int)$category_id . "'");
 
 		$this->load->model('design/seo_url');
 		$this->model_design_seo_url->invalidateSeoUrlCache();
