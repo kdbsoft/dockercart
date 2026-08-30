@@ -192,41 +192,35 @@
                     </div>
                   </div>
                   <div class="dc-override-item__body">
-                    <div class="dc-override-item__langs">
-                      <ul class="nav nav-tabs dc-override-langtabs">
+                    <div class="dc-lang-frame">
+                      <ul class="nav nav-tabs">
                         {% for language in languages %}
                         <li{% if loop.first %} class="active"{% endif %}>
-                          <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
-                          </a>
+                          <a href="#shipping-{{ code_safe }}-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a>
                         </li>
                         {% endfor %}
                       </ul>
-                    </div>
-                    <div class="dc-override-item__field">
-                      <label class="dcx-label">{{ text_custom_title }}</label>
-                      <div class="dc-override-langcontent">
+                      <div class="tab-content">
                         {% for language in languages %}
-                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                          <input type="text"
-                            name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]"
-                            value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
-                            placeholder="{{ method_data.default_title }}"
-                            class="form-control override-field">
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    <div class="dc-override-item__field">
-                      <label class="dcx-label">{{ text_custom_description }}</label>
-                      <div class="dc-override-langcontent">
-                        {% for language in languages %}
-                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                          <input type="text"
-                            name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]"
-                            value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
-                            placeholder="{{ placeholder_optional_description }}"
-                            class="form-control override-field">
+                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="shipping-{{ code_safe }}-{{ language.language_id }}">
+                          <div class="dcx-fields">
+                            <div class="dcx-field">
+                              <label class="dcx-label">{{ text_custom_title }}</label>
+                              <input type="text"
+                                name="module_dockercart_checkout_shipping_override[{{ method_code }}][title][{{ language.code }}]"
+                                value="{{ shipping_overrides[method_code].title[language.code]|default('') }}"
+                                placeholder="{{ method_data.default_title }}"
+                                class="form-control override-field">
+                            </div>
+                            <div class="dcx-field">
+                              <label class="dcx-label">{{ text_custom_description }}</label>
+                              <input type="text"
+                                name="module_dockercart_checkout_shipping_override[{{ method_code }}][description][{{ language.code }}]"
+                                value="{{ shipping_overrides[method_code].description[language.code]|default('') }}"
+                                placeholder="{{ placeholder_optional_description }}"
+                                class="form-control override-field">
+                            </div>
+                          </div>
                         </div>
                         {% endfor %}
                       </div>
@@ -295,41 +289,35 @@
                     </div>
                   </div>
                   <div class="dc-override-item__body">
-                    <div class="dc-override-item__langs">
-                      <ul class="nav nav-tabs dc-override-langtabs">
+                    <div class="dc-lang-frame">
+                      <ul class="nav nav-tabs">
                         {% for language in languages %}
                         <li{% if loop.first %} class="active"{% endif %}>
-                          <a href="javascript:void(0)" data-lang="{{ language.language_id }}" data-toggle="tooltip" title="{{ language.name }}">
-                            <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
-                          </a>
+                          <a href="#payment-{{ code_safe }}-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a>
                         </li>
                         {% endfor %}
                       </ul>
-                    </div>
-                    <div class="dc-override-item__field">
-                      <label class="dcx-label">{{ text_custom_title }}</label>
-                      <div class="dc-override-langcontent">
+                      <div class="tab-content">
                         {% for language in languages %}
-                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                          <input type="text"
-                            name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]"
-                            value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
-                            placeholder="{{ method_data.default_title }}"
-                            class="form-control override-field">
-                        </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                    <div class="dc-override-item__field">
-                      <label class="dcx-label">{{ text_custom_description }}</label>
-                      <div class="dc-override-langcontent">
-                        {% for language in languages %}
-                        <div class="dc-override-pane{% if loop.first %} active{% endif %}" data-langs="{{ language.language_id }}">
-                          <input type="text"
-                            name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]"
-                            value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
-                            placeholder="{{ placeholder_optional_description }}"
-                            class="form-control override-field">
+                        <div class="tab-pane{% if loop.first %} active{% endif %}" id="payment-{{ code_safe }}-{{ language.language_id }}">
+                          <div class="dcx-fields">
+                            <div class="dcx-field">
+                              <label class="dcx-label">{{ text_custom_title }}</label>
+                              <input type="text"
+                                name="module_dockercart_checkout_payment_override[{{ method_code }}][title][{{ language.code }}]"
+                                value="{{ payment_overrides[method_code].title[language.code]|default('') }}"
+                                placeholder="{{ method_data.default_title }}"
+                                class="form-control override-field">
+                            </div>
+                            <div class="dcx-field">
+                              <label class="dcx-label">{{ text_custom_description }}</label>
+                              <input type="text"
+                                name="module_dockercart_checkout_payment_override[{{ method_code }}][description][{{ language.code }}]"
+                                value="{{ payment_overrides[method_code].description[language.code]|default('') }}"
+                                placeholder="{{ placeholder_optional_description }}"
+                                class="form-control override-field">
+                            </div>
+                          </div>
                         </div>
                         {% endfor %}
                       </div>
@@ -587,23 +575,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Single language switcher toggles both title & description panes together
-  document.querySelectorAll('.dc-override-langtabs').forEach(function(tabs) {
-    var links = tabs.querySelectorAll('a');
-    links.forEach(function(link) {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        var lang = link.getAttribute('data-lang');
-        var body = tabs.closest('.dc-override-item__body');
-        if (!body) return;
-        links.forEach(function(l) { l.parentElement.classList.remove('active'); });
-        link.parentElement.classList.add('active');
-        body.querySelectorAll('.dc-override-pane[data-langs]').forEach(function(pane) {
-          pane.classList.toggle('active', pane.getAttribute('data-langs') === lang);
-        });
-      });
-    });
-  });
 });
 </script>
 
@@ -756,19 +727,9 @@ document.addEventListener('DOMContentLoaded', function() {
 .method-override-reset:hover { color:var(--dc-red-500); background:rgba(239,68,68,0.08); }
 .method-override-reset:disabled { opacity:0.4; cursor:not-allowed; }
 .method-override-reset i { width:14px; height:14px; }
-/* Compact language tabs inside override cards */
-.dc-override-item .nav-tabs { border-bottom:0; margin-bottom:6px; display:flex; flex-wrap:wrap; gap:4px; }
-.dc-override-item .nav-tabs > li { margin-bottom:0; }
-.dc-override-item .nav-tabs > li > a { border:0; background:var(--dc-gray-100); color:var(--dc-text-muted); font-size:11px; padding:2px 8px; border-radius:6px; margin:0; }
-.dc-override-item .nav-tabs > li.active > a,
-.dc-override-item .nav-tabs > li > a:hover { background:var(--dc-primary); color:#fff; }
-.dc-override-item .lang-code { font-weight:700; }
-.dc-override-item__langs { display:flex; }
-.dc-override-item__langs .dc-override-langtabs { display:inline-flex; }
-.dc-override-item__langs .dc-override-langtabs > li > a { padding:2px 9px; }
-.dc-override-langcontent { position:relative; }
-.dc-override-pane { display:none; }
-.dc-override-pane.active { display:block; }
+/* Language frame inside override cards — fieldset-like (same as category_form) */
+.dc-override-item .dc-lang-frame { margin-top:15px; }
+.dc-override-item .dc-lang-frame .lang-code { font-weight:700; }
 .dc-addr-field-group { display:inline-flex; align-items:center; gap:8px; margin-right:16px; }
 .dc-addr-field-group .dcx-checkbox-label { margin:0; }
 
