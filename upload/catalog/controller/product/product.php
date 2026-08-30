@@ -1657,6 +1657,22 @@ class ControllerProductProduct extends Controller {
 
 			$data['attribute_groups'] = $this->model_catalog_product->getProductAttributes($product_id);
 
+			$data['product_related_categories'] = array();
+
+			$this->load->model('catalog/category');
+			$this->load->model('tool/image');
+
+			$product_related_categories = $this->model_catalog_category->getProductRelatedCategories($product_id);
+
+			foreach ($product_related_categories as $category) {
+				$data['product_related_categories'][] = array(
+					'category_id' => $category['category_id'],
+					'name'        => $category['name'],
+					'href'        => $this->url->link('product/category', 'path=' . (int)$category['category_id']),
+					'thumb'       => $category['image'] ? $this->model_tool_image->resize($category['image'], 140, 140) : ''
+				);
+			}
+
 			$data['products'] = array();
 
 			$results = $this->model_catalog_product->getProductRelated($product_id);

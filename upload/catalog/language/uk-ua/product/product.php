@@ -40,6 +40,7 @@ $_['text_note'] = '<span class="text-danger">Примітка:</span> HTML не 
 $_['text_option'] = 'Доступні опції';
 $_['text_points'] = 'Ціна в бонусних балах:';
 $_['text_related'] = 'Супутні товари';
+$_['text_related_categories'] = 'Повʼязані категорії';
 $_['text_upsell'] = 'Рекомендовані товари';
 $_['text_you_may_upgrade'] = 'Можливо, вам підійде краще';
 $_['text_bundle_title'] = 'Разом дешевше';
