@@ -915,7 +915,7 @@ details in admin.
 ## 16. Warehouses & Dropshipping
 
 Multi-warehouse stock, self-pickup and dropshipping (migration
-`20260823_warehouses.sql`, core library `system/library/dockercart_warehouse.php`).
+`20260823_00_warehouses.sql`, core library `system/library/dockercart_warehouse.php`).
 
 ### Data model
 
