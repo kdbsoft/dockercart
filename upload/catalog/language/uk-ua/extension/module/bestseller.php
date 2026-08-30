@@ -13,4 +13,4 @@ $_['text_instock'] = 'В наявності';
 $_['text_preorder'] = 'Передзамовлення';
 $_['text_out_of_stock'] = 'Немає в наявності';
 $_['text_other'] = 'Інші';
-$_['text_all_categories'] = 'Усі категорії';
+$_['text_all_categories'] = 'Усі';
