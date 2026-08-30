@@ -184,13 +184,20 @@ FROM (SELECT 1 AS day_of_week UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SE
 WHERE NOT EXISTS (SELECT 1 FROM `oc_warehouse_schedule` WHERE `warehouse_id` = 1 AND `day_of_week` = d.day_of_week);
 
 -- Mirror current simple-product stock into the default warehouse.
+-- Configurable products have no head-level stock (variant_id = 0); their
+-- quantity is the SUM across variants. Exclude them so a re-run does not
+-- recreate phantom rows that 20260823_configurable_head_stock.sql deletes.
 INSERT IGNORE INTO `oc_warehouse_stock` (`warehouse_id`, `product_id`, `variant_id`, `quantity`, `unlimited`, `lead_time`)
 SELECT 1, `product_id`, 0, `quantity`, 0, 0
-FROM `oc_product`
-WHERE `subtract` = '1'
+FROM `oc_product` p
+WHERE p.`subtract` = '1'
+	AND NOT EXISTS (
+		SELECT 1 FROM `oc_product_configurable` pc
+		WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1'
+	)
 	AND NOT EXISTS (
 		SELECT 1 FROM `oc_warehouse_stock` s
-		WHERE s.`warehouse_id` = 1 AND s.`product_id` = `oc_product`.`product_id` AND s.`variant_id` = 0
+		WHERE s.`warehouse_id` = 1 AND s.`product_id` = p.`product_id` AND s.`variant_id` = 0
 	);
 
 -- Mirror current variant stock into the default warehouse.
