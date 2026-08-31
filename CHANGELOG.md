@@ -1,3 +1,9 @@
+## [3.12.1](https://github.com/kdbsoft/dockercart/compare/v3.12.0...v3.12.1) (2026-08-30)
+
+### Bug Fixes
+
+* **db:** order warehouse migrations and guard configurable stock cleanup ([aff7595](https://github.com/kdbsoft/dockercart/commit/aff759591edf8e444c0722395705cb34536441fc))
+
 ## [3.12.0](https://github.com/kdbsoft/dockercart/compare/v3.11.1...v3.12.0) (2026-08-30)
 
 ### Features
