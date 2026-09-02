@@ -394,6 +394,12 @@ class ModelCheckoutDockerCartCheckout extends Model {
 
         $method_data = array();
 
+        $recurring = false;
+
+        if (method_exists($this->cart, 'hasRecurringProducts')) {
+            $recurring = (bool)$this->cart->hasRecurringProducts();
+        }
+
         foreach ($results as $result) {
             if ($this->config->get('payment_' . $result['code'] . '_status')) {
                 $this->load->model('extension/payment/' . $result['code']);
