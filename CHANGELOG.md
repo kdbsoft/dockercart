@@ -1,3 +1,10 @@
+## [3.13.0](https://github.com/kdbsoft/dockercart/compare/v3.12.1...v3.13.0) (2026-09-02)
+
+### Features
+
+* **admin:** add order localization and variant labels ([edf430a](https://github.com/kdbsoft/dockercart/commit/edf430a43e81edf80f165469e0200d658a7f888e))
+* **checkout:** check for recurring products in payment ([6916eff](https://github.com/kdbsoft/dockercart/commit/6916eff000719a996d16dabd860f131b782a4bac))
+
 ## [3.12.1](https://github.com/kdbsoft/dockercart/compare/v3.12.0...v3.12.1) (2026-08-30)
 
 ### Bug Fixes
