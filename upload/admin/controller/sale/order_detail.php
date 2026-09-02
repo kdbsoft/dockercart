@@ -1579,10 +1579,11 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$options = $this->model_sale_order->getOrderOptions($order_id, $order_product_id);
 					$option_data = [];
+					$order_localizer = $this->orderLocalizer();
 					foreach ($options as $option) {
 						$option_data[] = [
-							'name'  => $option['name'],
-							'value' => $option['value'],
+							'name'  => $order_localizer->optionName($option),
+							'value' => $order_localizer->optionValue($option),
 							'type'  => $option['type'],
 						];
 					}
@@ -2784,12 +2785,12 @@ class ControllerSaleOrderDetail extends Controller {
 					}
 
 					$codes = [];
-					if (!empty($product_info['sku'])) $codes[] = ['label' => 'SKU', 'value' => $product_info['sku']];
-					if (!empty($product_info['upc'])) $codes[] = ['label' => 'UPC', 'value' => $product_info['upc']];
-					if (!empty($product_info['ean'])) $codes[] = ['label' => 'EAN', 'value' => $product_info['ean']];
-					if (!empty($product_info['jan'])) $codes[] = ['label' => 'JAN', 'value' => $product_info['jan']];
-					if (!empty($product_info['isbn'])) $codes[] = ['label' => 'ISBN', 'value' => $product_info['isbn']];
-					if (!empty($product_info['mpn'])) $codes[] = ['label' => 'MPN', 'value' => $product_info['mpn']];
+					if (!empty($product_info['sku'])) $codes[] = ['label' => $this->language->get('text_sku'), 'value' => $product_info['sku']];
+					if (!empty($product_info['upc'])) $codes[] = ['label' => $this->language->get('text_upc'), 'value' => $product_info['upc']];
+					if (!empty($product_info['ean'])) $codes[] = ['label' => $this->language->get('text_ean'), 'value' => $product_info['ean']];
+					if (!empty($product_info['jan'])) $codes[] = ['label' => $this->language->get('text_jan'), 'value' => $product_info['jan']];
+					if (!empty($product_info['isbn'])) $codes[] = ['label' => $this->language->get('text_isbn'), 'value' => $product_info['isbn']];
+					if (!empty($product_info['mpn'])) $codes[] = ['label' => $this->language->get('text_mpn'), 'value' => $product_info['mpn']];
 
 					$variant_data = null;
 					$order_options = [];
@@ -2842,19 +2843,20 @@ class ControllerSaleOrderDetail extends Controller {
 									'price_from' => $variant_effective_price < $variant_base_price ? $this->currency->format($variant_base_price, $this->config->get('config_currency')) : '',
 									'stock' => (int)$v['quantity'],
 								];
-								if (!empty($v['model'])) $codes[] = ['label' => 'Variant Model', 'value' => $v['model']];
-								if (!empty($v['sku'])) $codes[] = ['label' => 'Variant SKU', 'value' => $v['sku']];
-								if (!empty($v['upc'])) $codes[] = ['label' => 'Variant UPC', 'value' => $v['upc']];
-								if (!empty($v['ean'])) $codes[] = ['label' => 'Variant EAN', 'value' => $v['ean']];
-								if (!empty($v['mpn'])) $codes[] = ['label' => 'Variant MPN', 'value' => $v['mpn']];
+								if (!empty($v['model'])) $codes[] = ['label' => $this->language->get('text_variant_model'), 'value' => $v['model']];
+								if (!empty($v['sku'])) $codes[] = ['label' => $this->language->get('text_variant_sku'), 'value' => $v['sku']];
+								if (!empty($v['upc'])) $codes[] = ['label' => $this->language->get('text_variant_upc'), 'value' => $v['upc']];
+								if (!empty($v['ean'])) $codes[] = ['label' => $this->language->get('text_variant_ean'), 'value' => $v['ean']];
+								if (!empty($v['mpn'])) $codes[] = ['label' => $this->language->get('text_variant_mpn'), 'value' => $v['mpn']];
 							}
 						}
 
+						$order_localizer = $this->orderLocalizer();
 						$options = $this->model_sale_order->getOrderOptions($order_id, $order_product_id);
 						foreach ($options as $opt) {
 							$order_options[] = [
-								'name'  => $opt['name'],
-								'value' => $opt['value'],
+								'name'  => $order_localizer->optionName($opt),
+								'value' => $order_localizer->optionValue($opt),
 							];
 						}
 					}
@@ -2880,8 +2882,13 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$unit_tax = $order_quantity > 0 ? $order_tax / $order_quantity : 0;
 
+					$display_name = $order_product ? $this->orderLocalizer()->productName($order_product) : ($product_info['name'] ?? '');
+					if ($display_name === '' && !empty($product_info['name'])) {
+						$display_name = $product_info['name'];
+					}
+
 					$data = [
-						'name'        => $product_info['name'] ?? '',
+						'name'        => $display_name,
 						'model'       => $display_model,
 						'description' => $description,
 						'price'       => $this->currency->format($order_price + ($this->config->get('config_tax') ? $unit_tax : 0), $currency_code, $currency_value),
