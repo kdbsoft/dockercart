@@ -74,7 +74,7 @@
                 </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                  <select name="status" id="input-status" class="form-control" style="max-width:200px;">
+                  <select name="status" id="input-status" class="form-control">
                     {% if status %}
                     <option value="1" selected="selected">{{ text_enabled }}</option>
                     <option value="0">{{ text_disabled }}</option>
@@ -86,7 +86,7 @@
                 </div>
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" style="max-width:100px;" />
+                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
                 </div>
               </div>
             </form>
