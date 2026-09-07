@@ -826,15 +826,17 @@
                   </div>
                   <div class="tab-pane" id="tab-image">
                     <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-logo">{{ entry_logo }}</label>
-                        <a href="" id="thumb-logo" data-toggle="image" class="img-thumbnail"><img src="{{ logo }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                        <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                        <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                        <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
+                      <div class="dcx-fields dcx-fields--row">
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-logo">{{ entry_logo }}</label>
+                          <a href="" id="thumb-logo" data-toggle="image" class="img-thumbnail"><img src="{{ logo }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                          <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
+                        </div>
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                          <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
+                        </div>
                       </div>
                       <div class="dcx-field" style="max-width: 50%;">
                         <label class="dcx-label" for="input-image-max-dimension">{{ entry_image_max_dimension }} <span data-toggle="tooltip" title="{{ help_image_max_dimension }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
@@ -1195,7 +1197,7 @@
                           </div>
                         </div>
                         <div class="dcx-fields dcx-fields--row">
-                          <div class="dcx-field" style="max-width: 50%;">
+                          <div class="dcx-field dcx-field--half">
                             <div style="display:flex;align-items:center;gap:4px;">
                               <label class="dcx-label" for="input-signature-image">{{ entry_seller_signature_image }}</label>
                               <span data-toggle="tooltip" title="{{ help_seller_signature_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
@@ -1211,7 +1213,7 @@
                             <input type="hidden" name="config_seller_signature_image" value="{{ config_seller_signature_image }}" id="input-signature-image" />
                             <div class="help-block text-muted">{{ help_seller_signature_image }}</div>
                           </div>
-                          <div class="dcx-field" style="max-width: 50%;">
+                          <div class="dcx-field dcx-field--half">
                             <div style="display:flex;align-items:center;gap:4px;">
                               <label class="dcx-label" for="input-stamp-image">{{ entry_seller_stamp_image }}</label>
                               <span data-toggle="tooltip" title="{{ help_seller_stamp_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
