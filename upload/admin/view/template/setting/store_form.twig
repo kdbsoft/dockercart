@@ -408,15 +408,17 @@
                   </div>
                   <div class="tab-pane" id="tab-image">
                     <div class="dcx-fields">
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-logo">{{ entry_logo }}</label>
-                        <a href="" id="thumb-logo" data-toggle="image" class="img-thumbnail"><img src="{{ logo }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                        <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
-                      </div>
-                      <div class="dcx-field">
-                        <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                        <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
-                        <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
+                      <div class="dcx-fields dcx-fields--row">
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-logo">{{ entry_logo }}</label>
+                          <a href="" id="thumb-logo" data-toggle="image" class="img-thumbnail"><img src="{{ logo }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                          <input type="hidden" name="config_logo" value="{{ config_logo }}" id="input-logo" />
+                        </div>
+                        <div class="dcx-field">
+                          <label class="dcx-label" for="input-icon">{{ entry_icon }} <span data-toggle="tooltip" title="{{ help_icon }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <a href="" id="thumb-icon" data-toggle="image" class="img-thumbnail"><img src="{{ icon }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
+                          <input type="hidden" name="config_icon" value="{{ config_icon }}" id="input-icon" />
+                        </div>
                       </div>
                       <div class="dcx-field">
                         <label class="dcx-label" for="input-image-max-dimension">{{ entry_image_max_dimension }} <span data-toggle="tooltip" title="{{ help_image_max_dimension }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
