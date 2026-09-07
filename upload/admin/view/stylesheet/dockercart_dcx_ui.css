@@ -455,6 +455,14 @@
     flex-direction: column;
     gap: 6px;
 }
+/* Status / sort_order outside sidebar stay compact instead of full-width
+   (sidebar uses .dcx-sidebar-card__field, so .dcx-field = main panel only). */
+.dcx-field select[name="status"] {
+    max-width: 220px;
+}
+.dcx-field input[name="sort_order"] {
+    max-width: 120px;
+}
 .dcx-field-icon-wrap {
     position: relative;
 }
@@ -1866,6 +1874,30 @@ div.dcx-field.required > .dcx-label:before {
   .dc-attr-row__values { width: 100%; }
   .dc-attr-row .btn-remove-attr { position: absolute; top: 8px; right: 8px; }
   .dc-attr-row { position: relative; }
+}
+
+/* ── Attribute / option sets: 3 per row, like option values ── */
+#set-attributes-container,
+#set-options-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+#set-attributes-container .dc-attr-row,
+#set-options-container .dc-attr-row {
+    margin-bottom: 0;
+}
+@media (max-width: 1199px) {
+    #set-attributes-container,
+    #set-options-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 767px) {
+    #set-attributes-container,
+    #set-options-container {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ── Language tabs frame (fieldset-like: tabs straddle the top border) ── */
