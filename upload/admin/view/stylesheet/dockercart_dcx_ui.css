@@ -368,7 +368,7 @@
     min-width: 140px;
 }
 .dcx-fields--row .dcx-field--half {
-    flex: 0 0 calc(50% - 9px);
+    flex: 1 1 0;
     min-width: 0;
 }
 .dcx-banner-section {
