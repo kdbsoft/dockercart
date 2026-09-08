@@ -14,6 +14,7 @@ $_['text_home']         = 'Home';
 $_['entry_call_for_price_status'] = 'Show "Price on request" button';
 $_['entry_call_for_price_mode'] = '"Price on request" button mode';
 $_['entry_sale_timer_status'] = 'Show sale timers';
+$_['entry_show_open_hours'] = 'Show open hours in header';
 $_['entry_logo_dark']   = 'Footer Logo (dark background)';
 $_['entry_logo_light']  = 'Header Logo (light background)';
 $_['entry_favicon_master'] = 'Favicon master image';
@@ -45,6 +46,7 @@ $_['help_call_for_price_mode'] = 'Call: the button dials the store phone number 
 $_['text_call_for_price_mode_call'] = 'Call (phone link)';
 $_['text_call_for_price_mode_request'] = 'Request (one-click order form)';
 $_['help_sale_timer_status'] = 'Show countdown timers on products with an active special price (until the sale end date). When disabled, sale prices are still shown without a timer.';
+$_['help_show_open_hours'] = 'Show store open hours next to the phone in the header top bar. Disabled by default.';
 $_['help_social_block']   = 'Configure up to 4 social links with selectable icons. Empty link = icon is not displayed in footer.';
 $_['entry_messenger_fab_status'] = 'Messenger on product page';
 $_['help_messenger_fab_status']  = 'Show messenger contact buttons on the product page, below the feature blocks. Enabled by default.';
