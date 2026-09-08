@@ -9,6 +9,7 @@
  *   dockercart_theme_logo_dark      str  path relative to DIR_IMAGE
  *   dockercart_theme_logo_light     str  path relative to DIR_IMAGE
  *   dockercart_theme_menu_type      str  horizontal|vertical
+ *   dockercart_theme_show_open_hours  int  0|1 (default 0 — hide open hours in header)
  *   dockercart_theme_social_N_image str  social icon image path (relative to DIR_IMAGE)
  *   dockercart_theme_social_N_link  str  social link URL
  *   dockercart_theme_payment_N_image str  payment icon image path
@@ -119,6 +120,10 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
         /* ── Sale timer status (default: enabled) ── */
         $sale_timer_raw = $this->config->get('dockercart_theme_sale_timer_status');
         $data['dockercart_theme_sale_timer_status'] = ($sale_timer_raw === null) ? 1 : (int)$sale_timer_raw;
+
+        /* ── Header open hours status (default: disabled) ── */
+        $show_open_hours_raw = $this->config->get('dockercart_theme_show_open_hours');
+        $data['dockercart_theme_show_open_hours'] = ($show_open_hours_raw === null) ? 0 : (int)$show_open_hours_raw;
 
         /* ── Messenger FAB status (default: enabled) ── */
         $fab_raw = $this->config->get('dockercart_theme_messenger_fab_status');
@@ -272,6 +277,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_call_for_price_status' => (int)($p['dockercart_theme_call_for_price_status'] ?? 1),
             'dockercart_theme_call_for_price_mode' => (($p['dockercart_theme_call_for_price_mode'] ?? 'request') === 'call') ? 'call' : 'request',
             'dockercart_theme_sale_timer_status' => (int)($p['dockercart_theme_sale_timer_status'] ?? 1),
+            'dockercart_theme_show_open_hours' => (int)($p['dockercart_theme_show_open_hours'] ?? 0),
             'dockercart_theme_messenger_fab_status' => (int)($p['dockercart_theme_messenger_fab_status'] ?? 0),
             'dockercart_theme_product_features' => json_encode($product_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_category_features' => json_encode($category_features, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
@@ -881,6 +887,7 @@ class ControllerExtensionModuleDockerCartTheme extends Controller {
             'dockercart_theme_call_for_price_status' => 1,
             'dockercart_theme_call_for_price_mode' => 'request',
             'dockercart_theme_sale_timer_status' => 1,
+            'dockercart_theme_show_open_hours' => 0,
             'dockercart_theme_product_features' => json_encode($product_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_category_features' => json_encode($category_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'dockercart_theme_quickview_features' => json_encode($quickview_defaults, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),

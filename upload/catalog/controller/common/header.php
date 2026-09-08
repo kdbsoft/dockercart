@@ -356,6 +356,13 @@ class ControllerCommonHeader extends Controller {
 		} elseif (is_string($open_i18n) && $open_i18n !== '') {
 			$data['open_hours'] = $open_i18n;
 		}
+
+		$show_open_hours_raw = $this->config->get('dockercart_theme_show_open_hours');
+		$data['show_open_hours'] = ($show_open_hours_raw === null) ? 0 : (int)$show_open_hours_raw;
+
+		if (!$data['show_open_hours']) {
+			$data['open_hours'] = '';
+		}
 		
 		$data['language'] = $this->load->controller('common/language');
 		$data['currency'] = $this->load->controller('common/currency');
