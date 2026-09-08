@@ -922,7 +922,7 @@
                       <div class="dcx-section-header"><h4><i data-lucide="bell" width="16" height="16"></i> {{ text_mail_alert }}</h4></div>
                       <div class="dcx-fields">
                         <div class="dcx-fields dcx-fields--row">
-                          <div class="dcx-field">
+                          <div class="dcx-field dcx-field--half">
                             <label class="dcx-label">{{ entry_mail_alert }} <span data-toggle="tooltip" title="{{ help_mail_alert }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <div class="well well-sm" style="height: 150px; overflow: auto;">
                               {% for mail_alert in mail_alerts %}
@@ -940,7 +940,7 @@
                               {% endfor %}
                             </div>
                           </div>
-                          <div class="dcx-field" style="max-width: 50%;">
+                          <div class="dcx-field dcx-field--half">
                             <label class="dcx-label" for="input-mail-alert-email">{{ entry_mail_alert_email }} <span data-toggle="tooltip" title="{{ help_mail_alert_email }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <textarea name="config_mail_alert_email" rows="5" placeholder="{{ entry_mail_alert_email }}" id="input-alert-email" class="form-control">{{ config_mail_alert_email }}</textarea>
                           </div>

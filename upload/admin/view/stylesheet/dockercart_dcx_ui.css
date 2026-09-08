@@ -456,11 +456,13 @@
     gap: 6px;
 }
 /* Status / sort_order outside sidebar stay compact instead of full-width
-   (sidebar uses .dcx-sidebar-card__field, so .dcx-field = main panel only). */
-.dcx-field select[name="status"] {
+   (sidebar uses .dcx-sidebar-card__field, so .dcx-field = main panel only).
+   Substring match covers built-in module names like dashboard_*_status,
+   total_*_sort_order, module_*_status, analytics_*_status, etc. */
+.dcx-field select[name*="status"] {
     max-width: 220px;
 }
-.dcx-field input[name="sort_order"] {
+.dcx-field input[name*="sort_order"] {
     max-width: 120px;
 }
 .dcx-field-icon-wrap {
