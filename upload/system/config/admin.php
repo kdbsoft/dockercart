@@ -46,6 +46,7 @@ $_['action_event'] = array(
 		999  => 'event/language',
 	),
 	'view/extension/*/*/after' => array(
-		'event/dockercart_about_tab'
+		'event/dockercart_about_tab',
+		'event/extension_type_badge'
 	)
 );
