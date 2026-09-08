@@ -1,3 +1,9 @@
+## [3.13.3](https://github.com/kdbsoft/dockercart/compare/v3.13.2...v3.13.3) (2026-09-08)
+
+### Bug Fixes
+
+* **ssl:** pick up renewed certs without restart and serve HTTP-01 over HTTPS ([623293d](https://github.com/kdbsoft/dockercart/commit/623293d9428423fcf0272f9cf56451474aa02a8e))
+
 ## [3.13.2](https://github.com/kdbsoft/dockercart/compare/v3.13.1...v3.13.2) (2026-09-07)
 
 ## [3.13.1](https://github.com/kdbsoft/dockercart/compare/v3.13.0...v3.13.1) (2026-09-07)
