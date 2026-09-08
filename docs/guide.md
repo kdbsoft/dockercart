@@ -191,6 +191,16 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | `SSL_EMAIL` | — | Email for LE registration |
 | `LETSENCRYPT_ENABLED` | `false` | Enable LE mode |
 | `LETSENCRYPT_DATA_DIR` | `./docker/letsencrypt` | ACME state persistence |
+| `CERTBOT_RENEW_INTERVAL` | `24h` | How often the certbot container checks for renewal |
+| `RENEW_NGINX_RELOAD_INTERVAL` | `6h` | How often nginx reloads to pick up renewed certificates |
+
+Renewal flow: the certbot container runs `certbot renew --webroot` every
+`CERTBOT_RENEW_INTERVAL`; nginx has no deploy-hook (the certbot image has no
+nginx/docker CLI) and instead reloads itself every `RENEW_NGINX_RELOAD_INTERVAL`,
+so a renewed certificate goes live within that interval. The HTTP-01 challenge
+is served on both ports 80 and 443 (`location ^~ /.well-known/acme-challenge/`
+in `docker/nginx/conf.d/dockercart.conf` and `docker/nginx/ssl/dockercart.ssl.conf`),
+because LE follows redirects to HTTPS.
 
 #### Scheduler
 
