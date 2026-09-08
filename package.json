@@ -1,6 +1,6 @@
 {
   "name": "dockercart-theme-tailwind",
-  "version": "3.13.3",
+  "version": "3.14.0",
   "private": true,
   "devDependencies": {
     "@commitlint/cli": "^20.5.2",
