@@ -126,6 +126,13 @@ a {
     color: var(--dc-blue-700, #1d4ed8);
 }
 
+.page-header__type {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--dc-text-muted);
+    white-space: nowrap;
+}
+
 .page-header__badge--unfilled::before {
     background: transparent;
     border: 1.5px solid currentColor;
