@@ -1,3 +1,5 @@
+## [3.13.2](https://github.com/kdbsoft/dockercart/compare/v3.13.1...v3.13.2) (2026-09-07)
+
 ## [3.13.1](https://github.com/kdbsoft/dockercart/compare/v3.13.0...v3.13.1) (2026-09-07)
 
 ## [3.13.0](https://github.com/kdbsoft/dockercart/compare/v3.12.1...v3.13.0) (2026-09-02)
