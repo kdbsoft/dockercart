@@ -13,6 +13,16 @@ services:
       - ${LETSENCRYPT_DATA_DIR:-./docker/letsencrypt}:/etc/letsencrypt:ro
       - ${LETSENCRYPT_WEBROOT_DIR:-./docker/letsencrypt/www}:/var/www/certbot:ro
       - ./docker/nginx/ssl/dockercart.ssl.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
+    # Periodic reload so renewed certificates are picked up without a
+    # container restart. Reload with an unchanged cert is harmless.
+    # Reloading more often than certbot's renew interval guarantees the new
+    # cert goes live within RENEW_NGINX_RELOAD_INTERVAL of the renewal.
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while :; do sleep "${RENEW_NGINX_RELOAD_INTERVAL:-6h}"; nginx -s reload; done &
+        exec nginx -g "daemon off;"
 
   certbot:
     image: certbot/certbot:2.7.4
@@ -27,7 +37,9 @@ services:
     command:
       - |
         trap exit TERM; while :; do
-          certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "nginx -s reload";
+          # No deploy-hook: the certbot image has no nginx and no docker CLI.
+          # nginx picks up renewed certs via its own periodic reload loop.
+          certbot renew --webroot -w /var/www/certbot --quiet;
           sleep "${CERTBOT_RENEW_INTERVAL:-24h}";
         done
     networks:
