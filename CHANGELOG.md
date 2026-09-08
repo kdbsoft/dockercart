@@ -1,3 +1,9 @@
+## [3.14.0](https://github.com/kdbsoft/dockercart/compare/v3.13.3...v3.14.0) (2026-09-08)
+
+### Features
+
+* **theme:** add toggle to show open hours in header ([7e01a99](https://github.com/kdbsoft/dockercart/commit/7e01a99288e98b9b858df44169f117c98c34ebaf))
+
 ## [3.13.3](https://github.com/kdbsoft/dockercart/compare/v3.13.2...v3.13.3) (2026-09-08)
 
 ### Bug Fixes
