@@ -1,3 +1,13 @@
+## [3.15.0](https://github.com/kdbsoft/dockercart/compare/v3.14.0...v3.15.0) (2026-09-08)
+
+### Features
+
+* **admin:** inject extension type badge into edit page headers ([5fdb0a9](https://github.com/kdbsoft/dockercart/commit/5fdb0a9ea176f765fb6cfc74a9aab2c09987d10e))
+
+### Bug Fixes
+
+* **admin:** use substring selectors for status/sort_order field widths ([6d0c3de](https://github.com/kdbsoft/dockercart/commit/6d0c3de6aa004ac4df8722410bf5c2b831835254))
+
 ## [3.14.0](https://github.com/kdbsoft/dockercart/compare/v3.13.3...v3.14.0) (2026-09-08)
 
 ### Features
