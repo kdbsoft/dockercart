@@ -1,3 +1,9 @@
+## [3.15.1](https://github.com/kdbsoft/dockercart/compare/v3.15.0...v3.15.1) (2026-09-09)
+
+### Bug Fixes
+
+* **admin:** tighten help-block spacing and font size ([3e60e37](https://github.com/kdbsoft/dockercart/commit/3e60e374cf94103b39f37114f19ae36f6dd91bd5))
+
 ## [3.15.0](https://github.com/kdbsoft/dockercart/compare/v3.14.0...v3.15.0) (2026-09-08)
 
 ### Features
