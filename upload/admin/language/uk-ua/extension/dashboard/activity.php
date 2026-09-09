@@ -1,9 +1,5 @@
 <?php
 
-$_['entry_sort_order'] = 'Порядок сортування';
-$_['entry_status'] = 'Статус';
-$_['entry_width'] = 'Ширина';
-$_['error_permission'] = 'Увага: У вас немає дозволу на зміну активності на інформаційній панелі!';
 $_['heading_title'] = 'Нещодавня активність';
 $_['text_activity_address_add'] = '<a href="customer_id=%d">%s</a> додав нову адресу.';
 $_['text_activity_address_delete'] = '<a href="customer_id=%d">%s</a> видалив одну зі своїх адрес.';
@@ -40,12 +36,8 @@ $_['text_customer_register'] = '<a href="customer_id=%d">%s</a> - реєстра
 $_['text_customer_reset'] = '<a href="customer_id=%d">%s</a> - скинутий пароль облікового запису.';
 $_['text_customer_return_account'] = '<a href="customer_id=%d">%s</a> - запит повернення товару.';
 $_['text_customer_return_guest'] = '%s - запит повернення товару.';
-$_['text_edit'] = 'Редагувати останню активність на інформаційній панелі';
-$_['text_extension'] = 'Доповнення';
-$_['text_success'] = 'Успіх: Ви змінили активність панелі інструментів!';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Нещодавні події магазину та дії користувачів';

@@ -1,58 +1,13 @@
 <?php
 class ControllerExtensionReportMarketing extends Controller {
-	private $error = array();
 
 	public function index() {
-		$this->load->language('extension/report/marketing');
-
-		$this->document->setTitle($this->language->get('heading_title'));
-
-		$this->load->model('setting/setting');
-
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('report_marketing', $this->request->post);
-
-			$this->session->data['success'] = $this->language->get('text_success');
-
-			$this->response->redirect($this->buildExtensionBackUrl('report'));
-		}
-
-		if (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
-
-		$data['action'] = $this->url->link('extension/report/marketing', 'user_token=' . $this->session->data['user_token'], true);
-
-		$data['cancel'] = $this->buildExtensionBackUrl('report');
-
-		if (isset($this->request->post['report_marketing_status'])) {
-			$data['report_marketing_status'] = $this->request->post['report_marketing_status'];
-		} else {
-			$data['report_marketing_status'] = $this->config->get('report_marketing_status');
-		}
-
-		if (isset($this->request->post['report_marketing_sort_order'])) {
-			$data['report_marketing_sort_order'] = $this->request->post['report_marketing_sort_order'];
-		} else {
-			$data['report_marketing_sort_order'] = $this->config->get('report_marketing_sort_order');
-		}
-
-		$data['header'] = $this->load->controller('common/header');
-		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
-
-		$this->response->setOutput($this->load->view('extension/report/marketing_form', $data));
+		// The settings form was removed: reports are managed on the
+		// Reports page (report/report). Keep the route alive for old
+		// bookmarks by redirecting there.
+		$this->response->redirect($this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=marketing', true));
 	}
 	
-	protected function validate() {
-		if (!$this->user->hasPermission('modify', 'extension/report/marketing')) {
-			$this->error['warning'] = $this->language->get('error_permission');
-		}
-
-		return !$this->error;
-	}
 	
 	public function report() {
 		$this->load->language('extension/report/marketing');

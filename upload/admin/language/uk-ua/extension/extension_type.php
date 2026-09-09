@@ -12,7 +12,6 @@ $_['text_type_menu']      = 'Меню';
 $_['text_type_module']    = 'Модуль';
 $_['text_type_other']     = 'Інше';
 $_['text_type_payment']   = 'Платіж';
-$_['text_type_report']    = 'Звіт';
 $_['text_type_shipping']  = 'Доставка';
 $_['text_type_theme']     = 'Тема';
 $_['text_type_total']     = 'Підсумок замовлення';

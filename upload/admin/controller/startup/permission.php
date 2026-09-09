@@ -17,7 +17,6 @@ class ControllerStartupPermission extends Controller {
 			// If a 3rd part is found we need to check if its under one of the extension folders.
 			$extension = array(
 				'extension/advertise',
-				'extension/dashboard',
 				'extension/analytics',
 				'extension/captcha',
 				'extension/currency',
@@ -28,12 +27,19 @@ class ControllerStartupPermission extends Controller {
 				'extension/payment',
 				'extension/shipping',
 				'extension/theme',
-				'extension/total',
-				'extension/report'
+				'extension/total'
 			);
 
 			if (isset($part[2]) && in_array($route, $extension)) {
 				$route .= '/' . $part[2];
+			}
+
+			// Dashboard widgets are configured inline on the dashboard page (edit mode).
+			// The dashboard page itself is exempt from permission checks (see $ignore
+			// below), so its widget data routes are exempt too. Layout changes remain
+			// gated by the modify check inside common/dashboard/saveLayout.
+			if (isset($part[2]) && $route === 'extension/dashboard') {
+				return;
 			}
 
 			// We want to ingore some pages from having its permission checked.
