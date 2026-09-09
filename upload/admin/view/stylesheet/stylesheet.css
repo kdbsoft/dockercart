@@ -3919,6 +3919,12 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     border-color: var(--dc-primary, #3b82f6);
 }
 
+.help-block {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 12px;
+}
+
 /* ── Search input in list pages (e.g. category tree filter) ── */
 .category-search-wrap {
     min-width: 240px;
