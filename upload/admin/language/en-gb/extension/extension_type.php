@@ -12,7 +12,6 @@ $_['text_type_menu']      = 'Menu';
 $_['text_type_module']    = 'Module';
 $_['text_type_other']     = 'Other';
 $_['text_type_payment']   = 'Payment';
-$_['text_type_report']    = 'Report';
 $_['text_type_shipping']  = 'Shipping';
 $_['text_type_theme']     = 'Theme';
 $_['text_type_total']     = 'Order Total';

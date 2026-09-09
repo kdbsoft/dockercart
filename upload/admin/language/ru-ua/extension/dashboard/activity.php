@@ -1,9 +1,5 @@
 <?php
 
-$_['entry_sort_order'] = 'Порядок сортировки';
-$_['entry_status'] = 'Статус';
-$_['entry_width'] = 'Ширина';
-$_['error_permission'] = 'Внимание: у вас нет разрешения на изменение активности на панели мониторинга!';
 $_['heading_title'] = 'Последние события';
 $_['text_activity_address_add'] = '<a href="customer_id=%d">%s</a> добавил новый адрес.';
 $_['text_activity_address_delete'] = '<a href="customer_id=%d">%s</a> удалили один из своих адресов.';
@@ -21,12 +17,8 @@ $_['text_activity_reset'] = '<a href="customer_id=%d">%s</a> сбросили п
 $_['text_activity_return_account'] = '<a href="customer_id=%d">%s</a> отправил запрос <a href="return_id=%d">на возврат</a> товара.';
 $_['text_activity_return_guest'] = '%s отправил запрос <a href="return_id=%d">на возврат</a> товара.';
 $_['text_activity_transaction'] = '<a href="customer_id=%d">%s</a> получил комиссию от нового <a href="order_id=%d">заказа</a> .';
-$_['text_edit'] = 'Редактировать панель управления Последние действия';
-$_['text_extension'] = 'Дополнения';
-$_['text_success'] = 'Успех: Вы изменили активность на панели мониторинга!';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 // Dashboard Info Subtitle
 
 $_['text_activity_subtitle'] = 'Последние события магазина и действия пользователей';

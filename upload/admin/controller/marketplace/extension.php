@@ -33,7 +33,6 @@ class ControllerMarketplaceExtension extends Controller {
 		'payment'   => 'credit-card',
 		'shipping'  => 'truck',
 		'total'     => 'calculator',
-		'dashboard' => 'gauge',
 		'analytics' => 'line-chart',
 		'report'    => 'bar-chart',
 		'feed'      => 'rss',
@@ -171,7 +170,7 @@ class ControllerMarketplaceExtension extends Controller {
 
 				// Optional sort_order
 					$sort_order = '';
-					if (in_array($type, array('payment', 'shipping', 'total', 'report', 'dashboard', 'menu'))) {
+					if (in_array($type, array('payment', 'shipping', 'total', 'menu'))) {
 						$sort_order = (string)$this->config->get($type . '_' . $code . '_sort_order');
 					}
 
