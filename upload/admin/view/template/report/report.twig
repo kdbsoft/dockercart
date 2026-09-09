@@ -6,30 +6,207 @@
       <div class="row">
         <div class="col-sm-12">
           <h1 class="page-header__title">{{ heading_title }}</h1>
+          <div class="pull-right">
+            {% if can_edit %}
+            <button type="button" id="button-reports-edit" class="btn btn-default"><i data-lucide="pencil" width="16" height="16"></i> {{ text_edit_reports }}</button>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
   </div>
   <div class="container-fluid">
-    <div class="dcx-shell">
-      <div class="dcx-panel">
-        <div class="dcx-panel-head">
-          <div class="dcx-panel-head__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
-          <div>
-            <h3 class="dcx-panel-title">{{ text_type }}</h3>
-            <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div id="reports-view">
+      <div class="dcx-shell">
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="chart-no-axes-column" width="16" height="16"></i></div>
+            <div>
+              <h3 class="dcx-panel-title">{{ text_type }}</h3>
+              <div class="dcx-panel-head__subtitle">{{ text_report_subtitle }}</div>
+            </div>
           </div>
-        </div>
-        <div class="dcx-panel-body">
-          <ul class="dcx-pills dcx-pills--reports">
-            {% for report in reports %}
-            <li{% if code == report.code or (not code and loop.first) %} class="active"{% endif %}><a href="{{ report.href }}"><i data-lucide="{{ report.icon }}" width="14" height="14"></i>{{ report.text }}</a></li>
-            {% endfor %}
-          </ul>
-          <div>{{ report }}</div>
+          <div class="dcx-panel-body">
+            <ul class="dcx-pills dcx-pills--reports">
+              {% for report in reports %}
+              <li{% if code == report.code or (not code and loop.first) %} class="active"{% endif %}><a href="{{ report.href }}"><i data-lucide="{{ report.icon }}" width="14" height="14"></i>{{ report.text }}</a></li>
+              {% endfor %}
+            </ul>
+            <div>{{ report }}</div>
+          </div>
         </div>
       </div>
     </div>
+    {% if can_edit %}
+    <div id="reports-editor" style="display: none;">
+      <div class="dcx-shell">
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="settings-2" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_edit_reports }}</div>
+              <div class="dcx-panel-head__subtitle">{{ text_edit_reports_subtitle }}</div>
+            </div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <button type="button" id="button-reports-cancel" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</button>
+              <button type="button" id="button-reports-save" data-loading-text="{{ button_save }}" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            </div>
+          </div>
+          <ul id="reports-editor-list" class="dcx-dash-list dcx-dash-editor">
+            {% for report in manage %}
+            <li class="dcx-dash-list__item dcx-dash-editor-item{% if not report.status %} dcx-dash-editor-item--off{% endif %}" data-code="{{ report.code }}" data-installed="{{ report.installed ? 1 : 0 }}">
+              <span class="dcx-dash-editor-handle" data-toggle="tooltip" title="{{ text_drag_to_reorder }}"><i data-lucide="grip-vertical" width="16" height="16"></i></span>
+              <span class="dcx-dash-list__rank">{{ loop.index }}</span>
+              <span class="dcx-dash-list__main">
+                <span class="dcx-dash-list__name"><i data-lucide="{{ report.icon }}" width="14" height="14"></i> {{ report.text }}</span>
+                <span class="dcx-dash-list__meta">{{ report.installed ? text_installed : text_not_installed }}</span>
+              </span>
+              {% if report.installed %}
+              <a href="{{ report.uninstall }}" class="btn btn-default btn-sm" onclick="return confirm('{{ text_confirm }}');"><i data-lucide="circle-minus" width="14" height="14"></i> {{ button_uninstall }}</a>
+              <button type="button" class="btn btn-sm dcx-dash-toggle{% if report.status %} btn-success{% else %} btn-default{% endif %}">
+                <span class="dcx-dash-toggle__icon">{% if report.status %}<i data-lucide="eye" width="14" height="14"></i>{% else %}<i data-lucide="eye-off" width="14" height="14"></i>{% endif %}</span>
+                <span class="dcx-dash-toggle__label">{% if report.status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}</span>
+              </button>
+              <input type="hidden" class="dcx-report-status" value="{% if report.status %}1{% else %}0{% endif %}" />
+              {% else %}
+              <a href="{{ report.install }}" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_install }}</a>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
+<script type="text/javascript"><!--
+$('#button-reports-edit').on('click', function() {
+	var editing = $('#reports-editor').is(':hidden');
+	$('#reports-editor').toggle(editing);
+	$('#reports-view').toggle(!editing);
+	$(this).toggleClass('btn-primary', editing).toggleClass('btn-default', !editing);
+	lucide.createIcons();
+});
+$('#button-reports-cancel').on('click', function() {
+	$('#reports-editor').hide();
+	$('#reports-view').show();
+	$('#button-reports-edit').removeClass('btn-primary').addClass('btn-default');
+});
+(function() {
+	var list = $('#reports-editor-list');
+	if (!list.length) {
+		return;
+	}
+	var dragItem = null;
+	function renumber() {
+		list.children('.dcx-dash-editor-item').each(function(index) {
+			$(this).find('.dcx-dash-list__rank').text(index + 1);
+		});
+	}
+	function clearIndicators() {
+		list.children('.dcx-dash-editor-item').removeClass('dcx-dash-editor-item--drop-before dcx-dash-editor-item--drop-after');
+	}
+	// Enable native drag only from the handle so buttons keep working.
+	list.on('mousedown touchstart', '.dcx-dash-editor-handle', function() {
+		$(this).closest('.dcx-dash-editor-item').attr('draggable', true);
+	});
+	$(document).on('mouseup touchend', function() {
+		list.children('.dcx-dash-editor-item').attr('draggable', false);
+	});
+	list.on('dragstart', '.dcx-dash-editor-item', function(e) {
+		dragItem = this;
+		var dt = e.originalEvent.dataTransfer;
+		dt.effectAllowed = 'move';
+		try {
+			dt.setData('text/plain', $(this).data('code'));
+		} catch (err) {}
+		$(this).addClass('dcx-dash-editor-item--dragging');
+	});
+	list.on('dragend', '.dcx-dash-editor-item', function() {
+		dragItem = null;
+		$(this).removeClass('dcx-dash-editor-item--dragging');
+		clearIndicators();
+		renumber();
+	});
+	list.on('dragover', '.dcx-dash-editor-item', function(e) {
+		if (!dragItem || dragItem === this) {
+			return;
+		}
+		e.preventDefault();
+		var rect = this.getBoundingClientRect();
+		var before = (e.originalEvent.clientY - rect.top) < rect.height / 2;
+		clearIndicators();
+		$(this).addClass(before ? 'dcx-dash-editor-item--drop-before' : 'dcx-dash-editor-item--drop-after');
+	});
+	list.on('drop', '.dcx-dash-editor-item', function(e) {
+		if (!dragItem || dragItem === this) {
+			return;
+		}
+		e.preventDefault();
+		var rect = this.getBoundingClientRect();
+		var before = (e.originalEvent.clientY - rect.top) < rect.height / 2;
+		if (before) {
+			$(this).before(dragItem);
+		} else {
+			$(this).after(dragItem);
+		}
+		clearIndicators();
+		renumber();
+	});
+	// Visibility toggle.
+	list.on('click', '.dcx-dash-toggle', function() {
+		var item = $(this).closest('.dcx-dash-editor-item');
+		var on = !$(this).hasClass('btn-success');
+		$(this).toggleClass('btn-success', on).toggleClass('btn-default', !on);
+		$(this).find('.dcx-dash-toggle__icon').html('<i data-lucide="' + (on ? 'eye' : 'eye-off') + '" width="14" height="14"></i>');
+		$(this).find('.dcx-dash-toggle__label').text(on ? '{{ text_enabled }}' : '{{ text_disabled }}');
+		item.toggleClass('dcx-dash-editor-item--off', !on);
+		item.find('.dcx-report-status').val(on ? 1 : 0);
+		lucide.createIcons();
+	});
+	// Save all statuses and sort orders at once (like dashboard saveLayout).
+	$('#button-reports-save').on('click', function() {
+		var reports = {};
+		$('#reports-editor-list .dcx-dash-editor-item[data-installed="1"]').each(function(index) {
+			reports[$(this).data('code')] = {
+				'status': $(this).find('.dcx-report-status').val() === '1' ? 1 : 0,
+				'sort_order': index + 1
+			};
+		});
+		$.ajax({
+			url: 'index.php?route=report/report/saveLayout&user_token={{ user_token }}',
+			type: 'post',
+			data: {reports: reports},
+			dataType: 'json',
+			beforeSend: function() {
+				$('#button-reports-save').button('loading');
+			},
+			complete: function() {
+				$('#button-reports-save').button('reset');
+			},
+			success: function(json) {
+				if (json['error']) {
+					alert(json['error']);
+				} else {
+					location.reload();
+				}
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	});
+})();
+//--></script>
 {{ footer }}

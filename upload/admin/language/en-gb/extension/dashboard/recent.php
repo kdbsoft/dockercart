@@ -3,9 +3,6 @@
 $_['heading_title']     = 'Latest Orders';
 
 // Text
-$_['text_extension']    = 'Add-ons';
-$_['text_success']      = 'Success: You have modified dashboard recent orders!';
-$_['text_edit']         = 'Edit Dashboard Recent Orders';
 $_['text_badge_guest_order']      = 'Guest order';
 $_['text_badge_registered_order'] = 'Registered customer';
 $_['text_badge_guest']            = 'Guest';
@@ -13,7 +10,6 @@ $_['text_badge_registered']       = 'Registered';
 $_['text_tracking_number']        = 'Tracking Number';
 // Subtitle
 
-$_['text_edit_subtitle'] = 'Configure extension settings and options';
 // Dashboard Info Subtitle
 
 $_['text_recent_subtitle'] = 'Newest customer orders overview';
@@ -37,9 +33,5 @@ $_['column_action']     = 'Action';
 
 
 // Entry
-$_['entry_status']      = 'Status';
-$_['entry_sort_order']  = 'Sort Order';
-$_['entry_width']       = 'Width';
 
 // Error
-$_['error_permission']  = 'Warning: You do not have permission to modify dashboard recent orders!';

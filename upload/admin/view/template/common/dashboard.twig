@@ -6,6 +6,9 @@
         <div class="col-sm-12">
           <h1 class="page-header__title">{{ heading_title }}</h1>
           <div class="pull-right">
+            {% if can_edit %}
+            <button type="button" id="button-dashboard-edit" class="btn btn-default"><i data-lucide="pencil" width="16" height="16"></i> {{ text_edit_dashboard }}</button>
+            {% endif %}
             <button type="button" id="button-developer" data-loading-text="{{ text_loading }}" class="btn btn-info"><i data-lucide="settings" width="16" height="16"></i> {{ text_cache }}</button>
           </div>
         </div>
@@ -72,6 +75,7 @@
       </div>
     </div>
     {% endif %}
+    <div id="dashboard-grid">
     {% for row in rows %}
     <div class="row">{% for column in row.columns %}
       {% if row.md_full %}
@@ -81,7 +85,50 @@
       {% endif %}
       <div class="{{ class }}">{% for dashboard_1 in column.widgets %}{{ dashboard_1.output }}{% endfor %}</div>
       {% endfor %}</div>
-    {% endfor %}</div>
+    {% endfor %}
+    </div>
+    {% if can_edit %}
+    <div id="dashboard-editor" style="display: none;">
+      <div class="dcx-shell">
+        <div class="dcx-panel">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="layout-dashboard" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_edit_dashboard }}</div>
+              <div class="dcx-panel-subtitle">{{ text_edit_dashboard_subtitle }}</div>
+            </div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <button type="button" id="button-dashboard-cancel" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</button>
+              <button type="button" id="button-dashboard-save" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            </div>
+          </div>
+          <ul id="dashboard-editor-list" class="dcx-dash-list dcx-dash-editor">
+            {% for widget in widgets %}
+            <li class="dcx-dash-list__item dcx-dash-editor-item{% if not widget.status %} dcx-dash-editor-item--off{% endif %}" data-code="{{ widget.code }}">
+              <span class="dcx-dash-editor-handle" data-toggle="tooltip" title="{{ text_drag_to_reorder }}"><i data-lucide="grip-vertical" width="16" height="16"></i></span>
+              <span class="dcx-dash-list__rank">{{ loop.index }}</span>
+              <span class="dcx-dash-list__main">
+                <span class="dcx-dash-list__name">{{ widget.title }}</span>
+                <span class="dcx-dash-list__meta">{{ text_width }}: {{ widget.width }}/12</span>
+              </span>
+              <select class="form-control input-sm dcx-dash-width" title="{{ text_width }}">
+                {% for i in 3..12 %}
+                <option value="{{ i }}"{% if i == widget.width %} selected="selected"{% endif %}>{{ i }}/12</option>
+                {% endfor %}
+              </select>
+              <button type="button" class="btn btn-sm dcx-dash-toggle{% if widget.status %} btn-success{% else %} btn-default{% endif %}">
+                <span class="dcx-dash-toggle__icon">{% if widget.status %}<i data-lucide="eye" width="14" height="14"></i>{% else %}<i data-lucide="eye-off" width="14" height="14"></i>{% endif %}</span>
+                <span class="dcx-dash-toggle__label">{% if widget.status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}</span>
+              </button>
+              <input type="hidden" class="dcx-dash-status" value="{% if widget.status %}1{% else %}0{% endif %}" />
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    </div>
     {{ security }}
   <script type="text/javascript"><!--
 $('#button-developer').on('click', function() {
@@ -101,6 +148,131 @@ $('#button-developer').on('click', function() {
 
 			$('#modal-developer').modal('show');
 			lucide.createIcons();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+//--></script>
+  <script type="text/javascript"><!--
+$('#button-dashboard-edit').on('click', function() {
+	var editing = $('#dashboard-editor').is(':hidden');
+	$('#dashboard-editor').toggle(editing);
+	$('#dashboard-grid').toggle(!editing);
+	$(this).toggleClass('btn-primary', editing).toggleClass('btn-default', !editing);
+});
+$('#button-dashboard-cancel').on('click', function() {
+	$('#dashboard-editor').hide();
+	$('#dashboard-grid').show();
+	$('#button-dashboard-edit').removeClass('btn-primary').addClass('btn-default');
+});
+(function() {
+	var list = $('#dashboard-editor-list');
+	if (!list.length) {
+		return;
+	}
+	var dragItem = null;
+	function renumber() {
+		list.children('.dcx-dash-editor-item').each(function(index) {
+			$(this).find('.dcx-dash-list__rank').text(index + 1);
+		});
+	}
+	function clearIndicators() {
+		list.children('.dcx-dash-editor-item').removeClass('dcx-dash-editor-item--drop-before dcx-dash-editor-item--drop-after');
+	}
+	// Enable native drag only from the handle so selects and buttons keep working.
+	list.on('mousedown touchstart', '.dcx-dash-editor-handle', function() {
+		$(this).closest('.dcx-dash-editor-item').attr('draggable', true);
+	});
+	$(document).on('mouseup touchend', function() {
+		list.children('.dcx-dash-editor-item').attr('draggable', false);
+	});
+	list.on('dragstart', '.dcx-dash-editor-item', function(e) {
+		dragItem = this;
+		var dt = e.originalEvent.dataTransfer;
+		dt.effectAllowed = 'move';
+		try {
+			dt.setData('text/plain', $(this).data('code'));
+		} catch (err) {}
+		$(this).addClass('dcx-dash-editor-item--dragging');
+	});
+	list.on('dragend', '.dcx-dash-editor-item', function() {
+		dragItem = null;
+		$(this).removeClass('dcx-dash-editor-item--dragging');
+		clearIndicators();
+		renumber();
+	});
+	list.on('dragover', '.dcx-dash-editor-item', function(e) {
+		if (!dragItem || dragItem === this) {
+			return;
+		}
+		e.preventDefault();
+		var rect = this.getBoundingClientRect();
+		var before = (e.originalEvent.clientY - rect.top) < rect.height / 2;
+		clearIndicators();
+		$(this).addClass(before ? 'dcx-dash-editor-item--drop-before' : 'dcx-dash-editor-item--drop-after');
+	});
+	list.on('drop', '.dcx-dash-editor-item', function(e) {
+		if (!dragItem || dragItem === this) {
+			return;
+		}
+		e.preventDefault();
+		var rect = this.getBoundingClientRect();
+		var before = (e.originalEvent.clientY - rect.top) < rect.height / 2;
+		if (before) {
+			$(this).before(dragItem);
+		} else {
+		$(this).after(dragItem);
+		}
+		clearIndicators();
+		renumber();
+	});
+	// Visibility pill toggle.
+	list.on('click', '.dcx-dash-toggle', function() {
+		var item = $(this).closest('.dcx-dash-editor-item');
+		var on = !$(this).hasClass('btn-success');
+		$(this).toggleClass('btn-success', on).toggleClass('btn-default', !on);
+		$(this).find('.dcx-dash-toggle__icon').html('<i data-lucide="' + (on ? 'eye' : 'eye-off') + '" width="14" height="14"></i>');
+		$(this).find('.dcx-dash-toggle__label').text(on ? '{{ text_enabled }}' : '{{ text_disabled }}');
+		item.toggleClass('dcx-dash-editor-item--off', !on);
+		item.find('.dcx-dash-status').val(on ? 1 : 0);
+		lucide.createIcons();
+	});
+	// Live width hint in the row meta.
+	list.on('change', '.dcx-dash-width', function() {
+		var item = $(this).closest('.dcx-dash-editor-item');
+		var meta = item.find('.dcx-dash-list__meta');
+		meta.text('{{ text_width }}: ' + $(this).val() + '/12');
+	});
+})();
+$('#button-dashboard-save').on('click', function() {
+	var layout = {};
+	$('#dashboard-editor-list .dcx-dash-editor-item').each(function(index) {
+		var code = $(this).data('code');
+		layout[code] = {
+			'status': $(this).find('.dcx-dash-status').val() === '1' ? 1 : 0,
+			'width': $(this).find('.dcx-dash-width').val(),
+			'sort_order': index + 1
+		};
+	});
+	$.ajax({
+		url: 'index.php?route=common/dashboard/saveLayout&user_token={{ user_token }}',
+		type: 'post',
+		data: {layout: layout},
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-dashboard-save').button('loading');
+		},
+		complete: function() {
+			$('#button-dashboard-save').button('reset');
+		},
+		success: function(json) {
+			if (json['error']) {
+				alert(json['error']);
+			} else {
+				location.reload();
+			}
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

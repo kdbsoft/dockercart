@@ -6,6 +6,18 @@ $_['text_cache']    = 'Cache';
 // Error
 $_['error_install'] = 'Warning: Install folder still exists and should be deleted for security reasons!';
 
+// Dashboard edit mode
+$_['text_edit_dashboard']          = 'Edit dashboard';
+$_['text_edit_dashboard_subtitle'] = 'Toggle widgets, set widths and reorder. Save to apply to all admins.';
+$_['text_width']                   = 'Width';
+$_['text_drag_to_reorder']         = 'Drag to reorder';
+$_['text_layout_saved']            = 'Dashboard layout saved';
+
+// Error
+$_['error_permission']       = 'Warning: You do not have permission to modify the dashboard!';
+$_['error_invalid_request']  = 'Invalid request method';
+$_['error_invalid_layout']   = 'Invalid dashboard layout data';
+
 // Onboarding
 $_['text_onboarding']             = 'Getting Started';
 $_['text_onboarding_subtitle']    = 'Complete these steps to launch your store';
