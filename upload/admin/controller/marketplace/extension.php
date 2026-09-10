@@ -27,6 +27,19 @@ class ControllerMarketplaceExtension extends Controller {
 		'dockercart_newsletter',
 	);
 
+	// Blog management pages (posts, categories, authors, comments, settings) are
+	// managed via the Blog menu — keep them out of Add-ons. Only the
+	// "latest articles" widget (dockercart_blog_latest) stays visible.
+	private $hidden_extensions = array(
+		'module' => array(
+			'dockercart_blog',
+			'dockercart_blog_author',
+			'dockercart_blog_category',
+			'dockercart_blog_comment',
+			'dockercart_blog_post',
+		),
+	);
+
 	// Icon map per extension type
 	private $type_icons = array(
 		'module'    => 'puzzle',
@@ -84,6 +97,12 @@ class ControllerMarketplaceExtension extends Controller {
 					continue;
 				}
 
+				// Order Totals management has moved to DockerCart Checkout
+				// (extension/module/dockercart_checkout) — keep it out of Add-ons.
+				if ($type === 'total') {
+					continue;
+				}
+
 				if (!$this->user->hasPermission('access', 'extension/extension/' . $type)) {
 					continue;
 				}
@@ -114,6 +133,10 @@ class ControllerMarketplaceExtension extends Controller {
 
 				foreach ($ext_files as $ext_file) {
 					$code = basename($ext_file, '.php');
+
+					if (isset($this->hidden_extensions[$type]) && in_array($code, $this->hidden_extensions[$type], true)) {
+						continue;
+					}
 
 					$this->load->language('extension/' . $type . '/' . $code, 'ext_lang');
 					$name = $this->language->get('ext_lang')->get('heading_title');
