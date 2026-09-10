@@ -1,3 +1,13 @@
+## [3.16.0](https://github.com/kdbsoft/dockercart/compare/v3.15.1...v3.16.0) (2026-09-10)
+
+### Features
+
+* **checkout:** move order totals management to dockercart checkout page ([489a95f](https://github.com/kdbsoft/dockercart/commit/489a95f3165a7fb74d7b465fd9b72a60cc7c206b))
+
+### Bug Fixes
+
+* **extension:** hide blog management pages from modules and add-ons lists ([3b55464](https://github.com/kdbsoft/dockercart/commit/3b554645bc06dae40218cf535163a9a4796fe2a2))
+
 ## [3.15.1](https://github.com/kdbsoft/dockercart/compare/v3.15.0...v3.15.1) (2026-09-09)
 
 ### Bug Fixes
