@@ -25,3 +25,4 @@ $_['button_comment']        = 'Post Comment';
 // Date
 $_['date_format_short']     = 'm/d/Y';
 $_['text_read_article']       = 'Read article';
+$_['error_csrf'] = 'Warning: Your session has expired. Please refresh the page and try again.';

@@ -2451,6 +2451,14 @@ class ControllerProductProduct extends Controller {
 
 		$json = array();
 
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && !$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+			return;
+		}
+
 		if (isset($this->request->get['product_id']) && $this->request->get['product_id']) {
 			if ($this->request->server['REQUEST_METHOD'] == 'POST') {
 				$product_id = (int)$this->request->get['product_id'];
@@ -2657,7 +2665,9 @@ class ControllerProductProduct extends Controller {
 
 		$json = array();
 
-		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && !$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+		} elseif ($this->request->server['REQUEST_METHOD'] == 'POST') {
 			$review_id = isset($this->request->post['review_id']) ? (int)$this->request->post['review_id'] : 0;
 			$vote = isset($this->request->post['vote']) ? (string)$this->request->post['vote'] : '';
 
@@ -2699,7 +2709,9 @@ class ControllerProductProduct extends Controller {
 
 		$json = array();
 
-		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && !$this->validateCsrf()) {
+			$json['error'] = $this->language->get('error_csrf');
+		} elseif ($this->request->server['REQUEST_METHOD'] == 'POST') {
 			if (!$this->config->get('config_review_replies_enabled')) {
 				$json['error'] = $this->language->get('error_reply_disabled');
 			} elseif (!$this->customer->isLogged()) {

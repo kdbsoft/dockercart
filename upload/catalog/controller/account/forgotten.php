@@ -13,7 +13,7 @@ class ControllerAccountForgotten extends Controller {
 
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$customer_info = $this->model_account_customer->getCustomerByEmail($this->request->post['email']);
 
 			// for better security use existing validated customer email address instead of the posted one
@@ -64,6 +64,7 @@ class ControllerAccountForgotten extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
+		$data['csrf_token'] = $this->csrfToken();
 		$this->response->setOutput($this->load->view('account/forgotten', $data));
 	}
 

@@ -228,7 +228,7 @@ class ControllerAccountReturn extends Controller {
 
 		$this->load->model('account/return');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$this->model_account_return->addReturn($this->request->post);
 
 			$this->response->redirect($this->url->link('account/return/success', '', true));
@@ -468,6 +468,7 @@ class ControllerAccountReturn extends Controller {
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
+		$data['csrf_token'] = $this->csrfToken();
 
 		$this->response->setOutput($this->load->view('account/return_form', $data));
 	}

@@ -9,7 +9,7 @@ class ControllerInformationContact extends Controller {
 
 		$contact_form_status = (bool)$this->config->get('config_contact_form_status');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $contact_form_status && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $contact_form_status && $this->validateCsrf() && $this->validate()) {
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
 			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
@@ -169,6 +169,7 @@ class ControllerInformationContact extends Controller {
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
+		$data['csrf_token'] = $this->csrfToken();
 
 		$this->response->setOutput($this->load->view('information/contact', $data));
 	}
