@@ -640,9 +640,9 @@ body { padding-top: 0 !important; }
 }
 
 .dc-success-card--logout .dc-success-card__icon {
-  color: #7c3aed;
-  background: #f5f3ff;
-  border-color: #ddd6fe;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 /* =============================================================

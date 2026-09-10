@@ -9,17 +9,6 @@
 	--dc-blue-800: #1e40af;
 	--dc-blue-900: #1e3a5f;
 
-	--dc-indigo-500: #6366f1;
-	--dc-indigo-600: #4f46e5;
-	--dc-indigo-700: #4338ca;
-
-	--dc-violet-500: #8b5cf6;
-	--dc-violet-600: #7c3aed;
-
-	--dc-purple-500: #a855f7;
-	--dc-purple-600: #9333ea;
-	--dc-purple-700: #7e22ce;
-
 	--dc-cyan-500: #06b6d4;
 	--dc-cyan-600: #0891b2;
 
@@ -134,8 +123,6 @@
 	--dc-tile-danger-end: #b86666;
 	--dc-tile-info: #4a97a8;
 	--dc-tile-info-end: #468a9a;
-	--dc-tile-purple: #9180c0;
-	--dc-tile-purple-end: #8a78b4;
 
 	--dc-radius-xs: 4px;
 	--dc-radius-sm: 5px;
