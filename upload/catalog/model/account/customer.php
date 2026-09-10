@@ -26,8 +26,8 @@ class ModelAccountCustomer extends Model {
 		$this->db->query("UPDATE " . DB_PREFIX . "customer SET firstname = '" . $this->db->escape($data['firstname']) . "', lastname = '" . $this->db->escape($data['lastname']) . "', email = '" . $this->db->escape($data['email']) . "', telephone = '" . $this->db->escape($data['telephone']) . "', company = '" . $this->db->escape(isset($data['company']) ? $data['company'] : '') . "', tax_number = '" . $this->db->escape(isset($data['tax_number']) ? $data['tax_number'] : '') . "', custom_field = '" . $this->db->escape(isset($data['custom_field']['account']) ? json_encode($data['custom_field']['account']) : '') . "' WHERE customer_id = '" . (int)$customer_id . "'");
 	}
 
-	public function editPassword($email, $password) {
-		$this->db->query("UPDATE " . DB_PREFIX . "customer SET salt = '', password = '" . $this->db->escape(password_hash($password, PASSWORD_ARGON2ID)) . "', code = '' WHERE LOWER(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
+		public function editPassword($email, $password) {
+		$this->db->query("UPDATE " . DB_PREFIX . "customer SET salt = '', password = '" . $this->db->escape(password_hash($password, PASSWORD_ARGON2ID)) . "', code = '', code_expire = NULL WHERE LOWER(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
 	}
 
 	public function editAddressId($customer_id, $address_id) {
@@ -35,7 +35,8 @@ class ModelAccountCustomer extends Model {
 	}
 	
 	public function editCode($email, $code) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "customer` SET code = '" . $this->db->escape($code) . "' WHERE LCASE(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
+		// Reset codes are single-purpose and short-lived: 1 hour from issuance.
+		$this->db->query("UPDATE `" . DB_PREFIX . "customer` SET code = '" . $this->db->escape($code) . "', code_expire = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE LCASE(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
 	}
 
 	public function editNewsletter($newsletter) {
@@ -79,7 +80,9 @@ class ModelAccountCustomer extends Model {
 	}
 
 	public function getCustomerByCode($code) {
-		$query = $this->db->query("SELECT customer_id, firstname, lastname, email FROM `" . DB_PREFIX . "customer` WHERE code = '" . $this->db->escape($code) . "' AND code != ''");
+		// NULL code_expire = legacy row: reject it (code was issued before expiry
+		// tracking existed, so its age is unknown). Only fresh, unexpired codes match.
+		$query = $this->db->query("SELECT customer_id, firstname, lastname, email FROM `" . DB_PREFIX . "customer` WHERE code = '" . $this->db->escape($code) . "' AND code != '' AND code_expire IS NOT NULL AND code_expire >= NOW()");
 
 		return $query->row;
 	}
