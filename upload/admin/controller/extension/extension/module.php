@@ -133,9 +133,24 @@ class ControllerExtensionExtensionModule extends Controller {
 		// Compatibility code for old extension folders
 		$files = glob(DIR_APPLICATION . 'controller/extension/module/*.php');
 
+		// Blog management pages (posts, categories, authors, comments, settings) are
+		// managed via the Blog menu — keep them out of the list. Only the
+		// "latest articles" widget (dockercart_blog_latest) stays visible.
+		$hidden_extensions = array(
+			'dockercart_blog',
+			'dockercart_blog_author',
+			'dockercart_blog_category',
+			'dockercart_blog_comment',
+			'dockercart_blog_post',
+		);
+
 		if ($files) {
 			foreach ($files as $file) {
 				$extension = basename($file, '.php');
+
+				if (in_array($extension, $hidden_extensions, true)) {
+					continue;
+				}
 
 				$this->load->language('extension/module/' . $extension, 'extension');
 
