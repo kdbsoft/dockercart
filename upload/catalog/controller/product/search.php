@@ -10,13 +10,18 @@ class ControllerProductSearch extends Controller {
 		$this->load->model('tool/image');
 
 		if (isset($this->request->get['search'])) {
-			$search = html_entity_decode(html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+			// Request::clean() HTML-escapes all incoming data. Decode ONCE so the term can be
+			// matched against the raw catalog data, and keep the escaped original for anything
+			// that is output or logged (templates render with autoescape disabled).
+			$search = html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8');
+			$search_raw = trim((string)$this->request->get['search']);
 		} else {
 			$search = '';
+			$search_raw = '';
 		}
 
 		if (isset($this->request->get['tag'])) {
-			$tag = html_entity_decode(html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+			$tag = html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8');
 		} elseif (isset($this->request->get['search'])) {
 			$tag = $search;
 		} else {
@@ -309,13 +314,13 @@ class ControllerProductSearch extends Controller {
 
 				if ($layout_from) {
 					$data['layout_correction'] = array(
-						'corrected'     => $search,
+						'corrected'     => $search_raw,
 						'original'      => $suggest_from,
 						'original_href' => $this->url->link('product/search', $original_url)
 					);
 				} else {
 					$data['spell_correction'] = array(
-						'corrected'     => $search,
+						'corrected'     => $search_raw,
 						'original'      => $suggest_from,
 						'original_href' => $this->url->link('product/search', $original_url)
 					);
@@ -827,7 +832,7 @@ class ControllerProductSearch extends Controller {
 				}
 
 				$search_data = array(
-					'keyword'       => $search,
+					'keyword'       => $search_raw,
 					'category_id'   => $category_id,
 					'sub_category'  => $sub_category,
 					'description'   => $description,
@@ -840,7 +845,7 @@ class ControllerProductSearch extends Controller {
 			}
 		}
 
-		$data['search'] = $search;
+		$data['search'] = $search_raw;
 		$data['description'] = $description;
 		$data['category_id'] = $category_id;
 		$data['sub_category'] = $sub_category;
@@ -952,8 +957,9 @@ class ControllerProductSearch extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 
-		$search      = isset($this->request->get['search'])      ? html_entity_decode(html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') : '';
-		$tag         = isset($this->request->get['tag'])         ? html_entity_decode(html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8') : (isset($this->request->get['search']) ? $search : '');
+		// Decode once for matching against raw catalog data (see index()).
+		$search      = isset($this->request->get['search'])      ? html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8') : '';
+		$tag         = isset($this->request->get['tag'])         ? html_entity_decode(trim((string)$this->request->get['tag']), ENT_QUOTES, 'UTF-8') : (isset($this->request->get['search']) ? $search : '');
 		$description = isset($this->request->get['description']) ? $this->request->get['description'] : '';
 		$category_id = isset($this->request->get['category_id'])  ? $this->request->get['category_id'] : 0;
 		$sub_category = isset($this->request->get['sub_category']) ? $this->request->get['sub_category'] : ($category_id > 0 ? '1' : '');
@@ -1157,7 +1163,9 @@ class ControllerProductSearch extends Controller {
 		$json = ['success' => false];
 
 		if (isset($this->request->get['search']) && $this->config->get('config_customer_search')) {
-			$search = html_entity_decode(html_entity_decode(trim((string)$this->request->get['search']), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+			// Store the Request::clean()-escaped term as-is: the admin report renders it raw,
+			// so keeping the escaped form prevents stored XSS (and displays correctly).
+			$search = trim((string)$this->request->get['search']);
 
 			if ($search === '') {
 				$this->response->addHeader('Content-Type: application/json');
