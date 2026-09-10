@@ -1805,6 +1805,8 @@ document.addEventListener('DOMContentLoaded', function() {
       params.append(field.name, field.value || '');
     });
 
+    params.set('csrf_token', window.dcCsrfToken || '');
+
     return params;
   }
 

@@ -25,6 +25,7 @@
 
       <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
         <form action="{{ action }}" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
           {# My Affiliate #}
           <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-4">{{ text_my_affiliate }}</p>

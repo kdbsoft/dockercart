@@ -172,6 +172,7 @@
 
         {% if comment_form %}
           <form action="{{ comment_form }}" method="post" id="form-comment" class="space-y-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <div>
               <label for="input-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
               <input id="input-name" name="name" type="text" class="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:border-blue-400" />

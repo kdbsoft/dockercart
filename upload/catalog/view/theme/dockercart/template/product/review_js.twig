@@ -1,5 +1,11 @@
 <script>
 (function () {
+  // Attach the per-session CSRF token to AJAX payloads.
+  function withCsrf(params) {
+    params.set('csrf_token', window.dcCsrfToken || '');
+    return params;
+  }
+
   function loadReview(url) {
     var review = document.getElementById('review');
     if (!review) return;
@@ -267,7 +273,7 @@
     var action = form.getAttribute('data-write-url') || ('index.php?route=product/product/write&product_id=' + encodeURIComponent(productId));
 
     button.addEventListener('click', function () {
-      var params = new FormData(form);
+      var params = withCsrf(new FormData(form));
       button.disabled = true;
 
       fetch(action, {
@@ -412,7 +418,7 @@
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
-        body: 'review_id=' + encodeURIComponent(reviewId) + '&vote=' + encodeURIComponent(vote)
+        body: 'review_id=' + encodeURIComponent(reviewId) + '&vote=' + encodeURIComponent(vote) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '')
       })
       .then(function (response) { return response.json(); })
       .then(function (json) {
@@ -489,7 +495,7 @@
       clearAlert();
       if (submitBtn) submitBtn.disabled = true;
 
-      var params = new FormData(form);
+      var params = withCsrf(new FormData(form));
       params.set('review_id', reviewId);
 
       fetch(replyUrl, {

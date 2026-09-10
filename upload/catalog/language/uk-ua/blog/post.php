@@ -17,3 +17,4 @@ $_['text_blog_post'] = 'Стаття';
 $_['text_recommended_products'] = 'Рекомендовані товари';
 $_['text_recommended_categories'] = 'Рекомендовані категорії';
 $_['text_recommended_manufacturers'] = 'Рекомендовані виробники';
+$_['error_csrf'] = 'Увага: ваша сесія закінчилася. Оновіть сторінку і спробуйте ще раз.';
