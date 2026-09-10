@@ -227,21 +227,31 @@
                     </div>
                     <div class="dc-override-item__field">
                       <label class="dcx-label">{{ text_address_fields }}</label>
-                      <div class="dcx-checkbox-group">
+                      <div class="dc-addr-table" role="table" aria-label="{{ text_address_fields }}">
+                        <div class="dc-addr-table__row dc-addr-table__row--head" role="row">
+                          <span class="dc-addr-table__cell dc-addr-table__cell--name" role="columnheader"></span>
+                          <span class="dc-addr-table__cell dc-addr-table__cell--toggle" role="columnheader">{{ text_visible }}</span>
+                          <span class="dc-addr-table__cell dc-addr-table__cell--toggle" role="columnheader">{{ text_required }}</span>
+                        </div>
                         {% for key in address_field_order|default(['company','address_1','address_2','city','postcode']) %}
                         {% set label_key = 'text_field_' ~ key %}
                         {% set field_data = shipping_overrides[method_code].fields[key]|default({'visible': 1, 'required': 0}) %}
-                        <div class="dc-addr-field-group">
-                          <label class="dcx-checkbox-label">
-                            <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="0">
-                            <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="1" {% if field_data.visible %}checked{% endif %}>
-                            {{ attribute(_context, label_key)|default(key|replace({'_': ' '})|title) }}
-                          </label>
-                          <label class="dcx-checkbox-label dcx-checkbox-label--sm">
-                            <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="0">
-                            <input type="checkbox" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="1" {% if field_data.required %}checked{% endif %}>
-                            {{ text_required }}
-                          </label>
+                        <div class="dc-addr-table__row" role="row">
+                          <span class="dc-addr-table__cell dc-addr-table__cell--name" role="cell">{{ attribute(_context, label_key)|default(key|replace({'_': ' '})|title) }}</span>
+                          <span class="dc-addr-table__cell dc-addr-table__cell--toggle" role="cell">
+                            <label class="dc-toggle-sm" title="{{ text_visible }}">
+                              <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="0">
+                              <input type="checkbox" class="js-addr-visible" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][visible]" value="1" {% if field_data.visible %}checked{% endif %}>
+                              <span class="dc-toggle-slider-sm"></span>
+                            </label>
+                          </span>
+                          <span class="dc-addr-table__cell dc-addr-table__cell--toggle" role="cell">
+                            <label class="dc-toggle-sm" title="{{ text_required }}">
+                              <input type="hidden" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="0">
+                              <input type="checkbox" class="js-addr-required" name="module_dockercart_checkout_shipping_override[{{ method_code }}][fields][{{ key }}][required]" value="1" {% if field_data.required %}checked{% endif %}>
+                              <span class="dc-toggle-slider-sm"></span>
+                            </label>
+                          </span>
                         </div>
                         {% endfor %}
                       </div>
@@ -333,6 +343,99 @@
               </div>
               {% else %}
               <p class="text-muted">{{ text_no_methods_available }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ORDER TOTALS -->
+        <div class="dcx-panel" id="panel-totals" style="margin-top:16px;">
+          <div class="dcx-panel-head">
+            <div class="dcx-panel-head__icon"><i data-lucide="calculator" width="18" height="18"></i></div>
+            <div>
+              <div class="dcx-panel-title">{{ text_order_totals }}</div>
+            </div>
+          </div>
+          <div class="dcx-panel-body">
+            <div class="dcx-section" style="margin-top:0;padding-top:0;border-top:0;">
+              <h4><i data-lucide="calculator" width="16" height="16"></i> {{ text_order_totals }}</h4>
+              <div class="alert alert-info dc-alert-modern" style="margin-bottom:16px;">
+                <i data-lucide="info" width="16" height="16"></i>
+                {{ text_order_totals_help }}
+              </div>
+              {% if order_totals %}
+              {# Totals use the same Edit dashboard row look: drag handle + rank + name/meta + eye-toggle #}
+              <ul id="totals-editor-list" class="dcx-dash-list dcx-dash-editor dc-totals-list">
+                {% for total in order_totals %}
+                <li class="dcx-dash-list__item dcx-dash-editor-item{% if total.installed and not total.status %} dcx-dash-editor-item--off{% endif %}{% if not total.installed %} dc-total-item--not-installed{% endif %}" data-total-code="{{ total.code }}" data-code="{{ total.code }}">
+                  <span class="dcx-dash-editor-handle" data-toggle="tooltip" title="{{ text_drag_to_reorder }}"><i data-lucide="grip-vertical" width="16" height="16"></i></span>
+                  <span class="dcx-dash-list__rank">{{ loop.index }}</span>
+                  <span class="dcx-dash-list__main">
+                    <span class="dcx-dash-list__name">{{ total.name }}</span>
+                    <span class="dcx-dash-list__meta">{{ total.code }}{% if not total.installed %} &middot; {{ text_total_not_installed }}{% endif %}</span>
+                  </span>
+                  {% if total.installed and can_manage_totals %}
+                  <button type="button" class="btn btn-sm dcx-dash-toggle total-status-btn{% if total.status %} btn-success{% else %} btn-default{% endif %}" data-code="{{ total.code }}" title="{{ column_total_status }}">
+                    <span class="dcx-dash-toggle__icon">{% if total.status %}<i data-lucide="eye" width="14" height="14"></i>{% else %}<i data-lucide="eye-off" width="14" height="14"></i>{% endif %}</span>
+                    <span class="dcx-dash-toggle__label">{% if total.status %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}</span>
+                  </button>
+                  <input type="hidden" class="total-status-value" data-code="{{ total.code }}" value="{% if total.status %}1{% else %}0{% endif %}">
+                  {% endif %}
+                  {% if can_manage_totals %}
+                  {% if total.installed %}
+                  <button type="button" class="btn btn-sm btn-danger total-uninstall-btn" data-url="{{ total.uninstall }}">
+                    <i data-lucide="trash-2" width="14" height="14"></i> {{ button_total_uninstall }}
+                  </button>
+                  {% else %}
+                  <button type="button" class="btn btn-sm btn-success total-install-btn" data-url="{{ total.install }}">
+                    <i data-lucide="download" width="14" height="14"></i> {{ button_total_install }}
+                  </button>
+                  {% endif %}
+                  {% endif %}
+                  {% if total.installed and can_manage_totals and total.extra %}
+                  <div class="dc-total-item__extra">
+                    {% if total.extra.estimator is defined %}
+                    <label class="dcx-checkbox-label" title="{{ help_total_estimator }}">
+                      <input type="checkbox" class="total-extra-field" data-code="{{ total.code }}" data-field="estimator"
+                        data-type="bool" {% if total.extra.estimator %}checked{% endif %}>
+                      {{ text_total_estimator }}
+                    </label>
+                    {% endif %}
+                    {% if total.extra.total is defined %}
+                    <div class="dc-total-extra-group">
+                      <label class="dc-toggle-label-text" for="total-extra-{{ total.code }}-total">{{ text_total_min_total }}</label>
+                      <input type="text" class="form-control input-sm total-extra-field" id="total-extra-{{ total.code }}-total"
+                        data-code="{{ total.code }}" data-field="total" data-type="decimal"
+                        value="{{ total.extra.total }}" style="width:90px;">
+                    </div>
+                    {% endif %}
+                    {% if total.extra.fee is defined %}
+                    <div class="dc-total-extra-group">
+                      <label class="dc-toggle-label-text" for="total-extra-{{ total.code }}-fee">{{ text_total_fee }}</label>
+                      <input type="text" class="form-control input-sm total-extra-field" id="total-extra-{{ total.code }}-fee"
+                        data-code="{{ total.code }}" data-field="fee" data-type="decimal"
+                        value="{{ total.extra.fee }}" style="width:90px;">
+                    </div>
+                    {% endif %}
+                    {% if total.extra.tax_class_id is defined %}
+                    <div class="dc-total-extra-group">
+                      <label class="dc-toggle-label-text" for="total-extra-{{ total.code }}-tax">{{ text_total_tax_class }}</label>
+                      <select class="form-control input-sm total-extra-field" id="total-extra-{{ total.code }}-tax"
+                        data-code="{{ total.code }}" data-field="tax_class_id" data-type="int" style="width:170px;">
+                        <option value="0">{{ text_none|default('--- None ---') }}</option>
+                        {% for tax_class in tax_classes %}
+                        <option value="{{ tax_class.tax_class_id }}" {% if total.extra.tax_class_id == tax_class.tax_class_id %}selected{% endif %}>{{ tax_class.title }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-muted">{{ text_no_order_totals }}</p>
               {% endif %}
             </div>
           </div>
@@ -575,6 +678,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // Address fields table: hidden field cannot be required — dim the row and lock Required.
+  document.querySelectorAll('.dc-addr-table__row:not(.dc-addr-table__row--head)').forEach(function(row) {
+    var visible = row.querySelector('.js-addr-visible');
+    var required = row.querySelector('.js-addr-required');
+    if (!visible || !required) return;
+    function syncRequired() {
+      var show = visible.checked;
+      required.disabled = !show;
+      if (!show) required.checked = false;
+      row.classList.toggle('dc-addr-table__row--hidden', !show);
+    }
+    visible.addEventListener('change', syncRequired);
+    syncRequired();
+  });
+
 });
 </script>
 
@@ -730,14 +848,39 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Language frame inside override cards — fieldset-like (same as category_form) */
 .dc-override-item .dc-lang-frame { margin-top:15px; }
 .dc-override-item .dc-lang-frame .lang-code { font-weight:700; }
-.dc-addr-field-group { display:inline-flex; align-items:center; gap:8px; margin-right:16px; }
-.dc-addr-field-group .dcx-checkbox-label { margin:0; }
+/* Address fields table (shipping overrides): name + Visible / Required switch columns */
+.dc-addr-table { border:1px solid var(--dc-border-soft); border-radius:8px; overflow:hidden; background:#fff; max-width:520px; }
+.dc-addr-table__row { display:grid; grid-template-columns:1fr 84px 84px; align-items:center; }
+.dc-addr-table__row--head { background:var(--dc-gray-50); border-bottom:1px solid var(--dc-border-soft); }
+.dc-addr-table__row--head .dc-addr-table__cell { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--dc-text-muted); }
+.dc-addr-table__row:not(.dc-addr-table__row--head) + .dc-addr-table__row:not(.dc-addr-table__row--head) { border-top:1px solid var(--dc-border-soft); }
+.dc-addr-table__row:not(.dc-addr-table__row--head):hover { background:var(--dc-gray-50); }
+.dc-addr-table__row--hidden .dc-addr-table__cell--name { color:var(--dc-text-muted); }
+.dc-addr-table__cell { padding:8px 12px; font-size:13px; color:var(--dc-text-dark); }
+.dc-addr-table__cell--toggle { display:flex; justify-content:center; padding:8px 4px; }
+.dc-addr-table__cell--toggle .dc-toggle-sm { margin:0; }
+.dc-addr-table__cell--toggle input:disabled ~ .dc-toggle-slider-sm { opacity:.35; cursor:not-allowed; }
 
 @media (max-width:768px) {
   .dc-blocks-header, .dc-block-item { grid-template-columns:1fr; }
   .dc-modal { width:95%; max-height:90vh; }
   .dc-override-item__header { flex-direction:column; align-items:flex-start; }
 }
+
+/* ── Order Totals list — same look as Edit dashboard (dcx-dash-editor) ── */
+.dc-totals-list.dcx-dash-editor { padding:8px; }
+.dc-totals-list .dcx-dash-editor-item { flex-wrap:wrap; }
+.dc-totals-list .dc-total-item--not-installed .dcx-dash-list__name { color:var(--dc-text-muted); }
+.dc-totals-list .dc-total-item--not-installed .dcx-dash-list__rank { background:var(--dc-gray-100); color:var(--dc-text-muted); }
+.dc-totals-list .dc-total-item--not-installed .dcx-dash-editor-handle { opacity:.35; cursor:not-allowed; }
+.dc-total-item__extra {
+  flex:1 1 100%; display:flex; align-items:center; flex-wrap:wrap; gap:14px;
+  padding:10px 12px; border-top:1px dashed var(--dc-border-soft); background:var(--dc-gray-50);
+  border-radius:0 0 var(--dc-radius-lg) var(--dc-radius-lg);
+}
+.dc-total-extra-group { display:flex; align-items:center; gap:8px; }
+.dc-total-extra-group label { margin:0; white-space:nowrap; }
+.dc-total-item__extra .dcx-checkbox-label { margin:0; }
 </style>
 
 <script>
@@ -1283,6 +1426,204 @@ window.closeBlockSettingsModal = () => DockercartCheckout.closeBlockSettingsModa
 window.saveBlockSettings = () => DockercartCheckout.saveBlockSettings();
 
 document.addEventListener('DOMContentLoaded', () => { DockercartCheckout.init(); });
+</script>
+
+<script>
+// Order Totals management (moved from Add-ons)
+document.addEventListener('DOMContentLoaded', function() {
+  var saveUrl = 'index.php?route=extension/module/dockercart_checkout/saveTotal&user_token={{ user_token }}';
+  var saveOrderUrl = 'index.php?route=extension/module/dockercart_checkout/saveTotalsOrder&user_token={{ user_token }}';
+  var canReorderTotals = {{ can_manage_totals ? 'true' : 'false' }};
+
+  function flashError(message) {
+    alert(message || '{{ error_exception|e("js") }}');
+  }
+
+  function saveTotal(code, settings) {
+    fetch(saveUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ code: code, settings: settings }),
+      credentials: 'same-origin'
+    }).then(function(response) { return response.json(); }).then(function(json) {
+      if (!json.success) { flashError(json.error); }
+    }).catch(function(err) { flashError(err.message); });
+  }
+
+  var textEnabled = '{{ text_enabled|e('js') }}';
+  var textDisabled = '{{ text_disabled|e('js') }}';
+
+  function renderIcons() {
+    try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch (e) {}
+  }
+
+  // Same eye-toggle as Edit dashboard: button + hidden state, instant save.
+  document.querySelectorAll('.total-status-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var code = this.getAttribute('data-code');
+      var item = this.closest('.dcx-dash-editor-item');
+      var stateInput = item ? item.querySelector('.total-status-value') : null;
+      var on = !this.classList.contains('btn-success');
+      this.classList.toggle('btn-success', on);
+      this.classList.toggle('btn-default', !on);
+      var icon = this.querySelector('.dcx-dash-toggle__icon');
+      if (icon) icon.innerHTML = '<i data-lucide="' + (on ? 'eye' : 'eye-off') + '" width="14" height="14"></i>';
+      var label = this.querySelector('.dcx-dash-toggle__label');
+      if (label) label.textContent = on ? textEnabled : textDisabled;
+      if (item) item.classList.toggle('dcx-dash-editor-item--off', !on);
+      if (stateInput) stateInput.value = on ? '1' : '0';
+      renderIcons();
+      saveTotal(code, { status: on ? 1 : 0 });
+    });
+  });
+
+  function renumberTotals() {
+    var list = document.getElementById('totals-editor-list');
+    if (!list) return;
+    list.querySelectorAll('.dcx-dash-editor-item').forEach(function(item, index) {
+      var rank = item.querySelector('.dcx-dash-list__rank');
+      if (rank) rank.textContent = String(index + 1);
+    });
+  }
+
+  function persistTotalsOrder() {
+    var list = document.getElementById('totals-editor-list');
+    if (!list) return;
+    var order = [];
+    list.querySelectorAll('.dcx-dash-editor-item').forEach(function(item) {
+      if (item.classList.contains('dc-total-item--not-installed')) return;
+      var code = item.getAttribute('data-code');
+      if (code) order.push(code);
+    });
+    fetch(saveOrderUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ order: order }),
+      credentials: 'same-origin'
+    }).then(function(response) { return response.json(); }).then(function(json) {
+      if (!json.success) {
+        flashError(json.error);
+        location.reload();
+      }
+    }).catch(function(err) {
+      flashError(err.message);
+      location.reload();
+    });
+  }
+
+  // Drag&drop reordering like Edit dashboard: drag only via handle, installed items only.
+  (function initTotalsDragDrop() {
+    var list = document.getElementById('totals-editor-list');
+    if (!list || !canReorderTotals) return;
+    var dragItem = null;
+    function clearIndicators() {
+      list.querySelectorAll('.dcx-dash-editor-item').forEach(function(item) {
+        item.classList.remove('dcx-dash-editor-item--drop-before', 'dcx-dash-editor-item--drop-after');
+      });
+    }
+    function isDraggableItem(item) {
+      return item && !item.classList.contains('dc-total-item--not-installed');
+    }
+    list.addEventListener('mousedown', function(e) {
+      var handle = e.target.closest ? e.target.closest('.dcx-dash-editor-handle') : null;
+      if (!handle) return;
+      var item = handle.closest('.dcx-dash-editor-item');
+      if (!isDraggableItem(item)) return;
+      item.setAttribute('draggable', 'true');
+    });
+    list.addEventListener('touchstart', function(e) {
+      var handle = e.target.closest ? e.target.closest('.dcx-dash-editor-handle') : null;
+      if (!handle) return;
+      var item = handle.closest('.dcx-dash-editor-item');
+      if (!isDraggableItem(item)) return;
+      item.setAttribute('draggable', 'true');
+    }, { passive: true });
+    document.addEventListener('mouseup', function() {
+      list.querySelectorAll('.dcx-dash-editor-item').forEach(function(item) {
+        item.removeAttribute('draggable');
+      });
+    });
+    document.addEventListener('touchend', function() {
+      list.querySelectorAll('.dcx-dash-editor-item').forEach(function(item) {
+        item.removeAttribute('draggable');
+      });
+    });
+    list.addEventListener('dragstart', function(e) {
+      var item = e.target.closest ? e.target.closest('.dcx-dash-editor-item') : null;
+      if (!isDraggableItem(item)) {
+        e.preventDefault();
+        return;
+      }
+      dragItem = item;
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.getAttribute('data-code') || '');
+      } catch (err) {}
+      item.classList.add('dcx-dash-editor-item--dragging');
+    });
+    list.addEventListener('dragend', function(e) {
+      var item = e.target.closest ? e.target.closest('.dcx-dash-editor-item') : null;
+      if (item) item.classList.remove('dcx-dash-editor-item--dragging');
+      dragItem = null;
+      clearIndicators();
+      renumberTotals();
+    });
+    list.addEventListener('dragover', function(e) {
+      if (!dragItem) return;
+      var item = e.target.closest ? e.target.closest('.dcx-dash-editor-item') : null;
+      if (!item || item === dragItem || !isDraggableItem(item)) return;
+      e.preventDefault();
+      var rect = item.getBoundingClientRect();
+      var before = (e.clientY - rect.top) < rect.height / 2;
+      clearIndicators();
+      item.classList.add(before ? 'dcx-dash-editor-item--drop-before' : 'dcx-dash-editor-item--drop-after');
+    });
+    list.addEventListener('drop', function(e) {
+      var item = e.target.closest ? e.target.closest('.dcx-dash-editor-item') : null;
+      if (!dragItem || !item || item === dragItem || !isDraggableItem(item)) return;
+      e.preventDefault();
+      var rect = item.getBoundingClientRect();
+      var before = (e.clientY - rect.top) < rect.height / 2;
+      if (before) {
+        item.parentNode.insertBefore(dragItem, item);
+      } else {
+        item.parentNode.insertBefore(dragItem, item.nextSibling);
+      }
+      clearIndicators();
+      renumberTotals();
+      persistTotalsOrder();
+    });
+  })();
+
+  document.querySelectorAll('.total-extra-field').forEach(function(input) {
+    input.addEventListener('change', function() {
+      var value;
+      if (input.type === 'checkbox') { value = input.checked ? 1 : 0; }
+      else if (input.getAttribute('data-type') === 'int') { value = parseInt(input.value, 10) || 0; }
+      else { value = String(input.value).trim(); }
+      var settings = {};
+      settings[input.getAttribute('data-field')] = value;
+      saveTotal(input.getAttribute('data-code'), settings);
+    });
+  });
+
+  document.querySelectorAll('.total-install-btn, .total-uninstall-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var url = this.getAttribute('data-url');
+      var uninstall = this.classList.contains('total-uninstall-btn');
+      if (uninstall && !confirm('{{ text_confirm_uninstall|e("js") }}')) return;
+      btn.disabled = true;
+      fetch(url, { credentials: 'same-origin' })
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          if (json.success) { location.reload(); }
+          else { btn.disabled = false; flashError(json.error); }
+        })
+        .catch(function(err) { btn.disabled = false; flashError(err.message); });
+    });
+  });
+});
 </script>
 
 </div>

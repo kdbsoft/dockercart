@@ -286,3 +286,22 @@ $_["entry_country"] = "Country";
 $_["entry_zone"] = "Region / State";
 $_["text_step"] = "Step";
 $_["text_payment_method"] = "Payment Method";
+
+// Order Totals (moved from Add-ons)
+$_["text_order_totals"] = "Order Totals";
+$_["text_order_totals_help"] = "Manage which totals are calculated in the order summary and in which order: sub-total, coupons, shipping, tax, etc. Install, enable/disable, change the calculation order or configure each total.";
+$_["column_total_sort_order"] = "Sort Order";
+$_["column_total_status"] = "Enabled";
+$_["text_total_not_installed"] = "Not installed";
+$_["text_no_order_totals"] = "No order total extensions found.";
+$_["button_total_install"] = "Install";
+$_["button_total_uninstall"] = "Uninstall";
+$_["text_confirm_uninstall"] = "Are you sure you want to uninstall this order total?";
+$_["error_invalid_total_code"] = "Invalid order total code!";
+
+$_["text_total_estimator"] = "Shipping Estimator";
+$_["help_total_estimator"] = "Show the shipping cost estimator on the cart page";
+$_["text_total_min_total"] = "Order over";
+$_["text_total_fee"] = "Fee";
+$_["text_total_tax_class"] = "Tax Class";
+$_["text_drag_to_reorder"] = "Drag to reorder";
