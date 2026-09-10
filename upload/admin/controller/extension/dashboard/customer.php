@@ -55,6 +55,9 @@ class ControllerExtensionDashboardCustomer extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/customer')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/customer');
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -67,6 +70,11 @@ class ControllerExtensionDashboardCustomer extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/customer')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/customer');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
@@ -120,6 +128,11 @@ class ControllerExtensionDashboardCustomer extends Controller {
 	}
 
 	public function sparkline() {
+		if (!$this->userHasAccess('extension/dashboard/customer')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
 
 		$cache_key = 'dash_cust_spark_' . $period;

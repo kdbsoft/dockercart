@@ -28,6 +28,20 @@ abstract class Controller {
 	}
 
 	/**
+	 * Whether the current admin user has the given access permission.
+	 *
+	 * Safe to call from any context: when no user object is registered
+	 * (catalog side) it simply returns false.
+	 *
+	 * @param string $route route to check, e.g. "extension/dashboard/sale"
+	 */
+	protected function userHasAccess(string $route): bool {
+		$user = $this->registry->get('user');
+
+		return is_object($user) && $user->hasPermission('access', $route);
+	}
+
+	/**
 	 * Shared per-admin saved filter support (Shopify-style tabs).
 	 *
 	 * Builds the tabs (an "All" tab plus the admin's saved filters) for the
