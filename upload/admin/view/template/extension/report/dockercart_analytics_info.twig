@@ -486,7 +486,7 @@ function chartBase() {
   };
 }
 
-var palette = ['#5b7ea8', '#22c55e', '#f59e0b', '#8b5cf6', '#f43f5e', '#06b6d4', '#84cc16', '#f97316', '#eab308', '#ec4899'];
+var palette = ['#5b7ea8', '#22c55e', '#f59e0b', '#0284c7', '#f43f5e', '#06b6d4', '#84cc16', '#f97316', '#eab308', '#ec4899'];
 
 // 1. Revenue & orders timeline
 new Chart(document.getElementById('chart-revenue-orders'), {
@@ -513,7 +513,7 @@ new Chart(document.getElementById('chart-conversion'), {
   type: 'bar',
   data: {
     labels: {{ ts_labels|json_encode|raw }},
-    datasets: [{ label: {{ text_conversion|json_encode|raw }}, data: {{ ts_conversion|json_encode|raw }}, backgroundColor: '#8b5cf6', borderRadius: 4, borderSkipped: false }]
+    datasets: [{ label: {{ text_conversion|json_encode|raw }}, data: {{ ts_conversion|json_encode|raw }}, backgroundColor: '#0284c7', borderRadius: 4, borderSkipped: false }]
   },
   options: Object.assign(chartBase(), {
     scales: {

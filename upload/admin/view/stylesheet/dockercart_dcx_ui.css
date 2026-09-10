@@ -800,14 +800,6 @@ div.dcx-field.required > .dcx-label:before {
     border-color: var(--dc-blue-200);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
 }
-.dcx-stat-card--purple {
-    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-    border-color: #d8b4fe;
-}
-.dcx-stat-card--purple:hover {
-    border-color: #d8b4fe;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.08);
-}
 .dcx-stat-card--danger {
     background: linear-gradient(135deg, var(--dc-red-50) 0%, var(--dc-red-100) 100%);
     border-color: var(--dc-red-200);
@@ -1812,7 +1804,7 @@ div.dcx-field.required > .dcx-label:before {
 .dc-opt-card__cg-row .form-control,
 .dc-opt-card__cg-row .option-value-prefix-select,
 .dc-opt-card__cg-row .option-value-prefix-input { height: 30px; line-height: 28px; padding: 0 6px; }
-.dc-axis-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #6366f1; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; line-height: 1.6; white-space: nowrap; }
+.dc-axis-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; line-height: 1.6; white-space: nowrap; }
 .dc-axis-badge i { font-size: 10px; }
 .dc-axis-info-banner { display: flex; align-items: flex-start; gap: 8px; margin: 6px 15px 0; padding: 8px 12px; font-size: 12px; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; line-height: 1.5; }
 .dc-axis-info-banner i { margin-top: 2px; flex-shrink: 0; }
@@ -2935,8 +2927,8 @@ div.dcx-field.required > .dcx-label:before {
     color: var(--dc-green-700);
 }
 .dc-record-item__icon--reward {
-    background: var(--dc-purple-100);
-    color: var(--dc-purple-600);
+    background: var(--dc-primary-light);
+    color: var(--dc-primary-active);
 }
 .dc-record-item__icon--shield {
     background: var(--dc-blue-100);
