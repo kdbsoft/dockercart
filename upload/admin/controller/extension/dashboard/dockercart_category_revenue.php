@@ -31,6 +31,9 @@ class ControllerExtensionDashboardDockercartCategoryRevenue extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_category_revenue')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/dockercart_category_revenue');
 
 		$data['text_category_revenue_subtitle'] = $this->language->get('text_category_revenue_subtitle');
@@ -44,6 +47,11 @@ class ControllerExtensionDashboardDockercartCategoryRevenue extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_category_revenue')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/dockercart_category_revenue');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';

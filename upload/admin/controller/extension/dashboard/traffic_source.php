@@ -31,6 +31,9 @@ class ControllerExtensionDashboardTrafficSource extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/traffic_source')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/traffic_source');
 
 		$data['text_traffic_subtitle'] = $this->language->get('text_traffic_subtitle');
@@ -46,6 +49,11 @@ class ControllerExtensionDashboardTrafficSource extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/traffic_source')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/traffic_source');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';

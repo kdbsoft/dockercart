@@ -1,6 +1,9 @@
 <?php
 class ControllerExtensionDashboardChart extends Controller {
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/chart')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/chart');
 
 		$data['text_chart_subtitle'] = $this->language->get('text_chart_subtitle');
@@ -10,6 +13,9 @@ class ControllerExtensionDashboardChart extends Controller {
 	}
 
 	public function chart() {
+		if (!$this->userHasAccess('extension/dashboard/chart')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/chart');
 
 		$range = isset($this->request->get['range']) ? $this->request->get['range'] : 'month';
