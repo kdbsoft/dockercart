@@ -565,6 +565,11 @@ class ControllerCatalogProductConfigurable extends Controller {
 				$existing_axes[] = (int)$row['option_id'];
 			}
 
+			// Option axes come straight from POST and are interpolated into IN() below,
+			// so force-cast every element to a positive integer first.
+			$option_ids = array_map('intval', is_array($option_ids) ? $option_ids : array());
+			$option_ids = array_values(array_filter($option_ids));
+
 			$new_axes = array_diff($option_ids, $existing_axes);
 
 			if (!empty($new_axes)) {

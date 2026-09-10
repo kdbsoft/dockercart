@@ -26,11 +26,11 @@ class ControllerStartupLogin extends Controller {
 				'error/permission'
 			);
 
-			if (!in_array($route, $ignore) && (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || ($this->request->get['user_token'] != $this->session->data['user_token']))) {
+			if (!in_array($route, $ignore) && (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || !is_string($this->request->get['user_token']) || !is_string($this->session->data['user_token']) || !hash_equals($this->session->data['user_token'], $this->request->get['user_token']))) {
 				return new Action('common/login');
 			}
 		} else {
-			if (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || ($this->request->get['user_token'] != $this->session->data['user_token'])) {
+			if (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || !is_string($this->request->get['user_token']) || !is_string($this->session->data['user_token']) || !hash_equals($this->session->data['user_token'], $this->request->get['user_token'])) {
 				return new Action('common/login');
 			}
 		}

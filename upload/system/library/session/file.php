@@ -17,7 +17,16 @@ class File {
 
 			fclose($handle);
 
-			return unserialize($data, array('allowed_classes' => false));
+			$unserialized = unserialize($data, array('allowed_classes' => false));
+
+			// Corrupt or truncated session files (concurrent write / disk full)
+			// previously surfaced as "unserialize(): Extra data" warnings and a
+			// non-array return that broke consumers. Treat them as empty sessions.
+			if (!is_array($unserialized)) {
+				return array();
+			}
+
+			return $unserialized;
 		} else {
 			return array();
 		}

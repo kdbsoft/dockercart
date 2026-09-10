@@ -461,8 +461,15 @@ class ControllerStartupStartup extends Controller {
 					$own_host = preg_replace('/:\d+$/', '', $own_host);
 
 					if (!$matched && $host !== $own_host) {
-						$source = preg_replace('/\.[^.]+$/', '', $host);
-						$medium = 'referral';
+						// The host comes from the attacker-controlled HTTP_REFERER header,
+						// so the derived source is whitelisted before it reaches SQL.
+						$derived_source = preg_replace('/\.[^.]+$/', '', $host);
+						$derived_source = preg_replace('/[^a-z0-9._-]/', '', $derived_source);
+
+						if ($derived_source !== '') {
+							$source = $derived_source;
+							$medium = 'referral';
+						}
 					}
 				}
 			}
@@ -479,7 +486,7 @@ class ControllerStartupStartup extends Controller {
 			$session_id = $this->session->getId();
 
 			if ($session_id) {
-				$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_traffic_source` SET `session_id` = '" . $this->db->escape($session_id) . "', `source` = '" . $source . "', `medium` = '" . $medium . "', `campaign` = '" . $campaign . "', `date_added` = NOW()");
+				$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "dockercart_traffic_source` SET `session_id` = '" . $this->db->escape($session_id) . "', `source` = '" . $this->db->escape($source) . "', `medium` = '" . $this->db->escape($medium) . "', `campaign` = '" . $this->db->escape($campaign) . "', `date_added` = NOW()");
 			}
 		}		
 		
