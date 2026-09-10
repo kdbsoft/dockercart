@@ -244,6 +244,8 @@ class ControllerBlogPost extends Controller {
 				);
 			}
 
+			$data['csrf_token'] = $this->csrfToken();
+
 			$this->response->setOutput($this->load->view('blog/post', $data));
 		} else {
 			// Post not found - show 404
@@ -280,6 +282,7 @@ class ControllerBlogPost extends Controller {
 	 * Add comment to post (AJAX endpoint)
 	 */
 	public function addComment() {
+		$this->load->language('blog/post');
 		$this->load->language('extension/module/dockercart_blog');
 		$this->load->model('extension/module/dockercart_blog_comment');
 
@@ -290,6 +293,11 @@ class ControllerBlogPost extends Controller {
 			// Validate CAPTCHA if enabled
 			if ($this->config->get('module_dockercart_blog_captcha')) {
 				// Implement CAPTCHA validation here
+			}
+
+			// CSRF
+			if (!$this->validateCsrf()) {
+				$json['error'] = $this->language->get('error_csrf');
 			}
 
 			// Validate required fields

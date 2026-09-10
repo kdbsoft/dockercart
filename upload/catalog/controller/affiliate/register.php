@@ -17,7 +17,7 @@ class ControllerAffiliateRegister extends Controller {
 		
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$customer_id = $this->model_account_customer->addCustomer($this->request->post);
 
 			$this->model_account_customer->addAffiliate($customer_id, $this->request->post);
@@ -312,6 +312,7 @@ class ControllerAffiliateRegister extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
+		$data['csrf_token'] = $this->csrfToken();
 		$this->response->setOutput($this->load->view('affiliate/register', $data));
 	}
 

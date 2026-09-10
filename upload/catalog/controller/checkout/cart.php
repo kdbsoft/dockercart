@@ -409,6 +409,15 @@ class ControllerCheckoutCart extends Controller {
 
 		$json = array();
 
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && !$this->validateCsrf()) {
+			$json['error']['csrf'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
+
 		if (isset($this->request->post['product_id'])) {
 			$product_id = (int)$this->request->post['product_id'];
 		} else {
@@ -547,6 +556,15 @@ class ControllerCheckoutCart extends Controller {
 		$this->load->language('checkout/cart');
 
 		$json = array();
+
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && !$this->validateCsrf()) {
+			$json['error']['csrf'] = $this->language->get('error_csrf');
+
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode($json));
+
+			return;
+		}
 
 		if (isset($this->request->post['bundle_id'])) {
 			$bundle_id = (int)$this->request->post['bundle_id'];

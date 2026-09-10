@@ -17,7 +17,7 @@ class ControllerAffiliateLogin extends Controller {
 
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && isset($this->request->post['email']) && isset($this->request->post['password']) && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && isset($this->request->post['email']) && isset($this->request->post['password']) && $this->validateCsrf() && $this->validate()) {
 			// Added strpos check to pass McAfee PCI compliance test (http://forum.opencart.com/viewtopic.php?f=10&t=12043&p=151494#p151295)
 			if (isset($this->request->post['redirect']) && (strpos($this->request->post['redirect'], $this->config->get('config_url')) === 0 || strpos($this->request->post['redirect'], $this->config->get('config_ssl')) === 0)) {
 				$this->response->redirect(str_replace('&amp;', '&', $this->request->post['redirect']));
@@ -92,6 +92,7 @@ class ControllerAffiliateLogin extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
+		$data['csrf_token'] = $this->csrfToken();
 		$this->response->setOutput($this->load->view('affiliate/login', $data));
 	}
 

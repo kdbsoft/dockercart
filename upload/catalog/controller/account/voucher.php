@@ -11,7 +11,7 @@ class ControllerAccountVoucher extends Controller {
 			$this->session->data['vouchers'] = array();
 		}
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$this->session->data['vouchers'][mt_rand()] = array(
 				'description'      => sprintf($this->language->get('text_for'), $this->currency->format($this->request->post['amount'], $this->session->data['currency'], 1.0), $this->request->post['to_name']),
 				'to_name'          => $this->request->post['to_name'],
@@ -153,6 +153,7 @@ class ControllerAccountVoucher extends Controller {
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
+		$data['csrf_token'] = $this->csrfToken();
 
 		$this->response->setOutput($this->load->view('account/voucher', $data));
 	}

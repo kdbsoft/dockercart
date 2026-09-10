@@ -325,7 +325,7 @@ window.wishlist = window.wishlist || {
 window.cart = window.cart || {
   add: function (productId, quantity, variantId) {
     var qty = quantity || 1;
-    var body = 'product_id=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty);
+    var body = 'product_id=' + encodeURIComponent(productId) + '&quantity=' + encodeURIComponent(qty) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '');
 
     if (variantId && parseInt(variantId, 10) > 0) {
       body += '&option[variant_id]=' + encodeURIComponent(variantId);
@@ -360,7 +360,7 @@ window.cart = window.cart || {
       });
   },
   addBundle: function (bundleId) {
-    fetch('index.php?route=checkout/cart/addBundle', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'bundle_id=' + encodeURIComponent(bundleId) })
+    fetch('index.php?route=checkout/cart/addBundle', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest' }, body: 'bundle_id=' + encodeURIComponent(bundleId) + '&csrf_token=' + encodeURIComponent(window.dcCsrfToken || '') })
       .then(function (response) { return response.json(); })
       .then(function (json) {
         if (json && json.error) {

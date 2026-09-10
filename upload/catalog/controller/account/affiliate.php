@@ -19,7 +19,7 @@ class ControllerAccountAffiliate extends Controller {
 
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$this->model_account_customer->addAffiliate($this->customer->getId(), $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -47,7 +47,7 @@ class ControllerAccountAffiliate extends Controller {
 
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			$this->model_account_customer->editAffiliate($this->customer->getId(), $this->request->post);
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -262,6 +262,7 @@ class ControllerAccountAffiliate extends Controller {
 		$data['content_bottom'] = $this->load->controller('common/content_bottom');
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
+		$data['csrf_token'] = $this->csrfToken();
 
 		$this->response->setOutput($this->load->view('account/affiliate', $data));
 	}

@@ -29,6 +29,7 @@
         <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm">
           <h2 class="text-lg font-extrabold text-gray-900 mb-5">{{ text_register }}</h2>
           <form action="{{ action }}" method="post" enctype="multipart/form-data" id="account">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
             {# Customer Groups #}
             {% if customer_groups|length > 1 %}

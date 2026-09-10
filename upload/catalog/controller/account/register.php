@@ -13,7 +13,7 @@ class ControllerAccountRegister extends Controller {
 
 		$this->load->model('account/customer');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 			// Auto-subscribe all new customers
 			$this->request->post['newsletter'] = 1;
 
@@ -223,6 +223,7 @@ class ControllerAccountRegister extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
+		$data['csrf_token'] = $this->csrfToken();
 		$this->response->setOutput($this->load->view('account/register', $data));
 	}
 

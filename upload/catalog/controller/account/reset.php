@@ -22,7 +22,7 @@ class ControllerAccountReset extends Controller {
 
 			$this->document->setTitle($this->language->get('heading_title'));
 
-			if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+			if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateCsrf() && $this->validate()) {
 				$this->model_account_customer->editPassword($customer_info['email'], $this->request->post['password']);
 
 				$this->session->data['success'] = $this->language->get('text_success');
@@ -82,6 +82,7 @@ class ControllerAccountReset extends Controller {
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
 
+			$data['csrf_token'] = $this->csrfToken();
 			$this->response->setOutput($this->load->view('account/reset', $data));
 		} else {
 			$this->load->language('account/reset');

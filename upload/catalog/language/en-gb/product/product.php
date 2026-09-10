@@ -139,3 +139,4 @@ $_['error_video']              = 'Warning: Please enter a valid YouTube link.';
 $_['error_video_upload']       = 'Warning: Failed to upload the video.';
 $_['error_video_size']         = 'Warning: The video exceeds the allowed size.';
 $_['error_video_type']         = 'Warning: Only MP4 / WEBM video files are allowed.';
+$_['error_csrf']             = 'Warning: Your session has expired. Please refresh the page and try again.';
