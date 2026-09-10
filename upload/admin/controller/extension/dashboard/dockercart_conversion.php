@@ -41,6 +41,9 @@ class ControllerExtensionDashboardDockercartConversion extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_conversion')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/dockercart_conversion');
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -62,6 +65,11 @@ class ControllerExtensionDashboardDockercartConversion extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_conversion')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/dockercart_conversion');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
@@ -113,6 +121,11 @@ class ControllerExtensionDashboardDockercartConversion extends Controller {
 	}
 
 	public function sparkline() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_conversion')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
 
 		$cache_key = 'dash_dc_conversion_spark_' . $period;

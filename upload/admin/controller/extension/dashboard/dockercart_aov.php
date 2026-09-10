@@ -41,6 +41,9 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_aov')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/dockercart_aov');
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -62,6 +65,11 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_aov')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/dockercart_aov');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
@@ -113,6 +121,11 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 	}
 
 	public function sparkline() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_aov')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';
 
 		$cache_key = 'dash_dc_aov_spark_' . $period;

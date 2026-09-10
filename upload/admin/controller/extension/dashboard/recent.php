@@ -1,6 +1,9 @@
 <?php
 class ControllerExtensionDashboardRecent extends Controller {
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/recent')) {
+			return '';
+		}
 		$this->load->language('sale/order');
 		$this->load->language('extension/dashboard/recent');
 

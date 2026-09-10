@@ -31,6 +31,9 @@ class ControllerExtensionDashboardDockercartTopProducts extends Controller {
 	}
 
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_top_products')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/dockercart_top_products');
 
 		$data['text_top_products_subtitle'] = $this->language->get('text_top_products_subtitle');
@@ -44,6 +47,11 @@ class ControllerExtensionDashboardDockercartTopProducts extends Controller {
 	}
 
 	public function ajax() {
+		if (!$this->userHasAccess('extension/dashboard/dockercart_top_products')) {
+			$this->response->addHeader('Content-Type: application/json');
+			$this->response->setOutput(json_encode(array('error' => 'permission')));
+			return;
+		}
 		$this->load->language('extension/dashboard/dockercart_top_products');
 
 		$period = isset($this->request->get['period']) ? $this->request->get['period'] : 'month';

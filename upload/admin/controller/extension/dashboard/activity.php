@@ -1,6 +1,9 @@
 <?php
 class ControllerExtensionDashboardActivity extends Controller {
 	public function dashboard() {
+		if (!$this->userHasAccess('extension/dashboard/activity')) {
+			return '';
+		}
 		$this->load->language('extension/dashboard/activity');
 
 		$data['text_activity_subtitle'] = $this->language->get('text_activity_subtitle');
