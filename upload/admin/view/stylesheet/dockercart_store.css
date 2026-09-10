@@ -154,7 +154,7 @@
 }
 
 .store-badge-one_time {
-	background: var(--dc-purple-700);
+	background: var(--dc-primary);
 }
 
 .store-badge-subscription {
@@ -162,7 +162,7 @@
 }
 
 .store-badge-trial {
-	background: var(--dc-purple-600);
+	background: var(--dc-info);
 }
 
 .store-badge-free {
