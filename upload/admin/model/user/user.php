@@ -15,11 +15,12 @@ class ModelUserUser extends Model {
 	}
 
 	public function editPassword($user_id, $password) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "user` SET salt = '', password = '" . $this->db->escape(password_hash($password, PASSWORD_BCRYPT, ['cost' => 12])) . "', code = '' WHERE user_id = '" . (int)$user_id . "'");
+		$this->db->query("UPDATE `" . DB_PREFIX . "user` SET salt = '', password = '" . $this->db->escape(password_hash($password, PASSWORD_BCRYPT, ['cost' => 12])) . "', code = '', code_expire = NULL WHERE user_id = '" . (int)$user_id . "'");
 	}
 
 	public function editCode($email, $code) {
-		$this->db->query("UPDATE `" . DB_PREFIX . "user` SET code = '" . $this->db->escape($code) . "' WHERE LCASE(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
+		// Reset codes are single-purpose and short-lived: 1 hour from issuance.
+		$this->db->query("UPDATE `" . DB_PREFIX . "user` SET code = '" . $this->db->escape($code) . "', code_expire = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE LCASE(email) = '" . $this->db->escape(utf8_strtolower($email)) . "'");
 	}
 
 	public function deleteUser($user_id) {
@@ -45,7 +46,9 @@ class ModelUserUser extends Model {
 	}
 
 	public function getUserByCode($code) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "user` WHERE code = '" . $this->db->escape($code) . "' AND code != ''");
+		// NULL code_expire = legacy row: reject it (age unknown). Only fresh,
+		// unexpired codes match.
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "user` WHERE code = '" . $this->db->escape($code) . "' AND code != '' AND code_expire IS NOT NULL AND code_expire >= NOW()");
 
 		return $query->row;
 	}
