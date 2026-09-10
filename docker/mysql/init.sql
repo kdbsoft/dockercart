@@ -6311,7 +6311,7 @@ INSERT INTO `oc_dockercart_scheduler_task` VALUES
 (41,'license_check','License Verification',1,'every_3d','2026-09-07 11:22:51',NULL,'2026-07-03 18:33:04','2026-09-07 11:22:51',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
 (79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-09-09 09:02:39',NULL,'2026-07-24 18:51:04','2026-09-09 09:02:39',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
 (96,'currency_refresh','Currency Refresh',1,'daily','2026-09-09 09:02:39',NULL,'2026-07-29 10:46:20','2026-09-09 09:02:39',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-09-09 13:04:08',NULL,'2026-08-01 18:17:04','2026-09-09 13:04:08',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-09-09 13:19:08',NULL,'2026-08-01 18:17:04','2026-09-09 13:19:08',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
 (140,'reward_auto_award','Auto-award reward points',1,'daily','2026-09-09 09:02:39',NULL,'2026-08-06 08:09:03','2026-09-09 09:02:39',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
 (141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-09-09 09:02:39',NULL,'2026-08-06 15:36:09','2026-09-09 09:02:39',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
 (154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-09-09 09:02:39',NULL,'2026-08-09 15:39:28','2026-09-09 09:02:39',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
@@ -23168,7 +23168,8 @@ LOCK TABLES `oc_session` WRITE;
 INSERT INTO `oc_session` VALUES
 ('377a9fab8380fda028ec26cbb9','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"zuUtXlcwlaZCtFocFPh4ZLsumdpVwPyH\"}','2026-09-08 08:23:25'),
 ('48bfb109b904e9890b8d1f6de7','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"xAgzIkSSnWvcjprzBKEumNU3aW7UVzLb\"}','2026-09-03 05:43:30'),
-('4b7b9e0572318d4cb7441963c5','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"N9ACLMSuODysqpvQt2tcGJZC84MuFKPO\"}','2026-09-09 09:45:36');
+('4b7b9e0572318d4cb7441963c5','{\"language\":\"ru-ua\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"N9ACLMSuODysqpvQt2tcGJZC84MuFKPO\"}','2026-09-09 09:45:36'),
+('721f575c8907bc297de5bb3346','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"rmtxP3qgfltM1W5QE75eLa1pKcXnlX7J\"}','2026-09-10 10:15:01');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -33354,4 +33355,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-09-09 13:13:51
+-- Dump completed on 2026-09-09 13:29:56
