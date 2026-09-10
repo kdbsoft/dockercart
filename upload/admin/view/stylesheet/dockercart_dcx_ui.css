@@ -206,6 +206,7 @@
 .dcx-panel-body .form-control {
     height: 34px;
     font-size: 13px;
+    line-height: 14px;
 }
 .dcx-panel-body textarea.form-control {
     height: auto;
@@ -3600,6 +3601,7 @@ a.dcx-wh-card__line--link:hover span {
     padding: 8px;
 }
 .dcx-dash-editor .dcx-dash-list__item {
+    position: relative;
     border: 1px solid transparent;
     border-radius: var(--dc-radius-lg);
     gap: 10px;
@@ -3629,13 +3631,27 @@ a.dcx-wh-card__line--link:hover span {
     cursor: grabbing;
 }
 .dcx-dash-editor-item--dragging {
-    opacity: 0.4;
+    opacity: 0.9;
+    border-color: var(--dc-primary);
+    background: rgba(37, 99, 235, 0.05);
+    box-shadow: 0 10px 24px rgba(8, 15, 35, 0.14);
 }
-.dcx-dash-editor-item--drop-before {
-    box-shadow: 0 -2px 0 0 var(--dc-primary);
+.dcx-dash-editor-item--drop-before::after,
+.dcx-dash-editor-item--drop-after::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--dc-primary);
+    pointer-events: none;
 }
-.dcx-dash-editor-item--drop-after {
-    box-shadow: 0 2px 0 0 var(--dc-primary);
+.dcx-dash-editor-item--drop-before::after {
+    top: -2px;
+}
+.dcx-dash-editor-item--drop-after::after {
+    bottom: -2px;
 }
 .dcx-dash-width {
     flex: 0 0 auto;

@@ -260,3 +260,22 @@ $_["entry_country"] = "Страна";
 $_["entry_zone"] = "Регион / Область";
 $_["text_step"] = "Шаг";
 $_["text_payment_method"] = "Способ оплаты";
+
+// Order Totals (moved from Add-ons)
+$_["text_order_totals"] = "Итого в заказе";
+$_["text_order_totals_help"] = "Управляйте тем, какие итоги рассчитываются в сводке заказа и в каком порядке: подытог, купоны, доставка, налоги и т.д. Устанавливайте, включайте/отключайте, меняйте порядок расчёта или настраивайте каждый итог.";
+$_["column_total_sort_order"] = "Порядок";
+$_["column_total_status"] = "Включено";
+$_["text_total_not_installed"] = "Не установлено";
+$_["text_no_order_totals"] = "Расширения итогов заказа не найдены.";
+$_["button_total_install"] = "Установить";
+$_["button_total_uninstall"] = "Удалить";
+$_["text_confirm_uninstall"] = "Вы уверены, что хотите удалить этот итог заказа?";
+$_["error_invalid_total_code"] = "Неверный код итога заказа!";
+
+$_["text_total_estimator"] = "Калькулятор доставки";
+$_["help_total_estimator"] = "Показывать калькулятор стоимости доставки на странице корзины";
+$_["text_total_min_total"] = "Заказ от";
+$_["text_total_fee"] = "Сбор";
+$_["text_total_tax_class"] = "Налоговый класс";
+$_["text_drag_to_reorder"] = "Потяните, чтобы изменить порядок";

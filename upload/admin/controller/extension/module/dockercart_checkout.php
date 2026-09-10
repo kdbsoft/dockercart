@@ -306,6 +306,21 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
 	// Load countries for default country dropdown (model already loaded above)
 	$data["admin_countries"] = $this->model_localisation_country->getCountries();
 
+	// Order Totals management (moved from Add-ons)
+	$data["order_totals"] = $this->getOrderTotals();
+	$data["can_manage_totals"] = $this->user->hasPermission(
+		"modify",
+		"extension/extension/total",
+	);
+
+	// Tax classes for inline fee settings (handling / low_order_fee)
+	if ($data["order_totals"]) {
+		$this->load->model("localisation/tax_class");
+		$data["tax_classes"] = $this->model_localisation_tax_class->getTaxClasses();
+	} else {
+		$data["tax_classes"] = [];
+	}
+
 	$data["text_active"] = $this->language->get("text_active");
 	$data["text_inactive"] = $this->language->get("text_inactive");
 	$data["text_module_description"] = $this->language->get("text_module_description");
@@ -1782,6 +1797,358 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
         }
 
         return $methods;
+    }
+
+    /**
+     * AJAX: Save Order Total status / sort order without leaving the page
+     */
+    public function saveTotal()
+    {
+        $json = ["success" => false, "error" => ""];
+        $this->load->language("extension/module/dockercart_checkout");
+
+        if (
+            !$this->user->hasPermission(
+                "modify",
+                "extension/extension/total",
+            )
+        ) {
+            $json["error"] = $this->language->get("error_permission");
+            $this->response->addHeader("Content-Type: application/json");
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        $code = isset($data["code"]) ? (string) $data["code"] : "";
+
+        if (
+            $code === "" ||
+            strlen($code) > 64 ||
+            !preg_match("/^[a-zA-Z0-9_]+$/", $code) ||
+            !is_file(
+                DIR_APPLICATION .
+                    "controller/extension/total/" .
+                    $code .
+                    ".php",
+            )
+        ) {
+            $json["error"] = $this->language->get("error_invalid_total_code");
+            $this->response->addHeader("Content-Type: application/json");
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        // Collect field updates: top-level status/sort_order plus the
+        // optional "settings" map. Only whitelisted fields are accepted.
+        $updates = [];
+
+        if (isset($data["status"])) {
+            $updates["status"] = $data["status"];
+        }
+        if (isset($data["sort_order"])) {
+            $updates["sort_order"] = $data["sort_order"];
+        }
+        if (
+            isset($data["settings"]) &&
+            is_array($data["settings"])
+        ) {
+            foreach ($data["settings"] as $field => $value) {
+                $updates[(string) $field] = $value;
+            }
+        }
+
+        try {
+            $setting_code = "total_" . $code;
+
+            $this->load->model("setting/setting");
+
+            // Carry the complete key set for this code — editSetting()
+            // deletes all rows with the code before re-inserting.
+            $setting = $this->model_setting_setting->getSetting($setting_code);
+
+            $allowed = $this->getTotalFieldTypes($code);
+
+            foreach ($updates as $field => $value) {
+                if (!isset($allowed[$field])) {
+                    continue;
+                }
+
+                $setting[$setting_code . "_" . $field] =
+                    $this->castTotalSettingValue(
+                        $value,
+                        $allowed[$field],
+                    );
+            }
+
+            $this->model_setting_setting->editSetting($setting_code, $setting);
+
+            $json["success"] = true;
+        } catch (Exception $e) {
+            $json["error"] = sprintf(
+                $this->language->get("error_exception"),
+                $e->getMessage(),
+            );
+        }
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($json));
+    }
+
+    /**
+     * AJAX: Save Order Totals calculation order from drag&drop.
+     * Accepts the installed codes in their new top-to-bottom order and
+     * rewrites total_<code>_sort_order sequentially (1..N).
+     */
+    public function saveTotalsOrder()
+    {
+        $json = ["success" => false, "error" => ""];
+        $this->load->language("extension/module/dockercart_checkout");
+
+        if (
+            !$this->user->hasPermission(
+                "modify",
+                "extension/extension/total",
+            )
+        ) {
+            $json["error"] = $this->language->get("error_permission");
+            $this->response->addHeader("Content-Type: application/json");
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        $input = file_get_contents("php://input");
+        $data = json_decode($input, true);
+
+        $order = isset($data["order"]) && is_array($data["order"])
+            ? $data["order"]
+            : null;
+
+        if ($order === null) {
+            $json["error"] = $this->language->get("error_invalid_total_code");
+            $this->response->addHeader("Content-Type: application/json");
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
+
+        try {
+            $this->load->model("setting/extension");
+            $this->load->model("setting/setting");
+
+            $installed = $this->model_setting_extension->getInstalled("total");
+            $installed_lookup = array_fill_keys($installed, true);
+
+            $position = 1;
+            foreach ($order as $code) {
+                $code = (string) $code;
+
+                if (
+                    $code === "" ||
+                    strlen($code) > 64 ||
+                    !preg_match("/^[a-zA-Z0-9_]+$/", $code) ||
+                    !is_file(
+                        DIR_APPLICATION .
+                            "controller/extension/total/" .
+                            $code .
+                            ".php",
+                    ) ||
+                    !isset($installed_lookup[$code])
+                ) {
+                    continue;
+                }
+
+                $setting_code = "total_" . $code;
+
+                // Carry the complete key set — editSetting() deletes all
+                // rows with the code before re-inserting.
+                $setting = $this->model_setting_setting->getSetting($setting_code);
+                $setting[$setting_code . "_sort_order"] = (string) $position++;
+                $this->model_setting_setting->editSetting($setting_code, $setting);
+            }
+
+            $json["success"] = true;
+        } catch (Exception $e) {
+            $json["error"] = sprintf(
+                $this->language->get("error_exception"),
+                $e->getMessage(),
+            );
+        }
+
+        $this->response->addHeader("Content-Type: application/json");
+        $this->response->setOutput(json_encode($json));
+    }
+
+    /**
+     * Per-code extra settings fields (beyond status/sort_order) with types.
+     * Stored in oc_setting as total_<code>_<field>.
+     *
+     * @return array code => field => type
+     */
+    private function getTotalFieldTypes($code)
+    {
+        $types = [
+            "status" => "bool",
+            "sort_order" => "int",
+        ];
+
+        $extra = [
+            "shipping" => ["estimator" => "bool"],
+            "handling" => [
+                "total" => "decimal",
+                "fee" => "decimal",
+                "tax_class_id" => "int",
+            ],
+            "low_order_fee" => [
+                "total" => "decimal",
+                "fee" => "decimal",
+                "tax_class_id" => "int",
+            ],
+        ];
+
+        if (isset($extra[$code])) {
+            $types += $extra[$code];
+        }
+
+        return $types;
+    }
+
+    /**
+     * Cast an incoming value by declared field type
+     *
+     * @param mixed $value Raw value from the request
+     * @param string $type One of bool, int, decimal
+     * @return string Sanitized value ready for oc_setting
+     */
+    private function castTotalSettingValue($value, $type)
+    {
+        switch ($type) {
+            case "bool":
+                return (int) $value === 1 ? "1" : "0";
+
+            case "int":
+                return (string) (int) $value;
+
+            case "decimal":
+                $value = str_replace(",", ".", trim((string) $value));
+
+                return is_numeric($value) ? $value : "0";
+
+            default:
+                return (string) $value;
+        }
+    }
+
+    /**
+     * Get Order Total extensions (moved from Add-ons management)
+     *
+     * @return array List of total extensions with install/status/sort data
+     */
+    private function getOrderTotals()
+    {
+        $this->load->model("setting/extension");
+
+        $installed_list = $this->model_setting_extension->getInstalled("total");
+
+        // Clean up orphaned installs (same logic as Add-ons page)
+        foreach ($installed_list as $key => $value) {
+            if (
+                !is_file(
+                    DIR_APPLICATION .
+                        "controller/extension/total/" .
+                        $value .
+                        ".php",
+                )
+            ) {
+                $this->model_setting_extension->uninstall("total", $value);
+                unset($installed_list[$key]);
+            }
+        }
+
+        $ext_files = glob(
+            DIR_APPLICATION . "controller/extension/total/*.php",
+        );
+
+        if (!$ext_files) {
+            return [];
+        }
+
+        $totals = [];
+
+        foreach ($ext_files as $ext_file) {
+            $code = basename($ext_file, ".php");
+
+            $this->load->language("extension/total/" . $code);
+            $name = $this->language->get("heading_title");
+            if (empty($name) || $name === "heading_title") {
+                $name = ucfirst(str_replace("_", " ", $code));
+            }
+
+            $installed = in_array($code, $installed_list);
+
+            // Inline extra settings (fee amounts, estimator, tax class...)
+            $extra_values = [];
+            foreach (
+                $this->getTotalFieldTypes($code)
+                as $field => $type
+            ) {
+                if (in_array($field, ["status", "sort_order"])) {
+                    continue;
+                }
+
+                $extra_values[$field] = $installed
+                    ? $this->castTotalSettingValue(
+                        $this->config->get("total_" . $code . "_" . $field),
+                        $type,
+                    )
+                    : "";
+            }
+
+            $totals[] = [
+                "code" => $code,
+                "name" => $name,
+                "installed" => $installed,
+                "status" => $installed
+                    ? (bool) $this->config->get("total_" . $code . "_status")
+                    : false,
+                "sort_order" => $installed
+                    ? (string) $this->config->get(
+                        "total_" . $code . "_sort_order",
+                    )
+                    : "",
+                "extra" => $extra_values,
+                "install" => $this->url->link(
+                    "marketplace/extension/install",
+                    "user_token=" .
+                        $this->session->data["user_token"] .
+                        "&type=total&extension=" .
+                        $code,
+                    true,
+                ),
+                "uninstall" => $this->url->link(
+                    "marketplace/extension/uninstall",
+                    "user_token=" .
+                        $this->session->data["user_token"] .
+                        "&type=total&extension=" .
+                        $code,
+                    true,
+                ),
+            ];
+        }
+
+        // Installed first (ordered by sort_order), then the rest by name
+        usort($totals, function ($a, $b) {
+            if ($a["installed"] !== $b["installed"]) {
+                return $a["installed"] ? -1 : 1;
+            }
+            if ($a["installed"]) {
+                return (int) $a["sort_order"] <=> (int) $b["sort_order"];
+            }
+            return strcmp($a["name"], $b["name"]);
+        });
+
+        return $totals;
     }
 
     private function getAvailablePaymentMethods()

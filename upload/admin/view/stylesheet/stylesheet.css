@@ -3920,7 +3920,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .help-block {
-    margin-top: 0;
+    margin-top: 3px;
     margin-bottom: 0;
     font-size: 12px;
 }
