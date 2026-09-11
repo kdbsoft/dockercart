@@ -1773,29 +1773,6 @@ class ControllerExtensionModuleDockercartCheckout extends Controller
                 ];
             }
         }
-
-        // Handle dockercart_novapost - sub-methods: branch, locker, courier
-        if ($code === "dockercart_novapost") {
-            $this->load->language("extension/shipping/dockercart_novapost");
-
-            $delivery_types = [
-                "branch"  => "delivery_branch",
-                "locker"  => "delivery_locker",
-                "courier" => "delivery_courier",
-            ];
-
-            foreach ($delivery_types as $key => $lang_key) {
-                $method_code = "dockercart_novapost." . $key;
-                $title = $this->language->get($lang_key);
-                if (empty($title) || $title === $lang_key) {
-                    $title = ucfirst($key);
-                }
-                $methods[$method_code] = [
-                    "title" => $title,
-                ];
-            }
-        }
-
         return $methods;
     }
 
