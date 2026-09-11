@@ -1,3 +1,16 @@
+## [3.17.0](https://github.com/kdbsoft/dockercart/compare/v3.16.0...v3.17.0) (2026-09-10)
+
+### Features
+
+* **admin:** add per-widget permission checks to dashboard controllers ([bebd189](https://github.com/kdbsoft/dockercart/commit/bebd1890df7b0e72ec383dcc6b5100667e501a6b))
+* **auth:** add expiry to password reset codes ([43a3292](https://github.com/kdbsoft/dockercart/commit/43a3292536bfcd615673b6dcdd6956c00ac3a693))
+* **catalog:** add CSRF protection to storefront forms and AJAX endpoints ([220821c](https://github.com/kdbsoft/dockercart/commit/220821c5db65917b86f6eb0dcb877128e0125ff5))
+* **nginx:** add conditional HSTS header for HTTPS-only traffic ([bdcdc9d](https://github.com/kdbsoft/dockercart/commit/bdcdc9dc706c5bc9869771cb50c78cca4a3b4a2c))
+
+### Bug Fixes
+
+* **security:** harden token comparison, session handling, and input validation ([baa609e](https://github.com/kdbsoft/dockercart/commit/baa609e63c006f85083dff7901ebc7680b3056f0))
+
 ## [3.16.0](https://github.com/kdbsoft/dockercart/compare/v3.15.1...v3.16.0) (2026-09-10)
 
 ### Features
