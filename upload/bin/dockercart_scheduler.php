@@ -392,7 +392,7 @@ function reapWorkers(array &$activeTasks, PDO $pdo, string $dbPrefix, int $worke
  * handled by the conditional last_run claim in the main loop — a task may
  * only be dispatched by the daemon whose conditional UPDATE affected one row.
  *
- * @param string               $taskKey      e.g. "import_yml:1" or "novapost_sync:2"
+ * @param string               $taskKey      e.g. "import_yml:1"
  * @param array<string, array> $activeTasks  PID tracking map
  * @return bool
  */
@@ -434,7 +434,7 @@ pcntl_signal(SIGWINCH, function () use (&$running): void {
 // ── Main Loop ──────────────────────────────────────────────────────────
 
 /**
- * Active tasks keyed by task_key (e.g. "import_yml:3", "novapost_sync:1").
+ * Active tasks keyed by task_key (e.g. "import_yml:3").
  * Each value: ['pid' => int, 'process' => resource, 'handler' => string, 'task_id' => int, 'started_at' => int]
  * @var array<string, array>
  */
@@ -500,7 +500,7 @@ while ($running) {
 			continue;
 		}
 
-		// Build task_key for dedup: "import_yml:5" or "novapost_sync:2"
+		// Build task_key for dedup: "import_yml:5"
 		$taskKey = $taskType . ':' . ($sourceId ?? $taskId);
 
 		if (isTaskAlreadyRunning($taskKey, $activeTasks)) {

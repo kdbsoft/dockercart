@@ -54,12 +54,6 @@ class OrderLocalizer {
 			if ($title !== null) {
 				return $title;
 			}
-
-			$title = $this->resolveNovapostMethodTitle((string)$order['shipping_code']);
-
-			if ($title !== null) {
-				return $title;
-			}
 		}
 
 		return (string)($order['shipping_method'] ?? '');
@@ -303,42 +297,6 @@ class OrderLocalizer {
 		}
 
 		return $query->row;
-	}
-
-	/**
-	 * Resolve "dockercart_novapost.{branch|locker|courier}" titles from the
-	 * shipping extension language file. Returns null when the code is not a
-	 * novapost code or the file/keys are unavailable.
-	 */
-	private function resolveNovapostMethodTitle(string $code): ?string {
-		if (strpos($code, 'dockercart_novapost.') !== 0) {
-			return null;
-		}
-
-		$lang_keys = [
-			'branch'  => 'delivery_branch',
-			'locker'  => 'delivery_locker',
-			'courier' => 'delivery_courier',
-		];
-
-		$suffix = substr($code, strlen('dockercart_novapost.'));
-
-		if (!isset($lang_keys[$suffix])) {
-			return null;
-		}
-
-		if (!$this->language->load('extension/shipping/dockercart_novapost')) {
-			return null;
-		}
-
-		$key = $lang_keys[$suffix];
-		$title = $this->language->get($key);
-
-		if (empty($title) || $title === $key) {
-			return null;
-		}
-
-		return $title;
 	}
 
 	/**

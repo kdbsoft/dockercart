@@ -2687,29 +2687,6 @@ class ControllerSaleOrderDetail extends Controller {
 				];
 			}
 		}
-
-		if ($code === 'dockercart_novapost') {
-			$this->load->language('extension/shipping/dockercart_novapost', 'shipping_dockercart_novapost');
-			$novapost_lang = $this->language->get('shipping_dockercart_novapost');
-
-			$delivery_types = [
-				'branch'  => 'delivery_branch',
-				'locker'  => 'delivery_locker',
-				'courier' => 'delivery_courier',
-			];
-
-			foreach ($delivery_types as $key => $lang_key) {
-				$method_code = 'dockercart_novapost.' . $key;
-				$title = $novapost_lang->get($lang_key);
-				if (empty($title) || $title === $lang_key) {
-					$title = ucfirst($key);
-				}
-				$methods[$method_code] = [
-					'title' => $title,
-				];
-			}
-		}
-
 		return $methods;
 	}
 

@@ -710,7 +710,7 @@ referenced entity or translation is gone:
 | Method | Resolves from | Fallback |
 |---|---|---|
 | `paymentMethodTitle($order)` | `payment_code` `dockercart_universal.dockercart_universal_{id}` → `oc_dockercart_universal_payment_description.name` | stored `payment_method` |
-| `shippingMethodTitle($order)` | universal `name` + `delivery_time` (same format as checkout quotes); `dockercart_novapost.{branch\|locker\|courier}` → `delivery_branch/delivery_locker/delivery_courier` language keys | stored `shipping_method` |
+| `shippingMethodTitle($order)` | universal `name` + `delivery_time` (same format as checkout quotes) | stored `shipping_method` |
 | `paymentEntryTitle($payment)` | like `paymentMethodTitle` but for `oc_order_payment` rows | stored |
 | `productName($order_product)` | `oc_product_description.name` by `product_id` | stored `name` |
 | `optionName($order_option)` | `product_option_id` → `oc_option_description.name` | stored `name` |
