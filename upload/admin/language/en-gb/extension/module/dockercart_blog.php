@@ -33,7 +33,7 @@ $_['text_manage_comments'] = 'Manage Comments';
 $_['text_home']        = 'Home';
 
 // Tab
-$_['tab_general']      = 'General Settings';
+$_['tab_general']      = 'Module Settings';
 $_['tab_display']      = 'Display';
 $_['tab_comments']     = 'Comments';
 $_['tab_seo']          = 'SEO / Sitemap';
@@ -46,7 +46,7 @@ $_['text_tab_comments_subtitle'] = 'Manage comment moderation and spam';
 $_['text_tab_about_subtitle'] = 'Module information and support';
 
 $_['text_form']         = 'Add Blog';
-$_['text_status_card']  = 'Status';
+$_['text_status_card']  = 'Module Status';
 $_['text_quick_links_card'] = 'Quick Links';
 $_['text_about_card']   = 'About';
 $_['text_module_label'] = 'Module';

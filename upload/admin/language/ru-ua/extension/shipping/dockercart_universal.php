@@ -21,7 +21,7 @@ $_['text_name_description']        = 'Название и описание';
 $_['text_pricing']                 = 'Цена';
 $_['text_conditions']              = 'Условия';
 $_['text_status_sorting']          = 'Статус';
-$_['text_general_settings']        = 'Статус';
+$_['text_general_settings']        = 'Статус модуля';
 $_['text_geo_restriction']         = 'Географическое ограничение';
 $_['text_order_total_range']       = 'Диапазон суммы заказа';
 $_['text_weight_range']            = 'Диапазон веса';
@@ -72,6 +72,7 @@ $_['entry_max_total']              = 'Макс. сумма заказа';
 $_['entry_min_weight']             = 'Мин. вес';
 $_['entry_max_weight']             = 'Макс. вес';
 $_['entry_status']                 = 'Статус';
+$_['entry_method_status']          = 'Статус';
 $_['entry_sort_order']             = 'Сортировка';
 
 // Help

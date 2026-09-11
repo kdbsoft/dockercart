@@ -30,7 +30,7 @@ $_['text_default_success']             = 'Thanks! You are now subscribed.';
 $_['text_default_already']             = 'You are subscribed';
 $_['text_active']                      = 'Active';
 $_['text_inactive']                    = 'Inactive';
-$_['text_status_card']                 = 'Status';
+$_['text_status_card']                 = 'Module Status';
 $_['text_tools_card']                  = 'Tools';
 
 // Entry

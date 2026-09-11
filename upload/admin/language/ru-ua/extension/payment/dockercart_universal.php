@@ -20,7 +20,7 @@ $_['text_method_form_description'] = 'Настройка названия, оп�
 $_['text_name_description']        = 'Название и описание';
 $_['text_conditions']              = 'Условия';
 $_['text_status_sorting']          = 'Статус';
-$_['text_general_settings']        = 'Статус';
+$_['text_general_settings']        = 'Статус модуля';
 $_['text_geo_restriction']         = 'Географическое ограничение';
 $_['text_order_total_range']       = 'Диапазон суммы заказа';
 $_['text_shipping_dependency']       = 'Зависимость от доставки';
@@ -58,6 +58,7 @@ $_['entry_max_total']              = 'Макс. сумма заказа';
 $_['entry_shipping_methods']         = 'Разрешённые способы доставки';
 $_['entry_order_status']           = 'Статус заказа';
 $_['entry_status']                 = 'Статус';
+$_['entry_method_status']          = 'Статус';
 $_['entry_sort_order']             = 'Сортировка';
 $_['entry_reserve_minutes']        = 'Время резерва (минут)';
 
