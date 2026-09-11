@@ -30,6 +30,9 @@ class ControllerMarketplaceExtension extends Controller {
 	// Blog management pages (posts, categories, authors, comments, settings) are
 	// managed via the Blog menu — keep them out of Add-ons. Only the
 	// "latest articles" widget (dockercart_blog_latest) stays visible.
+	// Account menu is rendered directly via common/account_menu (not a layout
+	// widget) and Store is a legacy multistore switcher unused in single-store
+	// setup — keep both out of Add-ons.
 	private $hidden_extensions = array(
 		'module' => array(
 			'dockercart_blog',
@@ -37,6 +40,8 @@ class ControllerMarketplaceExtension extends Controller {
 			'dockercart_blog_category',
 			'dockercart_blog_comment',
 			'dockercart_blog_post',
+			'account',
+			'store',
 		),
 	);
 
