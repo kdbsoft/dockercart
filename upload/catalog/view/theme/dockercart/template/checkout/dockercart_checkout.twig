@@ -2596,8 +2596,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } catch (e) { /* ignore template injection errors */ }
 
-            // Reset shipping state on country change so stale methods
-            // (e.g. NovaPost for non-UA countries) are cleared.
+            // Reset shipping state on country change so stale methods are cleared.
             window._lastSavedShipping = null;
             window._lastSentShippingMethod = null;
             const smContainer = $('#shipping-methods');
@@ -3913,14 +3912,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check shipping method (only if shipping is required)
     if ({{ shipping_required ? 'true' : 'false' }} && !$('input[name="shipping_method"]:checked')) {
       errors.push(window.dcLang?.error_select_shipping_method || 'Please select a shipping method');
-    }
-
-    // NovaPost-specific validation (city, division/address)
-    if (typeof window._novapostValidate === 'function') {
-      const npResult = window._novapostValidate();
-      if (!npResult.valid && npResult.errors.length) {
-        npResult.errors.forEach(function (e) { errors.push(e); });
-      }
     }
 
     // Check payment method

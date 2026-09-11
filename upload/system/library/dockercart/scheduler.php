@@ -22,7 +22,7 @@ class DockercartScheduler {
 	// ────────────────────────────────────────────────────────────
 
 	/**
-	 * Register a singleton global task (e.g. currency_refresh, novapost_sync).
+	 * Register a singleton global task (e.g. currency_refresh).
 	 *
 	 * Idempotent — ignores rows that already exist (ON DUPLICATE KEY).
 	 *
