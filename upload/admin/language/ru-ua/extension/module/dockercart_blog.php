@@ -27,7 +27,7 @@ $_['help_posts_per_page'] = 'Количество статей на страни
 
 $_['tab_comments'] = 'Комментарии';
 $_['tab_display'] = 'Отображение';
-$_['tab_general'] = 'Общие';
+$_['tab_general'] = 'Настройки модуля';
 $_['tab_about'] = 'О модуле';
 $_['tab_seo'] = 'SEO';
 $_['tab_statistics'] = 'Статистика';
@@ -61,7 +61,7 @@ $_['text_total_comments'] = 'Всего комментариев';
 $_['text_total_posts'] = 'Всего статей';
 $_['text_yes'] = 'Да';
 $_['text_form']         = 'Добавить блог';
-$_['text_status_card']  = 'Статус';
+$_['text_status_card']  = 'Статус модуля';
 $_['text_quick_links_card'] = 'Быстрые ссылки';
 $_['text_about_card']   = 'О модуле';
 $_['text_module_label'] = 'Модуль';

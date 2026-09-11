@@ -196,7 +196,7 @@ $_["button_clear_fields"] = "Очистить поля";
 
 // Missing keys from English
 // Sidebar
-$_["text_sidebar_status"] = "Состояние модуля";
+$_["text_sidebar_status"] = "Статус модуля";
 $_["text_sidebar_nav"] = "Разделы";
 $_["text_sidebar_about"] = "О модуле";
 $_["text_module_always_active"] =

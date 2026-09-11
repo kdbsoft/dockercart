@@ -15,7 +15,7 @@ $_['text_yes']          = 'Yes';
 $_['text_no']           = 'No';
 
 // Tab
-$_['tab_general']       = 'General Settings';
+$_['tab_general']       = 'Module Settings';
 $_['tab_connection']    = 'Connection Settings';
 $_['tab_morphology']    = 'Language & Morphology';
 $_['tab_indexing']      = 'Indexing';
