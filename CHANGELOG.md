@@ -1,3 +1,10 @@
+## [3.18.0](https://github.com/kdbsoft/dockercart/compare/v3.17.0...v3.18.0) (2026-09-11)
+
+### Features
+
+* **admin:** hide Account and Store modules from extension lists ([82c59a4](https://github.com/kdbsoft/dockercart/commit/82c59a4e584158902733ff8a4c4c2935ec7cf0c5))
+* **shipping:** remove NovaPost integration and SDK dependency ([d3221de](https://github.com/kdbsoft/dockercart/commit/d3221de7e133dbd9d6a98beb812217e14a6ab47e))
+
 ## [3.17.0](https://github.com/kdbsoft/dockercart/compare/v3.16.0...v3.17.0) (2026-09-10)
 
 ### Features
