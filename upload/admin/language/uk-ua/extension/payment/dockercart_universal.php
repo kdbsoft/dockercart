@@ -20,7 +20,7 @@ $_['text_method_form_description'] = 'Налаштування назви, оп�
 $_['text_name_description']        = 'Назва та опис';
 $_['text_conditions']              = 'Умови';
 $_['text_status_sorting']          = 'Статус';
-$_['text_general_settings']        = 'Статус';
+$_['text_general_settings']        = 'Статус модуля';
 $_['text_geo_restriction']         = 'Географічне обмеження';
 $_['text_order_total_range']       = 'Діапазон суми замовлення';
 $_['text_shipping_dependency']       = 'Залежність від доставки';
@@ -58,6 +58,7 @@ $_['entry_max_total']              = 'Макс. сума замовлення';
 $_['entry_shipping_methods']         = 'Дозволені способи доставки';
 $_['entry_order_status']           = 'Статус замовлення';
 $_['entry_status']                 = 'Статус';
+$_['entry_method_status']          = 'Статус';
 $_['entry_sort_order']             = 'Сортування';
 $_['entry_reserve_minutes']        = 'Час резерву (хвилин)';
 

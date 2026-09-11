@@ -20,7 +20,7 @@ $_['text_method_form_description'] = 'Configure payment method name, description
 $_['text_name_description']        = 'Name & Description';
 $_['text_conditions']              = 'Conditions';
 $_['text_status_sorting']          = 'Status';
-$_['text_general_settings']        = 'Status';
+$_['text_general_settings']        = 'Module Status';
 $_['text_geo_restriction']         = 'Geographic Restriction';
 $_['text_order_total_range']       = 'Order Total Range';
 $_['text_shipping_dependency']      = 'Shipping Dependency';
@@ -58,6 +58,7 @@ $_['entry_max_total']              = 'Max Order Total';
 $_['entry_shipping_methods']        = 'Allowed Shipping Methods';
 $_['entry_order_status']           = 'Order Status';
 $_['entry_status']                 = 'Status';
+$_['entry_method_status']          = 'Status';
 $_['entry_sort_order']             = 'Sort Order';
 $_['entry_reserve_minutes']        = 'Reserve Duration (minutes)';
 
