@@ -1,3 +1,10 @@
+## [3.18.1](https://github.com/kdbsoft/dockercart/compare/v3.18.0...v3.18.1) (2026-09-11)
+
+### Bug Fixes
+
+* **migrations:** handle object-form permission JSON in account/store removal ([d6edab2](https://github.com/kdbsoft/dockercart/commit/d6edab29dee8cc8eaa63351bdc39675b5345cdf7))
+* **migrations:** repair user group permissions corrupted by REPLACE-based migrations ([08553cb](https://github.com/kdbsoft/dockercart/commit/08553cb984fc3b65823b1db46581eecacb1ed6fc))
+
 ## [3.18.0](https://github.com/kdbsoft/dockercart/compare/v3.17.0...v3.18.0) (2026-09-11)
 
 ### Features
