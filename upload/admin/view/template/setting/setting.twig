@@ -1168,10 +1168,7 @@
                       <div class="dcx-section-header"><h4><i data-lucide="image" width="16" height="16"></i> {{ text_invoice_logo }}</h4></div>
                         <div class="dcx-fields">
                           <div class="dcx-field">
-                            <div style="display:flex;align-items:center;gap:4px;">
-                              <label class="dcx-label" for="input-invoice-logo">{{ entry_seller_invoice_logo }}</label>
-                              <span data-toggle="tooltip" title="{{ help_invoice_logo }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </div>
+                            <label class="dcx-label" for="input-invoice-logo">{{ entry_seller_invoice_logo }} <span data-toggle="tooltip" title="{{ help_invoice_logo }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <a href="" id="thumb-invoice-logo" data-toggle="image" class="img-thumbnail"><img src="{{ seller_invoice_logo_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                             <input type="hidden" name="config_seller_invoice_logo" value="{{ config_seller_invoice_logo }}" id="input-invoice-logo" />
                             <div class="help-block text-muted">{{ help_invoice_logo }}</div>
@@ -1182,26 +1179,17 @@
                       <div class="dcx-section-header"><h4><i data-lucide="pen-line" width="16" height="16"></i> {{ text_invoice_signature }}</h4></div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field" style="max-width: 50%;">
-                            <div style="display:flex;align-items:center;gap:4px;">
-                              <label class="dcx-label" for="input-seller-officer">{{ entry_seller_officer }}</label>
-                              <span data-toggle="tooltip" title="{{ help_seller_officer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </div>
+                            <label class="dcx-label" for="input-seller-officer">{{ entry_seller_officer }} <span data-toggle="tooltip" title="{{ help_seller_officer }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_seller_officer" value="{{ config_seller_officer }}" placeholder="{{ entry_seller_officer }}" id="input-seller-officer" class="form-control" />
                           </div>
                           <div class="dcx-field" style="max-width: 50%;">
-                            <div style="display:flex;align-items:center;gap:4px;">
-                              <label class="dcx-label" for="input-seller-officer-role">{{ entry_seller_officer_role }}</label>
-                              <span data-toggle="tooltip" title="{{ help_seller_officer_role }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </div>
+                            <label class="dcx-label" for="input-seller-officer-role">{{ entry_seller_officer_role }} <span data-toggle="tooltip" title="{{ help_seller_officer_role }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <input type="text" name="config_seller_officer_role" value="{{ config_seller_officer_role }}" placeholder="{{ entry_seller_officer_role }}" id="input-seller-officer-role" class="form-control" />
                           </div>
                         </div>
                         <div class="dcx-fields dcx-fields--row">
                           <div class="dcx-field dcx-field--half">
-                            <div style="display:flex;align-items:center;gap:4px;">
-                              <label class="dcx-label" for="input-signature-image">{{ entry_seller_signature_image }}</label>
-                              <span data-toggle="tooltip" title="{{ help_seller_signature_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </div>
+                            <label class="dcx-label" for="input-signature-image">{{ entry_seller_signature_image }} <span data-toggle="tooltip" title="{{ help_seller_signature_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <div style="display:flex;align-items:flex-start;gap:8px;">
                               <a href="" id="thumb-signature-image" class="img-thumbnail" onclick="event.preventDefault(); $('#input-signature-image-file').trigger('click');"><img src="{{ seller_signature_image_url ?: placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" style="width:100px;height:100px;object-fit:contain;" /></a>
                               <div>
@@ -1214,10 +1202,7 @@
                             <div class="help-block text-muted">{{ help_seller_signature_image }}</div>
                           </div>
                           <div class="dcx-field dcx-field--half">
-                            <div style="display:flex;align-items:center;gap:4px;">
-                              <label class="dcx-label" for="input-stamp-image">{{ entry_seller_stamp_image }}</label>
-                              <span data-toggle="tooltip" title="{{ help_seller_stamp_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </div>
+                            <label class="dcx-label" for="input-stamp-image">{{ entry_seller_stamp_image }} <span data-toggle="tooltip" title="{{ help_seller_stamp_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <div style="display:flex;align-items:flex-start;gap:8px;">
                               <a href="" id="thumb-stamp-image" class="img-thumbnail" onclick="event.preventDefault(); $('#input-stamp-image-file').trigger('click');"><img src="{{ seller_stamp_image_url ?: placeholder }}" alt="" title="" data-placeholder="{{ placeholder }}" style="width:100px;height:100px;object-fit:contain;" /></a>
                               <div>

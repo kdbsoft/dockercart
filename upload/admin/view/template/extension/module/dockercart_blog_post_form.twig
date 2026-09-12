@@ -90,12 +90,11 @@
                       <textarea name="post_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].meta_keyword }}</textarea>
                     </div>
                     <div class="dcx-field">
-                      <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tags }}</label>
+                      <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tags }} <span data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dc-tag-input">
                         <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tags }}" />
                         <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
                         <input type="hidden" name="post_description[{{ language.language_id }}][tags]" value="{{ post_description[language.language_id] ? post_description[language.language_id].tags }}" />
-                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tags }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
                   </div>
