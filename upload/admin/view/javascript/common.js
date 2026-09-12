@@ -377,3 +377,38 @@ $(document).on('click', 'tr[data-href]', function(e) {
 
 	window.location = $(this).data('href');
 });
+
+/* ── Sticky right sidebar (dcx-sidebar-card) ──
+   The sidebar column scrolls together with the page and pins once its
+   bottom edge reaches the viewport bottom, so it follows the page scroll
+   all the way to the very bottom without an inner scrollbar. */
+(function() {
+	var init = function() {
+		var col = document.querySelector('#content .col-lg-4.col-xl-3:has(.dcx-sidebar-card)');
+		if (!col) return;
+
+		var update = function() {
+			if (window.innerWidth < 1200) {
+				col.style.top = '';
+				return;
+			}
+
+			// Pin with the bottom edge just above the viewport bottom;
+			// for short sidebars fall back to the regular top offset
+			var pinFrom = window.innerHeight - col.offsetHeight - 32;
+			col.style.top = Math.min(70, pinFrom) + 'px';
+		};
+
+		if (window.ResizeObserver) {
+			new ResizeObserver(update).observe(col);
+		}
+		window.addEventListener('resize', update);
+		update();
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+})();

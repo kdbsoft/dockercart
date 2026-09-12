@@ -362,6 +362,9 @@
     margin-top: 12px;
     align-items: flex-start;
 }
+.dcx-fields--row.end {
+    align-items: flex-end;
+}
 .dcx-fields--row:first-child {
     margin-top: 0;
 }
@@ -1038,6 +1041,17 @@ div.dcx-field.required > .dcx-label:before {
     background: var(--dc-surface);
     margin-bottom: 16px;
 }
+
+/* ── Sticky right sidebar column ──
+   The dcx-sidebar-card column scrolls together with the page and pins
+   when its bottom edge reaches the viewport bottom, so it follows the
+   scroll down to the very bottom of the page (no inner scrollbar).
+   `top` is set dynamically in common.js. */
+@media (min-width: 1200px) {
+    .col-lg-4.col-xl-3:has(.dcx-sidebar-card) {
+        position: sticky; /* top: set by common.js */
+    }
+}
 .dcx-sidebar-card__header {
     padding: 14px 18px;
     border-bottom: 1px solid var(--dc-border);
@@ -1106,6 +1120,11 @@ div.dcx-field.required > .dcx-label:before {
     font-size: 12px;
     font-weight: 500;
     color: var(--dc-text-dark);
+}
+.dcx-sidebar-card__field.required > .dcx-sidebar-card__label:before {
+    content: '* ';
+    color: var(--dc-red-500);
+    font-weight: bold;
 }
 .dcx-reward-row {
     flex-wrap: nowrap;
