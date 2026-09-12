@@ -1119,7 +1119,12 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 }
 
 .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     margin: 0;
+    padding-left: 0;
+    list-style: none;
     gap: 4px;
 }
 
@@ -3969,14 +3974,24 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     padding: 8px 15px;
 }
 .pagination-wrap .row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     margin: 0;
 }
 .pagination-wrap .col-sm-6 {
+    float: none;
+    width: 100%;
     padding: 0;
+    text-align: left;
+}
+.pagination-wrap .pagination {
+    justify-content: flex-start;
+    margin: 0;
 }
 .pagination-wrap .pagination li {
-    display: inline-block;
-    margin-right: 6px;
+    margin: 0;
 }
 
 /* Custom xl breakpoint (≥1400px) */

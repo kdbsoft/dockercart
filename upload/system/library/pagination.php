@@ -14,7 +14,7 @@ class Pagination {
 	public $total = 0;
 	public $page = 1;
 	public $limit = 20;
-	public $num_links = 8;
+	public $num_links = 5;
 	public $url = '';
 	public $text_first = '|&lt;';
 	public $text_last = '&gt;|';
@@ -77,16 +77,45 @@ class Pagination {
 				}
 			}
 
-			for ($i = $start; $i <= $end; $i++) {
-				if ($page == $i) {
-					$output .= '<li class="active"><span>' . $i . '</span></li>';
-				} else {
-					if ($i === 1) {
-						$output .= '<li><a href="' . str_replace(array('&amp;page={page}', '?page={page}', '&page={page}'), '', $this->url) . '">' . $i . '</a></li>';
-					} else {
-						$output .= '<li><a href="' . str_replace('{page}', $i, $this->url) . '">' . $i . '</a></li>';
-					}
+			$pages = range($start, $end);
+
+			if ($start > 1) {
+				array_unshift($pages, 1);
+			}
+
+			if ($end < $num_pages) {
+				$pages[] = $num_pages;
+			}
+
+			// Fill single-page gaps so an ellipsis never hides just one page.
+			$expanded = [];
+			$previous = 0;
+
+			foreach ($pages as $page_num) {
+				if ($previous && $page_num - $previous == 2) {
+					$expanded[] = $previous + 1;
 				}
+
+				$expanded[] = $page_num;
+				$previous = $page_num;
+			}
+
+			$previous = 0;
+
+			foreach ($expanded as $page_num) {
+				if ($previous && $page_num - $previous > 1) {
+					$output .= '<li class="disabled"><span>&hellip;</span></li>';
+				}
+
+				if ($page == $page_num) {
+					$output .= '<li class="active"><span>' . $page_num . '</span></li>';
+				} elseif ($page_num === 1) {
+					$output .= '<li><a href="' . str_replace(array('&amp;page={page}', '?page={page}', '&page={page}'), '', $this->url) . '">' . $page_num . '</a></li>';
+				} else {
+					$output .= '<li><a href="' . str_replace('{page}', (string)$page_num, $this->url) . '">' . $page_num . '</a></li>';
+				}
+
+				$previous = $page_num;
 			}
 		}
 
