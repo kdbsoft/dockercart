@@ -1,3 +1,10 @@
+## [3.19.0](https://github.com/kdbsoft/dockercart/compare/v3.18.1...v3.19.0) (2026-09-12)
+
+### Features
+
+* **admin:** add sticky right sidebar column ([312e89d](https://github.com/kdbsoft/dockercart/commit/312e89de47aad1fc17ef21e6e248b9ba3484526c))
+* **admin:** improve pagination styling and behavior ([feac3ea](https://github.com/kdbsoft/dockercart/commit/feac3ea76db66156e54bea6e0d1a90d25cc9dd1c))
+
 ## [3.18.1](https://github.com/kdbsoft/dockercart/compare/v3.18.0...v3.18.1) (2026-09-11)
 
 ### Bug Fixes
