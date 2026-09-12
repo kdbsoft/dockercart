@@ -48,7 +48,7 @@
               <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-theme">
                 <div class="dcx-fields">
                   <div class="dcx-field">
-                    <label class="dcx-label" for="input-directory"><span data-toggle="tooltip" title="{{ help_directory }}">{{ entry_directory }}</span></label>
+                    <label class="dcx-label" for="input-directory">{{ entry_directory }} <span data-toggle="tooltip" title="{{ help_directory }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <select name="theme_dockercart_directory" id="input-directory" class="form-control">
                       {% for directory in directories %}
                       {% if directory == theme_dockercart_directory %}
@@ -72,14 +72,14 @@
                     </select>
                   </div>
                   <div class="dcx-field required">
-                    <label class="dcx-label" for="input-catalog-limit"><span data-toggle="tooltip" title="{{ help_product_limit }}">{{ entry_product_limit }}</span></label>
+                    <label class="dcx-label" for="input-catalog-limit">{{ entry_product_limit }} <span data-toggle="tooltip" title="{{ help_product_limit }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <input type="text" name="theme_dockercart_product_limit" value="{{ theme_dockercart_product_limit }}" placeholder="{{ entry_product_limit }}" id="input-catalog-limit" class="form-control" />
                     {% if error_product_limit %}
                     <div class="text-danger">{{ error_product_limit }}</div>
                     {% endif %}
                   </div>
                   <div class="dcx-field required">
-                    <label class="dcx-label" for="input-description-limit"><span data-toggle="tooltip" title="{{ help_product_description_length }}">{{ entry_product_description_length }}</span></label>
+                    <label class="dcx-label" for="input-description-limit">{{ entry_product_description_length }} <span data-toggle="tooltip" title="{{ help_product_description_length }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                     <input type="text" name="theme_dockercart_product_description_length" value="{{ theme_dockercart_product_description_length }}" placeholder="{{ entry_product_description_length }}" id="input-description-limit" class="form-control" />
                     {% if error_product_description_length %}
                     <div class="text-danger">{{ error_product_description_length }}</div>

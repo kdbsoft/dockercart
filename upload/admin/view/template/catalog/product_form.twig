@@ -86,12 +86,11 @@
                             <textarea name="product_description[{{ language.language_id }}][meta_keyword]" rows="5" placeholder="{{ entry_meta_keyword }}" id="input-meta-keyword{{ language.language_id }}" class="form-control">{{ product_description[language.language_id] ? product_description[language.language_id].meta_keyword }}</textarea>
                           </div>
                           <div class="dcx-field">
-                            <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tag }}</label>
+                            <label class="dcx-label" for="input-tag{{ language.language_id }}">{{ entry_tag }} <span data-toggle="tooltip" title="{{ help_tag }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                             <div class="dc-tag-input">
                               <input type="text" id="input-tag{{ language.language_id }}" class="form-control dc-tag-input__field" placeholder="{{ entry_tag }}"/>
                               <div class="dc-tag-input__tags" id="tag-chips{{ language.language_id }}"></div>
                               <input type="hidden" name="product_description[{{ language.language_id }}][tag]" value="{{ product_description[language.language_id] ? product_description[language.language_id].tag }}"/>
-                              <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_tag }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                             </div>
                           </div>
                         </div>
@@ -112,11 +111,8 @@
                   <div class="row">
                     <div class="col-sm-3">
                       <div class="dcx-field required">
-                        <label class="dcx-label" for="input-model">{{ entry_model }}</label>
-                        <div class="dcx-field-icon-wrap">
-                          <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
-                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_model }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                        </div>
+                        <label class="dcx-label" for="input-model">{{ entry_model }} <span data-toggle="tooltip" title="{{ help_model }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                        <input type="text" name="model" value="{{ model }}" placeholder="{{ entry_model }}" id="input-model" class="form-control"/>
                         {% if error_model %}
                           <div class="text-danger">{{ error_model }}</div>
                         {% endif %}
@@ -124,11 +120,8 @@
                     </div>
                     <div class="col-sm-3">
                       <div class="dcx-field">
-                        <label class="dcx-label" for="input-sku">{{ entry_sku }}</label>
-                        <div class="dcx-field-icon-wrap">
-                          <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
-                          <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_sku }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                        </div>
+                        <label class="dcx-label" for="input-sku">{{ entry_sku }} <span data-toggle="tooltip" title="{{ help_sku }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                        <input type="text" name="sku" value="{{ sku }}" placeholder="{{ entry_sku }}" id="input-sku" class="form-control"/>
                       </div>
                     </div>
                   </div>
@@ -136,51 +129,36 @@
                     <div class="row">
                       <div class="col-sm-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-upc">{{ entry_upc }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_upc }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-upc">{{ entry_upc }} <span data-toggle="tooltip" title="{{ help_upc }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
                         </div>
                       </div>
                       <div class="col-sm-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-ean">{{ entry_ean }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="ean" value="{{ ean }}" placeholder="{{ entry_ean }}" id="input-ean" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_ean }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-ean">{{ entry_ean }} <span data-toggle="tooltip" title="{{ help_ean }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="ean" value="{{ ean }}" placeholder="{{ entry_ean }}" id="input-ean" class="form-control"/>
                         </div>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-sm-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-jan">{{ entry_jan }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_jan }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-jan">{{ entry_jan }} <span data-toggle="tooltip" title="{{ help_jan }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>
                         </div>
                       </div>
                       <div class="col-sm-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-isbn">{{ entry_isbn }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="isbn" value="{{ isbn }}" placeholder="{{ entry_isbn }}" id="input-isbn" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_isbn }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-isbn">{{ entry_isbn }} <span data-toggle="tooltip" title="{{ help_isbn }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="isbn" value="{{ isbn }}" placeholder="{{ entry_isbn }}" id="input-isbn" class="form-control"/>
                         </div>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-sm-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-mpn">{{ entry_mpn }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_mpn }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-mpn">{{ entry_mpn }} <span data-toggle="tooltip" title="{{ help_mpn }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="mpn" value="{{ mpn }}" placeholder="{{ entry_mpn }}" id="input-mpn" class="form-control"/>
                         </div>
                       </div>
                     </div>
@@ -307,35 +285,29 @@
                           <div class="dcx-checkbox-group">
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
-                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
-                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                             <label class="dcx-checkbox-label">
                               <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
-                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
+                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
                             </label>
                           </div>
                         </div>
                       </div>
                       <div class="col-sm-6 col-lg-4 col-xl-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-minimum">{{ entry_minimum }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_minimum }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-minimum">{{ entry_minimum }} <span data-toggle="tooltip" title="{{ help_minimum }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
                         </div>
                       </div>
                       <div class="col-sm-6 col-lg-4 col-xl-3">
                         <div class="dcx-field">
-                          <label class="dcx-label" for="input-quantity-step">{{ entry_quantity_step }}</label>
-                          <div class="dcx-field-icon-wrap">
-                            <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
-                            <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_quantity_step }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
-                          </div>
+                          <label class="dcx-label" for="input-quantity-step">{{ entry_quantity_step }} <span data-toggle="tooltip" title="{{ help_quantity_step }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                          <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
                         </div>
                       </div>
                     </div>
@@ -1255,10 +1227,9 @@
                 <div class="dcx-panel-body">
                   <div class="dcx-fields dcx-fields--row">
                     <div class="dcx-field" style="flex:0 0 auto;">
-                      <label class="dcx-label" for="input-points">{{ entry_points }}</label>
-                      <div class="dcx-field-icon-wrap" style="max-width:160px;">
+                      <label class="dcx-label" for="input-points">{{ entry_points }} <span data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                      <div style="max-width:160px;">
                         <input type="text" name="points" value="{{ points }}" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
-                        <span class="dcx-field-icon" data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span>
                       </div>
                     </div>
                     <div id="rewards-container" class="table-responsive" style="flex:1 1 auto;min-width:220px;">
@@ -1521,7 +1492,7 @@
             </div>
             {% if product_downloads|length > 0 %}
             <div class="dcx-sidebar-card__field">
-              <label class="dcx-sidebar-card__label" for="input-download"><span data-toggle="tooltip" title="{{ help_download }}">{{ entry_download }}</span></label>
+              <label class="dcx-sidebar-card__label" for="input-download">{{ entry_download }} <span data-toggle="tooltip" title="{{ help_download }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
               <div class="dcx-tree-select"
                    data-url="index.php?route=catalog/download/autocomplete&user_token={{ user_token }}"
                    data-mode="multi"
