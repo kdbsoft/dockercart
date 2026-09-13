@@ -1,7 +1,8 @@
 <?php
 // Heading
 $_['heading_title']          = 'Zones';
-$_['text_search_zone']       = 'Search zones by name or code';
+$_['text_search_zone']       = 'Search zones by name, code or country';
+$_['text_all_country_zones'] = 'Show all zones of this country';
 
 // Text
 $_['text_success']           = 'Success: You have modified zones!';

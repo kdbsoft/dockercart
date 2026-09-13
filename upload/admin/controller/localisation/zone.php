@@ -168,11 +168,26 @@ class ControllerLocalisationZone extends Controller {
 		$data['add'] = $this->url->link('localisation/zone/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/zone/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		// Reference lists: search-only toolbar (no saved filter tabs)
-		$data['user_filter'] = $this->renderUserFilter('zone', 'localisation/zone', array(), array(), '', array(), array(
+		// Reference lists: search-only toolbar (no filter tabs, search on the left)
+		$this->load->model('localisation/country');
+
+		$search = array(
 			'placeholder' => $this->language->get('text_search_zone'),
 			'url'         => $this->url->link('localisation/zone/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
-		), false);
+		);
+
+		// An active country filter is shown in the search box so all zones
+		// of the country stay one click (clear) away.
+		if ($filter_country_id) {
+			$filter_country_info = $this->model_localisation_country->getCountry($filter_country_id);
+
+			if ($filter_country_info) {
+				$search['value'] = $filter_country_info['name'];
+				$search['clear_url'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'], true);
+			}
+		}
+
+		$data['user_filter'] = $this->renderUserFilter('zone', 'localisation/zone', array(), array(), '', array(), $search, false, true);
 
 		$data['zones'] = array();
 
@@ -218,7 +233,6 @@ class ControllerLocalisationZone extends Controller {
 			$data['selected'] = array();
 		}
 
-		$this->load->model('localisation/country');
 		$data['countries'] = $this->model_localisation_country->getCountries();
 		$data['filter_country_id'] = $filter_country_id;
 		$data['user_token'] = $this->session->data['user_token'];
@@ -435,12 +449,37 @@ class ControllerLocalisationZone extends Controller {
 	public function autocomplete(): void {
 		$json = array();
 
+		$this->load->language('localisation/zone');
+
 		if (isset($this->request->get['filter_search'])) {
 			$filter_search = trim((string)$this->request->get['filter_search']);
 
 			if ($filter_search !== '') {
 				$this->load->model('localisation/zone');
 				$this->load->model('localisation/country');
+
+				// Countries first: typing a country offers "all zones of this
+					// country" rows, so Enter opens the filtered zone list.
+				$filter_search_lower = utf8_strtolower($filter_search);
+				$country_matches = 0;
+
+				foreach ($this->model_localisation_country->getCountries() as $country) {
+					if (utf8_strpos(utf8_strtolower($country['name']), $filter_search_lower) === false) {
+						continue;
+					}
+
+					$json[] = array(
+						'id'       => $country['iso_code_2'],
+						'name'     => $country['name'],
+						'subtitle' => $this->language->get('text_all_country_zones'),
+						'meta'     => (string)$this->model_localisation_zone->getTotalZonesByCountryId($country['country_id']),
+						'href'     => $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . '&filter_country_id=' . (int)$country['country_id'], true)
+					);
+
+					if (++$country_matches >= 5) {
+						break;
+					}
+				}
 
 				$filter_data = array(
 					'filter_name' => $filter_search,
