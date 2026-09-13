@@ -50,6 +50,7 @@ class ControllerCommonUserFilter extends Controller {
 			'uf_fields_json'      => json_encode($args['fields'] ?? array()),
 			'uf_search'           => $args['search'] ?? null,
 			'uf_show_add'         => (bool)($args['show_add'] ?? true),
+			'uf_hide_tabs'        => (bool)($args['hide_tabs'] ?? false),
 			'uf_text_add_filter'  => $this->language->get('text_add_filter'),
 			'uf_text_filter_name' => $this->language->get('entry_filter_name'),
 			'uf_text_add_condition' => $this->language->get('text_add_condition'),
