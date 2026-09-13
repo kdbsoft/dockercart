@@ -27,3 +27,4 @@ $_['error_name']       = 'Module Name must be between 3 and 64 characters!';
 // Button
 $_['button_save']      = 'Save';
 $_['button_cancel']    = 'Cancel';
+$_['text_status_card'] = 'Module Status';

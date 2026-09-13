@@ -52,3 +52,4 @@ $_['button_edit']                       = 'Edit';
 // Error
 $_['error_permission']                  = 'Warning: You do not have permission to modify this module!';
 $_['error_name']                        = 'Module Name must be between 3 and 64 characters!';
+$_['text_status_card'] = 'Module Status';
