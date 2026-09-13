@@ -18,3 +18,4 @@ $_['entry_max_number'] = 'Max Number';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify Captcha!';
+$_['text_status_card'] = 'Module Status';

@@ -13,3 +13,4 @@ $_['text_success'] = 'Успіх: Ви змінили TikTok Pixel!';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
+$_['text_status_card'] = 'Статус модуля';
