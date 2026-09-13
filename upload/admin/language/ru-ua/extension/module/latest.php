@@ -25,3 +25,4 @@ $_['text_default_module_name'] = 'Новинки';
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 
+$_['text_status_card'] = 'Статус модуля';

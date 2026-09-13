@@ -488,7 +488,7 @@
 .dcx-field-help {
     font-size: 12px;
     color: var(--dc-text-muted);
-    margin-top: 2px;
+    margin-top: 3px;
 }
 .dcx-field-rating {
     display: flex;
@@ -1191,7 +1191,7 @@ div.dcx-field.required > .dcx-label:before {
 .dcx-sidebar-card__help {
     font-size: 12px;
     color: var(--dc-text-muted);
-    margin-top: 6px;
+    margin-top: 3px;
     line-height: 1.5;
 }
 .dcx-sidebar-card__help i {
@@ -1253,8 +1253,7 @@ div.dcx-field.required > .dcx-label:before {
 .dcx-sidebar-card__links {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    margin-top: 12px;
+    gap: 12px;
 }
 
 .dcx-sidebar-card__store-label {
