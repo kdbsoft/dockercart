@@ -1,3 +1,9 @@
+## [3.20.0](https://github.com/kdbsoft/dockercart/compare/v3.19.0...v3.20.0) (2026-09-13)
+
+### Features
+
+* **viewed:** add configurable product limit for viewed products module ([ed0bbf8](https://github.com/kdbsoft/dockercart/commit/ed0bbf80fd75e1331dac038620d026f19e58fdb8))
+
 ## [3.19.0](https://github.com/kdbsoft/dockercart/compare/v3.18.1...v3.19.0) (2026-09-12)
 
 ### Features
