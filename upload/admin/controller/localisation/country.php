@@ -168,11 +168,11 @@ class ControllerLocalisationCountry extends Controller {
 		$data['add'] = $this->url->link('localisation/country/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/country/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
-		// Reference lists: search-only toolbar (no saved filter tabs)
+		// Reference lists: search-only toolbar (no filter tabs, search on the left)
 		$data['user_filter'] = $this->renderUserFilter('country', 'localisation/country', array(), array(), '', array(), array(
 			'placeholder' => $this->language->get('text_search_country'),
 			'url'         => $this->url->link('localisation/country/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
-		), false);
+		), false, true);
 
 		$data['countries'] = array();
 
