@@ -1,3 +1,15 @@
+## [3.21.0](https://github.com/kdbsoft/dockercart/compare/v3.20.0...v3.21.0) (2026-09-13)
+
+### Features
+
+* **admin:** add search-only mode to user filter toolbar ([fd0f140](https://github.com/kdbsoft/dockercart/commit/fd0f140fd993a2aa8af36fe9f3ee72e6a529a25c))
+* **localisation:** search zones by country with autocomplete ([429e2ac](https://github.com/kdbsoft/dockercart/commit/429e2acfcdbc65a4bb504efd5c86118c2cd25362))
+
+### Bug Fixes
+
+* **admin:** restore scroll lock for nested Bootstrap modals ([104e73f](https://github.com/kdbsoft/dockercart/commit/104e73fbf2ed7d7358e429b3353fd37756683181))
+* **localisation:** update SEO URL edit subtitle translations ([fa24f2f](https://github.com/kdbsoft/dockercart/commit/fa24f2fedc83493693047dd7d55e7e7c75f79f14))
+
 ## [3.20.0](https://github.com/kdbsoft/dockercart/compare/v3.19.0...v3.20.0) (2026-09-13)
 
 ### Features
