@@ -4,7 +4,7 @@
 
 DockerCart is a full-stack e-commerce platform built on a Docker infrastructure. A single command brings up the complete stack — Nginx reverse proxy, PHP 8.5 application server, MariaDB database, Redis cache, Manticore Search full-text engine, and a scheduler daemon — pre-configured and ready to serve production traffic.
 
-There is no web installer and no `/install` directory. Run `make start` and a production-grade store is live.
+Run `make start` and a production-grade store is live.
 
 Documentation and resources are available at [dockercart.net](https://dockercart.net), including the [capabilities list](https://dockercart.net/capabilities) and a [live demo](https://demo.dockercart.net).
 
