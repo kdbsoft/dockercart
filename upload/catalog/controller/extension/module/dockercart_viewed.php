@@ -15,7 +15,13 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 		$data['viewed_link'] = $this->url->link('account/viewed', '', true);
 		$data['products'] = array();
 
-		$product_ids = $this->model_account_viewed->getViewedProductIds(10);
+		$limit = (int)$this->config->get('module_dockercart_viewed_limit');
+
+		if ($limit <= 0) {
+			$limit = 10;
+		}
+
+		$product_ids = $this->model_account_viewed->getViewedProductIds($limit);
 
 		$products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', $product_ids));
 

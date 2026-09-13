@@ -26,3 +26,4 @@ $_['text_default_module_name'] = 'Бестселлеры';
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 
+$_['text_status_card'] = 'Статус модуля';

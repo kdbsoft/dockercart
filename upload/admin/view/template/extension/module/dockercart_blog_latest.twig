@@ -1,11 +1,9 @@
 {{ header }}{{ column_left }}
 <div id="content">
-  <div class="container-fluid">
   <div class="page-header">
-
-
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="col-lg-8 col-xl-offset-1 col-xl-7">
           <a href="{{ cancel }}" class="page-header__link">
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
@@ -17,6 +15,8 @@
               {% endif %}
             </span>
           </a>
+        </div>
+        <div class="col-lg-4 col-xl-3">
           <div class="pull-right">
             <button type="submit" form="form-module" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
             <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
@@ -25,49 +25,30 @@
       </div>
       {% if error_warning %}
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="col-lg-8 col-xl-offset-1 col-xl-7">
           <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         </div>
       </div>
       {% endif %}
+    </div>
   </div>
-</div>
-<div class="container-fluid"><div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
-        <div class="dcx-shell">
-          <div class="dcx-panel">
-            <div class="dcx-panel-head">
-              <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="18" height="18"></i></div>
-              <div>
-                <div class="dcx-panel-title">{{ text_form }}</div>
-                <div class="dcx-panel-subtitle">{{ text_form_subtitle }}</div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="pencil" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_form }}</div>
+                  <div class="dcx-panel-subtitle">{{ text_form_subtitle }}</div>
+                </div>
               </div>
-            </div>
-            <div class="dcx-panel-body">
-              <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module">
+              <div class="dcx-panel-body">
                 <div class="dcx-fields">
-                  <div class="dcx-field required">
-                    <label class="dcx-label">{{ entry_name }}</label>
-                    <div class="dc-lang-frame">
-                    <ul class="nav nav-tabs">
-                      {% for language in languages %}
-                      <li{% if loop.first %} class="active"{% endif %}><a href="#name-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
-                      {% endfor %}
-                    </ul>
-                    <div class="tab-content">
-                      {% for language in languages %}
-                      <div class="tab-pane{% if loop.first %} active{% endif %}" id="name-lang-{{ language.language_id }}">
-                        <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
-                      </div>
-                      {% endfor %}
-                    </div>
-                    </div>
-                    {% if error_name %}
-                    <div class="text-danger">{{ error_name }}</div>
-                    {% endif %}
-                  </div>
                   <div class="dcx-field">
                     <label class="dcx-label" for="input-limit">{{ entry_limit }}</label>
                     <input type="text" name="limit" value="{{ limit }}" placeholder="{{ entry_limit }}" id="input-limit" class="form-control" />
@@ -81,25 +62,52 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <div class="dcx-field">
-                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                    <select name="status" id="input-status" class="form-control">
-                      {% if status %}
-                      <option value="1" selected="selected">{{ text_enabled }}</option>
-                      <option value="0">{{ text_disabled }}</option>
-                      {% else %}
-                      <option value="1">{{ text_enabled }}</option>
-                      <option value="0" selected="selected">{{ text_disabled }}</option>
-                      {% endif %}
-                    </select>
-                  </div>
                 </div>
-              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+          <div class="dcx-shell">
+            <div class="dcx-sidebar-card">
+              <div class="dcx-sidebar-card__header">
+                <div class="dcx-sidebar-card__header-icon"><i data-lucide="power" width="16" height="16"></i></div>
+                <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+              </div>
+              <div class="dcx-sidebar-card__body">
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                  <select name="status" id="input-status" class="form-control">
+                    {% if status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+                <div class="dcx-sidebar-card__field required">
+                  <label class="dcx-sidebar-card__label">{{ entry_name }}</label>
+                  <div class="dcx-sidebar-card__links">
+                    {% for language in languages %}
+                    <div class="dcx-sidebar-card__link-item">
+                      <label class="dcx-sidebar-card__link-label">
+                        <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                        {{ language.name }}
+                      </label>
+                      <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                    </div>
+                    {% endfor %}
+                  </div>
+                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>
 {{ footer }}

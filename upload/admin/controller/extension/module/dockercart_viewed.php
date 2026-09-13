@@ -32,6 +32,14 @@ class ControllerExtensionModuleDockercartViewed extends Controller {
 			$data['module_dockercart_viewed_status'] = $this->config->get('module_dockercart_viewed_status');
 		}
 
+		if (isset($this->request->post['module_dockercart_viewed_limit'])) {
+			$data['module_dockercart_viewed_limit'] = $this->request->post['module_dockercart_viewed_limit'];
+		} elseif ($this->config->has('module_dockercart_viewed_limit')) {
+			$data['module_dockercart_viewed_limit'] = $this->config->get('module_dockercart_viewed_limit');
+		} else {
+			$data['module_dockercart_viewed_limit'] = 10;
+		}
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
