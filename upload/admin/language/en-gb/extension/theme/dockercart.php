@@ -55,3 +55,4 @@ $_['error_image_related']              = 'Related Product Image Size dimensions 
 $_['error_image_compare']              = 'Compare Image Size dimensions required!';
 $_['error_image_cart']                 = 'Cart Image Size dimensions required!';
 $_['error_webp_quality']                = 'WebP quality must be between 1 and 100!';
+$_['text_status_card'] = 'Module Status';

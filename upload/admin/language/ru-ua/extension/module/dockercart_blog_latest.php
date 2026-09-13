@@ -27,3 +27,4 @@ $_['error_name']       = 'Название модуля должно содер�
 // Button
 $_['button_save']      = 'Сохранить';
 $_['button_cancel']    = 'Отмена';
+$_['text_status_card'] = 'Статус модуля';
