@@ -8,7 +8,9 @@ $_['text_success']     = 'Success: You have modified viewed products module!';
 $_['text_edit']        = 'Edit Viewed Products Module';
 
 // Entry
+$_['entry_limit']      = 'Limit';
 $_['entry_status']     = 'Status';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify viewed products module!';
+$_['text_status_card'] = 'Module Status';
