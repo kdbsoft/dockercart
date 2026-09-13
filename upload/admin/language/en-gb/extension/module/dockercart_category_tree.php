@@ -23,3 +23,4 @@ $_['help_max_depth']   = '0 = unlimited depth, show entire tree. 1 = top level o
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify category tree module!';
 $_['error_name']       = 'Module Name must be between 3 and 64 characters!';
+$_['text_status_card'] = 'Module Status';

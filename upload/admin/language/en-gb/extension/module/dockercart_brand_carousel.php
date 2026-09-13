@@ -23,3 +23,4 @@ $_['entry_status']        = 'Status';
 $_['error_permission']    = 'Warning: You do not have permission to modify brand carousel module!';
 $_['error_name']          = 'Module Name must be between 3 and 64 characters!';
 $_['error_limit']         = 'Limit must be at least 1!';
+$_['text_status_card'] = 'Module Status';

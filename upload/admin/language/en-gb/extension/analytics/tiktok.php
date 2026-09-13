@@ -20,3 +20,4 @@ $_['entry_status']     = 'Status';
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify TikTok Pixel!';
 $_['error_code']	   = 'Code required!';
+$_['text_status_card'] = 'Module Status';
