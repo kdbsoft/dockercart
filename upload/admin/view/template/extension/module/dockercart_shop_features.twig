@@ -202,25 +202,6 @@
             <div class="dcx-panel-body">
               <div class="dcx-fields">
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                  <select name="status" id="input-status" class="form-control">
-                    <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
-                    <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
-                  </select>
-                </div>
-
-                <div class="dcx-field required">
-                  <label class="dcx-label">{{ entry_name }}</label>
-                  {% for language in languages %}
-                  <div class="dc-attr-row__value">
-                    <span class="lang-code">{{ language.code|split('-')|first|upper }}</span> <span class="lang-name">{{ language.name }}</span>
-                    <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
-                  </div>
-                  {% endfor %}
-                  {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
-                </div>
-
-                <div class="dcx-field">
                   <ul class="nav nav-tabs" role="tablist">
                     {% for language in languages %}
                     <li{% if loop.first %} class="active"{% endif %}><a href="#section-lang-{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
@@ -313,6 +294,36 @@
       <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
         <div class="dcx-shell">
           <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="power" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  <option value="1" {% if status %}selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  <option value="0" {% if not status %}selected="selected"{% endif %}>{{ text_disabled }}</option>
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field required">
+                <label class="dcx-sidebar-card__label">{{ entry_name }}</label>
+                <div class="dcx-sidebar-card__links">
+                  {% for language in languages %}
+                  <div class="dcx-sidebar-card__link-item">
+                    <label class="dcx-sidebar-card__link-label">
+                      <span class="lang-code">{{ language.code|split('-')|first|upper }}</span>
+                      {{ language.name }}
+                    </label>
+                    <input type="text" name="name_translation[{{ language.language_id }}]" value="{{ name_translation[language.language_id] }}" placeholder="{{ entry_name }}" class="form-control" />
+                  </div>
+                  {% endfor %}
+                </div>
+                {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="dcx-sidebar-card" style="margin-top:16px;">
             <div class="dcx-sidebar-card__header">
               <div class="dcx-sidebar-card__header-icon"><i data-lucide="layout-list" width="16" height="16"></i></div>
               <h3 class="dcx-sidebar-card__title">{{ text_widgets }}</h3>
