@@ -1,3 +1,9 @@
+## [3.21.1](https://github.com/kdbsoft/dockercart/compare/v3.21.0...v3.21.1) (2026-09-13)
+
+### Bug Fixes
+
+* **admin:** use clearer sidebar icons for warehouse, store and localisation ([9e8e8f6](https://github.com/kdbsoft/dockercart/commit/9e8e8f657df0a5b9a0b8c5325b73be402c75a5e0))
+
 ## [3.21.0](https://github.com/kdbsoft/dockercart/compare/v3.20.0...v3.21.0) (2026-09-13)
 
 ### Features
