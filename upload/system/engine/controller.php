@@ -53,7 +53,7 @@ abstract class Controller {
 	 * @param array  $fields    filter builder fields for the add-filter modal
 	 * @param string $route     current controller route for tab links
 	 */
-	protected function renderUserFilter(string $entity, string $route, array $fields, array $tabCounts = array(), string $activeBuiltin = '', array $extraTabs = array(), ?array $search = null, bool $showAdd = true): string {
+	protected function renderUserFilter(string $entity, string $route, array $fields, array $tabCounts = array(), string $activeBuiltin = '', array $extraTabs = array(), ?array $search = null, bool $showAdd = true, bool $hideTabs = false): string {
 		$this->load->language('common/user_filter');
 		$this->load->model('user/user_filter');
 
@@ -65,9 +65,9 @@ abstract class Controller {
 			$active_filter_id = 0;
 		}
 
-		$saved_filters = $this->model_user_user_filter->getFilters($user_id, $entity);
+		$saved_filters = $hideTabs ? array() : $this->model_user_user_filter->getFilters($user_id, $entity);
 
-		$tabs = array_merge($extraTabs, array(
+		$tabs = $hideTabs ? array() : array_merge($extraTabs, array(
 			array(
 				'id'    => 'all',
 				'name'  => $this->language->get('text_filter_all'),
@@ -97,7 +97,8 @@ abstract class Controller {
 			'fields'           => $fields,
 			'search'           => $search,
 			'redirect_url'     => $this->url->link($route, 'user_token=' . $this->session->data['user_token'], true),
-			'show_add'         => $showAdd
+			'show_add'         => $showAdd,
+			'hide_tabs'        => $hideTabs
 		));
 	}
 

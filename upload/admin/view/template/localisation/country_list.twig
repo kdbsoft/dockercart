@@ -68,22 +68,4 @@
     </div>
   </div>
 </div>
-<script type="text/javascript"><!--
-$('#button-filter').on('click', function() {
-	var url = '';
-
-	var filter_name = $('input[name=\'filter_name\']').val();
-
-	if (filter_name) {
-		url += '&filter_name=' + encodeURIComponent(filter_name);
-	}
-
-	location = 'index.php?route=localisation/country&user_token={{ user_token }}' + url;
-});
-//--></script>
-<script type="text/javascript"><!--
-$('#filter-country input, #filter-country select').on('keypress', function(e) {
-	if (e.which == 13) { $('#button-filter').trigger('click'); }
-});
-//--></script>
 {{ footer }}

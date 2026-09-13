@@ -51,6 +51,4 @@ $_['text_list_subtitle'] = 'Керуйте SEO-псевдонімами URL';
 
 $_['text_add_seo_url_subtitle'] = 'Створити новий SEO-псевдонім URL';
 
-$_['text_edit_seo_url_subtitle'] = 'Редагувати маппінг SEO URL';
-
-
+$_['text_edit_seo_url_subtitle'] = 'Редагувати зв\'язки SEO URL';

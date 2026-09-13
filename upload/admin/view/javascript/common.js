@@ -22,6 +22,18 @@ function getURLVar(key) {
 	}
 }
 
+/* ── Nested Bootstrap modals ──
+   Bootstrap removes `.modal-open` from <body> whenever ANY modal closes,
+   even if another modal is still open. That unlocks the page scroll behind
+   the remaining modal and breaks its scrolling (the modal stays fixed while
+   the page scrolls underneath). Restore the lock while at least one modal
+   stays visible. */
+$(document).on('hidden.bs.modal', '.modal', function() {
+	if ($('.modal:visible').length) {
+		$(document.body).addClass('modal-open');
+	}
+});
+
 $(document).ready(function() {
 	//Form Submit for IE Browser
 	$('button[type=\'submit\']').on('click', function() {

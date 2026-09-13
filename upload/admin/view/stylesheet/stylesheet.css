@@ -2678,6 +2678,14 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     margin-bottom: 16px;
 }
 
+.order-filter-tabs--search-only .order-filter-tabs__inner {
+    justify-content: flex-start;
+}
+
+.order-filter-tabs--search-only .order-search-wrap {
+    margin-left: 0;
+}
+
 .order-filter-tabs__inner {
     display: flex;
     align-items: center;

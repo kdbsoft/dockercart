@@ -96,11 +96,21 @@ class ModelLocalisationZone extends Model {
 		}
 
 		if (!empty($data['filter_name'])) {
+			$filter_name = $this->db->escape((string)$data['filter_name']);
+
 			if ($this->hasZoneDescriptionTable()) {
-				$conditions[] = "COALESCE(zd.name, z.name) LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
+				$zone_name_expr = "COALESCE(zd.name, z.name)";
 			} else {
-				$conditions[] = "z.name LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
+				$zone_name_expr = "z.name";
 			}
+
+			if ($this->hasCountryDescriptionTable()) {
+				$country_name_expr = "COALESCE(cd.name, c.name)";
+			} else {
+				$country_name_expr = "c.name";
+			}
+
+			$conditions[] = "(" . $zone_name_expr . " LIKE '%" . $filter_name . "%' OR " . $country_name_expr . " LIKE '%" . $filter_name . "%' OR z.code LIKE '%" . $filter_name . "%')";
 		}
 
 		if ($conditions) {
@@ -195,21 +205,49 @@ class ModelLocalisationZone extends Model {
 	}
 
 	public function getTotalZones($data = array()) {
-		$cache_key = 'zone.total.' . md5(json_encode($data));
+		$cache_key = 'zone.total.' . (int)$this->config->get('config_language_id') . '.' . md5(json_encode($data));
 		$zone_total = $this->cache->get($cache_key);
 
 		if ($zone_total !== false) {
 			return (int)$zone_total;
 		}
 
-		$sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "zone";
+		$sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "zone z LEFT JOIN " . DB_PREFIX . "country c ON (z.country_id = c.country_id)";
+
+		if ($this->hasZoneDescriptionTable()) {
+			$sql .= " LEFT JOIN " . DB_PREFIX . "zone_description zd ON (z.zone_id = zd.zone_id AND zd.language_id = '" . (int)$this->config->get('config_language_id') . "')";
+		}
+
+		if ($this->hasCountryDescriptionTable()) {
+			$sql .= " LEFT JOIN " . DB_PREFIX . "country_description cd ON (c.country_id = cd.country_id AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "')";
+		}
+
+		$conditions = array();
 
 		if (!empty($data['filter_country_id'])) {
-			$sql .= " WHERE country_id = '" . (int)$data['filter_country_id'] . "'";
+			$conditions[] = "z.country_id = '" . (int)$data['filter_country_id'] . "'";
 		}
 
 		if (!empty($data['filter_name'])) {
-			$sql .= (!empty($data['filter_country_id']) ? " AND" : " WHERE") . " name LIKE '%" . $this->db->escape((string)$data['filter_name']) . "%'";
+			$filter_name = $this->db->escape((string)$data['filter_name']);
+
+			if ($this->hasZoneDescriptionTable()) {
+				$zone_name_expr = "COALESCE(zd.name, z.name)";
+			} else {
+				$zone_name_expr = "z.name";
+			}
+
+			if ($this->hasCountryDescriptionTable()) {
+				$country_name_expr = "COALESCE(cd.name, c.name)";
+			} else {
+				$country_name_expr = "c.name";
+			}
+
+			$conditions[] = "(" . $zone_name_expr . " LIKE '%" . $filter_name . "%' OR " . $country_name_expr . " LIKE '%" . $filter_name . "%' OR z.code LIKE '%" . $filter_name . "%')";
+		}
+
+		if ($conditions) {
+			$sql .= " WHERE " . implode(" AND ", $conditions);
 		}
 
 		$query = $this->db->query($sql);
