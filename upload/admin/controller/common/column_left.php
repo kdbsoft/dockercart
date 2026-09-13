@@ -412,7 +412,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$warehouse_children[] = array(
 					'name'     => $this->language->get('text_warehouse_warehouses'),
 					'href'     => $this->url->link('warehouse/warehouse', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'     => 'warehouse',
+					'icon'     => 'building-2',
 					'children' => array()
 				);
 			}
@@ -575,7 +575,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_setting'),
 					'href'     => $this->url->link('setting/store', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'	   => 'sliders-horizontal',
+					'icon'	   => 'store',
 					'children' => array()
 				);
 			}
@@ -750,7 +750,7 @@ class ControllerCommonColumnLeft extends Controller {
 				$system[] = array(
 					'name'	   => $this->language->get('text_localisation'),
 					'href'     => '',
-					'icon'	   => 'globe',
+					'icon'	   => 'book-open',
 					'children' => $localisation
 				);
 			}
