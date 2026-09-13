@@ -21,3 +21,4 @@ $_['help_categories']  = 'Select specific categories to display. Leave empty to 
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify category module!';
+$_['text_status_card'] = 'Module Status';

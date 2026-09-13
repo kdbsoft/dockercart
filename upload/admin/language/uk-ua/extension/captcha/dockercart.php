@@ -18,3 +18,4 @@ $_['entry_max_number'] = 'Максимальне число';
 
 // Error
 $_['error_permission'] = 'Увага: У вас немає дозволу на зміну Captcha!';
+$_['text_status_card'] = 'Статус модуля';
