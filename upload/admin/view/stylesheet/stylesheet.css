@@ -3977,20 +3977,44 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     line-height: 1.45;
 }
 
-/* --- Pagination wrapper for list pages --- */
+/* --- Pagination wrapper for list pages: pages left, results below, results left when no pages --- */
 .pagination-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     padding: 8px 15px;
 }
+.pagination-wrap__pages {
+    width: 100%;
+    text-align: left;
+}
+.pagination-wrap__pages:empty {
+    display: none;
+}
+.pagination-wrap__results {
+    width: 100%;
+    text-align: left;
+    font-size: 13px;
+    color: var(--dc-text-muted, #6b7280);
+    line-height: 1.45;
+}
+.pagination-wrap__results:empty {
+    display: none;
+}
+/* Legacy fallback: old 2-col markup (row/col-sm-6) renders the same stacked-left layout */
 .pagination-wrap .row {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
     margin: 0;
+    width: 100%;
 }
 .pagination-wrap .col-sm-6 {
     float: none;
     width: 100%;
+    max-width: 100%;
     padding: 0;
     text-align: left;
 }
