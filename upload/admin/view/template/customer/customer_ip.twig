@@ -18,9 +18,9 @@
   {% endif %}
 </div>
 {% if results %}
-<div class="row">
-  <div class="col-sm-6 text-left">{{ pagination }}</div>
-  <div class="col-sm-6 text-right">{{ results }}</div>
+<div class="pagination-wrap">
+  <div class="pagination-wrap__pages">{{ pagination }}</div>
+  <div class="pagination-wrap__results">{{ results }}</div>
 </div>
 {% endif %}
 <script type="text/javascript"><!--
