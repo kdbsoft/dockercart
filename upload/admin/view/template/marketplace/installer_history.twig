@@ -35,8 +35,6 @@
 .dc-history-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; color: #6c757d; font-size: 13px; }
 </style>
 <div class="pagination-wrap">
-  <div class="row">
-    <div class="col-sm-6 text-left">{{ pagination }}</div>
-    <div class="col-sm-6 text-right">{{ results }}</div>
-  </div>
+  <div class="pagination-wrap__pages">{{ pagination }}</div>
+  <div class="pagination-wrap__results">{{ results }}</div>
 </div>

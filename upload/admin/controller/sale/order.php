@@ -1003,6 +1003,241 @@ class ControllerSaleOrder extends Controller {
 	}
 
 	/**
+	 * Status modal data for the order list: current status plus the
+	 * flow-aware list of allowed transitions. The modal submits to
+	 * sale/order/addHistory, so the flow validation stays in one place.
+	 */
+	public function getStatusData(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+			$this->load->model('localisation/order_status');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$order_statuses = $this->model_localisation_order_status->getOrderStatuses();
+
+				$status_names = [];
+
+				foreach ($order_statuses as $status) {
+					$status_names[(int)$status['order_status_id']] = $status['name'];
+				}
+
+				$order_flow = new \OrderFlow([
+					'steps'       => (array)$this->config->get('config_order_flow_steps'),
+					'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+				]);
+
+				$current_id = (int)$order_info['order_status_id'];
+				$allowed = [];
+
+				foreach ($order_flow->getAllowedTransitions($current_id) as $target) {
+					$allowed[] = [
+						'order_status_id' => $target,
+						'name'            => $status_names[$target] ?? '',
+						'terminal'        => $order_flow->isTerminal($target),
+						'is_refund'       => $target === 134,
+					];
+				}
+
+				$all = [];
+
+				foreach ($order_statuses as $status) {
+					$all[] = [
+						'order_status_id' => (int)$status['order_status_id'],
+						'name'            => $status['name'],
+					];
+				}
+
+				$json['success'] = true;
+				$json['order_id'] = $order_id;
+				$json['current_id'] = $current_id;
+				$json['current_name'] = $status_names[$current_id] ?? $order_info['order_status'];
+				$json['flow_enabled'] = $order_flow->isEnabled();
+				$json['flow_terminal'] = $order_flow->isTerminal($current_id);
+				$json['allowed'] = $allowed;
+				$json['statuses'] = $all;
+				$json['shipping_status_id'] = (int)$this->config->get('config_order_flow_shipping_status');
+				$json['has_tracking'] = trim((string)$order_info['tracking_number']) !== '';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Payment modal data for the order list. Payment status is derived
+	 * (paid_amount vs total), so the modal works with the same
+	 * sale/order_detail payment endpoints as the order edit page.
+	 */
+	public function getPaymentData(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$total = (float)$order_info['total'];
+				$paid_amount = (float)$order_info['paid_amount'];
+				$currency_code = $order_info['currency_code'];
+				$currency_value = $order_info['currency_value'];
+				$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
+
+				$order_localizer = new OrderLocalizer($this->registry);
+				$payments = [];
+
+				foreach ($this->model_sale_order->getOrderPayments($order_id) as $payment) {
+					$amount = (float)$payment['amount'];
+
+					$payments[] = [
+						'order_payment_id' => (int)$payment['order_payment_id'],
+						'amount'           => $this->currency->format(abs($amount), $currency_code, $currency_value),
+						'amount_raw'       => $amount,
+						'is_reversal'      => $amount < 0,
+						'payment_method'   => $order_localizer->paymentEntryTitle($payment),
+						'reference'        => $payment['reference'],
+						'comment'          => $payment['comment'],
+						'date_added'       => date($this->language->get('datetime_format'), strtotime($payment['date_added'])),
+					];
+				}
+
+				$methods = [];
+
+				foreach ($this->getAvailablePaymentMethods() as $code => $method) {
+					$methods[] = [
+						'code'  => $code,
+						'title' => $method['title'],
+					];
+				}
+
+				$json['success'] = true;
+				$json['order_id'] = $order_id;
+				$json['payment_status'] = $status;
+				$json['payment_status_text'] = $this->language->get('text_payment_status_' . $status);
+				$json['total'] = $this->currency->format($total, $currency_code, $currency_value);
+				$json['total_raw'] = $total;
+				$json['paid_amount'] = $this->currency->format($paid_amount, $currency_code, $currency_value);
+				$json['paid_amount_raw'] = $paid_amount;
+				$json['remaining'] = $this->currency->format(max(0, $total - $paid_amount), $currency_code, $currency_value);
+				$json['remaining_raw'] = max(0, $total - $paid_amount);
+				$json['overpaid_raw'] = max(0, $paid_amount - $total);
+				$json['payments'] = $payments;
+				$json['payment_methods'] = $methods;
+				$json['payment_code'] = $order_info['payment_code'];
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Shipment modal data for the order list. Shipping status is derived
+	 * from ordered vs shipped quantities, so the modal works with the same
+	 * sale/order_detail shipment endpoints as the order edit page.
+	 */
+	public function getShipmentData(): void {
+		$this->load->language('sale/order');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('access', 'sale/order')) {
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$order_id = (int)($this->request->get['order_id'] ?? 0);
+
+			$this->load->model('sale/order');
+
+			$order_info = $this->model_sale_order->getOrder($order_id);
+
+			if (!$order_info) {
+				$json['error'] = $this->language->get('error_action');
+			} else {
+				$localizer = new OrderLocalizer($this->registry);
+				$products = $this->model_sale_order->getOrderProducts($order_id);
+				$progress = $this->model_sale_order->getOrderShipmentProgress($order_id);
+
+				$products_view = [];
+				$ordered_total = 0;
+				$shipped_total = 0;
+
+				foreach ($products as $product) {
+					$ordered = (float)$product['quantity'];
+					$shipped = min((float)($progress[(int)$product['order_product_id']]['shipped'] ?? 0), $ordered);
+					$ordered_total += $ordered;
+					$shipped_total += $shipped;
+
+					$products_view[] = [
+						'order_product_id' => (int)$product['order_product_id'],
+						'name'             => $localizer->productName($product),
+						'model'            => $product['model'] ?? '',
+						'ordered'          => $ordered,
+						'shipped'          => $shipped,
+						'remaining'        => max(0, $ordered - $shipped),
+					];
+				}
+
+				$shipments_view = [];
+
+				foreach ($this->model_sale_order->getOrderShipments($order_id) as $shipment) {
+					$items = [];
+
+					foreach ((array)($shipment['items'] ?? []) as $item) {
+						$items[] = [
+							'order_product_id' => (int)$item['order_product_id'],
+							'name'             => $localizer->productName($item),
+							'quantity'         => (int)$item['quantity'],
+						];
+					}
+
+					$shipments_view[] = [
+						'shipment_id'     => (int)$shipment['shipment_id'],
+						'tracking_number' => $shipment['tracking_number'],
+						'comment'         => $shipment['comment'],
+						'items'           => $items,
+						'date_added'      => date($this->language->get('datetime_format'), strtotime($shipment['date_added'])),
+					];
+				}
+
+				$shipping_status = $this->model_sale_order->getShippingStatus($ordered_total, $shipped_total);
+
+				$json['success'] = true;
+				$json['order_id'] = $order_id;
+				$json['shipping_status'] = $shipping_status;
+				$json['shipping_status_text'] = $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '';
+				$json['ordered_total'] = $ordered_total;
+				$json['shipped_total'] = $shipped_total;
+				$json['products'] = $products_view;
+				$json['shipments'] = $shipments_view;
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
 	 * AJAX autocomplete for the order list search bar.
 	 * Finds orders by ID, customer name, email or phone.
 	 */
@@ -1092,6 +1327,63 @@ class ControllerSaleOrder extends Controller {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Installed payment methods for the payment modal. Mirrors
+	 * ControllerSaleOrderDetail::getAvailablePaymentMethods() so the list
+	 * stays synchronized with the order edit page.
+	 */
+	private function getAvailablePaymentMethods(): array {
+		$methods = [];
+		$this->load->model('setting/extension');
+		$extensions = $this->model_setting_extension->getInstalled('payment');
+
+		foreach ($extensions as $code) {
+			$status = $this->config->get('payment_' . $code . '_status');
+
+			if (!$status) {
+				continue;
+			}
+
+			$this->load->language('extension/payment/' . $code, 'payment_' . $code);
+			$extension_lang = $this->language->get('payment_' . $code);
+			$default_title = $extension_lang->get('heading_title');
+
+			if (empty($default_title) || $default_title === 'heading_title') {
+				$default_title = ucfirst(str_replace('_', ' ', $code));
+			}
+
+			$sub_methods = [];
+
+			if ($code === 'dockercart_universal') {
+				$this->load->model('extension/payment/dockercart_universal');
+				$db_methods = $this->model_extension_payment_dockercart_universal->getMethods();
+
+				foreach ($db_methods as $method) {
+					$method_code = 'dockercart_universal.dockercart_universal_' . $method['method_id'];
+					$sub_methods[$method_code] = [
+						'title' => $method['name'] ?? 'Method ' . $method['method_id'],
+					];
+				}
+			}
+
+			if ($sub_methods) {
+				foreach ($sub_methods as $sub_code => $sub_data) {
+					$methods[$sub_code] = [
+						'code'  => $sub_code,
+						'title' => $sub_data['title'],
+					];
+				}
+			} else {
+				$methods[$code] = [
+					'code'  => $code,
+					'title' => $default_title,
+				];
+			}
+		}
+
+		return $methods;
 	}
 
 	private function getDatePresetOptions(): array {
