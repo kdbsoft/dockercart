@@ -127,7 +127,7 @@
               <tbody>
               
               {% for order in orders %}
-              <tr data-href="{{ order.view }}">
+              <tr data-href="{{ order.view }}" data-order-id="{{ order.order_id }}">
                 <td class="text-center"> {% if order.order_id in selected %}
                   <input type="checkbox" name="selected[]" value="{{ order.order_id }}" checked="checked" />
                   {% else %}
@@ -138,10 +138,12 @@
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
-                  <span class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
+                  <a href="#" class="js-order-status" data-order-id="{{ order.order_id }}" data-order-view="{{ order.view }}" data-toggle="tooltip" title="{{ text_list_status_change }}" style="text-decoration:none">
+                    <span id="os-badge-{{ order.order_id }}" class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
+                  </a>
                 </td>
-                <td class="text-left"><span class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px">{{ order.paid_amount }}</div>{% endif %}</td>
-                <td class="text-left" style="font-size:12px;color:#555">{% if order.shipping_status %}<span class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ order.shipping_shipped_quantity }} / {{ order.shipping_ordered_quantity }}">{{ order.shipping_status_text }}</span><div class="ship-progress"><div class="ship-progress__bar" style="width: {{ order.shipping_progress_percent }}%"></div></div>{% endif %}{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
+                <td class="text-left"><a href="#" class="js-order-payment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_payment_change }}" style="text-decoration:none"><span id="ps-badge-{{ order.order_id }}" class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span></a>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px" id="ps-paid-{{ order.order_id }}">{{ order.paid_amount }}</div>{% endif %}</td>
+                <td class="text-left" style="font-size:12px;color:#555"><a href="#" class="js-order-shipment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_shipment_change }}" style="text-decoration:none">{% if order.shipping_status %}<span id="ss-badge-{{ order.order_id }}" class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ order.shipping_shipped_quantity }} / {{ order.shipping_ordered_quantity }}">{{ order.shipping_status_text }}</span><div class="ship-progress"><div id="ss-bar-{{ order.order_id }}" class="ship-progress__bar" style="width: {{ order.shipping_progress_percent }}%"></div></div>{% endif %}</a>{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
                 <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
               </tr>
@@ -402,39 +404,492 @@ $('.date').datetimepicker({
 });
 //--></script>
   <script type="text/javascript"><!--
-// Order status change
-$('.order-status-select').on('change', function() {
-	var element = this;
-	var orderId = $(element).data('order-id');
-	var statusId = $(element).val();
-	var notify = $(element).closest('td').find('.order-notify-check').prop('checked') ? 1 : 0;
+function listEsc(s) {
+	return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function listAlert(message, type) {
+	type = type || 'success';
+	$('.alert-dismissible').remove();
+	$('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + listEsc(message) + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+	if (window.lucide) { lucide.createIcons(); }
+}
+
+function listPaymentBadgeClass(status) {
+	if (status === 'paid') { return 'page-header__badge page-header__badge--success'; }
+	if (status === 'partial') { return 'page-header__badge page-header__badge--warning page-header__badge--unfilled'; }
+	if (status === 'overpaid') { return 'page-header__badge page-header__badge--danger'; }
+	return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+}
+
+function listShippingBadgeClass(status) {
+	if (status === 'shipped') { return 'page-header__badge page-header__badge--success'; }
+	if (status === 'partial') { return 'page-header__badge page-header__badge--warning page-header__badge--unfilled'; }
+	return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+}
+
+// ---- Order status modal (flow-aware) ----
+var listStatusData = null;
+var listStatusOrderView = '';
+
+function listStatusTitleFmt() { return '{{ text_list_status_title|escape('js') }}'; }
+
+function openOrderStatus(orderId, orderView) {
+	listStatusData = null;
+	listStatusOrderView = orderView || '';
+	$('#status-modal-error').hide();
+	$('#status-current').text('');
+	$('#status-new').html('');
+	$('#status-comment').val('');
+	$('#status-notify').prop('checked', true);
+	$('#status-override').prop('checked', false);
+	$('#status-override-wrap').hide();
+	$('#status-empty').hide();
+	$('#status-refund-hint').hide();
+	$('#status-tracking-warn').hide();
+	$('#status-apply').prop('disabled', true);
 
 	$.ajax({
-		url: 'index.php?route=sale/order/addHistory&user_token={{ user_token }}&order_id=' + orderId,
-		type: 'post',
+		url: 'index.php?route=sale/order/getStatusData&user_token={{ user_token }}&order_id=' + orderId,
 		dataType: 'json',
-		data: 'order_status_id=' + encodeURIComponent(statusId) + '&notify=' + notify + '&comment=',
-		beforeSend: function() {
-			$(element).prop('disabled', true);
-		},
-		complete: function() {
-			$(element).prop('disabled', false);
-		},
 		success: function(json) {
-			$('.alert-dismissible').remove();
-
-			if (json['error']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-			}
-
-			if (json['success']) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
-			}
+			if (json['error']) { listAlert(json['error'], 'danger'); return; }
+			listStatusData = json;
+			$('#status-modal-title').text(listStatusTitleFmt().replace('%s', json['order_id']));
+			$('#status-current').text(json['current_name']);
+			if (json['flow_enabled']) { $('#status-override-wrap').show(); }
+			fillStatusSelect(false);
+			$('#modal-order-status').modal('show');
 		},
 		error: function(xhr, ajaxOptions, thrownError) {
 			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
 		}
 	});
+}
+
+function fillStatusSelect(useAll) {
+	if (!listStatusData) { return; }
+	var list = useAll ? listStatusData['statuses'] : listStatusData['allowed'];
+	var html = '';
+	if (!list.length) {
+		$('#status-empty').show();
+	} else {
+		$('#status-empty').hide();
+		for (var i = 0; i < list.length; i++) {
+			html += '<option value="' + list[i]['order_status_id'] + '">' + listEsc(list[i]['name']) + '</option>';
+		}
+	}
+	$('#status-new').html(html);
+	$('#status-apply').prop('disabled', !list.length);
+	onStatusSelectChange();
+}
+
+function selectedStatusEntry() {
+	if (!listStatusData) { return null; }
+	var id = parseInt($('#status-new').val(), 10);
+	var lists = [listStatusData['allowed'], listStatusData['statuses']];
+	for (var l = 0; l < lists.length; l++) {
+		for (var i = 0; i < lists[l].length; i++) {
+			if (parseInt(lists[l][i]['order_status_id'], 10) === id) { return lists[l][i]; }
+		}
+	}
+	return { order_status_id: id };
+}
+
+function onStatusSelectChange() {
+	if (!listStatusData) { return; }
+	var entry = selectedStatusEntry();
+	var targetId = entry ? parseInt(entry['order_status_id'], 10) : 0;
+	var isRefund = !!(entry && entry['is_refund']);
+	$('#status-refund-hint').toggle(isRefund);
+	$('#status-apply').prop('disabled', isRefund || !targetId);
+	var needTracking = listStatusData['shipping_status_id'] > 0 && targetId === listStatusData['shipping_status_id'] && !listStatusData['has_tracking'] && !$('#status-override').prop('checked');
+	$('#status-tracking-warn').toggle(needTracking);
+}
+
+$(document).on('click', '.js-order-status', function(e) {
+	e.preventDefault();
+	openOrderStatus($(this).data('order-id'), $(this).data('order-view'));
+});
+
+$(document).on('change', '#status-override', function() {
+	fillStatusSelect($(this).prop('checked'));
+});
+
+$(document).on('change', '#status-new', onStatusSelectChange);
+
+$(document).on('click', '#status-refund-link', function(e) {
+	e.preventDefault();
+	if (listStatusOrderView) { location = listStatusOrderView; }
+});
+
+$(document).on('click', '#status-apply', function() {
+	if (!listStatusData) { return; }
+	var entry = selectedStatusEntry();
+	var targetId = entry ? parseInt(entry['order_status_id'], 10) : 0;
+	if (!targetId) { return; }
+	if (entry && entry['terminal'] && !confirm('{{ text_flow_confirm_terminal|escape('js') }}')) { return; }
+	var element = this;
+	$.ajax({
+		url: 'index.php?route=sale/order/addHistory&user_token={{ user_token }}&order_id=' + listStatusData['order_id'],
+		type: 'post',
+		dataType: 'json',
+		data: 'order_status_id=' + encodeURIComponent(targetId) + '&comment=' + encodeURIComponent($('#status-comment').val()) + '&notify=' + ($('#status-notify').prop('checked') ? '1' : '0') + '&override=' + ($('#status-override').prop('checked') ? '1' : '0'),
+		beforeSend: function() { $(element).prop('disabled', true); },
+		complete: function() { $(element).prop('disabled', false); },
+		success: function(json) {
+			if (json['error']) {
+				$('#status-modal-error').text(json['error']).show();
+				return;
+			}
+			$('#modal-order-status').modal('hide');
+			location.reload();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+// ---- Payment modal (same endpoints as the order edit page) ----
+var listPaymentOrderId = 0;
+var listPaymentDirty = false;
+
+function listPaymentTitleFmt() { return '{{ text_list_payment_title|escape('js') }}'; }
+
+$(document).on('click', '.js-order-payment', function(e) {
+	e.preventDefault();
+	openOrderPayment($(this).data('order-id'));
+});
+
+function openOrderPayment(orderId) {
+	listPaymentOrderId = orderId;
+	listPaymentDirty = false;
+	$('#payment-modal-error').hide();
+	$('#payment-summary').html('');
+	$('#payment-list').html('');
+	$('#payment-amount').val('');
+	$('#payment-reference').val('');
+	$('#payment-comment').val('');
+	$('#refund-amount').val('');
+	$('#refund-comment').val('');
+	refreshPaymentModal();
+	$('#modal-order-payment').modal('show');
+}
+
+function refreshPaymentModal() {
+	$.ajax({
+		url: 'index.php?route=sale/order/getPaymentData&user_token={{ user_token }}&order_id=' + listPaymentOrderId,
+		dataType: 'json',
+		success: function(json) {
+			if (json['error']) { $('#payment-modal-error').text(json['error']).show(); return; }
+			$('#payment-modal-error').hide();
+			$('#payment-modal-title').text(listPaymentTitleFmt().replace('%s', json['order_id']));
+			renderPaymentModal(json);
+			updatePaymentRow(json);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+function renderPaymentModal(json) {
+	var html = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
+	html += '<span class="' + listPaymentBadgeClass(json['payment_status']) + '">' + listEsc(json['payment_status_text']) + '</span>';
+	html += '<span class="text-muted" style="font-size:12px">{{ text_payment_paid_of|escape('js') }} ' + listEsc(json['paid_amount']) + ' / ' + listEsc(json['total']) + '</span>';
+	html += '<span class="text-muted" style="font-size:12px">{{ text_payment_remaining|escape('js') }}: ' + listEsc(json['remaining']) + '</span>';
+	html += '</div>';
+	$('#payment-summary').html(html);
+
+	var list = '';
+	if (json['payments'] && json['payments'].length) {
+		for (var i = 0; i < json['payments'].length; i++) {
+			var p = json['payments'][i];
+			list += '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px">';
+			list += '<span class="' + (p['is_reversal'] ? 'text-danger' : 'text-success') + '">' + (p['is_reversal'] ? '−' : '+') + ' ' + listEsc(p['amount']) + '</span>';
+			list += '<span class="text-muted">' + listEsc(p['payment_method']) + (p['reference'] ? ' · ' + listEsc(p['reference']) : '') + ' · ' + listEsc(p['date_added']) + '</span>';
+			if (!p['is_reversal']) {
+				list += '<button type="button" class="btn btn-xs btn-danger" onclick="listRemovePayment(' + p['order_payment_id'] + ')" title="{{ button_remove_payment|escape('js') }}"><i data-lucide="x" width="11" height="11"></i></button>';
+			} else {
+				list += '<span></span>';
+			}
+			list += '</div>';
+			if (p['comment']) { list += '<div class="text-muted" style="font-size:11px;margin:-2px 0 4px">' + listEsc(p['comment']) + '</div>'; }
+		}
+	} else {
+		list = '<div class="text-muted" style="font-size:12px">{{ text_no_payments|escape('js') }}</div>';
+	}
+	$('#payment-list').html(list);
+
+	var methods = '<option value="" data-code="">{{ text_select|escape('js') }}</option>';
+	for (var m = 0; m < json['payment_methods'].length; m++) {
+		var sel = json['payment_methods'][m]['code'] === json['payment_code'] ? ' selected="selected"' : '';
+		methods += '<option value="' + listEsc(json['payment_methods'][m]['title']) + '" data-code="' + listEsc(json['payment_methods'][m]['code']) + '"' + sel + '>' + listEsc(json['payment_methods'][m]['title']) + '</option>';
+	}
+	$('#list-payment-method').html(methods);
+	if (!$('#payment-amount').val() && json['remaining_raw'] > 0) {
+		$('#payment-amount').val(parseFloat(json['remaining_raw']).toFixed(2));
+	}
+	$('#payment-refund-block').toggle(json['paid_amount_raw'] > 0);
+	$('#payment-overpaid-block').toggle(json['overpaid_raw'] > 0);
+	if (window.lucide) { lucide.createIcons(); }
+}
+
+function updatePaymentRow(json) {
+	var badge = document.getElementById('ps-badge-' + json['order_id']);
+	if (badge) {
+		badge.textContent = json['payment_status_text'];
+		badge.className = listPaymentBadgeClass(json['payment_status']);
+	}
+	var paid = document.getElementById('ps-paid-' + json['order_id']);
+	if (paid) { paid.textContent = json['paid_amount']; }
+}
+
+$(document).on('click', '#payment-add', function() {
+	var amount = $('#payment-amount').val();
+	if (!amount || parseFloat(amount) <= 0) { $('#payment-modal-error').text('{{ error_payment_amount|escape('js') }}').show(); return; }
+	var methodSel = document.getElementById('list-payment-method');
+	var methodTitle = methodSel ? methodSel.value : '';
+	var methodCode = methodSel && methodSel.selectedIndex >= 0 ? methodSel.options[methodSel.selectedIndex].getAttribute('data-code') : '';
+	var element = this;
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/addPayment&user_token={{ user_token }}&order_id=' + listPaymentOrderId,
+		type: 'post',
+		dataType: 'json',
+		data: 'amount=' + encodeURIComponent(amount) + '&payment_method=' + encodeURIComponent(methodTitle) + '&payment_code=' + encodeURIComponent(methodCode) + '&reference=' + encodeURIComponent($('#payment-reference').val()) + '&comment=' + encodeURIComponent($('#payment-comment').val()),
+		beforeSend: function() { $(element).prop('disabled', true); },
+		complete: function() { $(element).prop('disabled', false); },
+		success: function(json) {
+			if (json['error']) { $('#payment-modal-error').text(json['error']).show(); return; }
+			$('#payment-modal-error').hide();
+			$('#payment-amount').val('');
+			$('#payment-reference').val('');
+			$('#payment-comment').val('');
+			listPaymentDirty = true;
+			refreshPaymentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).on('click', '#refund-add', function() {
+	var amount = $('#refund-amount').val();
+	if (!amount || parseFloat(amount) <= 0) { $('#payment-modal-error').text('{{ error_refund_amount|escape('js') }}').show(); return; }
+	var element = this;
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/addRefund&user_token={{ user_token }}&order_id=' + listPaymentOrderId,
+		type: 'post',
+		dataType: 'json',
+		data: 'amount=' + encodeURIComponent(amount) + '&comment=' + encodeURIComponent($('#refund-comment').val()),
+		beforeSend: function() { $(element).prop('disabled', true); },
+		complete: function() { $(element).prop('disabled', false); },
+		success: function(json) {
+			if (json['error']) { $('#payment-modal-error').text(json['error']).show(); return; }
+			$('#payment-modal-error').hide();
+			$('#refund-amount').val('');
+			$('#refund-comment').val('');
+			listPaymentDirty = true;
+			refreshPaymentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+function listRemovePayment(orderPaymentId) {
+	if (!confirm('{{ text_confirm_remove_payment|escape('js') }}')) { return; }
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/removePayment&user_token={{ user_token }}',
+		type: 'post',
+		dataType: 'json',
+		data: 'order_payment_id=' + encodeURIComponent(orderPaymentId),
+		success: function(json) {
+			if (json['error']) { $('#payment-modal-error').text(json['error']).show(); return; }
+			$('#payment-modal-error').hide();
+			listPaymentDirty = true;
+			refreshPaymentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+$(document).on('click', '#overpayment-remove', function() {
+	if (!confirm('{{ text_confirm_remove_overpayment|escape('js') }}')) { return; }
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/removeOverpayment&user_token={{ user_token }}&order_id=' + listPaymentOrderId,
+		type: 'post',
+		dataType: 'json',
+		success: function(json) {
+			if (json['error']) { $('#payment-modal-error').text(json['error']).show(); return; }
+			$('#payment-modal-error').hide();
+			listPaymentDirty = true;
+			refreshPaymentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).on('hidden.bs.modal', '#modal-order-payment', function() {
+	if (listPaymentDirty) { location.reload(); }
+});
+
+// ---- Shipment modal (same endpoints as the order edit page) ----
+var listShipmentOrderId = 0;
+var listShipmentDirty = false;
+
+function listShipmentTitleFmt() { return '{{ text_list_shipment_title|escape('js') }}'; }
+
+$(document).on('click', '.js-order-shipment', function(e) {
+	e.preventDefault();
+	openOrderShipment($(this).data('order-id'));
+});
+
+function openOrderShipment(orderId) {
+	listShipmentOrderId = orderId;
+	listShipmentDirty = false;
+	$('#shipment-modal-error').hide();
+	$('#shipment-summary').html('');
+	$('#shipment-list').html('');
+	$('#shipment-items').html('');
+	$('#shipment-tracking').val('');
+	$('#shipment-comment').val('');
+	$('#shipment-notify').prop('checked', true);
+	refreshShipmentModal();
+	$('#modal-order-shipment').modal('show');
+}
+
+function refreshShipmentModal() {
+	$.ajax({
+		url: 'index.php?route=sale/order/getShipmentData&user_token={{ user_token }}&order_id=' + listShipmentOrderId,
+		dataType: 'json',
+		success: function(json) {
+			if (json['error']) { $('#shipment-modal-error').text(json['error']).show(); return; }
+			$('#shipment-modal-error').hide();
+			$('#shipment-modal-title').text(listShipmentTitleFmt().replace('%s', json['order_id']));
+			renderShipmentModal(json);
+			updateShipmentRow(json);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+function renderShipmentModal(json) {
+	var percent = json['ordered_total'] > 0 ? Math.round(Math.min(json['shipped_total'], json['ordered_total']) / json['ordered_total'] * 100) : 0;
+	var html = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
+	if (json['shipping_status']) {
+		html += '<span class="' + listShippingBadgeClass(json['shipping_status']) + '">' + listEsc(json['shipping_status_text']) + '</span>';
+	}
+	html += '<span class="text-muted" style="font-size:12px">' + json['shipped_total'] + ' / ' + json['ordered_total'] + ' (' + percent + '%)</span>';
+	html += '</div>';
+	$('#shipment-summary').html(html);
+
+	var list = '';
+	if (json['shipments'] && json['shipments'].length) {
+		for (var i = 0; i < json['shipments'].length; i++) {
+			var s = json['shipments'][i];
+			list += '<div style="padding:6px 0;border-top:1px solid #eee;font-size:12px">';
+			list += '<div style="display:flex;justify-content:space-between;gap:8px"><span><i data-lucide="truck" width="12" height="12"></i> ' + listEsc(s['tracking_number']) + '</span>';
+			list += '<span class="text-muted">' + listEsc(s['date_added']) + '</span>';
+			list += '<button type="button" class="btn btn-xs btn-danger" onclick="listDeleteShipment(' + s['shipment_id'] + ')" title="{{ button_remove_shipment|escape('js') }}"><i data-lucide="x" width="11" height="11"></i></button></div>';
+			if (s['items'] && s['items'].length) {
+				for (var k = 0; k < s['items'].length; k++) {
+					list += '<div class="text-muted" style="font-size:11px">' + listEsc(s['items'][k]['name']) + ' × ' + s['items'][k]['quantity'] + '</div>';
+				}
+			}
+			if (s['comment']) { list += '<div class="text-muted" style="font-size:11px">' + listEsc(s['comment']) + '</div>'; }
+			list += '</div>';
+		}
+	} else {
+		list = '<div class="text-muted" style="font-size:12px">{{ text_no_shipments|escape('js') }}</div>';
+	}
+	$('#shipment-list').html(list);
+
+	var items = '';
+	for (var j = 0; j < json['products'].length; j++) {
+		var p = json['products'][j];
+		items += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">';
+		items += '<span>' + listEsc(p['name']) + ' <span class="text-muted">' + p['shipped'] + ' / ' + p['ordered'] + '</span></span>';
+		items += '<input type="number" class="form-control" style="width:80px" min="0" max="' + p['remaining'] + '" value="' + p['remaining'] + '" data-opid="' + p['order_product_id'] + '" />';
+		items += '</div>';
+	}
+	$('#shipment-items').html(items);
+	if (window.lucide) { lucide.createIcons(); }
+}
+
+function updateShipmentRow(json) {
+	var percent = json['ordered_total'] > 0 ? Math.round(Math.min(json['shipped_total'], json['ordered_total']) / json['ordered_total'] * 100) : 0;
+	var badge = document.getElementById('ss-badge-' + json['order_id']);
+	if (badge && json['shipping_status']) {
+		badge.textContent = json['shipping_status_text'];
+		badge.className = listShippingBadgeClass(json['shipping_status']);
+		badge.setAttribute('title', json['shipped_total'] + ' / ' + json['ordered_total']);
+	}
+	var bar = document.getElementById('ss-bar-' + json['order_id']);
+	if (bar) { bar.style.width = percent + '%'; }
+}
+
+$(document).on('click', '#shipment-add', function() {
+	var tracking = $('#shipment-tracking').val().trim();
+	if (!tracking) { $('#shipment-modal-error').text('{{ error_tracking_number|escape('js') }}').show(); return; }
+	var items = [];
+	$('#shipment-items input[data-opid]').each(function() {
+		var qty = parseInt($(this).val(), 10) || 0;
+		if (qty > 0) { items.push({ order_product_id: $(this).data('opid'), quantity: qty }); }
+	});
+	if (!items.length) { $('#shipment-modal-error').text('{{ error_shipment_items|escape('js') }}').show(); return; }
+	var element = this;
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/addShipment&user_token={{ user_token }}&order_id=' + listShipmentOrderId,
+		type: 'post',
+		dataType: 'json',
+		data: 'tracking_number=' + encodeURIComponent(tracking) + '&comment=' + encodeURIComponent($('#shipment-comment').val()) + '&items=' + encodeURIComponent(JSON.stringify(items)) + '&notify=' + ($('#shipment-notify').prop('checked') ? '1' : '0'),
+		beforeSend: function() { $(element).prop('disabled', true); },
+		complete: function() { $(element).prop('disabled', false); },
+		success: function(json) {
+			if (json['error']) { $('#shipment-modal-error').text(json['error']).show(); return; }
+			$('#shipment-modal-error').hide();
+			$('#shipment-tracking').val('');
+			$('#shipment-comment').val('');
+			listShipmentDirty = true;
+			refreshShipmentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+function listDeleteShipment(shipmentId) {
+	if (!confirm('{{ text_confirm_remove_shipment|escape('js') }}')) { return; }
+	$.ajax({
+		url: 'index.php?route=sale/order_detail/deleteShipment&user_token={{ user_token }}&order_id=' + listShipmentOrderId,
+		type: 'post',
+		dataType: 'json',
+		data: 'shipment_id=' + encodeURIComponent(shipmentId),
+		success: function(json) {
+			if (json['error']) { $('#shipment-modal-error').text(json['error']).show(); return; }
+			$('#shipment-modal-error').hide();
+			listShipmentDirty = true;
+			refreshShipmentModal();
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+$(document).on('hidden.bs.modal', '#modal-order-shipment', function() {
+	if (listShipmentDirty) { location.reload(); }
 });
 //--></script>
 
@@ -469,6 +924,135 @@ $('#button-new-order-confirm').on('click', function() {
 	var groupId = $('#new-order-group').val();
 	location = '{{ add }}' + (groupId ? '&customer_group_id=' + encodeURIComponent(groupId) : '');
 });
-//--></script>
+ //--></script>
+
+<div class="modal fade" id="modal-order-status" tabindex="-1" role="dialog" aria-labelledby="status-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="status-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="status-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p><strong>{{ text_list_status_current }}:</strong> <span id="status-current"></span></p>
+        <div class="form-group">
+          <label for="status-new">{{ text_list_status_new }}</label>
+          <select id="status-new" class="form-control"></select>
+        </div>
+        <div id="status-empty" class="alert alert-warning" style="display:none">{{ text_list_status_empty }}</div>
+        <div id="status-refund-hint" class="alert alert-info" style="display:none">{{ text_list_refund_hint }} <a id="status-refund-link" href="#">{{ button_open_order }}</a></div>
+        <div id="status-tracking-warn" class="alert alert-warning" style="display:none">{{ error_tracking_required }}</div>
+        <div class="form-group">
+          <label for="status-comment">{{ entry_comment }}</label>
+          <textarea id="status-comment" class="form-control" rows="2" placeholder="{{ text_comment_optional }}"></textarea>
+        </div>
+        <div class="checkbox">
+          <label><input type="checkbox" id="status-notify" checked="checked" /> {{ entry_notify }}</label>
+        </div>
+        <div class="checkbox" id="status-override-wrap" style="display:none">
+          <label><input type="checkbox" id="status-override" /> {{ text_flow_override }}</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="status-apply">{{ button_flow_apply }}</button>
+      </div>
+    </div>
+  </div>
 </div>
-{{ footer }} 
+
+<div class="modal fade" id="modal-order-payment" tabindex="-1" role="dialog" aria-labelledby="payment-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="payment-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="payment-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p class="text-muted" style="font-size:12px">{{ text_list_payment_hint }}</p>
+        <div id="payment-summary"></div>
+        <div id="payment-list"></div>
+        <hr />
+        <div class="form-group">
+          <label for="payment-amount">{{ entry_payment_amount }}</label>
+          <input type="text" id="payment-amount" class="form-control" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label for="list-payment-method">{{ entry_payment_method }}</label>
+          <select id="list-payment-method" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="payment-reference">{{ entry_payment_reference }}</label>
+          <input type="text" id="payment-reference" class="form-control" />
+          <div class="text-muted" style="font-size:11px;margin-top:3px">{{ text_payment_reference_hint }}</div>
+        </div>
+        <div class="form-group">
+          <label for="payment-comment">{{ entry_comment }}</label>
+          <textarea id="payment-comment" class="form-control" rows="2"></textarea>
+        </div>
+        <button type="button" class="btn btn-success" id="payment-add"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_payment }}</button>
+        <div id="payment-refund-block" style="display:none;margin-top:15px">
+          <hr />
+          <div class="form-group">
+            <label for="refund-amount">{{ entry_refund_amount }}</label>
+            <input type="text" id="refund-amount" class="form-control" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="refund-comment">{{ entry_comment }}</label>
+            <textarea id="refund-comment" class="form-control" rows="2"></textarea>
+          </div>
+          <button type="button" class="btn btn-warning" id="refund-add"><i data-lucide="undo-2" width="14" height="14"></i> {{ button_add_refund }}</button>
+        </div>
+        <div id="payment-overpaid-block" class="alert alert-warning" style="display:none;margin-top:15px">
+          {{ text_payment_overpaid_hint }}
+          <div style="margin-top:8px"><button type="button" class="btn btn-xs btn-warning" id="overpayment-remove"><i data-lucide="undo-2" width="12" height="12"></i> {{ button_remove_overpayment }}</button></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-order-shipment" tabindex="-1" role="dialog" aria-labelledby="shipment-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="shipment-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="shipment-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p class="text-muted" style="font-size:12px">{{ text_list_shipment_hint }}</p>
+        <div id="shipment-summary"></div>
+        <div id="shipment-list"></div>
+        <hr />
+        <div class="form-group">
+          <label for="shipment-tracking">{{ entry_tracking_number }}</label>
+          <input type="text" id="shipment-tracking" class="form-control" />
+          <div class="text-muted" style="font-size:11px;margin-top:3px">{{ entry_tracking_number_hint }}</div>
+        </div>
+        <div class="form-group">
+          <label>{{ text_shipment_items }}</label>
+          <div id="shipment-items"></div>
+        </div>
+        <div class="form-group">
+          <label for="shipment-comment">{{ entry_comment }}</label>
+          <textarea id="shipment-comment" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="checkbox">
+          <label><input type="checkbox" id="shipment-notify" checked="checked" /> {{ entry_notify }}</label>
+        </div>
+        <button type="button" class="btn btn-success" id="shipment-add"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_shipment }}</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{{ footer }}

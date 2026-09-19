@@ -290,6 +290,21 @@ $_['button_flow_apply']          = 'Применить';
 $_['text_comment_optional']      = 'Комментарий (необязательно)';
 $_['text_return_refund_note']    = 'Возврат средств по возврату #%s';
 
+// Модальные окна статусов в списке заказов
+$_['text_list_status_title']     = 'Сменить статус заказа — №%s';
+$_['text_list_payment_title']    = 'Оплаты — заказ №%s';
+$_['text_list_shipment_title']   = 'Отгрузки — заказ №%s';
+$_['text_list_status_current']   = 'Текущий статус';
+$_['text_list_status_new']       = 'Новый статус';
+$_['text_list_status_empty']     = 'Нет доступных переходов из этого статуса. Включите принудительную смену.';
+$_['text_list_refund_hint']      = 'Возвраты оформляются на странице заказа.';
+$_['text_list_payment_hint']     = 'Статус оплаты рассчитывается из записанных оплат — тех же, что на странице заказа.';
+$_['text_list_shipment_hint']    = 'Статус отгрузки рассчитывается из отгрузок — тех же, что на странице заказа.';
+$_['text_list_status_change']    = 'Сменить статус';
+$_['text_list_payment_change']   = 'Изменить оплату';
+$_['text_list_shipment_change']  = 'Изменить отгрузку';
+$_['button_open_order']          = 'Открыть заказ';
+
 // Shipments
 $_['text_shipments']             = 'Отгрузки';
 $_['text_no_shipments']          = 'Отгрузок не зарегистрировано';

@@ -262,6 +262,21 @@ $_['button_flow_apply']          = 'Apply';
 $_['text_comment_optional']      = 'Comment (optional)';
 $_['text_return_refund_note']    = 'Refund of return #%s';
 
+// Order list status modals
+$_['text_list_status_title']     = 'Change order status — #%s';
+$_['text_list_payment_title']    = 'Payments — order #%s';
+$_['text_list_shipment_title']   = 'Shipments — order #%s';
+$_['text_list_status_current']   = 'Current status';
+$_['text_list_status_new']       = 'New status';
+$_['text_list_status_empty']     = 'No transitions available from this status. Enable override to force a change.';
+$_['text_list_refund_hint']      = 'Refunds are processed on the order page.';
+$_['text_list_payment_hint']     = 'Payment status is calculated from recorded payments — same payments as on the order page.';
+$_['text_list_shipment_hint']    = 'Shipping status is calculated from shipments — same shipments as on the order page.';
+$_['text_list_status_change']    = 'Change status';
+$_['text_list_payment_change']   = 'Change payment';
+$_['text_list_shipment_change']  = 'Change shipping';
+$_['button_open_order']          = 'Open order';
+
 // Shipments
 $_['text_shipments']             = 'Shipments';
 $_['text_no_shipments']          = 'No shipments recorded';
