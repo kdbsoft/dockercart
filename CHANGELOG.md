@@ -1,3 +1,9 @@
+## [3.22.0](https://github.com/kdbsoft/dockercart/compare/v3.21.1...v3.22.0) (2026-09-19)
+
+### Features
+
+* **sale:** add inline status, payment, and shipment modals to order list ([458b768](https://github.com/kdbsoft/dockercart/commit/458b768d5b098c908d4acc6cfb9d74d9581ed3bc))
+
 ## [3.21.1](https://github.com/kdbsoft/dockercart/compare/v3.21.0...v3.21.1) (2026-09-13)
 
 ### Bug Fixes
