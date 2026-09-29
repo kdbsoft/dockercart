@@ -91,6 +91,8 @@ class ControllerExtensionModuleBanner extends Controller {
                 'accent_bg'          => $accent_bg,
                 'badge_text_color'   => $badge_text_color,
                 'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
+                'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb'),
+                'btn_text_color'     => $this->badgeTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
                 'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
                 'image'              => $image_landscape,
                 'image_portrait'     => $image_portrait,

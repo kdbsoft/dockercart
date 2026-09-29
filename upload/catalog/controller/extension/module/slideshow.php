@@ -89,6 +89,8 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 				'badge'              => isset($result['badge']) ? html_entity_decode((string)$result['badge'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : (isset($result['accent_text']) ? html_entity_decode((string)$result['accent_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : ''),
 				'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
+				'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb'),
+				'btn_text_color'     => $this->badgeTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
                 'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
 				'accent_color'       => $accent_color,
 				'accent_bg'          => $accent_bg,

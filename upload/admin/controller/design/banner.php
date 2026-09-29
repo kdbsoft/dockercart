@@ -453,6 +453,7 @@ class ControllerDesignBanner extends Controller {
 				'accent_text'        => isset($banner_image['accent_text']) ? $banner_image['accent_text'] : '',
 				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
+				'primary_btn_color'  => isset($banner_image['primary_btn_color']) ? $banner_image['primary_btn_color'] : '',
 				'link'               => $link,
 				'link_type'          => $link_data['type'],
 				'link_value'         => $link_data['value'],

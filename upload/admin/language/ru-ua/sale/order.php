@@ -407,6 +407,7 @@ $_['text_items']                 = 'товаров';
 $_['text_buyer'] = 'Покупатель';
 $_['text_edit_buyer'] = 'Изменить';
 $_['text_attach_customer'] = 'Связать с покупателем';
+$_['text_registered_customer'] = 'Зарегистрированный покупатель';
 $_['text_replace_customer'] = 'Заменить покупателя';
 $_['text_customer_attached'] = 'Покупатель связан';
 $_['entry_search_customer'] = 'Поиск клиента по имени, email или телефону…';
