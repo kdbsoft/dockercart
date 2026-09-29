@@ -1878,8 +1878,9 @@ div.dcx-field.required > .dcx-label:before {
 .dc-attr-row__value { display: flex; align-items: center; gap: 6px; }
 .dc-attr-row__value .lang-code { font-size: 10px; font-weight: 600; padding: 2px 5px; background: var(--dc-gray-100); border-radius: 3px; color: var(--dc-text-dark); flex: 0 0 auto; }
 .dc-attr-row__value .form-control { flex: 1; height: 32px; font-size: 13px; }
-.btn-remove-attr { color: #94a3b8; border: 1px solid var(--dc-border);; font-size: 16px; text-decoration: none; padding: 4px; }
-.btn-remove-attr:hover { color: #ef4444; }
+.btn-remove-attr, .dc-remove-route { color: #94a3b8; border: 1px solid var(--dc-border); font-size: 16px; text-decoration: none; padding: 4px; background-color: var(--dc-surface); border-radius: var(--dc-radius-sm); display: inline-flex; align-items: center; justify-content: center; transition: color var(--dc-transition-fast), background-color var(--dc-transition-fast), border-color var(--dc-transition-fast); }
+.btn-remove-attr:hover, .dc-remove-route:hover { color: #ef4444; background-color: var(--dc-danger-light); border-color: var(--dc-border); }
+.btn-remove-attr:focus-visible, .dc-remove-route:focus-visible { color: #ef4444; background-color: var(--dc-danger-light); border-color: var(--dc-border); outline: none; box-shadow: 0 0 0 2px var(--dc-primary-ring); }
 
 @media (max-width: 767px) {
   .dc-attr-row { flex-direction: column; }
