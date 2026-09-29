@@ -388,7 +388,7 @@ select[disabled] {
             <!-- Block: {{ block.name }} (with rows) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8"
                  data-block-id="{{ block.id }}"
-                 {% if block.id == 'payment_address' %}style="display: none;" id="payment-address-section"{% endif %}>
+                 {% if block.id == 'payment_address' %}{% if payment_same_as_shipping is defined and not payment_same_as_shipping %}id="payment-address-section"{% else %}style="display: none;" id="payment-address-section"{% endif %}{% endif %}>
               <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-semibold text-text-primary">{{ block.name }}</h2>
                 {% if block.id in ['customer_details', 'shipping_address', 'payment_method'] %}
@@ -441,6 +441,10 @@ select[disabled] {
                   {% set ctx_logged = attribute(ctx, 'logged')|default(false) %}
                   {% set ctx_countries = attribute(ctx, 'countries')|default([]) %}
                   {% set ctx_country_id = attribute(ctx, 'country_id')|default('') %}
+                  {% set ctx_zones = attribute(ctx, 'zones')|default([]) %}
+                  {% set ctx_zone_id = attribute(ctx, 'zone_id')|default('') %}
+                  {% set ctx_payment_zones = attribute(ctx, 'payment_zones')|default([]) %}
+                  {% set ctx_payment_zone_id = attribute(ctx, 'payment_zone_id')|default('') %}
 
                   {% if field.type == 'text' or field.type == 'email' or field.type == 'tel' %}
                     <div{% if field.hidden %} style="display: none;"{% endif %}>
@@ -503,6 +507,14 @@ select[disabled] {
                           {% if ctx_logged and attribute(ctx, field.id) is defined and attribute(ctx, field.id) != '' %}
                             <input type="hidden" name="{{ field.id }}" value="{{ attribute(ctx, field.id)|default('') }}" data-prefilled-hidden>
                           {% endif %}
+                        {% elseif field.id == 'zone_id' %}
+                          {% for zone in ctx_zones %}
+                            <option value="{{ zone.zone_id }}" {% if zone.zone_id == ctx_zone_id %}selected{% endif %}>{{ zone.name }}</option>
+                          {% endfor %}
+                        {% elseif field.id == 'payment_zone_id' %}
+                          {% for zone in ctx_payment_zones %}
+                            <option value="{{ zone.zone_id }}" {% if zone.zone_id == ctx_payment_zone_id %}selected{% endif %}>{{ zone.name }}</option>
+                          {% endfor %}
                         {% endif %}
                       </select>
                     </div>
@@ -570,7 +582,7 @@ select[disabled] {
               {% if block.id == 'shipping_address' %}
                 <div class="pt-4 border-t border-gray-200 mt-4">
                   <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" id="payment-same-as-shipping" checked class="w-5 h-5 accent-primary cursor-pointer">
+                    <input type="checkbox" id="payment-same-as-shipping" {% if payment_same_as_shipping is not defined or payment_same_as_shipping %}checked{% endif %} class="w-5 h-5 accent-primary cursor-pointer">
                     <span class="text-sm font-medium text-text-primary">{{ text_payment_same_as_shipping|default('Payment address is the same as shipping address') }}</span>
                   </label>
                 </div>
@@ -943,7 +955,17 @@ const DEFAULT_SHIPPING_COUNTRY_ID = '{{ country_id|default('')|e('js') }}';
 const DEFAULT_SHIPPING_ZONE_ID = '{{ zone_id|default('')|e('js') }}';
 const DEFAULT_PAYMENT_COUNTRY_ID = '{{ payment_country_id|default(country_id|default(''))|e('js') }}';
 const DEFAULT_PAYMENT_ZONE_ID = '{{ payment_zone_id|default(zone_id|default(''))|e('js') }}';
+const SELECTED_SHIPPING_METHOD = '{{ selected_shipping_method|default('')|e('js') }}';
+const SELECTED_PAYMENT_METHOD = '{{ selected_payment_method|default('')|e('js') }}';
 const DEFAULT_PHONE_FORMAT = '{{ default_phone_format|default('')|e('js') }}';
+// Seed in-memory guards with the server-restored selections so the first
+// auto-save does not re-POST an unchanged method in a loop after reload.
+if (SELECTED_SHIPPING_METHOD) {
+  window._lastSentShippingMethod = SELECTED_SHIPPING_METHOD;
+}
+if (typeof SELECTED_PAYMENT_METHOD !== 'undefined' && SELECTED_PAYMENT_METHOD) {
+  window._lastSentPaymentMethod = SELECTED_PAYMENT_METHOD;
+}
 const phoneFormatCache = new Map();
 
 const applyPhoneMask = (inputEl, format) => {
@@ -2088,6 +2110,19 @@ document.addEventListener('DOMContentLoaded', () => {
           selected.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
           log('Selected shipping method already sent previously, not re-triggering change');
+          // The shipping POST is skipped, but payment methods still need to
+          // load on a page reload — otherwise the payment block keeps the
+          // "select a shipping method" placeholder despite a selection.
+          const paymentSameCheckbox = $('#payment-same-as-shipping');
+          if (paymentSameCheckbox && paymentSameCheckbox.checked) {
+            if (typeof savePaymentAddressSameAsShipping === 'function') {
+              savePaymentAddressSameAsShipping();
+            } else if (typeof loadPaymentMethods === 'function') {
+              loadPaymentMethods();
+            }
+          } else if (typeof loadPaymentMethods === 'function') {
+            loadPaymentMethods();
+          }
         }
       }
     } else {
@@ -2295,10 +2330,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const fragment = document.createDocumentFragment();
         let first = true;
+        // Prefer the in-page selection first, then the server-restored method
+        // after a reload; fall back to first.
+        const savedPayment = window._lastSentPaymentMethod || ((typeof SELECTED_PAYMENT_METHOD !== 'undefined' && SELECTED_PAYMENT_METHOD) || '');
+        const hasSavedPayment = savedPayment && Object.prototype.hasOwnProperty.call(json.payment_methods, savedPayment);
 
         Object.entries(json.payment_methods).forEach(([code, method]) => {
+          const isSelected = hasSavedPayment ? code === savedPayment : first;
           const label = document.createElement('label');
-          label.className = `radio-card flex items-center justify-between ${first ? 'selected' : ''}`;
+          label.className = `radio-card flex items-center justify-between ${isSelected ? 'selected' : ''}`;
 
           const left = document.createElement('div');
           left.className = 'flex items-center gap-3';
@@ -2307,7 +2347,7 @@ document.addEventListener('DOMContentLoaded', () => {
           input.type = 'radio';
           input.name = 'payment_method';
           input.value = code;
-          if (first) input.checked = true;
+          if (isSelected) input.checked = true;
 
           const titleWrap = document.createElement('div');
           let titleHtml = `<div class="font-medium text-text-primary">${method.title}</div>`;
@@ -2344,6 +2384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newInput.addEventListener('change', (e) => {
               const value = e.target.value;
               log('Payment method changed', value);
+              window._lastSentPaymentMethod = value;
 
               // Keep the visual selection in sync when change fires (keyboard, programmatic or click)
                 try {
@@ -2401,6 +2442,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const checkedMethod = $('input[name="payment_method"]:checked');
           if (checkedMethod) {
             log('Payment method pre-selected, updating progress');
+            window._lastSentPaymentMethod = checkedMethod.value;
             updateProgressIntelligent();
 
             // Auto-load payment extension for pre-selected method on initial load
