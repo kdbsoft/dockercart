@@ -17,6 +17,7 @@ $_['entry_link_type'] = 'Тип посилання';
 $_['entry_link_search'] = 'Пошук за назвою...';
 $_['entry_name'] = 'Назва банера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
+$_['entry_primary_btn_color'] = 'Колір кнопки';
 $_['entry_sort_order'] = 'Порядок сортування';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст під заголовком';

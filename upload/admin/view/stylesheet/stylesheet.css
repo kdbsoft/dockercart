@@ -858,14 +858,85 @@ fieldset[disabled] .btn {
 }
 
 .btn-link {
-    color: var(--dc-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1.5;
+    color: var(--dc-primary);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--dc-radius-sm);
+    box-shadow: none;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dc-transition-fast), background-color var(--dc-transition-fast), border-color var(--dc-transition-fast), box-shadow var(--dc-transition-fast);
 }
 
-.btn-link:hover,
+.btn-link:hover {
+    color: var(--dc-primary-hover);
+    background-color: var(--dc-primary-light);
+    border-color: transparent;
+    text-decoration: none;
+}
+
 .btn-link:focus-visible {
     color: var(--dc-primary-hover);
+    background-color: var(--dc-primary-light);
+    border-color: transparent;
+    outline: none;
+    box-shadow: 0 0 0 2px var(--dc-primary-ring);
     text-decoration: none;
+}
+
+.btn-link:active,
+.btn-link.active {
+    color: var(--dc-primary-active);
+    background-color: var(--dc-primary-light);
+    border-color: transparent;
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.btn-link:disabled,
+.btn-link.disabled,
+.btn-link[disabled],
+fieldset[disabled] .btn-link {
+    color: var(--dc-text-faint);
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    text-decoration: none;
+    cursor: not-allowed;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.btn-link i,
+.btn-link svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    vertical-align: middle;
+}
+
+.btn-link.btn-link-danger {
+    color: var(--dc-text-muted);
+}
+
+.btn-link.btn-link-danger:hover,
+.btn-link.btn-link-danger:focus-visible {
+    color: var(--dc-danger-hover);
+    background-color: var(--dc-danger-light);
+}
+
+.btn-link.btn-link-danger:active,
+.btn-link.btn-link-danger.active {
+    color: var(--dc-danger-text);
+    background-color: var(--dc-danger-light);
 }
 
 .btn-sm {
