@@ -337,26 +337,37 @@ class ControllerCheckoutDockercartCheckout extends Controller
             }
         }
 
-        // Pre-fill customer data if logged in
+        // Pre-fill customer data: session is the source of truth so a page
+        // reload restores Country / Zone / address / methods. DB defaults are
+        // only used when the session has nothing yet.
         if ($this->customer->isLogged()) {
             $this->load->model("account/customer");
             $this->load->model("account/address");
 
-            $data["firstname"] = $this->customer->getFirstName();
-            $data["lastname"] = $this->customer->getLastName();
-            $data["email"] = $this->customer->getEmail();
-            $data["telephone"] = $this->customer->getTelephone();
+            $temp_customer = isset($this->session->data["dockercart_temp_customer"]) && is_array($this->session->data["dockercart_temp_customer"])
+                ? $this->session->data["dockercart_temp_customer"]
+                : [];
+
+            $data["firstname"] = $temp_customer["firstname"] ?? $this->customer->getFirstName();
+            $data["lastname"] = $temp_customer["lastname"] ?? $this->customer->getLastName();
+            $data["email"] = $temp_customer["email"] ?? $this->customer->getEmail();
+            $data["telephone"] = $temp_customer["telephone"] ?? $this->customer->getTelephone();
 
             $address_id = $this->customer->getAddressId();
 
-            // Always prefer customer's default address from database on fresh page load
-            // Session may contain stale data from previous order
-            $active_shipping = null;
+            $db_shipping = null;
             if ($address_id) {
-                $active_shipping = $this->model_account_address->getAddress(
+                $db_shipping = $this->model_account_address->getAddress(
                     $address_id,
                 );
             }
+
+            // Session wins over the DB default so an edited Country/Zone
+            // survives a reload. DB is only the first-load fallback.
+            $session_shipping = isset($this->session->data["shipping_address"]) && is_array($this->session->data["shipping_address"])
+                ? $this->session->data["shipping_address"]
+                : null;
+            $active_shipping = $session_shipping ?: $db_shipping;
 
             if ($active_shipping) {
                 $data["address_1"] = $active_shipping["address_1"] ?? "";
@@ -378,6 +389,22 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 if (!isset($this->session->data["payment_address"])) {
                     $this->session->data["payment_address"] = $active_shipping;
                 }
+
+                // Keep template country/zone in sync with the session default
+                // used above so the pre-selected options match the session.
+                if (isset($this->session->data["payment_address"]["country_id"])) {
+                    $data["payment_country_id"] =
+                        $this->session->data["payment_address"]["country_id"];
+                } else {
+                    $data["payment_country_id"] = $data["country_id"];
+                }
+
+                if (isset($this->session->data["payment_address"]["zone_id"])) {
+                    $data["payment_zone_id"] =
+                        $this->session->data["payment_address"]["zone_id"];
+                } else {
+                    $data["payment_zone_id"] = "";
+                }
             }
 
             // Customer addresses
@@ -394,19 +421,100 @@ class ControllerCheckoutDockercartCheckout extends Controller
                 ? (int) $this->session->data["payment_address"]["address_id"]
                 : (int) $address_id;
         } else {
-            $data["firstname"] = "";
-            $data["lastname"] = "";
-            $data["email"] = "";
-            $data["telephone"] = "";
-            $data["address_1"] = "";
-            $data["address_2"] = "";
-            $data["city"] = "";
-            $data["postcode"] = "";
-            $data["company"] = "";
+            $session_shipping = isset($this->session->data["shipping_address"]) && is_array($this->session->data["shipping_address"])
+                ? $this->session->data["shipping_address"]
+                : [];
+            $session_guest = isset($this->session->data["guest"]) && is_array($this->session->data["guest"])
+                ? $this->session->data["guest"]
+                : [];
+            $session_payment = isset($this->session->data["payment_address"]) && is_array($this->session->data["payment_address"])
+                ? $this->session->data["payment_address"]
+                : [];
+
+            $data["firstname"] = $session_guest["firstname"] ?? $session_shipping["firstname"] ?? $session_payment["firstname"] ?? "";
+            $data["lastname"] = $session_guest["lastname"] ?? $session_shipping["lastname"] ?? $session_payment["lastname"] ?? "";
+            $data["email"] = $session_guest["email"] ?? $session_payment["email"] ?? $session_shipping["email"] ?? "";
+            $data["telephone"] = $session_guest["telephone"] ?? $session_payment["telephone"] ?? $session_shipping["telephone"] ?? "";
+            $data["address_1"] = $session_shipping["address_1"] ?? "";
+            $data["address_2"] = $session_shipping["address_2"] ?? "";
+            $data["city"] = $session_shipping["city"] ?? "";
+            $data["postcode"] = $session_shipping["postcode"] ?? "";
+            $data["company"] = $session_shipping["company"] ?? "";
+            // country_id / zone_id / payment_* already resolved from session above.
             $data["addresses"] = [];
             $data["default_address_id"] = 0;
             $data["shipping_address_id"] = 0;
             $data["payment_address_id"] = 0;
+        }
+
+        // Payment address fields (payment_* block) restored from session so a
+        // separate payment address also survives a reload.
+        $session_payment_address = isset($this->session->data["payment_address"]) && is_array($this->session->data["payment_address"])
+            ? $this->session->data["payment_address"]
+            : [];
+        $data["payment_address_1"] = $session_payment_address["address_1"] ?? "";
+        $data["payment_address_2"] = $session_payment_address["address_2"] ?? "";
+        $data["payment_city"] = $session_payment_address["city"] ?? "";
+        $data["payment_postcode"] = $session_payment_address["postcode"] ?? "";
+        $data["payment_company"] = $session_payment_address["company"] ?? "";
+        $data["payment_firstname"] = $session_payment_address["firstname"] ?? $data["firstname"] ?? "";
+        $data["payment_lastname"] = $session_payment_address["lastname"] ?? $data["lastname"] ?? "";
+
+        // Whether the "same as shipping" checkbox should stay checked.
+        $data["payment_same_as_shipping"] = true;
+        if ($session_payment_address && isset($this->session->data["shipping_address"]) && is_array($this->session->data["shipping_address"])) {
+            $shipping_compare = $this->session->data["shipping_address"];
+            foreach (["address_1", "address_2", "city", "postcode", "country_id", "zone_id"] as $compare_key) {
+                $payment_value = (string) ($session_payment_address[$compare_key] ?? "");
+                $shipping_value = (string) ($shipping_compare[$compare_key] ?? "");
+                if ($payment_value !== $shipping_value) {
+                    $data["payment_same_as_shipping"] = false;
+                    break;
+                }
+            }
+        }
+
+        // Zones for the pre-selected countries so the Zone selects can be
+        // rendered server-side without waiting for an AJAX round-trip.
+        $this->load->model("localisation/zone");
+        $data["zones"] = !empty($data["country_id"])
+            ? $this->model_localisation_zone->getZonesByCountryId($data["country_id"])
+            : [];
+        $data["payment_zones"] = !empty($data["payment_country_id"])
+            ? $this->model_localisation_zone->getZonesByCountryId($data["payment_country_id"])
+            : [];
+
+        // Re-validate saved method selections against fresh quotes so a stale
+        // code from a previous address never stays pre-selected after reload.
+        $data["selected_shipping_method"] = "";
+        $data["selected_payment_method"] = "";
+        if (!empty($this->session->data["shipping_address"])) {
+            $fresh_shipping = $this->getShippingMethods();
+            $saved_shipping = isset($this->session->data["shipping_method"]["code"])
+                ? (string) $this->session->data["shipping_method"]["code"]
+                : "";
+            if ($saved_shipping !== "") {
+                $shipping_parts = explode(".", $saved_shipping, 2);
+                if (
+                    count($shipping_parts) === 2 &&
+                    isset($fresh_shipping[$shipping_parts[0]]["quote"][$shipping_parts[1]])
+                ) {
+                    $data["selected_shipping_method"] = $saved_shipping;
+                } else {
+                    unset($this->session->data["shipping_method"]);
+                }
+            }
+        }
+        if (!empty($this->session->data["payment_address"])) {
+            $fresh_payment = $this->getPaymentMethods();
+            $saved_payment = isset($this->session->data["payment_method"]["code"])
+                ? (string) $this->session->data["payment_method"]["code"]
+                : "";
+            if ($saved_payment !== "" && isset($fresh_payment[$saved_payment])) {
+                $data["selected_payment_method"] = $saved_payment;
+            } else {
+                unset($this->session->data["payment_method"]);
+            }
         }
 
         // Get cart contents for initial display
