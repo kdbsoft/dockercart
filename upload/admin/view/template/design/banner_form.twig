@@ -282,8 +282,17 @@
                     {# ── Button ── #}
                     <div class="slide-section">
                       <div class="slide-section__title"><i data-lucide="mouse-pointer-click" width="14" height="14"></i> {{ entry_primary_btn_text }}</div>
-                      <div class="form-group">
-                        <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" class="form-control" />
+                      <div class="btn-row-2col">
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_text }}</label>
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_text]" value="{{ banner_image.primary_btn_text }}" placeholder="{{ entry_primary_btn_text }}" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                          <label>{{ entry_primary_btn_color }}</label>
+                          <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_color]" value="{{ banner_image.primary_btn_color|default(banner_image.accent_color|default('#2563eb')) }}" class="form-control dc-color-input" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -645,7 +654,10 @@ function addSlide(language_id) {
   // Button
   html += '<div class="slide-section">';
   html += '<div class="slide-section__title"><i data-lucide="mouse-pointer-click" width="14" height="14"></i> {{ entry_primary_btn_text }}</div>';
-  html += '<div class="form-group"><input type="text" name="' + pfx + '[primary_btn_text]" value="" class="form-control" /></div>';
+  html += '<div class="btn-row-2col">';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_text }}</label><input type="text" name="' + pfx + '[primary_btn_text]" value="" placeholder="{{ entry_primary_btn_text }}" class="form-control" /></div>';
+  html += '<div class="form-group"><label>{{ entry_primary_btn_color }}</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="' + pfx + '[primary_btn_color]" value="#2563eb" class="form-control dc-color-input" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" /></div></div>';
+  html += '</div>';
   html += '</div>';
 
   html += '</div></div>';

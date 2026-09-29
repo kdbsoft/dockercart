@@ -31,9 +31,13 @@
   .banner-slide__overlay--left .banner-slide__btns { justify-content: flex-start; }
   .banner-slide__overlay--center .banner-slide__btns { justify-content: center; }
   .banner-slide__overlay--right .banner-slide__btns { justify-content: flex-end; }
-  .banner-slide__btn { display:inline-flex; align-items:center; justify-content:center; gap:.5px; text-decoration:none; font-weight:700; border-radius: .75rem; padding: .5rem .85rem; font-size: .95rem; transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease; }
-  .banner-slide__btn--primary { background: var(--accent, #2563eb); color: #fff; border: 1px solid var(--accent, #2563eb); box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
-  .banner-slide__btn--primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.18); filter: brightness(0.92); }
+  .banner-slide__btn { display:inline-flex; align-items:center; justify-content:center; gap:.5px; text-decoration:none; font-weight:700; padding: .5rem .85rem; font-size: .95rem; transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease, background-color .18s ease, color .18s ease, border-color .18s ease; }
+  .banner-slide__btn--classic { background: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, var(--accent, #2563eb)); border-radius: .75rem; box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
+  .banner-slide__btn--classic:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.18); filter: brightness(0.92); }
+  .banner-slide__btn--modern { background: transparent; color: #fff; border: 1.5px solid var(--btn-color, var(--accent, #2563eb)); border-radius: 9999px; padding: .55rem 1.25rem; box-shadow: none; }
+  .banner-slide__btn--modern:hover { background: var(--btn-color, var(--accent, #2563eb)); border-color: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.22); }
+  /* Back-compat: old markup used --accent only */
+  .banner-slide__btn--primary { background: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, var(--accent, #2563eb)); border-radius: .75rem; box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
   .banner-slide__btn--secondary { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.18); }
   .banner-slide__btn--secondary:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
   /* If template inlines accent color on primary, keep text white and add subtle shadow for contrast */
@@ -133,7 +137,7 @@
           {% endif %}
           {% if banner.primary_btn_text %}
           <div class="banner-slide__btns">
-            <span class="banner-slide__btn banner-slide__btn--primary"{% if banner.accent_color %} style="--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};"{% endif %}>{{ banner.primary_btn_text }}</span>
+            <span class="banner-slide__btn banner-slide__btn--modern" style="--btn-color: {{ banner.primary_btn_color|default(banner.accent_color|default('#2563eb')) }}; --btn-text: {{ banner.btn_text_color|default(banner.badge_text_color|default('#ffffff')) }}; --accent: {{ banner.accent_color|default(banner.primary_btn_color|default('#2563eb')) }};">{{ banner.primary_btn_text }}</span>
           </div>
           {% endif %}
         </div>
