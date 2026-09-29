@@ -1,3 +1,15 @@
+## [3.23.0](https://github.com/kdbsoft/dockercart/compare/v3.22.0...v3.23.0) (2026-09-29)
+
+### Features
+
+* **design:** add per-slide action button color and style ([467a337](https://github.com/kdbsoft/dockercart/commit/467a337e885ee580e66362b27511ef6e139953f9))
+
+### Bug Fixes
+
+* **admin:** give link and remove action buttons proper states ([5579a3d](https://github.com/kdbsoft/dockercart/commit/5579a3d73c47c214580fb9749c81667bfc5eaf69))
+* **checkout:** restore session data and methods on page reload ([6609fab](https://github.com/kdbsoft/dockercart/commit/6609fab467ae0e098bf511d90ab5ab5e5d4a7e62))
+* **sale:** clarify registered customer label in order details ([f9cdf3b](https://github.com/kdbsoft/dockercart/commit/f9cdf3bd4bdf717aef7be92e1ac15676ff809328))
+
 ## [3.22.0](https://github.com/kdbsoft/dockercart/compare/v3.21.1...v3.22.0) (2026-09-19)
 
 ### Features
