@@ -410,6 +410,7 @@ $_['text_items']                 = 'items';
 $_['text_buyer']                 = 'Buyer';
 $_['text_edit_buyer']            = 'Edit';
 $_['text_attach_customer']       = 'Link to buyer';
+$_['text_registered_customer']   = 'Registered customer';
 $_['text_replace_customer']      = 'Replace buyer';
 $_['text_customer_attached']     = 'Buyer linked';
 $_['entry_search_customer']      = 'Search customer by name, email or phone…';
