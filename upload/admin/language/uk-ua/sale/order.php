@@ -408,6 +408,7 @@ $_['text_items']                 = 'товарів';
 $_['text_buyer'] = 'Покупець';
 $_['text_edit_buyer'] = 'Змінити';
 $_['text_attach_customer'] = 'Пов\'язати з покупцем';
+$_['text_registered_customer'] = 'Зареєстрований покупець';
 $_['text_replace_customer'] = 'Замінити покупця';
 $_['text_customer_attached'] = 'Покупця пов\'язано';
 $_['entry_search_customer'] = 'Пошук клієнта за ім\'ям, email або телефоном…';

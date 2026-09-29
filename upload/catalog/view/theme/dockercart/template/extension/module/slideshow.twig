@@ -1,3 +1,13 @@
+<style>
+  /* Hero action button: classic = filled, modern = pill outline with fill on hover */
+  #hero .hero-btn { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; transition: transform .12s ease, box-shadow .12s ease, background-color .18s ease, color .18s ease, border-color .18s ease; }
+  #hero .hero-btn--classic { background: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, var(--accent, #2563eb)); border-radius: .75rem; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
+  #hero .hero-btn--classic:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.3); filter: brightness(0.92); }
+  #hero .hero-btn--modern { background: transparent; color: #fff; border: 1.5px solid var(--btn-color, var(--accent, #2563eb)); border-radius: 9999px; box-shadow: none; }
+  #hero .hero-btn--modern:hover { background: var(--btn-color, var(--accent, #2563eb)); border-color: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.3); }
+  /* Back-compat: old markup used banner-slide__btn--primary with --accent only */
+  #hero .banner-slide__btn--primary { background: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, var(--accent, #2563eb)); }
+</style>
 <section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y select-none">
   <div id="hero-slides" class="relative w-full h-full flex will-change-transform">
     {% for banner in banners %}
@@ -37,7 +47,7 @@
           {% endif %}
           {% if banner.primary_btn_text and banner.link %}
           <div class="flex flex-wrap gap-3">
-            <a href="{{ banner.link }}" class="banner-slide__btn--primary px-7 py-3 font-semibold rounded-xl shadow-lg transition text-sm inline-block" style="{% if banner.accent_color %}--accent: {{ banner.accent_color }}; color: {{ banner.badge_text_color }};{% endif %}">{{ banner.primary_btn_text }}</a>
+            <a href="{{ banner.link }}" class="hero-btn hero-btn--modern px-7 py-3 font-semibold shadow-lg transition text-sm inline-block" style="--btn-color: {{ banner.primary_btn_color|default(banner.accent_color|default('#2563eb')) }}; --btn-text: {{ banner.btn_text_color|default(banner.badge_text_color|default('#ffffff')) }}; --accent: {{ banner.accent_color|default(banner.primary_btn_color|default('#2563eb')) }};">{{ banner.primary_btn_text }}</a>
           </div>
           {% endif %}
         </div>

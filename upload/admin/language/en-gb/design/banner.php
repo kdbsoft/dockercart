@@ -29,6 +29,7 @@ $_['entry_accent_text']      = 'Top Badge';
 $_['entry_accent_color']     = 'Accent Color';
 $_['entry_accent_hint']      = 'Used for badge background and [bracketed] text in title';
 $_['entry_primary_btn_text'] = 'Button Text';
+$_['entry_primary_btn_color'] = 'Button Color';
 $_['entry_image']            = 'Image';
 $_['entry_link']             = 'Link';
 $_['entry_link_type']         = 'Link Type';

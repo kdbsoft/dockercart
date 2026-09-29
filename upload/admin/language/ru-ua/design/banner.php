@@ -17,6 +17,7 @@ $_['entry_link_type'] = 'Тип ссылки';
 $_['entry_link_search'] = 'Поиск по названию...';
 $_['entry_name'] = 'Название баннера';
 $_['entry_primary_btn_text'] = 'Текст кнопки';
+$_['entry_primary_btn_color'] = 'Цвет кнопки';
 $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст под заголовком';
