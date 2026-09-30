@@ -1483,7 +1483,6 @@ INSERT INTO `oc_cart` VALUES
 (14737,99853,'1256a4083a551523afa5bfad59',5023,0,'{\"9061\":\"9989\",\"9060\":\"9987\",\"variant_id\":\"704\"}',1.00,'2026-08-15 12:42:45'),
 (14738,99853,'1256a4083a551523afa5bfad59',5023,0,'{\"9061\":\"9989\",\"9060\":\"9986\",\"variant_id\":\"703\"}',1.00,'2026-08-15 12:43:39'),
 (14741,99853,'1256a4083a551523afa5bfad59',5004,0,'{\"9016\":\"9898\",\"9017\":\"9900\",\"9018\":\"9902\",\"9019\":\"9904\"}',1.00,'2026-08-17 12:14:53'),
-(14758,0,'b7ec1607e33bd662c310b29189',5022,0,'{\"9059\":\"9985\",\"9058\":\"9982\",\"variant_id\":\"701\"}',1.00,'2026-08-30 17:12:00'),
 (14759,0,'0040880217f25fc14aa52aac37',5080,0,'[]',2.00,'2026-09-10 17:55:20');
 /*!40000 ALTER TABLE `oc_cart` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2810,10 +2809,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_currency` WRITE;
 /*!40000 ALTER TABLE `oc_currency` DISABLE KEYS */;
 INSERT INTO `oc_currency` VALUES
-(1,'Pound Sterling','GBP','£','','2',0.01682907,1,'2026-09-29 10:23:14'),
-(2,'US Dollar','USD','$','','2',0.02232105,1,'2026-09-29 10:23:14'),
-(3,'Euro','EUR','','€','2',0.01961773,1,'2026-09-29 10:23:14'),
-(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-09-29 10:23:14');
+(1,'Pound Sterling','GBP','£','','2',0.01683128,1,'2026-09-30 08:40:09'),
+(2,'US Dollar','USD','$','','2',0.02229627,1,'2026-09-30 08:40:09'),
+(3,'Euro','EUR','','€','2',0.01963564,1,'2026-09-30 08:40:09'),
+(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-09-30 08:40:09');
 /*!40000 ALTER TABLE `oc_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -6525,18 +6524,18 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-09-29 10:23:13',NULL,'2026-07-02 11:00:50','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-09-30 08:40:04',NULL,'2026-07-02 11:00:50','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
 (41,'license_check','License Verification',1,'every_3d','2026-09-29 10:43:47',NULL,'2026-07-03 18:33:04','2026-09-29 10:43:47',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-09-29 10:23:13',NULL,'2026-07-24 18:51:04','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-09-29 10:23:13',NULL,'2026-07-29 10:46:20','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-09-29 11:38:13',NULL,'2026-08-01 18:17:04','2026-09-29 11:38:13',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
-(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-06 08:09:03','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-06 15:36:09','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
-(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-09 15:39:28','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
-(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-10 13:33:35','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
-(168,'dockercart_update_check','Update availability check',1,'hourly','2026-09-29 11:23:13',NULL,'2026-08-18 13:20:23','2026-09-29 11:23:13',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
-(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-18 14:08:08','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
-(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-09-29 10:23:13',NULL,'2026-08-23 10:13:15','2026-09-29 10:23:13',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1),
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-09-30 08:40:04',NULL,'2026-07-24 18:51:04','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-09-30 08:40:04',NULL,'2026-07-29 10:46:20','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-09-30 12:35:11',NULL,'2026-08-01 18:17:04','2026-09-30 12:35:11',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-06 08:09:03','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-06 15:36:09','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-09 15:39:28','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
+(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-10 13:33:35','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
+(168,'dockercart_update_check','Update availability check',1,'hourly','2026-09-30 12:40:04',NULL,'2026-08-18 13:20:23','2026-09-30 12:40:04',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
+(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-18 14:08:08','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
+(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-09-30 08:40:04',NULL,'2026-08-23 10:13:15','2026-09-30 08:40:04',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1),
 (173,'backup_s3','S3 Backup',0,'','2026-08-23 22:12:03','{\"status\":\"ok\",\"ts\":\"20260823_221152\",\"size_bytes\":106312990,\"size_mb\":101.39,\"db_size_bytes\":2000599,\"s3_key\":\"dockercart/backups/dockercart_20260823_221152.tar.gz\",\"retention_deleted\":[]}','2026-08-23 22:11:19','2026-08-23 22:12:03',NULL,0,'',1,1);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -11092,7 +11091,7 @@ INSERT INTO `oc_order` VALUES
 (99616,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:20','2026-08-15 11:56:20'),
 (99617,0,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','','','','','',44164.9523,0.0000,0,0,0,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 11:56:29','2026-08-24 10:24:37'),
 (99618,3,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','','','[]','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','Demo','VIP','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Стандартная доставка (4-5 дней)','dockercart_universal.dockercart_universal_3','123','','','','',92018.3439,0.0000,0,0,134,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.1.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-15 12:01:27','2026-08-23 16:23:39'),
-(99619,2,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','','','','[]','','','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Самовывоз','dockercart_universal.dockercart_universal_5','1234567890','','none','','',331936.1066,500.0000,0,0,129,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.5.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-17 12:40:43','2026-08-24 13:05:22');
+(99619,2,'DC-',0,'DockerCart','http://dockercart.local:8080/',99853,'',4,'Demo','VIP','vip@demo.local','','','','[]','','','','','','','','Украина',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Наложенный платеж','dockercart_universal.dockercart_universal_4','','','','','','','','Ukraine',220,'Kyiv',3490,'{lastname} {firstname}\r\n{company}\r\n{country}\r\n{zone}\r\n{city} {postcode}\r\n{address_1}','[]','Самовывоз','dockercart_universal.dockercart_universal_5','1234567890','','none','','',331936.1066,500.0000,0,0,129,0,0.0000,0,'',3,0,'UAH',1.00000000,'10.89.5.7','10.89.0.2, 10.89.0.2','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36','ru-RU,ru;q=0.7','2026-08-17 12:40:43','2026-09-29 22:26:52');
 /*!40000 ALTER TABLE `oc_order` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -18695,7 +18694,7 @@ CREATE TABLE `oc_product_special` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_special_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2058 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=2062 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -18790,7 +18789,10 @@ INSERT INTO `oc_product_special` VALUES
 (2054,5070,4,1,530.0892,'2026-09-27','0000-00-00',1,'0000-00-00 00:00:00'),
 (2055,5070,4,1,530.0892,'2026-09-28','0000-00-00',1,'0000-00-00 00:00:00'),
 (2056,5070,4,1,530.0892,'2026-09-29','0000-00-00',1,'0000-00-00 00:00:00'),
-(2057,5070,4,1,530.0892,'2026-09-29','0000-00-00',1,'0000-00-00 00:00:00');
+(2057,5070,4,1,530.0892,'2026-09-29','0000-00-00',1,'0000-00-00 00:00:00'),
+(2058,5070,4,1,530.0892,'2026-09-29','0000-00-00',1,'0000-00-00 00:00:00'),
+(2059,5057,4,1,1009.0115,'2026-09-30','0000-00-00',1,'0000-00-00 00:00:00'),
+(2060,5070,4,1,530.0892,'2026-09-30','0000-00-00',1,'0000-00-00 00:00:00');
 /*!40000 ALTER TABLE `oc_product_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22007,7 +22009,7 @@ LOCK TABLES `oc_return` WRITE;
 INSERT INTO `oc_return` VALUES
 (1,104,'partial',5023,2,'John','Doe','john@example.com','1234567890','Adidas Ultraboost Light','UBL-01',1,400.0000,1,0,1,1,3,'test partial','2026-08-01','2026-08-01 14:37:03','2026-08-01 14:37:28'),
 (2,104,'full',5023,2,'John','Doe','john@example.com','1234567890','Adidas Ultraboost Light','UBL-01',2,800.0000,1,0,1,1,3,'full rest','2026-08-01','2026-08-01 14:37:38','2026-08-01 14:37:47'),
-(3,99618,'full',5004,99853,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','OnePlus 12','DEMO-5004-BLK-256-12G',1,36794.1300,1,0,5,0,1,'','2026-08-15','2026-08-15 12:04:02','2026-08-25 10:57:43');
+(3,99618,'full',5004,99853,'Demo','VIP','vip@demo.local','+380 (38) 111-11-11','OnePlus 12','DEMO-5004-BLK-256-12G',1,36794.1300,1,0,5,0,1,'','2026-08-15','2026-08-15 12:04:02','2026-09-30 12:45:41');
 /*!40000 ALTER TABLE `oc_return` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -22111,7 +22113,7 @@ CREATE TABLE `oc_return_product` (
   PRIMARY KEY (`return_product_id`),
   KEY `return_id` (`return_id`),
   KEY `order_product_id` (`order_product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -22124,7 +22126,7 @@ LOCK TABLES `oc_return_product` WRITE;
 INSERT INTO `oc_return_product` VALUES
 (1,1,301,5023,0,'Adidas Ultraboost Light','UBL-01',1,400.0000,0.0000),
 (2,2,301,5023,0,'Adidas Ultraboost Light','UBL-01',2,400.0000,800.0000),
-(4,3,16,5004,639,'OnePlus 12','DEMO-5004-BLK-256-12G',1,36794.1269,36794.1269);
+(5,3,16,5004,639,'OnePlus 12','DEMO-5004-BLK-256-12G',1,36794.1269,36794.1269);
 /*!40000 ALTER TABLE `oc_return_product` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23420,7 +23422,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
-('b7ec1607e33bd662c310b29189','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"b9hwFlFPg81uKzEntEQHxZfvoFsUwTko\"}','2026-09-30 08:44:29');
+('b7ec1607e33bd662c310b29189','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"b9hwFlFPg81uKzEntEQHxZfvoFsUwTko\"}','2026-09-30 12:48:16');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -23441,7 +23443,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33382 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=33427 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -23901,9 +23903,9 @@ INSERT INTO `oc_setting` VALUES
 (33041,0,'total_shipping','total_shipping_sort_order','5',0),
 (33042,0,'total_shipping','total_shipping_status','1',0),
 (33043,0,'total_shipping','total_shipping_estimator','1',0),
-(33379,0,'dockercart_update','dockercart_update_last_check','1790670196',0),
-(33380,0,'dockercart_update','dockercart_update_remote_version','3.22.0',0),
-(33381,0,'dockercart_update','dockercart_update_changelog','### Features\n\n* **sale:** add inline status, payment, and shipment modals to order list ([458b768](https://github.com/kdbsoft/dockercart/commit/458b768d5b098c908d4acc6cfb9d74d9581ed3bc))',0);
+(33424,0,'dockercart_update','dockercart_update_last_check','1790761206',0),
+(33425,0,'dockercart_update','dockercart_update_remote_version','3.23.0',0),
+(33426,0,'dockercart_update','dockercart_update_changelog','### Features\n\n* **design:** add per-slide action button color and style ([467a337](https://github.com/kdbsoft/dockercart/commit/467a337e885ee580e66362b27511ef6e139953f9))\n\n### Bug Fixes\n\n* **admin:** give link and remove action buttons proper states ([5579a3d](https://github.com/kdbsoft/dockercart/commit/5579a3d73c47c214580fb9749c81667bfc5eaf69))\n* **checkout:** restore session data and methods on page reload ([6609fab](https://github.com/kdbsoft/dockercart/commit/6609fab467ae0e098bf511d90ab5ab5e5d4a7e62))\n* **sale:** clarify registered customer label in order details ([f9cdf3b](https://github.com/kdbsoft/dockercart/commit/f9cdf3bd4bdf717aef7be92e1ac15676ff809328))',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -33606,4 +33608,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-09-29 11:45:16
+-- Dump completed on 2026-09-30 12:46:03

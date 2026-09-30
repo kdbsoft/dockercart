@@ -108,8 +108,10 @@ $(document).ready(function() {
 				}).first();
 
 				// Copy the column classes from the existing alert row so the
-				// summary lines up with the other alerts in the page header
-				var colClass = 'col-sm-12';
+				// summary lines up with the other alerts in the page header.
+				// Fallback: canonical full-grid column (offset-1 + xl-10) shared by
+				// page headers and alert rows across admin form pages.
+				var colClass = 'col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10';
 				if ($alertRow.length) {
 					var $alertCol = $alertRow.find('.alert').first().closest('[class*="col-"]');
 					if ($alertCol.length && $alertCol.attr('class')) {
@@ -151,6 +153,48 @@ $(document).ready(function() {
 
 		$('html, body').animate({scrollTop: $field.offset().top - 50}, 300);
 	});
+
+	// Scroll to the very top of the page when an alert appears (e.g.
+	// error_warning after a failed form submit) so the message block at
+	// the top is visible even when the browser restores the scroll
+	// position deep inside a long form. Alerts inside modals are skipped —
+	// the modal itself already draws attention.
+	function dcScrollToAlert($alert) {
+		if (!$alert || !$alert.length) return;
+		if ($alert.closest('.modal').length) return;
+		if ($(window).scrollTop() < 10) return;
+		if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			$(window).scrollTop(0);
+		} else {
+			$('html, body').stop().animate({scrollTop: 0}, 300);
+		}
+	}
+
+	dcScrollToAlert($('#content .alert-danger, #content .alert-warning').filter(function() {
+		return $(this).closest('.modal').length === 0;
+	}).first());
+
+	// Same for alerts injected via AJAX after the page has loaded
+	// (e.g. list pages prepending .alert into #content)
+	if (window.MutationObserver) {
+		var dcAlertObserver = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				$(mutation.addedNodes).each(function() {
+					if (!this.querySelector && !this.classList) return;
+					var $el = $(this);
+					var $alert = $el.hasClass('alert-danger') || $el.hasClass('alert-warning')
+						? $el
+						: $el.find('.alert-danger, .alert-warning').first();
+					dcScrollToAlert($alert);
+				});
+			});
+		});
+
+		var contentEl = document.getElementById('content');
+		if (contentEl) {
+			dcAlertObserver.observe(contentEl, {childList: true, subtree: true});
+		}
+	}
 
 	// tooltips on hover
 	$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
