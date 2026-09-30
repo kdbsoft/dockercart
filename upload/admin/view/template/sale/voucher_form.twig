@@ -174,12 +174,12 @@ $('#button-send').on('click', function() {
 			$('.alert-dismissible').remove();
 
 			if (json['error']) {
-				$('#content > .container-fluid').first().prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div>');
+				$('#content > .container-fluid').first().prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + '</div></div></div>');
 				lucide.createIcons();
 			}
 
 			if (json['success']) {
-				$('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div>');
+				$('#content > .container-fluid').first().prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['success'] + '</div></div></div>');
 				lucide.createIcons();
 			}
 		},
