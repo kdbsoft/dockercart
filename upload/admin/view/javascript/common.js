@@ -108,8 +108,10 @@ $(document).ready(function() {
 				}).first();
 
 				// Copy the column classes from the existing alert row so the
-				// summary lines up with the other alerts in the page header
-				var colClass = 'col-sm-12';
+				// summary lines up with the other alerts in the page header.
+				// Fallback: canonical full-grid column (offset-1 + xl-10) shared by
+				// page headers and alert rows across admin form pages.
+				var colClass = 'col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10';
 				if ($alertRow.length) {
 					var $alertCol = $alertRow.find('.alert').first().closest('[class*="col-"]');
 					if ($alertCol.length && $alertCol.attr('class')) {
