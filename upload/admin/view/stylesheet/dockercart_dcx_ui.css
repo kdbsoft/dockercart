@@ -3688,3 +3688,472 @@ select.form-control.dcx-dash-width {
     display: inline-flex;
     align-items: center;
 }
+
+
+/* ==========================================================================
+   Radio / segmented control
+   --------------------------------------------------------------------------
+   One look for every radio group in the admin: the <label> becomes a segment
+   and the native input stays in the DOM — hidden with opacity:0 only — so
+   forms, keyboard navigation and `required` validation keep working.
+
+   Everything below restyles markup that already ships in core and module
+   templates; no HTML change is required. Selectors are prefixed with `body`
+   so they win over bootstrap.css / stylesheet.css without !important, and the
+   active state is driven purely by :checked — no JS class, so it can never
+   fall out of sync with the input. Single controls that are not a group (the
+   "default address" radio) stay native circles, see the last block.
+   ========================================================================== */
+
+/* ── .radio / .checkbox (customer payment, customer custom fields) ─────── */
+
+/* Drop the bootstrap block margins and the -20px label indent. */
+body .radio,
+body .checkbox {
+	position: static;
+	display: block;
+	min-height: 0;
+	margin: 0 0 6px;
+	padding: 0;
+}
+
+body .radio + .radio,
+body .checkbox + .checkbox {
+	margin-top: 0;
+}
+
+body .radio > label,
+body .radio-inline {
+	display: flex;
+	align-items: center;
+	min-height: 34px;
+	margin: 0;
+	padding: 7px 12px;
+	font-size: 13px;
+	line-height: 1.3;
+	font-weight: 500;
+	color: var(--dc-text, #545454);
+	text-align: center;
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-md, 6px);
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .radio-inline {
+	display: inline-flex;
+	vertical-align: middle;
+}
+
+body .radio > label:hover,
+body .radio-inline:hover {
+	background: var(--dc-surface-alt, #f8f9fb);
+}
+
+/* Hidden but focusable native radio — never display:none/visibility:hidden. */
+body .radio > input[type="radio"],
+body .radio > label > input[type="radio"],
+body .radio-inline > input[type="radio"],
+body .radio-inline input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+}
+
+body .radio > input[type="radio"]:focus-visible + label,
+body .radio > label > input[type="radio"]:focus-visible,
+body .radio-inline > input[type="radio"]:focus-visible {
+	outline: none;
+}
+
+body .radio > input[type="radio"]:focus-visible + label,
+body .radio > label:has(> input[type="radio"]:focus-visible),
+body .radio-inline:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+body .radio > input[type="radio"]:checked + label,
+body .radio > label:has(> input[type="radio"]:checked),
+body .radio-inline:has(> input[type="radio"]:checked) {
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	color: var(--dc-text-dark, #1f2937);
+	font-weight: 600;
+}
+
+/* Disabled wins over checked — a locked segment must not look actionable. */
+body .radio > input[type="radio"]:disabled + label,
+body .radio > label:has(> input[type="radio"]:disabled),
+body .radio-inline:has(> input[type="radio"]:disabled) {
+	opacity: .5;
+	cursor: not-allowed;
+	background: var(--dc-surface, #fff);
+	border-color: var(--dc-border, #e5e7eb);
+	color: var(--dc-text-muted, #6b7280);
+	font-weight: 500;
+}
+
+/* A `.dcx-seg--row` parent turns a run of legacy .radio blocks into a
+   horizontal row — written into the template, e.g. the customer payment
+   method group (3 short options). */
+body .dcx-seg--row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: 480px;
+}
+
+body .dcx-seg--row > .radio {
+	flex: 1 1 auto;
+	min-width: 120px;
+	margin-bottom: 0;
+}
+
+body .dcx-seg--row > .radio > label {
+	white-space: nowrap;
+}
+
+
+/* ── .dcx-checkbox-group holding radios (sitemap Вкл/Выкл) ────────────── */
+
+/* Only radios: checkboxes keep the existing vertical layout. */
+body .dcx-checkbox-group:has(input[type="radio"]) {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+body .dcx-checkbox-group:has(input[type="radio"]) .dcx-checkbox-label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 0;
+	min-width: 110px;
+	min-height: 34px;
+	margin: 0;
+	padding: 7px 12px;
+	font-size: 13px;
+	line-height: 1.3;
+	font-weight: 500;
+	text-align: center;
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-md, 6px);
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .dcx-checkbox-group:has(input[type="radio"]) .dcx-checkbox-label:hover {
+	background: var(--dc-surface-alt, #f8f9fb);
+}
+
+body .dcx-checkbox-group:has(input[type="radio"]) .dcx-checkbox-label > input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	flex-shrink: 0;
+	pointer-events: none;
+}
+
+body .dcx-checkbox-group:has(input[type="radio"]) .dcx-checkbox-label:has(> input[type="radio"]:checked) {
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	color: var(--dc-text-dark, #1f2937);
+	font-weight: 600;
+}
+
+body .dcx-checkbox-group:has(input[type="radio"]) .dcx-checkbox-label:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+
+/* ── Return type (sale/return_form.twig, sale/order_detail.twig) ───────── */
+
+body .return-type-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+body .return-type-row > .dcx-sidebar-card__checkbox {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 0;
+	min-width: 110px;
+	min-height: 34px;
+	margin: 0;
+	padding: 7px 12px;
+	font-size: 13px;
+	line-height: 1.3;
+	font-weight: 500;
+	text-align: center;
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-md, 6px);
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .return-type-row > .dcx-sidebar-card__checkbox:hover {
+	background: var(--dc-surface-alt, #f8f9fb);
+}
+
+body .return-type-row > .dcx-sidebar-card__checkbox > input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+}
+
+body .return-type-row > .dcx-sidebar-card__checkbox:has(> input[type="radio"]:checked) {
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	color: var(--dc-text-dark, #1f2937);
+	font-weight: 600;
+}
+
+body .return-type-row > .dcx-sidebar-card__checkbox:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+
+/* ── Banner content position (design/banner_form.twig) ─────────────────── */
+
+/* Replaces the module-local block that had zero gap, fused corners, hardcoded
+   hex values and `display:none` on the input. */
+body .position-radio-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: 100%;
+}
+
+body .position-radio-group > label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	flex: 0 0 auto;
+	min-height: 34px;
+	margin: 0;
+	padding: 7px 14px;
+	font-size: 12px;
+	line-height: 1.3;
+	font-weight: 500;
+	text-align: center;
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-md, 6px);
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .position-radio-group > label:hover {
+	background: var(--dc-surface-alt, #f8f9fb);
+}
+
+body .position-radio-group > label > input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+}
+
+body .position-radio-group > label:has(> input[type="radio"]:checked) {
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	color: var(--dc-text-dark, #1f2937);
+	font-weight: 600;
+}
+
+body .position-radio-group > label:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+
+/* ── On/Off toggles built from .btn (common/developer.twig,
+        extension/module/dockercart_theme.twig — Messenger FAB) ────────── */
+
+/* Both are `label.btn` with a radio inside. Strip the button skin and give
+   them the segment skin. Green/red semantic colouring is intentionally
+   dropped: the checked segment already reads as "active". */
+body .btn-group[data-toggle="buttons"],
+body #messenger-fab-toggle {
+	display: inline-flex;
+	gap: 6px;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn,
+body #messenger-fab-toggle > label.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	min-height: 34px;
+	margin: 0;
+	padding: 7px 12px;
+	font-size: 13px;
+	line-height: 1.3;
+	font-weight: 500;
+	text-align: center;
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-md, 6px);
+	box-shadow: none;
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn:hover,
+body #messenger-fab-toggle > label.btn:hover {
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface-alt, #f8f9fb);
+	border-color: var(--dc-border-medium, #d1d5db);
+}
+
+/* Neutralise the state colours the buttons carry (btn-success / btn-danger /
+   btn-primary / btn-default) plus the `active` class — server-rendered in
+   developer.twig, toggled by bootstrap's data-api in buttons.js. These rules
+   come before the :checked rule so the input stays the single source of truth. */
+body .btn-group[data-toggle="buttons"] > .btn.btn-success,
+body .btn-group[data-toggle="buttons"] > .btn.btn-danger,
+body .btn-group[data-toggle="buttons"] > .btn.btn-primary,
+body .btn-group[data-toggle="buttons"] > .btn.btn-default,
+body .btn-group[data-toggle="buttons"] > .btn.active,
+body #messenger-fab-toggle > label.btn.btn-success,
+body #messenger-fab-toggle > label.btn.btn-danger,
+body #messenger-fab-toggle > label.btn.btn-primary,
+body #messenger-fab-toggle > label.btn.btn-default,
+body #messenger-fab-toggle > label.btn.active {
+	color: var(--dc-text, #545454);
+	background: var(--dc-surface, #fff);
+	border-color: var(--dc-border, #e5e7eb);
+	font-weight: 500;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn > input[type="radio"],
+body #messenger-fab-toggle > label.btn > input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn:has(> input[type="radio"]:checked),
+body #messenger-fab-toggle > label.btn:has(> input[type="radio"]:checked) {
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	color: var(--dc-text-dark, #1f2937);
+	font-weight: 600;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn:has(> input[type="radio"]:disabled),
+body #messenger-fab-toggle > label.btn:has(> input[type="radio"]:disabled) {
+	opacity: .5;
+	cursor: not-allowed;
+	background: var(--dc-surface, #fff);
+	border-color: var(--dc-border, #e5e7eb);
+	color: var(--dc-text-muted, #6b7280);
+	font-weight: 500;
+}
+
+body .btn-group[data-toggle="buttons"] > .btn:has(> input[type="radio"]:focus-visible),
+body #messenger-fab-toggle > label.btn:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+
+/* ── Product-option pills (sale/order_detail.twig) ─────────────────────── */
+
+/* Same palette, pill radius. The active state used to be driven by a JS
+   class (--active, solid primary + white text); it is neutralised here so
+   `:checked` is the only source of truth. */
+body .product-option-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0;
+	margin: 0;
+	padding: 5px 12px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--dc-text-dark, #1f2937);
+	background: var(--dc-surface, #fff);
+	border: 1px solid var(--dc-border, #e5e7eb);
+	border-radius: var(--dc-radius-full, 999px);
+	cursor: pointer;
+	transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+body .product-option-pill:hover {
+	color: var(--dc-primary, #5b7ea8);
+	background: var(--dc-surface-alt, #f8f9fb);
+	border-color: var(--dc-border-medium, #d1d5db);
+}
+
+body .product-option-pill > input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+	pointer-events: none;
+}
+
+body .product-option-pill:has(> input[type="radio"]:checked) {
+	color: var(--dc-text-dark, #1f2937);
+	background: var(--dc-primary-light, #f0f4f8);
+	border-color: var(--dc-primary, #5b7ea8);
+	font-weight: 600;
+}
+
+body .product-option-pill:has(> input[type="radio"]:focus-visible) {
+	outline: 2px solid var(--dc-primary, #5b7ea8);
+	outline-offset: 1px;
+}
+
+body .product-option-pill__price {
+	margin-left: 4px;
+	font-size: 10px;
+	font-weight: 600;
+	opacity: .75;
+}
+
+
+/* ── Single, non-group radios — left as native circles ─────────────────── */
+
+/* The "default address" radio is one control, not a group: a circle is
+   correct. Only the sizing is normalised. */
+body .dc-address-item__default > input[type="radio"] {
+	margin: 0;
+	width: 15px;
+	height: 15px;
+}
