@@ -1210,7 +1210,7 @@
 
                     <div class="dc-promo-empty" id="promo-empty" style="display:none"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>
                   </div>
-                  <div class="dc-promo-actions">
+                  <div class="dc-promo-actions"{% if is_configurable and promo_variants %} style="display:none"{% endif %}>
                     <button type="button" class="dc-promo-add-btn" id="promo-add-btn">
                       <i data-lucide="plus" width="14" height="14"></i> {{ button_add }}
                     </button>
@@ -2405,6 +2405,11 @@
   var dcPromoVariants = {{ promo_variants|json_encode|raw }};
   var dcIsConfigurable = {{ is_configurable ? 'true' : 'false' }};
 
+  function dcUpdatePromoAddBtn() {
+	  var isGrouped = dcIsConfigurable && dcPromoVariants.length && (dcPromoActiveTab === 'discount' || dcPromoActiveTab === 'special');
+	  $('.dc-promo-actions').toggle(!isGrouped);
+  }
+
   function switchPromoTab(type) {
 	  if (dcPromoTypes.indexOf(type) === -1) {
 		  return;
@@ -2416,6 +2421,7 @@
 	  $('#promo-container .dc-promo-pane').hide();
 	  $('#promo-pane-' + type).show();
 	  dcUpdatePromoEmptyState();
+	  dcUpdatePromoAddBtn();
   }
 
   // Group server-rendered promo cards into per-type panes (tabs).
@@ -2451,6 +2457,7 @@
 	  });
 
 	  dcUpdatePromoEmptyState();
+	  dcUpdatePromoAddBtn();
 	  if (dcIsConfigurable && dcPromoVariants.length) {
 		  dcUpdateVariantGroupCounts();
 	  }
