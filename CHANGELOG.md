@@ -1,3 +1,15 @@
+## [3.24.0](https://github.com/kdbsoft/dockercart/compare/v3.23.0...v3.24.0) (2026-09-30)
+
+### Features
+
+* **admin:** style radio groups as segmented controls ([f7a91e8](https://github.com/kdbsoft/dockercart/commit/f7a91e8ffbdd3ec44d67b3207cc6fe8a06820ac5))
+* **sale:** move voucher status into a sidebar card ([32beca4](https://github.com/kdbsoft/dockercart/commit/32beca4c740f4f81ff665766421f7bfc72405b93))
+
+### Bug Fixes
+
+* **admin:** align form alerts with the page grid ([de1abbf](https://github.com/kdbsoft/dockercart/commit/de1abbf5d94298204f66a63d51aa0f0494121d7c))
+* **admin:** scroll to the top of the page when an alert appears ([0b8f1b4](https://github.com/kdbsoft/dockercart/commit/0b8f1b4b707c3997d95f50b5ecc2eed05515c697))
+
 ## [3.23.0](https://github.com/kdbsoft/dockercart/compare/v3.22.0...v3.23.0) (2026-09-29)
 
 ### Features
