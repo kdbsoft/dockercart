@@ -1,3 +1,9 @@
+## [3.24.1](https://github.com/kdbsoft/dockercart/compare/v3.24.0...v3.24.1) (2026-10-02)
+
+### Bug Fixes
+
+* **admin:** hide promo add button on grouped variant tabs ([840de5c](https://github.com/kdbsoft/dockercart/commit/840de5cdca54773cdca5987aae5d1b366a334b55))
+
 ## [3.24.0](https://github.com/kdbsoft/dockercart/compare/v3.23.0...v3.24.0) (2026-09-30)
 
 ### Features
