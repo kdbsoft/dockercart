@@ -1,3 +1,22 @@
+{# Skeleton preloader used for shipping / payment method lists — server-rendered
+   initial state (idle: no shimmer), and re-usable from JS (showShippingPreloader/
+   showPaymentPreloader render the same markup with animation enabled).
+   has_price renders the right-side amount placeholder. #}
+{% macro dc_preloader_skeleton(has_price) %}
+<div class="dc-preloader-skeleton" role="status" aria-busy="true" data-dc-preloader="dc-preloader-active" data-dc-preloader-at="0">
+  {% for i in 1..3 %}
+  <div class="skeleton-item" style="opacity: {{ 1 - (loop.index0 * 0.15) }};">
+    <div class="skeleton-circle"></div>
+    <div class="skeleton-lines">
+      <div class="skeleton-line" style="width: {{ ['100%', '85%', '70%'][loop.index0] }};"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+    {% if has_price %}<div class="skeleton-amount"></div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
 <!DOCTYPE html>
 <html dir="{{ direction }}" lang="{{ lang }}">
 <head>
@@ -300,6 +319,91 @@ select[disabled] {
   cursor: not-allowed;
   opacity: 0.9;
 }
+
+/* Preloader skeletons shown while shipping / payment methods are fetched via AJAX.
+   Uses theme CSS variables from :root above, so it adapts to light and dark themes. */
+.dc-preloader-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+}
+.dc-preloader-skeleton .skeleton-item {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-secondary);
+}
+.dc-preloader-skeleton .skeleton-circle {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--border-color);
+}
+.dc-preloader-skeleton .skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dc-preloader-skeleton .skeleton-line {
+  height: 12px;
+  width: 100%;
+  border-radius: 6px;
+  background: var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+.dc-preloader-skeleton .skeleton-line.short {
+  width: 40%;
+}
+.dc-preloader-skeleton .skeleton-line::after,
+.dc-preloader-skeleton .skeleton-amount::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--bg-primary) 55%, var(--bg-secondary) 70%, transparent);
+}
+/* Shimmer only runs while data is actually being fetched (animating variant);
+   initial server-rendered skeleton stays static. */
+.dc-preloader-skeleton.dc-preloader-animating .skeleton-line::after,
+.dc-preloader-skeleton.dc-preloader-animating .skeleton-amount::after {
+  animation: dc-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+.dc-preloader-skeleton .skeleton-amount {
+  flex-shrink: 0;
+  height: 12px;
+  width: 56px;
+  border-radius: 6px;
+  background: var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+@keyframes dc-skeleton-shimmer {
+  100% { transform: translateX(100%); }
+}
+.dc-preloader-skeleton .skeleton-item:nth-child(2) .skeleton-line::after,
+.dc-preloader-skeleton .skeleton-item:nth-child(2) .skeleton-amount::after { animation-delay: 0.15s; }
+.dc-preloader-skeleton .skeleton-item:nth-child(3) .skeleton-line::after,
+.dc-preloader-skeleton .skeleton-item:nth-child(3) .skeleton-amount::after { animation-delay: 0.3s; }
+.dc-preloader-skeleton .skeleton-item:nth-child(2) { opacity: 0.85; }
+.dc-preloader-skeleton .skeleton-item:nth-child(3) { opacity: 0.7; }
+
+/* Spinner animation shared by preloader spinners (confirm button etc.) */
+@keyframes dc-preloader-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Standalone spinner (used inside the confirm button while the order is being placed) */
+.preloader-spinner svg {
+  display: block;
+  animation: dc-preloader-rotate 0.8s linear infinite;
+}
 </style>
 {{ google_analytics }}
 {% if analytics is defined %}
@@ -559,9 +663,7 @@ select[disabled] {
                 <div class="pt-4">
                   <label class="block text-sm font-medium text-text-primary mb-3">{{ text_shipping_method }}</label>
                   <div class="space-y-3" id="shipping-methods">
-                    <div class="text-sm text-text-secondary py-4">
-                        {{ text_fill_address_to_see_shipping|default('Please fill in your address and select a region to see available shipping methods.') }}
-                      </div>
+                    {{ _self.dc_preloader_skeleton(true) }}
                   </div>
                 </div>
 
@@ -631,9 +733,7 @@ select[disabled] {
 
               {% if block.id == 'payment_method' %}
                 <div class="space-y-3" id="payment-methods">
-                  <div class="text-sm text-text-secondary py-4">
-                    {{ text_fill_shipping_to_see_payment|default('Please select a shipping method to see available payment methods.') }}
-                  </div>
+                  {{ _self.dc_preloader_skeleton(false) }}
                 </div>
                 <!-- Hidden container for payment extension form (loaded via AJAX) -->
                 <div id="payment-extension-container" style="display: none;"></div>
@@ -1044,6 +1144,56 @@ const ajax = (url, options = {}) => {
       if (error.name === 'AbortError') return Promise.reject({ aborted: true });
       throw error;
     });
+};
+
+// Spinner CSS is shared with the confirm-button preloader (see .preloader-spinner below).
+const LOADER_ICON_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+const DC_PRELOADER_MARK = 'dc-preloader-active';
+
+// Skeleton markup — mirrors the server-side Twig macro dc_preloader_skeleton()
+// (3 radio-card-like rows: circle + lines [+ amount], shimmer via CSS).
+// State lives ON the skeleton element itself (not the container), so replacing
+// container.innerHTML automatically clears it when real methods are rendered.
+const preloaderSkeletonHtml = (hasPrice, animate) => {
+  const widths = ['100%', '85%', '70%'];
+  let items = '';
+  for (let i = 0; i < 3; i++) {
+    const opacity = 1 - i * 0.15;
+    const price = hasPrice ? '<div class="skeleton-amount"></div>' : '';
+    items += `
+      <div class="skeleton-item" style="opacity: ${opacity};">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton-line" style="width: ${widths[i]};"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+        ${price}
+      </div>`;
+  }
+  return `<div class="dc-preloader-skeleton${animate ? ' dc-preloader-animating' : ''}" role="status" aria-busy="true" data-dc-preloader="${DC_PRELOADER_MARK}" data-dc-preloader-at="${Date.now()}">${items}</div>`;
+};
+
+const isPreloaderActive = (container) => !!container && !!container.querySelector('[data-dc-preloader]');
+
+const showShippingPreloader = (container) => {
+  if (!container) return;
+  container.innerHTML = preloaderSkeletonHtml(true, true);
+};
+
+const showPaymentPreloader = (container) => {
+  if (!container) return;
+  container.innerHTML = preloaderSkeletonHtml(false, true);
+};
+
+// Idle variants: static skeleton (no shimmer) as quiet placeholders
+const showShippingPreloaderIdle = (container) => {
+  if (!container) return;
+  container.innerHTML = preloaderSkeletonHtml(true, false);
+};
+
+const showPaymentPreloaderIdle = (container) => {
+  if (!container) return;
+  container.innerHTML = preloaderSkeletonHtml(false, false);
 };
 
 const showNotification = (messages, type = 'error', autoHide = true) => {
@@ -1741,7 +1891,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = $('#shipping-methods');
     if (!container) return;
 
-    container.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading }}</div>';
+    // Guard against concurrent loads (e.g. auto-save + zone change racing).
+    if (window._loadingShippingMethods) {
+      log('Shipping methods already loading, skipping');
+      return;
+    }
+    window._loadingShippingMethods = true;
+
+    // Show the skeleton and keep it visible for at least MIN_PRELOADER_MS so it
+    // doesn't flash imperceptibly on fast connections. Timer anchors to when
+    // the skeleton first appeared (e.g. an instant one shown by a chain step).
+    // A static idle skeleton (server-rendered or 'nothing to load' placeholder)
+    // is replaced with an animated one and the timer restarts — a real fetch
+    // is starting now.
+    const existingSkeleton = container.querySelector('[data-dc-preloader]');
+    const skeletonWasAnimated = !!existingSkeleton?.classList.contains('dc-preloader-animating');
+    if (!existingSkeleton || !skeletonWasAnimated) {
+      showShippingPreloader(container);
+    }
+    const skeletonEl = container.querySelector('[data-dc-preloader]');
+    const preloaderShownAt = parseInt(skeletonEl?.dataset.dcPreloaderAt || '0', 10) || Date.now();
+    const MIN_PRELOADER_MS = 600;
+    const waitForMinPreloader = () => {
+      const elapsed = Date.now() - preloaderShownAt;
+      return elapsed >= MIN_PRELOADER_MS ? Promise.resolve() : new Promise(r => setTimeout(r, MIN_PRELOADER_MS - elapsed));
+    };
 
     const data = {
       firstname: $('#input-firstname')?.value || '',
@@ -1761,6 +1935,7 @@ document.addEventListener('DOMContentLoaded', () => {
     log('Loading shipping methods with data:', data);
 
     ajax(ajaxUrls.shipping_address, { method: 'POST', data })
+      .then(json => waitForMinPreloader().then(() => json))
       .then(json => {
         if (json?.shipping_methods) {
           // Store field visibility config globally
@@ -1774,12 +1949,17 @@ document.addEventListener('DOMContentLoaded', () => {
             : String(json.error);
           container.innerHTML = `<div class="text-sm text-red-600 py-4">${errHtml}</div>`;
         } else {
-          container.innerHTML = `<div class="text-sm text-text-secondary py-4">${window.dcLang?.complete_address_first || 'Please complete your address first'}</div>`;
+          // Address incomplete — keep the quiet static skeleton instead of a
+          // text placeholder; retry happens automatically on next autosave.
+          showShippingPreloaderIdle(container);
         }
       })
       .catch(error => {
         log('Shipping error', error);
         container.innerHTML = '<div class="text-sm text-red-600 py-4">Error loading shipping methods</div>';
+      })
+      .finally(() => {
+        window._loadingShippingMethods = false;
       });
   };
 
@@ -2057,12 +2237,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
           window._savingShippingMethod = true;
 
+          // Show the payment skeleton RIGHT AWAY: the payment method list will
+          // be reloaded after the shipping_method save chain (POST shipping
+          // -> POST payment address -> GET payment methods), and without this
+          // the skeleton would only appear after two responses.
+          // If an idle/static skeleton is present, snapshot it as "previous"
+          // (it carries no data) and upgrade to animated. If an animated one
+          // is already up (previous chain), keep it — timestamp stays anchored.
+          const pmInstantEl = $('#payment-methods');
+          const pmExisting = pmInstantEl?.querySelector('[data-dc-preloader]');
+          const pmWasAnimated = !!pmExisting?.classList.contains('dc-preloader-animating');
+          const pmInstantPrev = (!pmInstantEl || (pmExisting && pmWasAnimated))
+            ? null
+            : pmInstantEl ? pmInstantEl.innerHTML : null;
+          if (pmInstantEl && (!pmExisting || !pmWasAnimated)) {
+            showPaymentPreloader(pmInstantEl);
+          }
+
           ajax(ajaxUrls.shipping_method, { method: 'POST', data: { shipping_method: value } })
             .then(json => {
               log('Shipping method saved', json);
               if (json.error) {
                 if (typeof json.error === 'object') showFieldErrors(json.error);
                 else showNotification(json.error, 'error');
+                // Restore the previous payment list on failure — skeleton is
+                // replaced with the previous content, state auto-clears.
+                const pmRestore = $('#payment-methods');
+                if (pmRestore && pmInstantPrev !== null) pmRestore.innerHTML = pmInstantPrev;
                 return;
               }
               if (json.totals) {
@@ -2083,6 +2284,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
               log('Error saving shipping method', error);
+              // Restore the previous payment list on network failure
+              const pmRestore = $('#payment-methods');
+              if (pmRestore && pmInstantPrev !== null) pmRestore.innerHTML = pmInstantPrev;
             })
             .finally(() => {
               window._savingShippingMethod = false;
@@ -2127,7 +2331,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       log('ERROR: No methods rendered in fragment');
-      container.innerHTML = '<div class="text-sm text-text-secondary py-4">No shipping methods available</div>';
+      showShippingPreloaderIdle(container);
     }
   };
 
@@ -2309,9 +2513,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window._loadingPaymentMethods = true;
 
-    container.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading }}</div>';
+    // Show the skeleton and keep it visible for at least MIN_PRELOADER_MS.
+    // Timer anchors to when the skeleton first appeared (e.g. an instant one
+    // shown by a chain step). A static idle skeleton is replaced with an
+    // animated one and the timer restarts — a real fetch is starting now.
+    const existingSkeleton = container.querySelector('[data-dc-preloader]');
+    const skeletonWasAnimated = !!existingSkeleton?.classList.contains('dc-preloader-animating');
+    if (!existingSkeleton || !skeletonWasAnimated) {
+      showPaymentPreloader(container);
+    }
+    const skeletonEl = container.querySelector('[data-dc-preloader]');
+    const preloaderShownAt = parseInt(skeletonEl?.dataset.dcPreloaderAt || '0', 10) || Date.now();
+    const MIN_PRELOADER_MS = 600;
+    const waitForMinPreloader = () => {
+      const elapsed = Date.now() - preloaderShownAt;
+      return elapsed >= MIN_PRELOADER_MS ? Promise.resolve() : new Promise(r => setTimeout(r, MIN_PRELOADER_MS - elapsed));
+    };
 
     ajax(CONFIG.urls.payment_method, { method: 'GET' })
+      .then(json => waitForMinPreloader().then(() => json))
       .then(json => {
         log('Payment methods response', json);
 
@@ -2324,7 +2544,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!json.payment_methods) {
-          container.innerHTML = '<div class="text-sm text-text-secondary py-4">Complete previous steps first</div>';
+          // Not an error state yet (e.g. shipping address not saved) — keep the
+          // quiet static skeleton instead of a text placeholder.
+          showPaymentPreloaderIdle(container);
           return;
         }
 
@@ -2466,7 +2688,8 @@ document.addEventListener('DOMContentLoaded', () => {
               });
           }
         } else {
-          container.innerHTML = '<div class="text-sm text-text-secondary py-4">No payment methods available</div>';
+          // payment_methods object empty — keep quiet static skeleton.
+          showPaymentPreloaderIdle(container);
         }
       })
       .catch(error => {
@@ -2643,12 +2866,12 @@ document.addEventListener('DOMContentLoaded', () => {
             window._lastSentShippingMethod = null;
             const smContainer = $('#shipping-methods');
             if (smContainer) {
-              smContainer.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading|e('js') }}</div>';
+              showShippingPreloader(smContainer);
             }
             // Clear current payment methods too
             const pmContainer = $('#payment-methods');
             if (pmContainer) {
-              pmContainer.innerHTML = '<div class="text-sm text-text-secondary py-4">{{ text_loading|e('js') }}</div>';
+              showPaymentPreloader(pmContainer);
             }
 
             // After zones are loaded, save address to reload shipping methods
@@ -2948,6 +3171,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Country set but zone not - still try (some shipping methods only need country)
       log('Country is pre-filled (no zone), attempting to load shipping methods');
       loadShippingMethods();
+    } else {
+      // Nothing to auto-load yet — keep the static skeleton placeholders
+      // (server-rendered) so the layout doesn't jump when methods load later.
+      const smContainer = $('#shipping-methods');
+      const pmContainer = $('#payment-methods');
+      if (smContainer && !isPreloaderActive(smContainer)) {
+        showShippingPreloaderIdle(smContainer);
+      }
+      if (pmContainer && !isPreloaderActive(pmContainer)) {
+        showPaymentPreloaderIdle(pmContainer);
+      }
     }
   }, 300);
 
@@ -2986,6 +3220,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window._savingShipping = true;
 
+    // Show the skeleton preloader instead of the previous placeholder/error text.
+    const smContainer = $('#shipping-methods');
+    let previousMethodsHtml = null;
+    if (smContainer) {
+      previousMethodsHtml = smContainer.innerHTML;
+      showShippingPreloader(smContainer);
+    }
+
     ajax(ajaxUrls.shipping_address, { method: 'POST', data })
       .then(json => {
         log('Shipping address response JSON:', JSON.stringify(json));
@@ -2997,6 +3239,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (json.error) {
+          // Restore the previous methods list on validation failure — skeleton
+          // state auto-clears because it lives on the replaced skeleton node.
+          if (smContainer && previousMethodsHtml !== null) {
+            smContainer.innerHTML = previousMethodsHtml;
+          }
           // Mark fields returned by server as invalid
           if (typeof json.error === 'object') {
             Object.keys(json.error).forEach(key => {
@@ -3103,6 +3350,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(error => {
         log('Error saving address', error);
+        // Restore the previous methods list on network failure
+        if (smContainer && previousMethodsHtml !== null) {
+          smContainer.innerHTML = previousMethodsHtml;
+        }
       })
       .finally(() => {
         window._savingShipping = false;
@@ -3193,7 +3444,11 @@ document.addEventListener('DOMContentLoaded', () => {
             pmContainer.innerHTML = `<div class="text-sm text-text-secondary py-4">${window.dcLang?.fill_and_save_shipping_to_enable_payment || 'Please fill in and save your shipping address to enable payment methods.'}</div>`;
           }
         } else {
-          // Payment address saved successfully, now load payment methods
+          // Payment address saved successfully, now load payment methods.
+          // No extra showPaymentPreloader here: either the instant skeleton
+          // from the shipping-method click is still showing (its timestamp
+          // drives the minimum-display window), or loadPaymentMethods will
+          // show its own.
           loadPaymentMethods();
         }
       })
@@ -3234,7 +3489,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           // Payment address saved successfully
           log('Payment address saved successfully');
-          // Load payment methods (which will call updateProgressIntelligent when ready)
+          // Load payment methods (shows its own skeleton; if the instant one
+          // from a shipping-method click is up, its timestamp is reused)
           loadPaymentMethods();
         }
       })
@@ -4004,9 +4260,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
-    // Disable button
+    // Disable button and show preloader with spinner + text
     btn.disabled = true;
-    btn.innerHTML = '{{ text_processing }}';
+    btn.innerHTML = `<span class="inline-flex items-center justify-center gap-3"><span class="preloader-spinner inline-flex">${LOADER_ICON_SVG}</span><span>{{ text_processing }}</span></span>`;
 
     log('Starting order confirmation...');
 
