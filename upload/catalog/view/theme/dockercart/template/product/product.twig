@@ -690,12 +690,12 @@
       <div class="mb-4">
         <h2 id="product-attributes-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ tab_attribute }}</h2>
       </div>
-      <div id="product-attributes-list" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+      <div id="product-attributes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10">
         {% for attribute_group in attribute_groups %}
         {% set _group_index = loop.index %}
         {% set _group_visible_count = min(attribute_group.attribute|length, 6) %}
-        {% set _group_is_visible = loop.index <= 2 and _group_visible_count > 0 %}
-        {% set _group_hidden_count = loop.index > 2 ? attribute_group.attribute|length : (attribute_group.attribute|length > 6 ? attribute_group.attribute|length - 6 : 0) %}
+        {% set _group_is_visible = loop.index <= 3 and _group_visible_count > 0 %}
+        {% set _group_hidden_count = loop.index > 3 ? attribute_group.attribute|length : (attribute_group.attribute|length > 6 ? attribute_group.attribute|length - 6 : 0) %}
         {% set _attribute_hidden_items = _attribute_hidden_items + _group_hidden_count %}
         <div class="product-attribute-group{% if not _group_is_visible %} hidden{% endif %}" data-attribute-column="{{ loop.index }}">
           <h3 class="text-sm font-bold text-gray-900 mb-3">{{ attribute_group.name }}</h3>
@@ -1097,11 +1097,11 @@ function initProductAttributes() {
     items.forEach(function(item) {
       var column = parseInt(item.getAttribute('data-attribute-column') || '0', 10);
       var position = parseInt(item.getAttribute('data-attribute-position') || '0', 10);
-      item.classList.toggle('hidden', !expanded && (column > 2 || position > 6));
+      item.classList.toggle('hidden', !expanded && (column > 3 || position > 6));
     });
     document.querySelectorAll('.product-attribute-group').forEach(function(group) {
       var column = parseInt(group.getAttribute('data-attribute-column') || '0', 10);
-      group.classList.toggle('hidden', !expanded && column > 2);
+      group.classList.toggle('hidden', !expanded && column > 3);
     });
     toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     if (label) label.textContent = expanded ? '{{ text_attributes_show_less|e('js') }}' : '{{ text_attributes_show_more|e('js') }}';
