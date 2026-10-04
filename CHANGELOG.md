@@ -1,3 +1,10 @@
+## [3.25.0](https://github.com/kdbsoft/dockercart/compare/v3.24.1...v3.25.0) (2026-10-04)
+
+### Features
+
+* **catalog:** add classic and modern banner button styles ([220721e](https://github.com/kdbsoft/dockercart/commit/220721ec519d28e20a339dc46de595fcf2b757fc))
+* **checkout:** show skeleton preloaders while methods load ([aa3d541](https://github.com/kdbsoft/dockercart/commit/aa3d5417593330afd9126baac1ab8f350311eec4))
+
 ## [3.24.1](https://github.com/kdbsoft/dockercart/compare/v3.24.0...v3.24.1) (2026-10-02)
 
 ### Bug Fixes
