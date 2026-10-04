@@ -1122,6 +1122,10 @@ class ControllerProductCategory extends Controller {
 			$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
 		}
 
+		$primary_btn_style = isset($result['primary_btn_style']) && in_array($result['primary_btn_style'], array('classic', 'modern'), true) ? $result['primary_btn_style'] : 'modern';
+		$btn_color = !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb');
+		$btn_text_color = $this->badgeTextColor($btn_color);
+
 		return array(
 			'title'              => $raw_title,
 			'title_html'         => $title_html,
@@ -1131,6 +1135,9 @@ class ControllerProductCategory extends Controller {
 			'accent_bg'          => $accent_bg,
 			'badge_text_color'   => $badge_text_color,
 			'primary_btn_text'   => isset($result['primary_btn_text']) ? html_entity_decode((string)$result['primary_btn_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
+			'primary_btn_style'  => $primary_btn_style,
+			'btn_color'          => $btn_color,
+			'btn_text_color'     => $btn_text_color,
 			'link'               => $this->resolveBannerLink(isset($result['link']) ? $result['link'] : ''),
 			'image'              => $image_landscape,
 			'image_portrait'     => $image_portrait,
@@ -1184,11 +1191,12 @@ class ControllerProductCategory extends Controller {
 			}
 
 			if ($card['primary_btn_text']) {
-				$button_style = $card['accent_color'] ? ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'], ENT_QUOTES, 'UTF-8') . '; color: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';"' : '';
+				$button_class = 'category-banner__btn category-banner__btn--' . $card['primary_btn_style'];
+				$button_style = ' style="--btn-color: ' . htmlspecialchars($card['btn_color'], ENT_QUOTES, 'UTF-8') . '; --btn-text: ' . htmlspecialchars($card['btn_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
 				if ($card['link']) {
-					$html .= '<a href="' . $card['link'] . '" class="category-banner__btn category-banner__btn--primary"' . $button_style . '>' . $card['primary_btn_text'] . '</a>';
+					$html .= '<a href="' . $card['link'] . '" class="' . $button_class . '"' . $button_style . '>' . $card['primary_btn_text'] . '</a>';
 				} else {
-					$html .= '<span class="category-banner__btn category-banner__btn--primary"' . $button_style . '>' . $card['primary_btn_text'] . '</span>';
+					$html .= '<span class="' . $button_class . '"' . $button_style . '>' . $card['primary_btn_text'] . '</span>';
 				}
 			}
 
