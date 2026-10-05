@@ -1,3 +1,10 @@
+## [3.27.0](https://github.com/kdbsoft/dockercart/compare/v3.26.1...v3.27.0) (2026-10-05)
+
+### Features
+
+* **admin:** move status and settings fields into sidebar cards on form pages ([baafad6](https://github.com/kdbsoft/dockercart/commit/baafad682ed3d5086418b5274849ba69c9e3811a))
+* **db:** add country phone/address formats and ru/uk localisation translations ([dca4b1d](https://github.com/kdbsoft/dockercart/commit/dca4b1d2777815090cb8bae2a24751034a0ec68b))
+
 ## [3.26.1](https://github.com/kdbsoft/dockercart/compare/v3.26.0...v3.26.1) (2026-10-05)
 
 ### Bug Fixes
