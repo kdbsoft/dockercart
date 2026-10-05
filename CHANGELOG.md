@@ -1,3 +1,9 @@
+## [3.25.1](https://github.com/kdbsoft/dockercart/compare/v3.25.0...v3.25.1) (2026-10-05)
+
+### Bug Fixes
+
+* **checkout:** stop double shipping-methods render after reload ([d5e52ae](https://github.com/kdbsoft/dockercart/commit/d5e52ae99beac35f1b37338bbc899f9e3088feac))
+
 ## [3.25.0](https://github.com/kdbsoft/dockercart/compare/v3.24.1...v3.25.0) (2026-10-04)
 
 ### Features
