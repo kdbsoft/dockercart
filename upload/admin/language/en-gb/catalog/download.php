@@ -23,6 +23,7 @@ $_['tab_description']   = 'Description';
 
 // Sidebar cards
 $_['text_file_card']    = 'File';
+$_['text_status_card']  = 'Status';
 
 
 

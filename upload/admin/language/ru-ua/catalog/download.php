@@ -39,6 +39,7 @@ $_['tab_description'] = 'Описание';
 
 // Sidebar cards
 $_['text_file_card'] = 'Файл';
+$_['text_status_card'] = 'Статус';
 
 // Empty state
 $_['text_empty_title']       = 'Пока нет загрузок';

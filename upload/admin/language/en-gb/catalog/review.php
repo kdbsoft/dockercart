@@ -18,6 +18,7 @@ $_['text_edit_review_subtitle'] = 'Edit review status and details';
 
 // Sidebar cards
 $_['text_review_card']  = 'Details';
+$_['text_status_card']  = 'Status';
 
 
 

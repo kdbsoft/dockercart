@@ -58,6 +58,7 @@ $_['text_edit_review_subtitle'] = 'Редагувати статус та дет
 
 // Sidebar cards
 $_['text_review_card'] = 'Деталі';
+$_['text_status_card'] = 'Статус';
 
 
 

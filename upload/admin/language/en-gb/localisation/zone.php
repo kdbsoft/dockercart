@@ -10,6 +10,10 @@ $_['text_list']              = 'Zone List';
 $_['text_add']               = 'Add Zone';
 $_['text_edit']              = 'Edit Zone';
 $_['text_filter']             = 'Filter';
+
+// Sidebar
+$_['text_status_card']        = 'Status';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage geographic zones per country';

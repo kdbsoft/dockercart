@@ -9,6 +9,10 @@ $_['text_list']               = 'Country List';
 $_['text_add']                = 'Add Country';
 $_['text_edit']               = 'Edit Country';
 $_['text_filter']              = 'Filter';
+
+// Sidebar
+$_['text_status_card']         = 'Status';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage countries and geolocation';

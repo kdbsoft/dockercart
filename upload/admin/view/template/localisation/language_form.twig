@@ -30,7 +30,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-language">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -71,22 +71,34 @@
                   <div class="text-danger">{{ error_locale }}</div>
                   {% endif %}
                 </div>
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-status">{{ entry_status }} <span data-toggle="tooltip" title="{{ help_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                  <select name="status" id="input-status" class="form-control">
-                    {% if status %}
-                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                    <option value="0">{{ text_disabled }}</option>
-                    {% else %}
-                    <option value="1">{{ text_enabled }}</option>
-                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                    {% endif %}
-                  </select>
-                </div>
-                <div class="dcx-field">
-                  <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="power" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }} <span data-toggle="tooltip" title="{{ help_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
               </div>
             </div>
           </div>
