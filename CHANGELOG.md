@@ -1,3 +1,9 @@
+## [3.26.0](https://github.com/kdbsoft/dockercart/compare/v3.25.1...v3.26.0) (2026-10-05)
+
+### Features
+
+* **nginx:** block cold catalog-filter bot hits ([3541ce9](https://github.com/kdbsoft/dockercart/commit/3541ce991ecb06dc430711973e3944a20f2df681))
+
 ## [3.25.1](https://github.com/kdbsoft/dockercart/compare/v3.25.0...v3.25.1) (2026-10-05)
 
 ### Bug Fixes
