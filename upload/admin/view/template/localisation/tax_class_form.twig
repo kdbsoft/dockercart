@@ -66,54 +66,61 @@
               </div>
               <div class="dcx-field" style="margin-top:12px;">
                 <label class="dcx-label">{{ text_tax_rate }}</label>
-                <div id="tax-rule">
-                  {% set tax_rule_row = 0 %}
-                  {% for tax_rule in tax_rules %}
-                  <div class="dc-promo-card" id="tax-rule-row{{ tax_rule_row }}">
-                    <div class="dc-promo-card__actions">
-                      <button type="button" onclick="$('#tax-rule-row{{ tax_rule_row }}').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                    </div>
-                    <div class="dc-promo-card__grid">
-                      <div class="dc-promo-card__field">
-                        <label>{{ entry_rate }}</label>
-                        <select name="tax_rule[{{ tax_rule_row }}][tax_rate_id]" class="form-control">
-                          {% for tax_rate in tax_rates %}
-                          {% if tax_rate.tax_rate_id == tax_rule.tax_rate_id %}
-                          <option value="{{ tax_rate.tax_rate_id }}" selected="selected">{{ tax_rate.name }}</option>
-                          {% else %}
-                          <option value="{{ tax_rate.tax_rate_id }}">{{ tax_rate.name }}</option>
-                          {% endif %}
-                          {% endfor %}
-                        </select>
-                      </div>
-                      <div class="dc-promo-card__field">
-                        <label>{{ entry_based }}</label>
-                        <select name="tax_rule[{{ tax_rule_row }}][based]" class="form-control">
-                          {% if tax_rule.based == 'shipping' %}
-                          <option value="shipping" selected="selected">{{ text_shipping }}</option>
-                          {% else %}
-                          <option value="shipping">{{ text_shipping }}</option>
-                          {% endif %}
-                          {% if tax_rule.based == 'payment' %}
-                          <option value="payment" selected="selected">{{ text_payment }}</option>
-                          {% else %}
-                          <option value="payment">{{ text_payment }}</option>
-                          {% endif %}
-                          {% if tax_rule.based == 'store' %}
-                          <option value="store" selected="selected">{{ text_store }}</option>
-                          {% else %}
-                          <option value="store">{{ text_store }}</option>
-                          {% endif %}
-                        </select>
-                      </div>
-                      <div class="dc-promo-card__field">
-                        <label>{{ entry_priority }}</label>
-                        <input type="text" name="tax_rule[{{ tax_rule_row }}][priority]" value="{{ tax_rule.priority }}" placeholder="{{ entry_priority }}" class="form-control" />
-                      </div>
-                    </div>
-                  </div>
-                  {% set tax_rule_row = tax_rule_row + 1 %}
-                  {% endfor %}
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover dcx-table" id="tax-rule-table">
+                    <thead>
+                      <tr>
+                        <td class="text-left">{{ entry_rate }}</td>
+                        <td class="text-left" style="width: 220px;">{{ entry_based }}</td>
+                        <td class="text-left" style="width: 140px;">{{ entry_priority }}</td>
+                        <td class="text-right" style="width: 1%;"></td>
+                      </tr>
+                    </thead>
+                    <tbody id="tax-rule">
+                      {% set tax_rule_row = 0 %}
+                      {% for tax_rule in tax_rules %}
+                      <tr id="tax-rule-row{{ tax_rule_row }}">
+                        <td class="text-left">
+                          <select name="tax_rule[{{ tax_rule_row }}][tax_rate_id]" class="form-control">
+                            {% for tax_rate in tax_rates %}
+                            {% if tax_rate.tax_rate_id == tax_rule.tax_rate_id %}
+                            <option value="{{ tax_rate.tax_rate_id }}" selected="selected">{{ tax_rate.name }}</option>
+                            {% else %}
+                            <option value="{{ tax_rate.tax_rate_id }}">{{ tax_rate.name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                          </select>
+                        </td>
+                        <td class="text-left">
+                          <select name="tax_rule[{{ tax_rule_row }}][based]" class="form-control">
+                            {% if tax_rule.based == 'shipping' %}
+                            <option value="shipping" selected="selected">{{ text_shipping }}</option>
+                            {% else %}
+                            <option value="shipping">{{ text_shipping }}</option>
+                            {% endif %}
+                            {% if tax_rule.based == 'payment' %}
+                            <option value="payment" selected="selected">{{ text_payment }}</option>
+                            {% else %}
+                            <option value="payment">{{ text_payment }}</option>
+                            {% endif %}
+                            {% if tax_rule.based == 'store' %}
+                            <option value="store" selected="selected">{{ text_store }}</option>
+                            {% else %}
+                            <option value="store">{{ text_store }}</option>
+                            {% endif %}
+                          </select>
+                        </td>
+                        <td class="text-left">
+                          <input type="text" name="tax_rule[{{ tax_rule_row }}][priority]" value="{{ tax_rule.priority }}" placeholder="{{ entry_priority }}" class="form-control" />
+                        </td>
+                        <td class="text-right">
+                          <button type="button" onclick="$('#tax-rule-row{{ tax_rule_row }}').remove();" class="btn btn-danger btn-xs" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
+                        </td>
+                      </tr>
+                      {% set tax_rule_row = tax_rule_row + 1 %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
                 </div>
                 <button type="button" onclick="addRule();" class="btn btn-primary btn-sm"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_rule_add }}</button>
               </div>
@@ -128,33 +135,28 @@
   var tax_rule_row = {{ tax_rule_row }};
 
   function addRule() {
-    html  = '<div class="dc-promo-card" id="tax-rule-row' + tax_rule_row + '">';
-    html += '  <div class="dc-promo-card__actions">';
-    html += '    <button type="button" onclick="$(\'#tax-rule-row' + tax_rule_row + '\').remove();" class="dc-promo-card__remove" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>';
-    html += '  </div>';
-    html += '  <div class="dc-promo-card__grid">';
-    html += '    <div class="dc-promo-card__field">';
-    html += '      <label>{{ entry_rate }}</label>';
-    html += '      <select name="tax_rule[' + tax_rule_row + '][tax_rate_id]" class="form-control">';
+    html  = '<tr id="tax-rule-row' + tax_rule_row + '">';
+    html += '  <td class="text-left">';
+    html += '    <select name="tax_rule[' + tax_rule_row + '][tax_rate_id]" class="form-control">';
     {% for tax_rate in tax_rates %}
-    html += '        <option value="{{ tax_rate.tax_rate_id }}">{{ tax_rate.name|escape('js') }}</option>';
+    html += '      <option value="{{ tax_rate.tax_rate_id }}">{{ tax_rate.name|escape('js') }}</option>';
     {% endfor %}
-    html += '      </select>';
-    html += '    </div>';
-    html += '    <div class="dc-promo-card__field">';
-    html += '      <label>{{ entry_based }}</label>';
-    html += '      <select name="tax_rule[' + tax_rule_row + '][based]" class="form-control">';
-    html += '        <option value="shipping">{{ text_shipping }}</option>';
-    html += '        <option value="payment">{{ text_payment }}</option>';
-    html += '        <option value="store">{{ text_store }}</option>';
-    html += '      </select>';
-    html += '    </div>';
-    html += '    <div class="dc-promo-card__field">';
-    html += '      <label>{{ entry_priority }}</label>';
-    html += '      <input type="text" name="tax_rule[' + tax_rule_row + '][priority]" value="" placeholder="{{ entry_priority }}" class="form-control" />';
-    html += '    </div>';
-    html += '  </div>';
-    html += '</div>';
+    html += '    </select>';
+    html += '  </td>';
+    html += '  <td class="text-left">';
+    html += '    <select name="tax_rule[' + tax_rule_row + '][based]" class="form-control">';
+    html += '      <option value="shipping">{{ text_shipping }}</option>';
+    html += '      <option value="payment">{{ text_payment }}</option>';
+    html += '      <option value="store">{{ text_store }}</option>';
+    html += '    </select>';
+    html += '  </td>';
+    html += '  <td class="text-left">';
+    html += '    <input type="text" name="tax_rule[' + tax_rule_row + '][priority]" value="" placeholder="{{ entry_priority }}" class="form-control" />';
+    html += '  </td>';
+    html += '  <td class="text-right">';
+    html += '    <button type="button" onclick="$(\'#tax-rule-row' + tax_rule_row + '\').remove();" class="btn btn-danger btn-xs" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
+    html += '  </td>';
+    html += '</tr>';
 
     $('#tax-rule').append(html);
     lucide.createIcons();
