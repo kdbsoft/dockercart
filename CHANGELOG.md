@@ -1,3 +1,9 @@
+## [3.26.1](https://github.com/kdbsoft/dockercart/compare/v3.26.0...v3.26.1) (2026-10-05)
+
+### Bug Fixes
+
+* **session:** serialize concurrent same-session DB writes with named locks ([c8d5a80](https://github.com/kdbsoft/dockercart/commit/c8d5a805198e6bd7376104c6b865ca9f0dff37f1))
+
 ## [3.26.0](https://github.com/kdbsoft/dockercart/compare/v3.25.1...v3.26.0) (2026-10-05)
 
 ### Features
