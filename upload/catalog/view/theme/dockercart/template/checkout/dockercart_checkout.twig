@@ -1886,6 +1886,21 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgressIntelligent();
   };
 
+  // Canonical dedup key for the shipping address payload. loadShippingMethods()
+  // sends extra contact identifiers (email/telephone) that saveShippingAddress()
+  // does not — the key covers only the address fields both agree on, so the
+  // _lastSavedShipping guard recognises an unchanged address across both paths.
+  const shippingPayloadKey = (data) => JSON.stringify({
+    firstname: data.firstname || '',
+    lastname: data.lastname || '',
+    address_1: data.address_1 || '',
+    address_2: data.address_2 || '',
+    city: data.city || '',
+    postcode: data.postcode || '',
+    country_id: data.country_id || '',
+    zone_id: data.zone_id || ''
+  });
+
   const loadShippingMethods = () => {
     log('Loading shipping methods...');
     const container = $('#shipping-methods');
@@ -1938,6 +1953,10 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(json => waitForMinPreloader().then(() => json))
       .then(json => {
         if (json?.shipping_methods) {
+          // Remember what was just sent: renderShippingMethods() triggers
+          // toggleAddressFieldsByShippingMethod() → checkAddressComplete(),
+          // which must not re-POST the identical address (double render).
+          window._lastSavedShipping = shippingPayloadKey(data);
           // Store field visibility config globally
           if (json.shipping_fields) {
             window._shippingFields = json.shipping_fields;
@@ -3208,8 +3227,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // address_id is only sent when explicitly selecting from dropdown
     };
 
-    // Avoid re-saving the same address repeatedly
-    const payloadKey = JSON.stringify(data);
+    // Avoid re-saving the same address repeatedly (key shared with
+    // loadShippingMethods() so a fresh render is not re-saved right away)
+    const payloadKey = shippingPayloadKey(data);
     log('Prepared shipping payload', payloadKey, 'lastSaved=', window._lastSavedShipping);
     if (window._lastSavedShipping === payloadKey) {
       log('Address unchanged since last save, skipping');
@@ -3337,12 +3357,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          // After shipping address saved, auto-save payment address if checkbox is checked
+          // After shipping address saved, auto-save payment address if checkbox is checked.
+          // renderShippingMethods() above already saved it synchronously when the
+          // method is unchanged, and a changed method is covered by the
+          // shipping_method change chain — only the no-selection edge (e.g.
+          // empty quotes) still needs an explicit call here.
           const paymentSameCheckbox = $('#payment-same-as-shipping');
           if (paymentSameCheckbox && paymentSameCheckbox.checked) {
             log('Payment address same as shipping is checked, saving payment address...');
-            // savePaymentAddressSameAsShipping will call loadPaymentMethods when done
-            setTimeout(() => savePaymentAddressSameAsShipping(), 200);
+            if (!$('input[name="shipping_method"]:checked')) {
+              savePaymentAddressSameAsShipping();
+            }
           } else {
             log('Payment address NOT same as shipping, user must fill payment address separately');
           }
