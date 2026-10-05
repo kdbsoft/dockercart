@@ -26,6 +26,7 @@ $_['text_add'] = 'Добавить валюту';
 $_['text_edit'] = 'Изменить валюту';
 $_['text_iso'] = 'Полный список кодов валют ISO и настроек можно найти <a href="http://www.xe.com/iso4217.php" target="_blank" class="alert-link">здесь</a> .';
 $_['text_list'] = 'Список валют';
+$_['text_status_card'] = 'Статус';
 $_['text_success'] = 'Успех: Вы изменили валюту!';
 // Subtitle
 

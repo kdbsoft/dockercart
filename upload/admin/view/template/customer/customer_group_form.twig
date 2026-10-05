@@ -36,7 +36,7 @@
   <div class="container-fluid">
     <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer-group">
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -84,10 +84,6 @@
                   </div>
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label" for="input-sort-order">{{ entry_sort_order }}</label>
-                  <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
-                </div>
-                <div class="dcx-field">
                   <label class="dcx-label" for="input-discount-percent">{{ entry_discount_percent }}</label>
                   <div class="input-group">
                     <input type="number" name="discount_percent" value="{{ discount_percent }}" placeholder="{{ entry_discount_percent }}" id="input-discount-percent" class="form-control" min="0" max="100" step="0.01" />
@@ -107,6 +103,22 @@
                   <div class="text-danger">{{ error_markup_percent }}</div>
                   {% endif %}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="cog" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_settings_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-sort-order">{{ entry_sort_order }}</label>
+                <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
               </div>
             </div>
           </div>

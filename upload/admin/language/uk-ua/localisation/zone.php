@@ -22,6 +22,7 @@ $_['text_add'] = 'Додати зону';
 $_['text_edit'] = 'Редагувати зону';
 $_['text_filter'] = 'Фільтр';
 $_['text_list'] = 'Список зон';
+$_['text_status_card'] = 'Статус';
 $_['text_success'] = 'Успіх: Ви змінили зони!';
 // Subtitle
 

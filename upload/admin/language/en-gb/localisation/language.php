@@ -7,6 +7,10 @@ $_['text_success']      = 'Success: You have modified languages!';
 $_['text_list']         = 'Language List';
 $_['text_add']          = 'Add Language';
 $_['text_edit']         = 'Edit Language';
+
+// Sidebar
+$_['text_status_card']  = 'Status';
+
 // Subtitle
 
 $_['text_list_subtitle'] = 'Manage installed languages';

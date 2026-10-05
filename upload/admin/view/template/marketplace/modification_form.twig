@@ -39,7 +39,7 @@
     <input type="hidden" name="user_token" value="{{ user_token }}" />
     {% if modification_id %}<input type="hidden" name="modification_id" value="{{ modification_id }}" />{% endif %}
     <div class="row">
-      <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">
           <div class="dcx-panel">
             <div class="dcx-panel-head">
@@ -76,18 +76,6 @@
                 <div class="dcx-field">
                   <label class="dcx-label" for="input-link">{{ entry_link }}</label>
                   <input type="text" name="link" value="{{ link }}" placeholder="{{ entry_link }}" id="input-link" class="form-control" />
-                </div>
-                <div class="dcx-field required">
-                  <label class="dcx-label" for="input-status">{{ entry_status }}</label>
-                  <select name="status" id="input-status" class="form-control">
-                    {% if status %}
-                    <option value="1" selected="selected">{{ text_enabled }}</option>
-                    <option value="0">{{ text_disabled }}</option>
-                    {% else %}
-                    <option value="1">{{ text_enabled }}</option>
-                    <option value="0" selected="selected">{{ text_disabled }}</option>
-                    {% endif %}
-                  </select>
                 </div>
               </div>
             </div>
@@ -184,6 +172,30 @@
             </div>
           </div>
           {% endif %}
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="power" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <div class="dcx-sidebar-card__field">
+                <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                <select name="status" id="input-status" class="form-control">
+                  {% if status %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  <option value="0">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
