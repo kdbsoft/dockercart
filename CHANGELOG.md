@@ -1,3 +1,10 @@
+## [3.27.1](https://github.com/kdbsoft/dockercart/compare/v3.27.0...v3.27.1) (2026-10-07)
+
+### Bug Fixes
+
+* **sale:** stripe shipment progress bar for partial quantities ([2db0047](https://github.com/kdbsoft/dockercart/commit/2db004796187db18d047638afa322dc2e8c531b2))
+* **session:** serialize file and redis writes and guard cookie race ([9f2e573](https://github.com/kdbsoft/dockercart/commit/9f2e5731d600a7cd47b2733ebc54ff137a9d540c))
+
 ## [3.27.0](https://github.com/kdbsoft/dockercart/compare/v3.26.1...v3.27.0) (2026-10-05)
 
 ### Features
