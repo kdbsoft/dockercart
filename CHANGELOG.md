@@ -1,3 +1,9 @@
+## [3.27.2](https://github.com/kdbsoft/dockercart/compare/v3.27.1...v3.27.2) (2026-10-07)
+
+### Bug Fixes
+
+* **scripts:** restore exec bit on scripts/*.sh for entrypoint migrations ([7ed70b1](https://github.com/kdbsoft/dockercart/commit/7ed70b16ff06343d7d4469425ccc0ec9cb55d690))
+
 ## [3.27.1](https://github.com/kdbsoft/dockercart/compare/v3.27.0...v3.27.1) (2026-10-07)
 
 ### Bug Fixes
