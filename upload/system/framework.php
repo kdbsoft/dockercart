@@ -127,14 +127,30 @@ if ($config->get('session_autostart')) {
 
 	$request = $registry->get('request');
 
-	setcookie($config->get('session_name'), $session->getId(), [
-		'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
-		'path'     => ini_get('session.cookie_path'),
-		'domain'   => ini_get('session.cookie_domain'),
-		'secure'   => !empty($request->server['HTTPS']) || (isset($request->server['HTTP_X_FORWARDED_PROTO']) && $request->server['HTTP_X_FORWARDED_PROTO'] == 'https'),
-		'httponly' => true,
-		'samesite' => 'Lax',
-	]);
+	/*
+	The session cookie is only sent when the session id is actually new or
+	has changed (e.g. after session->rotate() on login). Re-sending an
+	unchanged cookie on every response lets a request that was in flight
+	during a concurrent login rotate() arrive last and rewrite the cookie
+	back to the old, already destroyed session id — the browser then sends
+	the dead id and the next admin page shows the login form again.
+	Time-limited cookies (session.cookie_lifetime > 0) are always refreshed,
+	since an unchanged skip would eventually let them expire while the
+	session is still alive.
+	*/
+
+	$cookie_id = isset($_COOKIE[$config->get('session_name')]) ? (string)$_COOKIE[$config->get('session_name')] : '';
+
+	if (ini_get('session.cookie_lifetime') || $cookie_id !== (string)$session->getId()) {
+		setcookie($config->get('session_name'), $session->getId(), [
+			'expires'  => ini_get('session.cookie_lifetime') ? time() + ini_get('session.cookie_lifetime') : 0,
+			'path'     => ini_get('session.cookie_path'),
+			'domain'   => ini_get('session.cookie_domain'),
+			'secure'   => !empty($request->server['HTTPS']) || (isset($request->server['HTTP_X_FORWARDED_PROTO']) && $request->server['HTTP_X_FORWARDED_PROTO'] == 'https'),
+			'httponly' => true,
+			'samesite' => 'Lax',
+		]);
+	}
 }
 
 // Cache
