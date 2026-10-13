@@ -239,7 +239,16 @@ because LE follows redirects to HTTPS.
 
 ### robots.txt
 
-`robots.txt` is auto-generated on every container start from the `ensure_robots_txt()` heredoc in `docker/entrypoint.sh`. Sitemap URL is populated from `DOCKERCART_URL` or `DOCKERCART_HTTPS_URL`. To customize, edit the heredoc and restart the container.
+`robots.txt` is managed from the admin at **System → Indexing** (`setting/indexing`).
+The page has a master "Enable indexing" switch (on by default) and an editor for the
+`robots.txt` contents; saving writes `/var/www/html/robots.txt` immediately. Switching
+indexing off makes the file disallow the whole store (`Disallow: /`).
+
+The file is only *seeded* with a default template by `ensure_robots_txt()` in
+`docker/entrypoint.sh` on first boot (sitemap URL from `DOCKERCART_URL` /
+`DOCKERCART_HTTPS_URL`); once it exists it is never overwritten on restart, so admin
+edits survive. The same default template lives in
+`ControllerSettingIndexing::defaultRobotsTxt()` — keep the two in sync.
 
 ---
 

@@ -1,0 +1,105 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+          <div class="pull-right">
+            <button type="submit" form="form-indexing" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">
+              {{ heading_title }}
+            </span>
+          </a>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-indexing">
+    <div class="row">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-2 col-xl-8">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="globe" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_panel_indexing }}</div>
+                <div class="dcx-panel-subtitle">{{ text_settings_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="dcx-checkbox-group">
+                  <label class="dcx-checkbox-label">
+                    <input type="hidden" name="config_indexing_status" value="0" />
+                    <input type="checkbox" name="config_indexing_status" value="1" id="input-indexing-status" {% if config_indexing_status %}checked="checked"{% endif %} /> {{ entry_indexing_status }}
+                    <span data-toggle="tooltip" title="{{ help_indexing_status }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                  </label>
+                </div>
+              </div>
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <label class="dcx-label" for="input-indexing-robots">{{ entry_robots }} <span data-toggle="tooltip" title="{{ help_robots }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
+                  <button type="button" class="btn btn-default btn-sm" id="btn-reset-robots" data-confirm="{{ text_confirm_reset }}"><i data-lucide="rotate-ccw" width="14" height="14"></i> {{ button_reset }}</button>
+                  <textarea name="config_indexing_robots" rows="22" id="input-indexing-robots" class="form-control" spellcheck="false" style="margin-top: 8px; font-family: SFMono-Regular, Menlo, Consolas, monospace; white-space: pre;">{{ config_indexing_robots }}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+</div>
+<textarea id="robots-default" style="display: none;">{{ default_robots }}</textarea>
+<script type="text/javascript"><!--
+document.getElementById('btn-reset-robots').addEventListener('click', function() {
+	if (!confirm(this.getAttribute('data-confirm'))) {
+		return;
+	}
+
+	document.getElementById('input-indexing-robots').value = document.getElementById('robots-default').value;
+});
+
+(function() {
+	var status = document.getElementById('input-indexing-status');
+	var robots = document.getElementById('input-indexing-robots');
+
+	function sync() {
+		if (status.checked) {
+			robots.removeAttribute('readonly');
+		} else {
+			robots.setAttribute('readonly', 'readonly');
+		}
+	}
+
+	status.addEventListener('change', sync);
+	sync();
+})();
+//--></script>
+{{ footer }}

@@ -100,7 +100,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $result['orders'] = $this->reindexOrders();
             $result['customers'] = $this->reindexCustomers();
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $result['success'] = false;
             $result['error'] = $e->getMessage();
         }
@@ -958,7 +958,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
                     $this->log->write("DockerCart Search: Applied morphology '$morphology' to table '$table'");
                 }
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $result['success'] = false;
             $result['errors'][] = $e->getMessage();
         }
