@@ -55,7 +55,7 @@ The entrypoint script (`docker/entrypoint.sh`) runs the following on first start
 2. **Database seeding** — creates the schema (`docker/mysql/init.sql`) and applies pending migrations
 3. **OCMOD refresh** — rebuilds modification cache
 4. **Search indexing** — builds the Manticore full-text index
-5. **Permission setup** — ensures correct ownership on storage directories
+5. **Permission setup** — keeps the bind-mounted `upload/` + `storage/` writable by everyone who touches them: owner = host user, group = `staff` (GID 50, shared with `www-data` and the FTP container), dirs `g+rwxs` (SGID, so new files inherit the group), files `g+rw`, nothing world-writable. Only drifted files are rewritten (`resolve_owner()` in `docker/entrypoint.sh`), so in steady state a restart touches no inodes. “Host user” means container root under rootless Podman and the owner of `./upload` under rootful Docker; if the host-side webroot ended up owned by real `root`, fix it once with `sudo chown -R "$USER:" upload storage`.
 
 No web installer is involved — there is no `/install` directory.
 
