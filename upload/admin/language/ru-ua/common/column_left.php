@@ -64,6 +64,7 @@ $_['text_return_status'] = 'Статусы возврата';
 $_['text_review'] = 'Отзывы';
 $_['text_review_setting'] = 'Настройки отзывов';
 $_['text_sale'] = 'Продажи';
+$_['text_indexing'] = 'Индексация';
 $_['text_seo_url'] = 'SEO URL';
 $_['text_setting'] = 'Магазины';
 $_['text_statistics'] = 'Статистика';
