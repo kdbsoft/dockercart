@@ -78,18 +78,26 @@ SELECT 'dockercart_trash_blog_post', 'admin/model/extension/module/dockercart_bl
 WHERE NOT EXISTS (SELECT 1 FROM `oc_event` WHERE `code` = 'dockercart_trash_blog_post');
 
 -- Grant the recycle bin permission (access + modify) to user groups.
+-- Guarded by JSON_VALID(): addUserGroup()/editUserGroup() can leave an empty
+-- string in `permission`, and JSON_CONTAINS('') fails with ER 4037 (the rows
+-- themselves are healed by 20260815_add_tool_update_permission.sql, which
+-- always runs first).
 UPDATE `oc_user_group`
 SET `permission` = JSON_SET(
     `permission`,
     '$.access',
-    JSON_MERGE(COALESCE(JSON_EXTRACT(`permission`, '$.access'), JSON_ARRAY()), JSON_ARRAY('tool/recycle_bin'))
+    JSON_MERGE_PRESERVE(COALESCE(JSON_EXTRACT(`permission`, '$.access'), JSON_ARRAY()), JSON_ARRAY('tool/recycle_bin'))
 )
-WHERE JSON_CONTAINS(`permission`, '"tool/recycle_bin"', '$.access') = 0;
+WHERE `permission` IS NOT NULL
+	AND JSON_VALID(`permission`)
+	AND JSON_CONTAINS(`permission`, '"tool/recycle_bin"', '$.access') = 0;
 
 UPDATE `oc_user_group`
 SET `permission` = JSON_SET(
     `permission`,
     '$.modify',
-    JSON_MERGE(COALESCE(JSON_EXTRACT(`permission`, '$.modify'), JSON_ARRAY()), JSON_ARRAY('tool/recycle_bin'))
+    JSON_MERGE_PRESERVE(COALESCE(JSON_EXTRACT(`permission`, '$.modify'), JSON_ARRAY()), JSON_ARRAY('tool/recycle_bin'))
 )
-WHERE JSON_CONTAINS(`permission`, '"tool/recycle_bin"', '$.modify') = 0;
+WHERE `permission` IS NOT NULL
+	AND JSON_VALID(`permission`)
+	AND JSON_CONTAINS(`permission`, '"tool/recycle_bin"', '$.modify') = 0;
