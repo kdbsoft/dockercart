@@ -1,3 +1,14 @@
+## [3.28.0](https://github.com/kdbsoft/dockercart/compare/v3.27.4...v3.28.0) (2026-10-13)
+
+### Features
+
+* **setting:** add admin indexing page to manage robots.txt ([3e31e37](https://github.com/kdbsoft/dockercart/commit/3e31e37fb8e45ea0351c9cb8d23194c2326e9c30))
+
+### Bug Fixes
+
+* **admin:** standardize alert markup in admin list templates ([a1a79f5](https://github.com/kdbsoft/dockercart/commit/a1a79f54e1f85025e67dde8eda59fde90ae7981a))
+* **search:** load currency settings and catch throwable in reindex ([2a4d98e](https://github.com/kdbsoft/dockercart/commit/2a4d98e3843c3ef259dce73c042e07c49c458d2c))
+
 ## [3.27.4](https://github.com/kdbsoft/dockercart/compare/v3.27.3...v3.27.4) (2026-10-13)
 
 ### Bug Fixes
