@@ -1,3 +1,9 @@
+## [3.27.4](https://github.com/kdbsoft/dockercart/compare/v3.27.3...v3.27.4) (2026-10-13)
+
+### Bug Fixes
+
+* fix bug in start.sh with LE cert ([1b980b2](https://github.com/kdbsoft/dockercart/commit/1b980b2402d86a85505abd0d6b50c0f18c39f533))
+
 ## [3.27.3](https://github.com/kdbsoft/dockercart/compare/v3.27.2...v3.27.3) (2026-10-13)
 
 ### Bug Fixes
