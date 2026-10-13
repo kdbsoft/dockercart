@@ -1,3 +1,9 @@
+## [3.27.3](https://github.com/kdbsoft/dockercart/compare/v3.27.2...v3.27.3) (2026-10-13)
+
+### Bug Fixes
+
+* migration issue ([e57ffcd](https://github.com/kdbsoft/dockercart/commit/e57ffcd8c8e0fec62f225411ccb88e8f1c68c633))
+
 ## [3.27.2](https://github.com/kdbsoft/dockercart/compare/v3.27.1...v3.27.2) (2026-10-07)
 
 ### Bug Fixes
