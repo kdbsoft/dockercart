@@ -264,7 +264,7 @@ $('#button-import-submit').on('click', function() {
 				return;
 			}
 
-			$('#content > .container-fluid').first().prepend('<div class="alert alert-success alert-dismissible dcx-flash-import"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['message'] + '</div>');
+			$('#content > .container-fluid').first().prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-success alert-dismissible dcx-flash-import"><i data-lucide="circle-check" width="16" height="16"></i> ' + json['message'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 			lucide.createIcons();
 			$('#import-modal').modal('hide');
 			setTimeout(function() { location.reload(); }, 900);
