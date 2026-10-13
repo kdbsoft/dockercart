@@ -113,6 +113,7 @@ $_['text_return_reason'] = 'Причини повернення';
 $_['text_return_status'] = 'Статуси повернення';
 $_['text_review'] = 'Відгуки';
 $_['text_review_setting'] = 'Налаштування відгуків';
+$_['text_indexing'] = 'Індексація';
 $_['text_sale'] = 'Продажі';
 $_['text_seo'] = 'SEO';
 $_['text_seo_url'] = 'URL-адреса SEO';

@@ -81,6 +81,7 @@ try {
 
 	// Load store settings into config and register the currency library so the
 	// indexer can convert per-product prices to the store base currency.
+	// NOTE: keep this bootstrap in sync with admin/cli/dockercart_search_reindex.php.
 	try {
 		// Fetch configured DB credentials (fall back to config definitions).
 		$db_host = $config->get('db_hostname') ?: DB_HOSTNAME;

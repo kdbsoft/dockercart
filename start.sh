@@ -102,7 +102,7 @@ fi
 # DERIVE STORE URL(S) FROM DOMAIN + LISTEN PORT (fallback only)
 # ============================================================================
 # DOCKERCART_URL / DOCKERCART_HTTPS_URL are the source of truth for the app
-# URL (config.php, config_url/config_ssl in the DB, robots.txt sitemap, Traefik
+# URL (config.php, config_url/config_ssl in the DB, robots.txt seed sitemap, Traefik
 # labels). They are usually derived from DOCKERCART_DOMAIN + the listen ports,
 # but an explicitly set URL (e.g. http://shop.local:8080) must win — .env is
 # operator-owned and start.sh never writes to it. Derivation runs only when the
