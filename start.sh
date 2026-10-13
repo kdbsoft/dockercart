@@ -377,6 +377,18 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
 
     echo "Switching stack to standalone HTTPS mode..."
     DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose -f docker-compose.yml -f docker-compose.le.yml up -d --build
+
+    # Persist standalone-LE mode (base + LE override) as the active file set so
+    # `make restart` / `make stop` / `make update` reconstruct HTTPS mode
+    # instead of falling back to the base-only HTTP set. The override stays out
+    # of COMPOSE_FILES during the ACME HTTP phase above (its :443 TLS server
+    # block would fail nginx startup while no certificate exists yet), so it is
+    # appended only now — after the LE stack came up successfully.
+    COMPOSE_FILES+=("-f" "docker-compose.le.yml")
+    if [ -f .env ]; then
+        persist_compose_files
+    fi
+
     echo ""
     echo "Store: https://${SSL_DOMAIN}"
     echo "Admin: https://${SSL_DOMAIN}/admin"
