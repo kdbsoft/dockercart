@@ -314,7 +314,8 @@
   const btn = document.getElementById('button-generate');
   if (!btn) return;
 
-  const container = document.querySelector('.container-fluid');
+  const containers = document.querySelectorAll('#content > .container-fluid');
+  const container = containers.length ? containers[containers.length - 1] : null;
   const lastGeneratedWrap = document.getElementById('sitemap-last-generated-wrap');
 
   const updateLastGenerated = (lastGenerated, fileCount) => {
@@ -329,7 +330,8 @@
 
   const createAlert = (type, message) => {
     const safe = message || '';
-    return `<div class="alert alert-${type} alert-dismissible"><i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" width="16" height="16"></i> ${safe}<button type="button" class="close" data-dismiss="alert">&times;</button></div>`;
+    const icon = type === 'success' ? 'circle-check' : 'circle-alert';
+    return `<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-${type} alert-dismissible"><i data-lucide="${icon}" width="16" height="16"></i> ${safe}<button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>`;
   };
 
   const setBusy = (isBusy) => {

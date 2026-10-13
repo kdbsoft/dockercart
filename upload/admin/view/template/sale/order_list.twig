@@ -318,7 +318,7 @@ $('.button-order-delete').on('click', function(e) {
 				$('.alert-dismissible').remove();
 	
 				if (json['error']) {
-					$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+					$('#content > .container-fluid').prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 				}
 	
 				if (json['success']) {
@@ -363,7 +363,7 @@ $('#button-delete').on('click', function(e) {
 			$(element).button('reset');
 
 			if (errors.length) {
-				$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + errors.join('<br />') + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+				$('#content > .container-fluid').prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + errors.join('<br />') + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 			} else {
 				location = '{{ delete }}';
 			}
@@ -410,8 +410,9 @@ function listEsc(s) {
 
 function listAlert(message, type) {
 	type = type || 'success';
+	var icon = type === 'success' ? 'circle-check' : 'circle-alert';
 	$('.alert-dismissible').remove();
-	$('#content > .container-fluid').prepend('<div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> ' + listEsc(message) + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+	$('#content > .container-fluid').prepend('<div class="row"><div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-' + type + ' alert-dismissible"><i data-lucide="' + icon + '" width="16" height="16"></i> ' + listEsc(message) + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div></div></div>');
 	if (window.lucide) { lucide.createIcons(); }
 }
 
