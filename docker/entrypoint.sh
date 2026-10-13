@@ -200,12 +200,20 @@ wait_for_mysql() {
     echo "MariaDB is up and running!"
 }
 
-# Генерация robots.txt при каждом старте (как config.php)
+# Первичная раскладка robots.txt. После этого файл управляется из админки
+# (Система -> Индексация), поэтому здесь он только создаётся, если его ещё
+# нет — при каждом рестарте существующий файл не перезаписывается, иначе
+# правки из админки терялись бы.
 ensure_robots_txt() {
     resolve_owner
     local robots_file="/var/www/html/robots.txt"
 
-    echo "Regenerating $robots_file ..."
+    if [ -f "$robots_file" ]; then
+        echo "$robots_file already exists - leaving it as is (managed from admin)."
+        return 0
+    fi
+
+    echo "Seeding $robots_file ..."
 
     local url="${DOCKERCART_URL:-http://dockercart.local}"
     url="${url%/}"
@@ -214,13 +222,7 @@ ensure_robots_txt() {
         url="${DOCKERCART_HTTPS_URL%/}"
     fi
 
-    if [ "${DISALLOW_INDEXING:-NO}" = "YES" ]; then
-        cat > "$robots_file" <<-EOF
-	User-agent: *
-	Disallow: /
-	EOF
-    else
-        cat > "$robots_file" <<-EOF
+    cat > "$robots_file" <<-EOF
 	User-agent: *
 	Allow: /catalog/view/javascript/
 	Allow: /catalog/view/theme/
@@ -250,14 +252,13 @@ ensure_robots_txt() {
 
 	Sitemap: ${url}/sitemap.xml
 	EOF
-    fi
 
     if [ "$(id -u)" -eq 0 ]; then
         chown "$OWNER" "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 
-    echo "$robots_file regenerated (sitemap: ${url}/sitemap.xml)"
+    echo "$robots_file seeded (sitemap: ${url}/sitemap.xml)"
 }
 
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
@@ -785,7 +786,7 @@ setup_logrotate
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
 
-# Генерируем robots.txt при каждом старте
+# Создаём robots.txt, только если его ещё нет (дальше управляется из админки)
 ensure_robots_txt
 
 # Ждем MariaDB

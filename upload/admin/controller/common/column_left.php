@@ -579,6 +579,17 @@ class ControllerCommonColumnLeft extends Controller {
 					'children' => array()
 				);
 			}
+
+			// Indexing (robots.txt)
+			if ($this->user->hasPermission('access', 'setting/indexing')) {
+				$system[] = array(
+					'id'       => 'menu-indexing',
+					'icon'	   => 'globe',
+					'name'	   => $this->language->get('text_indexing'),
+					'href'     => $this->url->link('setting/indexing', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
 		// Order flow (moved out of References -> Orders into System -> Settings)
 		if ($this->user->hasPermission('access', 'sale/order')) {
 			$system[] = array(
