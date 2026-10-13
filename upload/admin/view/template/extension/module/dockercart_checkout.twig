@@ -568,13 +568,14 @@ document.addEventListener('DOMContentLoaded', function() {
   var form = document.getElementById('form-dockercart-checkout');
 
   function createAlert(type, html, cls) {
-    var container = document.querySelector('.container-fluid');
+    var container = document.querySelector('#content > .container-fluid');
     if (!container) return;
-    var existing = document.querySelector('.' + (cls || 'dc-apply-alert'));
+    var marker = cls || 'dc-apply-alert';
+    var existing = document.querySelector('.' + marker);
     if (existing) existing.remove();
     var div = document.createElement('div');
-    div.className = 'alert alert-' + type + ' alert-dismissible ' + (cls || 'dc-apply-alert');
-    div.innerHTML = html + '\n<button type="button" class="close" data-dismiss="alert">&times;</button>';
+    div.className = 'row ' + marker;
+    div.innerHTML = '<div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10"><div class="alert alert-' + type + ' alert-dismissible">' + html + '\n<button type="button" class="close" data-dismiss="alert">&times;</button></div></div>';
     container.insertBefore(div, container.firstChild);
     try { if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons(); } catch(e) {}
   }
@@ -592,9 +593,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.text();
       }).then(function() {
-        createAlert('success', '<i data-lucide="circle-check"></i> {{ text_success|default("Settings saved") | e('js') }}');
+        createAlert('success', '<i data-lucide="circle-check" width="16" height="16"></i> {{ text_success|default("Settings saved") | e('js') }}');
       }).catch(function(err) {
-        createAlert('danger', '<i data-lucide="circle-alert"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
+        createAlert('danger', '<i data-lucide="circle-alert" width="16" height="16"></i> ' + (err.message || 'Save failed'), 'dc-apply-alert-error');
       }).finally(function() {
         applyBtn.disabled = false;
       });
