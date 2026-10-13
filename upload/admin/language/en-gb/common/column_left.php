@@ -27,6 +27,7 @@ $_['text_extensions_store']     = 'Add-ons Store';
 $_['text_geo_zone']             = 'Geo Zones';
 $_['text_import']               = 'Import';
 $_['text_information']          = 'Information';
+$_['text_indexing']             = 'Indexing';
 $_['text_installer']            = 'Installer';
 $_['text_language']             = 'Languages';
 $_['text_layout']               = 'Layouts';
