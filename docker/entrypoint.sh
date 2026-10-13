@@ -1,70 +1,102 @@
 #!/bin/bash
 set -e
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Права в bind-mount'ах (upload/, storage/)
+#
+# Каталоги лежат на хосте, а пишут в них четыре стороны: PHP/www-data, entrypoint
+# от root (composer, config.php, robots.txt), OCMOD/GUI-обновлятор от www-data,
+# FTP-контейнер (GID 50) и сам хостовый пользователь. Держим инвариант:
+#
+#   владелец  = хостовый пользователь  → хостовые git/редакторы пишут без sudo;
+#   группа    = staff (GID 50)         → www-data и FTP-юзер пишут по группе;
+#   каталоги  = SGID + g+rwx           → новые файлы наследуют группу staff;
+#   файлы     = g+rw, без o+w          → вебрут не world-writable.
+#
+# Владелец зависит от userns:
+#   * rootless (podman: в /proc/self/uid_map больше одной строки) — container-uid 0
+#     И ЕСТЬ хостовый пользователь, поэтому владелец root;
+#   * rootful — root это настоящий root, и chown в root:staff закрыл бы вебрут от
+#     хостового пользователя (если он не в GID 50), поэтому берём uid владельца
+#     самого bind-mount'а.
+# Если вебрут уже принадлежит root'у (наследие старой схемы) — починить на хосте:
+#   sudo chown -R "$USER:" upload storage
+#
+# Все проходы идемпотентны и гейтед: find обходит дерево, но chown/chgrp/chmod
+# вызывается только для несовпавших файлов и батчами (`-exec ... +` вместо `\;` —
+# иначе получается по процессу на файл). В устоявшемся состоянии ни один inode не
+# перезаписывается; старая версия трогала ~12k файлов на каждый старт контейнера.
+resolve_owner() {
+	if [ -n "${OWNER:-}" ]; then
+		return 0
+	fi
+	STAFF_GID="$(getent group staff | cut -d: -f3)"
+	[ -n "$STAFF_GID" ] || STAFF_GID=50
+	if [ "$(wc -l < /proc/self/uid_map 2>/dev/null || echo 1)" -gt 1 ]; then
+		OWNER_UID=0
+	else
+		OWNER_UID="$(stat -c %u /var/www/html 2>/dev/null || echo 0)"
+	fi
+	OWNER="${OWNER_UID}:${STAFF_GID}"
+}
+
+# Владелец + группа, только для несовпавших файлов.
+# .rclone.conf не трогаем: в нём S3-секреты, права задаёт ensure_rclone_config (600).
+fix_ownership() {
+	local path="$1"
+	[ -e "$path" ] || return 0
+	find "$path" -name '.rclone.conf' -prune -o ! -uid "$OWNER_UID" -exec chown -h "$OWNER_UID" {} + 2>/dev/null || true
+	find "$path" -name '.rclone.conf' -prune -o ! -gid "$STAFF_GID" -exec chgrp -h "$STAFF_GID" {} + 2>/dev/null || true
+}
+
+# SGID + group-write: каталоги g+rwxs (новые файлы наследуют группу staff), файлы
+# g+rw. Ничего не срезаем — exec-биты и хостовые режимы остаются как есть.
+fix_group_access() {
+	local path="$1"
+	[ -d "$path" ] || return 0
+	find "$path" -name '.rclone.conf' -prune -o -type d \( ! -perm -2000 -o ! -perm -070 \) -exec chmod g+rwxs {} + 2>/dev/null || true
+	find "$path" -name '.rclone.conf' -prune -o -type f ! -perm -060 -exec chmod g+rw {} + 2>/dev/null || true
+}
+
+# В вебруте не должно быть world-writable файлов (мы таких не создаём, но хостовые
+# права могли прийти любыми). o+r/o+x не выдаём: nginx статику не отдаёт сам —
+# всё проксируется в Apache, который читает файлы как www-data (см. nginx conf).
+fix_no_world_write() {
+	local path="$1"
+	[ -d "$path" ] || return 0
+	find "$path" -perm -002 -exec chmod o-w {} + 2>/dev/null || true
+}
+
 # Fix permissions for mounted volumes (они приходят с правами хоста)
-# Combines base permissions + SGID/group setup for FTP+www-data access.
 fix_permissions() {
-    echo "Fixing permissions for mounted volumes..."
+	echo "Fixing permissions for mounted volumes..."
+	resolve_owner
 
-    # ---- Base permissions (files/dirs readable, some writable) ----
-    if [ -d "/var/www/html" ]; then
-        find /var/www/html -type d -exec chmod 755 {} \; 2>/dev/null || true
-        find /var/www/html -type f -exec chmod 644 {} \; 2>/dev/null || true
-    fi
+	# Жёсткое требование (работает и без root — chmod по своим файлам).
+	fix_no_world_write /var/www/html
 
-    if [ -d "/var/www/storage" ]; then
-        # Ensure writable storage subdirs exist even when the host bind mount
-        # was auto-created empty by docker (fresh clone / first server install),
-        # which would otherwise shadow the dirs pre-built into the image.
-        for d in cache logs download upload modification session backup documents/invoices logs/scheduler; do
-            mkdir -p "/var/www/storage/$d" 2>/dev/null || true
-        done
-        chmod -R 775 /var/www/storage 2>/dev/null || true
-        mkdir -p /var/www/storage/documents/invoices 2>/dev/null || true
-        chmod 2775 /var/www/storage/documents /var/www/storage/documents/invoices 2>/dev/null || true
-    fi
+	if [ -d "/var/www/storage" ]; then
+		# Ensure writable storage subdirs exist even when the host bind mount
+		# was auto-created empty by docker (fresh clone / first server install),
+		# which would otherwise shadow the dirs pre-built into the image.
+		for d in cache logs download upload modification session backup documents/invoices logs/scheduler; do
+			mkdir -p "/var/www/storage/$d" 2>/dev/null || true
+		done
+		mkdir -p /var/www/storage/documents/invoices 2>/dev/null || true
+	fi
 
-    # Writable dirs for uploads
-    chmod -R 775 /var/www/html/image/catalog 2>/dev/null || true
-    chmod -R 775 /var/www/html/image/cache 2>/dev/null || true
+	# ---- Extended permissions (run when we are root) ----
+	if [ "$(id -u)" -eq 0 ]; then
+		# Владелец — хостовый пользователь (в rootless это container-root), группа —
+		# staff (см. комментарий выше); правим только то, что реально разъехалось.
+		fix_ownership /var/www/html
+		fix_ownership /var/www/storage
 
-    # ---- SGID + group write for FTP (staff) + www-data shared access ----
-    chgrp -R staff /var/www/html/image/ 2>/dev/null || true
-    find /var/www/html/image/catalog /var/www/html/image/cache -type d -exec chmod g+ws {} \; 2>/dev/null || true
-    find /var/www/html/image/catalog /var/www/html/image/cache -type f -exec chmod g+w {} \; 2>/dev/null || true
-
-    # ---- Extended permissions (run when we are root) ----
-    if [ "$(id -u)" -eq 0 ]; then
-        # SGID on all webroot dirs so new files inherit group
-        find /var/www/html -type d -exec chmod 2775 {} \; || true
-        # Files: group write so www-data and host users can edit
-        find /var/www/html -type f -exec chmod 664 {} \; || true
-
-        # Webroot owner root + group staff. Under rootless podman the container
-        # root maps to the host user, so chowning keeps every file editable from
-        # the host; www-data (member of staff) keeps group-write for the GUI
-        # updater and image uploads. chgrp alone would only shift the group into
-        # the host subgid range and lock the host user out of the webroot.
-        chown -R root:staff /var/www/html/ 2>/dev/null || true
-
-        # Storage dirs: SGID + group write (www-data через staff group)
-        if ! chgrp -R staff /var/www/storage/ 2>/dev/null; then
-            echo "WARNING: failed to chgrp -R staff /var/www/storage/ (check host bind-mount ownership/ACL)"
-        fi
-        if ! chmod -R 2775 /var/www/storage/ 2>/dev/null; then
-            echo "WARNING: failed to chmod -R 2775 /var/www/storage/ (check host bind-mount ownership/ACL)"
-        fi
-        if ! chmod -R 2775 /var/www/html/image/cache/ 2>/dev/null; then
-            echo "WARNING: failed to chmod -R 2775 /var/www/html/image/cache/"
-        fi
-
-        # Ensure modification cache is owned by www-data (refresh runs as root)
-        chown -R www-data:staff /var/www/storage/modification/ || true
-
-        # Final safety net for restrictive host FS mappings
-        # (group-writable only — never world-writable inside the webroot)
-        find /var/www/html/image/cache -type d -exec chmod 2775 {} \; || true
-        find /var/www/html/image/cache -type f -exec chmod 664 {} \; || true
+		# SGID + group-write: www-data (и FTP, и хостовый пользователь) пишут в image/,
+		# storage/ и в файлы вебрута — как это делал chmod -R 2775/664, но без o+r и
+		# без срезки exec-битов.
+		fix_group_access /var/www/html
+		fix_group_access /var/www/storage
 
         # Git exclude file for extension installer (mounted from host .git/info/exclude)
         if [ -f "/var/www/git-exclude" ]; then
@@ -75,16 +107,18 @@ fix_permissions() {
         fi
 
         # Make VERSION writable by www-data so the GUI "System Update" worker can
-        # rewrite it in place (it lives in the rw ./upload bind mount).
-        if [ -f "/var/www/html/VERSION" ]; then
-            chown root:staff /var/www/html/VERSION 2>/dev/null || true
-            chmod 664 /var/www/html/VERSION 2>/dev/null || true
-        fi
+        # rewrite it in place (it lives in the rw ./upload bind mount). Отдельный
+        # chown/chmod тут не нужен — VERSION уже покрыт fix_ownership (владелец —
+        # хостовый пользователь) и fix_group_access (группа staff с g+rw).
 
         # Diagnostic write test
         if ! su -s /bin/sh www-data -c 'touch /var/www/html/image/cache/.perm_test && rm -f /var/www/html/image/cache/.perm_test' 2>/dev/null; then
             echo "WARNING: /var/www/html/image/cache is still not writable by www-data."
             echo "WARNING: Check host-side ownership/ACL on bind mount: ./upload/image/cache"
+        fi
+        if ! su -s /bin/sh www-data -c 'touch /var/www/storage/cache/.perm_test && rm -f /var/www/storage/cache/.perm_test' 2>/dev/null; then
+            echo "WARNING: /var/www/storage/cache is still not writable by www-data."
+            echo "WARNING: Check host-side ownership/ACL on bind mount: ./storage"
         fi
     else
 		echo "WARNING: not running as root, skipping ownership changes."
@@ -168,6 +202,7 @@ wait_for_mysql() {
 
 # Генерация robots.txt при каждом старте (как config.php)
 ensure_robots_txt() {
+    resolve_owner
     local robots_file="/var/www/html/robots.txt"
 
     echo "Regenerating $robots_file ..."
@@ -218,7 +253,7 @@ ensure_robots_txt() {
     fi
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown root:staff "$robots_file" 2>/dev/null || true
+        chown "$OWNER" "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 
@@ -227,6 +262,7 @@ ensure_robots_txt() {
 
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
 ensure_app_configs() {
+    resolve_owner
     local root_config="/var/www/html/config.php"
     local admin_config="/var/www/html/admin/config.php"
 
@@ -367,7 +403,9 @@ define('SESSION_ENGINE', $env('SESSION_ENGINE', 'file'));
 PHP
 
     if [ "$(id -u)" -eq 0 ]; then
-        chown www-data:www-data "$root_config" "$admin_config" 2>/dev/null || true
+        # Владелец — хостовый пользователь (иначе config.php не читается с хоста),
+        # группа — www-data: 640 → БД-креды доступны только www-data и владельцу.
+        chown "${OWNER%:*}:www-data" "$root_config" "$admin_config" 2>/dev/null || true
         chmod 640 "$root_config" "$admin_config" 2>/dev/null || true
     fi
 }
@@ -724,7 +762,8 @@ if [ "$DOCKERCART_ROLE" = "backup" ]; then
     apply_php_settings
 mkdir -p /var/www/storage/backup
 mkdir -p /var/www/storage/upload
-chown -R www-data:staff /var/www/storage/upload/ || true
+fix_ownership /var/www/storage/upload
+fix_group_access /var/www/storage/upload
     ensure_rclone_config
     echo "Starting DockerCart backup worker..."
     exec php /var/www/html/bin/dockercart_backup_s3.php "$@"
@@ -783,18 +822,19 @@ ensure_rclone_config
 # Перестраиваем OCMOD модификации (читает XML из БД и файлов, пересоздаёт кэш)
 echo "Refreshing OCMOD modifications..."
 php /var/www/html/admin/cli/dockercart_modification_refresh.php || echo "WARNING: OCMOD modification refresh failed (non-fatal)"
-chown -R www-data:staff /var/www/storage/modification/ || true
+fix_ownership /var/www/storage/modification
+fix_group_access /var/www/storage/modification
 
 # Re-apply ownership/permissions to writable storage subdirs. The OCMOD refresh
 # (writes ocmod.log) and any startup error run as root and create root:root files
 # (e.g. error.log) that www-data then cannot append to -> "Permission denied" on
-# fopen(..., 'a'). Re-own only the writable subdirs (NOT storage/vendor or
-# storage/.rclone.conf, which keep their own stricter permissions).
+# fopen(..., 'a'). Ownership follows the bind-mount owner (fix_ownership), so the
+# files stay editable from the host too; storage/.rclone.conf is never touched.
 if [ "$(id -u)" -eq 0 ]; then
 	for d in logs cache download upload session backup documents modification; do
 		if [ -d "/var/www/storage/$d" ]; then
-			chown -R www-data:staff "/var/www/storage/$d" 2>/dev/null || true
-			chmod -R 2775 "/var/www/storage/$d" 2>/dev/null || true
+			fix_ownership "/var/www/storage/$d"
+			fix_group_access "/var/www/storage/$d"
 		fi
 	done
 fi
