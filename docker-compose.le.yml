@@ -25,7 +25,7 @@ services:
         exec nginx -g "daemon off;"
 
   certbot:
-    image: certbot/certbot:2.7.4
+    image: certbot/certbot:latest
     container_name: ${CERTBOT_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_certbot}
     restart: ${RESTART_POLICY:-unless-stopped}
     depends_on:
