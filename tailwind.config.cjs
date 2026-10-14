@@ -9,17 +9,8 @@ module.exports = {
     './html/**/*.html'
   ],
   safelist: [
-    // dockercart_shop_features palette — dynamically assigned in PHP controller
-    { pattern: /bg-(blue|teal|rose|indigo|purple|green|orange|red)-(100|600)/ },
-    { pattern: /text-(blue|teal|rose|indigo|purple|green|orange|red)-(500|600)/ },
+    // Kept for class names passed as strings between Twig/JS (product card button themes)
     'group-hover:bg-blue-600',
-    'group-hover:bg-teal-500',
-    'group-hover:bg-rose-500',
-    'group-hover:bg-indigo-600',
-    'group-hover:bg-purple-600',
-    'group-hover:bg-green-600',
-    'group-hover:bg-orange-600',
-    'group-hover:bg-red-600',
     'hover:bg-blue-600',
     'hover:bg-emerald-600',
     'hover:bg-amber-600',

@@ -10,17 +10,6 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         $language_id = (int)$this->config->get('config_language_id');
         $features = isset($setting['features']) && is_array($setting['features']) ? $setting['features'] : array();
 
-        $palette = array(
-            array('icon_bg' => 'bg-blue-100', 'icon_hover_bg' => 'group-hover:bg-blue-600', 'icon_text' => 'text-blue-600'),
-            array('icon_bg' => 'bg-teal-100', 'icon_hover_bg' => 'group-hover:bg-teal-500', 'icon_text' => 'text-teal-600'),
-            array('icon_bg' => 'bg-rose-100', 'icon_hover_bg' => 'group-hover:bg-rose-500', 'icon_text' => 'text-rose-500'),
-            array('icon_bg' => 'bg-indigo-100', 'icon_hover_bg' => 'group-hover:bg-indigo-600', 'icon_text' => 'text-indigo-600'),
-            array('icon_bg' => 'bg-purple-100', 'icon_hover_bg' => 'group-hover:bg-purple-600', 'icon_text' => 'text-purple-600'),
-            array('icon_bg' => 'bg-green-100', 'icon_hover_bg' => 'group-hover:bg-green-600', 'icon_text' => 'text-green-600'),
-            array('icon_bg' => 'bg-orange-100', 'icon_hover_bg' => 'group-hover:bg-orange-600', 'icon_text' => 'text-orange-600'),
-            array('icon_bg' => 'bg-red-100', 'icon_hover_bg' => 'group-hover:bg-red-600', 'icon_text' => 'text-red-600'),
-        );
-
         $data['features'] = array();
 
         $section_title = '';
@@ -61,7 +50,7 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         }
         $data['section_subtitle'] = $section_subtitle;
 
-        foreach ($features as $index => $feature) {
+        foreach ($features as $feature) {
             if (!is_array($feature)) {
                 continue;
             }
@@ -98,16 +87,11 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
                 continue;
             }
 
-            $color = $palette[$index % count($palette)];
-
             $data['features'][] = array(
                 'icon' => isset($feature['icon']) && $feature['icon'] !== '' ? (string)$feature['icon'] : 'truck',
                 'title' => $title,
                 'text' => $text,
-                'sort_order' => isset($feature['sort_order']) ? (int)$feature['sort_order'] : 0,
-                'icon_bg' => $color['icon_bg'],
-                'icon_hover_bg' => $color['icon_hover_bg'],
-                'icon_text' => $color['icon_text']
+                'sort_order' => isset($feature['sort_order']) ? (int)$feature['sort_order'] : 0
             );
         }
 
@@ -116,12 +100,10 @@ class ControllerExtensionModuleDockercartShopFeatures extends Controller {
         });
 
         if (!$data['features']) {
-            $data['features'] = array(
-                array('icon' => 'truck', 'title' => $this->language->get('text_default_feature_1_title'), 'text' => $this->language->get('text_default_feature_1_text'), 'icon_bg' => 'bg-blue-100', 'icon_hover_bg' => 'group-hover:bg-blue-600', 'icon_text' => 'text-blue-600'),
-                array('icon' => 'shield-check', 'title' => $this->language->get('text_default_feature_2_title'), 'text' => $this->language->get('text_default_feature_2_text'), 'icon_bg' => 'bg-teal-100', 'icon_hover_bg' => 'group-hover:bg-teal-500', 'icon_text' => 'text-teal-600'),
-                array('icon' => 'refresh-ccw', 'title' => $this->language->get('text_default_feature_3_title'), 'text' => $this->language->get('text_default_feature_3_text'), 'icon_bg' => 'bg-rose-100', 'icon_hover_bg' => 'group-hover:bg-rose-500', 'icon_text' => 'text-rose-500'),
-                array('icon' => 'headset', 'title' => $this->language->get('text_default_feature_4_title'), 'text' => $this->language->get('text_default_feature_4_text'), 'icon_bg' => 'bg-indigo-100', 'icon_hover_bg' => 'group-hover:bg-indigo-600', 'icon_text' => 'text-indigo-600')
-            );
+            $data['features'][] = array('icon' => 'truck', 'title' => $this->language->get('text_default_feature_1_title'), 'text' => $this->language->get('text_default_feature_1_text'));
+            $data['features'][] = array('icon' => 'shield-check', 'title' => $this->language->get('text_default_feature_2_title'), 'text' => $this->language->get('text_default_feature_2_text'));
+            $data['features'][] = array('icon' => 'refresh-ccw', 'title' => $this->language->get('text_default_feature_3_title'), 'text' => $this->language->get('text_default_feature_3_text'));
+            $data['features'][] = array('icon' => 'headset', 'title' => $this->language->get('text_default_feature_4_title'), 'text' => $this->language->get('text_default_feature_4_text'));
         }
 
         return $this->load->view('extension/module/dockercart_shop_features', $data);
