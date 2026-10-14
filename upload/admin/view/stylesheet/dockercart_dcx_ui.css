@@ -1724,6 +1724,13 @@ div.dcx-field.required > .dcx-label:before {
     gap: 4px;
 }
 
+.dcx-checkbox-group--inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-top: 4px;
+}
+
 .dcx-fields > .dcx-checkbox-group {
     margin-top: -8px;
 }

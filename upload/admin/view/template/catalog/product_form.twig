@@ -282,20 +282,6 @@
                           {% if reserved_quantity > 0 %}
                           <div class="dc-wh-hint dc-wh-hint--reserved"><i data-lucide="lock" width="14" height="14"></i> <span>{{ text_reserved_quantity }}: {{ reserved_quantity }}</span></div>
                           {% endif %}
-                          <div class="dcx-checkbox-group">
-                            <label class="dcx-checkbox-label">
-                              <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
-                              <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </label>
-                            <label class="dcx-checkbox-label">
-                              <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
-                              <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </label>
-                            <label class="dcx-checkbox-label">
-                              <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
-                              <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
-                            </label>
-                          </div>
                         </div>
                       </div>
                       <div class="col-sm-6 col-lg-4 col-xl-3">
@@ -308,6 +294,24 @@
                         <div class="dcx-field">
                           <label class="dcx-label" for="input-quantity-step">{{ entry_quantity_step }} <span data-toggle="tooltip" title="{{ help_quantity_step }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                           <input type="text" name="quantity_step" value="{{ quantity_step }}" placeholder="{{ entry_quantity_step }}" id="input-quantity-step" class="form-control"/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <div class="dcx-checkbox-group dcx-checkbox-group--inline">
+                          <label class="dcx-checkbox-label">
+                            <input type="checkbox" name="subtract" value="1"{% if subtract %} checked{% endif %} /> {{ entry_subtract }}
+                            <span data-toggle="tooltip" title="{{ help_subtract }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="checkbox" name="preorder" value="1"{% if preorder %} checked{% endif %} /> {{ entry_preorder }}
+                            <span data-toggle="tooltip" title="{{ help_preorder }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
+                          <label class="dcx-checkbox-label">
+                            <input type="checkbox" name="shipping" value="1"{% if shipping %} checked{% endif %} /> {{ entry_shipping }}
+                            <span data-toggle="tooltip" title="{{ help_shipping }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                          </label>
                         </div>
                       </div>
                     </div>
