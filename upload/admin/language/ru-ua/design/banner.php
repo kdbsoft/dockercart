@@ -9,8 +9,7 @@ $_['text_content_position_center'] = 'По центру';
 $_['text_content_position_right'] = 'Справа';
 
 $_['entry_accent_color'] = 'Акцентный цвет';
-$_['entry_accent_hint'] = 'Используется в качестве фона для значка и текста в скобках в заголовке.';
-$_['entry_accent_text'] = 'Акцентный текст';
+$_['entry_accent_hint'] = 'Используется для текста в скобках в заголовке и цвета кнопки по умолчанию.';
 $_['entry_image'] = 'Изображение';
 $_['entry_link'] = 'Ссылка';
 $_['entry_link_type'] = 'Тип ссылки';
@@ -64,9 +63,6 @@ $_['button_add_slide']        = 'Добавить слайд';
 $_['text_landscape']          = 'Альбомная';
 $_['text_portrait']           = 'Книжная';
 $_['text_mp4']                = 'MP4';
-
-// Placeholders
-$_['placeholder_accent_text']    = 'напр. Новая коллекция';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублировати';

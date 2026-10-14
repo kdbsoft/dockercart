@@ -1092,24 +1092,6 @@ class ControllerProductCategory extends Controller {
 
 		$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
 
-		$accent_bg = '';
-		$badge_text_color = $accent_color ? $this->badgeTextColor($accent_color) : '#ffffff';
-
-		if ($accent_color) {
-			$hex = ltrim($accent_color, '#');
-
-			if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
-				$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-			}
-
-			if (preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
-				$r = hexdec(substr($hex, 0, 2));
-				$g = hexdec(substr($hex, 2, 2));
-				$b = hexdec(substr($hex, 4, 2));
-				$accent_bg = 'rgba(' . $r . ',' . $g . ',' . $b . ',0.5)';
-			}
-		}
-
 		$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		if ($accent_color) {
@@ -1124,16 +1106,13 @@ class ControllerProductCategory extends Controller {
 
 		$primary_btn_style = isset($result['primary_btn_style']) && in_array($result['primary_btn_style'], array('classic', 'modern'), true) ? $result['primary_btn_style'] : 'modern';
 		$btn_color = !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb');
-		$btn_text_color = $this->badgeTextColor($btn_color);
+		$btn_text_color = $this->contrastTextColor($btn_color);
 
 		return array(
 			'title'              => $raw_title,
 			'title_html'         => $title_html,
 			'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
-			'accent_text'        => isset($result['accent_text']) ? html_entity_decode((string)$result['accent_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 			'accent_color'       => $accent_color,
-			'accent_bg'          => $accent_bg,
-			'badge_text_color'   => $badge_text_color,
 			'primary_btn_text'   => isset($result['primary_btn_text']) ? html_entity_decode((string)$result['primary_btn_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 			'primary_btn_style'  => $primary_btn_style,
 			'btn_color'          => $btn_color,
@@ -1157,7 +1136,7 @@ class ControllerProductCategory extends Controller {
 
 		$image = $card['image_portrait'] ? $card['image_portrait'] : $card['image'];
 		$position = in_array($card['content_position'], array('left', 'center', 'right'), true) ? $card['content_position'] : 'left';
-		$style = ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'] ? $card['accent_color'] : 'transparent', ENT_QUOTES, 'UTF-8') . '; --category-banner-button-text: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
+		$style = ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'] ? $card['accent_color'] : 'transparent', ENT_QUOTES, 'UTF-8') . '; --category-banner-button-text: ' . htmlspecialchars($card['btn_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
 
 		$html = '<div class="category-banner category-banner--' . $position . ' category-banner__stretched"' . $style . '><div class="category-banner__media">';
 
@@ -1165,22 +1144,8 @@ class ControllerProductCategory extends Controller {
 			$html .= '<img src="' . $image . '" alt="' . htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') . '" loading="lazy" />';
 		}
 
-		if ($card['title_html'] || $card['subtitle'] || $card['accent_text'] || $card['primary_btn_text']) {
+		if ($card['title_html'] || $card['subtitle'] || $card['primary_btn_text']) {
 			$html .= '<div class="category-banner__overlay category-banner__overlay--' . $position . '"><div class="category-banner__content">';
-
-			if ($card['accent_text']) {
-				$badge_style = '';
-				if ($card['accent_color']) {
-					$badge_style .= 'background-color: ' . htmlspecialchars($card['accent_color'], ENT_QUOTES, 'UTF-8') . ';';
-				}
-				if ($card['accent_bg']) {
-					$badge_style .= '--accent-bg: ' . htmlspecialchars($card['accent_bg'], ENT_QUOTES, 'UTF-8') . ';';
-				}
-				if ($card['accent_color'] || $card['accent_bg']) {
-					$badge_style .= 'color: ' . htmlspecialchars($card['badge_text_color'], ENT_QUOTES, 'UTF-8') . ';';
-				}
-				$html .= '<span class="category-banner__badge"' . ($badge_style ? ' style="' . $badge_style . '"' : '') . '>' . $card['accent_text'] . '</span>';
-			}
 
 			if ($card['title_html']) {
 				$html .= '<h2 class="category-banner__title">' . $card['title_html'] . '</h2>';
@@ -1222,7 +1187,7 @@ class ControllerProductCategory extends Controller {
 		return $link;
 	}
 
-	private function badgeTextColor($hex) {
+	private function contrastTextColor($hex) {
 		$hex = ltrim($hex, '#');
 
 		if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
