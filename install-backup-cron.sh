@@ -18,17 +18,39 @@ CRON_FILE="/etc/cron.d/dockercart-backup"
 LOG_FILE="$PROJECT_DIR/storage/logs/backup.log"
 
 # --- Load .env (best-effort; tolerate non-strict shell syntax) ---
-if [ -f "$PROJECT_DIR/.env" ]; then
-    set +u
-    set -a
-    # shellcheck disable=SC1091
-    . "$PROJECT_DIR/.env" || true
-    set +a
-    set -u
+# Use the safe loader (same as start.sh/update.sh): only KEY=value lines are
+# exported, bare tokens (e.g. unquoted DOCKERCART_COMPOSE_FILES with spaces)
+# are skipped instead of executed as commands.
+if [ -f "$PROJECT_DIR/scripts/load-env.sh" ]; then
+	# shellcheck disable=SC1091
+	. "$PROJECT_DIR/scripts/load-env.sh"
+	load_env "$PROJECT_DIR/.env"
+elif [ -f "$PROJECT_DIR/.env" ]; then
+	set +u
+	set -a
+	# shellcheck disable=SC1091
+	. "$PROJECT_DIR/.env" || true
+	set +a
+	set -u
 fi
 
 SCHEDULE="${BACKUP_S3_SCHEDULE:-0 2 * * *}"
 CRON_USER="${BACKUP_S3_CRON_USER:-root}"
+# load_env() keeps surrounding quotes literally (export "$line" never strips
+# them), while naive sourcing strips them — normalize both cases.
+SCHEDULE="${SCHEDULE#\"}"
+SCHEDULE="${SCHEDULE%\"}"
+SCHEDULE="${SCHEDULE#\'}"
+SCHEDULE="${SCHEDULE%\'}"
+CRON_USER="${CRON_USER#\"}"
+CRON_USER="${CRON_USER%\"}"
+CRON_USER="${CRON_USER#\'}"
+CRON_USER="${CRON_USER%\'}"
+# Cron needs exactly 5 fields; reject 6-field or quoted leftovers early.
+if ! printf '%s' "$SCHEDULE" | grep -qE '^[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+$'; then
+	echo "ERROR: BACKUP_S3_SCHEDULE must be 5 fields (got: $SCHEDULE)." >&2
+	exit 1
+fi
 
 # --- Validation ---
 if [ "$(id -u)" -ne 0 ]; then
