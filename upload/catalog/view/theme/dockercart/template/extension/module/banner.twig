@@ -26,7 +26,6 @@
   .banner-slide__overlay--right .banner-slide__content { text-align: right; }
   .banner-slide__title { font-size: 1.75rem; font-weight: 800; line-height: 1.2; margin: 0 0 .75rem; }
   .banner-slide__subtitle { margin: 0 0 .875rem; font-size: 1.125rem; line-height: 1.5; opacity: .95; }
-  .banner-slide__badge { display: inline-block; padding: .25rem .5rem; font-weight:700; border-radius: .5rem; margin-bottom: .75rem; background: var(--accent, #2563eb); }
   .banner-slide__btns { margin-top: 0; display:flex; gap:.75rem; flex-wrap:wrap; }
   .banner-slide__overlay--left .banner-slide__btns { justify-content: flex-start; }
   .banner-slide__overlay--center .banner-slide__btns { justify-content: center; }
@@ -122,13 +121,9 @@
       </picture>
       {% endif %}
 
-      {% if banner.title_html or banner.subtitle or banner.accent_text or banner.primary_btn_text %}
+      {% if banner.title_html or banner.subtitle or banner.primary_btn_text %}
       <div class="banner-slide__overlay banner-slide__overlay--{{ banner.content_position ?: 'left' }}">
         <div class="banner-slide__content">
-          {% if banner.accent_text %}
-          {%- set badge_color = banner.accent_color ? banner.accent_color : '' -%}
-          <span class="banner-slide__badge"{% if badge_color or banner.accent_color or banner.accent_bg %} style="{% if badge_color %}background-color: {{ badge_color }};{% endif %}{% if banner.accent_color %} --accent: {{ banner.accent_color }};{% endif %}{% if banner.accent_bg %} --accent-bg: {{ banner.accent_bg }};{% endif %} color: {{ banner.badge_text_color }};"{% endif %}>{{ banner.accent_text }}</span>
-          {% endif %}
           {% if banner.title_html %}
           <h2 class="banner-slide__title">{{ banner.title_html|raw }}</h2>
           {% endif %}
@@ -137,7 +132,7 @@
           {% endif %}
           {% if banner.primary_btn_text %}
           <div class="banner-slide__btns">
-            <span class="banner-slide__btn banner-slide__btn--modern" style="--btn-color: {{ banner.primary_btn_color|default(banner.accent_color|default('#2563eb')) }}; --btn-text: {{ banner.btn_text_color|default(banner.badge_text_color|default('#ffffff')) }}; --accent: {{ banner.accent_color|default(banner.primary_btn_color|default('#2563eb')) }};">{{ banner.primary_btn_text }}</span>
+            <span class="banner-slide__btn banner-slide__btn--modern" style="--btn-color: {{ banner.primary_btn_color|default(banner.accent_color|default('#2563eb')) }}; --btn-text: {{ banner.btn_text_color|default('#ffffff') }}; --accent: {{ banner.accent_color|default(banner.primary_btn_color|default('#2563eb')) }};">{{ banner.primary_btn_text }}</span>
           </div>
           {% endif %}
         </div>

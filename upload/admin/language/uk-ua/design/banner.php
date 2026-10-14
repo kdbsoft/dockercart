@@ -9,8 +9,7 @@ $_['text_content_position_center'] = 'По центру';
 $_['text_content_position_right'] = 'Справа';
 
 $_['entry_accent_color'] = 'Акцентний колір';
-$_['entry_accent_hint'] = 'Використовується для фону значка та тексту [у дужках] у заголовку';
-$_['entry_accent_text'] = 'Акцентний текст';
+$_['entry_accent_hint'] = 'Використовується для тексту [у дужках] у заголовку та кольору кнопки за замовчуванням';
 $_['entry_image'] = 'Зображення';
 $_['entry_link'] = 'Посилання';
 $_['entry_link_type'] = 'Тип посилання';
@@ -64,9 +63,6 @@ $_['button_add_slide']        = 'Додати слайд';
 $_['text_landscape']          = 'Альбомна';
 $_['text_portrait']           = 'Книжкова';
 $_['text_mp4']                = 'MP4';
-
-// Placeholders
-$_['placeholder_accent_text']    = 'напр. Нова колекція';
 
 // Actions
 $_['button_duplicate_slide']    = 'Дублювати';
