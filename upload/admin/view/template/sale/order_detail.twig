@@ -931,13 +931,13 @@ function savePanelChanges(panelId) {
 		});
 		Promise.all(promises).then(() => {
 			if (!discountChanged) {
-				showAlertAndReload('{{ text_order_saved }}');
+				showAlertAndReload('{{ text_order_saved|e("js") }}');
 				return;
 			}
 			api('index.php?route=sale/order_detail/applyLineDiscounts&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 				'POST', { discount: JSON.stringify(discountValues) }).then(j => {
 					if (j.success) {
-						showAlertAndReload('{{ text_order_saved }}');
+						showAlertAndReload('{{ text_order_saved|e("js") }}');
 					} else if (j.error) {
 						showAlert(j.error, 'danger');
 					}
@@ -1004,11 +1004,11 @@ function savePanelChanges(panelId) {
 		}
 		Promise.all(promises).then(() => {
 			if (attachedCustomer) {
-				showAlertAndReload('{{ text_customer_attached }}');
+				showAlertAndReload('{{ text_customer_attached|e("js") }}');
 			} else if (customerGroupChanged) {
-				showAlertAndReload('{{ text_order_saved }}');
+				showAlertAndReload('{{ text_order_saved|e("js") }}');
 			} else {
-				showAlert('{{ text_order_saved }}');
+				showAlert('{{ text_order_saved|e("js") }}');
 			}
 		});
 	} else if (panelId === 'order-details') {
@@ -1037,7 +1037,7 @@ function savePanelChanges(panelId) {
 				'POST', { field: 'comment', value: commentEl.value }));
 		}
 		Promise.all(promises).then(() => {
-			showAlertAndReload('{{ text_order_saved }}');
+			showAlertAndReload('{{ text_order_saved|e("js") }}');
 		});
 	}
 }
@@ -1363,7 +1363,7 @@ function saveChanges() {
 			'POST', { field: 'comment', value: commentEl.value }));
 	}
 	Promise.all(promises).then(() => {
-		showAlertAndReload('{{ text_order_saved }}');
+		showAlertAndReload('{{ text_order_saved|e("js") }}');
 	});
 }
 
@@ -1401,14 +1401,14 @@ function removeCoupon() {
 
 function removeProduct(btn) {
 	const card = btn.closest('.order-product-card');
-	if (!confirm('{{ text_confirm }}')) return;
+	if (!confirm('{{ text_confirm|e("js") }}')) return;
 	api('index.php?route=sale/order_detail/removeProduct&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 		'POST', { order_product_id: card.dataset.orderProductId }).then(j => {
 			if (j.success) {
 				card.remove();
 				renumberProductPositions();
 				if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
-				showAlert('{{ text_success }}');
+				showAlert('{{ text_success|e("js") }}');
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
 			}
@@ -1437,7 +1437,7 @@ function restoreCatalogPrice(btn) {
 			const totalEl = card.querySelector('.order-product-card__total');
 			if (totalEl) totalEl.textContent = '= ' + formatCurrency(parseFloat(j.total_raw) || 0);
 			if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
-			showAlert(j.success || '{{ text_order_saved }}');
+			showAlert(j.success || '{{ text_order_saved|e("js") }}');
 		});
 }
 
@@ -1452,7 +1452,7 @@ function updateTotalsUI(totals, totalQuantity) {
 		if (t.code === 'sub_total' && totalQuantity !== undefined) {
 			const label = row.querySelector('.order-totals-card__label');
 			const base = row.dataset.labelBase;
-			if (label && base) label.textContent = base + ' ({{ text_items }}: ' + totalQuantity + ')';
+			if (label && base) label.textContent = base + ' ({{ text_items|e("js") }}: ' + totalQuantity + ')';
 		}
 	});
 }
@@ -1524,7 +1524,7 @@ function applyFlowOverride() {
 		'POST', { order_status_id: statusEl.value, comment: comment, notify: '0', override: override ? '1' : '0' })
 		.then(j => {
 			if (j.success) {
-				showAlertAndReload('{{ text_success }}');
+				showAlertAndReload('{{ text_success|e("js") }}');
 			} else if (j.error) {
 				showAlert(j.error, 'danger');
 			}
@@ -1692,13 +1692,13 @@ function confirmRefund() {
 			if (j.error) { showAlert(j.error, 'danger'); return; }
 			closeRefundModal();
 			if (j.payments_html) refreshPaymentsCard(j.payments_html);
-			showAlertAndReload(j.success || '{{ text_success }}');
+			showAlertAndReload(j.success || '{{ text_success|e("js") }}');
 		});
 }
 
 function confirmFlowTransition() {
 	if (!flowTransitionTarget) return;
-	if (flowTransitionTerminal && !confirm('{{ text_flow_confirm_terminal }}')) return;
+	if (flowTransitionTerminal && !confirm('{{ text_flow_confirm_terminal|e("js") }}')) return;
 	const comment = document.getElementById('flow-transition-comment').value;
 	const notify = document.getElementById('flow-transition-notify').checked;
 	const doTransition = (notifyCustomer) => {
@@ -1707,7 +1707,7 @@ function confirmFlowTransition() {
 			.then(j => {
 				if (j.success) {
 					closeFlowTransition();
-					showAlertAndReload('{{ text_success }}');
+					showAlertAndReload('{{ text_success|e("js") }}');
 				} else if (j.error) {
 					showAlert(j.error, 'danger');
 				}
@@ -1717,7 +1717,7 @@ function confirmFlowTransition() {
 	if (shipSection && shipSection.style.display !== 'none') {
 		const tracking = document.getElementById('flow-shipment-tracking').value.trim();
 		if (!tracking) {
-			showAlert('{{ error_tracking_number }}', 'danger');
+			showAlert('{{ error_tracking_number|e("js") }}', 'danger');
 			return;
 		}
 		const items = [];
@@ -1726,7 +1726,7 @@ function confirmFlowTransition() {
 			if (qty > 0) items.push({ order_product_id: inp.dataset.shipmentQty, quantity: qty });
 		});
 		if (!items.length) {
-			showAlert('{{ error_shipment_items }}', 'danger');
+			showAlert('{{ error_shipment_items|e("js") }}', 'danger');
 			return;
 		}
 		api('index.php?route=sale/order_detail/addShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
@@ -1771,7 +1771,7 @@ function updateHeaderShippingBadge(j) {
 function addShipment() {
 	const tracking = document.getElementById('shipment-tracking').value.trim();
 	if (!tracking) {
-		showAlert('{{ error_tracking_number }}', 'danger');
+		showAlert('{{ error_tracking_number|e("js") }}', 'danger');
 		return;
 	}
 	const items = [];
@@ -1780,7 +1780,7 @@ function addShipment() {
 		if (qty > 0) items.push({ order_product_id: inp.dataset.opid, quantity: qty });
 	});
 	if (!items.length) {
-		showAlert('{{ error_shipment_items }}', 'danger');
+		showAlert('{{ error_shipment_items|e("js") }}', 'danger');
 		return;
 	}
 	const comment = document.getElementById('shipment-comment').value.trim();
@@ -1798,7 +1798,7 @@ function addShipment() {
 }
 
 function deleteShipment(shipmentId) {
-	if (!confirm('{{ text_confirm_remove_shipment }}')) return;
+	if (!confirm('{{ text_confirm_remove_shipment|e("js") }}')) return;
 	api('index.php?route=sale/order_detail/deleteShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 		'POST', { shipment_id: shipmentId })
 		.then(j => {
@@ -1831,7 +1831,7 @@ function addPayment() {
 	const comment = document.getElementById('payment-comment').value;
 
 	if (!amount || parseFloat(amount) <= 0) {
-		showAlert('{{ error_payment_amount }}', 'warning');
+		showAlert('{{ error_payment_amount|e("js") }}', 'warning');
 		return;
 	}
 
@@ -1856,7 +1856,7 @@ function addRefund() {
 	const comment = document.getElementById('refund-comment').value;
 
 	if (!amount || parseFloat(amount) <= 0) {
-		showAlert('{{ error_refund_amount }}', 'warning');
+		showAlert('{{ error_refund_amount|e("js") }}', 'warning');
 		return;
 	}
 
@@ -1875,7 +1875,7 @@ function addRefund() {
 }
 
 function removePayment(orderPaymentId) {
-	if (!confirm('{{ text_confirm_remove_payment }}')) return;
+	if (!confirm('{{ text_confirm_remove_payment|e("js") }}')) return;
 	api('index.php?route=sale/order_detail/removePayment&user_token=' + USER_TOKEN, 'POST', { order_payment_id: orderPaymentId })
 		.then(j => {
 			if (j.error) { showAlert(j.error, 'danger'); return; }
@@ -1886,7 +1886,7 @@ function removePayment(orderPaymentId) {
 }
 
 function removeOverpayment() {
-	if (!confirm('{{ text_confirm_remove_overpayment }}')) return;
+	if (!confirm('{{ text_confirm_remove_overpayment|e("js") }}')) return;
 	api('index.php?route=sale/order_detail/removeOverpayment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
 		.then(j => {
 			if (j.error) { showAlert(j.error, 'danger'); return; }
@@ -1926,7 +1926,7 @@ function toggleBrowserInfo() {
 	const open = el.style.display !== 'none';
 	el.style.display = open ? 'none' : '';
 	ch.style.transform = open ? '' : 'rotate(90deg)';
-	txt.textContent = open ? '{{ text_show_browser_info }}' : '{{ text_hide_browser_info }}';
+	txt.textContent = open ? '{{ text_show_browser_info|e("js") }}' : '{{ text_hide_browser_info|e("js") }}';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -2009,7 +2009,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const b = document.createElement('span');
 		if (p.stock && p.stock.not_tracked) {
 			b.className = 'dcx-picker__stock dcx-picker__stock--na';
-			b.textContent = '{{ text_stock_not_tracked }}';
+			b.textContent = '{{ text_stock_not_tracked|e("js") }}';
 		} else if (p.stock && p.stock.total > 0) {
 			b.className = 'dcx-picker__stock dcx-picker__stock--in';
 			let label = '{{ text_stock_in }}: ' + p.stock.total;
@@ -2019,7 +2019,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			b.textContent = label;
 		} else {
 			b.className = 'dcx-picker__stock dcx-picker__stock--out';
-			b.textContent = '{{ text_stock_out }}';
+			b.textContent = '{{ text_stock_out|e("js") }}';
 		}
 		return b;
 	}
@@ -2031,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (!items.length) {
 			const empty = document.createElement('div');
 			empty.className = 'dcx-picker__empty';
-			empty.textContent = '{{ text_no_results }}';
+			empty.textContent = '{{ text_no_results|e("js") }}';
 			dropdown.appendChild(empty);
 		} else {
 			items.forEach((p, i) => {
@@ -2060,7 +2060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				if (p.is_configurable) {
 					const b = document.createElement('span');
 					b.className = 'dcx-picker__config-badge';
-					b.textContent = '{{ text_configurable }}';
+					b.textContent = '{{ text_configurable|e("js") }}';
 					nameLine.appendChild(b);
 				}
 				const sub = document.createElement('div');
@@ -2182,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (p.is_configurable) {
 			const b = document.createElement('span');
 			b.className = 'dcx-picker__config-badge';
-			b.textContent = '{{ text_configurable }}';
+			b.textContent = '{{ text_configurable|e("js") }}';
 			nameLine.appendChild(b);
 		}
 		const meta = document.createElement('div');
@@ -2198,7 +2198,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const clearBtn = document.createElement('button');
 		clearBtn.type = 'button';
 		clearBtn.className = 'order-product-summary__clear';
-		clearBtn.title = '{{ text_clear }}';
+		clearBtn.title = '{{ text_clear|e("js") }}';
 		clearBtn.innerHTML = '<i data-lucide="x" width="14" height="14"></i>';
 		clearBtn.addEventListener('click', clearProductSelection);
 
@@ -2377,7 +2377,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			} else {
 				stockItem.className = 'order-product-preview__stock-warn';
 				stockItem.innerHTML = '<i data-lucide="alert-triangle" width="12" height="12"></i><span></span>';
-				stockItem.querySelector('span').textContent = '{{ text_stock_out }}';
+				stockItem.querySelector('span').textContent = '{{ text_stock_out|e("js") }}';
 			}
 			row.appendChild(stockItem);
 		}
@@ -2498,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			restoreBtn.className = 'btn btn-default btn-xs edit-only';
 			restoreBtn.style.display = editing ? '' : 'none';
 			restoreBtn.dataset.restoreCatalogPrice = '';
-			restoreBtn.title = '{{ button_restore_catalog_price }}';
+			restoreBtn.title = '{{ button_restore_catalog_price|e("js") }}';
 			restoreBtn.innerHTML = '<i data-lucide="rotate-ccw" width="12" height="12"></i>';
 			restoreBtn.addEventListener('click', function() { restoreCatalogPrice(this); });
 			priceDiv.appendChild(restoreBtn);
@@ -2528,7 +2528,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const discDiv = document.createElement('div');
 		discDiv.className = 'order-product-card__disc edit-only';
 		discDiv.style.display = editing ? '' : 'none';
-		discDiv.title = '{{ entry_discount_percent }}';
+		discDiv.title = '{{ entry_discount_percent|e("js") }}';
 		const discInput = document.createElement('input');
 		discInput.type = 'number';
 		discInput.className = 'form-control';
@@ -2549,7 +2549,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		const removeBtn = document.createElement('button');
 		removeBtn.type = 'button';
 		removeBtn.className = 'btn btn-danger btn-xs btn--icon';
-		removeBtn.title = '{{ button_remove }}';
+		removeBtn.title = '{{ button_remove|e("js") }}';
 		removeBtn.innerHTML = '<i data-lucide="trash-2" width="13" height="13"></i>';
 		removeBtn.addEventListener('click', function() { removeProduct(this); });
 		actionsDiv.appendChild(removeBtn);
@@ -2603,7 +2603,7 @@ function addProduct() {
 				appendProductCard(j.product);
 				if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
 				clearProductSelection();
-				showAlert('{{ text_product_added }}');
+				showAlert('{{ text_product_added|e("js") }}');
 			}
 		});
 }
@@ -2674,7 +2674,7 @@ if (customerSearchInputs.length) {
 		if (!items.length) {
 			const empty = document.createElement('div');
 			empty.className = 'dcx-picker__empty';
-			empty.textContent = '{{ text_no_customers }}';
+			empty.textContent = '{{ text_no_customers|e("js") }}';
 			dropdown.appendChild(empty);
 		} else {
 			items.forEach(function(item) {
@@ -2768,7 +2768,7 @@ if (customerSearchInputs.length) {
 		customerDropdown.style.display = 'none';
 		customerDropdown.innerHTML = '';
 
-		showAlert('{{ text_customer_attached }}', 'success');
+		showAlert('{{ text_customer_attached|e("js") }}', 'success');
 	}
 
 	// When the buyer panel edit mode is toggled, reset the search state
@@ -3064,7 +3064,7 @@ $(document).on('change', '.warehouse-move-select', function() {
 			warehouseCloseSelect($select);
 			if (window.lucide) lucide.createIcons();
 		},
-		error: function() { alert('{{ text_warehouse_move_failed }}'); }
+		error: function() { alert('{{ text_warehouse_move_failed|e("js") }}'); }
 	});
 });
 //--></script>
