@@ -151,6 +151,12 @@ elif [ "$LOCAL" = "$BASE" ]; then
 		compose up --force-recreate --no-deps -d apache scheduler
 	fi
 
+	# apache gets a new IP after --force-recreate, so nginx must re-resolve
+	# the upstream hostname immediately instead of serving 502s until its
+	# periodic re-resolve (or next restart). Non-fatal: the update itself
+	# (code + migrations) must not fail just because nginx is stopped.
+	compose exec -T nginx nginx -s reload || log "Warning: nginx reload failed, restart nginx manually."
+
 	# Refresh OCMOD modifications to match new code
 	log "Refreshing OCMOD modifications..."
 	compose exec -T apache php /var/www/html/admin/cli/dockercart_modification_refresh.php
