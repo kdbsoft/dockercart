@@ -38,22 +38,6 @@ class ControllerExtensionModuleSlideshow extends Controller {
 
 			// Accent/title processing (allow [word] to be highlighted)
 			$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
-			// Prepare a translucent background variant (hex alpha) for badge use (50% alpha)
-			$accent_bg = '';
-			$badge_text_color = $accent_color ? $this->badgeTextColor($accent_color) : '#ffffff';
-			if ($accent_color) {
-				$hex = ltrim($accent_color, '#');
-				// expand 3-digit hex to 6-digit
-				if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
-					$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-				}
-				if (preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
-					$r = hexdec(substr($hex, 0, 2));
-					$g = hexdec(substr($hex, 2, 2));
-					$b = hexdec(substr($hex, 4, 2));
-					$accent_bg = 'rgba(' . $r . ',' . $g . ',' . $b . ',0.5)';
-				}
-			}
 			// Decode any HTML entities saved in DB to avoid double-encoding
 			$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
@@ -87,14 +71,11 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'title'              => html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
 				'title_html'         => $title_html,
 				'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
-				'badge'              => isset($result['badge']) ? html_entity_decode((string)$result['badge'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : (isset($result['accent_text']) ? html_entity_decode((string)$result['accent_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : ''),
 				'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
 				'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb'),
-				'btn_text_color'     => $this->badgeTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
+				'btn_text_color'     => $this->contrastTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
                 'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
 				'accent_color'       => $accent_color,
-				'accent_bg'          => $accent_bg,
-				'badge_text_color'   => $badge_text_color,
 				'image'              => $image_landscape,
 				'image_portrait'     => $image_portrait,
 				'video_type'         => $video_type,
@@ -114,7 +95,7 @@ class ControllerExtensionModuleSlideshow extends Controller {
         return $link;
     }
 
-    private function badgeTextColor($hex) {
+    private function contrastTextColor($hex) {
 		$hex = ltrim($hex, '#');
 		if (preg_match('/^[0-9a-fA-F]{3}$/', $hex)) {
 			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];

@@ -265,21 +265,15 @@
                       <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" class="dc-link-hidden" />
                     </div>
 
-                    {# ── Badge ── #}
+                    {# ── Accent color ── #}
                     <div class="slide-section">
-                      <div class="slide-section__title"><i data-lucide="tag" width="14" height="14"></i> {{ entry_accent_text }}</div>
-                      <div class="btn-row-2col">
-                        <div class="form-group">
-                          <label>{{ entry_accent_text }}</label>
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_text]" value="{{ banner_image.accent_text }}" placeholder="{{ placeholder_accent_text }}" class="form-control" />
+                      <div class="slide-section__title"><i data-lucide="palette" width="14" height="14"></i> {{ entry_accent_color }}</div>
+                      <div class="form-group">
+                        <label>{{ entry_accent_color }}</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#2563eb') }}" class="form-control dc-color-input accent-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
                         </div>
-                        <div class="form-group">
-                          <label>{{ entry_accent_color }}</label>
-                          <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#2563eb') }}" class="form-control dc-color-input accent-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
-                          </div>
-                          <div class="accent-hint">{{ entry_accent_hint }}</div>
-                        </div>
+                        <div class="accent-hint">{{ entry_accent_hint }}</div>
                       </div>
                     </div>
 
@@ -646,13 +640,10 @@ function addSlide(language_id) {
   html += '<input type="hidden" name="' + pfx + '[link]" value="" class="dc-link-hidden" />';
   html += '</div>';
 
-  // Badge
+  // Accent color
   html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i data-lucide="tag" width="14" height="14"></i> {{ entry_accent_text }}</div>';
-  html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_accent_text }}</label><input type="text" name="' + pfx + '[accent_text]" value="" placeholder="{{ placeholder_accent_text }}" class="form-control" /></div>';
+  html += '<div class="slide-section__title"><i data-lucide="palette" width="14" height="14"></i> {{ entry_accent_color }}</div>';
   html += '<div class="form-group"><label>{{ entry_accent_color }}</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="' + pfx + '[accent_color]" value="#2563eb" class="form-control dc-color-input accent-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" /></div><div class="accent-hint">{{ entry_accent_hint }}</div></div>';
-  html += '</div>';
   html += '</div>';
 
   // Button
