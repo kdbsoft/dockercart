@@ -1,3 +1,9 @@
+## [3.29.1](https://github.com/kdbsoft/dockercart/compare/v3.29.0...v3.29.1) (2026-10-14)
+
+### Bug Fixes
+
+* **product:** normalize attribute entities on read and write ([8b15167](https://github.com/kdbsoft/dockercart/commit/8b15167e79863fcff759ed0090580f121d0b7009))
+
 ## [3.29.0](https://github.com/kdbsoft/dockercart/compare/v3.28.0...v3.29.0) (2026-10-14)
 
 ### Features
