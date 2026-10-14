@@ -1,3 +1,9 @@
+## [3.29.2](https://github.com/kdbsoft/dockercart/compare/v3.29.1...v3.29.2) (2026-10-14)
+
+### Bug Fixes
+
+* **backup:** use safe env loader and validate cron schedule ([4b63227](https://github.com/kdbsoft/dockercart/commit/4b63227d88c8573417264cd68a4f6d1f5fb5cbaa))
+
 ## [3.29.1](https://github.com/kdbsoft/dockercart/compare/v3.29.0...v3.29.1) (2026-10-14)
 
 ### Bug Fixes
