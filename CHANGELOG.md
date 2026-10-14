@@ -1,3 +1,9 @@
+## [3.29.3](https://github.com/kdbsoft/dockercart/compare/v3.29.2...v3.29.3) (2026-10-14)
+
+### Bug Fixes
+
+* **admin:** escape inline JS strings in order detail template ([8f0359b](https://github.com/kdbsoft/dockercart/commit/8f0359b5e18159fad558d35c02e983e29336d915))
+
 ## [3.29.2](https://github.com/kdbsoft/dockercart/compare/v3.29.1...v3.29.2) (2026-10-14)
 
 ### Bug Fixes
