@@ -1,3 +1,9 @@
+## [3.29.4](https://github.com/kdbsoft/dockercart/compare/v3.29.3...v3.29.4) (2026-10-14)
+
+### Bug Fixes
+
+* **nginx:** re-resolve apache upstream after container recreate ([1d16d85](https://github.com/kdbsoft/dockercart/commit/1d16d8562e54b0d53f5c4243b1d5e848662938ec))
+
 ## [3.29.3](https://github.com/kdbsoft/dockercart/compare/v3.29.2...v3.29.3) (2026-10-14)
 
 ### Bug Fixes
