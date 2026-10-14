@@ -1,3 +1,9 @@
+## [3.29.0](https://github.com/kdbsoft/dockercart/compare/v3.28.0...v3.29.0) (2026-10-14)
+
+### Features
+
+* **product:** adapt attribute grid to number of groups ([ad38ae7](https://github.com/kdbsoft/dockercart/commit/ad38ae7838a76e94077af61f91c78b7731426857))
+
 ## [3.28.0](https://github.com/kdbsoft/dockercart/compare/v3.27.4...v3.28.0) (2026-10-13)
 
 ### Features
