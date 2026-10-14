@@ -334,7 +334,6 @@ class ControllerDesignBanner extends Controller {
 		$data['text_landscape']          = $this->language->get('text_landscape');
 		$data['text_portrait']           = $this->language->get('text_portrait');
 		$data['text_mp4']                = $this->language->get('text_mp4');
-		$data['placeholder_accent_text']    = $this->language->get('placeholder_accent_text');
 		$data['placeholder_primary_btn']    = $this->language->get('placeholder_primary_btn');
 		$data['placeholder_secondary_btn']  = $this->language->get('placeholder_secondary_btn');
 		$data['button_duplicate_slide']    = $this->language->get('button_duplicate_slide');
@@ -450,7 +449,6 @@ class ControllerDesignBanner extends Controller {
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
-				'accent_text'        => isset($banner_image['accent_text']) ? $banner_image['accent_text'] : '',
 				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
 				'primary_btn_color'  => isset($banner_image['primary_btn_color']) ? $banner_image['primary_btn_color'] : '',

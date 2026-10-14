@@ -25,9 +25,8 @@ $_['entry_title']            = 'Title';
 $_['entry_title_hint']       = 'Wrap accent words with [brackets], e.g.: The Future of [Smart Living]';
 $_['entry_subtitle']         = 'Subtitle';
 
-$_['entry_accent_text']      = 'Top Badge';
 $_['entry_accent_color']     = 'Accent Color';
-$_['entry_accent_hint']      = 'Used for badge background and [bracketed] text in title';
+$_['entry_accent_hint']      = 'Used for [bracketed] text in title and default button color';
 $_['entry_primary_btn_text'] = 'Button Text';
 $_['entry_primary_btn_color'] = 'Button Color';
 $_['entry_image']            = 'Image';
@@ -78,9 +77,6 @@ $_['button_add_slide']        = 'Add Slide';
 $_['text_landscape']          = 'Landscape';
 $_['text_portrait']           = 'Portrait';
 $_['text_mp4']                = 'MP4';
-
-// Placeholders
-$_['placeholder_accent_text']    = 'e.g. New Collection';
 
 // Actions
 $_['button_duplicate_slide']    = 'Duplicate';
