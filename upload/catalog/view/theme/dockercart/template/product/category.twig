@@ -143,7 +143,7 @@
               text_all_reviews: text_all_reviews|default('')
             } %}
             {% if category_banner and banner_position == loop.index %}
-            <div class="category-banner category-banner--{{ category_banner.content_position|default('left') }} category-banner__stretched" style="--category-banner-accent: {{ category_banner.accent_color|default('transparent')|e('html_attr') }}; --category-banner-button-text: {{ category_banner.badge_text_color|default('#ffffff')|e('html_attr') }};">
+            <div class="category-banner category-banner--{{ category_banner.content_position|default('left') }} category-banner__stretched" style="--category-banner-accent: {{ category_banner.accent_color|default('transparent')|e('html_attr') }}; --category-banner-button-text: {{ category_banner.btn_text_color|default('#ffffff')|e('html_attr') }};">
               <div class="category-banner__media">
                 {% if category_banner.image_portrait %}
                 <picture>
@@ -153,12 +153,9 @@
                 {% elseif category_banner.image %}
                 <img src="{{ category_banner.image }}" alt="{{ category_banner.title|e('html_attr') }}" loading="lazy" />
                 {% endif %}
-                {% if category_banner.title_html or category_banner.subtitle or category_banner.accent_text or category_banner.primary_btn_text %}
+                {% if category_banner.title_html or category_banner.subtitle or category_banner.primary_btn_text %}
                 <div class="category-banner__overlay category-banner__overlay--{{ category_banner.content_position|default('left') }}">
                   <div class="category-banner__content">
-                    {% if category_banner.accent_text %}
-                    <span class="category-banner__badge"{% if category_banner.accent_color or category_banner.accent_bg %} style="{% if category_banner.accent_color %}background-color: {{ category_banner.accent_color }};{% endif %}{% if category_banner.accent_bg %} --accent-bg: {{ category_banner.accent_bg }};{% endif %} color: {{ category_banner.badge_text_color }};"{% endif %}>{{ category_banner.accent_text }}</span>
-                    {% endif %}
                     {% if category_banner.title_html %}
                     <h2 class="category-banner__title">{{ category_banner.title_html|raw }}</h2>
                     {% endif %}
@@ -167,7 +164,7 @@
                     {% endif %}
                     {% if category_banner.primary_btn_text %}
                     {% set banner_btn_class = 'category-banner__btn category-banner__btn--' ~ (category_banner.primary_btn_style ? category_banner.primary_btn_style : 'modern') %}
-                    {% set banner_btn_style = '--btn-color: ' ~ category_banner.btn_color|default(category_banner.accent_color|default('#2563eb')) ~ '; --btn-text: ' ~ category_banner.btn_text_color|default(category_banner.badge_text_color|default('#ffffff')) ~ ';' %}
+                    {% set banner_btn_style = '--btn-color: ' ~ category_banner.btn_color|default(category_banner.accent_color|default('#2563eb')) ~ '; --btn-text: ' ~ category_banner.btn_text_color|default('#ffffff') ~ ';' %}
                     {% if category_banner.link %}<a href="{{ category_banner.link }}" class="{{ banner_btn_class }}" style="{{ banner_btn_style }}">{{ category_banner.primary_btn_text }}</a>{% else %}<span class="{{ banner_btn_class }}" style="{{ banner_btn_style }}">{{ category_banner.primary_btn_text }}</span>{% endif %}
                     {% endif %}
                   </div>
@@ -270,7 +267,6 @@
   .category-banner__content { width: 100%; padding: 1.25rem 1rem; box-sizing: border-box; color: #fff; text-align: left; pointer-events: auto; }
   .category-banner__overlay--center .category-banner__content { text-align: center; }
   .category-banner__overlay--right .category-banner__content { text-align: right; }
-  .category-banner__badge { display: inline-block; margin-bottom: .625rem; padding: .25rem .5rem; border-radius: .5rem; font-size: .6875rem; font-weight: 700; }
   .category-banner__title { margin: 0 0 .5rem; color: #fff !important; font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
   .category-banner__subtitle { margin: 0 0 .75rem; color: #fff !important; font-size: .875rem; line-height: 1.45; opacity: .95; }
   .category-banner__btn { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--btn-color, var(--category-banner-accent, transparent)) !important; border-radius: .75rem; padding: .5rem .85rem; background: var(--btn-color, var(--category-banner-accent, transparent)) !important; color: var(--btn-text, var(--category-banner-button-text, #fff)) !important; font-size: .8125rem; font-weight: 700; line-height: 1.2; text-decoration: none; transition: transform .12s ease, box-shadow .12s ease, background-color .18s ease, color .18s ease, border-color .18s ease; }
