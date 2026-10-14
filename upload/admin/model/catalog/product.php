@@ -198,7 +198,7 @@ class ModelCatalogProduct extends Model
                                 (int) $language_id .
                                 "', text = '" .
                                 $this->db->escape(
-                                    $product_attribute_description["text"],
+                                    $this->normalizeAttributeText($product_attribute_description["text"] ?? ""),
                                 ) .
                                 "'",
                         );
@@ -527,7 +527,7 @@ class ModelCatalogProduct extends Model
                                 (int) $language_id .
                                 "', text = '" .
                                 $this->db->escape(
-                                    $product_attribute_description["text"],
+                                    $this->normalizeAttributeText($product_attribute_description["text"] ?? ""),
                                 ) .
                                 "'",
                         );
@@ -1330,7 +1330,7 @@ class ModelCatalogProduct extends Model
 								(int) $language_id .
 								"', text = '" .
 								$this->db->escape(
-									$product_attribute_description["text"],
+									$this->normalizeAttributeText($product_attribute_description["text"] ?? ""),
 								) .
 								"'",
 						);
@@ -3592,6 +3592,32 @@ class ModelCatalogProduct extends Model
         }
 
         return array_unique($axis_option_ids);
+    }
+
+    /**
+     * Normalize attribute text before DB write: decode (possibly
+     * multiply-encoded) HTML entities to raw text (e.g. 6.1&quot; -> 6.1").
+     * Catalog output is auto-escaped by Twig, so storing raw prevents
+     * 6.1&amp;quot; artifacts on the product page.
+     */
+    private function normalizeAttributeText($value) {
+        if (!is_string($value) || $value === '' || strpos($value, '&') === false) {
+            return is_string($value) ? $value : '';
+        }
+
+        $decoded = $value;
+
+        for ($i = 0; $i < 10; $i++) {
+            $next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            if ($next === $decoded) {
+                break;
+            }
+
+            $decoded = $next;
+        }
+
+        return $decoded;
     }
 
 }

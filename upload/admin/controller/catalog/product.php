@@ -1517,10 +1517,20 @@ class ControllerCatalogProduct extends Controller {
 			$attribute_info = $this->model_catalog_attribute->getAttribute($product_attribute['attribute_id']);
 
 			if ($attribute_info) {
+				$attribute_descriptions = array();
+
+				if (!empty($product_attribute['product_attribute_description']) && is_array($product_attribute['product_attribute_description'])) {
+					foreach ($product_attribute['product_attribute_description'] as $language_id => $attribute_description) {
+						$attribute_descriptions[$language_id] = array(
+							'text' => $this->decodeHtmlEntitiesForDisplay($attribute_description['text'] ?? '')
+						);
+					}
+				}
+
 				$data['product_attributes'][] = array(
 					'attribute_id'                  => $product_attribute['attribute_id'],
 					'name'                          => $this->decodeHtmlEntitiesForDisplay($attribute_info['name']),
-					'product_attribute_description' => $product_attribute['product_attribute_description']
+					'product_attribute_description' => $attribute_descriptions
 				);
 			}
 		}
@@ -2394,7 +2404,7 @@ class ControllerCatalogProduct extends Controller {
 
 		$decoded = (string)$value;
 
-		for ($i = 0; $i < 2; $i++) {
+		for ($i = 0; $i < 10; $i++) {
 			$next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 			if ($next === $decoded) {

@@ -1101,8 +1101,8 @@ class ModelCatalogProduct extends Model {
 		foreach ($product_attribute_query->rows as $product_attribute) {
 			$attributes_by_group[(int)$product_attribute['attribute_group_id']][] = array(
 				'attribute_id' => $product_attribute['attribute_id'],
-				'name'         => $product_attribute['name'],
-				'text'         => $product_attribute['text']
+				'name'         => $this->decodeAttributeValue($product_attribute['name']),
+				'text'         => $this->decodeAttributeValue($product_attribute['text'])
 			);
 		}
 
@@ -1110,12 +1110,38 @@ class ModelCatalogProduct extends Model {
 			$gid = (int)$product_attribute_group['attribute_group_id'];
 			$product_attribute_group_data[] = array(
 				'attribute_group_id' => $gid,
-				'name'               => $product_attribute_group['name'],
+				'name'               => $this->decodeAttributeValue($product_attribute_group['name']),
 				'attribute'          => isset($attributes_by_group[$gid]) ? $attributes_by_group[$gid] : array()
 			);
 		}
 
 		return $product_attribute_group_data;
+	}
+
+	/**
+	 * Decode (possibly multiply-encoded) HTML entities stored in attribute
+	 * names/texts (e.g. 6.1&quot; saved as 6.1&amp;quot;). Loops until stable
+	 * so legacy rows with 2-6 levels of encoding all render as 6.1".
+	 * Twig auto-escapes on output, so returning raw text is correct.
+	 */
+	private function decodeAttributeValue($value) {
+		if (!is_string($value) || $value === '' || strpos($value, '&') === false) {
+			return $value;
+		}
+
+		$decoded = $value;
+
+		for ($i = 0; $i < 10; $i++) {
+			$next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+			if ($next === $decoded) {
+				break;
+			}
+
+			$decoded = $next;
+		}
+
+		return $decoded;
 	}
 
 	/**
@@ -1141,7 +1167,7 @@ class ModelCatalogProduct extends Model {
 		foreach ($group_query->rows as $row) {
 			$groups_by_product[(int)$row['product_id']][] = array(
 				'attribute_group_id' => (int)$row['attribute_group_id'],
-				'name'               => $row['name'],
+				'name'               => $this->decodeAttributeValue($row['name']),
 			);
 			$group_ids[(int)$row['attribute_group_id']] = true;
 		}
@@ -1157,8 +1183,8 @@ class ModelCatalogProduct extends Model {
 		foreach ($attribute_query->rows as $row) {
 			$attributes_by_product_group[(int)$row['product_id']][(int)$row['attribute_group_id']][] = array(
 				'attribute_id' => $row['attribute_id'],
-				'name'         => $row['name'],
-				'text'         => $row['text'],
+				'name'         => $this->decodeAttributeValue($row['name']),
+				'text'         => $this->decodeAttributeValue($row['text']),
 			);
 		}
 
