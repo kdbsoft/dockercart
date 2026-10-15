@@ -317,7 +317,6 @@ $_['text_panel_design_subtitle']      = 'Override the default page layout per st
 // Sidebar cards
 $_['text_seo_card']        = 'Links';
 $_['text_design_card']     = 'Theme';
-$_['text_seo_preview']     = 'Preview';
 $_['text_organization_card'] = 'Organization';
 $_['text_status_card'] = 'Status';
 

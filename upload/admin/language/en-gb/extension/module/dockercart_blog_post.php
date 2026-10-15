@@ -100,7 +100,6 @@ $_['text_status_card']     = 'Status';
 $_['text_organization_card'] = 'Organization';
 $_['text_seo_card']        = 'SEO';
 $_['text_media_card']      = 'Media';
-$_['text_seo_preview']     = 'Preview';
 $_['text_active']          = 'Active';
 $_['text_inactive']        = 'Inactive';
 $_['text_select_category'] = 'Select Categories';

@@ -6,7 +6,6 @@ $_['tab_images_group'] = 'Зображення';
 $_['text_status_card'] = 'Статус';
 $_['text_organization_card'] = 'Організація';
 $_['text_seo_card'] = 'SEO';
-$_['text_seo_preview'] = 'Попередній перегляд';
 
 $_['column_action'] = 'Дія';
 $_['column_name'] = 'Назва категорії';

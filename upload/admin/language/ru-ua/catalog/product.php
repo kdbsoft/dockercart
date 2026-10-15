@@ -304,7 +304,6 @@ $_['text_panel_design_subtitle']      = 'Переопределение стан
 // Sidebar cards
 $_['text_seo_card']        = 'Ссылки';
 $_['text_design_card']     = 'Тема';
-$_['text_seo_preview']     = 'Предпросмотр';
 $_['text_organization_card'] = 'Организация';
 $_['text_status_card'] = 'Статус';
 

@@ -96,6 +96,5 @@ $_['text_status_card']        = 'Status';
 $_['text_organization_card']  = 'Organization';
 $_['text_seo_card']           = 'Links';
 $_['text_design_card']        = 'Theme';
-$_['text_seo_preview']        = 'Preview';
 $_['text_url_handle']         = 'URL handle';
 $_['text_visibility']         = 'Visibility';
