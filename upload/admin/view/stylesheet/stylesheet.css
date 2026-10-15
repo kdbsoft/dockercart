@@ -2485,6 +2485,23 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     white-space: nowrap;
 }
 
+/* Single language mode: hide language switcher UI (tabs, badges).
+   Activated via body.single-language from common/header when only
+   one active admin language exists. Covers all forms at once,
+   including JS-generated rows using the same classes. */
+body.single-language ul.nav-tabs:has(.lang-code) {
+    display: none;
+}
+
+body.single-language .dc-lang-frame > ul.nav-tabs {
+    display: none;
+}
+
+body.single-language .lang-code,
+body.single-language .lang-name {
+    display: none;
+}
+
 .well.filter {
     background-color: var(--dc-surface)fff;
 }
