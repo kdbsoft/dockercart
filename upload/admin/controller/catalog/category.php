@@ -423,7 +423,6 @@ class ControllerCatalogCategory extends Controller {
 		$data['text_organization_card'] = $this->language->get('text_organization_card');
 		$data['text_seo_card'] = $this->language->get('text_seo_card');
 		$data['text_design_card'] = $this->language->get('text_design_card');
-		$data['text_seo_preview'] = $this->language->get('text_seo_preview');
 		$data['text_url_handle'] = $this->language->get('text_url_handle');
 		$data['text_visibility'] = $this->language->get('text_visibility');
 

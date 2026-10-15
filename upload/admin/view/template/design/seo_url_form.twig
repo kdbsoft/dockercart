@@ -72,12 +72,6 @@
                   {% endif %}
                   {% endfor %}
                 </div>
-                <div class="dcx-field">
-                  <div class="dcx-seo-preview">
-                    <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
-                    <span class="dcx-seo-preview__url">{{ text_seo_url_base }}</span><span id="seo-url-preview">...</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -87,14 +81,4 @@
     </form>
   </div>
 </div>
-<script type="text/javascript"><!--
-$('input[name^="seo_url"]').on('input', function() {
-  var firstVal = $('input[name^="seo_url"]:first').val();
-  if (firstVal) {
-    $('#seo-url-preview').text(firstVal);
-  } else {
-    $('#seo-url-preview').text('...');
-  }
-});
-//--></script>
 {{ footer }}
