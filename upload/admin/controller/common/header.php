@@ -27,6 +27,7 @@ class ControllerCommonHeader extends Controller {
 		$data['dockercart_version'] = defined('DOCKERCART_VERSION') ? DOCKERCART_VERSION : '';
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
+		$data['single_language'] = false;
 
 		$this->load->language('common/header');
 
@@ -131,6 +132,8 @@ class ControllerCommonHeader extends Controller {
 			}
 
 			$data['current_language_code'] = $current_language_code;
+
+			$data['single_language'] = count($data['languages']) <= 1;
 
 			$data['admin_search_url'] = $this->url->link('common/admin_search', 'user_token=' . $this->session->data['user_token'], true);
 			$data['admin_search_suggest_url'] = $this->url->link('common/admin_search/suggest', 'user_token=' . $this->session->data['user_token'], true);

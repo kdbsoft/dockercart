@@ -34,7 +34,6 @@ $_['tab_seo']           = 'SEO';
 $_['text_status_card']     = 'Status';
 $_['text_organization_card'] = 'Organization';
 $_['text_seo_card']        = 'SEO';
-$_['text_seo_preview']     = 'Preview';
 
 // Entry
 $_['entry_name']        = 'Category Name';

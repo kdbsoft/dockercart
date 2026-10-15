@@ -306,10 +306,6 @@
                 {% endfor %}
               {% endfor %}
             </div>
-            <div class="dcx-seo-preview">
-              <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
-              <span class="dcx-seo-preview__url">yoursite.com/blog/</span><span id="seo-url-preview">...</span>
-            </div>
           </div>
         </div>
       </div>
@@ -543,14 +539,6 @@ $(document).on('click', '#post-product-category .dcx-tree-select__well-remove', 
 	$('#post-product-category').toggle(count > 0);
 });
 
-$('input[name^="post_seo_url"]').on('input', function() {
-	var firstVal = $('input[name^="post_seo_url"]:first').val();
-	if (firstVal) {
-		$('#seo-url-preview').text(firstVal);
-	} else {
-		$('#seo-url-preview').text('...');
-	}
-});
 //--></script>
 </div>
 {{ footer }}
