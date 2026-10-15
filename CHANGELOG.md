@@ -1,3 +1,9 @@
+## [3.30.1](https://github.com/kdbsoft/dockercart/compare/v3.30.0...v3.30.1) (2026-10-15)
+
+### Bug Fixes
+
+* quickfix in user groups ([dc79424](https://github.com/kdbsoft/dockercart/commit/dc79424a12082a03ab37d8adfc85c40b0a4a5e81))
+
 ## [3.30.0](https://github.com/kdbsoft/dockercart/compare/v3.29.4...v3.30.0) (2026-10-15)
 
 ### Features
