@@ -40,6 +40,22 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         // Handle form submission
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validateForm()) {
+            // editSetting() deletes ALL rows with this code first, so preserve
+            // keys that have no field on the form (system status, admin fallback,
+            // legacy query mappings). Without this every Save wipes them and the
+            // storefront voice button disappears (voice_search = status && voice).
+            foreach (['module_dockercart_search_status', 'module_dockercart_search_admin_fallback', 'module_dockercart_search_query_mappings'] as $preserve_key) {
+                if (!isset($this->request->post[$preserve_key])) {
+                    if ($this->config->has($preserve_key)) {
+                        $this->request->post[$preserve_key] = $this->config->get($preserve_key);
+                    } elseif ($preserve_key === 'module_dockercart_search_query_mappings') {
+                        $this->request->post[$preserve_key] = '';
+                    } else {
+                        $this->request->post[$preserve_key] = 1;
+                    }
+                }
+            }
+
             $this->model_setting_setting->editSetting('module_dockercart_search', $this->request->post);
 
             $this->session->data['success'] = $this->language->get('text_success');
@@ -187,6 +203,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
 
         // Set default settings
         $this->model_setting_setting->editSetting('module_dockercart_search', [
+            'module_dockercart_search_status' => 1,
             'module_dockercart_search_host' => 'manticore',
             'module_dockercart_search_port' => 9306,
             'module_dockercart_search_http_port' => 9308,
