@@ -33,22 +33,10 @@ class ControllerExtensionModuleBanner extends Controller {
                 $image_portrait = '';
             }
 
-            // Process accent highlighting: [word] -> <span style="color:accent_color">word</span>
-            $accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
-            // Decode any HTML entities saved in DB to avoid double-encoding (e.g. '&amp;' -> '&')
-            $raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-            if ($accent_color) {
-                $title_html = preg_replace(
-                    '/\[(.+?)\]/',
-                    '<span style="color:' . htmlspecialchars($accent_color, ENT_QUOTES) . '">$1</span>',
-                    htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8')
-                );
-            } else {
-                $title_html = htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8');
-                // Still strip brackets if no accent color
-                $title_html = preg_replace('/\[(.+?)\]/', '$1', $title_html);
-            }
+		// Decode any HTML entities saved in DB to avoid double-encoding (e.g. '&amp;' -> '&')
+		$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		// Strip [brackets] legacy markup
+		$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
 
             // Video processing (YouTube takes priority over MP4)
             $video_type = isset($result['video_type']) ? $result['video_type'] : '';
@@ -69,10 +57,9 @@ class ControllerExtensionModuleBanner extends Controller {
                 'title'              => html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                 'title_html'         => $title_html,
                 'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
-                'accent_color'       => $accent_color,
                 'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
-                'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb'),
-                'btn_text_color'     => $this->contrastTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
+                'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : '#2563eb',
+                'btn_text_color'     => $this->contrastTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : '#2563eb'),
                 'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
                 'image'              => $image_landscape,
                 'image_portrait'     => $image_portrait,

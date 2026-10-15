@@ -8,8 +8,6 @@ $_['text_content_position_left'] = 'Слева';
 $_['text_content_position_center'] = 'По центру';
 $_['text_content_position_right'] = 'Справа';
 
-$_['entry_accent_color'] = 'Акцентный цвет';
-$_['entry_accent_hint'] = 'Используется для текста в скобках в заголовке и цвета кнопки по умолчанию.';
 $_['entry_image'] = 'Изображение';
 $_['entry_link'] = 'Ссылка';
 $_['entry_link_type'] = 'Тип ссылки';
@@ -21,7 +19,6 @@ $_['entry_sort_order'] = 'Порядок сортировки';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст под заголовком';
 $_['entry_title'] = 'Заголовок';
-$_['entry_title_hint'] = 'Слова с диакритическими знаками заключайте в [квадратные скобки], например: Будущее [умной жизни]';
 $_['entry_video_type'] = 'Фоновое видео';
 $_['entry_video'] = 'ID видео / файл';
 $_['entry_video_type_none'] = 'Нет (только изображение)';
