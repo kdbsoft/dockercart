@@ -22,11 +22,8 @@ $_['column_action']     = 'Action';
 // Entry
 $_['entry_name']             = 'Banner Name';
 $_['entry_title']            = 'Title';
-$_['entry_title_hint']       = 'Wrap accent words with [brackets], e.g.: The Future of [Smart Living]';
 $_['entry_subtitle']         = 'Subtitle';
 
-$_['entry_accent_color']     = 'Accent Color';
-$_['entry_accent_hint']      = 'Used for [bracketed] text in title and default button color';
 $_['entry_primary_btn_text'] = 'Button Text';
 $_['entry_primary_btn_color'] = 'Button Color';
 $_['entry_image']            = 'Image';
