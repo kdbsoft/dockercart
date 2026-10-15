@@ -236,7 +236,7 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             $script .= '</script>' . "\n";
         }
 
-        if ($this->config->get('module_dockercart_search_voice')) {
+        if ($this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice')) {
             $script .= '<script src="catalog/view/javascript/dockercart_voice_search.js?v=' . DOCKERCART_VERSION . '"></script>' . "\n";
         }
 
