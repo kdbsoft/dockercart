@@ -145,7 +145,6 @@ class ModelDesignBanner extends Model {
 			$banner_image_data[$banner_image['language_id']][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
-				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
 				'primary_btn_color'  => isset($banner_image['primary_btn_color']) ? $banner_image['primary_btn_color'] : '',
 				'primary_btn_style'  => isset($banner_image['primary_btn_style']) && in_array($banner_image['primary_btn_style'], array('classic', 'modern'), true) ? $banner_image['primary_btn_style'] : 'modern',
@@ -172,7 +171,6 @@ class ModelDesignBanner extends Model {
 		$image_portrait      = isset($banner_image['image_portrait']) ? $this->db->escape($banner_image['image_portrait']) : '';
 		$link                = isset($banner_image['link']) ? $this->db->escape($banner_image['link']) : '';
 		$subtitle            = isset($banner_image['subtitle']) ? $this->db->escape($banner_image['subtitle']) : '';
-		$accent_color        = isset($banner_image['accent_color']) ? $this->db->escape($banner_image['accent_color']) : '';
 		$primary_btn_text    = isset($banner_image['primary_btn_text']) ? $this->db->escape($banner_image['primary_btn_text']) : '';
 		$primary_btn_color   = isset($banner_image['primary_btn_color']) ? $this->db->escape($banner_image['primary_btn_color']) : '';
 		$primary_btn_style   = isset($banner_image['primary_btn_style']) && in_array($banner_image['primary_btn_style'], array('classic', 'modern'), true) ? $banner_image['primary_btn_style'] : 'modern';
@@ -185,7 +183,6 @@ class ModelDesignBanner extends Model {
 			language_id = '"         . (int)$language_id . "',
 			title = '"               . $this->db->escape($banner_image['title']) . "',
 			subtitle = '"            . $subtitle . "',
-			accent_color = '"        . $accent_color . "',
 			primary_btn_text = '"    . $primary_btn_text . "',
 			primary_btn_color = '"   . $primary_btn_color . "',
 			primary_btn_style = '"   . $this->db->escape($primary_btn_style) . "',

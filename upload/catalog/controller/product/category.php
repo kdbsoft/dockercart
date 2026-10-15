@@ -1090,29 +1090,19 @@ class ControllerProductCategory extends Controller {
 			$image_portrait = $this->model_tool_image->resize($result['image_portrait'], 600, 900);
 		}
 
-		$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
-
 		$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-		if ($accent_color) {
-			$title_html = preg_replace(
-				'/\[(.+?)\]/',
-				'<span style="color:' . htmlspecialchars($accent_color, ENT_QUOTES) . '">$1</span>',
-				htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8')
-			);
-		} else {
-			$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
-		}
+		// Strip [brackets] legacy markup
+		$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
 
 		$primary_btn_style = isset($result['primary_btn_style']) && in_array($result['primary_btn_style'], array('classic', 'modern'), true) ? $result['primary_btn_style'] : 'modern';
-		$btn_color = !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb');
+		$btn_color = !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : '#2563eb';
 		$btn_text_color = $this->contrastTextColor($btn_color);
 
 		return array(
 			'title'              => $raw_title,
 			'title_html'         => $title_html,
 			'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
-			'accent_color'       => $accent_color,
 			'primary_btn_text'   => isset($result['primary_btn_text']) ? html_entity_decode((string)$result['primary_btn_text'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 			'primary_btn_style'  => $primary_btn_style,
 			'btn_color'          => $btn_color,
@@ -1136,7 +1126,7 @@ class ControllerProductCategory extends Controller {
 
 		$image = $card['image_portrait'] ? $card['image_portrait'] : $card['image'];
 		$position = in_array($card['content_position'], array('left', 'center', 'right'), true) ? $card['content_position'] : 'left';
-		$style = ' style="--category-banner-accent: ' . htmlspecialchars($card['accent_color'] ? $card['accent_color'] : 'transparent', ENT_QUOTES, 'UTF-8') . '; --category-banner-button-text: ' . htmlspecialchars($card['btn_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
+		$style = ' style="--category-banner-button-text: ' . htmlspecialchars($card['btn_text_color'], ENT_QUOTES, 'UTF-8') . ';"';
 
 		$html = '<div class="category-banner category-banner--' . $position . ' category-banner__stretched"' . $style . '><div class="category-banner__media">';
 

@@ -449,7 +449,6 @@ class ControllerDesignBanner extends Controller {
 			$data['banner_images'][$key][] = array(
 				'title'              => $banner_image['title'],
 				'subtitle'           => isset($banner_image['subtitle']) ? $banner_image['subtitle'] : '',
-				'accent_color'       => isset($banner_image['accent_color']) ? $banner_image['accent_color'] : '',
 				'primary_btn_text'   => isset($banner_image['primary_btn_text']) ? $banner_image['primary_btn_text'] : '',
 				'primary_btn_color'  => isset($banner_image['primary_btn_color']) ? $banner_image['primary_btn_color'] : '',
 				'link'               => $link,
