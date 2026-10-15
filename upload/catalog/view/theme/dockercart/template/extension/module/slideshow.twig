@@ -1,7 +1,7 @@
 <style>
   /* Hero action button: filled background */
   #hero .hero-btn { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; transition: transform .12s ease, box-shadow .12s ease, background-color .18s ease, color .18s ease, border-color .18s ease; }
-  #hero .hero-btn--classic { background: var(--btn-color, var(--accent, #2563eb)); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, var(--accent, #2563eb)); border-radius: 9999px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
+  #hero .hero-btn--classic { background: var(--btn-color, #2563eb); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, #2563eb); border-radius: 9999px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
   #hero .hero-btn--classic:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.3); filter: brightness(0.92); }
 </style>
 <section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y select-none">
@@ -39,7 +39,7 @@
           {% endif %}
           {% if banner.primary_btn_text and banner.link %}
           <div class="flex flex-wrap gap-3">
-            <a href="{{ banner.link }}" class="hero-btn hero-btn--classic px-7 py-3 font-semibold shadow-lg transition text-sm inline-block" style="--btn-color: {{ banner.primary_btn_color|default(banner.accent_color|default('#2563eb')) }}; --btn-text: {{ banner.btn_text_color|default('#ffffff') }}; --accent: {{ banner.accent_color|default(banner.primary_btn_color|default('#2563eb')) }};">{{ banner.primary_btn_text }}</a>
+            <a href="{{ banner.link }}" class="hero-btn hero-btn--classic px-7 py-3 font-semibold shadow-lg transition text-sm inline-block" style="--btn-color: {{ banner.primary_btn_color|default('#2563eb') }}; --btn-text: {{ banner.btn_text_color|default('#ffffff') }};">{{ banner.primary_btn_text }}</a>
           </div>
           {% endif %}
         </div>

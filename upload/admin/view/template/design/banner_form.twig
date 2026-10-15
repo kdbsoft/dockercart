@@ -23,9 +23,6 @@
     .banner-slide-card .input-group { max-width: 400px; }
     .banner-slide-card .input-group-addon,
     .banner-slide-card .input-group .input-group-addon { background: #f8fafc; border-color: #d1d5db; color: #6b7280; }
-    .accent-hint { font-size: 11px; color: #9ca3af; margin-top: 3px; }
-    .accent-hint code { background: #f3f4f6; border-radius: 3px; padding: 1px 4px; color: #5b7ea8; }
-    .banner-slide-card .accent-hint--spacer { visibility: hidden; }
     .slide-images-row { display: flex; gap: 16px; flex-wrap: wrap; }
     .slide-image-block { text-align: center; }
     .slide-image-block small,
@@ -40,7 +37,6 @@
       .banner-slide-card .dc-link-row { flex-direction: column; gap: 8px; }
       .banner-slide-card .dc-link-row .dc-link-type { width: 100%; max-width: 100%; }
       .banner-slide-card .input-group { max-width: 100%; }
-      .banner-slide-card .accent-hint--spacer { display: none; }
       .banner-slide-card .form-control,
       .banner-slide-card select.form-control,
       .banner-slide-card textarea.form-control { font-size: 16px; }
@@ -173,12 +169,10 @@
                         <div class="form-group">
                           <label>{{ entry_title }}</label>
                           <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][title]" value="{{ banner_image.title }}" placeholder="{{ entry_title }}" class="form-control slide-title-input" />
-                          <div class="accent-hint">{{ entry_title_hint }}</div>
                         </div>
                         <div class="form-group">
                           <label>{{ entry_subtitle }}</label>
                           <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][subtitle]" value="{{ banner_image.subtitle }}" placeholder="{{ entry_subtitle }}" class="form-control" />
-                          <div class="accent-hint accent-hint--spacer">&nbsp;</div>
                         </div>
                       </div>
                       <div class="form-group">
@@ -265,18 +259,6 @@
                       <input type="hidden" name="banner_image[{{ language.language_id }}][{{ image_row }}][link]" value="{{ banner_image.link }}" class="dc-link-hidden" />
                     </div>
 
-                    {# ── Accent color ── #}
-                    <div class="slide-section">
-                      <div class="slide-section__title"><i data-lucide="palette" width="14" height="14"></i> {{ entry_accent_color }}</div>
-                      <div class="form-group">
-                        <label>{{ entry_accent_color }}</label>
-                        <div style="display:flex;gap:8px;align-items:center;">
-                          <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][accent_color]" value="{{ banner_image.accent_color|default('#2563eb') }}" class="form-control dc-color-input accent-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
-                        </div>
-                        <div class="accent-hint">{{ entry_accent_hint }}</div>
-                      </div>
-                    </div>
-
                     {# ── Button ── #}
                     <div class="slide-section">
                       <div class="slide-section__title"><i data-lucide="mouse-pointer-click" width="14" height="14"></i> {{ entry_primary_btn_text }}</div>
@@ -288,7 +270,7 @@
                         <div class="form-group">
                           <label>{{ entry_primary_btn_color }}</label>
                           <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_color]" value="{{ banner_image.primary_btn_color|default(banner_image.accent_color|default('#2563eb')) }}" class="form-control dc-color-input" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
+                            <input type="text" name="banner_image[{{ language.language_id }}][{{ image_row }}][primary_btn_color]" value="{{ banner_image.primary_btn_color|default('#2563eb') }}" class="form-control dc-color-input" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" />
                           </div>
                         </div>
                       </div>
@@ -562,8 +544,8 @@ function addSlide(language_id) {
   html += '<div class="slide-section">';
   html += '<div class="slide-section__title"><i data-lucide="pencil" width="14" height="14"></i> {{ text_tab_general }}</div>';
   html += '<div class="btn-row-2col">';
-  html += '<div class="form-group"><label>{{ entry_title }}</label><input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control slide-title-input" /><div class="accent-hint">{{ entry_title_hint }}</div></div>';
-  html += '<div class="form-group"><label>{{ entry_subtitle }}</label><input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" /><div class="accent-hint accent-hint--spacer">&nbsp;</div></div>';
+  html += '<div class="form-group"><label>{{ entry_title }}</label><input type="text" name="' + pfx + '[title]" value="" placeholder="{{ entry_title }}" class="form-control slide-title-input" /></div>';
+  html += '<div class="form-group"><label>{{ entry_subtitle }}</label><input type="text" name="' + pfx + '[subtitle]" value="" placeholder="{{ entry_subtitle }}" class="form-control" /></div>';
   html += '</div>';
   html += '<div class="form-group"><label>{{ entry_content_position }}</label>';
   html += '<div class="position-radio-group">';
@@ -638,12 +620,6 @@ function addSlide(language_id) {
   html += '</div>';
   html += '</div>';
   html += '<input type="hidden" name="' + pfx + '[link]" value="" class="dc-link-hidden" />';
-  html += '</div>';
-
-  // Accent color
-  html += '<div class="slide-section">';
-  html += '<div class="slide-section__title"><i data-lucide="palette" width="14" height="14"></i> {{ entry_accent_color }}</div>';
-  html += '<div class="form-group"><label>{{ entry_accent_color }}</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="' + pfx + '[accent_color]" value="#2563eb" class="form-control dc-color-input accent-color-text" data-default-color="#2563eb" placeholder="#2563eb" style="flex:1;" maxlength="16" /></div><div class="accent-hint">{{ entry_accent_hint }}</div></div>';
   html += '</div>';
 
   // Button

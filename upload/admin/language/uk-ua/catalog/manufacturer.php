@@ -61,7 +61,6 @@ $_['text_edit_manufacturer_subtitle'] = 'Редагувати дані виро�
 // Sidebar cards
 $_['text_status_card'] = 'Статус';
 $_['text_seo_card'] = 'Посилання';
-$_['text_seo_preview'] = 'Попередній перегляд';
 
 // Empty state
 $_['text_empty_title']       = 'Поки немає виробників';

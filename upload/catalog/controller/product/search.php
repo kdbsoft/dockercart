@@ -897,6 +897,8 @@ class ControllerProductSearch extends Controller {
 		$data['search_global_url'] = $this->url->link('product/search', ltrim($global_url, '&'));
 
 		$data['voice_search'] = $this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice');
+		$data['text_voice_search'] = $this->language->get('text_voice_search');
+		$data['text_voice_listening'] = $this->language->get('text_voice_listening');
 
 		$data['sort'] = $sort;
 		$data['order'] = $order;

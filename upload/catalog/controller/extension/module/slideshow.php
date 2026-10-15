@@ -36,21 +36,10 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				$image_portrait = '';
 			}
 
-			// Accent/title processing (allow [word] to be highlighted)
-			$accent_color = !empty($result['accent_color']) ? $result['accent_color'] : '';
 			// Decode any HTML entities saved in DB to avoid double-encoding
 			$raw_title = html_entity_decode((string)$result['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-			if ($accent_color) {
-				$title_html = preg_replace(
-					'/\[(.+?)\]/',
-					'<span style="color:' . htmlspecialchars($accent_color, ENT_QUOTES) . '">$1</span>',
-					htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8')
-				);
-			} else {
-				$title_html = htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8');
-				$title_html = preg_replace('/\[(.+?)\]/', '$1', $title_html);
-			}
+			// Strip [brackets] legacy markup
+			$title_html = preg_replace('/\[(.+?)\]/', '$1', htmlspecialchars($raw_title, ENT_QUOTES, 'UTF-8'));
 
 			// Video processing (YouTube takes priority over MP4)
 			$video_type = isset($result['video_type']) ? $result['video_type'] : '';
@@ -72,10 +61,9 @@ class ControllerExtensionModuleSlideshow extends Controller {
 				'title_html'         => $title_html,
 				'subtitle'           => isset($result['subtitle']) ? html_entity_decode((string)$result['subtitle'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : '',
 				'primary_btn_text'   => isset($result['primary_btn_text']) ? $result['primary_btn_text'] : '',
-				'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb'),
-				'btn_text_color'     => $this->contrastTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : ($accent_color ? $accent_color : '#2563eb')),
+				'primary_btn_color'  => !empty($result['primary_btn_color']) ? $result['primary_btn_color'] : '#2563eb',
+				'btn_text_color'     => $this->contrastTextColor(!empty($result['primary_btn_color']) ? $result['primary_btn_color'] : '#2563eb'),
                 'link'               => $this->resolveLink(isset($result['link']) ? $result['link'] : ''),
-				'accent_color'       => $accent_color,
 				'image'              => $image_landscape,
 				'image_portrait'     => $image_portrait,
 				'video_type'         => $video_type,
