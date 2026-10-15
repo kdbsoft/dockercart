@@ -57,6 +57,8 @@ class ControllerCommonSearch extends Controller {
 		$data['categories'] = $this->model_catalog_category->getCategories(0);
 
 		$data['voice_search'] = $this->config->get('module_dockercart_search_status') && $this->config->get('module_dockercart_search_voice');
+		$data['text_voice_search'] = $this->language->get('text_voice_search');
+		$data['text_voice_listening'] = $this->language->get('text_voice_listening');
 
 		return $this->load->view('common/search', $data);
 	}

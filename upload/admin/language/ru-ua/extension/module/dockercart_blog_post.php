@@ -58,7 +58,6 @@ $_['tab_recommended'] = 'Рекомендуемые';
 $_['text_status_card'] = 'Статус';
 $_['text_organization_card'] = 'Организация';
 $_['text_seo_card'] = 'SEO';
-$_['text_seo_preview'] = 'Предпросмотр';
 $_['text_media_card'] = 'Медиа';
 $_['text_active'] = 'Активно';
 $_['text_inactive'] = 'Неактивно';

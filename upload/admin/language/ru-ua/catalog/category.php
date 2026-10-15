@@ -90,6 +90,5 @@ $_['text_status_card']        = 'Статус';
 $_['text_organization_card']  = 'Организация';
 $_['text_seo_card']           = 'Ссылки';
 $_['text_design_card']        = 'Тема';
-$_['text_seo_preview']        = 'Предпросмотр';
 $_['text_url_handle']         = 'URL-адрес';
 $_['text_visibility']         = 'Видимость';

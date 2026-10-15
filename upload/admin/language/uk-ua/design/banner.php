@@ -8,8 +8,6 @@ $_['text_content_position_left'] = 'Зліва';
 $_['text_content_position_center'] = 'По центру';
 $_['text_content_position_right'] = 'Справа';
 
-$_['entry_accent_color'] = 'Акцентний колір';
-$_['entry_accent_hint'] = 'Використовується для тексту [у дужках] у заголовку та кольору кнопки за замовчуванням';
 $_['entry_image'] = 'Зображення';
 $_['entry_link'] = 'Посилання';
 $_['entry_link_type'] = 'Тип посилання';
@@ -21,7 +19,6 @@ $_['entry_sort_order'] = 'Порядок сортування';
 $_['entry_status'] = 'Статус';
 $_['entry_subtitle'] = 'Текст під заголовком';
 $_['entry_title'] = 'Назва';
-$_['entry_title_hint'] = 'Заберіть наголоси в [дужні дужки], наприклад: Майбутнє [Розумного життя]';
 $_['entry_video_type'] = 'Фонове відео';
 $_['entry_video'] = 'ID відео / файл';
 $_['entry_video_type_none'] = 'Немає (тільки зображення)';

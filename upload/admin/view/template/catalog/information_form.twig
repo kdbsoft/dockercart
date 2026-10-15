@@ -175,10 +175,6 @@
                 {% endfor %}
               {% endfor %}
             </div>
-            <div class="dcx-seo-preview">
-              <span class="dcx-seo-preview__label">{{ text_seo_preview }}</span>
-              <span class="dcx-seo-preview__url">yoursite.com/information/</span><span id="seo-url-preview">...</span>
-            </div>
           </div>
         </div>
         <div class="dcx-sidebar-card">
@@ -215,15 +211,6 @@
   <script type="text/javascript"><!--
 $('#language a:first').tab('show');
 $('[data-toggle="tooltip"]').tooltip();
-
-$('input[name^="information_seo_url"]').on('input', function() {
-  var firstVal = $('input[name^="information_seo_url"]:first').val();
-  if (firstVal) {
-    $('#seo-url-preview').text(firstVal);
-  } else {
-    $('#seo-url-preview').text('...');
-  }
-});
 //--></script>
 </div>
 {{ footer }}

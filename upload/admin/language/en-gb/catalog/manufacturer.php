@@ -29,7 +29,6 @@ $_['tab_seo']           = 'SEO';
 // Sidebar cards
 $_['text_status_card']  = 'Status';
 $_['text_seo_card']     = 'Links';
-$_['text_seo_preview']  = 'Preview';
 
 // Column
 $_['column_name']       = 'Manufacturer Name';

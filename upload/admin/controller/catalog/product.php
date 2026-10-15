@@ -1033,7 +1033,6 @@ class ControllerCatalogProduct extends Controller {
 		// Sidebar card titles
 		$data['text_seo_card']    = $this->language->get('text_seo_card');
 		$data['text_design_card'] = $this->language->get('text_design_card');
-		$data['text_seo_preview'] = $this->language->get('text_seo_preview');
 		$data['text_organization_card'] = $this->language->get('text_organization_card');
 		$data['text_status_card'] = $this->language->get('text_status_card');
 		$data['entry_main_category'] = $this->language->get('entry_main_category');
