@@ -1,3 +1,15 @@
+## [3.30.0](https://github.com/kdbsoft/dockercart/compare/v3.29.4...v3.30.0) (2026-10-15)
+
+### Features
+
+* **admin:** hide language switcher in single-language installs ([3d3a292](https://github.com/kdbsoft/dockercart/commit/3d3a292aac8b25e4fa9e7778496a12809ede8361))
+
+### Bug Fixes
+
+* **admin:** stack stock checkboxes on product form ([db58be6](https://github.com/kdbsoft/dockercart/commit/db58be605aeda2eb2b0607de8a70bbca37773246))
+* **nginx:** render nginx.conf from template with runtime resolvers ([231f6ab](https://github.com/kdbsoft/dockercart/commit/231f6ab2a483d271f1ee991355fbb8286b1a3697))
+* **search:** preserve module settings when saving the search form ([23d3d5c](https://github.com/kdbsoft/dockercart/commit/23d3d5ccc41a797c86a8b141d2087c12a0839d1e))
+
 ## [3.29.4](https://github.com/kdbsoft/dockercart/compare/v3.29.3...v3.29.4) (2026-10-14)
 
 ### Bug Fixes
