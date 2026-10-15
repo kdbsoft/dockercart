@@ -155,13 +155,23 @@ http {
         "1:0:0:0:0" 1;
     }
 
-    # Docker embedded DNS: the apache container is recreated by update.sh
-    # and gets a new IP, so the upstream hostname must be re-resolved at
-    # runtime (nginx >= 1.27.3 re-resolves upstreams with `resolve`; this
-    # requires both `resolver` here and shared memory via `zone`).
+    # Runtime DNS for the `resolve` upstream below: the apache container is
+    # recreated by update.sh and gets a new IP, so the hostname must be
+    # re-resolved at runtime (nginx >= 1.27.3; needs `resolver` here plus
+    # shared memory via `zone`). The resolver address is runtime-specific and
+    # therefore NOT hardcoded:
+    #   Docker -> embedded DNS at 127.0.0.11
+    #   Podman (rootless/netavark) -> aardvark-dns at the network gateway
+    #            (e.g. 10.89.5.1), taken from /etc/resolv.conf
+    # This file is a template: the official image exports
+    # NGINX_LOCAL_RESOLVERS from the container's /etc/resolv.conf
+    # (/docker-entrypoint.d/15-local-resolvers.envsh, enabled by
+    # NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1) and
+    # /docker-entrypoint.d/20-envsubst-on-templates.sh renders it to
+    # /etc/nginx/nginx.conf at start-up.
     # valid=10s bounds the 502 window after a recreate; ipv6=off because
-    # the Docker networks here are IPv4-only.
-    resolver 127.0.0.11 valid=10s ipv6=off;
+    # the Docker/Podman networks here are IPv4-only.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
 
     # Upstream to Apache
     upstream apache {

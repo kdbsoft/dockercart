@@ -106,6 +106,9 @@ dockercart/
 │   │   └── migrations/         Incremental SQL migrations
 │   ├── manticore/              Manticore Search configs
 │   └── nginx/                  Nginx configs
+│       ├── templates/          nginx.conf.template (rendered at container start)
+│       ├── conf.d/             Server blocks + snippets
+│       └── ssl/                Self-signed / LE server blocks
 ├── storage/                    Runtime files (outside webroot)
 │   ├── logs/                   Application error logs
 │   ├── cache/                  Cache files
@@ -124,6 +127,16 @@ dockercart/
 ```
 
 ### Storage Paths
+
+`docker/nginx/templates/nginx.conf.template` is rendered into
+`/etc/nginx/nginx.conf` at container start by the official nginx image entrypoint
+(`NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1` and `NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx`
+in the compose files). `${NGINX_LOCAL_RESOLVERS}` is read from the container's
+`/etc/resolv.conf`, so the `apache` upstream resolver works unchanged under Docker
+(`127.0.0.11`) and under Podman rootless (aardvark-dns at the network gateway,
+e.g. `10.89.5.1`) — the addresses are runtime-specific, never hardcode them.
+Editing the template needs a container recreate (`docker compose up -d nginx`),
+not `nginx -s reload`: the rendered file lives in the container filesystem.
 
 All runtime data lives outside the webroot:
 

@@ -23,7 +23,7 @@ services:
     volumes:
       - ./upload:/var/www/html:ro
       - ./storage:/var/www/storage:ro
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,z
+      - ./docker/nginx/templates:/etc/nginx/templates:ro,z
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro,z
       - ./docker/nginx/cache:/var/cache/nginx:Z
     ulimits:
@@ -33,6 +33,14 @@ services:
     environment:
       - TZ=${TZ:-UTC}
       - HEALTHCHECK_TOKEN=${HEALTHCHECK_TOKEN:-}
+      # nginx.conf is a template rendered at start-up by the image entrypoint:
+      # NGINX_LOCAL_RESOLVERS is exported from the container's /etc/resolv.conf
+      # (Docker: 127.0.0.11, Podman: the aardvark-dns network gateway).
+      - NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+      # Substitute only NGINX_* variables, so no container env var can ever
+      # clash with an nginx variable name ($host, $uri, ...).
+      - NGINX_ENVSUBST_FILTER=^NGINX_
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
