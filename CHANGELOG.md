@@ -1,3 +1,9 @@
+## [3.32.0](https://github.com/kdbsoft/dockercart/compare/v3.31.1...v3.32.0) (2026-10-16)
+
+### Features
+
+* **admin:** add quick-edit modals to order header badges ([bcac72d](https://github.com/kdbsoft/dockercart/commit/bcac72d4eea883782fb035a5d731e1770463ed84))
+
 ## [3.31.1](https://github.com/kdbsoft/dockercart/compare/v3.31.0...v3.31.1) (2026-10-16)
 
 ### Bug Fixes
