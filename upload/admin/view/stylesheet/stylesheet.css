@@ -2508,6 +2508,13 @@ body.single-language .lang-name {
     display: none;
 }
 
+/* Sidebar SEO cards render <label class="dcx-sidebar-card__link-label">
+   with a bare {{ language.name }} text node (no .lang-name wrapper),
+   so the rules above hide only the badge. Hide the whole label. */
+body.single-language .dcx-sidebar-card__link-label {
+    display: none;
+}
+
 .well.filter {
     background-color: var(--dc-surface)fff;
 }
