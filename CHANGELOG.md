@@ -1,3 +1,9 @@
+## [3.32.1](https://github.com/kdbsoft/dockercart/compare/v3.32.0...v3.32.1) (2026-10-16)
+
+### Bug Fixes
+
+* **admin:** hide sidebar language labels in single-language mode ([b507f57](https://github.com/kdbsoft/dockercart/commit/b507f5716a93721f128298e6d0b3c12e329dbe7c))
+
 ## [3.32.0](https://github.com/kdbsoft/dockercart/compare/v3.31.1...v3.32.0) (2026-10-16)
 
 ### Features
