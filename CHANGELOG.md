@@ -1,3 +1,9 @@
+## [3.31.1](https://github.com/kdbsoft/dockercart/compare/v3.31.0...v3.31.1) (2026-10-16)
+
+### Bug Fixes
+
+* **catalog:** replace bad Russian translation on contact page ([c6e4d49](https://github.com/kdbsoft/dockercart/commit/c6e4d497c168d9a323fb606e7526b27f4365a813))
+
 ## [3.31.0](https://github.com/kdbsoft/dockercart/compare/v3.30.1...v3.31.0) (2026-10-16)
 
 ### Features
