@@ -8,10 +8,16 @@
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
               {{ heading_title }}
-              <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
-              <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
+              <span class="js-hdr-status" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_status_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrStatus();">
+                <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
+              </span>
+              <span class="js-hdr-payment" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_payment_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrPayment();">
+                <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
+              </span>
               {% if shipping_status %}
-              <span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span>
+              <span class="js-hdr-shipment" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_shipment_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrShipment();">
+                <span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span>
+              </span>
               {% endif %}
             </span>
           </a>
@@ -3012,6 +3018,499 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 <div id="pcm-overlay" class="pcm-overlay" style="display:none"></div>
+<div class="modal fade" id="modal-hdr-status" tabindex="-1" role="dialog" aria-labelledby="hdr-status-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="hdr-status-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="hdr-status-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p><strong>{{ text_list_status_current }}:</strong> <span id="hdr-status-current"></span></p>
+        <div class="form-group">
+          <label for="hdr-status-new">{{ text_list_status_new }}</label>
+          <select id="hdr-status-new" class="form-control"></select>
+        </div>
+        <div id="hdr-status-empty" class="alert alert-warning" style="display:none">{{ text_list_status_empty }}</div>
+        <div id="hdr-status-refund-hint" class="alert alert-info" style="display:none">{{ text_list_refund_hint }} <a id="hdr-status-refund-link" href="#">{{ button_add_refund }}</a></div>
+        <div id="hdr-status-tracking-warn" class="alert alert-warning" style="display:none">{{ error_tracking_required }}</div>
+        <div class="form-group">
+          <label for="hdr-status-comment">{{ entry_comment }}</label>
+          <textarea id="hdr-status-comment" class="form-control" rows="2" placeholder="{{ text_comment_optional }}"></textarea>
+        </div>
+        <div class="checkbox">
+          <label><input type="checkbox" id="hdr-status-notify" checked="checked" /> {{ entry_notify }}</label>
+        </div>
+        <div class="checkbox" id="hdr-status-override-wrap" style="display:none">
+          <label><input type="checkbox" id="hdr-status-override" /> {{ text_flow_override }}</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+        <button type="button" class="btn btn-primary" id="hdr-status-apply">{{ button_flow_apply }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-hdr-payment" tabindex="-1" role="dialog" aria-labelledby="hdr-payment-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="hdr-payment-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="hdr-payment-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p class="text-muted" style="font-size:12px">{{ text_list_payment_hint }}</p>
+        <div id="hdr-payment-summary"></div>
+        <div id="hdr-payment-list"></div>
+        <hr />
+        <div class="form-group">
+          <label for="hdr-payment-amount">{{ entry_payment_amount }}</label>
+          <input type="text" id="hdr-payment-amount" class="form-control" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label for="hdr-payment-method">{{ entry_payment_method }}</label>
+          <select id="hdr-payment-method" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="hdr-payment-reference">{{ entry_payment_reference }}</label>
+          <input type="text" id="hdr-payment-reference" class="form-control" />
+          <div class="text-muted" style="font-size:11px;margin-top:3px">{{ text_payment_reference_hint }}</div>
+        </div>
+        <div class="form-group">
+          <label for="hdr-payment-comment">{{ entry_comment }}</label>
+          <textarea id="hdr-payment-comment" class="form-control" rows="2"></textarea>
+        </div>
+        <button type="button" class="btn btn-success" id="hdr-payment-add"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_payment }}</button>
+        <div id="hdr-payment-refund-block" style="display:none;margin-top:15px">
+          <hr />
+          <div class="form-group">
+            <label for="hdr-refund-amount">{{ entry_refund_amount }}</label>
+            <input type="text" id="hdr-refund-amount" class="form-control" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="hdr-refund-comment">{{ entry_comment }}</label>
+            <textarea id="hdr-refund-comment" class="form-control" rows="2"></textarea>
+          </div>
+          <button type="button" class="btn btn-warning" id="hdr-refund-add"><i data-lucide="undo-2" width="14" height="14"></i> {{ button_add_refund }}</button>
+        </div>
+        <div id="hdr-payment-overpaid-block" class="alert alert-warning" style="display:none;margin-top:15px">
+          {{ text_payment_overpaid_hint }}
+          <div style="margin-top:8px"><button type="button" class="btn btn-xs btn-warning" id="hdr-overpayment-remove"><i data-lucide="undo-2" width="12" height="12"></i> {{ button_remove_overpayment }}</button></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-hdr-shipment" tabindex="-1" role="dialog" aria-labelledby="hdr-shipment-modal-title">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ button_cancel }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="hdr-shipment-modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <div id="hdr-shipment-modal-error" class="alert alert-danger" style="display:none"></div>
+        <p class="text-muted" style="font-size:12px">{{ text_list_shipment_hint }}</p>
+        <div id="hdr-shipment-summary"></div>
+        <div id="hdr-shipment-list"></div>
+        <hr />
+        <div class="form-group">
+          <label for="hdr-shipment-tracking">{{ entry_tracking_number }}</label>
+          <input type="text" id="hdr-shipment-tracking" class="form-control" />
+          <div class="text-muted" style="font-size:11px;margin-top:3px">{{ entry_tracking_number_hint }}</div>
+        </div>
+        <div class="form-group">
+          <label>{{ text_shipment_items }}</label>
+          <div id="hdr-shipment-items"></div>
+        </div>
+        <div class="form-group">
+          <label for="hdr-shipment-comment">{{ entry_comment }}</label>
+          <textarea id="hdr-shipment-comment" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="checkbox">
+          <label><input type="checkbox" id="hdr-shipment-notify" checked="checked" /> {{ entry_notify }}</label>
+        </div>
+        <button type="button" class="btn btn-success" id="hdr-shipment-add"><i data-lucide="plus" width="14" height="14"></i> {{ button_add_shipment }}</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{{ button_cancel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+// Header badges quick-edit: same modals and endpoints as the order list
+// (sale/order/getStatusData, getPaymentData, getShipmentData + sale/order_detail
+// payment/shipment endpoints). IDs are hdr- prefixed so they never clash with
+// the inline payment/shipment forms on this page.
+function hdrEsc(s) {
+	return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+$(document).on('keydown', '.js-hdr-status, .js-hdr-payment, .js-hdr-shipment', function(e) {
+	if (e.key === 'Enter' || e.key === ' ') {
+		e.preventDefault();
+		e.stopPropagation();
+		if ($(this).hasClass('js-hdr-status')) { openHdrStatus(); }
+		else if ($(this).hasClass('js-hdr-payment')) { openHdrPayment(); }
+		else { openHdrShipment(); }
+	}
+});
+
+function hdrPaymentBadgeClass(status) {
+	if (status === 'paid') { return 'page-header__badge page-header__badge--success'; }
+	if (status === 'partial') { return 'page-header__badge page-header__badge--warning page-header__badge--unfilled'; }
+	if (status === 'overpaid') { return 'page-header__badge page-header__badge--danger'; }
+	return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+}
+
+function hdrShippingBadgeClass(status) {
+	if (status === 'shipped') { return 'page-header__badge page-header__badge--success'; }
+	if (status === 'partial') { return 'page-header__badge page-header__badge--warning page-header__badge--unfilled'; }
+	return 'page-header__badge page-header__badge--default page-header__badge--unfilled';
+}
+
+// ---- Order status ----
+var hdrStatusData = null;
+
+function openHdrStatus() {
+	hdrStatusData = null;
+	$('#hdr-status-modal-error').hide();
+	$('#hdr-status-current').text('');
+	$('#hdr-status-new').html('');
+	$('#hdr-status-comment').val('');
+	$('#hdr-status-notify').prop('checked', true);
+	$('#hdr-status-override').prop('checked', false);
+	$('#hdr-status-override-wrap').hide();
+	$('#hdr-status-empty').hide();
+	$('#hdr-status-refund-hint').hide();
+	$('#hdr-status-tracking-warn').hide();
+	$('#hdr-status-apply').prop('disabled', true);
+
+	api('index.php?route=sale/order/getStatusData&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'GET')
+		.then(function(json) {
+			if (json['error']) { showAlert(json['error'], 'danger'); return; }
+			hdrStatusData = json;
+			$('#hdr-status-modal-title').text('{{ text_list_status_title|e('js') }}'.replace('%s', json['order_id']));
+			$('#hdr-status-current').text(json['current_name']);
+			if (json['flow_enabled']) { $('#hdr-status-override-wrap').show(); }
+			fillHdrStatusSelect(false);
+			$('#modal-hdr-status').modal('show');
+		});
+}
+
+function fillHdrStatusSelect(useAll) {
+	if (!hdrStatusData) { return; }
+	var list = useAll ? hdrStatusData['statuses'] : hdrStatusData['allowed'];
+	var html = '';
+	if (!list.length) {
+		$('#hdr-status-empty').show();
+	} else {
+		$('#hdr-status-empty').hide();
+		for (var i = 0; i < list.length; i++) {
+			html += '<option value="' + list[i]['order_status_id'] + '">' + hdrEsc(list[i]['name']) + '</option>';
+		}
+	}
+	$('#hdr-status-new').html(html);
+	$('#hdr-status-apply').prop('disabled', !list.length);
+	onHdrStatusSelectChange();
+}
+
+function hdrSelectedStatusEntry() {
+	if (!hdrStatusData) { return null; }
+	var id = parseInt($('#hdr-status-new').val(), 10);
+	var lists = [hdrStatusData['allowed'], hdrStatusData['statuses']];
+	for (var l = 0; l < lists.length; l++) {
+		for (var i = 0; i < lists[l].length; i++) {
+			if (parseInt(lists[l][i]['order_status_id'], 10) === id) { return lists[l][i]; }
+		}
+	}
+	return { order_status_id: id };
+}
+
+function onHdrStatusSelectChange() {
+	if (!hdrStatusData) { return; }
+	var entry = hdrSelectedStatusEntry();
+	var targetId = entry ? parseInt(entry['order_status_id'], 10) : 0;
+	var isRefund = !!(entry && entry['is_refund']);
+	$('#hdr-status-refund-hint').toggle(isRefund);
+	$('#hdr-status-apply').prop('disabled', isRefund || !targetId);
+	var needTracking = hdrStatusData['shipping_status_id'] > 0 && targetId === hdrStatusData['shipping_status_id'] && !hdrStatusData['has_tracking'] && !$('#hdr-status-override').prop('checked');
+	$('#hdr-status-tracking-warn').toggle(needTracking);
+}
+
+$(document).on('change', '#hdr-status-override', function() {
+	fillHdrStatusSelect($(this).prop('checked'));
+});
+
+$(document).on('change', '#hdr-status-new', onHdrStatusSelectChange);
+
+$(document).on('click', '#hdr-status-refund-link', function(e) {
+	e.preventDefault();
+	$('#modal-hdr-status').modal('hide');
+	openRefundModal();
+});
+
+$(document).on('click', '#hdr-status-apply', function() {
+	if (!hdrStatusData) { return; }
+	var entry = hdrSelectedStatusEntry();
+	var targetId = entry ? parseInt(entry['order_status_id'], 10) : 0;
+	if (!targetId) { return; }
+	if (entry && entry['terminal'] && !confirm('{{ text_flow_confirm_terminal|e('js') }}')) { return; }
+	api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
+		'POST', { order_status_id: targetId, comment: $('#hdr-status-comment').val(), notify: $('#hdr-status-notify').prop('checked') ? '1' : '0', override: $('#hdr-status-override').prop('checked') ? '1' : '0' })
+		.then(function(json) {
+			if (json['error']) {
+				$('#hdr-status-modal-error').text(json['error']).show();
+				return;
+			}
+			$('#modal-hdr-status').modal('hide');
+			showAlertAndReload('{{ text_success|e('js') }}');
+		});
+});
+
+// ---- Payment ----
+var hdrPaymentDirty = false;
+
+function openHdrPayment() {
+	hdrPaymentDirty = false;
+	$('#hdr-payment-modal-error').hide();
+	$('#hdr-payment-summary').html('');
+	$('#hdr-payment-list').html('');
+	$('#hdr-payment-amount').val('');
+	$('#hdr-payment-reference').val('');
+	$('#hdr-payment-comment').val('');
+	$('#hdr-refund-amount').val('');
+	$('#hdr-refund-comment').val('');
+	refreshHdrPaymentModal();
+	$('#modal-hdr-payment').modal('show');
+}
+
+function refreshHdrPaymentModal() {
+	api('index.php?route=sale/order/getPaymentData&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'GET')
+		.then(function(json) {
+			if (json['error']) { $('#hdr-payment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-payment-modal-error').hide();
+			$('#hdr-payment-modal-title').text('{{ text_list_payment_title|e('js') }}'.replace('%s', json['order_id']));
+			renderHdrPaymentModal(json);
+		});
+}
+
+function renderHdrPaymentModal(json) {
+	var html = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
+	html += '<span class="' + hdrPaymentBadgeClass(json['payment_status']) + '">' + hdrEsc(json['payment_status_text']) + '</span>';
+	html += '<span class="text-muted" style="font-size:12px">{{ text_payment_paid_of|e('js') }} ' + hdrEsc(json['paid_amount']) + ' / ' + hdrEsc(json['total']) + '</span>';
+	html += '<span class="text-muted" style="font-size:12px">{{ text_payment_remaining|e('js') }}: ' + hdrEsc(json['remaining']) + '</span>';
+	html += '</div>';
+	$('#hdr-payment-summary').html(html);
+
+	var list = '';
+	if (json['payments'] && json['payments'].length) {
+		for (var i = 0; i < json['payments'].length; i++) {
+			var p = json['payments'][i];
+			list += '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px">';
+			list += '<span class="' + (p['is_reversal'] ? 'text-danger' : 'text-success') + '">' + (p['is_reversal'] ? '−' : '+') + ' ' + hdrEsc(p['amount']) + '</span>';
+			list += '<span class="text-muted">' + hdrEsc(p['payment_method']) + (p['reference'] ? ' · ' + hdrEsc(p['reference']) : '') + ' · ' + hdrEsc(p['date_added']) + '</span>';
+			if (!p['is_reversal']) {
+				list += '<button type="button" class="btn btn-xs btn-danger" onclick="hdrRemovePayment(' + p['order_payment_id'] + ')" title="{{ button_remove_payment|e('js') }}"><i data-lucide="x" width="11" height="11"></i></button>';
+			} else {
+				list += '<span></span>';
+			}
+			list += '</div>';
+			if (p['comment']) { list += '<div class="text-muted" style="font-size:11px;margin:-2px 0 4px">' + hdrEsc(p['comment']) + '</div>'; }
+		}
+	} else {
+		list = '<div class="text-muted" style="font-size:12px">{{ text_no_payments|e('js') }}</div>';
+	}
+	$('#hdr-payment-list').html(list);
+
+	var methods = '<option value="" data-code="">{{ text_select|e('js') }}</option>';
+	for (var m = 0; m < json['payment_methods'].length; m++) {
+		var sel = json['payment_methods'][m]['code'] === json['payment_code'] ? ' selected="selected"' : '';
+		methods += '<option value="' + hdrEsc(json['payment_methods'][m]['title']) + '" data-code="' + hdrEsc(json['payment_methods'][m]['code']) + '"' + sel + '>' + hdrEsc(json['payment_methods'][m]['title']) + '</option>';
+	}
+	$('#hdr-payment-method').html(methods);
+	if (!$('#hdr-payment-amount').val() && json['remaining_raw'] > 0) {
+		$('#hdr-payment-amount').val(parseFloat(json['remaining_raw']).toFixed(2));
+	}
+	$('#hdr-payment-refund-block').toggle(json['paid_amount_raw'] > 0);
+	$('#hdr-payment-overpaid-block').toggle(json['overpaid_raw'] > 0);
+	if (window.lucide) { lucide.createIcons(); }
+}
+
+$(document).on('click', '#hdr-payment-add', function() {
+	var amount = $('#hdr-payment-amount').val();
+	if (!amount || parseFloat(amount) <= 0) { $('#hdr-payment-modal-error').text('{{ error_payment_amount|e('js') }}').show(); return; }
+	var methodSel = document.getElementById('hdr-payment-method');
+	var methodTitle = methodSel ? methodSel.value : '';
+	var methodCode = methodSel && methodSel.selectedIndex >= 0 ? methodSel.options[methodSel.selectedIndex].getAttribute('data-code') : '';
+	api('index.php?route=sale/order_detail/addPayment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ amount: amount, payment_method: methodTitle, payment_code: methodCode, reference: $('#hdr-payment-reference').val(), comment: $('#hdr-payment-comment').val() })
+		.then(function(json) {
+			if (json['error']) { $('#hdr-payment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-payment-modal-error').hide();
+			$('#hdr-payment-amount').val('');
+			$('#hdr-payment-reference').val('');
+			$('#hdr-payment-comment').val('');
+			hdrPaymentDirty = true;
+			refreshHdrPaymentModal();
+		});
+});
+
+$(document).on('click', '#hdr-refund-add', function() {
+	var amount = $('#hdr-refund-amount').val();
+	if (!amount || parseFloat(amount) <= 0) { $('#hdr-payment-modal-error').text('{{ error_refund_amount|e('js') }}').show(); return; }
+	api('index.php?route=sale/order_detail/addRefund&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ amount: amount, comment: $('#hdr-refund-comment').val() })
+		.then(function(json) {
+			if (json['error']) { $('#hdr-payment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-payment-modal-error').hide();
+			$('#hdr-refund-amount').val('');
+			$('#hdr-refund-comment').val('');
+			hdrPaymentDirty = true;
+			refreshHdrPaymentModal();
+		});
+});
+
+function hdrRemovePayment(orderPaymentId) {
+	if (!confirm('{{ text_confirm_remove_payment|e('js') }}')) { return; }
+	api('index.php?route=sale/order_detail/removePayment&user_token=' + USER_TOKEN, 'POST', { order_payment_id: orderPaymentId })
+		.then(function(json) {
+			if (json['error']) { $('#hdr-payment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-payment-modal-error').hide();
+			hdrPaymentDirty = true;
+			refreshHdrPaymentModal();
+		});
+}
+
+$(document).on('click', '#hdr-overpayment-remove', function() {
+	if (!confirm('{{ text_confirm_remove_overpayment|e('js') }}')) { return; }
+	api('index.php?route=sale/order_detail/removeOverpayment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
+		.then(function(json) {
+			if (json['error']) { $('#hdr-payment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-payment-modal-error').hide();
+			hdrPaymentDirty = true;
+			refreshHdrPaymentModal();
+		});
+});
+
+$(document).on('hidden.bs.modal', '#modal-hdr-payment', function() {
+	if (hdrPaymentDirty) { location.reload(); }
+});
+
+// ---- Shipment ----
+var hdrShipmentDirty = false;
+
+function openHdrShipment() {
+	hdrShipmentDirty = false;
+	$('#hdr-shipment-modal-error').hide();
+	$('#hdr-shipment-summary').html('');
+	$('#hdr-shipment-list').html('');
+	$('#hdr-shipment-items').html('');
+	$('#hdr-shipment-tracking').val('');
+	$('#hdr-shipment-comment').val('');
+	$('#hdr-shipment-notify').prop('checked', true);
+	refreshHdrShipmentModal();
+	$('#modal-hdr-shipment').modal('show');
+}
+
+function refreshHdrShipmentModal() {
+	api('index.php?route=sale/order/getShipmentData&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'GET')
+		.then(function(json) {
+			if (json['error']) { $('#hdr-shipment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-shipment-modal-error').hide();
+			$('#hdr-shipment-modal-title').text('{{ text_list_shipment_title|e('js') }}'.replace('%s', json['order_id']));
+			renderHdrShipmentModal(json);
+		});
+}
+
+function renderHdrShipmentModal(json) {
+	var percent = json['ordered_total'] > 0 ? Math.round(Math.min(json['shipped_total'], json['ordered_total']) / json['ordered_total'] * 100) : 0;
+	var html = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">';
+	if (json['shipping_status']) {
+		html += '<span class="' + hdrShippingBadgeClass(json['shipping_status']) + '">' + hdrEsc(json['shipping_status_text']) + '</span>';
+	}
+	html += '<span class="text-muted" style="font-size:12px">' + json['shipped_total'] + ' / ' + json['ordered_total'] + ' (' + percent + '%)</span>';
+	html += '</div>';
+	$('#hdr-shipment-summary').html(html);
+
+	var list = '';
+	if (json['shipments'] && json['shipments'].length) {
+		for (var i = 0; i < json['shipments'].length; i++) {
+			var s = json['shipments'][i];
+			list += '<div style="padding:6px 0;border-top:1px solid #eee;font-size:12px">';
+			list += '<div style="display:flex;justify-content:space-between;gap:8px"><span><i data-lucide="truck" width="12" height="12"></i> ' + hdrEsc(s['tracking_number']) + '</span>';
+			list += '<span class="text-muted">' + hdrEsc(s['date_added']) + '</span>';
+			list += '<button type="button" class="btn btn-xs btn-danger" onclick="hdrDeleteShipment(' + s['shipment_id'] + ')" title="{{ button_remove_shipment|e('js') }}"><i data-lucide="x" width="11" height="11"></i></button></div>';
+			if (s['items'] && s['items'].length) {
+				for (var k = 0; k < s['items'].length; k++) {
+					list += '<div class="text-muted" style="font-size:11px">' + hdrEsc(s['items'][k]['name']) + ' × ' + s['items'][k]['quantity'] + '</div>';
+				}
+			}
+			if (s['comment']) { list += '<div class="text-muted" style="font-size:11px">' + hdrEsc(s['comment']) + '</div>'; }
+			list += '</div>';
+		}
+	} else {
+		list = '<div class="text-muted" style="font-size:12px">{{ text_no_shipments|e('js') }}</div>';
+	}
+	$('#hdr-shipment-list').html(list);
+
+	var items = '';
+	for (var j = 0; j < json['products'].length; j++) {
+		var p = json['products'][j];
+		items += '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;font-size:12px">';
+		items += '<span>' + hdrEsc(p['name']) + ' <span class="text-muted">' + p['shipped'] + ' / ' + p['ordered'] + '</span></span>';
+		items += '<input type="number" class="form-control" style="width:80px" min="0" max="' + p['remaining'] + '" value="' + p['remaining'] + '" data-opid="' + p['order_product_id'] + '" />';
+		items += '</div>';
+	}
+	$('#hdr-shipment-items').html(items);
+	if (window.lucide) { lucide.createIcons(); }
+}
+
+$(document).on('click', '#hdr-shipment-add', function() {
+	var tracking = $('#hdr-shipment-tracking').val().trim();
+	if (!tracking) { $('#hdr-shipment-modal-error').text('{{ error_tracking_number|e('js') }}').show(); return; }
+	var items = [];
+	$('#hdr-shipment-items input[data-opid]').each(function() {
+		var qty = parseInt($(this).val(), 10) || 0;
+		if (qty > 0) { items.push({ order_product_id: $(this).data('opid'), quantity: qty }); }
+	});
+	if (!items.length) { $('#hdr-shipment-modal-error').text('{{ error_shipment_items|e('js') }}').show(); return; }
+	api('index.php?route=sale/order_detail/addShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST',
+		{ tracking_number: tracking, comment: $('#hdr-shipment-comment').val(), items: JSON.stringify(items), notify: $('#hdr-shipment-notify').prop('checked') ? '1' : '0' })
+		.then(function(json) {
+			if (json['error']) { $('#hdr-shipment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-shipment-modal-error').hide();
+			$('#hdr-shipment-tracking').val('');
+			$('#hdr-shipment-comment').val('');
+			hdrShipmentDirty = true;
+			refreshHdrShipmentModal();
+		});
+});
+
+function hdrDeleteShipment(shipmentId) {
+	if (!confirm('{{ text_confirm_remove_shipment|e('js') }}')) { return; }
+	api('index.php?route=sale/order_detail/deleteShipment&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST', { shipment_id: shipmentId })
+		.then(function(json) {
+			if (json['error']) { $('#hdr-shipment-modal-error').text(json['error']).show(); return; }
+			$('#hdr-shipment-modal-error').hide();
+			hdrShipmentDirty = true;
+			refreshHdrShipmentModal();
+		});
+}
+
+$(document).on('hidden.bs.modal', '#modal-hdr-shipment', function() {
+	if (hdrShipmentDirty) { location.reload(); }
+});
+//--></script>
 <script type="text/javascript"><!--
 // Warehouse: reveal the move-to-warehouse selector, then submit the move.
 function warehouseCloseSelect($select) {
