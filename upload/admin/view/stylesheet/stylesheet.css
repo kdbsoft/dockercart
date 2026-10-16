@@ -2396,6 +2396,12 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
     vertical-align: middle;
 }
 
+/* Sidebar badge — available add-on updates */
+#column-left .badge.badge-success {
+    background: var(--dc-green-600, #16a34a);
+    color: #fff;
+}
+
 /* Extension type filter */
 #ext-type-filter .btn {
     margin-bottom: 2px;

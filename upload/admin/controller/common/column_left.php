@@ -350,12 +350,26 @@ class ControllerCommonColumnLeft extends Controller {
 			// Extension
 			$marketplace = array();
 
+			// Installed add-ons with available updates (green badge, cache-only — never blocks on network)
+			$extension_updates = 0;
+
+			if ($this->user->hasPermission('access', 'extension/store') && is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
+				try {
+					$extension_store = new DockercartExtensionStore($this->registry);
+					$extension_updates = $extension_store->countAvailableUpdates();
+				} catch (\Throwable $e) {
+					$extension_updates = 0;
+				}
+			}
+
 			if ($this->user->hasPermission('access', 'extension/store')) {
 				$marketplace[] = array(
-					'name'	   => $this->language->get('text_extensions_store'),
-					'href'     => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
-					'icon'     => 'boxes',
-					'children' => array()
+					'name'	       => $this->language->get('text_extensions_store'),
+					'href'         => $this->url->link('extension/store', 'user_token=' . $this->session->data['user_token'], true),
+					'icon'         => 'boxes',
+					'badge'        => $extension_updates,
+					'badge_class'  => 'badge-success',
+					'children'     => array()
 				);
 			}
 
@@ -397,11 +411,13 @@ class ControllerCommonColumnLeft extends Controller {
 
 			if ($marketplace) {
 				$data['menus'][] = array(
-					'id'       => 'menu-extension',
-					'icon'	   => 'puzzle',
-					'name'	   => $this->language->get('text_extension'),
-					'href'     => '',
-					'children' => $marketplace
+					'id'          => 'menu-extension',
+					'icon'	      => 'puzzle',
+					'name'	      => $this->language->get('text_extension'),
+					'href'        => '',
+					'badge'       => $extension_updates,
+					'badge_class' => 'badge-success',
+					'children'    => $marketplace
 				);
 			}
 
