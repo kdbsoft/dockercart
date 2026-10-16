@@ -1,3 +1,9 @@
+## [3.31.0](https://github.com/kdbsoft/dockercart/compare/v3.30.1...v3.31.0) (2026-10-16)
+
+### Features
+
+* **admin:** add green sidebar badge with add-on update count ([b90ea40](https://github.com/kdbsoft/dockercart/commit/b90ea401406bec6041c5baa5c41835b9b7d8b78c))
+
 ## [3.30.1](https://github.com/kdbsoft/dockercart/compare/v3.30.0...v3.30.1) (2026-10-15)
 
 ### Bug Fixes
