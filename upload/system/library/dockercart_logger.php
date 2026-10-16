@@ -140,7 +140,7 @@ class DockercartLogger {
      *
      * @return bool
      */
-    private function isDebugEnabled() {
+    public function isDebugEnabled() {
         // Return cached value if already checked
         if ($this->debug_enabled !== null) {
             return $this->debug_enabled;
