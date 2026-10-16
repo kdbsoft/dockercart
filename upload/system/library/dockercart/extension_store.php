@@ -108,6 +108,151 @@ class DockercartExtensionStore {
 		}
 	}
 
+	/**
+	 * Reads the YML catalog from the local file cache only — never hits the
+	 * network. Used by the admin sidebar badge so every page load stays fast;
+	 * the cache is warmed whenever the Add-ons Store page is visited.
+	 */
+	public function getCachedYml(?string $lang = null): ?SimpleXMLElement {
+		if ($lang === null) {
+			try {
+				$lang = $this->resolveLanguage();
+			} catch (\Throwable $e) {
+				$lang = 'en';
+			}
+		}
+
+		$lang = preg_replace('/[^a-z]/', '', (string)$lang) ?: 'en';
+
+		$candidates = array($this->cache_dir . 'yml_' . $lang . '.xml');
+
+		if ($lang !== 'en') {
+			$candidates[] = $this->cache_dir . 'yml_en.xml';
+		}
+
+		foreach ($candidates as $cache_file) {
+			if (!is_file($cache_file)) {
+				continue;
+			}
+
+			$use_errors = libxml_use_internal_errors(true);
+			$xml = simplexml_load_file($cache_file);
+			libxml_clear_errors();
+			libxml_use_internal_errors($use_errors);
+
+			if ($xml !== false) {
+				return $xml;
+			}
+		}
+
+		// Last resort: newest parseable yml_*.xml cache in any language.
+		$files = glob($this->cache_dir . 'yml_*.xml');
+
+		if ($files === false) {
+			return null;
+		}
+
+		usort($files, function ($a, $b) {
+			return filemtime($b) - filemtime($a);
+		});
+
+		foreach ($files as $cache_file) {
+			if (in_array($cache_file, $candidates, true)) {
+				continue;
+			}
+
+			$use_errors = libxml_use_internal_errors(true);
+			$xml = @simplexml_load_file($cache_file);
+			libxml_clear_errors();
+			libxml_use_internal_errors($use_errors);
+
+			if ($xml !== false && $xml !== null) {
+				return $xml;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Counts installed extensions with a newer version in the cached catalog.
+	 * Cache-only (no network) so it is safe to call on every admin page.
+	 * Returns 0 when the catalog cache is cold or on any failure.
+	 */
+	public function countAvailableUpdates(): int {
+		try {
+			$db = $this->registry->get('db');
+
+			$result = $db->query(
+				"SELECT `sku`, `installed_version` FROM `" . DB_PREFIX . "dockercart_extension_meta`"
+			);
+		} catch (\Throwable $e) {
+			return 0;
+		}
+
+		if (empty($result->num_rows)) {
+			return 0;
+		}
+
+		$yml = $this->getCachedYml();
+
+		if ($yml === null) {
+			return 0;
+		}
+
+		$versions = array();
+
+		try {
+			if (!isset($yml->shop->offers->offer)) {
+				return 0;
+			}
+
+			foreach ($yml->shop->offers->offer as $offer) {
+				$sku = (string)$offer['id'];
+
+				if ($sku === '') {
+					continue;
+				}
+
+				$version = '';
+
+				foreach ($offer->param as $param) {
+					if ((string)$param['code'] === 'version') {
+						$version = (string)$param;
+						break;
+					}
+				}
+
+				if ($version === '') {
+					continue;
+				}
+
+				if (!isset($versions[$sku]) || version_compare($version, $versions[$sku], '>')) {
+					$versions[$sku] = $version;
+				}
+			}
+		} catch (\Throwable $e) {
+			return 0;
+		}
+
+		$count = 0;
+
+		foreach ($result->rows as $row) {
+			$sku = (string)($row['sku'] ?? '');
+			$installed = (string)($row['installed_version'] ?? '');
+
+			if ($sku === '' || $installed === '' || !isset($versions[$sku])) {
+				continue;
+			}
+
+			if (version_compare($versions[$sku], $installed, '>')) {
+				$count++;
+			}
+		}
+
+		return $count;
+	}
+
 	public function buildCategoriesTree(SimpleXMLElement $yml): array {
 		$categories = array();
 		$children = array();
