@@ -681,7 +681,8 @@ class DockercartExtensionStore {
 		?string $author = null,
 		?string $author_email = null,
 		?string $license_type = null,
-		?string $link = null
+		?string $link = null,
+		string $extension_type = 'module'
 	): void {
 		$db = $this->registry->get('db');
 
@@ -715,13 +716,14 @@ class DockercartExtensionStore {
 			     `sku` = '" . $db->escape($sku) . "',
 			     `installed_version` = '" . $db->escape($version) . "',
 			     `source` = '" . $db->escape($source) . "',
-			     `extension_type` = 'module',
+			     `extension_type` = '" . $db->escape($extension_type) . "',
 			     `extension_install_id` = " . ($extension_install_id !== null ? (int)$extension_install_id : 'NULL') . ",
 			     " . $column_sql . "
 			     `date_added` = NOW(),
 			     `date_modified` = NOW()
 			 ON DUPLICATE KEY UPDATE
 			     `installed_version` = VALUES(`installed_version`),
+			     `extension_type` = VALUES(`extension_type`),
 			     `sku` = VALUES(`sku`),
 			     `extension_install_id` = VALUES(`extension_install_id`),
 			     " . $update_sql . "
