@@ -1,3 +1,15 @@
+## [3.33.0](https://github.com/kdbsoft/dockercart/compare/v3.32.2...v3.33.0) (2026-10-17)
+
+### Features
+
+* **store:** validate package manifest and honor extension type ([026c05b](https://github.com/kdbsoft/dockercart/commit/026c05b0c5d0a6afc025394a32065f3832d4c658))
+
+### Bug Fixes
+
+* **security:** mirror CLI-path denies in the self-signed nginx vhost ([292bf6c](https://github.com/kdbsoft/dockercart/commit/292bf6ca0494bfc3af5795d0feaf35837d6e7007))
+* **store:** roll back files and DB state when an install fails ([11a77f3](https://github.com/kdbsoft/dockercart/commit/11a77f3877f475581db8590cf13a7c8783c8d303))
+* **store:** support bin/cron dirs and unify installed-path resolution ([d30b465](https://github.com/kdbsoft/dockercart/commit/d30b465516e419f883e577280e21674d0a0eb29e))
+
 ## [3.32.2](https://github.com/kdbsoft/dockercart/compare/v3.32.1...v3.32.2) (2026-10-17)
 
 ### Bug Fixes
