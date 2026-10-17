@@ -179,7 +179,9 @@ class ControllerMarketplaceInstall extends Controller {
 					'admin/',
 					'catalog/',
 					'system/',
-					'image/'
+					'image/',
+					'bin/',
+					'cron/'
 				);
 
 				// First we need to do some checks
@@ -251,6 +253,15 @@ class ControllerMarketplaceInstall extends Controller {
 
 							if (substr($destination, 0, 6) == 'system') {
 								$path = DIR_SYSTEM . substr($destination, 7);
+							}
+
+							// bin/ and cron/ carry CLI scripts and live in the webroot
+							if (substr($destination, 0, 3) == 'bin') {
+								$path = dirname(DIR_SYSTEM) . '/bin/' . substr($destination, 4);
+							}
+
+							if (substr($destination, 0, 4) == 'cron') {
+								$path = dirname(DIR_SYSTEM) . '/cron/' . substr($destination, 5);
 							}
 
 							if (is_dir($file) && !is_dir($path)) {
