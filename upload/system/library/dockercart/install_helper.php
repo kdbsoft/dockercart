@@ -21,6 +21,15 @@ class DockercartInstallHelper {
 			return DIR_SYSTEM . substr($path, 7);
 		}
 
+		// bin/ and cron/ carry CLI scripts and live in the webroot
+		if (substr($path, 0, 3) == 'bin') {
+			return dirname(DIR_SYSTEM) . '/bin/' . substr($path, 4);
+		}
+
+		if (substr($path, 0, 4) == 'cron') {
+			return dirname(DIR_SYSTEM) . '/cron/' . substr($path, 5);
+		}
+
 		return '';
 	}
 
