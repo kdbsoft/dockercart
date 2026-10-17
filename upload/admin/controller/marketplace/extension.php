@@ -123,6 +123,7 @@ class ControllerMarketplaceExtension extends Controller {
 					if (!is_file(DIR_APPLICATION . 'controller/extension/' . $type . '/' . $value . '.php')
 						&& !is_file(DIR_APPLICATION . 'controller/' . $type . '/' . $value . '.php')
 					) {
+						$this->log->write('Marketplace: removed orphaned extension record "' . $type . '/' . $value . '" — controller file is missing');
 						$this->model_setting_extension->uninstall($type, $value);
 						unset($installed_list[$key]);
 					}
