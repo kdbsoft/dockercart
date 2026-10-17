@@ -749,17 +749,7 @@ class ControllerExtensionStore extends Controller {
 				rsort($paths);
 
 				foreach ($paths as $result) {
-					$source = '';
-
-					if (substr($result['path'], 0, 5) == 'admin') {
-						$source = DIR_APPLICATION . substr($result['path'], 6);
-					} elseif (substr($result['path'], 0, 7) == 'catalog') {
-						$source = DIR_CATALOG . substr($result['path'], 8);
-					} elseif (substr($result['path'], 0, 5) == 'image') {
-						$source = DIR_IMAGE . substr($result['path'], 6);
-					} elseif (substr($result['path'], 0, 6) == 'system') {
-						$source = DIR_SYSTEM . substr($result['path'], 7);
-					}
+					$source = DockercartInstallHelper::getSourcePath($result['path']);
 
 					if ($source) {
 						if (is_file($source)) {
@@ -1302,22 +1292,16 @@ class ControllerExtensionStore extends Controller {
 	}
 
 	private function resolveDestination(string $prefix, string $sub_path): ?string {
-		$allowed = [
-			'admin' => DIR_APPLICATION,
-			'catalog' => DIR_CATALOG,
-			'image' => DIR_IMAGE,
-			'system' => DIR_SYSTEM,
-		];
-
-		if (!isset($allowed[$prefix])) {
-			return null;
-		}
-
 		if (preg_match('#(?:^|/)\.\.(?:/|$)#', $sub_path)) {
 			return null;
 		}
 
-		return $allowed[$prefix] . $sub_path;
+		// Single source of truth for the installed-path -> webroot mapping, so
+		// the store flow understands the same directories as the classic
+		// installer (admin, catalog, image, system, bin, cron).
+		$source = DockercartInstallHelper::getSourcePath($prefix . '/' . $sub_path);
+
+		return $source !== '' ? $source : null;
 	}
 
 	private function processInstallXml(string $xml_path, int $extension_install_id): void {
