@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 class ControllerExtensionStore extends Controller {
+	/** @var array Absolute paths of files this request created (rollback only). */
+	private $installed_new_paths = array();
+
+	/** @var array Relative paths of files this request created (git-exclude rollback). */
+	private $installed_new_rel_paths = array();
+
 	private function loadStore(): DockercartExtensionStore {
 		return new DockercartExtensionStore($this->registry);
 	}
@@ -352,7 +358,14 @@ class ControllerExtensionStore extends Controller {
 
 		$license_key = $this->request->post['license_key'] ?? '';
 
+		$token = '';
+		$code = '';
+		$type = 'module';
+		$extension_install_id = 0;
+
 		try {
+			$this->db->query("START TRANSACTION");
+
 			$store = $this->loadStore();
 
 			$meta = $store->getInstalledMeta($sku);
@@ -488,7 +501,20 @@ class ControllerExtensionStore extends Controller {
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_install_success'), $current_version['version']);
 		} catch (\Throwable $e) {
+			// Remove the files this request created. extension_path rows only
+			// exist inside the still-open transaction.
+			$this->rollbackInstalledFiles();
+
+			if ($token !== '') {
+				$this->cleanupTemp(DIR_UPLOAD . 'tmp-' . $token);
+
+				if (is_file(DIR_UPLOAD . $token . '.tmp')) {
+					unlink(DIR_UPLOAD . $token . '.tmp');
+				}
+			}
+
 			$this->db->query("ROLLBACK");
+
 			$this->log->write('Extension Store install EXCEPTION: ' . get_class($e) . ' ' . $e->getMessage() . ' file=' . $e->getFile() . ' line=' . $e->getLine());
 
 			if ($e instanceof DockercartStoreInstallException) {
@@ -532,6 +558,8 @@ class ControllerExtensionStore extends Controller {
 
 		$license_key = $this->request->post['license_key'] ?? '';
 
+		$token = '';
+
 		try {
 			$this->db->query("START TRANSACTION");
 
@@ -553,6 +581,7 @@ class ControllerExtensionStore extends Controller {
 			$versions = $store->getModuleVersions($sku);
 
 			if (empty($versions)) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = 'No versions available';
 				$this->response->setOutput(json_encode($json));
 
@@ -576,6 +605,7 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			if (!version_compare($current_version['version'], $meta['installed_version'], '>')) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_up_to_date');
 				$this->response->setOutput(json_encode($json));
 
@@ -583,6 +613,7 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			if ($version_id === null) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = 'No downloadable version found';
 				$this->response->setOutput(json_encode($json));
 
@@ -598,6 +629,7 @@ class ControllerExtensionStore extends Controller {
 				if (!empty($license_key)) {
 					$validation = $licensing->validate($meta['code']);
 					if (empty($validation['valid'])) {
+						$this->db->query("ROLLBACK");
 						$json['error'] = $this->language->get('error_license_expired');
 						$this->response->setOutput(json_encode($json));
 
@@ -610,6 +642,7 @@ class ControllerExtensionStore extends Controller {
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
 				$this->log->write('Extension Store update: getDownloadUrl returned null/empty — sku=' . $sku . ' version_id=' . $version_id);
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -619,6 +652,7 @@ class ControllerExtensionStore extends Controller {
 			$zip_content = $this->downloadFile($download_data['downloadUrl']);
 
 			if ($zip_content === false) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -680,6 +714,18 @@ class ControllerExtensionStore extends Controller {
 			$json['message'] = sprintf($this->language->get('text_update_success'), $from_version, $current_version['version']);
 			$json['new_version'] = $current_version['version'];
 		} catch (\Throwable $e) {
+			// Best-effort rollback of files this update created; files that
+			// overwrote earlier versions are left in place.
+			$this->rollbackInstalledFiles();
+
+			if ($token !== '') {
+				$this->cleanupTemp(DIR_UPLOAD . 'tmp-' . $token);
+
+				if (is_file(DIR_UPLOAD . $token . '.tmp')) {
+					unlink(DIR_UPLOAD . $token . '.tmp');
+				}
+			}
+
 			$this->db->query("ROLLBACK");
 			$this->log->write('Extension Store update error: ' . get_class($e) . ' ' . $e->getMessage());
 
@@ -730,6 +776,7 @@ class ControllerExtensionStore extends Controller {
 			$meta = $store->getInstalledMeta($sku);
 
 			if (!$meta) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_not_installed');
 				$this->response->setOutput(json_encode($json));
 
@@ -1285,6 +1332,7 @@ class ControllerExtensionStore extends Controller {
 			$dest = $this->resolveDestination($prefix, $sub_path);
 
 			if ($dest === null) {
+				$this->log->write('Extension Store install: skipped unmapped package path ' . $prefix . '/' . $sub_path);
 				continue;
 			}
 
@@ -1294,8 +1342,15 @@ class ControllerExtensionStore extends Controller {
 				mkdir($dest_dir, 0755, true);
 			}
 
+			$existed = is_file($dest);
+
 			if (!copy($item->getPathname(), $dest)) {
-				continue;
+				throw new \Exception('Failed to copy installed file ' . $prefix . '/' . $sub_path . ' to ' . $dest);
+			}
+
+			if (!$existed) {
+				$this->installed_new_paths[] = $dest;
+				$this->installed_new_rel_paths[] = $prefix . '/' . $sub_path;
 			}
 
 			unlink($item->getPathname());
@@ -1466,6 +1521,26 @@ class ControllerExtensionStore extends Controller {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Rolls back files written by a failed install/update request. Only files
+	 * that did not exist before the request are removed, and only when still
+	 * present; pre-existing files that were overwritten are left untouched.
+	 */
+	private function rollbackInstalledFiles(): void {
+		if (!empty($this->installed_new_rel_paths)) {
+			DockercartInstallHelper::syncGitExclude(array_reverse($this->installed_new_rel_paths), 'remove');
+			$this->installed_new_rel_paths = array();
+		}
+
+		foreach (array_reverse($this->installed_new_paths) as $path) {
+			if (is_file($path) && !unlink($path)) {
+				$this->log->write('Extension Store install rollback: failed to unlink ' . $path);
+			}
+		}
+
+		$this->installed_new_paths = array();
 	}
 
 	private function processInstallXml(string $xml_path, int $extension_install_id): void {
