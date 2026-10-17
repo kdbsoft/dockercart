@@ -5,28 +5,35 @@ declare(strict_types=1);
 class DockercartInstallHelper {
 
 	public static function getSourcePath(string $path): string {
-		if (substr($path, 0, 5) == 'admin') {
+		// Installed paths must never traverse outside their prefix. The classic
+		// installer rejects ".." during validation and the store flow guards it
+		// separately — keep the helper itself safe for untrusted input too.
+		if (strpos($path, '..') !== false) {
+			return '';
+		}
+
+		if ($path == 'admin' || substr($path, 0, 6) == 'admin/') {
 			return DIR_APPLICATION . substr($path, 6);
 		}
 
-		if (substr($path, 0, 7) == 'catalog') {
+		if ($path == 'catalog' || substr($path, 0, 8) == 'catalog/') {
 			return DIR_CATALOG . substr($path, 8);
 		}
 
-		if (substr($path, 0, 5) == 'image') {
+		if ($path == 'image' || substr($path, 0, 6) == 'image/') {
 			return DIR_IMAGE . substr($path, 6);
 		}
 
-		if (substr($path, 0, 6) == 'system') {
+		if ($path == 'system' || substr($path, 0, 7) == 'system/') {
 			return DIR_SYSTEM . substr($path, 7);
 		}
 
 		// bin/ and cron/ carry CLI scripts and live in the webroot
-		if (substr($path, 0, 3) == 'bin') {
+		if ($path == 'bin' || substr($path, 0, 4) == 'bin/') {
 			return dirname(DIR_SYSTEM) . '/bin/' . substr($path, 4);
 		}
 
-		if (substr($path, 0, 4) == 'cron') {
+		if ($path == 'cron' || substr($path, 0, 5) == 'cron/') {
 			return dirname(DIR_SYSTEM) . '/cron/' . substr($path, 5);
 		}
 
