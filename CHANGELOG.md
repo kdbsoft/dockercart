@@ -1,3 +1,10 @@
+## [3.32.2](https://github.com/kdbsoft/dockercart/compare/v3.32.1...v3.32.2) (2026-10-17)
+
+### Bug Fixes
+
+* **marketplace:** allow bin/ and cron/ directories in the extension installer ([1ebe207](https://github.com/kdbsoft/dockercart/commit/1ebe2077e42c244e58a9b164be228a57441813e4))
+* **security:** deny web access to cron scripts and align the SSL vhost ([537ffb8](https://github.com/kdbsoft/dockercart/commit/537ffb80bd86e596228a5d41efdef5b9fa89e642))
+
 ## [3.32.1](https://github.com/kdbsoft/dockercart/compare/v3.32.0...v3.32.1) (2026-10-16)
 
 ### Bug Fixes
