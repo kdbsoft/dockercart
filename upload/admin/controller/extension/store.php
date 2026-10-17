@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 class ControllerExtensionStore extends Controller {
+	/** @var array Absolute paths of files this request created (rollback only). */
+	private $installed_new_paths = array();
+
+	/** @var array Relative paths of files this request created (git-exclude rollback). */
+	private $installed_new_rel_paths = array();
+
 	private function loadStore(): DockercartExtensionStore {
 		return new DockercartExtensionStore($this->registry);
 	}
@@ -352,25 +358,26 @@ class ControllerExtensionStore extends Controller {
 
 		$license_key = $this->request->post['license_key'] ?? '';
 
+		$token = '';
+		$code = '';
+		$type = 'module';
+		$extension_install_id = 0;
+
 		try {
+			$this->db->query("START TRANSACTION");
+
 			$store = $this->loadStore();
 
 			$meta = $store->getInstalledMeta($sku);
 
 			if ($meta) {
-				$json['error'] = $this->language->get('error_already_installed');
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException($this->language->get('error_already_installed'));
 			}
 
 			$versions = $store->getModuleVersions($sku);
 
 			if (empty($versions)) {
-				$json['error'] = 'No versions available for this extension';
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException('No versions available for this extension');
 			}
 
 			$current_version = null;
@@ -390,20 +397,14 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			if ($version_id === null) {
-				$json['error'] = 'No downloadable version found';
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException('No downloadable version found');
 			}
 
 			$download_data = $store->getDownloadUrl($sku, $version_id, $license_key);
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
 				$this->log->write('Extension Store install: getDownloadUrl returned null/empty — sku=' . $sku . ' version_id=' . $version_id);
-				$json['error'] = $this->language->get('error_download_failed');
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException($this->language->get('error_download_failed'));
 			}
 
 			if (!empty($download_data['licenseKey'])) {
@@ -413,16 +414,13 @@ class ControllerExtensionStore extends Controller {
 			$zip_content = $this->downloadFile($download_data['downloadUrl']);
 
 			if ($zip_content === false) {
-				$json['error'] = $this->language->get('error_download_failed');
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException($this->language->get('error_download_failed'));
 			}
 
 			$code = 'dockercart_' . preg_replace('/^dockercart_/', '', $sku);
 
 			if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
-				throw new \Exception('Invalid extension code');
+				throw new DockercartStoreInstallException('Invalid extension code');
 			}
 
 			$token = token(10);
@@ -430,45 +428,53 @@ class ControllerExtensionStore extends Controller {
 
 			file_put_contents($tmp_file, $zip_content);
 
+			// Validate the actual package against the store item before a single
+			// file is written or a single row is inserted: the manifest code must
+			// match the SKU-derived code, the declared type must be installable
+			// and the package must ship the controller behind extension/{type}/{code}.
+			$manifest = $this->readPackageManifest($tmp_file);
+
+			$type = $this->resolvePackageType($manifest['type']);
+
+			$this->assertPackageMatches($manifest, $code, $type, $tmp_file, true);
+
 			$this->session->data['store_install_token'] = $token;
 
 			$this->load->model('setting/extension');
 
 			$extension_install_id = $this->model_setting_extension->addExtensionInstall($sku . '_' . $current_version['version'] . '.ocmod.zip');
 
-			try {
-				$install_result = $this->runOcmodInstall($token, $extension_install_id);
+			$install_result = $this->runOcmodInstall($token, $extension_install_id);
 
-				if (!empty($install_result['error'])) {
-					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
-					$json['error'] = $install_result['error'];
-					$this->response->setOutput(json_encode($json));
-
-					return;
-				}
-			} catch (\Throwable $e) {
-				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
-				throw $e;
+			if (!empty($install_result['error'])) {
+				throw new DockercartStoreInstallException($install_result['error']);
 			}
 
 			$this->clearModificationCache();
 
 			// Re-check installation status (TOCTOU guard)
 			if ($store->getInstalledMeta($sku)) {
-				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
-				$json['error'] = $this->language->get('error_already_installed');
-				$this->response->setOutput(json_encode($json));
-
-				return;
+				throw new DockercartStoreInstallException($this->language->get('error_already_installed'));
 			}
 
-			$this->model_setting_extension->install('module', $code);
+			// The install hook is dispatched through Action::execute(), which
+			// returns an Exception object when the controller is missing — verify
+			// the controller exists on disk before writing any state.
+			if (!is_file(DIR_APPLICATION . 'controller/extension/' . $type . '/' . $code . '.php')) {
+				throw new DockercartStoreInstallException(sprintf($this->language->get('error_package_no_controller'), $type, $code));
+			}
+
+			$this->model_setting_extension->install($type, $code);
 
 			$this->load->model('user/user_group');
-			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/module/' . $code);
-			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/module/' . $code);
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/' . $type . '/' . $code);
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/' . $type . '/' . $code);
 
-			$this->load->controller('extension/module/' . $code . '/install');
+			$controller_result = $this->load->controller('extension/' . $type . '/' . $code . '/install');
+
+			if ($controller_result instanceof \Exception) {
+				throw new DockercartStoreInstallException($controller_result->getMessage());
+			}
 
 			$module_info = $store->getModuleInfo($sku);
 
@@ -478,7 +484,8 @@ class ControllerExtensionStore extends Controller {
 				author:      $module_info['author'] ?? null,
 				author_email: $module_info['authorEmail'] ?? null,
 				license_type: $module_info['licenseType'] ?? null,
-				link:        $module_info['link'] ?? null
+				link:        $module_info['link'] ?? null,
+				extension_type: $type
 			);
 
 			$this->load->library('dockercart/licensing');
@@ -494,9 +501,27 @@ class ControllerExtensionStore extends Controller {
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_install_success'), $current_version['version']);
 		} catch (\Throwable $e) {
+			// Remove the files this request created. extension_path rows only
+			// exist inside the still-open transaction.
+			$this->rollbackInstalledFiles();
+
+			if ($token !== '') {
+				$this->cleanupTemp(DIR_UPLOAD . 'tmp-' . $token);
+
+				if (is_file(DIR_UPLOAD . $token . '.tmp')) {
+					unlink(DIR_UPLOAD . $token . '.tmp');
+				}
+			}
+
 			$this->db->query("ROLLBACK");
+
 			$this->log->write('Extension Store install EXCEPTION: ' . get_class($e) . ' ' . $e->getMessage() . ' file=' . $e->getFile() . ' line=' . $e->getLine());
-			$json['error'] = $this->language->get('error_download_failed');
+
+			if ($e instanceof DockercartStoreInstallException) {
+				$json['error'] = $e->getMessage();
+			} else {
+				$json['error'] = $this->language->get('error_download_failed');
+			}
 		}
 
 		$this->response->setOutput(json_encode($json));
@@ -533,6 +558,8 @@ class ControllerExtensionStore extends Controller {
 
 		$license_key = $this->request->post['license_key'] ?? '';
 
+		$token = '';
+
 		try {
 			$this->db->query("START TRANSACTION");
 
@@ -548,9 +575,13 @@ class ControllerExtensionStore extends Controller {
 				return;
 			}
 
+			$code = $meta['code'];
+			$type = $this->normalizeInstalledType($meta['extension_type'] ?? 'module');
+
 			$versions = $store->getModuleVersions($sku);
 
 			if (empty($versions)) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = 'No versions available';
 				$this->response->setOutput(json_encode($json));
 
@@ -574,6 +605,7 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			if (!version_compare($current_version['version'], $meta['installed_version'], '>')) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_up_to_date');
 				$this->response->setOutput(json_encode($json));
 
@@ -581,6 +613,7 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			if ($version_id === null) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = 'No downloadable version found';
 				$this->response->setOutput(json_encode($json));
 
@@ -596,6 +629,7 @@ class ControllerExtensionStore extends Controller {
 				if (!empty($license_key)) {
 					$validation = $licensing->validate($meta['code']);
 					if (empty($validation['valid'])) {
+						$this->db->query("ROLLBACK");
 						$json['error'] = $this->language->get('error_license_expired');
 						$this->response->setOutput(json_encode($json));
 
@@ -608,6 +642,7 @@ class ControllerExtensionStore extends Controller {
 
 			if ($download_data === null || empty($download_data['downloadUrl'])) {
 				$this->log->write('Extension Store update: getDownloadUrl returned null/empty — sku=' . $sku . ' version_id=' . $version_id);
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -617,6 +652,7 @@ class ControllerExtensionStore extends Controller {
 			$zip_content = $this->downloadFile($download_data['downloadUrl']);
 
 			if ($zip_content === false) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_download_failed');
 				$this->response->setOutput(json_encode($json));
 
@@ -628,35 +664,34 @@ class ControllerExtensionStore extends Controller {
 
 			file_put_contents($tmp_file, $zip_content);
 
+			// The update archive must belong to the installed extension.
+			$manifest = $this->readPackageManifest($tmp_file);
+
+			$this->assertPackageMatches($manifest, $code, $type, $tmp_file, false);
+
 			$this->load->model('setting/extension');
 
 			$extension_install_id = $this->model_setting_extension->addExtensionInstall($sku . '_' . $current_version['version'] . '_update.ocmod.zip');
 
-			try {
-				$install_result = $this->runOcmodInstall($token, $extension_install_id);
+			$install_result = $this->runOcmodInstall($token, $extension_install_id);
 
-				if (!empty($install_result['error'])) {
-					$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
-					$json['error'] = $install_result['error'];
-					$this->response->setOutput(json_encode($json));
-
-					return;
-				}
-			} catch (\Throwable $e) {
-				$this->model_setting_extension->deleteExtensionInstall($extension_install_id);
-				throw $e;
+			if (!empty($install_result['error'])) {
+				throw new DockercartStoreInstallException($install_result['error']);
 			}
 
 			$this->clearModificationCache();
 
-			$code = $meta['code'];
 			$from_version = $meta['installed_version'];
 
-			$update_result = $this->load->controller('extension/module/' . $code . '/update', [
+			$controller_result = $this->load->controller('extension/' . $type . '/' . $code . '/update', [
 				'from' => $from_version,
 				'to' => $current_version['version'],
 				'token' => $token,
 			]);
+
+			if ($controller_result instanceof \Exception) {
+				throw new DockercartStoreInstallException($controller_result->getMessage());
+			}
 
 			// Consolidate: replace the previous install record with this update's record.
 			// processInstallXml already removed the old modification row (by code),
@@ -678,10 +713,27 @@ class ControllerExtensionStore extends Controller {
 			$json['success'] = true;
 			$json['message'] = sprintf($this->language->get('text_update_success'), $from_version, $current_version['version']);
 			$json['new_version'] = $current_version['version'];
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
+			// Best-effort rollback of files this update created; files that
+			// overwrote earlier versions are left in place.
+			$this->rollbackInstalledFiles();
+
+			if ($token !== '') {
+				$this->cleanupTemp(DIR_UPLOAD . 'tmp-' . $token);
+
+				if (is_file(DIR_UPLOAD . $token . '.tmp')) {
+					unlink(DIR_UPLOAD . $token . '.tmp');
+				}
+			}
+
 			$this->db->query("ROLLBACK");
-			$this->log->write('Extension Store update error: ' . $e->getMessage());
-			$json['error'] = $this->language->get('error_download_failed');
+			$this->log->write('Extension Store update error: ' . get_class($e) . ' ' . $e->getMessage());
+
+			if ($e instanceof DockercartStoreInstallException) {
+				$json['error'] = $e->getMessage();
+			} else {
+				$json['error'] = $this->language->get('error_download_failed');
+			}
 		}
 
 		$this->response->setOutput(json_encode($json));
@@ -724,6 +776,7 @@ class ControllerExtensionStore extends Controller {
 			$meta = $store->getInstalledMeta($sku);
 
 			if (!$meta) {
+				$this->db->query("ROLLBACK");
 				$json['error'] = $this->language->get('error_not_installed');
 				$this->response->setOutput(json_encode($json));
 
@@ -731,14 +784,21 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			$code = $meta['code'];
+			$type = $this->normalizeInstalledType($meta['extension_type'] ?? 'module');
 
 			$this->load->model('setting/extension');
 			$this->load->model('setting/module');
 
 			$extension_install_id = $meta['extension_install_id'];
 
-			// Call module uninstall script
-			$this->load->controller('extension/module/' . $code . '/uninstall');
+			// Call the extension's own uninstall hook. A missing controller
+			// (Action::execute returns an Exception object) must not block
+			// cleanup of the orphaned install.
+			$controller_result = $this->load->controller('extension/' . $type . '/' . $code . '/uninstall');
+
+			if ($controller_result instanceof \Exception) {
+				$this->log->write('Extension Store uninstall: uninstall hook ' . $type . '/' . $code . ' is not callable — continuing with cleanup');
+			}
 
 			// Remove files
 			if ($extension_install_id) {
@@ -749,17 +809,7 @@ class ControllerExtensionStore extends Controller {
 				rsort($paths);
 
 				foreach ($paths as $result) {
-					$source = '';
-
-					if (substr($result['path'], 0, 5) == 'admin') {
-						$source = DIR_APPLICATION . substr($result['path'], 6);
-					} elseif (substr($result['path'], 0, 7) == 'catalog') {
-						$source = DIR_CATALOG . substr($result['path'], 8);
-					} elseif (substr($result['path'], 0, 5) == 'image') {
-						$source = DIR_IMAGE . substr($result['path'], 6);
-					} elseif (substr($result['path'], 0, 6) == 'system') {
-						$source = DIR_SYSTEM . substr($result['path'], 7);
-					}
+					$source = DockercartInstallHelper::getSourcePath($result['path']);
 
 					if ($source) {
 						if (is_file($source)) {
@@ -818,12 +868,12 @@ class ControllerExtensionStore extends Controller {
 			}
 
 			// Uninstall extension
-			$this->model_setting_extension->uninstall('module', $code);
+			$this->model_setting_extension->uninstall($type, $code);
 			$this->model_setting_module->deleteModulesByCode($code);
 
 			// Remove permissions
 			$this->load->model('user/user_group');
-			$this->model_user_user_group->removePermissions('extension/module/' . $code);
+			$this->model_user_user_group->removePermissions('extension/' . $type . '/' . $code);
 
 			// Remove meta
 			$store->removeInstalledMeta($code);
@@ -840,9 +890,9 @@ class ControllerExtensionStore extends Controller {
 
 			$json['success'] = true;
 			$json['message'] = $this->language->get('text_uninstall_success');
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$this->db->query("ROLLBACK");
-			$this->log->write('Extension Store uninstall error: ' . $e->getMessage());
+			$this->log->write('Extension Store uninstall error: ' . get_class($e) . ' ' . $e->getMessage());
 			$json['error'] = $this->language->get('text_error');
 		}
 
@@ -1282,6 +1332,7 @@ class ControllerExtensionStore extends Controller {
 			$dest = $this->resolveDestination($prefix, $sub_path);
 
 			if ($dest === null) {
+				$this->log->write('Extension Store install: skipped unmapped package path ' . $prefix . '/' . $sub_path);
 				continue;
 			}
 
@@ -1291,8 +1342,15 @@ class ControllerExtensionStore extends Controller {
 				mkdir($dest_dir, 0755, true);
 			}
 
+			$existed = is_file($dest);
+
 			if (!copy($item->getPathname(), $dest)) {
-				continue;
+				throw new \Exception('Failed to copy installed file ' . $prefix . '/' . $sub_path . ' to ' . $dest);
+			}
+
+			if (!$existed) {
+				$this->installed_new_paths[] = $dest;
+				$this->installed_new_rel_paths[] = $prefix . '/' . $sub_path;
 			}
 
 			unlink($item->getPathname());
@@ -1302,22 +1360,187 @@ class ControllerExtensionStore extends Controller {
 	}
 
 	private function resolveDestination(string $prefix, string $sub_path): ?string {
-		$allowed = [
-			'admin' => DIR_APPLICATION,
-			'catalog' => DIR_CATALOG,
-			'image' => DIR_IMAGE,
-			'system' => DIR_SYSTEM,
-		];
-
-		if (!isset($allowed[$prefix])) {
-			return null;
-		}
-
 		if (preg_match('#(?:^|/)\.\.(?:/|$)#', $sub_path)) {
 			return null;
 		}
 
-		return $allowed[$prefix] . $sub_path;
+		// Single source of truth for the installed-path -> webroot mapping, so
+		// the store flow understands the same directories as the classic
+		// installer (admin, catalog, image, system, bin, cron).
+		$source = DockercartInstallHelper::getSourcePath($prefix . '/' . $sub_path);
+
+		return $source !== '' ? $source : null;
+	}
+
+	/**
+	 * Reads install.xml straight from the downloaded archive (before extraction)
+	 * so the package can be attributed to the store item without touching the
+	 * filesystem or the database.
+	 */
+	private function readPackageManifest(string $zip_path): array {
+		$zip = new \ZipArchive();
+
+		if ($zip->open($zip_path) !== true) {
+			throw new DockercartStoreInstallException($this->language->get('error_package_invalid'));
+		}
+
+		$xml_content = $zip->getFromName('install.xml');
+
+		$zip->close();
+
+		if ($xml_content === false || $xml_content === '') {
+			throw new DockercartStoreInstallException($this->language->get('error_package_invalid'));
+		}
+
+		$xml = new \DOMDocument();
+
+		$use_errors = libxml_use_internal_errors(true);
+		$loaded = $xml->loadXML($xml_content, LIBXML_NONET);
+		libxml_clear_errors();
+		libxml_use_internal_errors($use_errors);
+
+		if (!$loaded) {
+			throw new DockercartStoreInstallException($this->language->get('error_package_invalid'));
+		}
+
+		$value = function (string $tag) use ($xml): string {
+			$node = $xml->getElementsByTagName($tag)->item(0);
+
+			return $node ? trim($node->nodeValue) : '';
+		};
+
+		return array(
+			'name'        => $value('name'),
+			'code'        => $value('code'),
+			'type'        => $value('type'),
+			'version'     => $value('version'),
+			'min_version' => $value('minDockerCartVersion'),
+		);
+	}
+
+	/**
+	 * Verifies that the package manifest belongs to the expected extension and
+	 * can be installed on this platform. Throws instead of writing anything.
+	 */
+	private function assertPackageMatches(array $manifest, string $code, string $type, string $zip_path, bool $require_controller): void {
+		if ($manifest['code'] === '') {
+			throw new DockercartStoreInstallException($this->language->get('error_package_invalid'));
+		}
+
+		if ($manifest['code'] !== $code) {
+			throw new DockercartStoreInstallException(sprintf($this->language->get('error_package_mismatch'), $manifest['code'], $code));
+		}
+
+		if ($manifest['type'] !== '' && strtolower($manifest['type']) !== $type) {
+			throw new DockercartStoreInstallException(sprintf($this->language->get('error_package_type'), $manifest['type']));
+		}
+
+		if ($require_controller && !$this->packageContainsController($zip_path, $type, $code)) {
+			throw new DockercartStoreInstallException(sprintf($this->language->get('error_package_no_controller'), $type, $code));
+		}
+
+		if ($manifest['min_version'] !== '') {
+			$platform_version = $this->getPlatformVersion();
+
+			if ($platform_version !== '' && version_compare($platform_version, $manifest['min_version'], '<')) {
+				throw new DockercartStoreInstallException(sprintf($this->language->get('error_min_version'), $manifest['min_version'], $platform_version));
+			}
+		}
+	}
+
+	private function packageContainsController(string $zip_path, string $type, string $code): bool {
+		$zip = new \ZipArchive();
+
+		if ($zip->open($zip_path) !== true) {
+			return false;
+		}
+
+		$found = $zip->locateName('upload/admin/controller/extension/' . $type . '/' . $code . '.php') !== false;
+
+		$zip->close();
+
+		return $found;
+	}
+
+	/**
+	 * Resolves the installable extension type declared by the package. Falls
+	 * back to "module" when the manifest predates the <type> element.
+	 */
+	private function resolvePackageType(string $type): string {
+		$type = strtolower(trim($type));
+
+		if ($type === '') {
+			return 'module';
+		}
+
+		if (!preg_match('/^[a-z0-9_]+$/', $type) || !in_array($type, $this->getValidExtensionTypes(), true)) {
+			throw new DockercartStoreInstallException(sprintf($this->language->get('error_package_type'), $type));
+		}
+
+		return $type;
+	}
+
+	/**
+	 * Normalizes the extension type stored in the meta table, falling back to
+	 * "module" for legacy/unknown values so existing installs keep working.
+	 */
+	private function normalizeInstalledType(string $type): string {
+		$type = strtolower(trim($type));
+
+		if ($type === '' || !preg_match('/^[a-z0-9_]+$/', $type) || !in_array($type, $this->getValidExtensionTypes(), true)) {
+			return 'module';
+		}
+
+		return $type;
+	}
+
+	private function getValidExtensionTypes(): array {
+		$types = array();
+		$files = glob(DIR_APPLICATION . 'controller/extension/extension/*.php');
+
+		if ($files) {
+			foreach ($files as $file) {
+				$type = basename($file, '.php');
+
+				if ($type !== 'promotion') {
+					$types[] = $type;
+				}
+			}
+		}
+
+		return $types;
+	}
+
+	private function getPlatformVersion(): string {
+		if (defined('DOCKERCART_VERSION')) {
+			return (string) DOCKERCART_VERSION;
+		}
+
+		if (defined('VERSION')) {
+			return (string) VERSION;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Rolls back files written by a failed install/update request. Only files
+	 * that did not exist before the request are removed, and only when still
+	 * present; pre-existing files that were overwritten are left untouched.
+	 */
+	private function rollbackInstalledFiles(): void {
+		if (!empty($this->installed_new_rel_paths)) {
+			DockercartInstallHelper::syncGitExclude(array_reverse($this->installed_new_rel_paths), 'remove');
+			$this->installed_new_rel_paths = array();
+		}
+
+		foreach (array_reverse($this->installed_new_paths) as $path) {
+			if (is_file($path) && !unlink($path)) {
+				$this->log->write('Extension Store install rollback: failed to unlink ' . $path);
+			}
+		}
+
+		$this->installed_new_paths = array();
 	}
 
 	private function processInstallXml(string $xml_path, int $extension_install_id): void {
@@ -1408,4 +1631,12 @@ class ControllerExtensionStore extends Controller {
 			}
 		}
 	}
+}
+
+/**
+ * Raised for user-facing install/update validation failures (package mismatch,
+ * unsupported type, missing controller, unsupported platform version). The
+ * message is shown to the admin instead of the generic download error.
+ */
+class DockercartStoreInstallException extends \RuntimeException {
 }
