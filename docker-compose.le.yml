@@ -17,10 +17,20 @@ services:
     # container restart. Reload with an unchanged cert is harmless.
     # Reloading more often than certbot's renew interval guarantees the new
     # cert goes live within RENEW_NGINX_RELOAD_INTERVAL of the renewal.
+    #
+    # The image entrypoint runs /docker-entrypoint.d/* (which renders
+    # /etc/nginx/templates/nginx.conf.template — proxy_cache_path and
+    # limit_req_zone zones conf.d relies on — and exports NGINX_LOCAL_RESOLVERS)
+    # ONLY when its first argument is "nginx" or "nginx-debug". A bare
+    # "sh -c ..." command skips it, so nginx would start with the stock image
+    # config and die on the undefined zones. Validate the config once (this
+    # renders the template), then start the reload loop and exec nginx as
+    # PID 1 so restart semantics stay intact.
     command:
       - /bin/sh
       - -c
       - |
+        /docker-entrypoint.sh nginx -t || exit 1
         while :; do sleep "${RENEW_NGINX_RELOAD_INTERVAL:-6h}"; nginx -s reload; done &
         exec nginx -g "daemon off;"
 
