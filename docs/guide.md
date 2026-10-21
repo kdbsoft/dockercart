@@ -20,6 +20,7 @@
 14. [Order Flow](#14-order-flow)
 15. [Product Returns (full / partial / exchange)](#15-product-returns-full--partial--exchange)
 16. [Warehouses & Dropshipping](#16-warehouses--dropshipping)
+17. [Admin REST API](#17-admin-rest-api)
 
 ---
 
@@ -114,7 +115,8 @@ dockercart/
 │   ├── cache/                  Cache files
 │   └── ...                     Session, download, modification, upload
 ├── upload/                     Application source (mounted as /var/www/html)
-│   ├── admin/                  Admin panel (MVC)
+│   ├── admin/                  Admin panel (MVC) + REST API controllers/startup
+│   ├── api/                    REST API front controller (+ generated config.php)
 │   ├── catalog/                Storefront (MVC)
 │   ├── bin/                    CLI scripts
 │   ├── system/                 Framework libraries
@@ -1141,3 +1143,258 @@ without a price are excluded from purchase/profit and shown in a separate
 Settings → Options → Warehouses). A daily scheduler task `warehouse_audit`
 (`bin/dockercart_warehouse_audit.php`) recomputes the caches and self-heals
 drift; the stock screen offers a manual "Recalculate totals" run.
+
+---
+
+## 17. Admin REST API
+
+A bearer-token API for the admin panel: catalog (products, categories,
+manufacturers), orders, customers, returns, warehouses/stock, blog and reference
+data. It is an **admin** API — every request runs as an admin principal built
+from an API key, so permissions, order-flow rules, warehouse movements and
+everything else behave exactly like an operator in the panel.
+
+### Public surface
+
+```
+GET    /api/v1/products?search=iphone&limit=20
+POST   /api/v1/products                  { "model": "...", "descriptions": { "en-gb": { "name": "..." } } }
+GET    /api/v1/orders/123                (lines, totals, history, payments)
+POST   /api/v1/orders/123/history        { "order_status_id": 132, "comment": "Confirmed", "notify": true }
+PATCH  /api/v1/products/42/stock         { "quantity": 25 }
+GET    /api/v1/customers?email=…         (profile, addresses, order/reward aggregates)
+GET    /api/v1/returns?status_id=1       (return requests)
+POST   /api/v1/returns                   { "order_id": 123, "products": [{ "order_product_id": 456, "quantity": 1 }], "return_reason_id": 1 }
+GET    /api/v1/warehouses                (all warehouses, disabled ones flagged)
+GET    /api/v1/warehouses/1/stock        (quantity, reserved, available per product/variant)
+POST   /api/v1/stock/adjustments         { "adjustments": [{ "warehouse_id": 1, "product_id": 42, "delta": -3 }] }
+GET    /api/v1/meta/languages            (codes for `descriptions`)
+GET    /api/v1/meta/return-statuses      (ids for returns, with `-reasons` and `-actions`)
+```
+
+Customers, returns and warehouses reuse the panel's own permission routes
+(`customer/customer`, `sale/return`, `warehouse/warehouse`, `warehouse/stock`), so
+the standard roles (sales manager, storekeeper, accountant, …) already grant the
+matching read/write access without a second permission model. Customer
+credentials (`password`, `salt`, `token`, `code`, `ip`, `cart`, `wishlist`,
+`remember_token`) are never part of a representation.
+
+Returns are created **from an order**: the client sends the order line ids and
+quantities, and the contact details, product name/model, price and variant are
+snapshotted from `oc_order_product` (the same auto-fill the panel form does). A
+return does not move stock or money when it is created — that happens on
+completion (`POST /v1/returns/{id}/history` reaching the Complete status), which
+restocks the lines through the warehouse layer, refunds `amount` once and moves a
+`full` return's order to Refunded. `restock` cannot be disabled from the API.
+
+Stock is only ever written through the warehouse layer: `PATCH
+/v1/products/{id}/stock` sets an absolute total, while `POST /v1/stock/adjustments`
+applies **signed deltas as one atomic batch** (1–100 lines, movement type
+`adjustment`, `reference`/`comment` land in `oc_warehouse_stock_movement`). If a
+delta would take a warehouse row below zero the whole batch is rolled back and
+answered `409 insufficient_stock` with the offending lines in `fields` — an
+external system can never believe stock moved when it did not. `GET
+/v1/warehouses/{id}/stock` exposes `quantity` (physical), `reserved` (active
+reservations) and `available` (`null` for unlimited dropship rows).
+
+Full reference: **System → API → Documentation** in the panel (a standalone
+Swagger UI page, served from `upload/api/openapi.json`; the panel session is
+required, so the API surface is not advertised publicly). `GET /v1/meta/sections` returns every
+endpoint together with the permission it requires.
+
+Conventions:
+
+- success `{"data": …}` (collections add `"meta": {"page","limit","total","pages"}`)
+- failures are **RFC 9457 problem documents** (`Content-Type: application/problem+json`):
+  `{type, title, status, detail, instance, code, request_id, fields?}` — `type` is a
+  stable URN (`urn:dockercart:api:error:validation_failed`), `code` repeats its last
+  segment, `fields` maps 422 problems per field, `request_id` matches the journal.
+  Statuses: `401` invalid/expired/revoked key, `403` permission, `404` unknown
+  resource, `405` wrong method, `409` idempotency conflict, `412` stale `If-Match`,
+  `422` validation, `428` missing `If-Match` (strict mode), `429` rate limit,
+  `503` API disabled. A refused stock adjustment is `409 insufficient_stock` and a
+  refused order transition `409 invalid_transition`.
+- dates ISO-8601, money fixed point strings with 4 decimals
+- multilingual fields are keyed by **language code** (`en-gb`, `ru-ua`, `uk-ua`),
+  not by `language_id`
+- `PUT` replaces the document (relations missing from the body are removed, like
+  saving the panel form), `PATCH` merges into the current document
+- order status changes always follow the configured order flow: `override` is
+  rejected (`422`) and a refused transition answers `409 invalid_transition`
+- pagination: `?page=1&limit=20` (max 100) + per-resource filters;
+  `?language=ru-ua` switches the language used for joined descriptions
+
+### Concurrency control (ETag / If-Match)
+
+Every single-resource GET returns a strong `ETag` (sha1 of the exact
+representation). Clients that edit data should:
+
+1. `GET /v1/products/42` → keep `ETag`;
+2. send it back as `If-Match: "<etag>"` on `PUT`/`PATCH`/`DELETE`;
+3. on `412 Precondition Failed` re-read the resource and re-apply the change.
+
+`If-Match: *` only requires the resource to exist. `If-None-Match` on GET answers
+`304 Not Modified` with the current ETag (cheap polling). A missing `If-Match` is
+tolerated by default for one-way integrations; set
+`config_api_require_if_match=1` (System → API → Keys → API settings) to reject such
+writes with `428 Precondition Required`. nginx appends `-gzip` to the ETag of a
+compressed response — the API strips that suffix (and `W/`) before comparing, so
+echoing the header verbatim works.
+
+### Retries (Idempotency-Key)
+
+POST endpoints accept an optional `Idempotency-Key` header (8–128 printable ASCII
+chars, unique per API key + endpoint):
+
+```bash
+curl -X POST https://shop.example/api/v1/products   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json"   -H "Idempotency-Key: 7b1f0c42-import-2026-10-21-01"   -d '{"model":"SKU-1","descriptions":{"en-gb":{"name":"Imported"}}}'
+```
+
+The first request executes and its answer is stored for 24 h
+(`oc_api_idempotency`); a retry with the same key **and the same body** replays
+that answer verbatim (`201`, `Idempotent-Replay: true`) instead of creating a
+second product. The same key with a different body answers
+`409 idempotency_conflict`; a concurrent retry while the first is still running
+gets `409 idempotency_in_progress` (5 minute lock). 5xx answers are not stored, so
+they can be retried.
+
+### Documentation & discovery
+
+`GET /api/v1/openapi.json` — the only unauthenticated endpoint; returns the
+OpenAPI 3.0 document (cacheable: `ETag` + `max-age=300`, `304` on
+`If-None-Match`). Swagger UI in the panel (**System → API → Documentation**, the
+`setting/api_docs` access permission) renders exactly that document, so an
+integrator and the panel never drift apart.
+
+The documentation is a **standalone page** (its own document, no panel chrome):
+Swagger UI brings its own stylesheet and does not belong into the panel
+layout. The page still requires the panel session, so the API surface stays
+undiscovered from the outside — only the OpenAPI document itself is public.
+
+### Authentication & keys
+
+Keys are managed in **System → API → Keys** (the sidebar nests them under
+*System → API*):
+
+- the plain token (`dcapi_…`) is displayed **once**, on create/rotate; only its
+  SHA-256 hash is stored (`oc_api_key.token_hash`), so a database dump cannot be
+  replayed;
+- send it as `Authorization: Bearer <token>` (or `X-Api-Key: <token>`); tokens in
+  the query string are rejected on purpose (they would leak into access logs);
+- optional expiry date, IP allowlist (IPs/CIDR, v4 + v6) and per-minute rate
+  limit; `0` rate limit falls back to the global value;
+- revoke (`status = 0`) or rotate at any time — both take effect immediately.
+
+**A key belongs either to an admin user or to nobody** (`oc_api_key.user_id`):
+
+- `user_id > 0` — the key is owned by a person. It acts with the permissions of
+  the **current** group of that user, so moving the user to another role
+  immediately changes what the key may do. A disabled or deleted owner
+  invalidates the key (`401 token_revoked`); deleting the user removes the key.
+- `user_id = 0` — a shared key that uses the group stored in
+  `oc_api_key.user_group_id`.
+
+**Permissions always come from an admin user group**: GET endpoints require the
+group's `access` permission on the route, write endpoints its `modify`
+permission. So `oc_user_group.permission` stays the single source of truth and
+the standard roles (`DockercartRoles`) can be reused as-is. Order endpoints also
+honour the capabilities `sale/order/status` and `sale/order/shipment`.
+
+The keys of a user are managed **in the user form itself** (Users → Users →
+edit): the panel shows an *API keys* card with the keys of that user and
+buttons to create, rotate, revoke, enable and delete them. The card appears
+when the operator has the `setting/api_key` access permission (the actions need
+`modify`), so a support operator can hand out a token without leaving the
+user.
+
+The panel pages of the API are **not** part of any standard role template
+(`DockercartRoles`) — by default only the Administrator reaches them. Grant
+`setting/api_key` explicitly (access + modify) if another role should manage
+keys; that role then also gets the *API keys* card of the user form.
+
+Global switches (**System → API → Keys → API settings**, saved with
+`updateSetting('config', …)`): `config_api_status` (kill switch → `503`),
+`config_api_rate_limit` (default per-key limit),
+`config_api_log_retention_days` (journal retention) and
+`config_api_require_if_match` (mandatory `If-Match`, strict optimistic locking).
+
+### Request journal
+
+Every request is journalled in `oc_api_log` (key snapshot, method, path, status,
+duration, IP, request-id, error code) and shown in **System → API → Request log**.
+Rows are trimmed by age by the `api_log_cleanup` scheduler task
+(`bin/dockercart_api_log_cleanup.php`, daily, which also expires
+`oc_api_idempotency` rows). The journal is security evidence: it is *not* removed
+when a key is deleted.
+
+### Deliberately not exposed
+
+- **Store settings** — no `PATCH /settings` and no settings write at all: a partial
+  `editSetting('config', …)` wipes ~100 store options (see AGENTS.md), so the API
+  stays out of that surface. Only read-only dictionaries are published
+  (`/v1/meta/…`). The panel's API key page itself saves its three options with
+  `updateSetting()`.
+- **Stock columns** — nothing writes `oc_product.quantity` / `oc_product_variant.quantity`
+  directly. `PATCH /v1/products/{id}/stock` goes through
+  `DockercartWarehouse::setTotalQuantity()` and `POST /v1/stock/adjustments` through
+  `DockercartWarehouse::adjustStockBatch()` (the warehouse layer owns the value and
+  the cache), and product create/update routes `quantity` through the same layer via
+  `ModelCatalogProduct`.
+- **Variants** — read-only (`GET /v1/products/{id}/variants`) and built with
+  `ProductConfigurable` (axes, `getVariants()`, aggregated price/stock), so it matches
+  the storefront (enabled variants only). The `variant_hash` is derived from the
+  option axes: axes, hash rebuilds and axis-option pricing (always `0`) stay panel
+  operations. `editProduct()` already excludes axis options from its
+  delete/insert pass, so an integration cannot corrupt them through `options`.
+- **Order-flow `override`** — not accepted (see above); the capability scope for
+  status changes remains `sale/order/status`.
+
+### Implementation map
+
+| Path | Role |
+|---|---|
+| `upload/api/index.php` | front controller (`start('api')`) |
+| `upload/api/config.php` | generated by `docker/entrypoint.sh` (requires `admin/config.php`, defines `DIR_API`) |
+| `upload/system/config/api.php` | app config: pre-actions without `startup/login` + `startup/permission` |
+| `upload/admin/controller/startup/api.php` | path → route, bearer auth, JSON body, rate limit, JSON error/fatal handlers, journal |
+| `upload/admin/controller/api/**` | resource controllers (they call the admin models) |
+| `upload/system/library/dockercart/api/**` | `Routes` (endpoint + permission whitelist), `KeyRepository`, `Principal`, `Response` (envelopes, ETag, 304), `Idempotency`, `Error` (RFC 9457 codes), `Validator`, `Serializer`, payload mappers |
+| `upload/system/library/dockercart/product_rules.php` | product field rules shared by the panel form and the API |
+| `upload/api/openapi.json` | OpenAPI 3.0 document (served at `/api/v1/openapi.json` and to the docs page) |
+| `upload/admin/view/javascript/swagger-ui/` | vendored Swagger UI bundle (no CDN) |
+
+The `api` application reuses the **admin MVC tree** (`DIR_APPLICATION` =
+`upload/admin/`), so `$this->load->model('catalog/product')` resolves to the
+admin models — the same code the panel runs. Panel HTML controllers are *not*
+called as API handlers; only the endpoints that already have a JSON contract
+(`sale/order/addHistory`, `sale/order/quickEdit`) are reused through
+`$this->load->controller()`.
+
+### Web server routing
+
+nginx rewrites `/api/<path>` to `/api/index.php?_route_=/<path>` (`location ^~
+/api/`, `rewrite … break`). Apache also maps the path at the **virtual-host**
+level, because the webroot `.htaccess` (generated from the SEO settings)
+overrides `<Directory>` rewrites. `upload/api/config.php` and
+`docker/apache.conf`/`docker/entrypoint.sh` changes need `make restart` (image
+rebuild); nginx config is bind-mounted and only needs a reload.
+
+### Extending
+
+1. add the endpoint + required permission to `Dockercart\Api\Routes::TABLE`;
+2. add the controller action in `upload/admin/controller/api/…` and do the work
+   through the admin model;
+3. document it in `upload/api/openapi.json` (the docs page and
+   `/api/v1/openapi.json` pick it up automatically), including the `ETag`
+   header on reads and `If-Match`/`Idempotency-Key` parameters on writes;
+4. if the resource is a new admin section, add the route to the matching
+   `DockercartRoles` template so standard roles can reach it.
+
+`GET /v1/meta/sections` is generated from `Routes::TABLE`, and
+`upload/api/openapi.json` must list exactly the same method/path pairs — a quick
+check while reviewing an endpoint change:
+
+```bash
+php -r '$s=json_decode(file_get_contents("upload/api/openapi.json"),true); echo count($s["paths"]), " paths\n";'
+```
+
