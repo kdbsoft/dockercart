@@ -1,10 +1,150 @@
 <style>
   /* Hero action button: filled background */
-  #hero .hero-btn { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; transition: transform .12s ease, box-shadow .12s ease, background-color .18s ease, color .18s ease, border-color .18s ease; }
-  #hero .hero-btn--classic { background: var(--btn-color, #2563eb); color: var(--btn-text, #fff); border: 1px solid var(--btn-color, #2563eb); border-radius: 9999px; box-shadow: 0 6px 18px rgba(2,6,23,0.25); }
-  #hero .hero-btn--classic:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(2,6,23,0.3); filter: brightness(0.92); }
+  .hero-root .hero-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease, background-position .75s cubic-bezier(.3,.7,.3,1);
+  }
+  .hero-root .hero-btn--classic {
+    color: var(--btn-text, #fff);
+    border: 1px solid var(--btn-color, #2563eb);
+    border-radius: 9999px;
+    background-color: var(--btn-color, #2563eb);
+    background-image:
+      linear-gradient(100deg, transparent 44%, rgba(255,255,255,.78) 50%, transparent 56%),
+      linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 58%);
+    background-size: 260% 100%, 100% 100%;
+    background-position: 100% 0, 0 0;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.32),
+      0 8px 22px rgba(2,6,23,.28);
+  }
+  .hero-root .hero-btn--classic:hover {
+    transform: translateY(-2px);
+    background-position: 0% 0, 0 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.45),
+      0 14px 34px rgba(2,6,23,.34);
+    filter: brightness(1.05);
+  }
+  .hero-root .hero-btn--classic:active { transform: translateY(0); }
+  .hero-root .hero-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    transition: translate .22s cubic-bezier(.2,.7,.3,1);
+  }
+  .hero-root .hero-btn--classic:hover svg { translate: 3px 0; }
+
+  /* ── Arrow buttons: hollow rings with a luminous border ── */
+  .hero-root .hero-nav {
+    position: absolute;
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: scale .22s cubic-bezier(.2,.7,.3,1);
+  }
+  /* soft dark halo — defines the hairline ring on light photos,
+     disappears on dark ones, the empty middle stays untouched */
+  .hero-root .hero-nav__ringwrap {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    filter: drop-shadow(0 0 3px rgba(2,6,23,.45));
+  }
+  /* hairline luminous ring — the middle stays completely empty */
+  .hero-root .hero-nav__ring {
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 9999px;
+    background: linear-gradient(140deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.62) 30%, rgba(255,255,255,.42) 55%, rgba(255,255,255,.58) 80%, rgba(255,255,255,.92) 100%);
+    background-size: 220% 220%;
+    background-position: 0% 0%;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+    transition: background-position .7s cubic-bezier(.2,.7,.3,1);
+  }
+  /* bloom that lights up the inside of the empty ring on hover */
+  .hero-root .hero-nav__glow {
+    position: absolute;
+    inset: 3px;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 0 48%, rgba(255,255,255,.12) 70%, rgba(255,255,255,.28) 100%);
+    opacity: 0;
+    transform: scale(.72);
+    transition: opacity .26s ease, transform .42s cubic-bezier(.2,.7,.3,1);
+    pointer-events: none;
+  }
+  .hero-root .hero-nav svg {
+    position: relative;
+    z-index: 1;
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.75;
+    /* keeps the chevron readable over bright photos */
+    filter: drop-shadow(0 0 2.5px rgba(2,6,23,.55));
+    transition: translate .26s cubic-bezier(.2,.7,.3,1);
+  }
+  .hero-root .hero-nav:hover { scale: 1.07; }
+  .hero-root .hero-nav:hover .hero-nav__glow { opacity: 1; transform: scale(1); }
+  .hero-root .hero-nav:hover .hero-nav__ring { background-position: 100% 100%; }
+  .hero-root .hero-nav--prev:hover svg { translate: -3px 0; }
+  .hero-root .hero-nav--next:hover svg { translate: 3px 0; }
+  .hero-root .hero-nav:active { scale: .95; }
+  .hero-root .hero-nav:focus-visible { outline: 2px solid rgba(255,255,255,.95); outline-offset: 3px; }
+
+  /* ── Slide indicators: hollow rings, active one stretches into a pill ── */
+  .hero-root .hero-dot {
+    height: 9px;
+    width: 9px;
+    padding: 0;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,.70);
+    background: transparent;
+    box-shadow: 0 1px 3px rgba(2,6,23,.35);
+    transition: width .45s cubic-bezier(.2,.7,.3,1), background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    cursor: pointer;
+  }
+  .hero-root .hero-dot:hover { background-color: rgba(255,255,255,.28); border-color: rgba(255,255,255,.95); }
+  .hero-root .hero-dot:focus-visible { outline: 2px solid rgba(255,255,255,.95); outline-offset: 3px; }
+  .hero-root .hero-dot.is-active {
+    width: 30px;
+    border-color: rgba(255,255,255,.95);
+    background: linear-gradient(90deg, rgba(255,255,255,.95), rgba(255,255,255,.60));
+  }
+
+  @media (max-width: 767px) {
+    .hero-root .hero-nav { width: 36px; height: 36px; }
+    .hero-root .hero-nav svg { width: 16px; height: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-root .hero-nav,
+    .hero-root .hero-nav__ring,
+    .hero-root .hero-nav__glow,
+    .hero-root .hero-nav svg,
+    .hero-root .hero-dot { transition: none; }
+  }
 </style>
-<section id="hero" class="relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y select-none">
+<section id="hero" class="hero-root relative w-full h-[56vh] min-h-[340px] max-h-[540px] overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y select-none">
   <div id="hero-slides" class="relative w-full h-full flex will-change-transform">
     {% for banner in banners %}
     <div class="hero-slide relative shrink-0 basis-full w-full h-full{% if banner.link %} cursor-pointer{% endif %}" data-slide="{{ loop.index0 }}"{% if banner.link %} data-slide-link="{{ banner.link }}"{% endif %}>
@@ -39,7 +179,7 @@
           {% endif %}
           {% if banner.primary_btn_text and banner.link %}
           <div class="flex flex-wrap gap-3">
-            <a href="{{ banner.link }}" class="hero-btn hero-btn--classic px-7 py-3 font-semibold shadow-lg transition text-sm inline-block" style="--btn-color: {{ banner.primary_btn_color|default('#2563eb') }}; --btn-text: {{ banner.btn_text_color|default('#ffffff') }};">{{ banner.primary_btn_text }}</a>
+            <a href="{{ banner.link }}" class="hero-btn hero-btn--classic px-7 py-3 font-semibold text-sm" style="--btn-color: {{ banner.primary_btn_color|default('#2563eb') }}; --btn-text: {{ banner.btn_text_color|default('#ffffff') }};">{{ banner.primary_btn_text }}<i data-lucide="arrow-right"></i></a>
           </div>
           {% endif %}
         </div>
@@ -49,16 +189,20 @@
   </div>
 
   {% if banners|length > 1 %}
-  <button onclick="prevSlide_{{ module }}()" class="absolute left-4 max-md:left-0 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Previous">
-    <i data-lucide="chevron-left" class="w-5 h-5 text-white"></i>
+  <button type="button" onclick="prevSlide_{{ module }}()" class="hero-nav hero-nav--prev absolute left-4 max-md:left-2 top-1/2 -translate-y-1/2" aria-label="Previous slide">
+    <span class="hero-nav__ringwrap"><span class="hero-nav__ring"></span></span>
+    <span class="hero-nav__glow"></span>
+    <i data-lucide="chevron-left"></i>
   </button>
-  <button onclick="nextSlide_{{ module }}()" class="absolute right-4 max-md:right-0 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm border border-white/30 transition" aria-label="Next">
-    <i data-lucide="chevron-right" class="w-5 h-5 text-white"></i>
+  <button type="button" onclick="nextSlide_{{ module }}()" class="hero-nav hero-nav--next absolute right-4 max-md:right-2 top-1/2 -translate-y-1/2" aria-label="Next slide">
+    <span class="hero-nav__ringwrap"><span class="hero-nav__ring"></span></span>
+    <span class="hero-nav__glow"></span>
+    <i data-lucide="chevron-right"></i>
   </button>
 
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-30">
     {% for banner in banners %}
-    <button class="hero-dot transition-all duration-500 ease-in-out {% if not loop.first %}opacity-50{% endif %}" style="{% if loop.first %}width:32px;{% else %}width:8px;opacity:0.5;{% endif %} height:8px; border-radius:999px; background:#ffffff;" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"></button>
+    <button type="button" class="hero-dot{% if loop.first %} is-active{% endif %}" data-dot="{{ loop.index0 }}" onclick="goToSlide_{{ module }}({{ loop.index0 }})" aria-label="Go to slide {{ loop.index }}"{% if loop.first %} aria-current="true"{% endif %}></button>
     {% endfor %}
   </div>
   {% endif %}
@@ -72,7 +216,7 @@
       const originals = Array.from(track.children);
       const N = originals.length;
       if (!N) return;
-      const dots = document.querySelectorAll('#hero .hero-dot');
+      const dots = section.querySelectorAll('.hero-dot');
 
       // Looping track: 3 copies of the slide set (prev | current | next) so
       // navigation never hits an edge and no empty gap can appear.
@@ -110,8 +254,8 @@
 
       function updateDots() {
         dots.forEach(function (d, i) {
-          d.style.width = (i === current) ? '32px' : '8px';
-          d.style.opacity = (i === current) ? '1' : '0.5';
+          d.classList.toggle('is-active', i === current);
+          d.setAttribute('aria-current', i === current ? 'true' : 'false');
         });
       }
 
