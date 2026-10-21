@@ -7,6 +7,7 @@
         <div class="col-sm-12">
           <div class="pull-right">
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
+            <button type="button" class="btn btn-default" onclick="if (confirm('{{ text_confirm_create_roles }}')) { $('#form-create-roles').submit(); }"><i data-lucide="users-round" width="16" height="16"></i> {{ button_create_roles }}</button>
             <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-user-group').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
@@ -25,6 +26,7 @@
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
     {% endif %}
+    <form action="{{ create_roles }}" method="post" id="form-create-roles" style="display:none"></form>
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-user-group">
       <div class="table-responsive">
         <table class="table table-bordered table-hover">
@@ -32,6 +34,7 @@
             <tr>
               <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
               <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+              <td class="text-left">{{ column_role }}</td>
             </tr>
           </thead>
           <tbody>
@@ -44,11 +47,12 @@
                 <input type="checkbox" name="selected[]" value="{{ user_group.user_group_id }}" />
                 {% endif %}</td>
               <td class="text-left"><a href="{{ user_group.edit }}" class="row-title-link">{{ user_group.name }}</a></td>
+              <td class="text-left">{% if user_group.template_name %}<span class="label label-info">{{ user_group.template_name }}</span>{% else %}<span class="text-muted">{{ text_custom_group }}</span>{% endif %}</td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-              <td class="text-center" colspan="2">{{ text_no_results }}</td>
+              <td class="text-center" colspan="3">{{ text_no_results }}</td>
             </tr>
             {% endif %}
           </tbody>

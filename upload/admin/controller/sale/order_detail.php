@@ -106,6 +106,12 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['order_id'] = $order_id;
 		$data['edit_mode'] = !empty($this->request->get['edit']);
+
+		// UI capabilities: read-only roles (accountant, courier, operator) must not
+		// see editing affordances that the server would reject anyway.
+		$data['can_edit'] = $this->userCanModify('sale/order');
+		$data['can_status'] = $this->userCanModify('sale/order', 'sale/order/status');
+		$data['can_shipment'] = $this->userCanModify('sale/order', 'sale/order/shipment');
 		$data['customer_search_url'] = $this->url->link('customer/customer/autocomplete', 'user_token=' . $this->session->data['user_token'], true);
 		$data['attach_url'] = $this->url->link('sale/order_detail/attachCustomer', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true);
 
@@ -954,6 +960,9 @@ class ControllerSaleOrderDetail extends Controller {
 				$this->load->model('localisation/order_status');
 				$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
 
+				$data['can_edit'] = $this->userCanModify('sale/order');
+				$data['can_status'] = $this->userCanModify('sale/order', 'sale/order/status');
+
 				$data['page'] = $page;
 				$data['limit'] = $limit;
 				$data['total'] = $total;
@@ -1024,7 +1033,9 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$json = [];
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
+		// Capability: a role may change the order status without holding the full
+		// "modify" permission of the order (e.g. Courier).
+		if (!$this->userCanModify('sale/order', 'sale/order/status')) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
@@ -1272,11 +1283,17 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$json = [];
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
+		$field = $this->request->post['field'] ?? '';
+
+		// Capability: editing the tracking number alone is allowed without the
+		// full "modify" permission of the order (same capability as shipments).
+		$can_modify = $this->userCanModify('sale/order')
+			|| ($field === 'tracking_number' && $this->userCanModify('sale/order/shipment'));
+
+		if (!$can_modify) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
-			$field = $this->request->post['field'] ?? '';
 			$value = $this->request->post['value'] ?? '';
 
 			$this->load->model('sale/order');
@@ -1968,7 +1985,8 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$json = [];
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
+		// Capability: shipments / tracking numbers (courier, storekeeper).
+		if (!$this->userCanModify('sale/order', 'sale/order/shipment')) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);
@@ -2034,7 +2052,8 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$json = [];
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
+		// Capability: shipments / tracking numbers (courier, storekeeper).
+		if (!$this->userCanModify('sale/order', 'sale/order/shipment')) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
 			$shipment_id = (int)($this->request->post['shipment_id'] ?? 0);
@@ -2312,6 +2331,7 @@ class ControllerSaleOrderDetail extends Controller {
 		return [
 			'shipments'          => $shipments_view,
 			'shipment_products'  => $products_view,
+			'can_shipment'       => $this->userCanModify('sale/order', 'sale/order/shipment'),
 			'shipping_status_id' => (int)$this->config->get('config_order_flow_shipping_status'),
 			'shipping_status'    => $shipping_status,
 			'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
@@ -2334,6 +2354,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		return [
 			'payment_status'             => $status,
+			'can_edit'                   => $this->userCanModify('sale/order'),
 			'payment_status_text'        => $this->language->get('text_payment_status_' . $status),
 			'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($status),
 			'payment_status_header_badge_class' => $this->getPaymentStatusHeaderBadgeClass($status),

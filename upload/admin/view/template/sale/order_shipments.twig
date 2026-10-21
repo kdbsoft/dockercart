@@ -16,9 +16,11 @@
     <div class="dcx-payment-item__row">
       <span class="dcx-shipment-item__tracking"><i data-lucide="truck" width="12" height="12"></i> {{ shipment.tracking_number }}<a href="#" class="dc-copy-btn" data-copy="{{ shipment.tracking_number }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
       <span class="dcx-payment-item__date">{{ shipment.date_added }}</span>
+      {% if can_shipment %}
       <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="deleteShipment({{ shipment.shipment_id }})" title="{{ button_remove_shipment }}">
         <i data-lucide="x" width="11" height="11"></i>
       </button>
+      {% endif %}
     </div>
     {% if shipment.items %}
     <div class="dcx-shipment-item__items">
@@ -63,6 +65,7 @@
 </div>
 {% endif %}
 
+{% if can_shipment %}
 <div class="dcx-payment-add">
   <div class="order-add-title"><i data-lucide="truck" width="15" height="15"></i> {{ button_add_shipment }}</div>
   <div class="dcx-fields">
@@ -104,3 +107,4 @@
     </div>
   </div>
 </div>
+{% endif %}

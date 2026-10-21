@@ -41,12 +41,18 @@
   <div class="text-center" style="padding:16px;color:#999;font-size:13px">{{ text_no_results }}</div>
 {% endif %}
 
+{% if can_edit or can_status %}
 <div class="timeline-note-form">
   <ul class="dcx-pills dcx-pills--timeline" id="timeline-tabs" style="margin-bottom:12px;">
+    {% if can_edit %}
     <li class="active"><a href="#tl-note" data-toggle="tab"><i data-lucide="message-square-plus" width="14" height="14"></i> {{ text_add_note }}</a></li>
-    <li><a href="#tl-history" data-toggle="tab"><i data-lucide="history" width="14" height="14"></i> {{ text_history_add }}</a></li>
+    {% endif %}
+    {% if can_status %}
+    <li{% if not can_edit %} class="active"{% endif %}><a href="#tl-history" data-toggle="tab"><i data-lucide="history" width="14" height="14"></i> {{ text_history_add }}</a></li>
+    {% endif %}
   </ul>
   <div class="tab-content" style="padding-top:12px">
+    {% if can_edit %}
     <div class="tab-pane active" id="tl-note">
       <div class="dcx-fields">
         <textarea class="form-control" id="tl-note-comment" rows="2" placeholder="{{ entry_comment }}"></textarea>
@@ -60,7 +66,9 @@
         </div>
       </div>
     </div>
-    <div class="tab-pane" id="tl-history">
+    {% endif %}
+    {% if can_status %}
+    <div class="tab-pane{% if not can_edit %} active{% endif %}" id="tl-history">
       <div class="dcx-fields">
         <select class="form-control" id="tl-history-status">
           <option value="0">{{ text_select }}</option>
@@ -84,3 +92,5 @@
     </div>
   </div>
 </div>
+{% endif %}
+{% endif %}

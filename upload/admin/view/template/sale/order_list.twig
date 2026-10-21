@@ -11,17 +11,21 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="pull-right">
+            {% if can_modify %}
             {% if customer_groups|length > 1 %}
             <button type="button" id="button-new-order" class="btn btn-primary" data-toggle="modal" data-target="#new-order-modal"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</button>
             {% else %}
             <a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_new_order }}</a>
+            {% endif %}
             {% endif %}
             <button type="button" id="button-export-csv" class="btn btn-success dc-btn-selection">
               <i data-lucide="download" width="16" height="16"></i> {{ button_export_csv }}
               <i data-lucide="loader" width="16" height="16" class="spin" id="csv-export-spinner" style="display:none"></i>
             </button>
             <button type="button" id="button-print" class="btn btn-default dc-btn-selection"><i data-lucide="printer" width="16" height="16"></i> {{ button_print_selected }}</button>
+            {% if can_modify %}
             <button type="button" id="button-delete" class="btn btn-danger dc-btn-selection"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>
+            {% endif %}
           </div>
           <h1 class="page-header__title">{{ heading_title }}</h1>
         </div>
@@ -138,12 +142,16 @@
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.customer }}<br><small class="text-muted">{{ order.customer_type }}</small></td>
                 <td class="text-left" style="padding-top:8px;padding-bottom:8px;">{{ order.date_added }}</td>
                 <td class="text-left">
+                  {% if can_status %}
                   <a href="#" class="js-order-status" data-order-id="{{ order.order_id }}" data-order-view="{{ order.view }}" data-toggle="tooltip" title="{{ text_list_status_change }}" style="text-decoration:none">
                     <span id="os-badge-{{ order.order_id }}" class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
                   </a>
+                  {% else %}
+                  <span id="os-badge-{{ order.order_id }}" class="{{ order.order_status_badge_class }}">{{ order.order_status }}</span>
+                  {% endif %}
                 </td>
-                <td class="text-left"><a href="#" class="js-order-payment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_payment_change }}" style="text-decoration:none"><span id="ps-badge-{{ order.order_id }}" class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span></a>{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px" id="ps-paid-{{ order.order_id }}">{{ order.paid_amount }}</div>{% endif %}</td>
-                <td class="text-left" style="font-size:12px;color:#555"><a href="#" class="js-order-shipment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_shipment_change }}" style="text-decoration:none">{% if order.shipping_status %}<span id="ss-badge-{{ order.order_id }}" class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ order.shipping_shipped_quantity }} / {{ order.shipping_ordered_quantity }}">{{ order.shipping_status_text }}</span><div class="ship-progress"><div id="ss-bar-{{ order.order_id }}" class="ship-progress__bar" style="width: {{ order.shipping_progress_percent }}%"></div></div>{% endif %}</a>{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
+                <td class="text-left">{% if can_modify %}<a href="#" class="js-order-payment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_payment_change }}" style="text-decoration:none">{% endif %}<span id="ps-badge-{{ order.order_id }}" class="{{ order.payment_status_badge_class }}">{{ order.payment_status_text }}</span>{% if can_modify %}</a>{% endif %}{% if order.payment_method %}<div style="font-size:11px;color:#888;margin-top:2px">{{ order.payment_method }}</div>{% endif %}{% if order.paid_amount %}<div style="font-size:11px;color:#888;margin-top:1px" id="ps-paid-{{ order.order_id }}">{{ order.paid_amount }}</div>{% endif %}</td>
+                <td class="text-left" style="font-size:12px;color:#555">{% if can_shipment %}<a href="#" class="js-order-shipment" data-order-id="{{ order.order_id }}" data-toggle="tooltip" title="{{ text_list_shipment_change }}" style="text-decoration:none">{% endif %}{% if order.shipping_status %}<span id="ss-badge-{{ order.order_id }}" class="{{ order.shipping_status_badge_class }}" data-toggle="tooltip" title="{{ order.shipping_shipped_quantity }} / {{ order.shipping_ordered_quantity }}">{{ order.shipping_status_text }}</span><div class="ship-progress"><div id="ss-bar-{{ order.order_id }}" class="ship-progress__bar" style="width: {{ order.shipping_progress_percent }}%"></div></div>{% endif %}{% if can_shipment %}</a>{% endif %}{{ order.shipping_method }}{% if order.tracking_number %}<div style="font-size:11px;color:#888;margin-top:2px;white-space:nowrap"><i data-lucide="truck" width="11" height="11" style="vertical-align:-1px"></i> {{ order.tracking_number|replace({'|': ' | '}) }}</div>{% endif %}</td>
                 <td class="text-center" style="padding-top:8px;padding-bottom:8px;">{{ order.items_count }}</td>
                 <td class="text-right">{{ order.total }}</td>
               </tr>

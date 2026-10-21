@@ -1,10 +1,18 @@
 <?php
 namespace Cart;
 class User {
+	/**
+	 * Group id of the built-in Administrator group. It is an implicit
+	 * superuser: every hasPermission() check passes, so new controllers do not
+	 * need a migration that appends the route to its stored permission JSON.
+	 */
+	const ADMINISTRATOR_GROUP_ID = 1;
+
 	private $user_id;
 	private $user_group_id;
 	private $username;
 	private $permission = array();
+	private $superuser = false;
 	private $db;
 	private $request;
 	private $session;
@@ -23,6 +31,7 @@ class User {
 				$this->user_id = $user_query->row['user_id'];
 				$this->username = $user_query->row['username'];
 				$this->user_group_id = $user_query->row['user_group_id'];
+				$this->superuser = ((int)$user_query->row['user_group_id'] === self::ADMINISTRATOR_GROUP_ID);
 
 				$this->db->query("UPDATE " . DB_PREFIX . "user SET ip = '" . $this->db->escape($this->request->server['REMOTE_ADDR']) . "' WHERE user_id = '" . (int)$this->session->data['user_id'] . "'");
 
@@ -68,6 +77,7 @@ class User {
 		$this->user_id = $user_query->row['user_id'];
 		$this->username = $user_query->row['username'];
 		$this->user_group_id = $user_query->row['user_group_id'];
+		$this->superuser = ((int)$user_query->row['user_group_id'] === self::ADMINISTRATOR_GROUP_ID);
 
 		$user_group_query = $this->db->query("SELECT permission FROM " . DB_PREFIX . "user_group WHERE user_group_id = '" . (int)$user_query->row['user_group_id'] . "'");
 
@@ -101,14 +111,26 @@ class User {
 
 		$this->user_id = '';
 		$this->username = '';
+		$this->superuser = false;
 	}
 
+	/**
+	 * Administrator bypasses the stored permission document entirely.
+	 */
 	public function hasPermission($key, $value) {
+		if ($this->superuser) {
+			return true;
+		}
+
 		if (isset($this->permission[$key])) {
 			return in_array($value, $this->permission[$key]);
 		} else {
 			return false;
 		}
+	}
+
+	public function isSuperuser(): bool {
+		return $this->superuser;
 	}
 
 	public function isLogged() {
