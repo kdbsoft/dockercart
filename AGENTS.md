@@ -11,6 +11,11 @@ App source is in `upload/` (bind-mounted as `/var/www/html`); runtime data lives
 these host-side bind mounts — **changes on the host are immediately visible inside
 containers, no restart needed**. DB table prefix is `oc_`. Current version is in `upload/VERSION`.
 
+Three applications boot from `upload/system/config/*.php`: `catalog` (`upload/index.php`),
+`admin` (`upload/admin/index.php`) and `api` (`upload/api/index.php`). The `api` app reuses
+the admin MVC tree (`DIR_APPLICATION` = `upload/admin/`) with its own pre-actions
+(`startup/api` instead of `startup/login` + `startup/permission`) — see `docs/guide.md` §17.
+
 ## Tooling paths — easy to get wrong
 
 Composer `vendor-dir` is **`./storage/vendor/`** (set in `composer.json`), not `vendor/`.
@@ -30,7 +35,7 @@ CI runs three parallel jobs on push to `main` and on PRs (`.github/workflows/Lin
 
 ```bash
 # 1. PHP syntax (skips generated config.php files)
-find upload -type f -name "*.php" ! -path 'upload/config.php' ! -path 'upload/admin/config.php' -print0 \
+find upload -type f -name "*.php" ! -path 'upload/config.php' ! -path 'upload/admin/config.php' ! -path 'upload/api/config.php' -print0 \
   | xargs -0 -P4 php -l -n
 
 # 2. PHPStan (level 1, scans ./upload/ only — see phpstan.neon)
@@ -49,7 +54,7 @@ PHPStan `-a ./storage/vendor/autoload.php` is required (registers the custom ext
 These are written at container start by `docker/entrypoint.sh` from `.env` and overwritten on
 every boot:
 
-- `upload/config.php`, `upload/admin/config.php` — app configs
+- `upload/config.php`, `upload/admin/config.php`, `upload/api/config.php` — app configs
 - `robots.txt`, `sitemap.xml`
 - `storage/vendor/` — Composer deps
 Change behavior by editing `.env` (then `make restart`) or the entrypoint heredoc / Tailwind
@@ -121,6 +126,26 @@ Tailwind utilities so the built output stays in sync.
   `{access, modify}` and would drop it.
 - Read-only/limited roles must not see editing UI: pass `can_edit` / `can_status` /
   `can_shipment` flags to the template instead of letting actions fail server-side.
+- **Admin REST API** (`/api/v1/…`) has no permission model of its own: each key
+  borrows the group's `access` (read) / `modify` (write) permissions. Endpoints are
+  only reachable if they are listed in `Dockercart\Api\Routes::TABLE` together with
+  the required route — adding a controller there *is* the permission grant.
+  A key either belongs to an admin user (`oc_api_key.user_id > 0` — then it acts
+  with the **current** group of that owner, and a disabled/deleted owner invalidates
+  it) or is shared (`user_id = 0` — it uses the stored `user_group_id`).
+  Keys are managed under **System → API → Keys** (sidebar: *System → API →
+  Keys / Request log / Documentation* — the documentation is a **standalone
+  page**: its own document, no panel chrome, but the panel session is still
+  required) and per user in the **user form**
+  (`user/user/api_key*` actions, gated by the `setting/api_key` permission).
+  Errors are RFC 9457 problem documents (`application/problem+json`); single-resource
+  reads emit `ETag` (validated via `If-Match` on writes, `Controller::assertPreconditions()`)
+  and POST supports `Idempotency-Key` (`oc_api_idempotency`). `GET /v1/openapi.json`
+  is the one public endpoint (documented data, no credentials); everything else needs a
+  key. No settings endpoint exists by design (a partial
+  `editSetting('config', …)` wipes ~100 options) and stock is only written through
+  `DockercartWarehouse::setTotalQuantity()`; order status changes never accept `override`
+  (a refused transition is `409 invalid_transition`).
 
 ## Code conventions (differ from typical PHP defaults)
 
@@ -132,6 +157,8 @@ Tailwind utilities so the built output stays in sync.
 - MVC paths:
   - Catalog: `upload/catalog/{controller,model,view/theme/dockercart/template,language}/{section}/{name}.{php,twig}`
   - Admin:   `upload/admin/{controller,model,view/template,language}/{section}/{name}.{php,twig}`
+  - Admin REST API: `upload/admin/controller/api/{section}/{name}.php` (routed by the
+    `api` app, wired in `upload/system/library/dockercart/api/routes.php`)
 - Locales to keep in sync: `en-gb`, `ru-ua`, `uk-ua` (catalog and admin).
   Mirror any language string changes across all matching `{catalog,admin}/language/{locale}/` files.
 
@@ -223,6 +250,14 @@ Preview with `npm run release:dry-run`.
 
 ## Notes
 
+- **New API endpoint checklist**: add it to `upload/system/library/dockercart/api/routes.php`
+  (method, path, route, action, permission, `public` flag only for the OpenAPI document),
+  implement the action under `upload/admin/controller/api/`, build single resources with
+  `$this->respondResource()` and guard writes with `$this->assertPreconditions()` (so
+  ETag/If-Match stay consistent), document it in `upload/api/openapi.json`, and reuse the
+  admin model for the work (do not call HTML form controllers as API handlers).
+  `upload/api/config.php` is generated by the entrypoint, so `docker/entrypoint.sh` and
+  `docker/apache.conf` changes need `make restart`; nginx config is bind-mounted (reload only).
 - `build.xml` is a leftover OpenCart ant build file — not used by this project; ignore it.
 - `.opencode/`, `node_modules/`, `plan/`, `.cache/`, `.phpunit.cache/` are tool/local-only. Multi-step
   agent plans are written to `.opencode/plans/` (or the legacy `plan/` dir) — these are local
