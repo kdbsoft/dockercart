@@ -1,0 +1,120 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            {% if can_retry %}<a href="{{ retry }}" class="btn btn-primary"><i data-lucide="rotate-ccw" width="16" height="16"></i> {{ button_retry }}</a>{% endif %}
+            <a href="{{ back }}" class="btn btn-default"><i data-lucide="arrow-left" width="16" height="16"></i> {{ button_back }}</a>
+          </div>
+          <a href="{{ back }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">{{ text_log }} #{{ delivery.delivery_id }}</span>
+          </a>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if not delivery.subscription_status %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-warning"><i data-lucide="triangle-alert" width="16" height="16"></i> {{ text_subscription_disabled }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+        <div class="dcx-shell">
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="scroll-text" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ delivery.event_type }}</div>
+                <div class="dcx-panel-subtitle">{{ delivery.event_id }}</div>
+              </div>
+              <div class="dcx-panel-head__actions">
+                <span class="label {% if delivery.status == 'delivered' %}label-success{% elseif delivery.status == 'failed' %}label-danger{% elseif delivery.status == 'cancelled' %}label-default{% else %}label-warning{% endif %}">{{ delivery.status_text }}</span>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <dl class="dl-horizontal" style="margin-bottom:0;">
+                <dt>{{ entry_subscription }}</dt>
+                <dd><a href="{{ subscription_link }}">{{ delivery.subscription_name }}</a><div class="text-muted small"><code>{{ delivery.url }}</code></div></dd>
+                <dt>{{ text_attempts_used }}</dt>
+                <dd>{{ delivery.attempts }}</dd>
+                <dt>{{ column_date }}</dt><dd>{{ delivery.date_added }}</dd>
+                <dt>{{ text_next_attempt }}</dt><dd>{{ delivery.next_attempt_at ? delivery.next_attempt_at : '—' }}</dd>
+                {% if delivery.locked_until %}<dt>{{ text_locked }}</dt><dd>{{ delivery.locked_until }}</dd>{% endif %}
+                <dt>{{ column_duration }}</dt><dd>{{ delivery.duration_ms }} ms</dd>
+                <dt>{{ column_response }}</dt>
+                <dd>
+                  {% if delivery.response_code %}<code>{{ delivery.response_code }}</code>{% endif %}
+                  {% if delivery.last_error %}<div class="text-danger">{{ delivery.last_error }}</div>{% endif %}
+                </dd>
+              </dl>
+              {% if delivery.response_body %}
+              <div class="dcx-field" style="margin-top:16px;">
+                <label class="dcx-label">{{ text_response }}</label>
+                <pre style="max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.response_body }}</pre>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="file-json" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_payload }}</div>
+                <div class="dcx-panel-subtitle">{{ delivery.event_type }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <pre id="webhook-payload" style="max-height:520px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.payload_pretty }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+        <div class="dcx-shell">
+          <div class="dcx-sidebar-card">
+            <div class="dcx-sidebar-card__header">
+              <div class="dcx-sidebar-card__header-icon"><i data-lucide="info" width="16" height="16"></i></div>
+              <h3 class="dcx-sidebar-card__title">{{ text_info }}</h3>
+            </div>
+            <div class="dcx-sidebar-card__body">
+              <dl class="dl-horizontal" style="margin-bottom:0;">
+                <dt>{{ column_event_id }}</dt><dd style="word-break:break-all;"><code>{{ delivery.event_id }}</code></dd>
+                <dt>{{ column_event }}</dt><dd>{{ delivery.is_test ? text_test : '—' }}</dd>
+                <dt>{{ column_status }}</dt><dd>{{ delivery.status_text }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

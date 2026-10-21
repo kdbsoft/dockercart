@@ -805,7 +805,7 @@ class DockercartWarehouse {
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$new_qty . "' WHERE `stock_id` = '" . (int)$lock->row['stock_id'] . "'");
 
-		$this->recordMovement($warehouse_id, $product_id, $variant_id, $applied, $type, $context);
+		$this->journalMovement($warehouse_id, $product_id, $variant_id, $applied, $type, $context, $new_qty);
 
 		return ['applied' => (float)$applied, 'quantity' => (float)$new_qty];
 	}
@@ -1056,9 +1056,51 @@ class DockercartWarehouse {
 	}
 
 	/**
-	 * Write a stock movement journal row.
+	 * Write a stock movement journal row and publish stock.changed.
+	 *
+	 * This is the single choke point for stock events: every library path
+	 * (adjustStock*, setTotalQuantity, moveStock, order transitions, returns,
+	 * transfers, audit backfills) and the admin stock matrix call it. It must
+	 * run inside the caller's transaction; the outbox row is then committed
+	 * (or rolled back) together with the stock change.
+	 *
+	 * @return int movement_id (0 when the insert failed)
 	 */
-	protected function recordMovement(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context): void {
+	public function journalMovement(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context = [], ?float $quantity_after = null): int {
+		$movement_id = $this->recordMovement($warehouse_id, $product_id, $variant_id, $delta, $type, $context);
+
+		if ($movement_id <= 0 || abs($delta) < 0.0001) {
+			return $movement_id;
+		}
+
+		if ($quantity_after === null) {
+			$quantity_after = $this->getRowQuantity($warehouse_id, $product_id, $variant_id);
+		}
+
+		$dispatcher = new \Dockercart\Webhook\Dispatcher($this->registry);
+		$dispatcher->emit('stock.changed', [
+			'warehouse_id' => $warehouse_id,
+			'product_id'   => $product_id,
+			'variant_id'   => $variant_id,
+			'delta'        => round($delta, 4),
+			'quantity'     => round((float)$quantity_after, 4),
+			'type'         => $type,
+			'reference'    => (string)($context['reference'] ?? ''),
+			'order_id'     => (int)($context['order_id'] ?? 0),
+			'transfer_id'  => (int)($context['transfer_id'] ?? 0),
+			'movement_id'  => $movement_id,
+			'version'      => $movement_id,
+		]);
+
+		return $movement_id;
+	}
+
+	/**
+	 * Write a stock movement journal row.
+	 *
+	 * @return int movement_id
+	 */
+	protected function recordMovement(int $warehouse_id, int $product_id, int $variant_id, float $delta, string $type, array $context): int {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock_movement` SET
 			`warehouse_id` = '" . (int)$warehouse_id . "',
 			`product_id` = '" . (int)$product_id . "',
@@ -1071,6 +1113,8 @@ class DockercartWarehouse {
 			`user_id` = '" . (int)($context['user_id'] ?? 0) . "',
 			`comment` = '" . $this->db->escape((string)($context['comment'] ?? '')) . "',
 			`date_added` = NOW()");
+
+		return (int)$this->db->getLastId();
 	}
 
 	/**
@@ -1123,30 +1167,40 @@ class DockercartWarehouse {
 		$default_warehouse_id = $this->getDefaultWarehouseId();
 		$backfilled = 0;
 
-		$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
-			WHERE p.`subtract` = '1' AND p.`quantity` > 0
-			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_configurable` pc WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1')
-			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = p.`product_id`)");
+		$this->db->query("START TRANSACTION");
 
-		foreach ($products->rows as $row) {
-			$product_id = (int)$row['product_id'];
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . $product_id . "', `variant_id` = '0', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
-			$this->recordMovement($default_warehouse_id, $product_id, 0, (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0]);
-			$backfilled++;
+		try {
+			$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
+				WHERE p.`subtract` = '1' AND p.`quantity` > 0
+				AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_configurable` pc WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1')
+				AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = p.`product_id`)");
+
+			foreach ($products->rows as $row) {
+				$product_id = (int)$row['product_id'];
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . $product_id . "', `variant_id` = '0', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+				$this->journalMovement($default_warehouse_id, $product_id, 0, (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0], (float)$row['quantity']);
+				$backfilled++;
+			}
+
+			$variants = $this->db->query("SELECT pv.`product_id`, pv.`variant_id`, pv.`quantity` FROM `" . DB_PREFIX . "product_variant` pv
+				INNER JOIN `" . DB_PREFIX . "product_configurable` pc ON (pc.`product_id` = pv.`product_id` AND pc.`is_configurable` = '1')
+				WHERE pv.`status` = '1' AND pv.`subtract` = '1' AND pv.`quantity` > 0
+				AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = pv.`product_id` AND ws.`variant_id` = pv.`variant_id`)");
+
+			foreach ($variants->rows as $row) {
+				$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . (int)$row['product_id'] . "', `variant_id` = '" . (int)$row['variant_id'] . "', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
+				$this->journalMovement($default_warehouse_id, (int)$row['product_id'], (int)$row['variant_id'], (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0], (float)$row['quantity']);
+				$backfilled++;
+			}
+
+			$this->db->query("COMMIT");
+
+			return $backfilled;
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+
+			throw $e;
 		}
-
-		$variants = $this->db->query("SELECT pv.`product_id`, pv.`variant_id`, pv.`quantity` FROM `" . DB_PREFIX . "product_variant` pv
-			INNER JOIN `" . DB_PREFIX . "product_configurable` pc ON (pc.`product_id` = pv.`product_id` AND pc.`is_configurable` = '1')
-			WHERE pv.`status` = '1' AND pv.`subtract` = '1' AND pv.`quantity` > 0
-			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = pv.`product_id` AND ws.`variant_id` = pv.`variant_id`)");
-
-		foreach ($variants->rows as $row) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock` SET `warehouse_id` = '" . (int)$default_warehouse_id . "', `product_id` = '" . (int)$row['product_id'] . "', `variant_id` = '" . (int)$row['variant_id'] . "', `quantity` = '" . (float)$row['quantity'] . "', `unlimited` = '0', `lead_time` = '0'");
-			$this->recordMovement($default_warehouse_id, (int)$row['product_id'], (int)$row['variant_id'], (float)$row['quantity'], 'adjustment', ['reference' => 'audit-backfill', 'user_id' => 0]);
-			$backfilled++;
-		}
-
-		return $backfilled;
 	}
 
 	/**
