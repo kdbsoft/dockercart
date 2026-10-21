@@ -125,6 +125,50 @@ class ModelCheckoutOrder extends Model {
 				$stock_reservation->bindToOrder($session_id, (int)$order_id);
 			}
 
+			// Webhook outbox: order.created is written in this transaction, so
+			// it cannot be lost between COMMIT and the delivery worker.
+			$initial_status_id = (int)(isset($data['order_status_id']) ? $data['order_status_id'] : 0);
+
+			if ($initial_status_id <= 0) {
+				$initial_status_id = (int)$this->config->get('config_order_status_id');
+			}
+
+			$warehouse_ids = array();
+			$item_count = 0;
+
+			if (!empty($data['products']) && is_array($data['products'])) {
+				$item_count = count($data['products']);
+
+				foreach ($data['products'] as $order_product) {
+					$warehouse_id = (int)(isset($order_product['warehouse_id']) ? $order_product['warehouse_id'] : 0);
+
+					if ($warehouse_id > 0 && !in_array($warehouse_id, $warehouse_ids, true)) {
+						$warehouse_ids[] = $warehouse_id;
+					}
+				}
+			}
+
+			$webhook_dispatcher = new \Dockercart\Webhook\Dispatcher($this->registry);
+			$webhook_dispatcher->emit('order.created', array(
+				'order_id'        => (int)$order_id,
+				'store_id'        => (int)(isset($data['store_id']) ? $data['store_id'] : 0),
+				'customer_id'     => (int)(isset($data['customer_id']) ? $data['customer_id'] : 0),
+				'order_status_id' => $initial_status_id,
+				'total'           => (float)(isset($data['total']) ? $data['total'] : 0),
+				'currency_code'   => (string)(isset($data['currency_code']) ? $data['currency_code'] : ''),
+				'payment_code'    => (string)(isset($data['payment_code']) ? $data['payment_code'] : ''),
+				'shipping_code'   => (string)(isset($data['shipping_code']) ? $data['shipping_code'] : ''),
+				'item_count'      => $item_count,
+				'warehouse_ids'   => $warehouse_ids,
+				'version'         => date('Y-m-d H:i:s'),
+			), array(
+				'full' => function () use ($order_id) {
+					$payload = new \Dockercart\Webhook\OrderPayload($this->registry);
+
+					return $payload->full((int)$order_id);
+				},
+			));
+
 			$this->db->query("COMMIT");
 		} catch (\Exception $e) {
 			$this->db->query("ROLLBACK");
@@ -518,6 +562,10 @@ class ModelCheckoutOrder extends Model {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', comment_key = '" . $this->db->escape($comment_key) . "', comment_params = '" . $this->db->escape(is_array($comment_params) ? json_encode($comment_params) : '') . "', date_added = NOW()");
 			}
 
+			// The history row id is the event version. Capture it now: later
+			// inserts in this transaction change lastInsertId().
+			$order_history_id = $record_history ? (int)$this->db->getLastId() : 0;
+
 			// If old order status is the processing or complete status but new status is not then commence restock, and remove coupon, voucher and reward history
 			if ($was_processing && !$is_processing) {
 				// Restock: single write path through the warehouse source of truth.
@@ -570,6 +618,40 @@ class ModelCheckoutOrder extends Model {
 			if ($was_complete && !$is_complete) {
 				$dockercart_reward = new \DockercartReward($this->registry);
 				$dockercart_reward->revokeOrderReward((int)$order_id, 1.0);
+			}
+
+			// Webhook outbox: a real status transition only. 0 is the "not set"
+			// placeholder used by editOrder() and the legacy confirm flow, so a
+			// 0 → initial-status assignment is not a flow transition.
+			$old_status_id = (int)$order_info['order_status_id'];
+
+			if ($order_history_id > 0 && $old_status_id > 0 && $old_status_id !== (int)$order_status_id) {
+				$order_flow = new \OrderFlow(array(
+					'steps'       => (array)$this->config->get('config_order_flow_steps'),
+					'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+				));
+
+				$cancelled_statuses = (array)$this->config->get('config_cancelled_status');
+
+				$webhook_dispatcher = new \Dockercart\Webhook\Dispatcher($this->registry);
+				$webhook_dispatcher->emit('order.status_changed', array(
+					'order_id'        => (int)$order_id,
+					'store_id'        => (int)$order_info['store_id'],
+					'from_status_id'  => $old_status_id,
+					'to_status_id'    => (int)$order_status_id,
+					'override'        => (bool)$override,
+					'source'          => 'catalog',
+					'is_cancelled'    => in_array((int)$order_status_id, $cancelled_statuses, true),
+					'is_final'        => $order_flow->isFinalStep((int)$order_status_id),
+					'is_terminal'     => $order_flow->isTerminal((int)$order_status_id),
+					'version'         => $order_history_id,
+				), array(
+					'full' => function () use ($order_id) {
+						$payload = new \Dockercart\Webhook\OrderPayload($this->registry);
+
+						return $payload->full((int)$order_id);
+					},
+				));
 			}
 
 				$this->db->query("COMMIT");
