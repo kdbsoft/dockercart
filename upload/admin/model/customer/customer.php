@@ -77,6 +77,25 @@ class ModelCustomerCustomer extends Model {
 
 		return $query->row;
 	}
+
+	/**
+	 * Order aggregates of a customer: number and value of placed orders (any
+	 * status above 0, exactly like the order list) plus the first/last order
+	 * dates. Used by the API customer card, where the panel counts orders one
+	 * page at a time.
+	 *
+	 * @return array{order_count: int, order_total: float, first_order: ?string, last_order: ?string}
+	 */
+	public function getCustomerStats($customer_id) {
+		$query = $this->db->query("SELECT COUNT(*) AS order_count, COALESCE(SUM(total), 0) AS order_total, MIN(date_added) AS first_order, MAX(date_added) AS last_order FROM " . DB_PREFIX . "order WHERE customer_id = '" . (int)$customer_id . "' AND order_status_id > '0'");
+
+		return array(
+			'order_count' => (int)$query->row['order_count'],
+			'order_total' => (float)$query->row['order_total'],
+			'first_order' => $query->row['first_order'],
+			'last_order'  => $query->row['last_order'],
+		);
+	}
 	
 	public function getCustomers($data = array()) {
 		$sql = "SELECT *, CONCAT(c.firstname, ' ', c.lastname) AS name, cgd.name AS customer_group FROM " . DB_PREFIX . "customer c LEFT JOIN " . DB_PREFIX . "customer_group_description cgd ON (c.customer_group_id = cgd.customer_group_id)";
@@ -119,6 +138,14 @@ class ModelCustomerCustomer extends Model {
 
 		if (!empty($data['filter_date_added'])) {
 			$implode[] = "DATE(c.date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
+		}
+
+		if (!empty($data['filter_date_start'])) {
+			$implode[] = "DATE(c.date_added) >= DATE('" . $this->db->escape($data['filter_date_start']) . "')";
+		}
+
+		if (!empty($data['filter_date_end'])) {
+			$implode[] = "DATE(c.date_added) <= DATE('" . $this->db->escape($data['filter_date_end']) . "')";
 		}
 
 		if ($implode) {
