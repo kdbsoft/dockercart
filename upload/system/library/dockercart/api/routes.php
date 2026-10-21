@@ -87,6 +87,23 @@ final class Routes {
 		['GET',    '/v1/warehouses/{warehouse_id}/stock', 'api/warehouse/warehouses', 'stock', ['warehouse/stock', 'warehouse/warehouse'], []],
 		['POST',   '/v1/stock/adjustments',               'api/warehouse/stock',      'adjustments', [], ['warehouse/stock']],
 
+		// --------------------------------------------------------------- webhooks
+		// The requested "webhooks:read|write" scope is expressed with the panel's
+		// own permission model: reads need the group's "access" permission on
+		// setting/webhook, writes its "modify" permission.
+		['GET',    '/v1/webhooks',                        'api/webhooks', 'index',      ['setting/webhook'], []],
+		['POST',   '/v1/webhooks',                        'api/webhooks', 'add',        [], ['setting/webhook']],
+		['GET',    '/v1/webhooks/events',                 'api/webhooks', 'events',     ['setting/webhook'], []],
+		['GET',    '/v1/webhooks/{webhook_id}',           'api/webhooks', 'get',        ['setting/webhook'], []],
+		['PUT',    '/v1/webhooks/{webhook_id}',           'api/webhooks', 'edit',       [], ['setting/webhook']],
+		['PATCH',  '/v1/webhooks/{webhook_id}',           'api/webhooks', 'patch',      [], ['setting/webhook']],
+		['DELETE', '/v1/webhooks/{webhook_id}',           'api/webhooks', 'delete',     [], ['setting/webhook']],
+		['POST',   '/v1/webhooks/{webhook_id}/rotate',    'api/webhooks', 'rotate',     [], ['setting/webhook']],
+		['POST',   '/v1/webhooks/{webhook_id}/test',      'api/webhooks', 'test',       [], ['setting/webhook']],
+		['GET',    '/v1/webhooks/{webhook_id}/deliveries', 'api/webhooks', 'deliveries', ['setting/webhook'], []],
+		['GET',    '/v1/webhook-deliveries/{delivery_id}', 'api/webhooks', 'delivery',  ['setting/webhook'], []],
+		['POST',   '/v1/webhook-deliveries/{delivery_id}/retry', 'api/webhooks', 'retry', [], ['setting/webhook']],
+
 		// -------------------------------------------------------------------- blog
 		['GET',    '/v1/blog/posts',                      'api/blog/posts', 'index',  ['extension/module/dockercart_blog_post'], []],
 		['POST',   '/v1/blog/posts',                      'api/blog/posts', 'add',    [], ['extension/module/dockercart_blog_post']],
