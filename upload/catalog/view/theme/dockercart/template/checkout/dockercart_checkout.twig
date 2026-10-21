@@ -477,7 +477,8 @@ select[disabled] {
               <div class="flex items-center">
                 <label class="flex items-center gap-3 cursor-pointer">
                   <!-- The agree checkbox is validated explicitly in JS; remove generic 'required' markers to avoid duplicate errors -->
-                  <input type="checkbox" id="agree" class="w-5 h-5 accent-primary cursor-pointer">
+                  <!-- Pre-checked by default: the terms agreement is accepted unless the customer unchecks it explicitly -->
+                  <input type="checkbox" id="agree" class="w-5 h-5 accent-primary cursor-pointer" checked>
                   <span class="text-sm text-text-secondary">
                     {% if agree_id %}
                       {{ text_agree_read|default('I have read and agree to the') }} <button type="button" id="show-terms-modal" class="text-primary hover:underline font-medium">{{ text_terms }}</button>
