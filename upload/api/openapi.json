@@ -52,6 +52,10 @@
     {
       "name": "Meta",
       "description": "Reference data for building payloads."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Outbound webhook subscriptions, the event catalogue and the delivery journal."
     }
   ],
   "paths": {
@@ -5281,6 +5285,894 @@
         ]
       }
     },
+    "/v1/webhooks": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "List subscriptions",
+        "description": "Lists webhook subscriptions. The plain secret is never returned — build the receiver signature from the secret you received on create/rotate.",
+        "operationId": "listWebhooks",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Webhook"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name contains."
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Endpoint contains."
+          },
+          {
+            "name": "event",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only subscriptions that include this event type."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "description": "1 = enabled, 0 = disabled."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Create a subscription",
+        "description": "Creates a subscription and returns its HMAC secret **once** (field `secret`). Only an encrypted copy is stored, so a lost secret must be rotated. The endpoint URL is validated immediately: http/https, ports 80/443, no credentials, and private/loopback/link-local addresses are refused.",
+        "operationId": "createWebhook",
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "description": "Client-generated key scoped to this endpoint. A retry with the same key and body replays the first answer (header `Idempotent-Replay: true`) instead of queuing the event twice; reusing a key with a different body answers 409."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/events": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Event catalogue",
+        "description": "Every event type DockerCart can emit, its thin payload fields and the filter keys a subscription may use. `implemented: false` marks events that are documented but not emitted yet — they cannot be subscribed explicitly (wildcards are allowed). Descriptions are English (the API contract); the panel renders the same events in the operator's language.",
+        "operationId": "listWebhookEvents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookEvent"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Single subscription",
+        "description": "Returns the subscription with its delivery counters and the `secret_hint` (first 10 characters of the secret, for support).",
+        "operationId": "getWebhook",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong validator of this representation; send it back as If-Match on the next write."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Replace a subscription",
+        "description": "Full replace (like saving the panel form). `name`, `url` and `events` are required; `filters`, `full_payload` and `status` fall back to their defaults when omitted. The secret is unchanged — use `/rotate` for that. Send the ETag as If-Match.",
+        "operationId": "replaceWebhook",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong validator of this representation; send it back as If-Match on the next write."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ETag from the matching GET. A stale value answers 412; a missing value is rejected with 428 only when the deployment enables `config_api_require_if_match`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookInput"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Update a subscription",
+        "description": "Partial update: only the supplied fields change, the rest keeps its value. The secret is unchanged. Send the ETag as If-Match.",
+        "operationId": "updateWebhook",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong validator of this representation; send it back as If-Match on the next write."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ETag from the matching GET. A stale value answers 412; a missing value is rejected with 428 only when the deployment enables `config_api_require_if_match`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookPatch"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Delete a subscription",
+        "description": "Deletes the subscription **and** its delivery journal: the journal belongs to the subscription and is removed with it. Other subscriptions keep their history. Send the ETag as If-Match.",
+        "operationId": "deleteWebhook",
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "428": {
+            "$ref": "#/components/responses/PreconditionRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ETag from the matching GET. A stale value answers 412; a missing value is rejected with 428 only when the deployment enables `config_api_require_if_match`."
+          }
+        ]
+      }
+    },
+    "/v1/webhooks/{webhook_id}/rotate": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Rotate the secret",
+        "description": "Issues a new HMAC secret and returns it once. Pending deliveries are signed with the new secret, so update the receiver before (or at) rotation. Rotating does not disable the subscription or drop queued events.",
+        "operationId": "rotateWebhookSecret",
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Webhook"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "description": "Client-generated key scoped to this endpoint. A retry with the same key and body replays the first answer (header `Idempotent-Replay: true`) instead of queuing the event twice; reusing a key with a different body answers 409."
+          }
+        ]
+      }
+    },
+    "/v1/webhooks/{webhook_id}/test": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Queue a test event",
+        "description": "Queues a synthetic `webhook.test` event (`is_test: true`). It is signed and retried exactly like a real event but is excluded from the auto-disable counter. Nothing is sent from this request: the scheduler worker delivers it within a minute, so the answer is 202.",
+        "operationId": "testWebhook",
+        "responses": {
+          "202": {
+            "description": "Queued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookTestResult"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "description": "Client-generated key scoped to this endpoint. A retry with the same key and body replays the first answer (header `Idempotent-Replay: true`) instead of queuing the event twice; reusing a key with a different body answers 409."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Optional label echoed in `data.message`."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhook_id}/deliveries": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Delivery journal of a subscription",
+        "description": "Every delivery attempt with its status, attempt count and the receiver's response code. Payloads are omitted here — read a single delivery for the exact body.",
+        "operationId": "listWebhookDeliveries",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDelivery"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Webhook id."
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exact event type."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "sending",
+                "delivered",
+                "failed",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "event_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Event id (idempotency key of the receiver)."
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
+      }
+    },
+    "/v1/webhook-deliveries/{delivery_id}": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Single delivery",
+        "description": "Returns the stored request body (exactly the bytes that were signed and sent), the receiver response and the retry state. Retries reuse this body verbatim, so a subscription edit never changes a queued delivery.",
+        "operationId": "getWebhookDelivery",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong validator of this representation; send it back as If-Match on the next write."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookDeliveryDetail"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "delivery_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Delivery id."
+          }
+        ]
+      }
+    },
+    "/v1/webhook-deliveries/{delivery_id}/retry": {
+      "post": {
+        "tags": [
+          "Webhooks"
+        ],
+        "summary": "Retry a failed delivery",
+        "description": "Re-queues a **failed** delivery with the same row, `event_id` and payload (the receiver is expected to deduplicate by event id). A delivery that is not `failed`, or whose subscription is disabled, answers 409. The scheduler worker sends it within a minute.",
+        "operationId": "retryWebhookDelivery",
+        "responses": {
+          "202": {
+            "description": "Queued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebhookTestResult"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        },
+        "parameters": [
+          {
+            "name": "delivery_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Delivery id."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "description": "Client-generated key scoped to this endpoint. A retry with the same key and body replays the first answer (header `Idempotent-Replay: true`) instead of queuing the event twice; reusing a key with a different body answers 409."
+          }
+        ]
+      }
+    },
     "/v1/openapi.json": {
       "get": {
         "tags": [
@@ -8206,6 +9098,388 @@
             "type": "string"
           }
         }
+      },
+      "WebhookInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "events"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Absolute http(s) endpoint on port 80/443 without credentials. Private, loopback and link-local targets are refused."
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "Implemented event types. Wildcards (`order.*`, `stock.*`, `product.*`, `*`) are allowed."
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "description": "Optional filter document evaluated at emit time against the top-level `data` keys: scalar = exact match, array = any-of, scalar filter on an array value = membership. Unknown keys answer 422."
+          },
+          "full_payload": {
+            "type": "boolean",
+            "default": false,
+            "description": "Adds `data.object` (order header without contact data, products, totals, payments) to order events. Personal data is never included."
+          },
+          "status": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 1
+          }
+        }
+      },
+      "WebhookPatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          "full_payload": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        },
+        "description": "Only the supplied fields are changed."
+      },
+      "Webhook": {
+        "type": "object",
+        "properties": {
+          "webhook_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "full_payload": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "secret_hint": {
+            "type": "string",
+            "description": "First 10 characters of the secret (never the secret itself)."
+          },
+          "secret": {
+            "type": "string",
+            "description": "Present **only** in the create and rotate responses."
+          },
+          "consecutive_failures": {
+            "type": "integer"
+          },
+          "disabled_reason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "gone",
+              "repeated_failures",
+              null
+            ],
+            "description": "Set when the subscription was disabled automatically."
+          },
+          "disabled_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "last_success_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "last_failure_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deliveries": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "pending": {
+                "type": "integer"
+              },
+              "failed": {
+                "type": "integer"
+              }
+            }
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "api_key_id": {
+                "type": "integer",
+                "description": "API key that created the subscription (0 for panel-created rows)."
+              },
+              "user_id": {
+                "type": "integer"
+              }
+            }
+          },
+          "date_added": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "date_modified": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Event type, e.g. `order.status_changed`."
+          },
+          "domain": {
+            "type": "string",
+            "description": "Wildcard domain (`order`, `stock`, `product`, …)."
+          },
+          "description": {
+            "type": "string"
+          },
+          "implemented": {
+            "type": "boolean",
+            "description": "false = documented, not emitted yet."
+          },
+          "data_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Thin payload keys."
+          },
+          "filter_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys accepted in `filters`."
+          }
+        },
+        "description": "One event type. `description` is the canonical English text; the panel translates the same entry via `description_key`."
+      },
+      "WebhookDelivery": {
+        "type": "object",
+        "properties": {
+          "delivery_id": {
+            "type": "integer"
+          },
+          "webhook_id": {
+            "type": "integer"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Idempotency key of the event (`evt_…`); identical on every retry."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "sending",
+              "delivered",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "is_test": {
+            "type": "boolean"
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "response_code": {
+            "type": "integer",
+            "nullable": true
+          },
+          "last_error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Machine code of the failure: `timeout`, `connection_failed`, `ssrf_blocked`, `secret_unavailable`, `subscription_disabled`, `http_<code>`, …"
+          },
+          "duration_ms": {
+            "type": "integer"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "next_attempt_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "date_added": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookDeliveryDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebhookDelivery"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "payload": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The exact JSON body that was signed and sent (retries reuse it verbatim)."
+              },
+              "response_body": {
+                "type": "string",
+                "nullable": true,
+                "description": "First 2 KB of the receiver response."
+              },
+              "webhook": {
+                "type": "object",
+                "properties": {
+                  "webhook_id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "WebhookTestResult": {
+        "type": "object",
+        "properties": {
+          "delivery_id": {
+            "type": "integer"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending"
+            ]
+          }
+        }
       }
     },
     "responses": {
@@ -8331,6 +9605,16 @@
       },
       "InsufficientStock": {
         "description": "A stock adjustment would take the warehouse quantity below zero. The whole batch is rolled back (nothing is written) and `fields` names the offending lines.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "The resource is in a state that does not allow the action (e.g. retrying a delivery that is not `failed`, or testing a disabled subscription).",
         "content": {
           "application/problem+json": {
             "schema": {
