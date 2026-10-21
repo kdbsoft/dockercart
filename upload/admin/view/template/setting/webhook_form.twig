@@ -1,0 +1,230 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          {% if can_edit %}
+          <div class="pull-right">
+            {% if test %}<a href="{{ test }}" class="btn btn-default"><i data-lucide="send" width="16" height="16"></i> {{ button_test }}</a>{% endif %}
+            {% if rotate %}<a href="{{ rotate }}" class="btn btn-default" data-confirm="{{ text_rotate_confirm }}"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_rotate }}</a>{% endif %}
+            <button type="submit" form="form-webhook" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+          {% endif %}
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">{{ text_form }}</span>
+          </a>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if disabled_reason %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-warning"><i data-lucide="triangle-alert" width="16" height="16"></i> {{ text_disabled_reason }}: {{ disabled_reason }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if new_secret %}
+    <div class="row">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="alert alert-warning">
+          <h4><i data-lucide="key-round" width="16" height="16"></i> {{ text_secret_once }}</h4>
+          <p>{{ text_secret_help }}</p>
+          <div class="input-group" style="max-width: 720px;">
+            <input type="text" id="input-new-secret" class="form-control" value="{{ new_secret }}" readonly="readonly" spellcheck="false" onclick="this.select();" />
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" id="button-copy-secret"><i data-lucide="copy" width="14" height="14"></i> {{ button_copy }}</button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-webhook">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="webhook" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_subscription }}</div>
+                  <div class="dcx-panel-subtitle">{{ text_subscription_help }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
+                  <div class="dcx-field required">
+                    <label class="dcx-label" for="input-name">{{ entry_name }}</label>
+                    <input type="text" name="name" value="{{ name }}" id="input-name" class="form-control" maxlength="128" placeholder="{{ entry_name }}" />
+                    {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                    <div class="dcx-field-help">{{ help_name }}</div>
+                  </div>
+                  <div class="dcx-field required">
+                    <label class="dcx-label" for="input-url">{{ entry_url }}</label>
+                    <input type="text" name="url" value="{{ url }}" id="input-url" class="form-control" maxlength="500" placeholder="{{ text_url_hint }}" spellcheck="false" />
+                    {% if error_url %}<div class="text-danger">{{ error_url }}</div>{% endif %}
+                    <div class="dcx-field-help">{{ help_url }}</div>
+                  </div>
+
+                  <div class="dcx-field required">
+                    <label class="dcx-label">{{ entry_events }}</label>
+                    <div class="dcx-checkbox-list" style="max-height:none;">
+                      {% for event in event_options %}
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="events[]" value="{{ event.type }}" {% if event.selected %}checked="checked"{% endif %} />
+                          <code>{{ event.type }}</code>
+                          <span class="text-muted small">— {{ event.description }}</span>
+                        </label>
+                      </div>
+                      {% endfor %}
+                    </div>
+                    {% if error_events %}<div class="text-danger">{{ error_events }}</div>{% endif %}
+                    <div class="dcx-field-help">{{ text_events_help }} {{ text_wildcard_help }}</div>
+                  </div>
+
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-filters">{{ entry_filters }}</label>
+                    <textarea name="filters" rows="3" id="input-filters" class="form-control" spellcheck="false" placeholder='{{ text_filters_hint }}'>{{ filters }}</textarea>
+                    {% if error_filters %}<div class="text-danger">{{ error_filters }}</div>{% endif %}
+                    <div class="dcx-field-help">{{ text_filters_help }}</div>
+                  </div>
+
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-full-payload">{{ entry_full_payload }}</label>
+                    <select name="full_payload" id="input-full-payload" class="form-control">
+                      <option value="0" {% if not full_payload %}selected{% endif %}>{{ text_disabled }}</option>
+                      <option value="1" {% if full_payload %}selected{% endif %}>{{ text_enabled }}</option>
+                    </select>
+                    <div class="dcx-field-help">{{ text_full_payload_help }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% if planned_events %}
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="calendar-clock" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_planned }}</div>
+                  <div class="dcx-panel-subtitle">{{ text_events_help }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="small text-muted">
+                  {% for event in planned_events %}
+                  <div><code>{{ event.type }}</code> — {{ event.description }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-lg-4 col-xl-3">
+          <div class="dcx-shell">
+            <div class="dcx-sidebar-card">
+              <div class="dcx-sidebar-card__header">
+                <div class="dcx-sidebar-card__header-icon"><i data-lucide="power" width="16" height="16"></i></div>
+                <h3 class="dcx-sidebar-card__title">{{ text_status_card }}</h3>
+              </div>
+              <div class="dcx-sidebar-card__body">
+                <div class="dcx-sidebar-card__field">
+                  <label class="dcx-sidebar-card__label" for="input-status">{{ entry_status }}</label>
+                  <select name="status" id="input-status" class="form-control">
+                    <option value="1" {% if status %}selected{% endif %}>{{ text_enabled }}</option>
+                    <option value="0" {% if not status %}selected{% endif %}>{{ text_disabled }}</option>
+                  </select>
+                  <div class="dcx-sidebar-card__help">{{ text_status_help }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="dcx-sidebar-card">
+              <div class="dcx-sidebar-card__header">
+                <div class="dcx-sidebar-card__header-icon"><i data-lucide="info" width="16" height="16"></i></div>
+                <h3 class="dcx-sidebar-card__title">{{ text_info }}</h3>
+              </div>
+              <div class="dcx-sidebar-card__body">
+                <dl class="dl-horizontal" style="margin-bottom:0;">
+                  <dt>{{ text_secret_hint }}</dt><dd>{% if secret_hint %}<code>{{ secret_hint }}…</code>{% else %}<span class="text-muted">—</span>{% endif %}</dd>
+                  <dt>{{ text_created }}</dt><dd>{{ date_added ? date_added : '—' }}</dd>
+                  <dt>{{ text_last_success }}</dt><dd>{{ last_success_at ? last_success_at : text_never }}</dd>
+                  <dt>{{ text_last_failure }}</dt><dd>{{ last_failure_at ? last_failure_at : text_never }}</dd>
+                  <dt>{{ text_consecutive_failures }}</dt><dd>{{ consecutive_failures }}</dd>
+                </dl>
+              </div>
+            </div>
+            <div class="dcx-sidebar-card">
+              <div class="dcx-sidebar-card__header">
+                <div class="dcx-sidebar-card__header-icon"><i data-lucide="shield-check" width="16" height="16"></i></div>
+                <h3 class="dcx-sidebar-card__title">{{ text_security }}</h3>
+              </div>
+              <div class="dcx-sidebar-card__body">
+                <div class="dcx-sidebar-card__help">{{ text_security_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-sidebar-card">
+              <div class="dcx-sidebar-card__header">
+                <div class="dcx-sidebar-card__header-icon"><i data-lucide="truck" width="16" height="16"></i></div>
+                <h3 class="dcx-sidebar-card__title">{{ text_delivery }}</h3>
+              </div>
+              <div class="dcx-sidebar-card__body">
+                <div class="dcx-sidebar-card__help">{{ text_delivery_help }}</div>
+                <a class="btn btn-default btn-block" href="{{ log }}"><i data-lucide="scroll-text" width="14" height="14"></i> {{ button_log }}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div><script type="text/javascript"><!--
+(function () {
+	var copyButton = document.getElementById('button-copy-secret');
+
+	if (copyButton) {
+		copyButton.addEventListener('click', function () {
+			var input = document.getElementById('input-new-secret');
+			input.select();
+			document.execCommand('copy');
+			copyButton.classList.add('btn-success');
+		});
+	}
+
+	document.querySelectorAll('[data-confirm]').forEach(function (element) {
+		element.addEventListener('click', function (event) {
+			if (!confirm(element.getAttribute('data-confirm'))) {
+				event.preventDefault();
+			}
+		});
+	});
+})();
+//--></script>
+{{ footer }}
