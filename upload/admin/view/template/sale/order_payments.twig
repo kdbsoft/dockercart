@@ -35,7 +35,7 @@
         {{ payment.is_reversal ? '−' : '+' }} {{ payment.amount }}
       </span>
       <span class="dcx-payment-item__date">{{ payment.date_added }}</span>
-      {% if not payment.is_reversal %}
+      {% if not payment.is_reversal and can_edit %}
       <button type="button" class="btn btn-xs btn-danger btn--icon dcx-payment-item__remove" onclick="removePayment({{ payment.order_payment_id }})" data-toggle="tooltip" title="{{ button_remove_payment }}">
         <i data-lucide="x" width="11" height="11"></i>
       </button>
@@ -52,6 +52,7 @@
 <div class="text-muted" style="font-size:12px;margin-top:8px">{{ text_no_payments }}</div>
 {% endif %}
 
+{% if can_edit %}
 <div class="dcx-payment-add">
   <div class="order-add-title"><i data-lucide="credit-card" width="15" height="15"></i> {{ button_add_payment }}</div>
   <div class="dcx-fields">
@@ -84,8 +85,9 @@
     </div>
   </div>
 </div>
+{% endif %}
 
-{% if paid_amount_raw > 0 %}
+{% if paid_amount_raw > 0 and can_edit %}
 <div class="dcx-payment-add dcx-refund-add">
   <div class="order-add-title"><i data-lucide="undo-2" width="15" height="15"></i> {{ button_add_refund }}</div>
   <div class="dcx-fields">

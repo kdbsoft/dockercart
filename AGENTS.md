@@ -101,6 +101,27 @@ Tailwind utilities so the built output stays in sync.
   or the admin "Display Errors" checkbox), not in code. PHP `display_errors` in the image
   is `Off` (`docker/php.prod.ini`, baked into the image).
 
+## Admin permissions & roles
+
+- `oc_user_group.permission` holds two route lists: `access` (page opens) and `modify`
+  (changes save). `startup/permission.php` gates routes on `access`.
+- **Administrator (`user_group_id = 1`) is an implicit superuser** — `Cart\User::hasPermission()`
+  always returns `true`. Do **not** write migrations that append new routes to the admin
+  group; they are unnecessary.
+- Standard roles are defined once in `upload/system/library/dockercart/roles.php`
+  (`DockercartRoles`): sales manager, support operator, content manager, marketer, courier,
+  storekeeper, accountant. **Added an admin controller? Add its route to the matching
+  template(s)** there — that is the replacement for the old "grant route to Administrator"
+  migrations. Groups are created on demand (Users → User Groups → "Create standard roles",
+  idempotent via `oc_user_group.template_code`).
+- Action-level permissions are capability pseudo routes stored in the `modify` list and
+  checked with `Controller::userCanModify('sale/order', 'sale/order/status')` (parent route
+  OR capability). Current capabilities: `sale/order/status`, `sale/order/shipment`. A third
+  JSON key is **not** an option — the JSON repair migrations rebuild the document as
+  `{access, modify}` and would drop it.
+- Read-only/limited roles must not see editing UI: pass `can_edit` / `can_status` /
+  `can_shipment` flags to the template instead of letting actions fail server-side.
+
 ## Code conventions (differ from typical PHP defaults)
 
 - **Indentation: tabs** (enforced by `.php-cs-fixer.php` `setIndent("\t")`). Spaces will fail CI.

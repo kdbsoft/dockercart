@@ -585,6 +585,45 @@ See [`SECURITY.md`](../SECURITY.md) for the full policy.
 - Ensure `./storage/` is not publicly accessible
 - Image execution is disabled in Apache — do not remove this restriction
 
+### Admin Roles & Permissions
+
+Admin users belong to a group (`oc_user_group`). A group stores two route lists in
+`oc_user_group.permission` (JSON): `access` (the page may be opened, checked by
+`admin/controller/startup/permission.php`) and `modify` (changes may be saved).
+
+**Administrator is an implicit superuser.** `Cart\User::hasPermission()` returns `true`
+for `user_group_id = 1` regardless of the stored JSON, so every page — including pages
+added by future updates — is available to it and no “add the route to the admin group”
+migration is needed. The group cannot be deleted.
+
+**Standard roles come from templates.** `upload/system/library/dockercart/roles.php`
+(`DockercartRoles`) is the single source of truth for the ready-made role sets: sales
+manager, support operator, content manager, SEO/marketer, courier, storekeeper and
+accountant (read-only). Create them with **Users → User Groups → “Create standard roles”**:
+the action is idempotent and matches existing groups by `oc_user_group.template_code`,
+so renaming a group never produces a duplicate. A template can also be applied to any
+group in its edit form (“Role Template”), after which the permissions can be tuned by hand.
+
+**Action-level permissions (capabilities).** Instead of a third permission list, a
+capability is a pseudo route stored in the `modify` list and checked with
+`Controller::userCanModify()`, which accepts the parent route as an alternative:
+
+| Capability | Route | Allows |
+| --- | --- | --- |
+| Order status | `sale/order/status` | `sale/order/addHistory`, `sale/order_detail/addHistory` |
+| Shipments / tracking | `sale/order/shipment` | `sale/order_detail/addShipment`, `deleteShipment`, tracking-number `updateField` |
+
+So a group holding `modify` on `sale/order` keeps full control, while a Courier group
+holds only the two capabilities: it can move an order through its status flow and add a
+tracking number, but cannot delete orders, edit prices, take payments or issue refunds.
+Read-only roles get `access` without `modify`; the order pages then hide the editing
+affordances (`can_edit` / `can_status` / `can_shipment` flags).
+
+**When you add a new admin controller**, add its route to the templates in
+`DockercartRoles::templates()` so the standard roles can reach it. Routes under
+`startup/*`, `event/*` and `mail/*` are not navigable pages, are never permission
+checked, and are hidden from the group form.
+
 ---
 
 ## 11. Configurable Products & Variants

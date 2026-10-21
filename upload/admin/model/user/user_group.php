@@ -1,13 +1,25 @@
 <?php
 class ModelUserUserGroup extends Model {
 	public function addUserGroup($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "user_group SET name = '" . $this->db->escape($data['name']) . "', permission = '" . (isset($data['permission']) ? $this->db->escape(json_encode($data['permission'])) : '') . "'");
+		$template_code = isset($data['template_code']) && $data['template_code'] !== '' ? "'" . $this->db->escape($data['template_code']) . "'" : 'NULL';
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "user_group SET name = '" . $this->db->escape($data['name']) . "', template_code = " . $template_code . ", permission = '" . (isset($data['permission']) ? $this->db->escape(json_encode($data['permission'])) : '') . "'");
 	
 		return $this->db->getLastId();
 	}
 
 	public function editUserGroup($user_group_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "user_group SET name = '" . $this->db->escape($data['name']) . "', permission = '" . (isset($data['permission']) ? $this->db->escape(json_encode($data['permission'])) : '') . "' WHERE user_group_id = '" . (int)$user_group_id . "'");
+		$sql = "UPDATE " . DB_PREFIX . "user_group SET name = '" . $this->db->escape($data['name']) . "'";
+
+		// A missing "permission" key means "keep the stored document" (the
+		// Administrator group is a superuser and its form has no picker).
+		if (isset($data['permission'])) {
+			$sql .= ", permission = '" . $this->db->escape(json_encode($data['permission'])) . "'";
+		}
+
+		$sql .= " WHERE user_group_id = '" . (int)$user_group_id . "'";
+
+		$this->db->query($sql);
 	}
 
 	public function deleteUserGroup($user_group_id) {
@@ -18,11 +30,56 @@ class ModelUserUserGroup extends Model {
 		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "user_group WHERE user_group_id = '" . (int)$user_group_id . "'");
 
 		$user_group = array(
-			'name'       => $query->row['name'],
-			'permission' => json_decode($query->row['permission'], true)
+			'name'          => $query->row['name'],
+			'template_code' => isset($query->row['template_code']) ? (string)$query->row['template_code'] : '',
+			'permission'    => json_decode($query->row['permission'], true)
 		);
 
 		return $user_group;
+	}
+
+	/**
+	 * Returns the user group of the given template code (0 rows if none).
+	 */
+	public function getUserGroupByTemplateCode(string $template_code) {
+		$query = $this->db->query("SELECT DISTINCT * FROM " . DB_PREFIX . "user_group WHERE template_code = '" . $this->db->escape($template_code) . "'");
+
+		return $query->row;
+	}
+
+	/**
+	 * Creates the standard role groups that do not exist yet.
+	 *
+	 * Existing groups are detected by `template_code`, so renaming a group does
+	 * not resurrect a duplicate. Idempotent: a second run creates nothing.
+	 *
+	 * @param array<string, array{name: string, permission: array}> $templates code => resolved template
+	 * @return array{created: string[], existing: string[]} group names
+	 */
+	public function installTemplates(array $templates): array {
+		$created = array();
+		$existing = array();
+
+		foreach ($templates as $code => $template) {
+			if ($this->getUserGroupByTemplateCode($code)) {
+				$existing[] = $template['name'];
+
+				continue;
+			}
+
+			$this->addUserGroup(array(
+				'name'          => $template['name'],
+				'template_code' => $code,
+				'permission'    => $template['permission']
+			));
+
+			$created[] = $template['name'];
+		}
+
+		return array(
+			'created'  => $created,
+			'existing' => $existing
+		);
 	}
 
 	public function getUserGroups($data = array()) {

@@ -422,6 +422,11 @@ class ControllerSaleOrder extends Controller {
 		$data['export_url'] = str_replace('&amp;', '&', $this->url->link('sale/order/exportCsv', 'user_token=' . $this->session->data['user_token'], true));
 		$data['text_list_subtitle'] = $this->language->get('text_list_subtitle');
 
+		// UI capabilities: read-only roles must not see actions the server rejects.
+		$data['can_modify'] = $this->userCanModify('sale/order');
+		$data['can_status'] = $this->userCanModify('sale/order', 'sale/order/status');
+		$data['can_shipment'] = $this->userCanModify('sale/order', 'sale/order/shipment');
+
 		$this->load->model('customer/customer_group');
 		$data['customer_groups'] = $this->model_customer_customer_group->getCustomerGroups();
 		$data['customer_group_default'] = (int)$this->config->get('config_customer_group_id');
@@ -966,7 +971,9 @@ class ControllerSaleOrder extends Controller {
 
 		$json = [];
 
-		if (!$this->user->hasPermission('modify', 'sale/order')) {
+		// Capability: a role may change the order status without holding the full
+		// "modify" permission of the order (e.g. Courier).
+		if (!$this->userCanModify('sale/order', 'sale/order/status')) {
 			$json['error'] = $this->language->get('error_permission');
 		} else {
 			$order_id = (int)($this->request->get['order_id'] ?? 0);

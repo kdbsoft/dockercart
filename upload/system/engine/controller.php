@@ -42,6 +42,35 @@ abstract class Controller {
 	}
 
 	/**
+	 * Whether the current admin user may modify at least one of the given routes.
+	 *
+	 * Used for capability checks, where a pseudo route (e.g. "sale/order/status")
+	 * grants a single action of a controller that is otherwise modify-gated:
+	 *
+	 *   $this->userCanModify('sale/order', 'sale/order/status')
+	 *
+	 * A group holding the parent route keeps working unchanged, while a role such
+	 * as Courier can be granted the capability alone.
+	 *
+	 * @param string ...$routes routes to accept, any of them is enough
+	 */
+	protected function userCanModify(string ...$routes): bool {
+		$user = $this->registry->get('user');
+
+		if (!is_object($user)) {
+			return false;
+		}
+
+		foreach ($routes as $route) {
+			if ($user->hasPermission('modify', $route)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Shared per-admin saved filter support (Shopify-style tabs).
 	 *
 	 * Builds the tabs (an "All" tab plus the admin's saved filters) for the
