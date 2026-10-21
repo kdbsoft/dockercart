@@ -1,0 +1,153 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            {% if can_edit %}<a href="{{ clear }}" class="btn btn-danger" data-confirm="{{ text_clear_confirm }}"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_clear }}</a>{% endif %}
+            <a href="{{ back }}" class="btn btn-default"><i data-lucide="arrow-left" width="16" height="16"></i> {{ button_back }}</a>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="dcx-shell">
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="filter" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_filter }}</div>
+                <div class="dcx-panel-subtitle">{{ text_filter_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ filter }}" method="get" id="form-filter">
+                <input type="hidden" name="route" value="setting/api_log" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <div class="dcx-fields">
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field" style="flex:1 1 240px;">
+                      <label class="dcx-label" for="input-key">{{ entry_key }}</label>
+                      <select name="api_key_id" id="input-key" class="form-control">
+                        <option value="">{{ text_all }}</option>
+                        {% for key in keys %}
+                        <option value="{{ key.api_key_id }}" {% if key.api_key_id == filter_api_key_id %}selected{% endif %}>{{ key.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="dcx-field" style="flex:0 1 160px;">
+                      <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                      <input type="number" name="status" value="{{ filter_status ? filter_status : '' }}" id="input-status" class="form-control" placeholder="200, 404…" />
+                    </div>
+                    <div class="dcx-field" style="flex:0 1 200px;">
+                      <label class="dcx-label" for="input-error-code">{{ entry_error_code }}</label>
+                      <input type="text" name="error_code" value="{{ filter_error_code }}" id="input-error-code" class="form-control" placeholder="not_found" />
+                    </div>
+                  </div>
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field" style="flex:1 1 260px;">
+                      <label class="dcx-label" for="input-path">{{ entry_path }}</label>
+                      <input type="text" name="path" value="{{ filter_path }}" id="input-path" class="form-control" placeholder="/v1/products" />
+                    </div>
+                    <div class="dcx-field" style="flex:0 1 200px;">
+                      <label class="dcx-label" for="input-date">{{ entry_date }}</label>
+                      <input type="date" name="date_added" value="{{ filter_date_added }}" id="input-date" class="form-control" />
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="search" width="16" height="16"></i> {{ button_filter }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="scroll-text" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_log }}</div>
+                <div class="dcx-panel-subtitle">{{ text_log_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              {% if logs is not empty %}
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_date }}</th>
+                      <th>{{ column_key }}</th>
+                      <th>{{ column_method }}</th>
+                      <th>{{ column_path }}</th>
+                      <th>{{ column_status }}</th>
+                      <th class="text-right">{{ column_duration }}</th>
+                      <th>{{ column_ip }}</th>
+                      <th>{{ column_request_id }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for log in logs %}
+                    <tr class="{% if log.is_error %}danger{% endif %}">
+                      <td style="white-space:nowrap;">{{ log.date_added }}</td>
+                      <td><a href="{{ log.key_link }}">{{ log.key_name ? log.key_name : '—' }}</a> <span class="text-muted small">#{{ log.api_key_id }}</span></td>
+                      <td><span class="label label-default">{{ log.method }}</span></td>
+                      <td><code>{{ log.path }}</code>{% if log.error_code %}<div class="small text-danger">{{ log.error_code }}</div>{% endif %}</td>
+                      <td>{{ log.status_code }}</td>
+                      <td class="text-right">{{ log.duration_ms }} ms</td>
+                      <td>{{ log.ip }}</td>
+                      <td><span class="text-muted small">{{ log.request_id }}</span></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination-wrap">
+                <div class="pagination-wrap__pages">{{ pagination }}</div>
+                <div class="pagination-wrap__results">{{ results }}</div>
+              </div>
+              {% else %}
+              <p class="text-muted">{{ text_no_logs }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+document.querySelectorAll('[data-confirm]').forEach(function (element) {
+	element.addEventListener('click', function (event) {
+		if (!confirm(element.getAttribute('data-confirm'))) {
+			event.preventDefault();
+		}
+	});
+});
+//--></script>
+{{ footer }}

@@ -1,0 +1,308 @@
+/*
+ * DockerCart admin — standalone API documentation page
+ * (System → API → Documentation).
+ *
+ * The Swagger UI is a foreign application with its own stylesheet, so it gets
+ * a clean page of its own instead of being squeezed into the panel layout.
+ * This file styles only the page chrome (the bar on top) and aligns the
+ * Swagger UI with the panel: the admin font, the panel colors and neutral
+ * code chips.
+ */
+
+/* ---------- Page ---------- */
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body.dc-api-docs {
+	background: var(--dc-body-bg, #f5f7f9);
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-sans);
+	font-size: 14px;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Top bar ---------- */
+
+.dc-docs-bar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 20px;
+	background: var(--dc-surface);
+	border-bottom: 1px solid var(--dc-border);
+	position: sticky;
+	top: 0;
+	z-index: 20;
+}
+
+.dc-docs-bar__back,
+.dc-docs-bar__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--dc-text-muted);
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.dc-docs-bar__back:hover,
+.dc-docs-bar__link:hover {
+	color: var(--dc-primary);
+}
+
+.dc-docs-bar__title {
+	color: var(--dc-text-dark);
+	font-size: 15px;
+	font-weight: 700;
+}
+
+.dc-docs-bar__url {
+	display: inline-flex;
+	align-items: center;
+}
+
+.dc-docs-bar__url code {
+	background: var(--dc-surface-alt);
+	border: 1px solid var(--dc-border-soft);
+	border-radius: 5px;
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-mono);
+	font-size: 11px;
+	padding: 2px 6px;
+}
+
+.dc-docs-bar__spacer {
+	flex: 1 1 auto;
+}
+
+/* ---------- Content ---------- */
+
+.dc-docs-page {
+	background: var(--dc-surface);
+	border: 1px solid var(--dc-border);
+	border-radius: var(--dc-radius-xl);
+	margin: 20px;
+	padding: 24px 28px 32px;
+}
+
+/* ---------- Swagger UI ---------- */
+
+.swagger-ui {
+	font-family: var(--dc-font-sans);
+	color: var(--dc-text-dark);
+}
+
+.swagger-ui .wrapper {
+	max-width: none;
+	padding: 0;
+}
+
+.swagger-ui .topbar {
+	display: none;
+}
+
+/* Info block (title, description) */
+.swagger-ui .info {
+	margin: 0 0 16px;
+}
+
+.swagger-ui .info .title {
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-sans);
+	font-size: 20px;
+	font-weight: 700;
+	margin: 0;
+}
+
+.swagger-ui .info .title small {
+	background: var(--dc-surface-alt);
+	border: 1px solid var(--dc-border-soft);
+	border-radius: var(--dc-radius-full);
+	color: var(--dc-text-muted);
+	display: inline-block;
+	font-family: var(--dc-font-sans);
+	font-size: 11px;
+	font-weight: 600;
+	margin: 0 0 0 6px;
+	padding: 1px 8px;
+	position: relative;
+	top: -1px;
+	vertical-align: middle;
+}
+
+.swagger-ui .info .title small.version-stamp {
+	background: var(--dc-primary-light);
+	border-color: transparent;
+	color: var(--dc-primary);
+}
+
+.swagger-ui .info .title small pre {
+	color: inherit;
+	font-family: inherit;
+	margin: 0;
+	padding: 0;
+}
+
+.swagger-ui .info p,
+.swagger-ui .info table,
+.swagger-ui .info li {
+	color: var(--dc-text-muted);
+	font-family: var(--dc-font-sans);
+	font-size: 13px;
+}
+
+.swagger-ui .info p {
+	margin: 0 0 8px;
+}
+
+.swagger-ui .info strong {
+	color: var(--dc-text-dark);
+	font-weight: 600;
+}
+
+.swagger-ui .info a {
+	color: var(--dc-primary);
+	font-family: var(--dc-font-sans);
+	font-size: 13px;
+}
+
+/* Inline code of the description */
+.swagger-ui .markdown code,
+.swagger-ui .renderedMarkdown code {
+	background: var(--dc-surface-alt);
+	border: 1px solid var(--dc-border-soft);
+	border-radius: var(--dc-radius-md);
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-mono);
+	font-size: 12px;
+	font-weight: 500;
+	padding: 1px 5px;
+}
+
+/* Servers / Authorize */
+.swagger-ui .scheme-container {
+	background: transparent;
+	box-shadow: none;
+	margin: 0 0 14px;
+	padding: 14px 0 0;
+}
+
+.swagger-ui .scheme-container .schemes {
+	align-items: flex-end;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.swagger-ui .scheme-container .schemes > .schemes-server-container > label {
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-sans);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.swagger-ui .scheme-container .schemes > .schemes-server-container > label select {
+	border: 1px solid var(--dc-border);
+	border-radius: var(--dc-radius-md);
+	color: var(--dc-text-dark);
+	font-size: 12px;
+	height: auto;
+	padding: 4px 24px 4px 8px;
+}
+
+/* Tags (endpoints) */
+.swagger-ui .opblock-tag-section {
+	margin-bottom: 0;
+}
+
+.swagger-ui .opblock-tag {
+	border-bottom: 1px solid var(--dc-border);
+	font-family: var(--dc-font-sans);
+	padding: 8px 0;
+}
+
+.swagger-ui .opblock-tag:hover {
+	background: transparent;
+}
+
+.swagger-ui .opblock-tag span {
+	color: var(--dc-text-dark);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.swagger-ui .opblock-tag small {
+	color: var(--dc-text-muted);
+	font-family: var(--dc-font-sans);
+}
+
+/* Operations */
+.swagger-ui .opblock {
+	border-radius: var(--dc-radius-lg);
+	box-shadow: none;
+	margin: 0 0 8px;
+}
+
+.swagger-ui .opblock .opblock-summary {
+	border-radius: var(--dc-radius-lg);
+	padding: 6px 12px;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+	color: var(--dc-text-muted);
+	font-family: var(--dc-font-sans);
+	font-size: 13px;
+}
+
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-path__deprecated {
+	font-family: var(--dc-font-mono);
+	font-size: 13px;
+}
+
+.swagger-ui table thead tr td,
+.swagger-ui table thead tr th {
+	border-bottom-color: var(--dc-border);
+	color: var(--dc-text-muted);
+	font-family: var(--dc-font-sans);
+	font-size: 12px;
+}
+
+.swagger-ui table tbody tr td {
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-sans);
+	font-size: 13px;
+}
+
+.swagger-ui .parameter__name {
+	font-family: var(--dc-font-mono);
+	font-size: 13px;
+}
+
+/* Try it out */
+.swagger-ui .btn {
+	font-size: 13px;
+}
+
+.swagger-ui input[type=text],
+.swagger-ui input[type=password],
+.swagger-ui input[type=email],
+.swagger-ui textarea,
+.swagger-ui select {
+	border: 1px solid var(--dc-border);
+	border-radius: var(--dc-radius-md);
+	color: var(--dc-text-dark);
+	font-family: var(--dc-font-sans);
+	font-size: 13px;
+}
+
+.swagger-ui .btn.execute {
+	background: var(--dc-primary);
+	border-color: var(--dc-primary);
+	color: #fff;
+}
