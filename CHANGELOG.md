@@ -1,3 +1,14 @@
+## [3.34.0](https://github.com/kdbsoft/dockercart/compare/v3.33.1...v3.34.0) (2026-10-21)
+
+### Features
+
+* **admin:** add API key, request log and documentation pages ([57d10ed](https://github.com/kdbsoft/dockercart/commit/57d10ed74502b1689bbb7be7363519ba65e0e905))
+* **admin:** add role templates and action-level permissions ([5c554cb](https://github.com/kdbsoft/dockercart/commit/5c554cb863620a4ed2245fabaa4d491881fd39b8))
+* **api:** add the admin REST API v1 ([101063c](https://github.com/kdbsoft/dockercart/commit/101063c4a4b6cab965e253ce3baa5b9b13ef1b49))
+* **checkout:** pre-check the terms agreement checkbox ([ed2de69](https://github.com/kdbsoft/dockercart/commit/ed2de690378b6b393e5c5195fffc41ab86ebaa80))
+* **customer:** add order aggregates and date range filters ([bc05aaa](https://github.com/kdbsoft/dockercart/commit/bc05aaa7f58ceef0e8a3f39c3ec109eb4a240c3d))
+* **warehouse:** add batch stock adjustments and reserved lookups ([6e0c191](https://github.com/kdbsoft/dockercart/commit/6e0c191d72f88feefd8b762dd52f51778e546a86))
+
 ## [3.33.1](https://github.com/kdbsoft/dockercart/compare/v3.33.0...v3.33.1) (2026-10-19)
 
 ### Bug Fixes
