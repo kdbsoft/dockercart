@@ -21,6 +21,7 @@
 15. [Product Returns (full / partial / exchange)](#15-product-returns-full--partial--exchange)
 16. [Warehouses & Dropshipping](#16-warehouses--dropshipping)
 17. [Admin REST API](#17-admin-rest-api)
+18. [Webhooks](#18-webhooks)
 
 ---
 
@@ -1398,3 +1399,236 @@ check while reviewing an endpoint change:
 php -r '$s=json_decode(file_get_contents("upload/api/openapi.json"),true); echo count($s["paths"]), " paths\n";'
 ```
 
+
+---
+
+## 18. Webhooks
+
+Outbound event notifications next to the pull REST API: integrations receive
+`order.created`, `order.status_changed` and `stock.changed` instead of polling
+(`/v1/orders`, `/v1/warehouses/{id}/stock`).
+
+### Outbox, not inline sending
+
+The event is written to `oc_dockercart_webhook_delivery` **inside the business
+transaction** (`Dockercart\Webhook\Dispatcher::emit()`), together with the data
+change. Nothing is sent from the request: a `COMMIT` without a send can be
+retried, a send without a `COMMIT` loses the event.
+
+- the dispatcher never opens a transaction (MySQL would implicitly commit the
+  caller's one), never does HTTP and never throws — a webhook problem can never
+  roll back an order or a stock movement (errors go to `storage/logs/webhook.log`);
+- the row stores the **exact JSON body** that is sent, so a retry (or a
+  subscription edit) cannot change what the receiver gets;
+- fan-out (subscriptions + filters) is evaluated at emit time;
+- `INSERT IGNORE` on `(subscription_id, event_id)` keeps a re-emitted event from
+  being delivered twice.
+
+### Emit anchors (single choke points)
+
+| Event | Emitted from |
+|---|---|
+| `order.created` | `catalog/model/checkout/order.php::addOrder()` before `COMMIT` (never the duplicate-claim path) |
+| `order.status_changed` | `admin/model/sale/order.php::addOrderHistory()` and `catalog/model/checkout/order.php::addOrderHistory()`, before `COMMIT`; only for a real `from ≠ to` change with `to > 0` |
+| `stock.changed` | `DockercartWarehouse::journalMovement()` — the only place that writes `oc_warehouse_stock_movement`, so every path (order/return/transfer/adjustment/API batch/audit backfill) emits |
+
+`stock.changed` uses `movement_id` as `version` and the admin stock matrix
+(`ModelWarehouseStock::setCell()`, `applyCellUpdates()`, backfills) now journals
+through the same method instead of inserting movement rows itself.
+
+### Delivery contract
+
+```
+POST <subscription url>
+Content-Type: application/json; charset=utf-8
+User-Agent: DockerCart-Webhook/1.0
+X-DockerCart-Event: order.status_changed
+X-DockerCart-Event-Id: evt_01J…
+X-DockerCart-Delivery-Id: 42
+X-DockerCart-Timestamp: 1792588800
+X-DockerCart-Signature: sha256=<hmac>
+X-DockerCart-Attempt: 1
+
+{"id":"evt_01J…","type":"order.status_changed","occurred_at":"2026-10-21T10:15:00Z",
+ "data":{"order_id":1234,"store_id":0,"from_status_id":132,"to_status_id":133,
+         "override":false,"source":"admin","is_cancelled":false,"is_final":false,
+         "is_terminal":false,"version":88123}}
+```
+
+- **Signature**: `sha256=` + `hash_hmac('sha256', $timestamp . '.' . $raw_body, $secret)`
+  (verify against the raw body, not a re-serialized array). Retries get a fresh
+  timestamp/signature, the same body and the same `event_id`. Reject stale
+  timestamps (≤ 5 min is a sane window).
+- **Idempotency**: `event_id` is in the body and the header. Duplicates are
+  expected; deduplicate by it.
+- **Ordering is not guaranteed.** `occurred_at` plus `data.version`
+  (`oc_order_history.order_history_id` / `oc_warehouse_stock_movement.movement_id`)
+  lets a receiver drop stale events.
+- **Thin payload by default.** With `full_payload = 1` order events add
+  `data.object` (order header, products + options, totals, payments). It is
+  **PII-free** by design: no name/e-mail/phone/addresses and no free-text
+  comments — fetch those through `GET /api/v1/orders/{id}`, which is permission
+  checked and journalled.
+- **Language.** The payload contains no UI strings: the only human-readable
+  text in `data.object` (product names, option values, total titles, payment
+  method) is the snapshot saved when the order was created, i.e. historical data
+  in the **customer's** language — it is never re-translated (that would rewrite
+  an invoice). `data.object.language_id`, `language_code` and `language_name`
+  tell the receiver which language that snapshot is in; show it as-is or
+  localize on your side. The event *catalogue* in the panel
+  (System → API → Webhooks) is translated into the operator's language, while
+  `GET /v1/webhooks/events` serves the canonical English descriptions (the API
+  and its OpenAPI document are English by contract).
+- Wildcard `order.cancelled` does not exist: it is `order.status_changed` with
+  `is_terminal: true` (and `is_cancelled` from `config_cancelled_status`).
+
+### Retries, failures, auto-disable
+
+Worker: `bin/dockercart_webhook_deliver.php`, system scheduler task
+`webhook_deliver` (`* * * * *`, hidden from the scheduler UI). Each run recovers
+stale `sending` rows, claims a bounded batch with a conditional `UPDATE`
+(`status → sending`, `attempts + 1`, `locked_until`), sends sequentially and
+journals status/response/duration.
+
+| Answer | Result |
+|---|---|
+| `2xx` | `delivered`, `consecutive_failures` reset |
+| `408`, `425`, `429`, `5xx`, timeout, DNS/connect error | retried |
+| other `4xx` | `failed` at once (retrying cannot help) |
+| `410 Gone` | subscription disabled immediately (`disabled_reason = gone`) |
+
+Retry delays are `1 m / 5 m / 30 m / 2 h / 12 h`; after
+`config_webhook_max_attempts` attempts (default 6 = first + 5 retries) the row
+becomes `failed`. `config_webhook_disable_after` consecutive `failed`
+deliveries (default 4) disable the subscription (`repeated_failures`) and cancel
+its pending rows — visible in the panel with the reason. Test events
+(`webhook.test`) are delivered through the same path but never count towards
+auto-disable.
+
+### SSRF protection
+
+Subscription URLs are untrusted input:
+
+- syntax checked at save time — `http`/`https` only, ports 80/443, no
+  `user:pass@`, hostname must be a plain hostname or an IP literal (decimal/hex
+  IPv4 spellings are refused);
+- **re-resolved at send time** (A + AAAA); every address must be public —
+  loopback, private, link-local, CGNAT, ULA, documentation and NAT64 blocks are
+  rejected (`last_error = ssrf_blocked`);
+- the validated address is pinned with `CURLOPT_RESOLVE` (so DNS cannot be
+  re-bound between check and request), redirects are not followed, proxy env
+  vars are ignored, TLS verification stays on, connect timeout 3 s and the total
+  timeout comes from `config_webhook_timeout` (default 10 s).
+
+`WEBHOOK_ALLOW_PRIVATE=1` in the worker's (and, while creating a subscription,
+the panel's) environment bypasses the address *and* port checks for local
+development (`php -S 127.0.0.1:9999 receiver.php`). It is never read from the
+database and only the worker sends.
+
+### Subscriptions & secrets
+
+`oc_dockercart_webhook_subscription` holds `url`, `events` (JSON, wildcards
+allowed), `filters` (JSON), `full_payload`, `status`, the failure counters and
+`created_by_api_key_id` / `created_by_user_id`.
+
+Secrets are `whsec_` + 64 hex, encrypted with `config_encryption` (AES-256-GCM,
+`system/library/encryption.php`) and returned **once** — on create and on rotate.
+`GET` exposes only `secret_hint` (first 10 chars). A missing/rotated encryption
+key makes deliveries fail with `secret_unavailable` rather than send unsigned.
+
+Filters are matched against top-level `data` keys at emit time: scalar = exact,
+array = any-of, scalar filter against an array value = membership (e.g.
+`{"warehouse_ids": 2}` matches an order created on warehouse 2). Only keys from
+the event catalogue are accepted, so a typo answers `422` instead of producing a
+subscription that never fires.
+
+### Panel & API
+
+Panel: **System → API → Webhooks** (list, create/edit, enable/disable, rotate
+secret, send test event, delete, global settings) and **System → API → Webhook
+log** (journal with filters, payload, receiver response and "Retry" for failed
+rows). Both are administrator-only until a group is granted
+`setting/webhook` / `setting/webhook_log`.
+
+API (`/api/v1`, documented in the OpenAPI document):
+
+```
+GET    /v1/webhooks                     POST /v1/webhooks
+GET    /v1/webhooks/events
+GET    /v1/webhooks/{id}                PUT/PATCH/DELETE /v1/webhooks/{id}
+POST   /v1/webhooks/{id}/rotate         POST /v1/webhooks/{id}/test
+GET    /v1/webhooks/{id}/deliveries
+GET    /v1/webhook-deliveries/{id}      POST /v1/webhook-deliveries/{id}/retry
+```
+
+The requested `webhooks:read` / `webhooks:write` scope is the panel's own
+permission model: reads need the group's `access` on `setting/webhook`, writes
+its `modify`. `test` and `retry` answer `202` (queued) — delivery always happens
+in the worker — and `409` when the subscription is disabled or the delivery is
+not `failed`.
+
+### Settings (`oc_setting`, code `config`)
+
+| Key | Default | Meaning |
+|---|---|---|
+| `config_webhook_status` | `1` | kill switch; `0` keeps queueing but sends nothing |
+| `config_webhook_timeout` | `10` | total HTTP timeout per attempt (s) |
+| `config_webhook_max_attempts` | `6` | attempts per delivery (first + 5 retries) |
+| `config_webhook_disable_after` | `4` | consecutive failed deliveries → auto-disable |
+| `config_webhook_log_retention_days` | `30` | journal retention (`0` = keep forever) |
+
+They are saved with `updateSetting('config', …)` (never `editSetting`, which
+wipes the other store settings). Journal cleanup runs daily
+(`bin/dockercart_webhook_cleanup.php`, task `webhook_cleanup`) and also removes
+rows whose subscription no longer exists.
+
+### Tests
+
+The webhook system is covered by a dependency-free suite (`make test`, no DB/network):
+
+| Case file | Guards |
+|---|---|
+| `tools/tests/cases/webhook_events.php` | catalogue contract, wildcards, filter matching/normalization |
+| `webhook_dispatcher.php` | fan-out, filters, thin/full payloads, swallowed DB errors, **no** nested transaction/HTTP |
+| `webhook_delivery.php` | backoff table, failure classification, limit clamping |
+| `webhook_ssrf.php` | URL syntax and IPv4/IPv6 blocking matrix, dev override |
+| `webhook_order_payload.php` | full payload shape, no PII, snapshot language metadata |
+| `webhook_secret.php` / `webhook_signature.php` | AES-GCM storage, HMAC contract |
+| `webhook_ulid.php` | id format, uniqueness, time ordering |
+| `webhook_model.php` | panel/API validation matrix, ciphertext never leaves the model |
+| `webhook_localization.php` | `en-gb`/`ru-ua`/`uk-ua` key parity, placeholders, no English fallbacks |
+| `webhook_api_routes.php` | routes↔OpenAPI parity, permissions, `$ref` resolution |
+| `webhook_migration.php` | idempotent SQL, settings/scheduler wiring, additive-only |
+| `webhook_emit_anchors.php` | emit before `COMMIT`, real-change guards, single stock journal writer |
+
+### Implementation map
+
+| Path | Role |
+|---|---|
+| `upload/system/library/dockercart/webhook/events.php` | event catalogue, wildcard + filter matching |
+| `…/dispatcher.php` | outbox writer (`emit()`), request-level subscription cache |
+| `…/delivery.php` | row format, backoff table, retry reset, test enqueue |
+| `…/signature.php` | HMAC over `timestamp.body` |
+| `…/sender.php` | curl POST, IP pinning, response cap |
+| `…/ssrf.php` | URL and DNS/IP validation |
+| `…/secret.php` | secret generation + AES-GCM storage helpers |
+| `…/ulid.php` | `evt_…` event ids |
+| `…/order_payload.php` | PII-free full order object |
+| `upload/admin/model/setting/webhook.php` | subscriptions + journal + validation (shared by panel and API) |
+| `upload/bin/dockercart_webhook_deliver.php` | delivery worker |
+| `upload/bin/dockercart_webhook_cleanup.php` | journal retention |
+| `docker/mysql/migrations/20261025_webhooks.sql` | tables, settings, scheduler tasks |
+
+### Extending (roadmap events)
+
+The catalogue in `webhook/events.php` already lists the planned events
+(payments, shipments, products, returns, customers, transfers, dropship,
+reviews, price, config) with `implemented => false`. Adding one:
+
+1. flip `implemented` to `true` (and adjust `data_fields`/`filter_fields`);
+2. call `(new \Dockercart\Webhook\Dispatcher($this->registry))->emit('<type>', $data, $options)`
+   **inside** the transaction, right after the data write and before `COMMIT`,
+   with the version id captured from `getLastId()` at that moment;
+3. wrap any insert+update pair that currently has no transaction so the event
+   and the data commit together;
+4. document it in `docs/guide.md` and in the OpenAPI `WebhookEvent` example list.

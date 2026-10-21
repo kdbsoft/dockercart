@@ -205,22 +205,33 @@ class ModelWarehouseStock extends Model {
 
 		$delta = $quantity - $old_qty;
 
-		$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$quantity . "', `unlimited` = '" . (int)(int)$unlimited . "', `lead_time` = '" . (int)$lead_time . "' WHERE `stock_id` = '" . (int)$stock_id . "'");
-
-		if (abs($delta) > 0.0001) {
-			$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock_movement` SET
-				`warehouse_id` = '" . (int)$stock['warehouse_id'] . "',
-				`product_id` = '" . (int)$stock['product_id'] . "',
-				`variant_id` = '" . (int)$stock['variant_id'] . "',
-				`type` = 'adjustment',
-				`quantity` = '" . (float)$delta . "',
-				`reference` = 'admin-cell',
-				`user_id` = '" . (int)($this->user ? $this->user->getId() : 0) . "',
-				`date_added` = NOW()");
-		}
-
 		$warehouse = new \DockercartWarehouse($this->registry);
-		$warehouse->recomputeTotals((int)$stock['product_id']);
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+			$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . (float)$quantity . "', `unlimited` = '" . (int)(int)$unlimited . "', `lead_time` = '" . (int)$lead_time . "' WHERE `stock_id` = '" . (int)$stock_id . "'");
+
+			if (abs($delta) > 0.0001) {
+				$warehouse->journalMovement(
+					(int)$stock['warehouse_id'],
+					(int)$stock['product_id'],
+					(int)$stock['variant_id'],
+					$delta,
+					'adjustment',
+					['reference' => 'admin-cell', 'user_id' => (int)($this->user ? $this->user->getId() : 0)],
+					$quantity
+				);
+			}
+
+			$warehouse->recomputeTotals((int)$stock['product_id']);
+
+			$this->db->query("COMMIT");
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
 	}
 
 	/**
@@ -273,48 +284,56 @@ class ModelWarehouseStock extends Model {
 		$changed = 0;
 		$product_ids = [];
 
-		foreach ($updates as $update) {
-			$row = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_stock` WHERE `stock_id` = '" . (int)$update['stock_id'] . "'");
+		$warehouse = new \DockercartWarehouse($this->registry);
 
-			if (!$row->num_rows) {
-				continue;
+		$this->db->query("START TRANSACTION");
+
+		try {
+			foreach ($updates as $update) {
+				$row = $this->db->query("SELECT * FROM `" . DB_PREFIX . "warehouse_stock` WHERE `stock_id` = '" . (int)$update['stock_id'] . "'");
+
+				if (!$row->num_rows) {
+					continue;
+				}
+
+				$stock = $row->row;
+				$quantity = (float)$update['quantity'];
+				$unlimited = (int)$update['unlimited'];
+				$lead_time = (int)$update['lead_time'];
+
+				if (abs($quantity - (float)$stock['quantity']) < 0.0001 && $unlimited === (int)$stock['unlimited'] && $lead_time === (int)$stock['lead_time']) {
+					continue;
+				}
+
+				$delta = $quantity - (float)$stock['quantity'];
+
+				$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . $quantity . "', `unlimited` = '" . $unlimited . "', `lead_time` = '" . $lead_time . "' WHERE `stock_id` = '" . (int)$update['stock_id'] . "'");
+
+				if (abs($delta) > 0.0001) {
+					$warehouse->journalMovement(
+						(int)$stock['warehouse_id'],
+						(int)$stock['product_id'],
+						(int)$stock['variant_id'],
+						$delta,
+						'adjustment',
+						['reference' => 'admin-csv', 'user_id' => (int)($this->user ? $this->user->getId() : 0)],
+						$quantity
+					);
+				}
+
+				$product_ids[(int)$stock['product_id']] = true;
+				$changed++;
 			}
-
-			$stock = $row->row;
-			$quantity = (float)$update['quantity'];
-			$unlimited = (int)$update['unlimited'];
-			$lead_time = (int)$update['lead_time'];
-
-			if (abs($quantity - (float)$stock['quantity']) < 0.0001 && $unlimited === (int)$stock['unlimited'] && $lead_time === (int)$stock['lead_time']) {
-				continue;
-			}
-
-			$delta = $quantity - (float)$stock['quantity'];
-
-			$this->db->query("UPDATE `" . DB_PREFIX . "warehouse_stock` SET `quantity` = '" . $quantity . "', `unlimited` = '" . $unlimited . "', `lead_time` = '" . $lead_time . "' WHERE `stock_id` = '" . (int)$update['stock_id'] . "'");
-
-			if (abs($delta) > 0.0001) {
-				$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock_movement` SET
-					`warehouse_id` = '" . (int)$stock['warehouse_id'] . "',
-					`product_id` = '" . (int)$stock['product_id'] . "',
-					`variant_id` = '" . (int)$stock['variant_id'] . "',
-					`type` = 'adjustment',
-					`quantity` = '" . $delta . "',
-					`reference` = 'admin-csv',
-					`user_id` = '" . (int)($this->user ? $this->user->getId() : 0) . "',
-					`date_added` = NOW()");
-			}
-
-			$product_ids[(int)$stock['product_id']] = true;
-			$changed++;
-		}
-
-		if ($product_ids) {
-			$warehouse = new \DockercartWarehouse($this->registry);
 
 			foreach (array_keys($product_ids) as $product_id) {
 				$warehouse->recomputeTotals($product_id);
 			}
+
+			$this->db->query("COMMIT");
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+
+			throw $e;
 		}
 
 		return $changed;
@@ -374,7 +393,11 @@ class ModelWarehouseStock extends Model {
 		$user_id = (int)($this->user ? $this->user->getId() : 0);
 
 		$backfilled = 0;
-		$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+			$products = $this->db->query("SELECT p.`product_id`, p.`quantity` FROM `" . DB_PREFIX . "product` p
 			WHERE p.`subtract` = '1' AND p.`quantity` > 0
 			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_configurable` pc WHERE pc.`product_id` = p.`product_id` AND pc.`is_configurable` = '1')
 			AND NOT EXISTS (SELECT 1 FROM `" . DB_PREFIX . "warehouse_stock` ws WHERE ws.`product_id` = p.`product_id`)
@@ -402,22 +425,31 @@ class ModelWarehouseStock extends Model {
 			$backfilled++;
 		}
 
-		return $backfilled;
+			$this->db->query("COMMIT");
+
+			return $backfilled;
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
 	}
 
 	/**
 	 * Journal row for a manual backfill seed.
 	 */
 	protected function recordBackfillMovement(int $warehouse_id, int $product_id, int $variant_id, float $quantity, int $user_id): void {
-		$this->db->query("INSERT INTO `" . DB_PREFIX . "warehouse_stock_movement` SET
-			`warehouse_id` = '" . (int)$warehouse_id . "',
-			`product_id` = '" . (int)$product_id . "',
-			`variant_id` = '" . (int)$variant_id . "',
-			`type` = 'adjustment',
-			`quantity` = '" . (float)$quantity . "',
-			`reference` = 'recalculate-backfill',
-			`user_id` = '" . (int)$user_id . "',
-			`date_added` = NOW()");
+		$warehouse = new \DockercartWarehouse($this->registry);
+
+		$warehouse->journalMovement(
+			$warehouse_id,
+			$product_id,
+			$variant_id,
+			$quantity,
+			'adjustment',
+			['reference' => 'recalculate-backfill', 'user_id' => $user_id],
+			$quantity
+		);
 	}
 
 	protected function getCachedQuantities(int $product_id): array {

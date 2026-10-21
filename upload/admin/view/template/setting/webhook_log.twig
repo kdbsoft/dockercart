@@ -1,0 +1,208 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <a href="{{ filter }}" class="btn btn-default"><i data-lucide="refresh-cw" width="16" height="16"></i> {{ button_refresh }}</a>
+            <a href="{{ back }}" class="btn btn-default"><i data-lucide="arrow-left" width="16" height="16"></i> {{ button_back }}</a>
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="dcx-shell">
+
+          <div class="dcx-context-bar">
+            <div class="dcx-context-bar__icon"><i data-lucide="scroll-text" width="20" height="20"></i></div>
+            <div class="dcx-context-bar__meta">
+              <div class="dcx-context-bar__title">{{ text_log }}</div>
+              <div class="dcx-context-bar__subtitle">
+                <span class="dcx-context-bar__meta-item"><i data-lucide="list" width="12" height="12"></i> {{ summary }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="filter" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_log }}</div>
+                <div class="dcx-panel-subtitle">{{ text_log_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ filter }}" method="get" id="form-webhook-log-filter">
+                <input type="hidden" name="route" value="setting/webhook_log" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <div class="dcx-fields dcx-fields--row">
+                  <div class="dcx-field" style="flex:1 1 220px;">
+                    <label class="dcx-label" for="input-subscription">{{ entry_subscription }}</label>
+                    <select name="subscription_id" id="input-subscription" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      {% for subscription in subscriptions %}
+                      <option value="{{ subscription.subscription_id }}" {% if subscription.subscription_id == filter_subscription_id %}selected{% endif %}>{{ subscription.name }}{% if not subscription.status %} ({{ text_disabled }}){% endif %}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="dcx-field" style="flex:1 1 180px;">
+                    <label class="dcx-label" for="input-event-type">{{ entry_event_type }}</label>
+                    <input type="text" name="event_type" value="{{ filter_event_type }}" id="input-event-type" class="form-control" placeholder="order.created" list="event-type-list" />
+                    <datalist id="event-type-list">
+                      {% for event_type in event_types %}<option value="{{ event_type }}"></option>{% endfor %}
+                    </datalist>
+                  </div>
+                  <div class="dcx-field" style="flex:1 1 160px;">
+                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                    <select name="status" id="input-status" class="form-control">
+                      <option value="">{{ text_all }}</option>
+                      {% for key, label in statuses %}
+                      <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="dcx-field" style="flex:1 1 220px;">
+                    <label class="dcx-label" for="input-event-id">{{ entry_event_id }}</label>
+                    <input type="text" name="event_id" value="{{ filter_event_id }}" id="input-event-id" class="form-control" spellcheck="false" />
+                  </div>
+                </div>
+                <div class="dcx-fields dcx-fields--row">
+                  <div class="dcx-field" style="flex:1 1 200px;">
+                    <label class="dcx-label" for="input-date-from">{{ entry_date_from }}</label>
+                    <input type="date" name="date_from" value="{{ filter_date_from }}" id="input-date-from" class="form-control" />
+                  </div>
+                  <div class="dcx-field" style="flex:1 1 200px;">
+                    <label class="dcx-label" for="input-date-to">{{ entry_date_to }}</label>
+                    <input type="date" name="date_to" value="{{ filter_date_to }}" id="input-date-to" class="form-control" />
+                  </div>
+                  <div class="dcx-field" style="flex:0 0 auto;align-self:flex-end;">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="search" width="16" height="16"></i> {{ button_filter }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="scroll-text" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_log }}</div>
+                <div class="dcx-panel-subtitle">{{ summary }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              {% if deliveries is not empty %}
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_date }}</th>
+                      <th>{{ column_subscription }}</th>
+                      <th>{{ column_event }}</th>
+                      <th>{{ column_status }}</th>
+                      <th class="text-right">{{ column_attempts }}</th>
+                      <th>{{ column_response }}</th>
+                      <th class="text-right">{{ column_duration }}</th>
+                      <th class="text-right">{{ column_action }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for delivery in deliveries %}
+                    <tr>
+                      <td class="small">
+                        {{ delivery.date_added }}
+                        {% if delivery.is_test %}<div><span class="label label-info">{{ text_test }}</span></div>{% endif %}
+                      </td>
+                      <td class="small">
+                        <strong>{{ delivery.subscription_name }}</strong>
+                        <div class="text-muted">{{ delivery.url }}</div>
+                      </td>
+                      <td class="small">
+                        <code>{{ delivery.event_type }}</code>
+                        <div class="text-muted" style="word-break:break-all;">{{ delivery.event_id }}</div>
+                      </td>
+                      <td>
+                        {% if delivery.status == 'delivered' %}
+                        <span class="label label-success">{{ delivery.status_text }}</span>
+                        {% elseif delivery.status == 'failed' %}
+                        <span class="label label-danger">{{ delivery.status_text }}</span>
+                        {% elseif delivery.status == 'cancelled' %}
+                        <span class="label label-default">{{ delivery.status_text }}</span>
+                        {% else %}
+                        <span class="label label-warning">{{ delivery.status_text }}</span>
+                        {% endif %}
+                        {% if delivery.status == 'pending' and delivery.next_attempt_at %}
+                        <div class="small text-muted">{{ text_next_attempt }}: {{ delivery.next_attempt_at }}</div>
+                        {% endif %}
+                      </td>
+                      <td class="text-right">{{ delivery.attempts }}</td>
+                      <td class="small">
+                        {% if delivery.response_code %}
+                        <code>{{ delivery.response_code }}</code>
+                        {% endif %}
+                        {% if delivery.last_error %}
+                        <div class="text-danger">{{ delivery.last_error }}</div>
+                        {% endif %}
+                        {% if delivery.response_body %}
+                        <div class="text-muted" style="max-width:420px;word-break:break-all;">{{ delivery.response_body }}</div>
+                        {% endif %}
+                      </td>
+                      <td class="text-right small">{{ delivery.duration_ms }} ms</td>
+                      <td class="text-right">
+                        <div class="btn-group">
+                          <a href="{{ delivery.view }}" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ button_view }}"><i data-lucide="eye" width="14" height="14"></i></a>
+                          {% if can_edit and delivery.status == 'failed' %}
+                          <a href="{{ delivery.retry }}" class="btn btn-primary btn-sm" data-toggle="tooltip" title="{{ button_retry }}"><i data-lucide="rotate-ccw" width="14" height="14"></i></a>
+                          {% endif %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 text-left">{{ pagination }}</div>
+                <div class="col-sm-6 text-right">{{ results }}</div>
+              </div>
+              {% else %}
+              {% include 'common/empty_state.twig' with {
+                icon: 'webhook_log',
+                standalone: true,
+                title: text_no_logs,
+                description: text_no_logs_help
+              } %}
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

@@ -41,8 +41,12 @@ help: ## Show this help
 	@echo "  make shell        Bash into app container"
 	@echo "  make mariadb      Open MariaDB CLI"
 	@echo "  make backup       Dump DB to ./backups/"
+	@echo "  make test         Run the webhook/test suite (no DB needed)"
 	@echo ""
 	@echo "See README.md for full documentation."
+
+test: ## Run the dependency-free test suite (php tools/tests/run.php)
+	@php tools/tests/run.php
 
 migrate: ## Apply tracked SQL migrations from docker/mysql/migrations (idempotent)
 	@echo "Applying tracked SQL migrations from docker/mysql/migrations/..."

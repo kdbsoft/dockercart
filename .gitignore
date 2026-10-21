@@ -76,6 +76,11 @@ export-yml-[0-9]*-*.xml
 /tools/*
 !/tools/phpstan/
 !/tools/phpstan/*.php
+# Dependency-free test suite (CI job "tests", run with `make test`)
+!/tools/tests/
+!/tools/tests/*.php
+!/tools/tests/cases/
+!/tools/tests/cases/*.php
 .env
 # Ignore secret env variants (keep the tracked .env.example template)
 .env.*
