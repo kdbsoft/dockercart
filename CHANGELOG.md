@@ -1,3 +1,9 @@
+## [3.33.1](https://github.com/kdbsoft/dockercart/compare/v3.33.0...v3.33.1) (2026-10-19)
+
+### Bug Fixes
+
+* **nginx:** render template before starting reload loop ([db48c8f](https://github.com/kdbsoft/dockercart/commit/db48c8ffdf82e650a85efb95a5017e69495ff802))
+
 ## [3.33.0](https://github.com/kdbsoft/dockercart/compare/v3.32.2...v3.33.0) (2026-10-17)
 
 ### Features
