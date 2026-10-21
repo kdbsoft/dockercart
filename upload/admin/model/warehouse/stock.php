@@ -57,9 +57,9 @@ class ModelWarehouseStock extends Model {
 	/**
 	 * Shared JOINs + WHERE for the matrix list / count queries.
 	 *
-	 * Supported keys: filter_warehouse_id, filter_product_id, filter_name,
-	 * filter_model, filter_sku, filter_quantity_min, filter_quantity_max,
-	 * filter_unlimited.
+	 * Supported keys: filter_warehouse_id, filter_product_id, filter_variant_id,
+	 * filter_name, filter_model, filter_sku, filter_quantity_min,
+	 * filter_quantity_max, filter_unlimited.
 	 *
 	 * @return array{0: string, 1: string} [join_sql, where_sql]
 	 */
@@ -79,6 +79,10 @@ class ModelWarehouseStock extends Model {
 
 		if (!empty($data['filter_product_id'])) {
 			$where_sql .= " AND ws.`product_id` = '" . (int)$data['filter_product_id'] . "'";
+		}
+
+		if (isset($data['filter_variant_id']) && (string)$data['filter_variant_id'] !== '') {
+			$where_sql .= " AND ws.`variant_id` = '" . (int)$data['filter_variant_id'] . "'";
 		}
 
 		if (!empty($data['filter_name'])) {

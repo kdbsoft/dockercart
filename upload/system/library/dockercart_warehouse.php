@@ -191,6 +191,65 @@ class DockercartWarehouse {
 	}
 
 	/**
+	 * Batch version of the reservation half of getAvailableForLine(): held
+	 * quantity per (product, variant, warehouse), keyed by
+	 * "product_id:variant_id:warehouse_id". A reservation counts while it belongs
+	 * to an order or has not expired yet — the same rule getAvailableBatch() uses.
+	 *
+	 * @param array<int, array{product_id:int,variant_id:int}> $lines
+	 * @param array<int> $warehouse_ids
+	 * @return array<string,float>
+	 */
+	public function getReservedBatch(array $lines, array $warehouse_ids): array {
+		if (!$lines || !$warehouse_ids) {
+			return [];
+		}
+
+		$warehouse_ids = array_values(array_unique(array_map('intval', $warehouse_ids)));
+		$in_warehouses = implode(',', $warehouse_ids);
+
+		$pair_map = [];
+
+		foreach ($lines as $line) {
+			$key = (int)$line['product_id'] . ':' . (int)($line['variant_id'] ?? 0);
+			$pair_map[$key] = [(int)$line['product_id'], (int)($line['variant_id'] ?? 0)];
+		}
+
+		if (!$pair_map) {
+			return [];
+		}
+
+		$conditions = [];
+
+		foreach ($pair_map as [$pid, $vid]) {
+			$conditions[] = "(product_id = '" . (int)$pid . "' AND variant_id = '" . (int)$vid . "')";
+		}
+
+		$reserved = [];
+
+		$query = $this->db->query("SELECT warehouse_id, product_id, variant_id, COALESCE(SUM(quantity), 0) AS reserved FROM `" . DB_PREFIX . "stock_reservation` WHERE warehouse_id IN (" . $in_warehouses . ") AND (order_id IS NOT NULL OR expires_at > NOW()) AND (" . implode(' OR ', $conditions) . ") GROUP BY warehouse_id, product_id, variant_id");
+
+		foreach ($query->rows as $row) {
+			$reserved[(int)$row['product_id'] . ':' . (int)$row['variant_id'] . ':' . (int)$row['warehouse_id']] = (float)$row['reserved'];
+		}
+
+		// Materialise the zero rows too: callers (the stock API) index the map per
+		// matrix row and should not have to distinguish "no reservation" from
+		// "pair not queried".
+		foreach ($pair_map as [$pid, $vid]) {
+			foreach ($warehouse_ids as $wid) {
+				$key = $pid . ':' . $vid . ':' . $wid;
+
+				if (!isset($reserved[$key])) {
+					$reserved[$key] = 0.0;
+				}
+			}
+		}
+
+		return $reserved;
+	}
+
+	/**
 	 * Total stock of a product line across all warehouses (source of truth).
 	 * Unlimited rows contribute the UNLIMITED sentinel.
 	 */
@@ -776,6 +835,81 @@ class DockercartWarehouse {
 		$query = $this->db->query("SELECT `quantity` FROM `" . DB_PREFIX . "warehouse_stock` WHERE `warehouse_id` = '" . (int)$warehouse_id . "' AND `product_id` = '" . (int)$product_id . "' AND `variant_id` = '" . (int)$variant_id . "'");
 
 		return $query->num_rows ? (float)$query->row['quantity'] : 0.0;
+	}
+
+	/**
+	 * Atomic batch of stock adjustments in a single transaction.
+	 *
+	 * Every line goes through applyStockDelta() — the same locked write path as
+	 * adjustStock() — so the movement journal ('adjustment') and the denormalised
+	 * product/variant caches stay consistent. Unlike adjustStock(), which clamps a
+	 * negative delta at 0, a shortfall rolls the whole batch back: an external
+	 * system must never believe a delta was applied when the stock could not cover
+	 * it. Nothing is committed unless every line applies exactly as requested.
+	 *
+	 * Lines: [['warehouse_id' => int, 'product_id' => int, 'variant_id' => int,
+	 *          'delta' => float, 'reference' => string, 'comment' => string], …]
+	 *
+	 * @param array $context movement context shared by the batch (reference/comment/user_id)
+	 * @return array{ok: bool, lines: array, short: array} per-line results; 'short'
+	 *               holds the lines whose delta could not be applied in full
+	 */
+	public function adjustStockBatch(array $lines, array $context = []): array {
+		$results = [];
+		$short = [];
+
+		$this->db->query("START TRANSACTION");
+
+		try {
+			$product_ids = [];
+
+			foreach (array_values($lines) as $index => $line) {
+				$warehouse_id = (int)($line['warehouse_id'] ?? 0);
+				$product_id = (int)($line['product_id'] ?? 0);
+				$variant_id = (int)($line['variant_id'] ?? 0);
+				$delta = (float)($line['delta'] ?? 0);
+
+				$line_context = array_merge($context, [
+					'reference' => (string)($line['reference'] ?? ($context['reference'] ?? '')),
+					'comment'   => (string)($line['comment'] ?? ($context['comment'] ?? '')),
+				]);
+
+				$applied = $this->applyStockDelta($warehouse_id, $product_id, $variant_id, $delta, $line_context, 'adjustment');
+
+				$results[$index] = [
+					'warehouse_id'    => $warehouse_id,
+					'product_id'      => $product_id,
+					'variant_id'      => $variant_id,
+					'requested_delta' => $delta,
+					'applied'         => (float)$applied['applied'],
+					'quantity'        => (float)$applied['quantity'],
+				];
+
+				if (abs($applied['applied'] - $delta) > 0.0001) {
+					$short[$index] = $results[$index];
+				}
+
+				$product_ids[$product_id] = true;
+			}
+
+			if ($short) {
+				$this->db->query("ROLLBACK");
+
+				return ['ok' => false, 'lines' => array_values($results), 'short' => $short];
+			}
+
+			foreach (array_keys($product_ids) as $product_id) {
+				$this->recomputeTotals((int)$product_id);
+			}
+
+			$this->db->query("COMMIT");
+		} catch (\Throwable $e) {
+			$this->db->query("ROLLBACK");
+
+			throw $e;
+		}
+
+		return ['ok' => true, 'lines' => array_values($results), 'short' => []];
 	}
 
 	/**
