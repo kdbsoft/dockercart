@@ -587,6 +587,7 @@ class ControllerCommonColumnLeft extends Controller {
 			// System
 			$system = array();
 
+			// Store settings
 			if ($this->user->hasPermission('access', 'setting/setting')) {
 				$system[] = array(
 					'name'	   => $this->language->get('text_setting'),
@@ -604,6 +605,43 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_indexing'),
 					'href'     => $this->url->link('setting/indexing', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()
+				);
+			}
+
+			// API (keys, request journal, Swagger docs)
+			$api = array();
+
+			if ($this->user->hasPermission('access', 'setting/api_key')) {
+				$api[] = array(
+					'name'	   => $this->language->get('text_api_keys'),
+					'href'     => $this->url->link('setting/api_key', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'setting/api_log')) {
+				$api[] = array(
+					'name'	   => $this->language->get('text_api_log'),
+					'href'     => $this->url->link('setting/api_log', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'setting/api_docs')) {
+				$api[] = array(
+					'name'	   => $this->language->get('text_api_docs'),
+					'href'     => $this->url->link('setting/api_docs', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($api) {
+				$system[] = array(
+					'id'       => 'menu-api',
+					'icon'	   => 'key-round',
+					'name'	   => $this->language->get('text_api'),
+					'href'     => '',
+					'children' => $api
 				);
 			}
 		// Order flow (moved out of References -> Orders into System -> Settings)

@@ -39,3 +39,58 @@ $_['text_add_user_subtitle'] = 'Создать нового администра
 $_['text_edit_user_subtitle'] = 'Редактировать данные администратора';
 
 
+
+// API-ключи
+$_['text_api_keys']                = 'API-ключи';
+$_['text_api_keys_help']           = 'Ключи пользователя действуют с правами текущей группы этого пользователя.';
+$_['text_api_keys_empty']          = 'У пользователя пока нет API-ключей.';
+$_['text_api_enabled']             = 'Включён';
+$_['text_api_disabled']            = 'Отключён';
+$_['text_api_expired']             = 'Истёк';
+$_['text_api_never']               = 'Никогда';
+$_['text_api_limit']               = 'лимит';
+$_['text_api_minute']              = 'мин';
+$_['text_api_token_once']          = 'Скопируйте токен сейчас — он показывается только один раз';
+$_['text_api_token_help']          = 'Сохраните его в менеджере паролей или секретах CI. В базе хранится только хеш, восстановить токен позже нельзя.';
+$_['text_api_key_created']         = 'API-ключ «%s» создан.';
+$_['text_api_key_rotated']         = 'Для «%s» сгенерирован новый токен. Прежний токен больше не работает.';
+$_['text_api_key_revoked']         = 'API-ключ «%s» отозван.';
+$_['text_api_key_enabled']         = 'API-ключ «%s» включён.';
+$_['text_api_key_deleted']         = 'API-ключ «%s» удалён.';
+
+$_['column_api_name']              = 'Название';
+$_['column_api_prefix']            = 'Префикс токена';
+$_['column_api_status']            = 'Статус';
+$_['column_api_expires']           = 'Действует до';
+$_['column_api_last_used']         = 'Последнее использование';
+$_['column_api_requests']          = 'Запросы (24ч / всего)';
+$_['column_api_action']            = 'Действие';
+
+$_['entry_api_key_name']           = 'Название';
+$_['entry_api_key_comment']        = 'Комментарий';
+$_['entry_api_key_expires']        = 'Действует до';
+$_['entry_api_key_rate_limit']     = 'Лимит запросов';
+$_['entry_api_key_ip_allowlist']   = 'Список разрешённых IP';
+
+$_['help_api_key_expires']         = 'Оставьте пустым, если ключ не должен истекать.';
+$_['help_api_key_rate_limit']      = 'Запросов в минуту. 0 — использовать глобальное значение по умолчанию.';
+$_['help_api_key_ip_allowlist']    = 'Необязательно. IP-адрес или CIDR-блок. Пусто — любой адрес.';
+
+$_['button_api_key_add']           = 'Добавить ключ';
+$_['button_api_key_create']        = 'Создать ключ';
+$_['button_api_key_rotate']        = 'Перегенерировать токен';
+$_['button_api_key_revoke']        = 'Отозвать';
+$_['button_api_key_enable']        = 'Включить';
+$_['button_api_key_delete']        = 'Удалить';
+$_['button_api_key_copy']          = 'Копировать';
+
+$_['text_api_key_rotate_confirm']  = 'Сгенерировать новый токен? Текущий токен сразу перестанет работать.';
+$_['text_api_key_revoke_confirm']  = 'Отозвать ключ? Запросы с ним будут отклонены с HTTP 401.';
+$_['text_api_key_delete_confirm']  = 'Удалить ключ безвозвратно? Журнал запросов сохранится.';
+
+$_['error_api_permission']         = 'Внимание: у вас нет прав на изменение API-ключей!';
+$_['error_api_user']               = 'Внимание: пользователь не найден!';
+$_['error_api_name']               = 'Название должно содержать от 1 до 128 символов!';
+$_['error_api_expires']            = 'Дата окончания должна быть корректной (ГГГГ-ММ-ДД) или пустой!';
+$_['error_api_ip_allowlist']       = 'В списке IP допускаются только IP-адреса или CIDR-блоки!';
+$_['error_api_key']                = 'Внимание: API-ключ не найден!';

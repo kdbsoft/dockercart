@@ -1,0 +1,246 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="pull-right">
+            <a href="{{ log }}" class="btn btn-default"><i data-lucide="scroll-text" width="16" height="16"></i> {{ button_log }}</a>
+            <a href="{{ docs }}" class="btn btn-default"><i data-lucide="file-code" width="16" height="16"></i> {{ button_docs }}</a>
+            {% if can_edit %}<a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>{% endif %}
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% if success %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+        <div class="dcx-shell">
+
+          <div class="dcx-context-bar">
+            <div class="dcx-context-bar__icon"><i data-lucide="key-round" width="20" height="20"></i></div>
+            <div class="dcx-context-bar__meta">
+              <div class="dcx-context-bar__title">{{ text_keys }}</div>
+              <div class="dcx-context-bar__subtitle">
+                <span class="dcx-context-bar__meta-item"><i data-lucide="link" width="12" height="12"></i> <code>{{ api_base_url }}</code></span>
+                <span class="dcx-context-bar__meta-item"><i data-lucide="key-round" width="12" height="12"></i> {{ text_total_keys }}: {{ total_keys }}</span>
+                {% if filter_user_id %}
+                <span class="dcx-context-bar__meta-item"><i data-lucide="user" width="12" height="12"></i> {{ text_filter_owner }}: {{ filter_owner_name }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="filter" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_filter }}</div>
+                <div class="dcx-panel-subtitle">{{ text_filter_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ filter_action }}" method="get" id="form-api-filter">
+                <input type="hidden" name="route" value="setting/api_key" />
+                <input type="hidden" name="user_token" value="{{ user_token }}" />
+                <div class="dcx-fields dcx-fields--row">
+                  <div class="dcx-field" style="flex:1 1 320px;">
+                    <label class="dcx-label" for="input-owner">{{ entry_owner_filter }}</label>
+                    <select name="user_id" id="input-owner" class="form-control">
+                      <option value="">{{ text_all_owners }}</option>
+                      {% for user in users %}
+                      <option value="{{ user.user_id }}" {% if user.user_id == filter_user_id %}selected{% endif %}>{{ user.username }}{% if user.full_name %} — {{ user.full_name }}{% endif %}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="dcx-field-help">{{ help_owner_filter }}</div>
+                  </div>
+                  <div class="dcx-field" style="flex:0 0 auto;align-self:flex-end;">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="search" width="16" height="16"></i> {{ button_filter }}</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="key-round" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_keys }}</div>
+                <div class="dcx-panel-subtitle">{{ text_keys_help }}</div>
+              </div>
+              {% if can_edit %}
+              <div class="dcx-panel-head__actions">
+                <a href="{{ add }}" class="btn btn-primary btn-sm"><i data-lucide="plus" width="14" height="14"></i> {{ button_add }}</a>
+              </div>
+              {% endif %}
+            </div>
+            <div class="dcx-panel-body">
+              {% if keys is not empty %}
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover dcx-table">
+                  <thead>
+                    <tr>
+                      <th>{{ column_name }}</th>
+                      <th>{{ column_prefix }}</th>
+                      <th>{{ column_owner }}</th>
+                      <th>{{ column_group }}</th>
+                      <th>{{ column_status }}</th>
+                      <th>{{ column_expires }}</th>
+                      <th>{{ column_last_used }}</th>
+                      <th class="text-right">{{ column_requests }}</th>
+                      {% if can_edit %}<th class="text-right">{{ column_action }}</th>{% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for key in keys %}
+                    <tr>
+                      <td>
+                        <strong>{{ key.name }}</strong>
+                        {% if key.comment %}<div class="text-muted small">{{ key.comment }}</div>{% endif %}
+                      </td>
+                      <td><code>{{ key.prefix }}…</code></td>
+                      <td>
+                        {% if key.owner_id %}
+                        <a href="{{ key.owner_link }}">{{ key.owner }}</a>
+                        {% else %}
+                        <span class="text-muted">{{ key.owner }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ key.group }}</td>
+                      <td>
+                        {% if key.status_value and not key.is_expired %}
+                        <span class="label label-success">{{ key.status }}</span>
+                        {% else %}
+                        <span class="label label-danger">{{ key.status }}</span>
+                        {% endif %}
+                        {% if key.is_expired %}<span class="label label-warning">{{ text_expired }}</span>{% endif %}
+                      </td>
+                      <td>{{ key.expires_at ? key.expires_at : text_never }}</td>
+                      <td>
+                        {% if key.last_used_at %}
+                        {{ key.last_used_at }}
+                        {% if key.last_used_ip %}<div class="text-muted small">{{ key.last_used_ip }}</div>{% endif %}
+                        {% else %}
+                        <span class="text-muted">{{ text_never }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="text-right">
+                        {{ key.requests_24h }} / {{ key.requests_total }}
+                        {% if key.rate_limit %}<div class="text-muted small">{{ text_limit }}: {{ key.rate_limit }}/{{ text_minute }}</div>{% endif %}
+                      </td>
+                      {% if can_edit %}
+                      <td class="text-right" style="white-space: nowrap;">
+                        <a href="{{ key.edit }}" class="btn btn-primary btn-sm" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="pencil" width="14" height="14"></i></a>
+                        <a href="{{ key.rotate }}" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ button_rotate }}" data-confirm="{{ text_rotate_confirm }}"><i data-lucide="refresh-cw" width="14" height="14"></i></a>
+                        {% if key.status_value %}
+                        <a href="{{ key.revoke }}" class="btn btn-warning btn-sm" data-toggle="tooltip" title="{{ button_revoke }}" data-confirm="{{ text_revoke_confirm }}"><i data-lucide="ban" width="14" height="14"></i></a>
+                        {% else %}
+                        <a href="{{ key.enable }}" class="btn btn-success btn-sm" data-toggle="tooltip" title="{{ button_enable }}"><i data-lucide="circle-check" width="14" height="14"></i></a>
+                        {% endif %}
+                        <a href="{{ key.delete }}" class="btn btn-danger btn-sm" data-toggle="tooltip" title="{{ button_delete }}" data-confirm="{{ text_delete_confirm }}"><i data-lucide="trash-2" width="14" height="14"></i></a>
+                      </td>
+                      {% endif %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              {% include 'common/empty_state.twig' with {
+                icon: 'key',
+                standalone: true,
+                title: text_no_keys_title,
+                description: text_no_keys,
+                action_url: can_edit ? add : '',
+                action_text: can_edit ? button_add : ''
+              } %}
+              {% endif %}
+            </div>
+          </div>
+
+          {% if can_edit %}
+          <div class="dcx-panel">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="settings" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_settings }}</div>
+                <div class="dcx-panel-subtitle">{{ text_settings_help }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <form action="{{ settings_action }}" method="post" id="form-api-settings">
+                <div class="dcx-fields">
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-status">{{ entry_api_status }}</label>
+                      <select name="config_api_status" id="input-api-status" class="form-control">
+                        <option value="1" {% if config_api_status %}selected{% endif %}>{{ text_enabled }}</option>
+                        <option value="0" {% if not config_api_status %}selected{% endif %}>{{ text_disabled }}</option>
+                      </select>
+                      <div class="dcx-field-help">{{ help_api_status }}</div>
+                    </div>
+                    <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-rate-limit">{{ entry_api_rate_limit }}</label>
+                      <input type="number" min="0" name="config_api_rate_limit" value="{{ config_api_rate_limit }}" id="input-api-rate-limit" class="form-control" />
+                      <div class="dcx-field-help">{{ help_api_rate_limit }}</div>
+                    </div>
+                    <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-retention">{{ entry_api_log_retention_days }}</label>
+                      <input type="number" min="0" name="config_api_log_retention_days" value="{{ config_api_log_retention_days }}" id="input-api-retention" class="form-control" />
+                      <div class="dcx-field-help">{{ help_api_log_retention_days }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-field">
+                    <div class="dcx-checkbox-group">
+                      <label class="dcx-checkbox-label">
+                        <input type="checkbox" name="config_api_require_if_match" value="1" {% if config_api_require_if_match %}checked="checked"{% endif %} />
+                        {{ entry_api_require_if_match }}
+                      </label>
+                    </div>
+                    <div class="dcx-field-help">{{ help_api_require_if_match }}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <button type="submit" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+document.querySelectorAll('[data-confirm]').forEach(function (element) {
+	element.addEventListener('click', function (event) {
+		if (!confirm(element.getAttribute('data-confirm'))) {
+			event.preventDefault();
+		}
+	});
+});
+//--></script>
+{{ footer }}
