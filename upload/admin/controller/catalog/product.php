@@ -2417,19 +2417,11 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	private function isValidDecimalValue($value) {
-		$normalized = str_replace(',', '.', trim((string)$value));
-
-		return preg_match('/^\d+(\.\d{1,2})?$/', $normalized) === 1;
+		return DockercartProductRules::isValidDecimal($value);
 	}
 
 	private function normalizeDecimal($value, $default = 0.0) {
-		$normalized = str_replace(',', '.', trim((string)$value));
-
-		if (!is_numeric($normalized)) {
-			return (float)$default;
-		}
-
-		return round((float)$normalized, 2);
+		return DockercartProductRules::normalizeDecimal($value, $default);
 	}
 
 	private function formatQuantityForDisplay($value) {
@@ -2439,14 +2431,7 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	private function isQuantityMultiple($quantity, $step) {
-		$quantity_cents = (int)round((float)$quantity * 100);
-		$step_cents = (int)round((float)$step * 100);
-
-		if ($step_cents <= 0) {
-			return false;
-		}
-
-		return ($quantity_cents % $step_cents) === 0;
+		return DockercartProductRules::isQuantityMultiple($quantity, $step);
 	}
 
 	protected function validateForm() {
@@ -2454,56 +2439,12 @@ class ControllerCatalogProduct extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		foreach ($this->request->post['product_description'] as $language_id => $value) {
-			if ((utf8_strlen($value['name']) < 1) || (utf8_strlen($value['name']) > 255)) {
-				$this->error['name'][$language_id] = $this->language->get('error_name');
-			}
+		// Field rules shared with the REST API (POST/PATCH /v1/products).
+		$product_rules = new DockercartProductRules($this->registry);
+		$product_errors = $product_rules->validate((array)$this->request->post, isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0);
 
-			if ((utf8_strlen($value['meta_title']) < 1) || (utf8_strlen($value['meta_title']) > 255)) {
-				$this->error['meta_title'][$language_id] = $this->language->get('error_meta_title');
-			}
-		}
-
-		if ((utf8_strlen($this->request->post['model']) < 1) || (utf8_strlen($this->request->post['model']) > 64)) {
-			$this->error['model'] = $this->language->get('error_model');
-		}
-
-		$quantity_step_raw = isset($this->request->post['quantity_step']) ? $this->request->post['quantity_step'] : '1';
-		$minimum_raw = isset($this->request->post['minimum']) ? $this->request->post['minimum'] : '1';
-
-		$quantity_step = $this->normalizeDecimal($quantity_step_raw, 1.0);
-		$minimum = $this->normalizeDecimal($minimum_raw, 1.0);
-
-		if (!$this->isValidDecimalValue($quantity_step_raw) || $quantity_step <= 0) {
-			$this->error['quantity_step'] = $this->language->get('error_quantity_step');
-		}
-
-		if (!$this->isValidDecimalValue($minimum_raw) || $minimum <= 0) {
-			$this->error['minimum'] = $this->language->get('error_minimum_value');
-		}
-
-		if (!isset($this->error['quantity_step']) && !isset($this->error['minimum']) && !$this->isQuantityMultiple($minimum, $quantity_step)) {
-			$this->error['minimum_step'] = $this->language->get('error_minimum_step');
-		}
-
-		if ($this->request->post['product_seo_url']) {
-			$this->load->model('design/seo_url');
-
-			foreach ($this->request->post['product_seo_url'] as $store_id => $language) {
-				foreach ($language as $language_id => $keyword) {
-					if (!empty($keyword)) {
-						$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword, $language_id);
-
-						foreach ($seo_urls as $seo_url) {
-							if (($seo_url['store_id'] == $store_id) && (!isset($this->request->get['product_id']) || (($seo_url['query'] != 'product_id=' . $this->request->get['product_id'])))) {
-								$this->error['keyword'][$store_id][$language_id] = $this->language->get('error_keyword');
-
-								break;
-							}
-						}
-					}
-				}
-			}
+		foreach ($product_errors as $key => $value) {
+			$this->error[$key] = $value;
 		}
 
 		// A configurable product must have a default variant selected, otherwise
