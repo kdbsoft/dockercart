@@ -31,6 +31,21 @@ jobs:
           find upload -type f -name "*.php" ! -path 'upload/config.php' ! -path 'upload/admin/config.php' -print0 \
             | xargs -0 -P4 php -l -n
 
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: mbstring
+
+      - name: Run test suite
+        run: php tools/tests/run.php
+
   phpstan:
     name: PHPStan
     runs-on: ubuntu-latest

@@ -627,6 +627,23 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+			// Webhooks (subscriptions + delivery journal)
+			if ($this->user->hasPermission('access', 'setting/webhook')) {
+				$api[] = array(
+					'name'	   => $this->language->get('text_webhooks'),
+					'href'     => $this->url->link('setting/webhook', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($this->user->hasPermission('access', 'setting/webhook_log')) {
+				$api[] = array(
+					'name'	   => $this->language->get('text_webhook_log'),
+					'href'     => $this->url->link('setting/webhook_log', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($this->user->hasPermission('access', 'setting/api_docs')) {
 				$api[] = array(
 					'name'	   => $this->language->get('text_api_docs'),

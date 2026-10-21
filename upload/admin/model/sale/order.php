@@ -3095,7 +3095,7 @@ class ModelSaleOrder extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$lock_query = $this->db->query("SELECT order_status_id, affiliate_id, commission FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' FOR UPDATE");
+			$lock_query = $this->db->query("SELECT order_status_id, store_id, affiliate_id, commission FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "' FOR UPDATE");
 
 			if (!$lock_query->num_rows) {
 				$this->db->query("ROLLBACK");
@@ -3197,6 +3197,10 @@ class ModelSaleOrder extends Model {
 
 			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
 
+			// The history row id is the event version. Capture it now: later
+			// inserts in this transaction change lastInsertId().
+			$order_history_id = (int)$this->db->getLastId();
+
 			// Reversal from proc/complete to non-proc/complete → restock, remove affiliate commission
 			if ($was_processing && !$is_processing) {
 				$order_products = $this->getOrderProducts($order_id);
@@ -3247,6 +3251,38 @@ class ModelSaleOrder extends Model {
 			if ($was_complete && !$is_complete) {
 				$dockercart_reward = new \DockercartReward($this->registry);
 				$dockercart_reward->revokeOrderReward((int)$order_id, 1.0);
+			}
+
+			// Webhook outbox: successful transition only (the flow was either
+			// validated above or explicitly overridden by the operator). A 0
+			// source status is the "not set" placeholder, never a transition.
+			if ($old_status_id > 0 && (int)$order_status_id > 0 && $old_status_id !== (int)$order_status_id) {
+				$order_flow = new \OrderFlow([
+					'steps'       => (array)$this->config->get('config_order_flow_steps'),
+					'transitions' => (array)$this->config->get('config_order_flow_transitions'),
+				]);
+
+				$cancelled_statuses = (array)$this->config->get('config_cancelled_status');
+
+				$webhook_dispatcher = new \Dockercart\Webhook\Dispatcher($this->registry);
+				$webhook_dispatcher->emit('order.status_changed', [
+					'order_id'        => (int)$order_id,
+					'store_id'        => (int)($lock_query->row['store_id'] ?? 0),
+					'from_status_id'  => $old_status_id,
+					'to_status_id'    => (int)$order_status_id,
+					'override'        => (bool)$override,
+					'source'          => 'admin',
+					'is_cancelled'    => in_array((int)$order_status_id, $cancelled_statuses, true),
+					'is_final'        => $order_flow->isFinalStep((int)$order_status_id),
+					'is_terminal'     => $order_flow->isTerminal((int)$order_status_id),
+					'version'         => $order_history_id,
+				], [
+					'full' => function () use ($order_id) {
+						$payload = new \Dockercart\Webhook\OrderPayload($this->registry);
+
+						return $payload->full((int)$order_id);
+					},
+				]);
 			}
 
 			$this->db->query("COMMIT");
