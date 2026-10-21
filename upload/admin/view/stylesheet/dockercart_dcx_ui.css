@@ -115,6 +115,17 @@
     color: var(--dc-text-muted);
     opacity: .75;
 }
+/* Inline code inside a meta item: neutral chip instead of the Bootstrap one */
+.dcx-context-bar__meta-item code {
+    background: var(--dc-surface);
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-sm);
+    color: var(--dc-text-dark);
+    font-family: var(--dc-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 5px;
+}
 .dcx-context-bar__balance {
     margin-left: auto;
     display: flex;

@@ -54,6 +54,10 @@ class ControllerUserUser extends Controller {
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_user_user->editUser($this->request->get['user_id'], $this->request->post);
 
+			// The keys of the user follow the new group of the user.
+			$this->load->model('setting/api_key');
+			$this->model_setting_api_key->syncUserGroup((int)$this->request->get['user_id'], (int)($this->request->post['user_group_id'] ?? 0));
+
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$url = '';
@@ -86,6 +90,11 @@ class ControllerUserUser extends Controller {
 		if (isset($this->request->post['selected']) && $this->validateDelete()) {
 			foreach ($this->request->post['selected'] as $user_id) {
 				$this->model_user_user->deleteUser($user_id);
+
+				// The keys of a deleted user must not survive: they would be
+				// orphaned credentials nobody can manage any more.
+				$this->load->model('setting/api_key');
+				$this->model_setting_api_key->deleteKeysByUser((int)$user_id);
 			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
@@ -108,6 +117,258 @@ class ControllerUserUser extends Controller {
 		}
 
 		$this->getList();
+	}
+
+	/**
+	 * Creates an API key for a user straight from the user form.
+	 *
+	 * The key belongs to the user, so it acts with the permissions of the
+	 * current user group of that user (see ModelSettingApiKey::addKey()).
+	 */
+	public function api_key() {
+		$this->load->language('user/user');
+		$this->load->language('setting/api_key');
+
+		$user_id = $this->apiKeyUserId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->load->model('user/user');
+		$this->load->model('setting/api_key');
+
+		$user_info = $this->model_user_user->getUser($user_id);
+
+		if (!$user_info) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_user');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$name = trim((string)($this->request->post['name'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidName($name)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_name');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$expires_at = trim((string)($this->request->post['expires_at'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidExpires($expires_at)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_expires');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$allowlist = trim((string)($this->request->post['ip_allowlist'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidIpAllowlist($allowlist)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_ip_allowlist');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$created = $this->model_setting_api_key->addKey([
+			'name'          => $name,
+			'comment'       => trim((string)($this->request->post['comment'] ?? '')),
+			'user_id'       => $user_id,
+			'user_group_id' => (int)$user_info['user_group_id'],
+			'status'        => 1,
+			'expires_at'    => $expires_at !== '' ? $expires_at . ' 23:59:59' : '',
+			'ip_allowlist'  => $allowlist,
+			'rate_limit'    => max(0, (int)($this->request->post['rate_limit'] ?? 0)),
+		]);
+
+		// The plain token is shown exactly once, right after creation.
+		$this->session->data['api_new_token'] = $created['token'];
+		$this->session->data['api_new_token_user'] = $user_id;
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_created'), $name);
+
+		$this->apiKeyRedirect($user_id);
+	}
+
+	/**
+	 * Issues a new token for one of the keys of a user.
+	 */
+	public function api_key_rotate() {
+		$this->load->language('user/user');
+		$this->load->language('setting/api_key');
+
+		$user_id = $this->apiKeyUserId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($user_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->session->data['api_new_token'] = $this->model_setting_api_key->rotateKey((int)$key['api_key_id']);
+		$this->session->data['api_new_token_user'] = $user_id;
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_rotated'), (string)$key['name']);
+
+		$this->apiKeyRedirect($user_id);
+	}
+
+	/**
+	 * Revokes / enables one of the keys of a user.
+	 */
+	public function api_key_status() {
+		$this->load->language('user/user');
+		$this->load->language('setting/api_key');
+
+		$user_id = $this->apiKeyUserId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($user_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$status = (int)($this->request->get['status'] ?? 0);
+
+		$this->model_setting_api_key->setStatus((int)$key['api_key_id'], $status);
+
+		$this->session->data['success'] = $status
+			? sprintf($this->language->get('text_api_key_enabled'), (string)$key['name'])
+			: sprintf($this->language->get('text_api_key_revoked'), (string)$key['name']);
+
+		$this->apiKeyRedirect($user_id);
+	}
+
+	/**
+	 * Deletes one of the keys of a user.
+	 */
+	public function api_key_delete() {
+		$this->load->language('user/user');
+		$this->load->language('setting/api_key');
+
+		$user_id = $this->apiKeyUserId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($user_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($user_id);
+
+			return;
+		}
+
+		$this->model_setting_api_key->deleteKey((int)$key['api_key_id']);
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_deleted'), (string)$key['name']);
+
+		$this->apiKeyRedirect($user_id);
+	}
+
+	/**
+	 * The user the API key actions act on.
+	 */
+	private function apiKeyUserId(): int {
+		return isset($this->request->get['user_id']) ? (int)$this->request->get['user_id'] : 0;
+	}
+
+	/**
+	 * The key of the request — only when it really belongs to the user.
+	 */
+	private function apiKeyOwnedKey(int $user_id): array {
+		$api_key_id = isset($this->request->get['api_key_id']) ? (int)$this->request->get['api_key_id'] : 0;
+
+		if (!$api_key_id || !$user_id) {
+			return [];
+		}
+
+		$key = $this->model_setting_api_key->getKey($api_key_id);
+
+		if (!$key || (int)($key['user_id'] ?? 0) !== $user_id) {
+			return [];
+		}
+
+		return $key;
+	}
+
+	/**
+	 * Back to the form of the user.
+	 */
+	private function apiKeyRedirect(int $user_id): void {
+		$this->response->redirect($this->url->link('user/user/edit', 'user_token=' . $this->session->data['user_token'] . '&user_id=' . $user_id, true));
+	}
+
+	/**
+	 * A date of the panel in the format of the panel.
+	 */
+	private function apiKeyDate(string $value): string {
+		if ($value === '' || $value === '0000-00-00 00:00:00' || $value === '0000-00-00') {
+			return '';
+		}
+
+		$timestamp = strtotime($value);
+
+		if ($timestamp === false) {
+			return '';
+		}
+
+		return date($this->language->get('datetime_format'), $timestamp);
 	}
 
 	protected function getList() {
@@ -391,6 +652,54 @@ class ControllerUserUser extends Controller {
 			$data['status'] = $user_info['status'];
 		} else {
 			$data['status'] = 0;
+		}
+
+		// API keys of the user — shown only to operators who may manage keys.
+		$data['api_can_view'] = $this->user->hasPermission('access', 'setting/api_key');
+		$data['api_can_edit'] = $this->user->hasPermission('modify', 'setting/api_key');
+		$data['api_keys'] = [];
+		$data['api_create_action'] = '';
+		$data['api_new_token'] = '';
+		$data['api_base_url'] = rtrim((string)HTTP_CATALOG, '/') . '/api/v1';
+
+		$user_id = isset($this->request->get['user_id']) ? (int)$this->request->get['user_id'] : 0;
+
+		if ($data['api_can_view'] && $user_id) {
+			$this->load->model('setting/api_key');
+
+			$user_token = $this->session->data['user_token'];
+
+			foreach ($this->model_setting_api_key->getKeys(['user_id' => $user_id]) as $key) {
+				$data['api_keys'][] = [
+					'api_key_id'   => (int)$key['api_key_id'],
+					'name'         => (string)$key['name'],
+					'comment'      => (string)($key['comment'] ?? ''),
+					'prefix'       => (string)$key['prefix'],
+					'status_value' => (int)$key['status'],
+					'status'       => (int)$key['status'] ? $this->language->get('text_api_enabled') : $this->language->get('text_api_disabled'),
+					'expires_at'   => $this->apiKeyDate((string)($key['expires_at'] ?? '')),
+					'is_expired'   => !empty($key['expires_at']) && strtotime((string)$key['expires_at']) <= time(),
+					'last_used_at' => $this->apiKeyDate((string)($key['last_used_at'] ?? '')),
+					'requests_24h' => (int)$key['requests_24h'],
+					'requests_total' => (int)$key['requests_total'],
+					'rate_limit'   => (int)$key['rate_limit'],
+					'ip_allowlist' => (string)($key['ip_allowlist'] ?? ''),
+					'rotate'       => $this->url->link('user/user/api_key_rotate', 'user_token=' . $user_token . '&user_id=' . $user_id . '&api_key_id=' . (int)$key['api_key_id'], true),
+					'revoke'       => $this->url->link('user/user/api_key_status', 'user_token=' . $user_token . '&user_id=' . $user_id . '&api_key_id=' . (int)$key['api_key_id'] . '&status=0', true),
+					'enable'       => $this->url->link('user/user/api_key_status', 'user_token=' . $user_token . '&user_id=' . $user_id . '&api_key_id=' . (int)$key['api_key_id'] . '&status=1', true),
+					'delete'       => $this->url->link('user/user/api_key_delete', 'user_token=' . $user_token . '&user_id=' . $user_id . '&api_key_id=' . (int)$key['api_key_id'], true),
+					'edit'         => $this->url->link('setting/api_key/edit', 'user_token=' . $user_token . '&api_key_id=' . (int)$key['api_key_id'], true),
+				];
+			}
+
+			$data['api_create_action'] = $this->url->link('user/user/api_key', 'user_token=' . $user_token . '&user_id=' . $user_id, true);
+
+			// A freshly issued token is shown once, on the page of its owner.
+			if (!empty($this->session->data['api_new_token']) && (int)($this->session->data['api_new_token_user'] ?? 0) === $user_id) {
+				$data['api_new_token'] = (string)$this->session->data['api_new_token'];
+
+				unset($this->session->data['api_new_token'], $this->session->data['api_new_token_user']);
+			}
 		}
 
 		$data['header'] = $this->load->controller('common/header');
