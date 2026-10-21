@@ -1,3 +1,12 @@
+## [3.35.0](https://github.com/kdbsoft/dockercart/compare/v3.34.0...v3.35.0) (2026-10-21)
+
+### Features
+
+* **api:** expose webhook subscriptions over the REST API ([09cd44c](https://github.com/kdbsoft/dockercart/commit/09cd44c5a0588f6d1f020b052189c5e843d07806))
+* **webhooks:** add event library, outbox tables and delivery worker ([beaa03f](https://github.com/kdbsoft/dockercart/commit/beaa03f57ef30b86fd212cedb36929071a6dc36a))
+* **webhooks:** add panel pages for subscriptions and deliveries ([981d978](https://github.com/kdbsoft/dockercart/commit/981d978180b65232f9abe5772e9878d3fc2cdd39))
+* **webhooks:** emit order and stock events from the business flow ([1bc91a2](https://github.com/kdbsoft/dockercart/commit/1bc91a27a748945791be5d2d73ab5c4da08f32e5))
+
 ## [3.34.0](https://github.com/kdbsoft/dockercart/compare/v3.33.1...v3.34.0) (2026-10-21)
 
 ### Features
