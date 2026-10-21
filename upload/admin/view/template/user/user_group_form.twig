@@ -49,36 +49,113 @@
                   <div class="text-danger">{{ error_name }}</div>
                   {% endif %}
                 </div>
+                {% if is_superuser_group %}
+                <div class="alert alert-info" style="margin-bottom:0">
+                  <i data-lucide="shield-check" width="16" height="16"></i> {{ text_full_access }}
+                </div>
+                {% else %}
                 <div class="dcx-field">
-                  <label class="dcx-label">{{ entry_access }}</label>
+                  <label class="dcx-label" for="input-role-template">{{ entry_role_template }}</label>
+                  <div class="input-group">
+                    <select id="input-role-template" class="form-control">
+                      <option value="">{{ text_select_role_template }}</option>
+                      {% for role_template in role_templates %}
+                      <option value="{{ role_template.code }}">{{ role_template.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <span class="input-group-btn">
+                      <button type="button" id="button-apply-template" class="btn btn-default"><i data-lucide="wand-sparkles" width="14" height="14"></i> {{ button_apply_template }}</button>
+                    </span>
+                  </div>
+                  <div class="help-block">{{ help_role_template }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dcx-panel" style="margin-top:16px">
+            <div class="dcx-panel-head">
+              <div class="dcx-panel-head__icon"><i data-lucide="key-round" width="18" height="18"></i></div>
+              <div>
+                <div class="dcx-panel-title">{{ text_permissions }}</div>
+                <div class="dcx-panel-subtitle">{{ text_permissions_subtitle }}</div>
+              </div>
+            </div>
+            <div class="dcx-panel-body">
+              <div class="dcx-fields">
+                <div class="dcx-field">
+                  <div class="dcx-perm-toolbar">
+                    <div class="dcx-perm-search">
+                      <i data-lucide="search" width="14" height="14"></i>
+                      <input type="text" id="input-permission-search" class="form-control" placeholder="{{ entry_search_permission }}" />
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                      <button type="button" class="btn btn-default" data-perm-column-all="access"><i data-lucide="square-check" width="12" height="12"></i> {{ text_allow_all_access }}</button>
+                      <button type="button" class="btn btn-default" data-perm-column-none="access"><i data-lucide="square" width="12" height="12"></i> {{ text_deny_all_access }}</button>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                      <button type="button" class="btn btn-default" data-perm-column-all="modify"><i data-lucide="square-check" width="12" height="12"></i> {{ text_allow_all_modify }}</button>
+                      <button type="button" class="btn btn-default" data-perm-column-none="modify"><i data-lucide="square" width="12" height="12"></i> {{ text_deny_all_modify }}</button>
+                    </div>
+                  </div>
+                  <div class="dcx-perm-wrap">
+                    <table class="table table-bordered table-condensed dcx-perm-table">
+                      <thead>
+                        <tr>
+                          <th>{{ column_section }}</th>
+                          <th>{{ column_permission }}</th>
+                          <th class="text-center">{{ column_access }}</th>
+                          <th class="text-center">{{ column_modify }}</th>
+                        </tr>
+                      </thead>
+                      {% for section in permission_sections %}
+                      <tbody class="dcx-perm-section" data-perm-section="{{ section.code }}">
+                        <tr class="dcx-perm-section-row">
+                          <td colspan="4">
+                            <button type="button" class="dcx-perm-collapse" data-perm-collapse="{{ section.code }}"><i data-lucide="chevron-down" width="14" height="14"></i></button>
+                            <strong>{{ section.label }}</strong>
+                            <span class="dcx-perm-count">{{ section.routes|length }}</span>
+                            <span class="pull-right dcx-perm-section-actions">
+                              <a href="#" data-perm-section-all="access" data-perm-section="{{ section.code }}">{{ text_allow_access }}</a>
+                              <span class="dcx-perm-sep">·</span>
+                              <a href="#" data-perm-section-all="modify" data-perm-section="{{ section.code }}">{{ text_allow_modify }}</a>
+                              <span class="dcx-perm-sep">·</span>
+                              <a href="#" data-perm-section-none="1" data-perm-section="{{ section.code }}">{{ text_deny_section }}</a>
+                            </span>
+                          </td>
+                        </tr>
+                        {% for route in section.routes %}
+                        <tr class="dcx-perm-row" data-perm-row="{{ section.code }}" data-perm-search="{{ route.route|lower }} {{ route.name|lower }} {{ route.title|lower }}">
+                          <td></td>
+                          <td>
+                            <code class="dcx-perm-route">{{ route.route }}</code>
+                            {% if route.title %}<span class="dcx-perm-title">— {{ route.title }}</span>{% endif %}
+                          </td>
+                          <td class="text-center"><input type="checkbox" name="permission[access][]" value="{{ route.route }}" data-perm="access" {% if route.access %}checked="checked"{% endif %} /></td>
+                          <td class="text-center"><input type="checkbox" name="permission[modify][]" value="{{ route.route }}" data-perm="modify" {% if route.modify %}checked="checked"{% endif %} /></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                      {% endfor %}
+                    </table>
+                  </div>
+                  <div class="help-block">{{ help_permissions }}</div>
+                </div>
+                {% if capabilities %}
+                <div class="dcx-field">
+                  <label class="dcx-label">{{ entry_capabilities }}</label>
                   <div class="dcx-picker__well">
-                    {% for permission in permissions %}
+                    {% for capability in capabilities %}
                     <label class="dcx-picker__well-item">
-                      <input type="checkbox" name="permission[access][]" value="{{ permission.route }}" {% if permission.route in access %}checked="checked"{% endif %} />
-                      <span>{{ permission.name }}{% if permission.title %} — {{ permission.title }}{% endif %}</span>
+                      <input type="checkbox" name="permission[modify][]" value="{{ capability.route }}" {% if capability.checked %}checked="checked"{% endif %} />
+                      <span>{{ capability.label }} <code>{{ capability.route }}</code></span>
                     </label>
                     {% endfor %}
                   </div>
-                  <div style="margin-top:6px;">
-                    <button type="button" onclick="$(this).closest('.dcx-field').find(':checkbox').prop('checked', true);" class="btn btn-default btn-xs"><i data-lucide="square-check" width="12" height="12"></i> {{ text_select_all }}</button>
-                    <button type="button" onclick="$(this).closest('.dcx-field').find(':checkbox').prop('checked', false);" class="btn btn-default btn-xs"><i data-lucide="square" width="12" height="12"></i> {{ text_unselect_all }}</button>
-                  </div>
+                  <div class="help-block">{{ help_capabilities }}</div>
                 </div>
-                <div class="dcx-field">
-                  <label class="dcx-label">{{ entry_modify }}</label>
-                  <div class="dcx-picker__well">
-                    {% for permission in permissions %}
-                    <label class="dcx-picker__well-item">
-                      <input type="checkbox" name="permission[modify][]" value="{{ permission.route }}" {% if permission.route in modify %}checked="checked"{% endif %} />
-                      <span>{{ permission.name }}{% if permission.title %} — {{ permission.title }}{% endif %}</span>
-                    </label>
-                    {% endfor %}
-                  </div>
-                  <div style="margin-top:6px;">
-                    <button type="button" onclick="$(this).closest('.dcx-field').find(':checkbox').prop('checked', true);" class="btn btn-default btn-xs"><i data-lucide="square-check" width="12" height="12"></i> {{ text_select_all }}</button>
-                    <button type="button" onclick="$(this).closest('.dcx-field').find(':checkbox').prop('checked', false);" class="btn btn-default btn-xs"><i data-lucide="square" width="12" height="12"></i> {{ text_unselect_all }}</button>
-                  </div>
-                </div>
+                {% endif %}
+                {% endif %}
               </div>
             </div>
           </div>
@@ -88,4 +165,130 @@
     </form>
   </div>
 </div>
+{% if not is_superuser_group %}
+<script type="application/json" id="role-templates-data">{{ role_templates_json }}</script>
+<style>
+.dcx-perm-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+.dcx-perm-search { position:relative; flex:1 1 220px; min-width:180px; }
+.dcx-perm-search i, .dcx-perm-search svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:#9aa4b2; }
+.dcx-perm-search .form-control { padding-left:28px; }
+.dcx-perm-wrap { max-height:560px; overflow:auto; border:1px solid #e5e7eb; border-radius:8px; }
+.dcx-perm-table { margin-bottom:0; }
+.dcx-perm-table thead th { position:sticky; top:0; z-index:2; background:#f8fafc; }
+.dcx-perm-table td, .dcx-perm-table th { vertical-align:middle !important; }
+.dcx-perm-section-row td { background:#f1f5f9 !important; }
+.dcx-perm-collapse { border:0; background:transparent; padding:0 6px 0 0; color:#64748b; }
+.dcx-perm-section.is-collapsed .dcx-perm-collapse svg { transform:rotate(-90deg); }
+.dcx-perm-section.is-collapsed .dcx-perm-row { display:none; }
+.dcx-perm-count { display:inline-block; margin-left:6px; font-size:11px; color:#64748b; background:#e2e8f0; border-radius:10px; padding:0 7px; }
+.dcx-perm-section-actions { font-weight:400; font-size:12px; white-space:nowrap; }
+.dcx-perm-sep { color:#cbd5e1; padding:0 2px; }
+.dcx-perm-route { font-size:12px; background:transparent; padding:0; color:#334155; }
+.dcx-perm-title { font-size:12px; color:#94a3b8; }
+.dcx-perm-row.is-hidden, .dcx-perm-section.is-hidden { display:none; }
+</style>
+<script type="text/javascript">
+$(function () {
+	var templates = [];
+
+	try {
+		templates = JSON.parse(document.getElementById('role-templates-data').textContent) || [];
+	} catch (e) {
+		templates = [];
+	}
+
+	function rows() {
+		return $('#form-user-group .dcx-perm-row');
+	}
+
+	function setColumn(column, state) {
+		rows().each(function () {
+			var $row = $(this);
+
+			$row.find('input[data-perm="' + column + '"]').prop('checked', state);
+
+			if (column === 'access' && !state) {
+				// A route that loses "access" can no longer be modified.
+				$row.find('input[data-perm="modify"]').prop('checked', false);
+			}
+		});
+	}
+
+	// Granting "modify" implies the route must be opened as well.
+	$('#form-user-group').on('change', 'input[data-perm="modify"]', function () {
+		if ($(this).prop('checked')) {
+			$(this).closest('tr').find('input[data-perm="access"]').prop('checked', true);
+		}
+	});
+
+	$('[data-perm-column-all]').on('click', function () {
+		setColumn($(this).data('perm-column-all'), true);
+	});
+
+	$('[data-perm-column-none]').on('click', function () {
+		setColumn($(this).data('perm-column-none'), false);
+	});
+
+	$('.dcx-perm-section-actions a').on('click', function (e) {
+		e.preventDefault();
+
+		var $section = $(this).closest('.dcx-perm-section');
+
+		if ($(this).data('perm-section-none')) {
+			$section.find('input[type="checkbox"]').prop('checked', false);
+		} else {
+			$section.find('input[data-perm="' + $(this).data('perm-section-all') + '"]').prop('checked', true);
+		}
+	});
+
+	$('.dcx-perm-collapse').on('click', function () {
+		$(this).closest('.dcx-perm-section').toggleClass('is-collapsed');
+	});
+
+	$('#input-permission-search').on('input', function () {
+		var term = $.trim($(this).val()).toLowerCase();
+
+		rows().each(function () {
+			$(this).toggleClass('is-hidden', term !== '' && $(this).data('perm-search').indexOf(term) === -1);
+		});
+
+		$('.dcx-perm-section').each(function () {
+			$(this).toggleClass('is-hidden', $(this).find('.dcx-perm-row:not(.is-hidden)').length === 0 && term !== '');
+		});
+	});
+
+	$('#button-apply-template').on('click', function () {
+		var code = $('#input-role-template').val();
+		var template = null;
+
+		$.each(templates, function (index, item) {
+			if (item.code === code) {
+				template = item;
+			}
+		});
+
+		if (!template) {
+			return;
+		}
+
+		if (!confirm('{{ text_apply_template_confirm }}')) {
+			return;
+		}
+
+		rows().each(function () {
+			var route = $(this).find('input[data-perm="access"]').val();
+
+			$(this).find('input[data-perm="access"]').prop('checked', template.access.indexOf(route) !== -1);
+			$(this).find('input[data-perm="modify"]').prop('checked', template.modify.indexOf(route) !== -1);
+		});
+
+		$('.dcx-picker__well input[type="checkbox"]').each(function () {
+			$(this).prop('checked', template.modify.indexOf($(this).val()) !== -1);
+		});
+
+		$('#input-permission-search').val('').trigger('input');
+	});
+});
+</script>
+{% endif %}
 {{ footer }}

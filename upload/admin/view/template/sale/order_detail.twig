@@ -8,23 +8,39 @@
             <span class="page-header__back"><i data-lucide="arrow-left" width="20" height="20"></i></span>
             <span class="page-header__title">
               {{ heading_title }}
+              {% if can_status %}
               <span class="js-hdr-status" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_status_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrStatus();">
                 <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
               </span>
+              {% else %}
+              <span style="display:inline-block">
+                <span class="page-header__badge page-header__badge--{{ status_badge_class }}">{{ order_status }}</span>
+              </span>
+              {% endif %}
+              {% if can_edit %}
               <span class="js-hdr-payment" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_payment_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrPayment();">
                 <span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span>
               </span>
+              {% else %}
+              <span style="display:inline-block"><span class="page-header__badge {{ payment_status_header_badge_class }}">{{ payment_status_text }}</span></span>
+              {% endif %}
               {% if shipping_status %}
+              {% if can_shipment %}
               <span class="js-hdr-shipment" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_list_shipment_change }}" style="cursor:pointer;display:inline-block" onclick="event.preventDefault(); event.stopPropagation(); openHdrShipment();">
                 <span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span>
               </span>
+              {% else %}
+              <span style="display:inline-block"><span class="page-header__badge {{ shipping_status_header_badge_class }}" id="header-shipping-badge" data-toggle="tooltip" title="{{ shipping_shipped_total }} / {{ shipping_ordered_total }}">{{ shipping_status_text }}</span></span>
+              {% endif %}
               {% endif %}
             </span>
           </a>
           <div class="pull-right" id="header-actions">
+            {% if can_edit %}
             <button type="button" id="btn-edit" class="btn btn-primary hidden-xs" onclick="toggleEditMode()">
               <i data-lucide="pencil" width="16" height="16"></i> {{ button_edit }}
             </button>
+            {% endif %}
             <a href="{{ invoice_url }}" target="_blank" class="btn btn-primary">
               <i data-lucide="file-text" width="16" height="16"></i> {{ button_invoice }}{% if invoice_no %} № {{ invoice_no }}{% endif %}
             </a>
@@ -36,6 +52,7 @@
                 <i data-lucide="more-vertical" width="16" height="16"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-right">
+                {% if can_edit %}
                 <li class="{% if not reward_has_points %}disabled{% endif %}"><a href="#" onclick="event.preventDefault();{% if reward_has_points %}addReward();{% endif %}return false"><i data-lucide="star" width="14" height="14"></i> {{ button_reward_add }}</a></li>
                 <li class="{% if not reward_has_points %}disabled{% endif %}"><a href="#" onclick="event.preventDefault();{% if reward_has_points %}removeReward();{% endif %}return false"><i data-lucide="star-off" width="14" height="14"></i> {{ button_reward_remove }}</a></li>
                 {% if affiliate_id %}
@@ -50,6 +67,7 @@
                 <li><a href="#" onclick="event.preventDefault();duplicateOrder();return false"><i data-lucide="copy" width="14" height="14"></i> {{ button_duplicate_order }}</a></li>
                 <li class="divider"></li>
                 <li><a href="{{ create_return_url }}" target="_blank"><i data-lucide="rotate-ccw" width="14" height="14"></i> {{ button_create_return }}</a></li>
+                {% endif %}
               </ul>
             </div>
             <span id="edit-actions" style="display:none">
@@ -238,6 +256,7 @@
               </div>
 
               {# Coupon #}
+              {% if can_edit %}
               <div class="order-coupon-block">
                 {% if coupon_applied %}
                 <div class="order-coupon-row">
@@ -255,6 +274,7 @@
                 </div>
                 {% endif %}
               </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -858,10 +878,25 @@ const USER_TOKEN = '{{ user_token }}';
 const ORDER_ID = {{ order_id }};
 const SHIPPING_STATUS_ID = {{ shipping_status_id }};
 const EDIT_MODE = {{ edit_mode ? 'true' : 'false' }};
+const CAN_EDIT = {{ can_edit ? 'true' : 'false' }};
+const CAN_STATUS = {{ can_status ? 'true' : 'false' }};
+const CAN_SHIPMENT = {{ can_shipment ? 'true' : 'false' }};
 const SHIPPING_ZONE_ID = {{ shipping_zone_id }};
 const PAYMENT_ZONE_ID = {{ payment_zone_id }};
 const PAID_AMOUNT = {{ paid_amount_raw }};
 let isEditing = false;
+
+// Read-only roles (accountant, courier, operator) must not see editing
+// affordances: the server rejects those actions anyway, so hide the entries.
+if (!CAN_EDIT) {
+	document.querySelectorAll('.dcx-panel-edit-link, .dcx-sidebar-edit-link, .dcx-panel-edit-actions, .dcx-sidebar-edit-actions').forEach(function (element) {
+		element.remove();
+	});
+
+	if (EDIT_MODE) {
+		document.body.classList.remove('dcx-global-editing');
+	}
+}
 
 function duplicateOrder() {
 	api('index.php?route=sale/order_detail/duplicate&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID, 'POST')
