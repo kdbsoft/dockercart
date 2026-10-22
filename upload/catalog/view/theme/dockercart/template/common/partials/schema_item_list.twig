@@ -1,3 +1,18 @@
+{#
+  schema_item_list.twig
+  ItemList JSON-LD for product listing pages (category / search / special /
+  new arrivals / manufacturer).
+
+  Google requires every Product node to carry one of "offers", "review" or
+  "aggregateRating" — otherwise Search Console reports
+  "Provide a value for one of the following data elements: offers, review or
+  aggregateRating".
+  Therefore the controllers add "schema_price" (numeric price in the session
+  currency, 0 when the price is hidden / call-for-price) and "schema_currency"
+  to each listing product. A Product node is emitted only for products with a
+  visible price; the rest become plain ListItems so no Product markup is left
+  without offers.
+#}
 {% if products is defined and products %}
 <script type="application/ld+json">
 {
@@ -6,35 +21,33 @@
   "name": "{{ heading_title|default(name)|striptags|trim|e('js') }}",
   "itemListElement": [
     {% for product in products %}
+    {% set dc_schema_price = product.schema_price is defined ? product.schema_price : 0 %}
+    {% set dc_has_offer = dc_schema_price > 0 %}
     {
       "@type": "ListItem",
       "position": {{ loop.index }},
-      "url": "{{ product.href|e('js') }}",
+      "url": "{{ product.href|e('js') }}"{% if not dc_has_offer %},
+      "name": "{{ product.name|striptags|trim|e('js') }}"{% else %},
       "item": {
         "@type": "Product",
         "name": "{{ product.name|striptags|trim|e('js') }}"{% if product.thumb is defined and product.thumb %},
-        "image": "{{ product.thumb|e('js') }}"{% endif %}{% if product.rating is defined and product.rating and product.reviews is defined and product.reviews > 0 %},
+        "image": "{{ product.thumb|e('js') }}"{% endif %},
+        "offers": {
+          "@type": "Offer",
+          "url": "{{ product.href|e('js') }}",
+          "priceCurrency": "{{ product.schema_currency is defined and product.schema_currency ? product.schema_currency|e('js') : 'USD' }}",
+          "price": "{{ dc_schema_price|number_format(2, '.', '') }}",
+          "availability": "https://schema.org/{% if product.is_preorder is defined and product.is_preorder %}PreOrder{% elseif product.is_in_stock is defined and product.is_in_stock %}InStock{% else %}OutOfStock{% endif %}",
+          "itemCondition": "https://schema.org/NewCondition"
+        }{% if product.rating is defined and product.rating and product.reviews is defined and product.reviews > 0 %},
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": "{{ product.rating }}",
+          "bestRating": "5",
+          "worstRating": "1",
           "reviewCount": "{{ product.reviews }}"
-        },
-        "review": [
-          {
-            "@type": "Review",
-            "name": "{{ product.name|striptags|trim|e('js') }} - customer review summary",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "{{ product.rating }}",
-              "bestRating": "5"
-            },
-            "author": {
-              "@type": "Organization",
-              "name": "{{ name|default('Customer')|striptags|trim|e('js') }}"
-            }
-          }
-        ]{% endif %}
-      }
+        }{% endif %}
+      }{% endif %}
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
