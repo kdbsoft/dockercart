@@ -1,3 +1,9 @@
+## [3.35.1](https://github.com/kdbsoft/dockercart/compare/v3.35.0...v3.35.1) (2026-10-22)
+
+### Bug Fixes
+
+* emit offers in schema item list json-ld for products with visible price ([3207947](https://github.com/kdbsoft/dockercart/commit/320794754d8af41e4dac022085782af859008e76))
+
 ## [3.35.0](https://github.com/kdbsoft/dockercart/compare/v3.34.0...v3.35.0) (2026-10-21)
 
 ### Features
