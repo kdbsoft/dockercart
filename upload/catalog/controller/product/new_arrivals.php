@@ -215,12 +215,28 @@ class ControllerProductNewArrivals extends Controller {
 				$badge_class = 'from-blue-500 to-indigo-600';
 			}
 
+			// JSON-LD (schema_item_list.twig): a Product item must carry offers,
+			// review or aggregateRating. Emit a price only when the card actually
+			// shows one (hidden prices and call-for-price products are skipped).
+			$schema_price = 0.0;
+
+			if (($price !== false || $special !== false) && (float)$tax_price > 0 && empty($result['call_for_price'])) {
+				$schema_price = (float)$this->currency->format(
+					$this->tax->calculate($tax_price, $result['tax_class_id'], $this->config->get('config_tax')),
+					$this->session->data['currency'],
+					'',
+					false
+				);
+			}
+
 			$data['products'][] = array(
 				'product_id'         => $result['product_id'],
 				'thumb'              => $image,
 				'name'               => $result['name'],
 				'description'        => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 				'price'              => $price,
+				'schema_price'       => $schema_price,
+				'schema_currency'    => $this->session->data['currency'],
 				'special'            => $special,
 				'discount'           => $discount_percent,
 				'tax'                => $tax,
