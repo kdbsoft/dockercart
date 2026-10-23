@@ -21,6 +21,18 @@
     <div class="alert alert-warning" style="margin:20px 0;"><i data-lucide="alert-triangle" width="16" height="16"></i> {{ text_trust_warning }}</div>
     <div class="alert alert-info" style="margin:20px 0;"><i data-lucide="info" width="16" height="16"></i> {{ text_limitations }}</div>
 
+    {% if host_git_origin %}
+    <div class="alert {% if source_match is same as(false) %}alert-warning{% else %}alert-info{% endif %}" style="margin:20px 0;">
+      <i data-lucide="git-branch" width="16" height="16"></i>
+      {% if source_match is same as(false) %}{{ text_source_mismatch }}{% else %}{{ text_source_match }}{% endif %}
+      <br />
+      <small class="text-muted">{{ text_host_git }}: {{ host_git_origin|escape('html') }} @ {{ host_git_branch|escape('html') }}{% if host_git_head %} ({{ host_git_head|slice(0, 10) }}){% endif %}</small>
+      {% if deployed_source %}
+      <br /><small class="text-muted">{{ text_last_deploy }}: {{ deployed_source }}{% if deployed_version %} ({{ deployed_version }}){% endif %}</small>
+      {% endif %}
+    </div>
+    {% endif %}
+
     <div class="panel panel-default" id="progress-panel" style="margin:20px 0;display:none;">
       <div class="panel-heading">
         <h3 class="panel-title"><i data-lucide="activity" width="16" height="16"></i> {{ text_progress }} <span id="progress-percent" class="label label-default" style="display:none;"></span></h3>

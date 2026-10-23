@@ -51,31 +51,283 @@ compose() {
     docker compose $FILES "$@" 9>&-
 }
 
+# Path of the manifest written by the GUI updater (admin/cli/dockercart_update.php):
+# the exact list of files it deployed into upload/. Used to tell GUI copies apart
+# from files the user added by hand.
+UPDATE_MANIFEST="$SCRIPT_DIR/storage/dockercart_update/manifest.json"
+RECONCILE_BACKUP="$SCRIPT_DIR/storage/dockercart_update/backup/reconcile"
+DEPLOYED_FILE="$SCRIPT_DIR/storage/dockercart_update/deployed.json"
+HOST_GIT_FILE="$SCRIPT_DIR/storage/dockercart_update/host-git.json"
+
+# One manifest path per line. The file is a single-line JSON string array, so a
+# crude split is enough (paths are relative to upload/).
+manifest_paths() {
+    [ -f "$UPDATE_MANIFEST" ] || return 0
+    tr ',' '\n' < "$UPDATE_MANIFEST" \
+        | sed -e 's/\\\//\//g' -e 's/^\["//' -e 's/"\]$//' -e 's/^"//' -e 's/"$//'
+}
+
+manifest_has() {
+    manifest_paths | grep -qxF "$1"
+}
+
+# Read a top-level string value from a small JSON file without jq/php.
+json_get() {
+    [ -f "$1" ] || return 1
+    sed -n 's/.*"'"$2"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$1" \
+        | sed -e 's|\\/|/|g' -e 's|\\"|"|g' -e 's|\\\\|\\|g' \
+        | head -n 1
+}
+
+# Escape a value for a JSON string.
+json_escape() {
+    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
+# Atomically write a flat JSON object from key=value arguments.
+write_json_file() {
+    json_file=$1
+    shift
+    json_tmp="$json_file.tmp"
+    json_first=1
+
+    mkdir -p "$(dirname "$json_file")" 2>/dev/null || true
+
+    {
+        printf '{\n'
+        for json_kv in "$@"; do
+            if [ "$json_first" -eq 1 ]; then
+                json_first=0
+            else
+                printf ',\n'
+            fi
+            printf '  "%s": "%s"' "${json_kv%%=*}" "$(json_escape "${json_kv#*=}")"
+        done
+        printf '\n}\n'
+    } > "$json_tmp"
+
+    mv -f "$json_tmp" "$json_file"
+}
+
+# Normalize a git remote URL for comparison (drop trailing .git and slash).
+normalize_remote() {
+    printf '%s' "$1" | sed -e 's#/*$##' -e 's/\.git$//'
+}
+
+# Record the host git checkout state so the admin panel can compare it with the
+# repository configured for the GUI updater.
+write_host_git_state() {
+    write_json_file "$HOST_GIT_FILE" \
+        "origin=$(git remote get-url origin 2>/dev/null || true)" \
+        "branch=$BRANCH" \
+        "head=$(git rev-parse HEAD 2>/dev/null || true)" \
+        "version=$(cat "$SCRIPT_DIR/upload/VERSION" 2>/dev/null | tr -d '\r\n' || true)" \
+        "checked_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+}
+
+# Reset tracked paths from HEAD. The list is fed through stdin
+# (--pathspec-from-file, git >= 2.25) so paths with spaces survive, and a single
+# command avoids racing the IDE's git integration for .git/index.lock. Only an
+# index-lock failure is retried; any other error is reported immediately.
+# `HEAD` (not a bare `--`) is required: a bare checkout restores from the index,
+# which would leave IDE-staged GUI changes behind and still block the pull.
+reconcile_checkout() {
+    reconcile_paths=$1
+    reconcile_tries=0
+
+    # --pathspec-from-file needs git >= 2.25. On older git fall back to passing
+    # the paths as arguments (breaks on spaces in names, but keeps updates
+    # working instead of aborting on an unknown option).
+    if git checkout -h 2>&1 | grep -q -- '--pathspec-from-file'; then
+        reconcile_use_file=1
+    else
+        reconcile_use_file=0
+    fi
+
+    while :; do
+        if [ "$reconcile_use_file" = "1" ]; then
+            reconcile_err=$(printf '%s\n' "$reconcile_paths" | git checkout HEAD --pathspec-from-file=- 2>&1) && reconcile_rc=0 || reconcile_rc=$?
+        else
+            # shellcheck disable=SC2086
+            reconcile_err=$(git checkout HEAD -- $reconcile_paths 2>&1) && reconcile_rc=0 || reconcile_rc=$?
+        fi
+
+        if [ "$reconcile_rc" -eq 0 ]; then
+            return 0
+        fi
+
+        case "$reconcile_err" in
+            *index.lock*|*"Another git process"*)
+                reconcile_tries=$((reconcile_tries + 1))
+
+                if [ "$reconcile_tries" -ge 5 ]; then
+                    log "Error: git index stayed locked after 5 attempts: $reconcile_err"
+                    return 1
+                fi
+
+                log "git index busy, retrying ($reconcile_tries/5)..."
+                sleep 1
+                ;;
+            *)
+                log "Error: git checkout failed: $reconcile_err"
+                return 1
+                ;;
+        esac
+    done
+}
+
+# Keep a copy of a file that is about to be removed, preserving its path
+# relative to upload/, so nothing the user wrote is silently lost.
+reconcile_backup_file() {
+    reconcile_rel=$1
+    reconcile_dest="$RECONCILE_BACKUP-$RECONCILE_TS/$reconcile_rel"
+
+    mkdir -p "$(dirname "$reconcile_dest")" 2>/dev/null || true
+    cp -p "$SCRIPT_DIR/upload/$reconcile_rel" "$reconcile_dest" 2>/dev/null || true
+}
+
 reconcile_working_tree() {
     # The GUI updater (admin/cli/dockercart_update.php) copies upload/ straight
-    # into the bind mount but never advances git HEAD, so the working tree ends
-    # up dirty on exactly the files upstream will also touch. A fast-forward
-    # pull refuses to overwrite locally-modified files, so before pulling we
-    # reset only those GUI-managed paths (upload/*) that the upstream commit
-    # also changes. Real local edits outside upload/ are left untouched (they
-    # are blocked earlier by the dirty check below).
-    upstream_changed=$(git diff --name-only "$BASE" "$REMOTE" 2>/dev/null)
+    # into the bind mount but never advances git HEAD (the .git directory is not
+    # mounted into the container), so the working tree ends up carrying the new
+    # release while HEAD still points at the old one. A fast-forward pull then
+    # refuses to run: tracked files look locally modified, files the GUI added
+    # are untracked ("would be overwritten by merge"), and files the GUI pruner
+    # removed are shown as deletions.
+    #
+    # Before pulling, put upload/ back into a state git can fast-forward:
+    #   1. restore tracked upload/ files the upstream commit changes, plus any
+    #      tracked upload/ file the GUI pruner deleted;
+    #   2. remove untracked upload/ files that upstream provides (GUI copies).
+    # Real local edits outside upload/ still block the update below.
+    upstream_changed=$(git diff --name-only "$BASE" "$REMOTE" 2>/dev/null || true)
     [ -z "$upstream_changed" ] && return 0
 
-    local_dirty=$(git diff --name-only HEAD 2>/dev/null)
-    [ -z "$local_dirty" ] && return 0
+    RECONCILE_TS=$(date '+%Y%m%d-%H%M%S')
 
-    echo "$local_dirty" | while read -r f; do
+    # The GUI worker records what it deployed (source, remote, branch, sha). Use
+    # it to (a) warn when the GUI and the git checkout track different sources
+    # and (b) compare untracked files against the exact deployed commit instead
+    # of only the pull target.
+    deployed_source=$(json_get "$DEPLOYED_FILE" source || true)
+    deployed_remote=$(json_get "$DEPLOYED_FILE" remote || true)
+    deployed_branch=$(json_get "$DEPLOYED_FILE" branch || true)
+    deployed_sha=$(json_get "$DEPLOYED_FILE" sha || true)
+
+    if [ "$deployed_source" = "gui" ]; then
+        origin_remote=$(git remote get-url origin 2>/dev/null || true)
+
+        if [ -n "$deployed_remote" ] && [ -n "$origin_remote" ] \
+            && [ "$(normalize_remote "$deployed_remote")" != "$(normalize_remote "$origin_remote")" ]; then
+            log "Warning: the GUI updater deployed from $deployed_remote, but this checkout's origin is $origin_remote - upload/ is being reset to git's HEAD."
+        fi
+
+        if [ -n "$deployed_branch" ] && [ "$deployed_branch" != "$BRANCH" ]; then
+            log "Warning: the GUI updater tracked branch $deployed_branch, but this checkout is on $BRANCH."
+        fi
+    fi
+
+    # Prefer the exact deployed commit for content comparison; fall back to the
+    # pull target. The pull target still decides which untracked files block the
+    # merge (existence check in the loop below).
+    compare_refs="$REMOTE"
+
+    if [ -n "$deployed_sha" ] && git cat-file -e "$deployed_sha^{commit}" 2>/dev/null; then
+        compare_refs="$deployed_sha $REMOTE"
+    fi
+
+    # --- 1. tracked changes -------------------------------------------------
+    reset_list=""
+
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+
         case "$f" in
             upload/*) ;;
             *) continue ;;
         esac
 
-        if echo "$upstream_changed" | grep -qx "$f"; then
-            git checkout -- "$f"
-            log "Reconciled (GUI sync) before pull: $f"
+        if [ -e "$SCRIPT_DIR/$f" ]; then
+            # Modified: reset only when upstream also changes the file, so a
+            # real local edit to an untouched template survives.
+            if printf '%s\n' "$upstream_changed" | grep -qxF "$f"; then
+                reset_list="${reset_list:+$reset_list
+}$f"
+            fi
+        else
+            # Deleted: restore while upstream still ships the file. A deletion
+            # upstream shares is already covered by the pull itself.
+            if git cat-file -e "$REMOTE:$f" 2>/dev/null; then
+                reset_list="${reset_list:+$reset_list
+}$f"
+            fi
         fi
-    done
+    done <<EOF
+$(git diff --name-only HEAD 2>/dev/null || true)
+EOF
+
+    if [ -n "$reset_list" ]; then
+        if reconcile_checkout "$reset_list"; then
+            log "Reconciled $(printf '%s' "$reset_list" | grep -c .) tracked GUI path(s) before pull."
+        else
+            log "Error: could not reset GUI-managed paths (git index is busy)."
+            return 1
+        fi
+    fi
+
+    # --- 2. untracked files that upstream provides -------------------------
+    removed=0
+
+    while IFS= read -r f; do
+        [ -z "$f" ] && continue
+
+        case "$f" in
+            upload/*) ;;
+            *) continue ;;
+        esac
+
+        # A pure local addition that upstream does not ship cannot block the
+        # pull, so leave it alone.
+        git cat-file -e "$REMOTE:$f" 2>/dev/null || continue
+
+        rel=${f#upload/}
+
+        reconcile_known=0
+
+        for compare_ref in $compare_refs; do
+            if git show "$compare_ref:$f" 2>/dev/null | cmp -s - "$SCRIPT_DIR/$f"; then
+                reconcile_known=1
+                break
+            fi
+        done
+
+        if [ "$reconcile_known" -eq 1 ]; then
+            # Byte-identical to a known deployment: an unmodified GUI copy.
+            rm -f "$SCRIPT_DIR/$f"
+            removed=$((removed + 1))
+        else
+            # Content differs: keep a copy before removing the obstacle. A file
+            # listed in the GUI manifest is a GUI copy; anything else is a user
+            # addition and gets an explicit warning.
+            reconcile_backup_file "$rel"
+            rm -f "$SCRIPT_DIR/$f"
+            removed=$((removed + 1))
+
+            if manifest_has "$rel"; then
+                log "Replaced GUI file whose content differed (backup kept): $f"
+            else
+                log "Warning: removed untracked file not in the GUI manifest (backup kept): $f"
+            fi
+        fi
+    done <<EOF
+$(git ls-files --others --exclude-standard -- upload/ 2>/dev/null || true)
+EOF
+
+    if [ "$removed" -gt 0 ]; then
+        log "Removed $removed GUI-copied untracked file(s) before pull."
+    fi
+
+    return 0
 }
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -96,6 +348,7 @@ git fetch --prune origin "$BRANCH"
 LOCAL=$(git rev-parse @)
 REMOTE=$(git rev-parse "origin/$BRANCH")
 BASE=$(git merge-base @ "origin/$BRANCH")
+write_host_git_state || log "Warning: could not record host git state."
 
 if [ "$LOCAL" = "$REMOTE" ]; then
     log "Code is already up to date."
@@ -123,6 +376,17 @@ elif [ "$LOCAL" = "$BASE" ]; then
 
 	git pull --ff-only origin "$BRANCH"
 	log "Code updated successfully."
+
+	# Record the git deployment so the GUI/admin and the next update run can see
+	# which source is actually checked out.
+	write_json_file "$DEPLOYED_FILE" \
+		"source=git" \
+		"remote=$(git remote get-url origin 2>/dev/null || true)" \
+		"branch=$BRANCH" \
+		"sha=$(git rev-parse HEAD 2>/dev/null || true)" \
+		"version=$(cat "$SCRIPT_DIR/upload/VERSION" 2>/dev/null | tr -d '\r\n' || true)" \
+		"deployed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+		|| log "Warning: could not record deployment state."
 
 	# Decide whether the container image itself needs a rebuild. Changes to the
 	# Dockerfile, PHP config, Apache config, or docker/ scripts change what is
