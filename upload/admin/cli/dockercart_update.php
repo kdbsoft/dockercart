@@ -155,6 +155,50 @@ function update_set_warning(string $warning): void {
 	$GLOBALS['update_warnings'][] = $warning;
 }
 
+/**
+ * Resolve the branch tip commit SHA with `git ls-remote` (git ships in the
+ * image). Provider-agnostic: works for GitHub, GitLab, Gitea and self-hosted
+ * remotes, with no API call and no local .git directory. Returns null when git
+ * is unavailable or the ref cannot be resolved - the record then omits the SHA.
+ */
+function update_resolve_remote_sha(string $remote, string $branch): ?string {
+	$cmd = 'GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=/bin/true git ls-remote --exit-code '
+		. escapeshellarg($remote) . ' ' . escapeshellarg('refs/heads/' . $branch) . ' 2>/dev/null';
+
+	$out = [];
+	$rc = 0;
+	exec($cmd, $out, $rc);
+
+	if ($rc !== 0 || empty($out)) {
+		return null;
+	}
+
+	$sha = strtok(trim((string)$out[0]), " \t");
+
+	// SHA-1 (40) or SHA-256 (64) hex digest.
+	if (!is_string($sha) || !preg_match('/^[0-9a-f]{40}([0-9a-f]{24})?$/i', $sha)) {
+		return null;
+	}
+
+	return strtolower($sha);
+}
+
+/**
+ * Atomically write a small JSON document (temp file + rename), so the host-side
+ * reader never sees a half-written deployment record.
+ */
+function update_write_json_file(string $file, array $data): void {
+	$json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+	$tmp = $file . '.tmp';
+
+	@file_put_contents($tmp, $json);
+
+	if (!@rename($tmp, $file)) {
+		@file_put_contents($file, $json);
+		@unlink($tmp);
+	}
+}
+
 function update_is_excluded(string $relative): bool {
 	$rel = trim($relative, '/');
 	$parts = explode('/', $rel);
@@ -494,6 +538,8 @@ try {
 
 	// Download
 	update_set_status('download', 10, 'Downloading archive...');
+	// Best-effort: record which commit this branch pointed at when we deployed.
+	$remoteSha = update_resolve_remote_sha($remote, $branch);
 	$archive = $tmpDir . 'archive.tgz';
 	$remoteUrl = rtrim($remote, '/') . '/archive/refs/heads/' . $branch . '.tar.gz';
 	$cmd = 'curl -fsSL --connect-timeout 15 --max-time 120 ' . escapeshellarg($remoteUrl) . ' -o ' . escapeshellarg($archive) . ' 2>&1';
@@ -576,6 +622,18 @@ try {
 	} else {
 		update_set_status('version', 65, 'VERSION verified', 'VERSION set to ' . $expected);
 	}
+
+	// Record the exact deployment identity so the host-side `make update` can
+	// tell GUI-applied files apart from user edits and detect a source mismatch
+	// (see update.sh and docs/guide.md section 9).
+	update_write_json_file($updateDir . 'deployed.json', [
+		'source'      => 'gui',
+		'remote'      => $remote,
+		'branch'      => $branch,
+		'sha'         => $remoteSha,
+		'version'     => $expected,
+		'deployed_at' => date('c')
+	]);
 
 	// Detect dependency/infrastructure changes the GUI cannot apply: the
 	// root-level composer files are mounted read-only, so a changed lock file

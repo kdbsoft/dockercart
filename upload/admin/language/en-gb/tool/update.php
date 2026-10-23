@@ -24,6 +24,10 @@ $_['text_update_complete']   = 'Update complete — now running version %s.';
 $_['text_reconnecting']      = 'Connection to the server was lost — reconnecting…';
 $_['text_reload_hint']       = 'Could not reach the server. Reload the page to see the current status.';
 $_['text_warnings']          = 'Warnings';
+$_['text_host_git']          = 'Host git checkout';
+$_['text_source_match']      = 'The configured repository matches the host git checkout.';
+$_['text_source_mismatch']   = 'Warning: the configured repository/branch differs from the host git checkout. GUI updates and `make update` would deploy different code — align them.';
+$_['text_last_deploy']       = 'Last deployment';
 
 // Entry
 $_['entry_remote']           = 'Repository URL';

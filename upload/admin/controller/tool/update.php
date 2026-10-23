@@ -92,6 +92,16 @@ class ControllerToolUpdate extends Controller {
 		$data['remote_version'] = $info['remote'];
 		$data['changelog'] = $info['changelog'];
 
+		// Deployment provenance: compare the configured repository with the host
+		// git checkout so a GUI/git source mismatch is visible before updating.
+		$deployment = $this->model_tool_update->getDeploymentState();
+		$data['host_git_origin'] = (string)($deployment['host']['origin'] ?? '');
+		$data['host_git_branch'] = (string)($deployment['host']['branch'] ?? '');
+		$data['host_git_head'] = (string)($deployment['host']['head'] ?? '');
+		$data['deployed_source'] = (string)($deployment['deployed']['source'] ?? '');
+		$data['deployed_version'] = (string)($deployment['deployed']['version'] ?? '');
+		$data['source_match'] = $deployment['match'];
+
 		$data['user_token'] = $this->session->data['user_token'];
 		$data['action'] = $this->url->link('tool/update', 'user_token=' . $this->session->data['user_token'], true);
 		$data['check_url'] = $this->url->link('tool/update/check', 'user_token=' . $this->session->data['user_token'], true);

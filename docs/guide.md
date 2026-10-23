@@ -540,9 +540,18 @@ make update
 
 ### Safety Checks
 
-- **Clean repo required (with one exception):** modified tracked files outside `upload/` block the update. Commit or stash them first, or use `ALLOW_DIRTY=1 make update` to skip the check. The GUI updater (`admin/cli/dockercart_update.php`) copies `upload/` directly into the bind mount without advancing git HEAD, which leaves those paths "dirty" — `make update` automatically reconciles (resets) exactly those GUI-managed paths before pulling, so **running the GUI updater and then `make update` works without manual cleanup**.
+- **Clean repo required (with one exception):** modified tracked files outside `upload/` block the update. Commit or stash them first, or use `ALLOW_DIRTY=1 make update` to skip the check. The GUI updater (`admin/cli/dockercart_update.php`) copies `upload/` directly into the bind mount without advancing git HEAD, which leaves those paths "dirty": modified, deleted (the GUI pruner removes files upstream still ships) and untracked (files the release adds). `make update` automatically reconciles exactly those GUI-managed paths before pulling — it resets tracked `upload/*` changes in a single `git checkout` (retrying if the IDE holds `.git/index.lock`), restores deleted tracked files, and removes untracked `upload/*` files that upstream provides. Untracked files that upstream does **not** ship are left alone, so **running the GUI updater and then `make update` works without manual cleanup**. Untracked `upload/*` files whose content differs from upstream are copied to `storage/dockercart_update/backup/reconcile-<timestamp>/` before removal; `storage/dockercart_update/manifest.json` (written by the GUI) identifies GUI copies.
 - **Detached HEAD:** not supported — you must be on a branch.
 - **Diverged branches:** if local and remote have diverged, manual intervention is required.
+
+### Deployment provenance
+
+Both update paths write a small record into `storage/dockercart_update/` (bind-mounted, visible to both the host and the container), so each side knows what the other did:
+
+- `deployed.json` — written by whichever path deployed last: `{ "source": "gui" | "git", "remote", "branch", "sha", "version", "deployed_at" }`. The GUI worker resolves `sha` with `git ls-remote` (provider-agnostic; no local `.git` needed), so the record identifies the exact commit even when the branch has since moved.
+- `host-git.json` — written by `make update` on every run: `{ "origin", "branch", "head", "version", "checked_at" }`.
+
+`make update` reads `deployed.json` before reconciling and logs a warning when the GUI deployed from a different repository/branch than the git checkout; it also uses the recorded `sha` as an exact reference when comparing GUI-copied files. The admin **System → Update** page shows the host git checkout and warns when the configured repository/branch does not match it.
 
 ### Skip Migrations
 
