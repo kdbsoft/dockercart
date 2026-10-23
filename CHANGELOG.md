@@ -1,3 +1,9 @@
+## [3.35.2](https://github.com/kdbsoft/dockercart/compare/v3.35.1...v3.35.2) (2026-10-23)
+
+### Bug Fixes
+
+* **api:** disable REST API by default ([88bdfac](https://github.com/kdbsoft/dockercart/commit/88bdfac082e391b4dbfa28ff92dd796500cca742))
+
 ## [3.35.1](https://github.com/kdbsoft/dockercart/compare/v3.35.0...v3.35.1) (2026-10-22)
 
 ### Bug Fixes
