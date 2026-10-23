@@ -22,6 +22,7 @@
 16. [Warehouses & Dropshipping](#16-warehouses--dropshipping)
 17. [Admin REST API](#17-admin-rest-api)
 18. [Webhooks](#18-webhooks)
+19. [Product Files (public downloads)](#19-product-files-public-downloads)
 
 ---
 
@@ -1632,3 +1633,78 @@ reviews, price, config) with `implemented => false`. Adding one:
 3. wrap any insert+update pair that currently has no transaction so the event
    and the data commit together;
 4. document it in `docs/guide.md` and in the OpenAPI `WebhookEvent` example list.
+
+---
+
+## 19. Product Files (public downloads)
+
+Attach any number of files to a product — PDF instructions, manuals, datasheets,
+certificates — and show them in a public "Files" block on the product page.
+Unlike the built-in OpenCart `download` (which is purchase-gated and only appears
+in the customer account), these files are free for every visitor.
+
+### Data model
+
+| Table | Purpose |
+|---|---|
+| `oc_product_file` | one row per attachment: `storage_key`, `original_name`, `file_size`, `mime_type`, `sort_order`, `status`, `downloads_count`, `date_last_downloaded`, `date_added` |
+| `oc_product_file_description` | localized title per `language_id` |
+
+The physical payload lives **outside the webroot** in
+`DIR_STORAGE . 'documents/product/'` under a random key
+(`bin2hex(random_bytes(16)) . '.<ext>'`). It is never served by a direct URL —
+`upload/catalog/controller/product/product_file.php` streams it with
+`Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, and only
+for an enabled file of an enabled product. A disabled file (or the file of a
+disabled product) is not downloadable.
+
+### Admin
+
+The product form shows a **Files** field inside the **Media** panel
+(`catalog/product_form.twig`):
+
+* upload via AJAX (`catalog/product/fileUpload`) — the payload is written to
+  storage immediately and the returned metadata is kept in hidden inputs; the DB
+  row is written on save;
+* remove via AJAX (`catalog/product/fileDelete`) — a persisted file is deleted by
+  id (row + payload), a not-yet-saved upload only by storage key;
+* title per language (`en-gb`/`ru-ua`/`uk-ua`), sort order and status.
+
+Both AJAX actions reuse the `catalog/product` permission, so no new role route is
+required. On save, `ModelCatalogProduct::addProduct()` / `editProduct()` delegate to
+`ModelCatalogProductFile::saveFiles()`, which reconciles the submitted rows
+(update kept, insert new, delete missing — payload included). Deleting a product
+removes its files, and copying a product duplicates the payloads (a copy gets its
+own storage key, so the two products never share a file).
+
+Uploads use a **hard allowlist** (documents, raster images, archives and
+drawings: PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, ODT/ODS/ODP, RTF, TXT, CSV,
+JPG/PNG/GIF/WEBP/BMP/TIFF, ZIP/RAR/7Z, DWG/DXF, EPS/AI/PSD) — the global
+`config_file_ext_allowed` / `config_file_mime_allowed` lists are intentionally
+**not** used, so a permissive global setting cannot open a hole. On top of the
+extension check the controller:
+
+* detects the real content type with `finfo` (the client-sent mime is ignored)
+  and rejects active content (`text/html`, `image/svg+xml`, JS, shell, executables, ...);
+* rejects a `text/*` payload under a non-text extension (a renamed script);
+* rejects any payload carrying a PHP tag or a shebang;
+* keeps a dangerous-extension denylist as a second line of defence;
+* respects `config_file_max_size`.
+
+Product files are never served from the webroot and are always sent with
+`Content-Disposition: attachment` + `X-Content-Type-Options: nosniff`, so even an
+accepted document cannot execute in the browser.
+
+### Storefront
+
+`ModelCatalogProductFile::getFiles()` returns enabled files titled in the current
+language (falling back to the original filename). The product controller exposes
+them as `product_files` with a download `href`; `product.twig` renders a "Files"
+tab entry and the list section. `product/product_file/download` increments
+`downloads_count` and stamps `date_last_downloaded`.
+
+### Tests
+
+`tools/tests/cases/product_file_model.php` guards the storage-key format, the
+save/reconcile contract, payload deletion (including path-traversal safety) and
+the copy behaviour.
