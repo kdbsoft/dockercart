@@ -580,6 +580,9 @@
     {% if _desc_text is not empty %}
       {% set _tabs = _tabs|merge([{ key: 'description', label: tab_description, target: 'product-description' }]) %}
     {% endif %}
+    {% if product_files|length > 0 %}
+      {% set _tabs = _tabs|merge([{ key: 'files', label: tab_files, target: 'product-files-section' }]) %}
+    {% endif %}
     {% if attribute_groups %}
       {% set _tabs = _tabs|merge([{ key: 'attributes', label: tab_attribute, target: 'product-attributes' }]) %}
     {% endif %}
@@ -636,6 +639,28 @@
         {{ _desc_text is not empty ? description : heading_title }}
       </div>
     </section>
+
+    {% if product_files %}
+    <section id="product-files-section" class="mt-8" aria-labelledby="product-files-heading">
+      <div class="mb-3">
+        <h2 id="product-files-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ tab_files }}</h2>
+      </div>
+      <div class="bg-white border border-gray-100 rounded-3xl shadow-sm divide-y divide-gray-100 overflow-hidden">
+        {% for file in product_files %}
+        <a href="{{ file.href }}" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition" download>
+          <span class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-semibold text-gray-900 truncate">{{ file.name }}</span>
+            <span class="block text-xs text-gray-500">{{ file.file_size_label }}</span>
+          </span>
+          <span class="flex-shrink-0 text-blue-600"><i data-lucide="download" class="w-5 h-5"></i></span>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
 
     {% if product_related_categories %}
     <section class="mt-8" aria-labelledby="product-related-categories-heading">

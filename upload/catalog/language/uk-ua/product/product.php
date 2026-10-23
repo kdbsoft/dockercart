@@ -13,6 +13,7 @@ $_['error_text'] = 'Увага: Текст відгуку має містити 
 $_['tab_attribute'] = 'Характеристики';
 $_['tab_description'] = 'Опис';
 $_['tab_review'] = 'Відгуки';
+$_['tab_files'] = 'Файли';
 $_['text_attributes_show_more'] = 'Показати ще';
 $_['text_attributes_show_less'] = 'Згорнути';
 $_['text_benefits'] = 'Переваги:';

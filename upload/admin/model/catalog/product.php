@@ -1092,6 +1092,11 @@ class ModelCatalogProduct extends Model
         $warehouse = new DockercartWarehouse($this->registry);
         $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
 
+        if (isset($data['product_file'])) {
+            $this->load->model('catalog/product_file');
+            $this->model_catalog_product_file->saveFiles($product_id, (array) $data['product_file']);
+        }
+
         $this->cache->delete("product");
 
         return $product_id;
@@ -2005,6 +2010,11 @@ class ModelCatalogProduct extends Model
         $warehouse = new DockercartWarehouse($this->registry);
         $warehouse->setTotalQuantity((int) $product_id, (float) $data["quantity"], 0, array("reference" => "product-form"));
 
+        if (isset($data['product_file'])) {
+            $this->load->model('catalog/product_file');
+            $this->model_catalog_product_file->saveFiles($product_id, (array) $data['product_file']);
+        }
+
         $this->cache->delete("product");
         $this->cache->delete('category.product_related.' . (int)$product_id);
     }
@@ -2093,6 +2103,9 @@ class ModelCatalogProduct extends Model
             $new_product_id = $this->addProduct($data);
 
             if ($new_product_id) {
+                $this->load->model('catalog/product_file');
+                $this->model_catalog_product_file->copyFiles($product_id, $new_product_id);
+
                 $pc = new ProductConfigurable($this->registry);
 
                 if ($pc->isConfigurable($product_id)) {
@@ -2423,6 +2436,9 @@ class ModelCatalogProduct extends Model
                 (int) $product_id .
                 "'",
         );
+
+        $this->load->model("catalog/product_file");
+        $this->model_catalog_product_file->deleteFilesByProduct($product_id);
 
         $this->load->model("design/seo_url");
         $this->model_design_seo_url->invalidateSeoUrlCache();
