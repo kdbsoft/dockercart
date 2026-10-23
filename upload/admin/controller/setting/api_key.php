@@ -98,7 +98,7 @@ class ControllerSettingApiKey extends Controller {
 
 		$data['total_keys'] = $this->model_setting_api_key->getTotalKeys();
 
-		$data['config_api_status'] = $this->config->has('config_api_status') ? (int)$this->config->get('config_api_status') : 1;
+		$data['config_api_status'] = $this->config->has('config_api_status') ? (int)$this->config->get('config_api_status') : 0;
 		$data['config_api_rate_limit'] = $this->config->has('config_api_rate_limit') ? (int)$this->config->get('config_api_rate_limit') : 120;
 		$data['config_api_log_retention_days'] = $this->config->has('config_api_log_retention_days') ? (int)$this->config->get('config_api_log_retention_days') : 30;
 		$data['config_api_require_if_match'] = $this->config->has('config_api_require_if_match') ? (int)$this->config->get('config_api_require_if_match') : 0;
@@ -246,7 +246,7 @@ class ControllerSettingApiKey extends Controller {
 		$this->load->model('setting/setting');
 
 		$this->model_setting_setting->updateSetting('config', [
-			'config_api_status'             => (int)($this->request->post['config_api_status'] ?? 1),
+			'config_api_status'             => (int)($this->request->post['config_api_status'] ?? 0),
 			'config_api_rate_limit'         => max(0, (int)($this->request->post['config_api_rate_limit'] ?? 120)),
 			'config_api_log_retention_days' => max(0, (int)($this->request->post['config_api_log_retention_days'] ?? 30)),
 			'config_api_require_if_match'   => (int)($this->request->post['config_api_require_if_match'] ?? 0),

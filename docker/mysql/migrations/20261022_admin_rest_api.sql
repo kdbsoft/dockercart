@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `oc_api_log` (
 -- directly (upsert of three keys) instead of editSetting(), which would wipe
 -- the ~100 other config_* store settings.
 INSERT INTO `oc_setting` (`store_id`, `code`, `key`, `value`, `serialized`)
-SELECT 0, 'config', 'config_api_status', '1', 0
+SELECT 0, 'config', 'config_api_status', '0', 0
 WHERE NOT EXISTS (
 	SELECT 1 FROM `oc_setting` WHERE `store_id` = 0 AND `code` = 'config' AND `key` = 'config_api_status'
 );
