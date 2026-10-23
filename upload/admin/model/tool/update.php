@@ -213,6 +213,54 @@ class ModelToolUpdate extends Model {
 		$this->model_setting_setting->updateSetting('dockercart_update', $data);
 	}
 
+	/**
+	 * Deployment provenance shared with the host-side `make update` through
+	 * storage/dockercart_update/:
+	 *  - deployed.json - written by whichever path deployed last (GUI or git);
+	 *  - host-git.json - host git checkout state, written by update.sh.
+	 *
+	 * @return array{deployed: array<string, mixed>, host: array<string, mixed>, match: bool|null}
+	 */
+	public function getDeploymentState(): array {
+		$dir = $this->updateDir();
+
+		$deployed = $this->readJsonFile($dir . 'deployed.json');
+		$host     = $this->readJsonFile($dir . 'host-git.json');
+		$config   = $this->getConfig();
+
+		$match = null;
+
+		if (!empty($host['origin']) && !empty($host['branch'])) {
+			$match = $this->normalizeRemote($config['remote']) === $this->normalizeRemote((string)$host['origin'])
+				&& $config['branch'] === (string)$host['branch'];
+		}
+
+		return [
+			'deployed' => $deployed,
+			'host'     => $host,
+			'match'    => $match
+		];
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function readJsonFile(string $file): array {
+		if (!is_file($file)) {
+			return [];
+		}
+
+		$data = json_decode((string)@file_get_contents($file), true);
+
+		return is_array($data) ? $data : [];
+	}
+
+	private function normalizeRemote(string $remote): string {
+		$normalized = preg_replace('/\.git$/i', '', rtrim(trim($remote), '/'));
+
+		return is_string($normalized) ? $normalized : '';
+	}
+
 	public function isRunning(): bool {
 		$lock = $this->lockFile();
 
