@@ -19,6 +19,16 @@ declare(strict_types=1);
 
 class ControllerApiOpenapi extends \Dockercart\Api\Controller {
 	public function index() {
+		// A disabled API exposes nothing — not even the discovery document.
+		// The panel docs page renders the same file session-gated, so an
+		// integrator who needs the contract while the API is off should ask
+		// the shop to enable it first.
+		if ($this->config->has('config_api_status') && (int)$this->config->get('config_api_status') === 0) {
+			$this->responder()->error(\Dockercart\Api\Error::API_DISABLED);
+
+			return;
+		}
+
 		$file = dirname(rtrim(DIR_APPLICATION, '/\\')) . '/api/openapi.json';
 
 		$json = is_file($file) ? file_get_contents($file) : false;
