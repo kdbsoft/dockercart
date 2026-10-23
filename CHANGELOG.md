@@ -1,3 +1,9 @@
+## [3.36.0](https://github.com/kdbsoft/dockercart/compare/v3.35.2...v3.36.0) (2026-10-23)
+
+### Features
+
+* **catalog:** add product files (public downloads) ([b4c02f6](https://github.com/kdbsoft/dockercart/commit/b4c02f6d5823f8ef93a99ccfadcca9e45d75034b))
+
 ## [3.35.2](https://github.com/kdbsoft/dockercart/compare/v3.35.1...v3.35.2) (2026-10-23)
 
 ### Bug Fixes
