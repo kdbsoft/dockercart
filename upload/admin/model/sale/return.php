@@ -198,7 +198,11 @@ class ModelSaleReturn extends Model {
 		);
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			// The status subquery is aliased "return_status" (the panel shows that
+			// column); keep the public/panel sort key "status" working.
+			$sort = ($data['sort'] === 'status') ? 'return_status' : $data['sort'];
+
+			$sql .= " ORDER BY " . $sort;
 		} else {
 			$sql .= " ORDER BY r.return_id";
 		}
