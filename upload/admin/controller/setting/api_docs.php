@@ -8,8 +8,10 @@
  * session (the `setting/api_docs` access permission), so the API surface is
  * not advertised publicly.
  *
- * The OpenAPI document itself is served by the API application
- * (`GET /api/v1/openapi.json`, public and cacheable).
+ * The OpenAPI document itself is served to this page by the panel action
+ * `setting/api_docs/spec` (session-gated). A public copy also exists at
+ * `GET /api/v1/openapi.json`, but only when the API is deployed and enabled —
+ * the docs page never depends on it.
  *
  * @package    DockerCart
  * @subpackage Admin
@@ -25,9 +27,13 @@ class ControllerSettingApiDocs extends Controller {
 
 		$user_token = $this->session->data['user_token'];
 
-		// Public, cacheable document (no session, no user_token) — the same URL an
-		// integrator or a code generator would use.
-		$data['spec_url'] = rtrim((string)HTTP_CATALOG, '/') . '/api/v1/openapi.json';
+		// Serve the spec through the panel (setting/api_docs/spec), not the public
+		// /api/v1/openapi.json: the public URL depends on the API application being
+		// deployed AND enabled, while the panel always has the same file. The API
+		// is disabled by default (config_api_status = 0), so a fresh deployment
+		// without an explicit switch would 404 the public URL and the docs page
+		// must not depend on it.
+		$data['spec_url'] = $this->url->link('setting/api_docs/spec', 'user_token=' . $user_token, true);
 		$data['api_base_url'] = rtrim((string)HTTP_CATALOG, '/') . '/api/v1';
 
 		// Absolute URLs: the standalone page has no <base href> of the panel.
