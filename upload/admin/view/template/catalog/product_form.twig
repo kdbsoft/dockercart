@@ -519,6 +519,58 @@
                         <div class="help-block text-muted" style="margin-top:8px;">{{ help_image_360 }}</div>
                       </div>
                     </div>
+                    <div class="dcx-field">
+                      <label class="dcx-label"><i data-lucide="paperclip" width="14" height="14"></i> {{ text_panel_files_title }}</label>
+                      <div class="dc-files-guide">
+                        <div class="dc-files-guide__row"><i data-lucide="file-text" width="14" height="14"></i> <span>{{ text_files_instructions }}</span></div>
+                        <div class="dc-files-guide__row"><i data-lucide="shield-check" width="14" height="14"></i> <span>{{ text_files_allowed|format(product_file_allowed_extensions, product_file_max_size) }}</span></div>
+                      </div>
+                      <div style="margin: 10px 0;">
+                        <button type="button" id="button-file-upload" class="btn btn-default" data-loading-text="{{ text_loading }}"><i data-lucide="upload" width="14" height="14"></i> {{ button_file_upload }}</button>
+                      </div>
+                      <div id="product-files">
+                        {% for file in product_files %}
+                        {% set file_key = loop.index0 %}
+                        <div class="dc-file" data-file-key="{{ file_key }}">
+                          <input type="hidden" name="product_file[{{ file_key }}][product_file_id]" value="{{ file.product_file_id }}"/>
+                          <input type="hidden" name="product_file[{{ file_key }}][storage_key]" value="{{ file.storage_key }}"/>
+                          <input type="hidden" name="product_file[{{ file_key }}][original_name]" value="{{ file.original_name }}"/>
+                          <input type="hidden" name="product_file[{{ file_key }}][file_size]" value="{{ file.file_size }}"/>
+                          <input type="hidden" name="product_file[{{ file_key }}][mime_type]" value="{{ file.mime_type }}"/>
+                          <div class="dc-file__head">
+                            <i data-lucide="file-text" width="16" height="16"></i>
+                            <span class="dc-file__name">{{ file.original_name }}</span>
+                            <span class="dc-file__meta">{{ file.file_size_label }} · {{ file.downloads_count }} {{ text_file_downloads }}{% if file.date_last_downloaded %} · {{ text_file_last_download }}: {{ file.date_last_downloaded }}{% endif %}</span>
+                            <button type="button" class="dc-file__remove btn btn-danger btn-xs" data-product-file-id="{{ file.product_file_id }}" data-storage-key="{{ file.storage_key }}" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="trash-2" width="14" height="14"></i></button>
+                          </div>
+                          <div class="dc-file__body">
+                            <div class="row">
+                              {% for language in languages %}
+                              <div class="col-sm-4">
+                                <label class="dcx-sidebar-card__label"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</label>
+                                <input type="text" name="product_file[{{ file_key }}][name][{{ language.language_id }}]" value="{{ file.name[language.language_id] }}" placeholder="{{ entry_file_name }}" class="form-control"/>
+                              </div>
+                              {% endfor %}
+                            </div>
+                            <div class="row" style="margin-top: 8px;">
+                              <div class="col-sm-4">
+                                <label class="dcx-sidebar-card__label">{{ entry_sort_order }}</label>
+                                <input type="number" name="product_file[{{ file_key }}][sort_order]" value="{{ file.sort_order }}" class="form-control"/>
+                              </div>
+                              <div class="col-sm-4">
+                                <label class="dcx-sidebar-card__label">{{ entry_status }}</label>
+                                <select name="product_file[{{ file_key }}][status]" class="form-control">
+                                  <option value="1"{% if file.status %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                                  <option value="0"{% if not file.status %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                      <div id="product-files-empty" class="text-muted"{% if product_files|length %} style="display: none;"{% endif %}>{{ text_file_empty }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3577,6 +3629,17 @@ function escapeHtml(text) {
 .pcm-set-total { display:flex; gap:8px; align-items:center; }
 .pcm-set-total input { flex:1; width:120px; }
 .pcm-set-total-feedback { margin-top:8px; font-size:12px; }
+.dc-files-guide { background:#f8fafc; border:1px solid var(--dc-border,#e5e7eb); border-radius:10px; padding:10px 12px; margin:10px 0; display:flex; flex-direction:column; gap:6px; font-size:12px; color:#4b5563; line-height:1.5; }
+.dc-files-guide__row { display:flex; align-items:flex-start; gap:6px; }
+.dc-files-guide__row svg { flex-shrink:0; margin-top:2px; color:#6b7280; }
+.dc-file { border:1px solid var(--dc-border,#e5e7eb); border-radius:10px; padding:12px 14px; margin-bottom:10px; background:#fbfbfc; }
+.dc-file__head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.dc-file__head svg { flex-shrink:0; color:#6b7280; }
+.dc-file__name { font-weight:600; color:#111827; word-break:break-all; }
+.dc-file__meta { font-size:12px; color:#9ca3af; margin-left:auto; white-space:nowrap; }
+.dc-file__remove { flex-shrink:0; }
+.dc-file__body { border-top:1px solid var(--dc-border,#e5e7eb); padding-top:10px; }
+#product-files-empty { padding:14px; text-align:center; border:1px dashed var(--dc-border,#e5e7eb); border-radius:10px; }
 .text-success { color:#15803d; }
 .text-danger { color:#b91c1c; }
 </style>
@@ -3642,5 +3705,143 @@ $(document).on('click', '.dc-wh-stock-link', function(e) {
 });
 //--></script>
 {% endif %}
+
+<script type="text/javascript"><!--
+(function() {
+	var dcFileLanguages = {{ languages|json_encode|raw }};
+	var dcFileCounter = {{ product_files|length }};
+
+	function dcFileEscape(value) {
+		return String(value === undefined || value === null ? '' : value)
+			.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+	}
+
+	function dcFileCardHtml(key, file) {
+		var names = '';
+
+		dcFileLanguages.forEach(function(language) {
+			var code = String(language.code || '').split('-')[0].toUpperCase();
+
+			names += '<div class="col-sm-4">'
+				+ '<label class="dcx-sidebar-card__label"><span class="lang-code">' + dcFileEscape(code) + '</span> ' + dcFileEscape(language.name) + '</label>'
+				+ '<input type="text" name="product_file[' + key + '][name][' + language.language_id + ']" value="" placeholder="{{ entry_file_name|e('js') }}" class="form-control"/>'
+				+ '</div>';
+		});
+
+		return '<div class="dc-file" data-file-key="' + key + '">'
+			+ '<input type="hidden" name="product_file[' + key + '][product_file_id]" value="0"/>'
+			+ '<input type="hidden" name="product_file[' + key + '][storage_key]" value="' + dcFileEscape(file.storage_key) + '"/>'
+			+ '<input type="hidden" name="product_file[' + key + '][original_name]" value="' + dcFileEscape(file.original_name) + '"/>'
+			+ '<input type="hidden" name="product_file[' + key + '][file_size]" value="' + parseInt(file.file_size || 0, 10) + '"/>'
+			+ '<input type="hidden" name="product_file[' + key + '][mime_type]" value="' + dcFileEscape(file.mime_type) + '"/>'
+			+ '<div class="dc-file__head">'
+			+ '<i data-lucide="file-text" width="16" height="16"></i>'
+			+ '<span class="dc-file__name">' + dcFileEscape(file.original_name) + '</span>'
+			+ '<span class="dc-file__meta">' + dcFileEscape(file.file_size_label) + '</span>'
+			+ '<button type="button" class="dc-file__remove btn btn-danger btn-xs" data-product-file-id="0" data-storage-key="' + dcFileEscape(file.storage_key) + '" title="{{ button_remove|e('js') }}"><i data-lucide="trash-2" width="14" height="14"></i></button>'
+			+ '</div>'
+			+ '<div class="dc-file__body">'
+			+ '<div class="row">' + names + '</div>'
+			+ '<div class="row" style="margin-top: 8px;">'
+			+ '<div class="col-sm-4"><label class="dcx-sidebar-card__label">{{ entry_sort_order|e('js') }}</label><input type="number" name="product_file[' + key + '][sort_order]" value="' + dcFileCounter + '" class="form-control"/></div>'
+			+ '<div class="col-sm-4"><label class="dcx-sidebar-card__label">{{ entry_status|e('js') }}</label><select name="product_file[' + key + '][status]" class="form-control"><option value="1" selected="selected">{{ text_enabled|e('js') }}</option><option value="0">{{ text_disabled|e('js') }}</option></select></div>'
+			+ '</div></div></div>';
+	}
+
+	function dcFileRefreshEmpty() {
+		var has = document.querySelectorAll('#product-files .dc-file').length > 0;
+		var empty = document.getElementById('product-files-empty');
+
+		if (empty) {
+			empty.style.display = has ? 'none' : '';
+		}
+	}
+
+	$('#button-file-upload').on('click', function() {
+		$('#dc-form-file-upload').remove();
+
+		$('body').prepend('<form enctype="multipart/form-data" id="dc-form-file-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+		$('#dc-form-file-upload input[name=\'file\']').trigger('click');
+
+		if (typeof dcFileUploadTimer != 'undefined') {
+			clearInterval(dcFileUploadTimer);
+		}
+
+		dcFileUploadTimer = setInterval(function() {
+			if ($('#dc-form-file-upload input[name=\'file\']').val() != '') {
+				clearInterval(dcFileUploadTimer);
+
+				var $button = $('#button-file-upload');
+
+				$button.button('loading');
+
+				$.ajax({
+					url: 'index.php?route=catalog/product/fileUpload&user_token={{ user_token }}',
+					type: 'post',
+					dataType: 'json',
+					data: new FormData($('#dc-form-file-upload')[0]),
+					cache: false,
+					contentType: false,
+					processData: false,
+					complete: function() {
+						$button.button('reset');
+					},
+					success: function(json) {
+						if (json['error']) {
+							alert(json['error']);
+						}
+
+						if (json['file']) {
+							var key = 'n' + (dcFileCounter++);
+
+							$('#product-files').append(dcFileCardHtml(key, json['file']));
+							dcFileRefreshEmpty();
+
+							if (window.lucide) {
+								lucide.createIcons();
+							}
+						}
+					},
+					error: function(xhr, ajaxOptions, thrownError) {
+						alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+					}
+				});
+			}
+		}, 500);
+	});
+
+	$(document).on('click', '.dc-file__remove', function() {
+		if (!confirm('{{ button_remove|e('js') }}?')) {
+			return;
+		}
+
+		var $file = $(this).closest('.dc-file');
+		var productFileId = parseInt($(this).attr('data-product-file-id') || '0', 10);
+		var storageKey = $(this).attr('data-storage-key') || '';
+
+		$.ajax({
+			url: 'index.php?route=catalog/product/fileDelete&user_token={{ user_token }}',
+			type: 'post',
+			dataType: 'json',
+			data: { product_file_id: productFileId, storage_key: storageKey },
+			success: function(json) {
+				if (json['error']) {
+					alert(json['error']);
+
+					return;
+				}
+
+				$file.remove();
+				dcFileRefreshEmpty();
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			}
+		});
+	});
+})();
+//--></script>
 
 {{ footer }}

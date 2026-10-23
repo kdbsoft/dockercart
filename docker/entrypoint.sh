@@ -79,7 +79,7 @@ fix_permissions() {
 		# Ensure writable storage subdirs exist even when the host bind mount
 		# was auto-created empty by docker (fresh clone / first server install),
 		# which would otherwise shadow the dirs pre-built into the image.
-		for d in cache logs download upload modification session backup documents/invoices logs/scheduler; do
+		for d in cache logs download upload modification session backup documents/invoices documents/product logs/scheduler; do
 			mkdir -p "/var/www/storage/$d" 2>/dev/null || true
 		done
 		mkdir -p /var/www/storage/documents/invoices 2>/dev/null || true
