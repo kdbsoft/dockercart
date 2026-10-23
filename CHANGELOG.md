@@ -1,3 +1,9 @@
+## [3.37.0](https://github.com/kdbsoft/dockercart/compare/v3.36.0...v3.37.0) (2026-10-23)
+
+### Features
+
+* **update:** record deployment provenance for gui and git updates ([3b63435](https://github.com/kdbsoft/dockercart/commit/3b63435ca3f769a3c94dee1a26e2d4cb92edf537))
+
 ## [3.36.0](https://github.com/kdbsoft/dockercart/compare/v3.35.2...v3.36.0) (2026-10-23)
 
 ### Features
