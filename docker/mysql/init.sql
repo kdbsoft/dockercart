@@ -120,9 +120,6 @@ CREATE TABLE `oc_api_idempotency` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_api_idempotency` WRITE;
 /*!40000 ALTER TABLE `oc_api_idempotency` DISABLE KEYS */;
-INSERT INTO `oc_api_idempotency` VALUES
-(5,14,'smoke-returns-001','POST','/v1/returns','83d6a99264559096312bb3e2dff626d87000f59b',201,'{\"data\":{\"return_id\":4,\"order_id\":99612,\"customer_id\":0,\"customer\":\"Тест Тестов\",\"firstname\":\"Тест\",\"lastname\":\"Тестов\",\"email\":\"test@example.com\",\"telephone\":\"+380 (38) 050-12-34\",\"type\":\"partial\",\"product_id\":5010,\"product\":\"JBL Charge 5\",\"model\":\"DEMO-5010-BLK-W12\",\"quantity\":1,\"amount\":\"0.0000\",\"refunded\":false,\"opened\":false,\"return_reason_id\":1,\"return_action_id\":1,\"return_status_id\":1,\"return_status\":\"Pending\",\"date_ordered\":\"2026-08-13\",\"date_added\":\"2026-10-21T17:49:22+03:00\",\"date_modified\":\"2026-10-21T17:49:22+03:00\",\"comment\":\"api smoke test\",\"products\":[{\"order_product_id\":9,\"product_id\":5010,\"variant_id\":667,\"name\":\"JBL Charge 5\",\"model\":\"DEMO-5010-BLK-W12\",\"quantity\":1,\"price\":\"2313.7678\",\"total\":\"2313.7678\"}],\"history\":[]}}','[\"Location: \\/api\\/v1\\/returns\\/4\"]',NULL,'2026-10-21 17:49:22','2026-10-21 17:49:22'),
-(6,14,'smoke-adjust-001','POST','/v1/stock/adjustments','9e1b2306edf7cc2e4deab431fe9e6a81e788551f',200,'{\"data\":{\"adjustments\":[{\"warehouse_id\":1,\"product_id\":5083,\"variant_id\":0,\"requested_delta\":1,\"applied\":1,\"quantity\":57}]}}','[]',NULL,'2026-10-21 17:58:49','2026-10-21 17:58:49');
 /*!40000 ALTER TABLE `oc_api_idempotency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -196,7 +193,7 @@ CREATE TABLE `oc_api_log` (
   KEY `idx_api_log_key_date` (`api_key_id`,`date_added`),
   KEY `idx_api_log_date` (`date_added`),
   KEY `idx_api_log_status` (`status_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=699 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=701 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -206,6 +203,9 @@ CREATE TABLE `oc_api_log` (
 SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_api_log` WRITE;
 /*!40000 ALTER TABLE `oc_api_log` DISABLE KEYS */;
+INSERT INTO `oc_api_log` VALUES
+(699,0,'','GET','/v1/openapi.json','api/openapi/index',503,4,'::1','curl/8.21.0','d28ca2b8f677da1b','api_disabled','2026-10-23 11:03:04'),
+(700,0,'','GET','/v1/openapi.json','api/openapi/index',503,1,'::1','curl/8.21.0','3d48bd7a21ef9f78','api_disabled','2026-10-23 11:03:05');
 /*!40000 ALTER TABLE `oc_api_log` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -3441,10 +3441,10 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_currency` WRITE;
 /*!40000 ALTER TABLE `oc_currency` DISABLE KEYS */;
 INSERT INTO `oc_currency` VALUES
-(1,'Pound Sterling','GBP','£','','2',0.01662930,1,'2026-10-21 08:20:15'),
-(2,'US Dollar','USD','$','','2',0.02219469,1,'2026-10-21 08:20:15'),
-(3,'Euro','EUR','','€','2',0.01979018,1,'2026-10-21 08:20:15'),
-(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-10-21 08:20:15');
+(1,'Pound Sterling','GBP','£','','2',0.01660950,1,'2026-10-23 10:51:22'),
+(2,'US Dollar','USD','$','','2',0.02221671,1,'2026-10-23 10:51:22'),
+(3,'Euro','EUR','','€','2',0.01982750,1,'2026-10-23 10:51:22'),
+(4,'Гривна','UAH','','₴','0',1.00000000,1,'2026-10-23 10:51:22');
 /*!40000 ALTER TABLE `oc_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -4139,7 +4139,7 @@ CREATE TABLE `oc_customer_search` (
   `ip` varchar(40) NOT NULL,
   `date_added` datetime NOT NULL,
   PRIMARY KEY (`customer_search_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=558 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=559 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4697,7 +4697,8 @@ INSERT INTO `oc_customer_search` VALUES
 (545,0,1,0,'CeraVe',0,0,0,1,'127.0.0.1','2026-08-20 10:19:04'),
 (546,0,1,0,'CeraVe Hydrating Cleanser',0,0,0,1,'10.89.5.7','2026-08-20 10:28:23'),
 (556,0,1,0,'&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;',0,0,0,0,'10.89.5.7','2026-09-10 18:30:44'),
-(557,0,1,0,'best',0,0,0,21,'10.89.5.7','2026-10-15 14:05:27');
+(557,0,1,0,'best',0,0,0,21,'10.89.5.7','2026-10-15 14:05:27'),
+(558,0,1,0,'Apple iPhone 15 Pro',0,0,0,1,'10.89.5.7','2026-10-23 13:42:27');
 /*!40000 ALTER TABLE `oc_customer_search` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7620,7 +7621,7 @@ CREATE TABLE `oc_dockercart_product_variant_special` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`variant_special_id`),
   KEY `variant_id` (`variant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2199 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2218 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7876,7 +7877,22 @@ INSERT INTO `oc_dockercart_product_variant_special` VALUES
 (2195,724,1,1,3597.5500,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00'),
 (2196,814,1,1,6751.6600,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00'),
 (2197,815,1,1,8145.7700,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00'),
-(2198,833,1,1,594.5600,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00');
+(2198,833,1,1,594.5600,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00'),
+(2199,684,1,1,34678.6600,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2200,724,1,1,3597.5500,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2201,814,1,1,6751.6600,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2202,815,1,1,8145.7700,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2203,833,1,1,594.5600,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2204,684,1,1,34678.6600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2205,724,1,1,3597.5500,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2206,814,1,1,6751.6600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2207,815,1,1,8145.7700,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2208,833,1,1,594.5600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2211,684,1,1,34678.6600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2212,724,1,1,3597.5500,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2213,814,1,1,6751.6600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2214,815,1,1,8145.7700,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2215,833,1,1,594.5600,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00');
 /*!40000 ALTER TABLE `oc_dockercart_product_variant_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -7906,7 +7922,7 @@ CREATE TABLE `oc_dockercart_scheduler_task` (
   `is_system` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `task_type` (`task_type`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -7917,20 +7933,22 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_scheduler_task` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_scheduler_task` VALUES
-(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-10-21 08:20:13',NULL,'2026-07-02 11:00:50','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
-(41,'license_check','License Verification',1,'every_3d','2026-10-20 12:28:24',NULL,'2026-07-03 18:33:04','2026-10-20 12:28:24',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
-(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-10-21 08:20:13',NULL,'2026-07-24 18:51:04','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
-(96,'currency_refresh','Currency Refresh',1,'daily','2026-10-21 08:20:13',NULL,'2026-07-29 10:46:20','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
-(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-10-21 19:25:43',NULL,'2026-08-01 18:17:04','2026-10-21 19:25:43',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
-(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-06 08:09:03','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
-(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-06 15:36:09','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
-(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-09 15:39:28','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
-(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-10 13:33:35','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
-(168,'dockercart_update_check','Update availability check',1,'hourly','2026-10-21 18:58:44',NULL,'2026-08-18 13:20:23','2026-10-21 18:58:44',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
-(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-18 14:08:08','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
-(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-10-21 08:20:13',NULL,'2026-08-23 10:13:15','2026-10-21 08:20:13',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1),
+(29,'dockercart_sitemap_generate','Sitemap Generate',1,'daily','2026-10-23 10:51:21',NULL,'2026-07-02 11:00:50','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_sitemap_generate.php',1,0),
+(41,'license_check','License Verification',1,'every_3d','2026-10-23 12:29:21',NULL,'2026-07-03 18:33:04','2026-10-23 12:29:21',NULL,0,'php /var/www/html/bin/dockercart_license_check.php',1,1),
+(79,'traffic_source_cleanup','Traffic Source Cleanup',1,'daily','2026-10-23 10:51:21',NULL,'2026-07-24 18:51:04','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_traffic_cleanup.php',1,1),
+(96,'currency_refresh','Currency Refresh',1,'daily','2026-10-23 10:51:21',NULL,'2026-07-29 10:46:20','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_currency_refresh.php',1,0),
+(117,'reservation_cleanup','Reservation Cleanup',1,'every_15m','2026-10-23 14:06:22',NULL,'2026-08-01 18:17:04','2026-10-23 14:06:22',NULL,0,'php /var/www/html/bin/dockercart_reservation_cleanup.php',1,1),
+(140,'reward_auto_award','Auto-award reward points',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-06 08:09:03','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_reward_award.php',1,0),
+(141,'abandoned_cart_cleanup','Abandoned cart cleanup',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-06 15:36:09','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_abandoned_cart_cleanup.php',1,0),
+(154,'manticore_search_reindex','Manticore Search Reindex',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-09 15:39:28','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_search_reindex.php',1,0),
+(158,'promo_renew','Renew auto-renewable promotions',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-10 13:33:35','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_promo_renew.php',1,0),
+(168,'dockercart_update_check','Update availability check',1,'hourly','2026-10-23 13:51:22',NULL,'2026-08-18 13:20:23','2026-10-23 13:51:22',NULL,0,'php /var/www/html/bin/dockercart_update_check.php',1,1),
+(169,'recycle_bin_cleanup','Recycle bin purge',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-18 14:08:08','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_recycle_bin_cleanup.php',1,1),
+(172,'warehouse_audit','Warehouse Audit',1,'daily','2026-10-23 10:51:21',NULL,'2026-08-23 10:13:15','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_warehouse_audit.php',1,1),
 (173,'backup_s3','S3 Backup',0,'','2026-08-23 22:12:03','{\"status\":\"ok\",\"ts\":\"20260823_221152\",\"size_bytes\":106312990,\"size_mb\":101.39,\"db_size_bytes\":2000599,\"s3_key\":\"dockercart/backups/dockercart_20260823_221152.tar.gz\",\"retention_deleted\":[]}','2026-08-23 22:11:19','2026-08-23 22:12:03',NULL,0,'',1,1),
-(179,'api_log_cleanup','API log cleanup',1,'daily','2026-10-21 16:01:44',NULL,'2026-10-21 16:01:03','2026-10-21 16:01:44',NULL,0,'php /var/www/html/bin/dockercart_api_log_cleanup.php',1,1);
+(179,'api_log_cleanup','API log cleanup',1,'daily','2026-10-23 10:51:21',NULL,'2026-10-21 16:01:03','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_api_log_cleanup.php',1,1),
+(180,'webhook_deliver','Webhook delivery',1,'* * * * *','2026-10-23 14:09:22',NULL,'2026-10-21 23:31:58','2026-10-23 14:09:22',NULL,0,'php /var/www/html/bin/dockercart_webhook_deliver.php',1,1),
+(181,'webhook_cleanup','Webhook log cleanup',1,'daily','2026-10-23 10:51:21',NULL,'2026-10-21 23:31:58','2026-10-23 10:51:21',NULL,0,'php /var/www/html/bin/dockercart_webhook_cleanup.php',1,1);
 /*!40000 ALTER TABLE `oc_dockercart_scheduler_task` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -8697,7 +8715,7 @@ CREATE TABLE `oc_dockercart_traffic_source` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_session_source` (`session_id`,`source`),
   KEY `idx_date_added` (`date_added`)
-) ENGINE=InnoDB AUTO_INCREMENT=1844 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1846 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -8708,8 +8726,6 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_dockercart_traffic_source` WRITE;
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` DISABLE KEYS */;
 INSERT INTO `oc_dockercart_traffic_source` VALUES
-(1,'66511bcd02e10ab44e07eaeb8f','','none','','2026-07-24 18:54:50'),
-(2,'66511bcd02e10ab44e07eaeb8f','dockercart','referral','','2026-07-25 09:31:35'),
 (9,'9783b87f78a7ef5c40cb979c87','','none','','2026-07-29 08:17:05'),
 (10,'9783b87f78a7ef5c40cb979c87','dockercart','referral','','2026-07-29 10:34:21'),
 (12,'fd7fd7a5eb09071d292ecd11da','','none','','2026-07-29 15:26:21'),
@@ -10349,7 +10365,9 @@ INSERT INTO `oc_dockercart_traffic_source` VALUES
 (1840,'b2c4210bef1c45a3f9a3cff11e','','none','','2026-10-13 19:25:05'),
 (1841,'49e923cb6a0498e7e610a1a855','','none','','2026-10-14 13:59:16'),
 (1842,'c58812f94dccf7c591c36b5a5b','','none','','2026-10-20 12:29:01'),
-(1843,'d5469580b710b0e8af07f70567','','none','','2026-10-21 14:12:45');
+(1843,'d5469580b710b0e8af07f70567','','none','','2026-10-21 14:12:45'),
+(1844,'85a4460ed1156fe9360d438321','','none','','2026-10-23 13:40:56'),
+(1845,'42b05b1c9c23b40cd5f8209ae8','','none','','2026-10-23 13:46:57');
 /*!40000 ALTER TABLE `oc_dockercart_traffic_source` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -10537,7 +10555,7 @@ CREATE TABLE `oc_dockercart_viewed_product` (
   KEY `idx_customer_modified` (`customer_id`,`date_modified`),
   KEY `idx_session_modified` (`session_id`,`date_modified`),
   KEY `idx_product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6768 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6772 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -10914,8 +10932,98 @@ INSERT INTO `oc_dockercart_viewed_product` VALUES
 (6762,NULL,'49e923cb6a0498e7e610a1a855',5006,'2026-10-15 15:01:24','2026-10-15 15:01:24'),
 (6763,NULL,'49e923cb6a0498e7e610a1a855',5001,'2026-10-15 16:04:42','2026-10-15 16:04:42'),
 (6766,NULL,'d5469580b710b0e8af07f70567',5075,'2026-10-21 16:27:08','2026-10-21 16:27:08'),
-(6767,NULL,'d5469580b710b0e8af07f70567',5077,'2026-10-21 16:27:09','2026-10-21 16:27:09');
+(6767,NULL,'d5469580b710b0e8af07f70567',5077,'2026-10-21 16:27:09','2026-10-21 16:27:09'),
+(6769,NULL,'85a4460ed1156fe9360d438321',5001,'2026-10-23 13:43:04','2026-10-23 13:43:04'),
+(6771,NULL,'42b05b1c9c23b40cd5f8209ae8',5001,'2026-10-23 14:02:49','2026-10-23 14:02:49');
 /*!40000 ALTER TABLE `oc_dockercart_viewed_product` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_dockercart_webhook_delivery`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_webhook_delivery`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_webhook_delivery` (
+  `delivery_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subscription_id` int(11) NOT NULL DEFAULT 0,
+  `event_id` char(30) NOT NULL DEFAULT '',
+  `event_type` varchar(64) NOT NULL DEFAULT '',
+  `payload` mediumtext NOT NULL,
+  `is_test` tinyint(1) NOT NULL DEFAULT 0,
+  `status` varchar(16) NOT NULL DEFAULT 'pending',
+  `attempts` int(11) NOT NULL DEFAULT 0,
+  `next_attempt_at` datetime NOT NULL,
+  `locked_until` datetime DEFAULT NULL,
+  `response_code` smallint(5) NOT NULL DEFAULT 0,
+  `response_body` text DEFAULT NULL,
+  `duration_ms` int(11) NOT NULL DEFAULT 0,
+  `last_error` varchar(255) NOT NULL DEFAULT '',
+  `occurred_at` datetime NOT NULL,
+  `date_added` datetime NOT NULL,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`delivery_id`),
+  UNIQUE KEY `uniq_webhook_delivery_event` (`subscription_id`,`event_id`),
+  KEY `idx_webhook_delivery_due` (`status`,`next_attempt_at`),
+  KEY `idx_webhook_delivery_subscription` (`subscription_id`,`date_added`),
+  KEY `idx_webhook_delivery_date` (`date_added`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_webhook_delivery`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_webhook_delivery` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_webhook_delivery` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_dockercart_webhook_delivery` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_dockercart_webhook_subscription`
+--
+
+DROP TABLE IF EXISTS `oc_dockercart_webhook_subscription`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_dockercart_webhook_subscription` (
+  `subscription_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL DEFAULT '',
+  `url` varchar(500) NOT NULL DEFAULT '',
+  `secret_encrypted` varchar(1024) NOT NULL DEFAULT '',
+  `secret_hint` varchar(16) NOT NULL DEFAULT '',
+  `events` text DEFAULT NULL,
+  `filters` text DEFAULT NULL,
+  `full_payload` tinyint(1) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `consecutive_failures` int(11) NOT NULL DEFAULT 0,
+  `disabled_reason` varchar(32) NOT NULL DEFAULT '',
+  `disabled_at` datetime DEFAULT NULL,
+  `last_success_at` datetime DEFAULT NULL,
+  `last_failure_at` datetime DEFAULT NULL,
+  `created_by_api_key_id` int(11) NOT NULL DEFAULT 0,
+  `created_by_user_id` int(11) NOT NULL DEFAULT 0,
+  `date_added` datetime NOT NULL,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`subscription_id`),
+  KEY `idx_webhook_subscription_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_dockercart_webhook_subscription`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_dockercart_webhook_subscription` WRITE;
+/*!40000 ALTER TABLE `oc_dockercart_webhook_subscription` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oc_dockercart_webhook_subscription` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -13346,7 +13454,7 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_product` WRITE;
 /*!40000 ALTER TABLE `oc_product` DISABLE KEYS */;
 INSERT INTO `oc_product` VALUES
-(5001,'DEMO-5001',1101,'SKU-5001','','','','','',820.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,0,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,630,'2026-03-03 08:51:04','2026-08-30 11:25:12'),
+(5001,'DEMO-5001',1101,'SKU-5001','','','','','',820.00,1,'catalog/demo/demo-seed/products/electronics/apple-iphone-15-pro.jpg','','catalog/test_360_iphone.jpg',310,1,50000.0000,0,1,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,0,1,0,634,'2026-03-03 08:51:04','2026-08-30 11:25:12'),
 (5002,'DEMO-5002',1101,'SKU-5002','','','','','',186.00,0,'catalog/demo/demo-seed/products/electronics/samsung-galaxy-s24-ultra.jpg','','catalog/test_360_iphone.jpg',312,1,61349.1282,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,1,1,0,378,'2026-03-03 08:51:04','2026-08-09 18:26:40'),
 (5003,'DEMO-5003',1101,'SKU-5003','','','','','',392.00,0,'catalog/demo/demo-seed/products/electronics/google-pixel-8-pro.jpg','','',302,1,45999.0544,NULL,0,0,0,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,2,1,0,318,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
 (5004,'DEMO-5004',1101,'SKU-5004','','','','','',240.00,0,'catalog/demo/demo-seed/products/electronics/oneplus-12.jpg','catalog/Aero_Airship_01.glb','catalog/test_360_iphone.jpg',304,1,40882.3632,NULL,0,0,9,'2026-03-03',1.0000,1,20.0000,15.0000,10.0000,1,1,1.00,1.00,3,1,0,58,'2026-03-03 08:51:04','2026-08-09 13:52:09'),
@@ -15880,6 +15988,85 @@ INSERT INTO `oc_product_fbt` VALUES
 (5086,5089),
 (5087,5089);
 /*!40000 ALTER TABLE `oc_product_fbt` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_file`
+--
+
+DROP TABLE IF EXISTS `oc_product_file`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_file` (
+  `product_file_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `storage_key` varchar(255) NOT NULL DEFAULT '',
+  `original_name` varchar(255) NOT NULL DEFAULT '',
+  `file_size` int(10) unsigned NOT NULL DEFAULT 0,
+  `mime_type` varchar(128) NOT NULL DEFAULT '',
+  `sort_order` int(3) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `downloads_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `date_last_downloaded` datetime DEFAULT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`product_file_id`),
+  KEY `idx_product_file_product` (`product_id`),
+  KEY `idx_product_file_status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_file`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_file` WRITE;
+/*!40000 ALTER TABLE `oc_product_file` DISABLE KEYS */;
+INSERT INTO `oc_product_file` VALUES
+(2,5001,'b1536c966b6f18e54d58ae0c027562f1.pdf','instruction-manual.pdf',24661,'application/pdf',0,1,2,'2026-10-23 14:02:52','2026-10-23 13:55:04'),
+(3,5002,'68ffe2bfb14cdae14d43256e482c0801.pdf','instruction-manual.pdf',24661,'application/pdf',0,1,0,NULL,'2026-10-23 13:55:04'),
+(4,5003,'737737564bfc3ff84da5c1163a529899.pdf','instruction-manual.pdf',24661,'application/pdf',0,1,0,NULL,'2026-10-23 13:55:04');
+/*!40000 ALTER TABLE `oc_product_file` ENABLE KEYS */;
+UNLOCK TABLES;
+COMMIT;
+SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
+
+--
+-- Table structure for table `oc_product_file_description`
+--
+
+DROP TABLE IF EXISTS `oc_product_file_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `oc_product_file_description` (
+  `product_file_id` int(11) NOT NULL,
+  `language_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`product_file_id`,`language_id`),
+  KEY `idx_product_file_description_language` (`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oc_product_file_description`
+--
+
+SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
+LOCK TABLES `oc_product_file_description` WRITE;
+/*!40000 ALTER TABLE `oc_product_file_description` DISABLE KEYS */;
+INSERT INTO `oc_product_file_description` VALUES
+(2,1,'User Manual (demo)'),
+(2,2,'Інструкція з експлуатації (демо)'),
+(2,3,'Инструкция по эксплуатации (демо)'),
+(3,1,'User Manual (demo)'),
+(3,2,'Інструкція з експлуатації (демо)'),
+(3,3,'Инструкция по эксплуатации (демо)'),
+(4,1,'User Manual (demo)'),
+(4,2,'Інструкція з експлуатації (демо)'),
+(4,3,'Инструкция по эксплуатации (демо)');
+/*!40000 ALTER TABLE `oc_product_file_description` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
@@ -20122,7 +20309,7 @@ CREATE TABLE `oc_product_special` (
   `date_added` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`product_special_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2206 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=2225 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -20332,7 +20519,22 @@ INSERT INTO `oc_product_special` VALUES
 (2194,5070,4,1,530.0892,'2026-10-21','0000-00-00',1,'0000-00-00 00:00:00'),
 (2203,5023,1,0,500.0000,'0000-00-00','2026-07-07',0,'2026-07-25 10:12:03'),
 (2204,5023,2,1,45398.3562,'2026-07-06','0000-00-00',0,'2026-08-10 12:06:31'),
-(2205,5023,3,1,51533.2692,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31');
+(2205,5023,3,1,51533.2692,'2026-07-10','0000-00-00',0,'2026-08-10 12:06:31'),
+(2206,5019,4,1,5707.1574,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2207,5020,2,1,5808.4679,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2208,5021,4,1,2960.0059,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2209,5057,4,1,1009.0115,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2210,5070,4,1,530.0892,'2026-10-22','0000-00-00',1,'0000-00-00 00:00:00'),
+(2211,5019,4,1,5707.1574,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2212,5020,2,1,5808.4679,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2213,5021,4,1,2960.0059,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2214,5057,4,1,1009.0115,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2215,5070,4,1,530.0892,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2218,5019,4,1,5707.1574,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2219,5020,2,1,5808.4679,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2220,5021,4,1,2960.0059,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2221,5057,4,1,1009.0115,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00'),
+(2222,5070,4,1,530.0892,'2026-10-23','0000-00-00',1,'0000-00-00 00:00:00');
 /*!40000 ALTER TABLE `oc_product_special` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -24412,7 +24614,10 @@ INSERT INTO `oc_schema_migrations` VALUES
 ('20261021_user_group_template_code.sql','2026-10-21 11:08:05'),
 ('20261022_admin_rest_api.sql','2026-10-21 13:01:03'),
 ('20261023_api_idempotency.sql','2026-10-21 13:29:58'),
-('20261024_api_key_owner.sql','2026-10-21 15:32:57');
+('20261024_api_key_owner.sql','2026-10-21 15:32:57'),
+('20261025_webhooks.sql','2026-10-21 20:31:58'),
+('20261026_api_disabled_by_default.sql','2026-10-23 08:02:11'),
+('20261027_product_files.sql','2026-10-23 10:30:14');
 /*!40000 ALTER TABLE `oc_schema_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -24971,13 +25176,31 @@ SET @OLD_AUTOCOMMIT=@@AUTOCOMMIT, @@AUTOCOMMIT=0;
 LOCK TABLES `oc_session` WRITE;
 /*!40000 ALTER TABLE `oc_session` DISABLE KEYS */;
 INSERT INTO `oc_session` VALUES
+('161e95185c57a18fab724f071c','{\"language\":\"ru-ua\",\"currency\":\"UAH\"}','2026-10-24 10:55:18'),
 ('1b95df4e3b7bf962b58be88fcd','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"u6ZyLzqcmvXxH4Gb0CQy5HkbLKUImTTO\"}','2026-10-22 13:23:19'),
+('2942a7cb17c53bf526b0e1dcab','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"UVY5ZaaxwIPNmRIRmG0PzX6jEXRURtjC\"}','2026-10-24 10:55:11'),
+('2d01f9208d7d51f60e333c6ba6','{\"language\":\"ru-ua\",\"currency\":\"UAH\",\"csrf_token\":\"ujme6Ad28wyZs7DhVoXfOtQ7fCxKoJn8\"}','2026-10-24 10:55:18'),
+('2dc5178326c9044996577de039','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"ATv2Nk8lzcu3brkpMnqZnPTh8p20OSO0\"}','2026-10-24 10:30:53'),
+('3db8f1569934c7a78cdb910b3d','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:55:11'),
 ('403018e9dee2ac2a6c351c3582','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"p2KnsIVrVmUwfaqdTYs5SFZVeQrxBdM4\"}','2026-10-22 13:22:49'),
 ('4142a012467ec923be790e18a9','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"ZaZC1ym7tx0YiUh6aHgnMKrhZOURiCkJ\"}','2026-10-22 13:23:12'),
+('42b05b1c9c23b40cd5f8209ae8','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"x6NXJInqvIClOJuuCqyDhSzAvEnDiqCg\"}','2026-10-24 11:02:52'),
+('44561a2e6df0eb4f6c14b99c6d','{\"language\":\"uk-ua\",\"currency\":\"UAH\",\"csrf_token\":\"oKnIJAjxQ1I1qzpTIgug4cOaQukf4q33\"}','2026-10-24 10:55:58'),
 ('5a212f4e84e825f1b72f566d2b','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"ddIxQ0a7h223xCi8mnMgJ2bJZdopFmeN\"}','2026-10-22 13:23:29'),
+('623efc12a6c52c673959445ef6','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:30:37'),
+('6259d5a12ae9caddfc9e4539df','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:55:11'),
+('85a4460ed1156fe9360d438321','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"vWJGwTZb1oSboNh9vC1gyFvNnLLbimCk\",\"search_product_ids_8a9dc694c8d8b2bf0a21c8e746e55c95\":[5001]}','2026-10-24 10:43:04'),
 ('85a4d15eb431f8d4e49c61575a','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"EcBVL2E0UfTYZtM6z42hNIUPSTOoZycL\"}','2026-10-22 13:23:16'),
+('959deb074ba4b9f152976b89b1','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:55:11'),
+('9cb7186e649dbdf7fc015bc77c','{\"language\":\"ru-ua\",\"currency\":\"UAH\",\"csrf_token\":\"ANbQxqRwKnODcD94GgOatRULiFUc8qAA\"}','2026-10-24 10:55:57'),
+('a1bba305eaeb587dcc4146c4af','{\"language\":\"ru-ua\",\"currency\":\"UAH\",\"csrf_token\":\"AfJHCQEpCt6LQ9Nzs1x0KzqOEpUXlKLM\"}','2026-10-24 10:55:42'),
+('c1da503bd3114110e6cbde6cf6','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:30:52'),
+('c3167df1b09214a211c8dd7e8a','{\"language\":\"en-gb\",\"currency\":\"UAH\",\"csrf_token\":\"myNUBFt5HB5jAHCZ2xaCGX2XvAzipHE1\"}','2026-10-24 10:55:43'),
 ('c58812f94dccf7c591c36b5a5b','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"kRX69OMLQVMzxAaeBkSn62mmqN7XJhJy\"}','2026-10-22 07:08:22'),
-('d5469580b710b0e8af07f70567','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"50lEtyZRp7Ipdh5g9T0b7JbDw5SNIAOc\"}','2026-10-22 13:27:09');
+('d5469580b710b0e8af07f70567','{\"language\":\"en-gb\",\"dc_traffic_source\":true,\"currency\":\"UAH\",\"csrf_token\":\"50lEtyZRp7Ipdh5g9T0b7JbDw5SNIAOc\"}','2026-10-22 13:27:09'),
+('e122e827d76ea55712d1ef6a12','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:30:43'),
+('e23f367790dbcfa257d6fff403','{\"language\":\"uk-ua\",\"currency\":\"UAH\",\"csrf_token\":\"LeiMakKOaL2uryIWpQP05NuCDrmgN9he\"}','2026-10-24 10:55:42'),
+('e54838bad1a0337a95be069604','{\"language\":\"en-gb\",\"currency\":\"UAH\"}','2026-10-24 10:30:43');
 /*!40000 ALTER TABLE `oc_session` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -24998,7 +25221,7 @@ CREATE TABLE `oc_setting` (
   `value` mediumtext NOT NULL,
   `serialized` tinyint(1) NOT NULL,
   PRIMARY KEY (`setting_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33751 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=33798 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -25465,13 +25688,18 @@ INSERT INTO `oc_setting` VALUES
 (33670,0,'module_dockercart_search','module_dockercart_search_status','1',0),
 (33671,0,'module_dockercart_search','module_dockercart_search_admin_fallback','1',0),
 (33672,0,'module_dockercart_search','module_dockercart_search_query_mappings','',0),
-(33744,0,'dockercart_update','dockercart_update_last_check','1792598327',0),
-(33745,0,'dockercart_update','dockercart_update_remote_version','3.33.1',0),
-(33746,0,'dockercart_update','dockercart_update_changelog','### Bug Fixes\n\n* **nginx:** render template before starting reload loop ([db48c8f](https://github.com/kdbsoft/dockercart/commit/db48c8ffdf82e650a85efb95a5017e69495ff802))',0),
 (33747,0,'config','config_api_status','0',0),
 (33748,0,'config','config_api_rate_limit','120',0),
 (33749,0,'config','config_api_log_retention_days','30',0),
-(33750,0,'config','config_api_require_if_match','0',0);
+(33750,0,'config','config_api_require_if_match','0',0),
+(33757,0,'config','config_webhook_status','1',0),
+(33758,0,'config','config_webhook_timeout','10',0),
+(33759,0,'config','config_webhook_max_attempts','6',0),
+(33760,0,'config','config_webhook_disable_after','4',0),
+(33761,0,'config','config_webhook_log_retention_days','30',0),
+(33795,0,'dockercart_update','dockercart_update_last_check','1792752684',0),
+(33796,0,'dockercart_update','dockercart_update_remote_version','3.35.2',0),
+(33797,0,'dockercart_update','dockercart_update_changelog','### Bug Fixes\n\n* **api:** disable REST API by default ([88bdfac](https://github.com/kdbsoft/dockercart/commit/88bdfac082e391b4dbfa28ff92dd796500cca742))',0);
 /*!40000 ALTER TABLE `oc_setting` ENABLE KEYS */;
 UNLOCK TABLES;
 COMMIT;
@@ -42038,4 +42266,4 @@ SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-10-21 19:29:15
+-- Dump completed on 2026-10-23 14:10:03
