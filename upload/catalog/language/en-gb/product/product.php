@@ -96,6 +96,7 @@ $_['entry_bad']                = 'Bad';
 $_['tab_description']          = 'Description';
 $_['tab_attribute']            = 'Specification';
 $_['tab_review']               = 'Reviews';
+$_['tab_files']                = 'Files';
 $_['text_attributes_show_more'] = 'Show more';
 $_['text_attributes_show_less'] = 'Show less';
 

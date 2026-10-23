@@ -2,6 +2,53 @@
 class ControllerCatalogProduct extends Controller {
 	private $error = array();
 
+	/**
+	 * Hard allowlist of formats accepted as product files.
+	 *
+	 * Product files are public downloads (instructions, datasheets, ...), so
+	 * only document, raster image, archive and drawing formats are accepted.
+	 * Scripts, executables, HTML/SVG/XML and other active content are rejected
+	 * even when an administrator adds them to config_file_ext_allowed — that
+	 * global list is intentionally NOT used here.
+	 */
+	private const PRODUCT_FILE_EXTENSIONS = array(
+		'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf', 'txt', 'csv',
+		'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff',
+		'zip', 'rar', '7z',
+		'dwg', 'dxf', 'eps', 'ai', 'psd',
+	);
+
+	/**
+	 * Extensions whose payload is legitimately plain text. A text/* payload
+	 * under any other extension is treated as a renamed script and rejected.
+	 */
+	private const PRODUCT_FILE_TEXT_EXTENSIONS = array('txt', 'csv', 'rtf', 'dxf');
+
+	/**
+	 * Active-content extensions that must never be accepted, as a second line
+	 * of defence behind the allowlist.
+	 */
+	private const PRODUCT_FILE_DANGEROUS_EXTENSIONS = array(
+		'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'pht', 'phar', 'phps',
+		'pl', 'py', 'rb', 'sh', 'bash', 'zsh', 'cgi', 'fcgi', 'exe', 'dll', 'com',
+		'bat', 'cmd', 'msi', 'cab', 'scr', 'vbs', 'vbe', 'wsf', 'wsh',
+		'js', 'mjs', 'cjs', 'html', 'htm', 'xhtml', 'svg', 'svgz', 'xml', 'xsl', 'xslt',
+		'jsp', 'asp', 'aspx', 'jar', 'class', 'so', 'dylib',
+		'htaccess', 'ini', 'lnk', 'ps1', 'psd1', 'psm1', 'apk', 'deb', 'rpm', 'app', 'dmg', 'iso',
+	);
+
+	/**
+	 * MIME types detected from the payload (never from the client) that always
+	 * mean active content.
+	 */
+	private const PRODUCT_FILE_DANGEROUS_MIME = array(
+		'text/x-php', 'application/x-php', 'application/x-httpd-php', 'application/x-httpd-php-source',
+		'text/html', 'application/xhtml+xml', 'image/svg+xml', 'application/javascript', 'text/javascript',
+		'application/x-sh', 'application/x-shellscript', 'application/x-executable', 'application/x-dosexec',
+		'application/x-msdownload', 'application/x-msdos-program', 'application/vnd.microsoft.portable-executable',
+		'application/x-ms-shortcut', 'text/x-python', 'text/x-ruby', 'text/x-perl',
+	);
+
 	public function index() {
 		$this->load->language('catalog/product');
 
@@ -2119,6 +2166,56 @@ class ControllerCatalogProduct extends Controller {
 			}
 		}
 
+		// Product files (public downloads shown on the product page)
+		$this->load->model('catalog/product_file');
+
+		if (isset($this->request->post['product_file']) && is_array($this->request->post['product_file'])) {
+			$product_files = $this->request->post['product_file'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$product_files = array();
+
+			foreach ($this->model_catalog_product_file->getProductFiles($this->request->get['product_id']) as $file_row) {
+				$file_row['name'] = $this->model_catalog_product_file->getFileDescriptions($file_row['product_file_id']);
+
+				$product_files[] = $file_row;
+			}
+		} else {
+			$product_files = array();
+		}
+
+		$data['product_files'] = array();
+
+		foreach ($product_files as $index => $file) {
+			if (!is_array($file) || empty($file['storage_key'])) {
+				continue;
+			}
+
+			$names = array();
+
+			foreach ($data['languages'] as $language) {
+				$names[$language['language_id']] = isset($file['name'][$language['language_id']]) ? (string)$file['name'][$language['language_id']] : '';
+			}
+
+			$file_size = isset($file['file_size']) ? (int)$file['file_size'] : 0;
+
+			$data['product_files'][] = array(
+				'product_file_id'      => isset($file['product_file_id']) ? (int)$file['product_file_id'] : 0,
+				'storage_key'          => (string)$file['storage_key'],
+				'original_name'        => isset($file['original_name']) ? (string)$file['original_name'] : '',
+				'file_size'            => $file_size,
+				'file_size_label'      => $this->formatFileSize($file_size),
+				'mime_type'            => isset($file['mime_type']) ? (string)$file['mime_type'] : '',
+				'sort_order'           => isset($file['sort_order']) ? (int)$file['sort_order'] : (int)$index,
+				'status'               => !empty($file['status']),
+				'downloads_count'      => isset($file['downloads_count']) ? (int)$file['downloads_count'] : 0,
+				'date_last_downloaded' => !empty($file['date_last_downloaded']) ? (string)$file['date_last_downloaded'] : '',
+				'name'                 => $names,
+			);
+		}
+
+		$data['product_file_allowed_extensions'] = implode(', ', $this->productFileAllowedExtensions());
+		$data['product_file_max_size'] = $this->formatFileSize((int)$this->config->get('config_file_max_size'));
+
 		if (isset($this->request->post['product_related'])) {
 			$products = $this->request->post['product_related'];
 		} elseif (isset($this->request->get['product_id'])) {
@@ -2486,6 +2583,115 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		return !$this->error;
+	}
+
+	/**
+	 * AJAX upload of a product file (PDF instruction, datasheet, ...).
+	 *
+	 * The payload is stored outside the webroot immediately; the product form
+	 * keeps the returned metadata in hidden inputs and the DB row is written on
+	 * save (ModelCatalogProductFile::saveFiles).
+	 */
+	public function fileUpload() {
+		$this->load->language('catalog/product');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		$original_name = '';
+		$file = array();
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/product_file');
+
+			$file = isset($this->request->files['file']) ? $this->request->files['file'] : array();
+
+			if (empty($file['name']) || empty($file['tmp_name']) || !is_file($file['tmp_name'])) {
+				$json['error'] = $this->language->get('error_upload');
+			} else {
+				$original_name = basename(html_entity_decode((string)$file['name'], ENT_QUOTES, 'UTF-8'));
+
+				if (utf8_strlen($original_name) < 3 || utf8_strlen($original_name) > 128) {
+					$json['error'] = $this->language->get('error_filename');
+				}
+
+				if ((int)$file['error'] != UPLOAD_ERR_OK) {
+					$json['error'] = $this->language->get('error_upload_' . (int)$file['error']);
+				}
+
+				if (!isset($json['error'])) {
+					$upload_error = $this->validateProductFileUpload($file, $original_name);
+
+					if ($upload_error !== null) {
+						$json['error'] = $this->language->get($upload_error);
+					}
+				}
+
+				$max_size = (int)$this->config->get('config_file_max_size');
+
+				if (!isset($json['error']) && $max_size > 0 && (int)$file['size'] > $max_size) {
+					$json['error'] = sprintf($this->language->get('error_file_size'), $this->formatFileSize($max_size));
+				}
+			}
+		}
+
+		if (!isset($json['error'])) {
+			$directory = $this->model_catalog_product_file->getStorageDirectory();
+			$storage_key = $this->model_catalog_product_file->createStorageKey($original_name);
+
+			if ($directory === '' || !move_uploaded_file($file['tmp_name'], $directory . $storage_key)) {
+				$json['error'] = $this->language->get('error_upload_move');
+			} else {
+				$json['file'] = array(
+					'storage_key'   => $storage_key,
+					'original_name' => $original_name,
+					'file_size'     => (int)filesize($directory . $storage_key),
+					'mime_type'     => (string)$file['type'],
+				);
+				$json['success'] = $this->language->get('text_file_uploaded');
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * AJAX removal of a product file from the form. A persisted file is removed
+	 * by id (row + payload); a not-yet-saved upload only has a storage key.
+	 */
+	public function fileDelete() {
+		$this->load->language('catalog/product');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/product')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($json['error'])) {
+			$this->load->model('catalog/product_file');
+
+			$product_file_id = isset($this->request->post['product_file_id']) ? (int)$this->request->post['product_file_id'] : 0;
+
+			if ($product_file_id) {
+				$this->model_catalog_product_file->deleteFile($product_file_id);
+			} else {
+				$storage_key = isset($this->request->post['storage_key']) ? (string)$this->request->post['storage_key'] : '';
+
+				if ($storage_key !== '') {
+					$this->model_catalog_product_file->deleteUploadedFile($storage_key);
+				}
+			}
+
+			$json['success'] = $this->language->get('text_file_deleted');
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 
 	public function updateImage() {
@@ -3323,5 +3529,99 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Validate an uploaded product file.
+	 *
+	 * The extension must be on the hard allowlist, the payload must not be
+	 * detected as active content, a text payload is only accepted under a text
+	 * extension and the raw bytes must not carry a PHP tag or a shebang.
+	 *
+	 * @param array<string, mixed> $file
+	 *
+	 * @return string|null a language key on rejection, null when acceptable
+	 */
+	private function validateProductFileUpload(array $file, string $original_name) {
+		$extension = strtolower((string)pathinfo($original_name, PATHINFO_EXTENSION));
+
+		if ($extension === '' || !in_array($extension, self::PRODUCT_FILE_EXTENSIONS, true)) {
+			return 'error_filetype';
+		}
+
+		// Defence in depth: never accept an active-content extension, even if it
+		// were ever added to the allowlist by mistake.
+		if (in_array($extension, self::PRODUCT_FILE_DANGEROUS_EXTENSIONS, true)) {
+			return 'error_filetype';
+		}
+
+		$tmp_name = (string)($file['tmp_name'] ?? '');
+
+		if ($tmp_name === '' || !is_file($tmp_name)) {
+			return 'error_upload';
+		}
+
+		// Detect the real content type; the client-sent mime is not trusted.
+		$detected = '';
+
+		if (function_exists('finfo_open')) {
+			$finfo = finfo_open(FILEINFO_MIME_TYPE);
+
+			if ($finfo !== false) {
+				$detected = strtolower((string)finfo_file($finfo, $tmp_name));
+
+				finfo_close($finfo);
+			}
+		}
+
+		if ($detected !== '' && in_array($detected, self::PRODUCT_FILE_DANGEROUS_MIME, true)) {
+			return 'error_filetype';
+		}
+
+		// A text payload under a binary extension is a renamed script.
+		if ($detected !== '' && strpos($detected, 'text/') === 0 && !in_array($extension, self::PRODUCT_FILE_TEXT_EXTENSIONS, true)) {
+			return 'error_filetype';
+		}
+
+		// Reject server-side script markers and shebangs in the first 64 KiB.
+		$content = (string)file_get_contents($tmp_name, false, null, 0, 65536);
+
+		if (preg_match('/<\?(php|=|\s)/i', $content) || strpos($content, '#!') === 0) {
+			return 'error_filetype';
+		}
+
+		return null;
+	}
+
+	/**
+	 * Human-readable allowlist for the admin help text.
+	 *
+	 * @return string[]
+	 */
+	private function productFileAllowedExtensions() {
+		$extensions = array();
+
+		foreach (self::PRODUCT_FILE_EXTENSIONS as $extension) {
+			if (!in_array($extension, self::PRODUCT_FILE_DANGEROUS_EXTENSIONS, true)) {
+				$extensions[] = strtoupper($extension);
+			}
+		}
+
+		return $extensions;
+	}
+
+	private function formatFileSize($bytes) {
+		$bytes = max(0, (int)$bytes);
+
+		$units = array('B', 'KB', 'MB', 'GB', 'TB');
+		$index = 0;
+		$size = (float)$bytes;
+
+		while ($size >= 1024 && $index < count($units) - 1) {
+			$size /= 1024;
+			$index++;
+		}
+
+		return ($index === 0 ? (string)(int)$size : number_format($size, 1, '.', '')) . ' ' . $units[$index];
 	}
 }

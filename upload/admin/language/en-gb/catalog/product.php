@@ -323,3 +323,20 @@ $_['text_status_card'] = 'Status';
 // Empty state
 $_['text_empty_title']       = 'No products yet';
 $_['text_empty_description'] = 'Products are the heart of your store. Add your first product to start selling.';
+
+// Product files
+$_['text_panel_files_title']    = 'Files';
+$_['button_file_upload']        = 'Upload file';
+$_['entry_file_name']           = 'Title';
+$_['text_file_empty']           = 'No files attached yet.';
+$_['text_file_downloads']       = 'downloads';
+$_['text_file_last_download']   = 'Last download';
+$_['text_file_uploaded']        = 'File uploaded.';
+$_['text_file_deleted']         = 'File removed.';
+$_['error_file_size']           = 'File is too large. Maximum size is %s.';
+$_['text_files_instructions']   = 'Attach instructions, manuals, datasheets or certificates. Every file is shown in a public "Files" block on the product page and can be downloaded by anyone, without an account. The title is set per language.';
+$_['text_files_allowed']        = 'Allowed formats: %s. Maximum size: %s.';
+$_['error_upload']              = 'Upload required!';
+$_['error_filename']            = 'Filename must be between 3 and 128 characters!';
+$_['error_filetype']            = 'Invalid file type!';
+$_['error_upload_move']         = 'Could not save the uploaded file. Check that the storage directory is writable.';

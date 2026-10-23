@@ -13,6 +13,7 @@ $_['error_text'] = 'Внимание: текст отзыва должен со�
 $_['tab_attribute'] = 'Характеристики';
 $_['tab_description'] = 'Описание';
 $_['tab_review'] = 'Отзывы';
+$_['tab_files'] = 'Файлы';
 $_['text_attributes_show_more'] = 'Показать еще';
 $_['text_attributes_show_less'] = 'Свернуть';
 $_['text_brand'] = 'Бренд';

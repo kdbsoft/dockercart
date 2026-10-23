@@ -2289,6 +2289,17 @@ class ControllerProductProduct extends Controller {
 			$this->model_catalog_product->updateViewed($product_id);
 		}
 
+		// Public product files (instructions, datasheets, ...)
+		$this->load->model('catalog/product_file');
+
+		$data['product_files'] = array();
+
+		foreach ($this->model_catalog_product_file->getFiles($product_id) as $product_file) {
+			$product_file['href'] = $this->url->link('product/product_file/download', 'product_file_id=' . $product_file['product_file_id'], true);
+
+			$data['product_files'][] = $product_file;
+		}
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');
