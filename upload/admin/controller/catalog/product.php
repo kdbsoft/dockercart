@@ -725,6 +725,30 @@ class ControllerCatalogProduct extends Controller {
 			}
 
 			$store_count_by_product = $this->model_catalog_product->getProductStoreCounts($product_ids);
+
+			// Combined (configurable) products: their price is computed from the
+			// variants, so the list shows a range instead of an editable field.
+			$configurable_map = array();
+			$config_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_configurable WHERE is_configurable = '1' AND product_id IN (" . $ids_str . ")");
+
+			foreach ($config_query->rows as $row) {
+				$configurable_map[(int)$row['product_id']] = true;
+			}
+
+			// Effective active special per product for the default customer group
+			// (same row the storefront shows a guest).
+			$special_by_product = array();
+			$default_customer_group_id = (int)$this->config->get('config_customer_group_id');
+
+			if ($default_customer_group_id) {
+				$special_query = $this->db->query("SELECT product_id, product_special_id, price FROM " . DB_PREFIX . "product_special WHERE customer_group_id = '" . $default_customer_group_id . "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) AND product_id IN (" . $ids_str . ") ORDER BY priority ASC, price ASC, product_special_id ASC");
+
+				foreach ($special_query->rows as $row) {
+					if (!isset($special_by_product[(int)$row['product_id']])) {
+						$special_by_product[(int)$row['product_id']] = $row;
+					}
+				}
+			}
 		}
 
 		foreach ($results as $result) {
@@ -767,6 +791,9 @@ class ControllerCatalogProduct extends Controller {
 
 			$manufacturer_name = isset($result['manufacturer_name']) ? $result['manufacturer_name'] : '';
 			$store_count = isset($store_count_by_product[$pid]) ? $store_count_by_product[$pid] : 0;
+			$is_configurable = isset($configurable_map[$pid]);
+			$price_special = isset($special_by_product[$pid]) ? $special_by_product[$pid] : null;
+			$price_html = $this->renderPriceCellHtml($pid, $is_configurable, (float)$result['price'], (int)$result['currency_id'], $price_special);
 
 			$data['products'][] = array(
 				'product_id'    => $pid,
@@ -785,6 +812,7 @@ class ControllerCatalogProduct extends Controller {
 				'status_raw'    => $result['status'],
 				'categories'    => $cat_display,
 				'categories_raw'=> $cat_data ? $cat_data['category_ids'] : '',
+				'price_html'    => $price_html,
 				'has_options'   => $has_options,
 				'option_count'  => $option_count,
 				'option_qty_sum'=> $opt_qty ? (float)$opt_qty['total_qty'] : 0,
@@ -948,7 +976,9 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_variant'] = $this->language->get('text_variant');
 		$data['column_category'] = $this->language->get('column_category');
 		$data['column_manufacturer'] = $this->language->get('column_manufacturer');
+		$data['column_price'] = $this->language->get('column_price');
 		$data['column_store'] = $this->language->get('column_store');
+		$data['text_configurable_price'] = $this->language->get('text_configurable_price');
 		$data['text_enabled'] = $this->language->get('text_enabled');
 		$data['text_disabled'] = $this->language->get('text_disabled');
 		$data['text_select_category'] = $this->language->get('text_select_category');
@@ -960,6 +990,71 @@ class ControllerCatalogProduct extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('catalog/product_list', $data));
+	}
+
+	/**
+	 * Inner HTML of the list price cell for one product.
+	 *
+	 * Simple products expose editable price (and, when the default customer
+	 * group has an active special, an editable special rendered like the
+	 * storefront: red special + struck-through base). Configurable products
+	 * show the variant price range and a pencil that only alerts.
+	 */
+	protected function renderPriceCellHtml($product_id, $is_configurable, $price, $currency_id, $special = null) {
+		$product_id = (int)$product_id;
+		$price = (float)$price;
+		$currency_code = $this->getProductCurrencyCode($currency_id);
+
+		if ($is_configurable) {
+			$pc = new \ProductConfigurable($this->registry);
+			$range = $pc->getAggregatedPriceRange($product_id, null);
+
+			$min = isset($range['min']) ? (float)$range['min'] : 0.0;
+			$max = isset($range['max']) ? (float)$range['max'] : 0.0;
+
+			if ($min <= 0 && $max <= 0) {
+				$range_text = $this->currency->format($price, $currency_code, 1);
+			} else {
+				$range_text = $this->currency->format($min, $currency_code, 1);
+
+				if ($max > $min) {
+					$range_text .= ' – ' . $this->currency->format($max, $currency_code, 1);
+				}
+			}
+
+			return '<span class="inline-edit dc-price-value" data-product-id="' . $product_id . '" data-field="price" data-configurable="1">' . $range_text . ' <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>';
+		}
+
+		$price_text = $this->currency->format($price, $currency_code, 1);
+
+		if ($special && isset($special['price']) && (float)$special['price'] < $price) {
+			$special_price = (float)$special['price'];
+
+			return '<span class="inline-edit dc-price-special" data-product-id="' . $product_id . '" data-field="special" data-value="' . htmlspecialchars((string)$special_price, ENT_QUOTES, 'UTF-8') . '"><span class="dc-price-special-value">' . $this->currency->format($special_price, $currency_code, 1) . '</span> <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>'
+				. '<span class="inline-edit dc-price-base" data-product-id="' . $product_id . '" data-field="price" data-value="' . htmlspecialchars((string)$price, ENT_QUOTES, 'UTF-8') . '"><span class="dc-price-struck">' . $price_text . '</span> <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>';
+		}
+
+		return '<span class="inline-edit dc-price-base" data-product-id="' . $product_id . '" data-field="price" data-value="' . htmlspecialchars((string)$price, ENT_QUOTES, 'UTF-8') . '">' . $price_text . ' <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>';
+	}
+
+	/**
+	 * Currency code a product's price is denominated in (0 = store default).
+	 */
+	protected function getProductCurrencyCode($currency_id) {
+		$currency_id = (int)$currency_id;
+		$default_code = $this->config->get('config_currency');
+
+		if ($currency_id <= 0) {
+			return $default_code;
+		}
+
+		foreach ($this->currency->getCurrencies() as $code => $info) {
+			if ((int)$info['currency_id'] === $currency_id) {
+				return $code;
+			}
+		}
+
+		return $default_code;
 	}
 
 	protected function getForm() {
@@ -2791,6 +2886,51 @@ class ControllerCatalogProduct extends Controller {
 						$json['value_html'] = '<span style="color:#e67e22;font-weight:600;">' . $display . '</span>';
 					} else {
 						$json['value_html'] = '<span style="color:#27ae60;font-weight:600;">' . $display . '</span>';
+					}
+				}
+			} elseif ($field === 'price' || $field === 'special') {
+				$this->load->language('catalog/product');
+
+				$pc = new \ProductConfigurable($this->registry);
+
+				if ($pc->isConfigurable($product_id)) {
+					// Combined products are priced per variant — point the admin
+					// to the product form instead of silently doing nothing.
+					$json['error'] = $this->language->get('text_configurable_price');
+				} else {
+					$normalized_input = str_replace(',', '.', trim((string)$value));
+
+					if (!is_numeric($normalized_input) || (float)$normalized_input < 0) {
+						$json['error'] = $this->language->get('error_invalid_price');
+					} else {
+						$price_value = round((float)$normalized_input, 4);
+						$product_query = $this->db->query("SELECT price, currency_id FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+
+						if (!$product_query->num_rows) {
+							$json['error'] = 'Invalid product';
+						} else {
+							$currency_id = (int)$product_query->row['currency_id'];
+
+							if ($field === 'price') {
+								$this->model_catalog_product->updateProductField($product_id, array('price' => $price_value));
+							} else {
+								$special = $this->model_catalog_product->getActiveProductSpecial($product_id, (int)$this->config->get('config_customer_group_id'));
+
+								if (!$special) {
+									$json['error'] = 'Invalid special';
+								} else {
+									$this->model_catalog_product->updateProductSpecialPrice((int)$special['product_special_id'], $price_value);
+								}
+							}
+
+							if (!isset($json['error'])) {
+								$price_query = $this->db->query("SELECT price FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
+								$special = $this->model_catalog_product->getActiveProductSpecial($product_id, (int)$this->config->get('config_customer_group_id'));
+
+								$json['success'] = true;
+								$json['value_html'] = $this->renderPriceCellHtml($product_id, false, (float)$price_query->row['price'], $currency_id, $special);
+							}
+						}
 					}
 				}
 			} elseif ($field === 'categories') {

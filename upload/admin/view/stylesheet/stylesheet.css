@@ -4233,7 +4233,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 .dc-product-list {
     table-layout: fixed;
     width: 100%;
-    min-width: 820px;
+    min-width: 960px;
 }
 
 .dc-product-list > thead > tr > td.dc-col-check {
@@ -4241,23 +4241,27 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .dc-product-list > thead > tr > td.dc-col-name {
-    width: 30%;
+    width: 25%;
 }
 
 .dc-product-list > thead > tr > td.dc-col-model {
-    width: 12%;
+    width: 10%;
 }
 
 .dc-product-list > thead > tr > td.dc-col-category {
-    width: 17%;
+    width: 14%;
 }
 
 .dc-product-list > thead > tr > td.dc-col-manufacturer {
-    width: 12%;
+    width: 10%;
 }
 
 .dc-product-list > thead > tr > td.dc-col-quantity {
-    width: 11%;
+    width: 8%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-price {
+    width: 13%;
 }
 
 .dc-product-list > thead > tr > td.dc-col-store {
@@ -4299,7 +4303,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .dc-cell-clamp {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -4310,4 +4314,28 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .dc-col-category .inline-edit-icon {
     flex: 0 0 auto;
+}
+
+/* ── Product list: price cell (base + special) ── */
+.dc-price-cell {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 2px 6px;
+}
+
+.dc-price-cell .inline-edit-icon {
+    margin-left: 2px;
+}
+
+.dc-price-special-value {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.dc-price-struck {
+    color: #9ca3af;
+    text-decoration: line-through;
+    font-size: 11px;
 }

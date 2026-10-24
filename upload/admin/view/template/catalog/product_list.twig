@@ -49,6 +49,7 @@ small.text-muted svg { vertical-align: middle; }
                       <td class="text-left dc-col-category">{{ column_category }}</td>
                       <td class="text-left dc-col-manufacturer">{% if sort == 'm.name' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }} sortable">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}" class="sortable">{{ column_manufacturer }}</a> {% endif %}</td>
                       <td class="text-right dc-col-quantity">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
+                      <td class="text-right dc-col-price">{{ column_price }}</td>
                       <td class="text-center dc-col-store">{{ column_store }}</td>
                       <td class="text-left dc-col-status">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
                     </tr>
@@ -76,7 +77,7 @@ small.text-muted svg { vertical-align: middle; }
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
-                    <td class="text-left">
+                    <td class="text-left dc-col-category">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="categories" data-value="{{ product.categories_raw }}">
                         <span class="dc-cell-clamp"{% if product.categories %} data-toggle="tooltip" title="{{ product.categories|striptags }}"{% endif %}>{{ product.categories|raw }}</span>
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
@@ -113,6 +114,9 @@ small.text-muted svg { vertical-align: middle; }
                           <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                         </span>
                       {% endif %}
+                    </td>
+                    <td class="text-right dc-col-price">
+                      <div class="dc-price-cell" data-product-id="{{ product.product_id }}">{{ product.price_html|raw }}</div>
                     </td>
                     <td class="text-center">
                       <span class="badge">{{ product.store_count }}</span>
@@ -312,6 +316,12 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 	if ($span.find('input, select').length) return;
 
 	var field = $span.data('field');
+
+	if ($span.data('configurable') && (field === 'price' || field === 'special')) {
+		alert('{{ text_configurable_price|e('js') }}');
+		return;
+	}
+
 	var rawValue = $span.data('value');
 
 	$span.addClass('editing');
@@ -416,6 +426,46 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 		}
 
 		$('#category-tree-modal').modal('show');
+	} else if (field === 'price' || field === 'special') {
+		var $cell = $span.closest('.dc-price-cell');
+
+		$span.html('<input type="text" class="form-control input-sm inline-edit-input" style="width:110px;" value="' + rawValue + '">');
+		var $priceInput = $span.find('input');
+		$priceInput.focus().select();
+
+		function revertPrice() {
+			$span.removeClass('editing'); $span.html($span.data('display'));
+		}
+
+		function savePrice() {
+			var newValue = $priceInput.val();
+			var productId = $span.data('product-id');
+
+			$.ajax({
+				url: 'index.php?route=catalog/product/updateField&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: { product_id: productId, field: field, value: newValue },
+				success: function(json) {
+					if (json['error']) {
+						$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
+						setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
+					} else {
+						$cell.html(json['value_html']);
+						lucide.createIcons({ nodes: [$cell[0]] });
+					}
+				},
+				error: function() {
+					revertPrice();
+				}
+			});
+		}
+
+		$priceInput.on('blur', savePrice);
+		$priceInput.on('keydown', function(e) {
+			if (e.which === 13) { e.preventDefault(); $priceInput.trigger('blur'); }
+			if (e.which === 27) { revertPrice(); }
+		});
 	} else {
 		var currentDisplay = $span.clone().children('.inline-edit-icon').remove().children('.label').remove().end().text().trim();
 

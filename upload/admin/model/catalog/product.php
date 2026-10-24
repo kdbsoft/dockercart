@@ -2964,6 +2964,44 @@ class ModelCatalogProduct extends Model
         return $query->rows;
     }
 
+    /**
+     * Effective active special for a customer group — the same row the
+     * storefront picks (priority, then lowest price, then lowest id).
+     */
+    public function getActiveProductSpecial($product_id, $customer_group_id)
+    {
+        $customer_group_id = (int) $customer_group_id;
+
+        if (!$customer_group_id) {
+            return null;
+        }
+
+        $query = $this->db->query(
+            "SELECT product_special_id, price, priority, date_start, date_end FROM " .
+                DB_PREFIX .
+                "product_special WHERE product_id = '" .
+                (int) $product_id .
+                "' AND customer_group_id = '" .
+                $customer_group_id .
+                "' AND ((date_start = '0000-00-00' OR date_start < NOW()) AND (date_end = '0000-00-00' OR date_end > NOW())) ORDER BY priority ASC, price ASC, product_special_id ASC LIMIT 1",
+        );
+
+        return $query->num_rows ? $query->row : null;
+    }
+
+    public function updateProductSpecialPrice($product_special_id, $price)
+    {
+        $this->db->query(
+            "UPDATE " .
+                DB_PREFIX .
+                "product_special SET price = '" .
+                (float) $price .
+                "' WHERE product_special_id = '" .
+                (int) $product_special_id .
+                "'",
+        );
+    }
+
     public function getProductGifts($product_id)
     {
         $query = $this->db->query(
