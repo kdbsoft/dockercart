@@ -147,6 +147,15 @@ class ControllerLocalisationZone extends Controller {
 			$filter_country_id = 0;
 		}
 
+		// Toolbar quick search filters zones by name / country / code.
+		if (isset($this->request->get['filter_search'])) {
+			$filter_name = trim((string)$this->request->get['filter_search']);
+		} elseif (isset($this->request->get['filter_name'])) {
+			$filter_name = (string)$this->request->get['filter_name'];
+		} else {
+			$filter_name = '';
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['sort'])) {
@@ -165,6 +174,10 @@ class ControllerLocalisationZone extends Controller {
 			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
+		if ($filter_name !== '') {
+			$url .= '&filter_name=' . urlencode(html_entity_decode($filter_name, ENT_QUOTES, 'UTF-8'));
+		}
+
 		$data['add'] = $this->url->link('localisation/zone/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
 		$data['delete'] = $this->url->link('localisation/zone/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
@@ -176,9 +189,13 @@ class ControllerLocalisationZone extends Controller {
 			'url'         => $this->url->link('localisation/zone/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
 		);
 
-		// An active country filter is shown in the search box so all zones
-		// of the country stay one click (clear) away.
-		if ($filter_country_id) {
+		// A free-text search wins; otherwise an active country filter is shown
+		// in the search box so all zones of the country stay one click (clear)
+		// away.
+		if ($filter_name !== '') {
+			$search['value'] = $filter_name;
+			$search['clear_url'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'], true);
+		} elseif ($filter_country_id) {
 			$filter_country_info = $this->model_localisation_country->getCountry($filter_country_id);
 
 			if ($filter_country_info) {
@@ -193,6 +210,7 @@ class ControllerLocalisationZone extends Controller {
 
 		$filter_data = array(
 			'filter_country_id' => $filter_country_id,
+			'filter_name'       => $filter_name,
 			'sort'  => $sort,
 			'order' => $order,
 			'start' => ($page - 1) * $this->config->get('config_limit_admin'),
@@ -253,6 +271,10 @@ class ControllerLocalisationZone extends Controller {
 			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
 		}
 
+		if ($filter_name !== '') {
+			$url .= '&filter_name=' . urlencode(html_entity_decode($filter_name, ENT_QUOTES, 'UTF-8'));
+		}
+
 		$data['sort_country'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . '&sort=c.name' . $url, true);
 		$data['sort_name'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . '&sort=z.name' . $url, true);
 		$data['sort_code'] = $this->url->link('localisation/zone', 'user_token=' . $this->session->data['user_token'] . '&sort=z.code' . $url, true);
@@ -269,6 +291,10 @@ class ControllerLocalisationZone extends Controller {
 
 		if (isset($this->request->get['filter_country_id'])) {
 			$url .= '&filter_country_id=' . (int)$this->request->get['filter_country_id'];
+		}
+
+		if ($filter_name !== '') {
+			$url .= '&filter_name=' . urlencode(html_entity_decode($filter_name, ENT_QUOTES, 'UTF-8'));
 		}
 
 		$pagination = new Pagination();
@@ -459,7 +485,8 @@ class ControllerLocalisationZone extends Controller {
 				$this->load->model('localisation/country');
 
 				// Countries first: typing a country offers "all zones of this
-					// country" rows, so Enter opens the filtered zone list.
+				// country" rows that link to the country-filtered list (Enter on
+				// the search box instead filters the list by zone name).
 				$filter_search_lower = utf8_strtolower($filter_search);
 				$country_matches = 0;
 

@@ -185,6 +185,16 @@ class ControllerDesignSeoUrl extends Controller {
 	}
 
 	protected function getList() {
+		// Toolbar quick search filters the list by SEO keyword. Normalise it
+		// into filter_keyword so sorting, pagination and edit redirects keep it.
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->request->get['filter_keyword'] = '%' . $filter_search . '%';
+			}
+		}
+
 		if (isset($this->request->get['filter_query'])) {
 			$filter_query = $this->request->get['filter_query'];
 		} else {
@@ -266,7 +276,9 @@ class ControllerDesignSeoUrl extends Controller {
 		// Search-only toolbar (no saved filter tabs)
 		$data['user_filter'] = $this->renderUserFilter('seo_url', 'design/seo_url', array(), array(), '', array(), array(
 			'placeholder' => $this->language->get('text_search_seo_url'),
-			'url'         => $this->url->link('design/seo_url/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+			'url'         => $this->url->link('design/seo_url/autocomplete', 'user_token=' . $this->session->data['user_token'], true),
+			'value'       => $filter_keyword !== '' ? trim($filter_keyword, '%') : '',
+			'clear_url'   => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true)
 		), false);
 
 		$data['seo_urls'] = array();

@@ -220,6 +220,22 @@ class ControllerSaleOrder extends Controller {
 	}
 			
 	protected function getList() {
+		// Toolbar quick search: numeric terms target the order id, everything
+		// else the customer name / email / phone (mirrors the autocomplete).
+		// Normalise it into the native params so sorting, pagination and the
+		// edit redirects keep the filter.
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				if (ctype_digit($filter_search)) {
+					$this->request->get['filter_order_id'] = $filter_search;
+				} else {
+					$this->request->get['filter_customer'] = $filter_search;
+				}
+			}
+		}
+
 		if (isset($this->request->get['filter_order_id'])) {
 			$filter_order_id = $this->request->get['filter_order_id'];
 		} else {
@@ -355,7 +371,9 @@ class ControllerSaleOrder extends Controller {
 			array('key' => 'date_preset', 'label' => $this->language->get('entry_date_added'), 'type' => 'preset', 'options' => $this->getDatePresetOptions())
 		), $tab_counts, $active_builtin, $builtin_tabs, array(
 			'placeholder' => $this->language->get('text_search_orders'),
-			'url'         => $this->url->link('sale/order/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+			'url'         => $this->url->link('sale/order/autocomplete', 'user_token=' . $this->session->data['user_token'], true),
+			'value'       => $filter_customer !== '' ? $filter_customer : $filter_order_id,
+			'clear_url'   => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true)
 		));
 
 		$data['active_filter'] = $active_filter;

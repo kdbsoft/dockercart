@@ -123,6 +123,16 @@ class ControllerLocalisationCountry extends Controller {
 	}
 
 	protected function getList() {
+		// Toolbar quick search filters the list by country name. Normalise it
+		// into filter_name so sorting, pagination and edit redirects keep it.
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->request->get['filter_name'] = $filter_search;
+			}
+		}
+
 		if (isset($this->request->get['filter_name'])) {
 			$filter_name = $this->request->get['filter_name'];
 		} else {
@@ -171,7 +181,9 @@ class ControllerLocalisationCountry extends Controller {
 		// Reference lists: search-only toolbar (no filter tabs, search on the left)
 		$data['user_filter'] = $this->renderUserFilter('country', 'localisation/country', array(), array(), '', array(), array(
 			'placeholder' => $this->language->get('text_search_country'),
-			'url'         => $this->url->link('localisation/country/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+			'url'         => $this->url->link('localisation/country/autocomplete', 'user_token=' . $this->session->data['user_token'], true),
+			'value'       => $filter_name,
+			'clear_url'   => $this->url->link('localisation/country', 'user_token=' . $this->session->data['user_token'], true)
 		), false, true);
 
 		$data['countries'] = array();

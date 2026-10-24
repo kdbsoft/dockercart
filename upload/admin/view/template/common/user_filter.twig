@@ -24,7 +24,7 @@
     <div class="order-search-wrap">
       <div class="search-input-wrap{% if uf_search.value %} has-value{% endif %}">
         <i data-lucide="search" width="14" height="14" class="search-input-icon"></i>
-        <input type="search" id="uf-search-input" class="form-control" placeholder="{{ uf_search.placeholder }}" autocomplete="off" value="{{ uf_search.value|default('') }}" data-search-url="{{ uf_search.url }}" />
+        <input type="search" id="uf-search-input" class="form-control" placeholder="{{ uf_search.placeholder }}" autocomplete="off" value="{{ uf_search.value|default('')|e('html_attr') }}" data-search-url="{{ uf_search.url }}" />
         {% if uf_search.clear_url %}
         <button type="button" class="order-search-clear" data-toggle="tooltip" title="{{ uf_text_clear }}" data-clear-url="{{ uf_search.clear_url }}"><i data-lucide="x" width="14" height="14"></i></button>
         {% endif %}
@@ -431,11 +431,16 @@
 				hideSearch();
 			} else if (e.key === 'Enter') {
 				e.preventDefault();
-				var first = searchDropdown.querySelector('a');
+				hideSearch();
 
-				if (first) {
-					window.location.href = first.getAttribute('href');
+				var query = this.value.trim();
+				var target = redirectUrl;
+
+				if (query) {
+					target += '&filter_search=' + encodeURIComponent(query);
 				}
+
+				window.location.href = target;
 			}
 		});
 

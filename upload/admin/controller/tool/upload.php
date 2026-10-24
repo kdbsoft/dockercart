@@ -62,6 +62,16 @@ class ControllerToolUpload extends Controller {
 	}
 
 	protected function getList() {
+		// Toolbar quick search filters the list by upload name. Normalise it
+		// into filter_name so sorting, pagination and edit redirects keep it.
+		if (isset($this->request->get['filter_search'])) {
+			$filter_search = trim((string)$this->request->get['filter_search']);
+
+			if ($filter_search !== '') {
+				$this->request->get['filter_name'] = $filter_search;
+			}
+		}
+
 		if (isset($this->request->get['filter_name'])) {
 			$filter_name = $this->request->get['filter_name'];
 		} else {
@@ -119,7 +129,9 @@ class ControllerToolUpload extends Controller {
 		// Reference lists: search-only toolbar (no saved filter tabs)
 		$data['user_filter'] = $this->renderUserFilter('upload', 'tool/upload', array(), array(), '', array(), array(
 			'placeholder' => $this->language->get('text_search_upload'),
-			'url'         => $this->url->link('tool/upload/autocomplete', 'user_token=' . $this->session->data['user_token'], true)
+			'url'         => $this->url->link('tool/upload/autocomplete', 'user_token=' . $this->session->data['user_token'], true),
+			'value'       => $filter_name,
+			'clear_url'   => $this->url->link('tool/upload', 'user_token=' . $this->session->data['user_token'], true)
 		), false);
 
 		$data['uploads'] = array();

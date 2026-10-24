@@ -96,6 +96,18 @@ abstract class Controller {
 
 		$saved_filters = $hideTabs ? array() : $this->model_user_user_filter->getFilters($user_id, $entity);
 
+		// The toolbar search box is a list filter: submitting it reloads the
+		// list with &filter_search=<query>. Reflect the active query in the
+		// box (and offer the clear link) so the filter stays visible.
+		if ($search !== null && isset($this->request->get['filter_search'])) {
+			$active_search = trim((string)$this->request->get['filter_search']);
+
+			if ($active_search !== '') {
+				$search['value'] = $active_search;
+				$search['clear_url'] = $this->url->link($route, 'user_token=' . $this->session->data['user_token'], true);
+			}
+		}
+
 		$tabs = $hideTabs ? array() : array_merge($extraTabs, array(
 			array(
 				'id'    => 'all',
