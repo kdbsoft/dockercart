@@ -1,3 +1,14 @@
+## [3.38.0](https://github.com/kdbsoft/dockercart/compare/v3.37.1...v3.38.0) (2026-10-24)
+
+### Features
+
+* **localisation:** display currency exchange rate as default currency per unit ([418a103](https://github.com/kdbsoft/dockercart/commit/418a1034d5f3a7036e43b530adca539c1e2fccc9))
+
+### Bug Fixes
+
+* **sale:** format voucher amounts in store base currency ([28685d0](https://github.com/kdbsoft/dockercart/commit/28685d0c47864b6692bb9ed92b06f18d81ab4a2a))
+* **sale:** store and display order amounts in store base currency ([f0a406d](https://github.com/kdbsoft/dockercart/commit/f0a406d5778158734fb36858fae9c27600ba0d9a))
+
 ## [3.37.1](https://github.com/kdbsoft/dockercart/compare/v3.37.0...v3.37.1) (2026-10-24)
 
 ### Bug Fixes
