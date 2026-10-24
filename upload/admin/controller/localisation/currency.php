@@ -20,7 +20,13 @@ class ControllerLocalisationCurrency extends Controller {
 		$this->load->model('localisation/currency');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_localisation_currency->addCurrency($this->request->post);
+			$data = $this->request->post;
+
+			// The form exposes the human-readable rate (default currency per 1
+			// unit of this currency); the table stores OpenCart's inverse factor.
+			$data['value'] = $this->rateToValue($data['value']);
+
+			$this->model_localisation_currency->addCurrency($data);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -52,7 +58,13 @@ class ControllerLocalisationCurrency extends Controller {
 		$this->load->model('localisation/currency');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_localisation_currency->editCurrency($this->request->get['currency_id'], $this->request->post);
+			$data = $this->request->post;
+
+			// The form exposes the human-readable rate (default currency per 1
+			// unit of this currency); the table stores OpenCart's inverse factor.
+			$data['value'] = $this->rateToValue($data['value']);
+
+			$this->model_localisation_currency->editCurrency($this->request->get['currency_id'], $data);
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -195,7 +207,7 @@ class ControllerLocalisationCurrency extends Controller {
 				'currency_id'   => $result['currency_id'],
 				'title'         => $result['title'] . (($result['code'] == $this->config->get('config_currency')) ? $this->language->get('text_default') : null),
 				'code'          => $result['code'],
-				'value'         => $result['value'],
+				'value'         => $this->formatRate($this->valueToRate($result['value']), 6),
 				'date_modified' => date($this->language->get('datetime_format'), strtotime($result['date_modified'])),
 				'edit'          => $this->url->link('localisation/currency/edit', 'user_token=' . $this->session->data['user_token'] . '&currency_id=' . $result['currency_id'] . $url, true)
 			);
@@ -363,7 +375,7 @@ class ControllerLocalisationCurrency extends Controller {
 		if (isset($this->request->post['value'])) {
 			$data['value'] = $this->request->post['value'];
 		} elseif (!empty($currency_info)) {
-			$data['value'] = $currency_info['value'];
+			$data['value'] = $this->formatRate($this->valueToRate($currency_info['value']));
 		} else {
 			$data['value'] = '';
 		}
@@ -381,6 +393,44 @@ class ControllerLocalisationCurrency extends Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 
 		$this->response->setOutput($this->load->view('localisation/currency_form', $data));
+	}
+
+	/**
+	 * Convert the OpenCart internal currency factor (units of this currency per
+	 * 1 unit of the default currency) into the human-readable exchange rate
+	 * shown in the admin (units of the default currency per 1 unit of this one).
+	 *
+	 * @param mixed $value
+	 * @return float
+	 */
+	protected function valueToRate($value) {
+		$value = (float)$value;
+
+		return $value > 0 ? 1 / $value : 0.0;
+	}
+
+	/**
+	 * Inverse of valueToRate(): turn the rate posted by the admin form back into
+	 * the internal factor stored in the currency table.
+	 *
+	 * @param mixed $rate
+	 * @return float
+	 */
+	protected function rateToValue($rate) {
+		$rate = (float)str_replace(',', '.', (string)$rate);
+
+		return $rate > 0 ? 1 / $rate : 0.0;
+	}
+
+	/**
+	 * Format an exchange rate for display, trimming trailing zeros.
+	 *
+	 * @param float $rate
+	 * @param int   $precision
+	 * @return string
+	 */
+	protected function formatRate($rate, $precision = 8) {
+		return rtrim(rtrim(number_format((float)$rate, (int)$precision, '.', ''), '0'), '.');
 	}
 
 	protected function validateForm() {
