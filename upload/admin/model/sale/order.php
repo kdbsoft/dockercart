@@ -1300,6 +1300,12 @@ class ModelSaleOrder extends Model {
 			}
 		}
 
+		// Per-product currency -> store base currency factors. BXGY works on
+		// prices in the product's own currency (same as the storefront cart),
+		// but order_product stores base-currency amounts, so the distribution
+		// result must be converted before it is persisted.
+		$currency_factor_map = $this->getOrderLineCurrencyFactors($lines_query->rows);
+
 		foreach ($lines_query->rows as $line) {
 			$opid = (int)$line['order_product_id'];
 
@@ -1320,7 +1326,8 @@ class ModelSaleOrder extends Model {
 				'variant_id'       => (int)$line['variant_id'],
 				'quantity'         => (float)$line['quantity'],
 				'overridden'       => isset($overrides[$opid]),
-				'base_price'       => $this->recalculateOrderLineBasePrice((int)$line['product_id'], (int)$line['variant_id'], (float)$line['quantity'], $customer_group_id, $line_options)
+				'base_price'       => $this->recalculateOrderLineBasePrice((int)$line['product_id'], (int)$line['variant_id'], (float)$line['quantity'], $customer_group_id, $line_options),
+				'currency_factor'  => isset($currency_factor_map[(int)$line['product_id']]) ? $currency_factor_map[(int)$line['product_id']] : 1.0
 			);
 		}
 
@@ -1350,10 +1357,14 @@ class ModelSaleOrder extends Model {
 
 			$key = $line['product_id'] . ':' . $line['variant_id'];
 
+			// BXGY prices are computed in the product currency; convert them to
+			// the store base currency before persisting the order line.
+			$currency_factor = isset($line['currency_factor']) ? (float)$line['currency_factor'] : 1.0;
+
 			// No active BXGY discount for this line — restore the base price
 			// (a previous distribution may have discounted it).
 			if (!isset($bxgy_discounts[$key])) {
-				$base = round($line['base_price'], 4);
+				$base = round($line['base_price'] * $currency_factor, 4);
 
 				$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . $base . "', total = '" . round($base * max(1, (float)$line['quantity']), 4) . "' WHERE order_product_id = '" . (int)$line['order_product_id'] . "'");
 
@@ -1376,7 +1387,7 @@ class ModelSaleOrder extends Model {
 				$new_price = max(0, ($line['base_price'] * $quantity - $line_discount) / $quantity);
 			}
 
-			$new_price = round($new_price, 4);
+			$new_price = round($new_price * $currency_factor, 4);
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "order_product` SET price = '" . $new_price . "', total = '" . round($new_price * $quantity, 4) . "' WHERE order_product_id = '" . (int)$line['order_product_id'] . "'");
 		}
@@ -1914,11 +1925,41 @@ class ModelSaleOrder extends Model {
 	}
 
 	/**
+	 * Product-currency -> store base-currency factors for order lines, keyed by
+	 * product_id. Products without an explicit currency (0/NULL) map to 1.0.
+	 *
+	 * @param array $lines order_product rows (each with a product_id key)
+	 * @return array<int,float>
+	 */
+	private function getOrderLineCurrencyFactors(array $lines) {
+		$product_ids = array_values(array_unique(array_filter(array_map('intval', array_column($lines, 'product_id')))));
+
+		$factors = array();
+
+		if (!$product_ids) {
+			return $factors;
+		}
+
+		$query = $this->db->query("SELECT product_id, currency_id FROM `" . DB_PREFIX . "product` WHERE product_id IN (" . implode(',', $product_ids) . ")");
+
+		foreach ($query->rows as $row) {
+			$product_id = (int)$row['product_id'];
+			$factors[$product_id] = (float)$this->currency->convertProductPrice(1.0, (int)$row['currency_id']);
+		}
+
+		return $factors;
+	}
+
+	/**
 	 * Recalculate the BXGY base price of an existing order line from catalog
 	 * data (variant/plain price + catalog pricing + option prices), instead of
 	 * using the stored order_product.price which may already carry a BXGY
 	 * discount. This keeps BXGY distribution in admin consistent with the
 	 * storefront, where discounts always start from full catalog prices.
+	 *
+	 * The returned price is in the product's own currency (matching the
+	 * storefront cart and calculateProductPricing()); callers that persist it
+	 * into order_product must convert it to the store base currency first.
 	 *
 	 * @param int $product_id
 	 * @param int $variant_id

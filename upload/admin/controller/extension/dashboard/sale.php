@@ -153,7 +153,7 @@ class ControllerExtensionDashboardSale extends Controller {
 
 		switch ($period) {
 			case 'today':
-				$sql = "SELECT HOUR(date_added) AS bucket, SUM(total / currency_value) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) = CURDATE() GROUP BY HOUR(date_added) ORDER BY HOUR(date_added) ASC";
+				$sql = "SELECT HOUR(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) = CURDATE() GROUP BY HOUR(date_added) ORDER BY HOUR(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -168,7 +168,7 @@ class ControllerExtensionDashboardSale extends Controller {
 			case 'week':
 				$week_start = date('Y-m-d', strtotime('monday this week'));
 				$week_end = date('Y-m-d', strtotime('sunday this week'));
-				$sql = "SELECT DATE(date_added) AS bucket, SUM(total / currency_value) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $week_start . "' AND DATE(date_added) <= '" . $week_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $week_start . "' AND DATE(date_added) <= '" . $week_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -184,7 +184,7 @@ class ControllerExtensionDashboardSale extends Controller {
 				$month_start = date('Y-m-01');
 				$month_end = date('Y-m-t');
 				$days_in_month = (int)date('t');
-				$sql = "SELECT DATE(date_added) AS bucket, SUM(total / currency_value) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $month_start . "' AND DATE(date_added) <= '" . $month_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
+				$sql = "SELECT DATE(date_added) AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $month_start . "' AND DATE(date_added) <= '" . $month_end . "' GROUP BY DATE(date_added) ORDER BY DATE(date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -199,7 +199,7 @@ class ControllerExtensionDashboardSale extends Controller {
 			case 'year':
 				$year_start = date('Y-01-01');
 				$year_end = date('Y-12-31');
-				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, SUM(total / currency_value) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $year_start . "' AND DATE(date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y-%m') AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " AND DATE(date_added) >= '" . $year_start . "' AND DATE(date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY DATE_FORMAT(date_added, '%Y-%m') ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -213,7 +213,7 @@ class ControllerExtensionDashboardSale extends Controller {
 				break;
 			case 'all':
 			default:
-				$sql = "SELECT DATE_FORMAT(date_added, '%Y') AS bucket, SUM(total / currency_value) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " GROUP BY DATE_FORMAT(date_added, '%Y') ORDER BY DATE_FORMAT(date_added, '%Y') ASC";
+				$sql = "SELECT DATE_FORMAT(date_added, '%Y') AS bucket, SUM(total) AS val FROM `" . DB_PREFIX . "order` WHERE " . $status_filter . " GROUP BY DATE_FORMAT(date_added, '%Y') ORDER BY DATE_FORMAT(date_added, '%Y') ASC";
 				$result = $this->db->query($sql);
 				$data = array();
 				foreach ($result->rows as $row) {

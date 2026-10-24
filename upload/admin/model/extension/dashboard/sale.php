@@ -7,7 +7,7 @@ class ModelExtensionDashboardSale extends Model {
 			$implode[] = "'" . (int)$order_status_id . "'";
 		}
 
-		$sql = "SELECT SUM(total / currency_value) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ")";
+		$sql = "SELECT SUM(total) AS total FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ")";
 
 		if (!empty($data['filter_date_added'])) {
 			$sql .= " AND DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";

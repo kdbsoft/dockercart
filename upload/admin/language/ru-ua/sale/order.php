@@ -123,6 +123,7 @@ $_['text_panel_order_contents'] = 'Состав заказа';
 $_['text_edit_order_contents'] = 'Изменить заказ';
 $_['text_panel_totals']          = 'Итого';
 $_['text_order_detail'] = 'Детали заказа';
+$_['text_order_currency'] = 'Валюта заказа';
 $_['text_order_id'] = 'Номер заказа:';
 $_['text_reward_refunded'] = 'Возврат по заказу #%s';
 $_['text_payment_address'] = 'Адрес для оплаты';

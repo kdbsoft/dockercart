@@ -124,6 +124,7 @@ $_['text_panel_order_contents'] = 'Склад замовлення';
 $_['text_edit_order_contents'] = 'Змінити замовлення';
 $_['text_panel_totals']          = 'Разом';
 $_['text_order_detail'] = 'Деталі замовлення';
+$_['text_order_currency'] = 'Валюта замовлення';
 $_['text_order_id'] = 'Номер замовлення:';
 $_['text_reward_refunded'] = 'Повернення по замовленню #%s';
 $_['text_payment_address'] = 'Адреса для оплати';

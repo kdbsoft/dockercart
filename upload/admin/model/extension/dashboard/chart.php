@@ -169,7 +169,7 @@ class ModelExtensionDashboardChart extends Model {
 
 		$revenue_data = array();
 
-		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
+		$query = $this->db->query("SELECT SUM(total) AS total, DATE_FORMAT(date_added, '%Y-%m') AS bucket FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") GROUP BY DATE_FORMAT(date_added, '%Y-%m') ORDER BY bucket ASC");
 
 		foreach ($query->rows as $result) {
 			$revenue_data[$result['bucket']] = array(
@@ -400,7 +400,7 @@ class ModelExtensionDashboardChart extends Model {
 			);
 		}
 
-		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, HOUR(date_added) AS hour FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) = DATE(NOW()) GROUP BY HOUR(date_added) ORDER BY date_added ASC");
+		$query = $this->db->query("SELECT SUM(total) AS total, HOUR(date_added) AS hour FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) = DATE(NOW()) GROUP BY HOUR(date_added) ORDER BY date_added ASC");
 
 		foreach ($query->rows as $result) {
 			$revenue_data[$result['hour']] = array(
@@ -432,7 +432,7 @@ class ModelExtensionDashboardChart extends Model {
 			);
 		}
 
-		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') GROUP BY DAYNAME(date_added)");
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y-m-d', $date_start)) . "') GROUP BY DAYNAME(date_added)");
 
 		foreach ($query->rows as $result) {
 			$revenue_data[date('w', strtotime($result['date_added']))] = array(
@@ -462,7 +462,7 @@ class ModelExtensionDashboardChart extends Model {
 			);
 		}
 
-		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "') GROUP BY DATE(date_added)");
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND DATE(date_added) >= DATE('" . $this->db->escape(date('Y') . '-' . date('m') . '-1') . "') GROUP BY DATE(date_added)");
 
 		foreach ($query->rows as $result) {
 			$revenue_data[date('j', strtotime($result['date_added']))] = array(
@@ -490,7 +490,7 @@ class ModelExtensionDashboardChart extends Model {
 			);
 		}
 
-		$query = $this->db->query("SELECT SUM(total / currency_value) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND YEAR(date_added) = YEAR(NOW()) GROUP BY MONTH(date_added)");
+		$query = $this->db->query("SELECT SUM(total) AS total, date_added FROM `" . DB_PREFIX . "order` WHERE order_status_id IN(" . implode(",", $implode) . ") AND YEAR(date_added) = YEAR(NOW()) GROUP BY MONTH(date_added)");
 
 		foreach ($query->rows as $result) {
 			$revenue_data[date('n', strtotime($result['date_added']))] = array(
