@@ -121,7 +121,7 @@ write_host_git_state() {
         "origin=$(git remote get-url origin 2>/dev/null || true)" \
         "branch=$BRANCH" \
         "head=$(git rev-parse HEAD 2>/dev/null || true)" \
-        "version=$(cat "$SCRIPT_DIR/upload/VERSION" 2>/dev/null | tr -d '\r\n' || true)" \
+        "version=$(tr -d '\r\n' 2>/dev/null < "$SCRIPT_DIR/upload/VERSION" || true)" \
         "checked_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 }
 
@@ -384,7 +384,7 @@ elif [ "$LOCAL" = "$BASE" ]; then
 		"remote=$(git remote get-url origin 2>/dev/null || true)" \
 		"branch=$BRANCH" \
 		"sha=$(git rev-parse HEAD 2>/dev/null || true)" \
-		"version=$(cat "$SCRIPT_DIR/upload/VERSION" 2>/dev/null | tr -d '\r\n' || true)" \
+		"version=$(tr -d '\r\n' 2>/dev/null < "$SCRIPT_DIR/upload/VERSION" || true)" \
 		"deployed_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
 		|| log "Warning: could not record deployment state."
 
