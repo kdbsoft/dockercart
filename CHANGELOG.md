@@ -1,3 +1,5 @@
+## [3.38.1](https://github.com/kdbsoft/dockercart/compare/v3.38.0...v3.38.1) (2026-10-24)
+
 ## [3.38.0](https://github.com/kdbsoft/dockercart/compare/v3.37.1...v3.38.0) (2026-10-24)
 
 ### Features
