@@ -50,8 +50,8 @@ $_['entry_author']         = 'Author';
 $_['entry_category']       = 'Category';
 $_['entry_status']         = 'Status';
 $_['entry_featured']       = 'Featured';
-$_['entry_image']          = 'Featured Image';
-$_['entry_background_image'] = 'Background Image';
+$_['entry_image']          = 'Preview Image';
+$_['entry_background_image'] = 'Hero Background Image';
 $_['entry_date_published'] = 'Published Date';
 $_['entry_allow_comments'] = 'Allow Comments';
 $_['entry_sort_order']     = 'Sort Order';
@@ -63,6 +63,8 @@ $_['entry_store']          = 'Store';
 $_['entry_keyword']        = 'Keyword';
 
 // Help
+$_['help_background_image']    = 'Drawn behind the post title in the header. It is stretched to fill the header and the title switches between white and dark text automatically, depending on how light the image is. Leave it empty for the default dark blue gradient.';
+$_['help_image']               = 'The preview image: shown on blog cards (lists, search, archive) and above the text on the post page. It keeps its own aspect ratio — it is never cropped.';
 $_['help_tags']                = 'Enter tags for the post and press Enter.';
 $_['help_date_published']      = 'Set a future date/time to schedule publication. The post will not appear on the frontend until this date.';
 $_['help_related_product']     = 'Recommended products for this post.';

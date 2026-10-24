@@ -114,12 +114,12 @@
             <div class="dcx-panel-body">
               <div class="dcx-fields dcx-fields--row">
                 <div class="dcx-field">
-                  <label class="dcx-label">{{ entry_image }}</label>
+                  <label class="dcx-label">{{ entry_image }} <span data-toggle="tooltip" title="{{ help_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <a href="" id="thumb-image" data-toggle="image" class="img-thumbnail"><img src="{{ thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                   <input type="hidden" name="image" value="{{ image }}" id="input-image" />
                 </div>
                 <div class="dcx-field">
-                  <label class="dcx-label">{{ entry_background_image }}</label>
+                  <label class="dcx-label">{{ entry_background_image }} <span data-toggle="tooltip" title="{{ help_background_image }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                   <a href="" id="thumb-background" data-toggle="image" class="img-thumbnail"><img src="{{ background_thumb }}" alt="" title="" data-placeholder="{{ placeholder }}" /></a>
                   <input type="hidden" name="background_image" value="{{ background_image }}" id="input-background" />
                 </div>

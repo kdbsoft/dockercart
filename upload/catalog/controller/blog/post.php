@@ -86,18 +86,52 @@ class ControllerBlogPost extends Controller {
 				$data['author_url'] = '';
 			}
 
-			// Image (same dimensions as the hero background image)
+			// Image (natural aspect ratio — never cropped)
 			if ($post_info['image']) {
-				$data['image'] = $this->model_tool_image->resize($post_info['image'], 1920, 400);
+				$image_width  = 1920;
+				$image_height = 400;
+
+				$image_size = @getimagesize(DIR_IMAGE . $post_info['image']);
+
+				if ($image_size && !empty($image_size[0]) && !empty($image_size[1])) {
+					$ratio = $image_size[1] / $image_size[0];
+
+					// Fit inside 1920x1080 while keeping the original aspect ratio.
+					$image_width  = 1920;
+					$image_height = (int)round($image_width * $ratio);
+
+					if ($image_height > 1080) {
+						$image_height = 1080;
+						$image_width  = (int)round($image_height / $ratio);
+					}
+
+					// Never upscale beyond the source image.
+					if ($image_width > $image_size[0]) {
+						$image_width  = $image_size[0];
+						$image_height = $image_size[1];
+					}
+				}
+
+				// 'contain' + matching ratio = no padding, no crop.
+				$data['image'] = $this->model_tool_image->resize($post_info['image'], $image_width, $image_height, 'contain');
 				$data['thumb'] = $this->model_tool_image->resize($post_info['image'], 400, 300);
 			} else {
 				$data['image'] = '';
 				$data['thumb'] = '';
 			}
 
-			// Background image
+			// Background image — drawn behind the post title (the hero).
+			// Generated larger than a 1920x400 band and allowed to scale up, so it
+			// still fills the hero on wide screens; 'cover' keeps it edge to edge.
+			$data['hero_text_dark'] = false;
+
 			if (!empty($post_info['background_image'])) {
-				$data['background_image'] = $this->model_tool_image->resize($post_info['background_image'], 1920, 400);
+				$data['background_image'] = $this->model_tool_image->resize($post_info['background_image'], 2560, 800, 'cover');
+
+				// Light photo → dark heading and a light scrim, dark photo → white heading.
+				$data['hero_text_dark'] = \Dockercart\ImageContrast::prefersDarkText(
+					\Dockercart\ImageContrast::averageLuminance(DIR_IMAGE . $post_info['background_image'])
+				);
 			} else {
 				$data['background_image'] = '';
 			}

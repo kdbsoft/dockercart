@@ -7905,11 +7905,13 @@
           },
           "image": {
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "description": "Preview image shown on blog cards (lists, search, archive) and above the text on the post page. Rendered at its original aspect ratio - it is never cropped."
           },
           "background_image": {
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "description": "Hero background drawn behind the post title. Stretched to fill the header; the title colour (white or dark) is picked automatically from the image luminance. Leave empty for the default dark blue gradient."
           },
           "status": {
             "type": "integer",
@@ -8009,10 +8011,12 @@
             "type": "string"
           },
           "image": {
-            "type": "string"
+            "type": "string",
+            "description": "Preview image shown on blog cards (lists, search, archive) and above the text on the post page. Rendered at its original aspect ratio - it is never cropped."
           },
           "background_image": {
-            "type": "string"
+            "type": "string",
+            "description": "Hero background drawn behind the post title. Stretched to fill the header; the title colour (white or dark) is picked automatically from the image luminance. Empty = default dark blue gradient."
           },
           "status": {
             "type": "integer"
