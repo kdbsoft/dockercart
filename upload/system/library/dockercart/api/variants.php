@@ -33,7 +33,7 @@ final class Variants {
 	}
 
 	/**
-	 * @return array{product_id: int, is_configurable: bool, default_variant_id: int,
+	 * @return array{product_id: int, currency_id: int, is_configurable: bool, default_variant_id: int,
 	 *               options: array, aggregated: array, variants: array}
 	 */
 	public function forProduct(int $product_id): array {
@@ -42,6 +42,11 @@ final class Variants {
 		$info = $configurable->getConfigurable($product_id);
 
 		$default_variant_id = (int)($info['default_variant_id'] ?? 0);
+
+		// Variant prices are denominated in the product's currency (0 = store
+		// default), not the store base currency — surface it so clients can
+		// interpret every amount in this payload.
+		$currency_id = $this->productCurrencyId($product_id);
 
 		$options = [];
 
@@ -107,6 +112,7 @@ final class Variants {
 
 		return [
 			'product_id'         => $product_id,
+			'currency_id'        => $currency_id,
 			'is_configurable'    => $configurable->isConfigurable($product_id),
 			'default_variant_id' => $default_variant_id,
 			'options'            => $options,
@@ -119,5 +125,16 @@ final class Variants {
 			],
 			'variants'           => $variants,
 		];
+	}
+
+	/**
+	 * oc_product.currency_id (0 => store default) for the product.
+	 */
+	private function productCurrencyId(int $product_id): int {
+		$db = $this->registry->get('db');
+
+		$query = $db->query("SELECT `currency_id` FROM `" . DB_PREFIX . "product` WHERE `product_id` = '" . (int)$product_id . "'");
+
+		return $query->num_rows ? (int)$query->row['currency_id'] : 0;
 	}
 }

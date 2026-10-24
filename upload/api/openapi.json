@@ -6619,7 +6619,8 @@
           "price": {
             "type": "number",
             "minimum": 0,
-            "default": 0
+            "default": 0,
+            "description": "Denominated in `currency_id`."
           },
           "points": {
             "type": "integer",
@@ -6628,7 +6629,8 @@
           },
           "currency_id": {
             "type": "integer",
-            "default": 0
+            "default": 0,
+            "description": "Currency the price and every variant/option/customer-group price is denominated in; 0 means the store default currency."
           },
           "weight": {
             "type": "number",
@@ -6863,7 +6865,11 @@
           },
           "price": {
             "type": "string",
-            "description": "Fixed point, 4 decimals."
+            "description": "Fixed point, 4 decimals, denominated in `currency_id` (0 = store default)."
+          },
+          "currency_id": {
+            "type": "integer",
+            "description": "Currency the price and every variant/option/customer-group price is denominated in; 0 means the store default currency. Resolve with GET /v1/meta/currencies."
           },
           "points": {
             "type": "integer"
@@ -7090,6 +7096,10 @@
         "properties": {
           "product_id": {
             "type": "integer"
+          },
+          "currency_id": {
+            "type": "integer",
+            "description": "Currency every variant price is denominated in; 0 means the store default currency. Resolve with GET /v1/meta/currencies."
           },
           "is_configurable": {
             "type": "boolean"
