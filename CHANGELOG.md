@@ -1,3 +1,9 @@
+## [3.39.1](https://github.com/kdbsoft/dockercart/compare/v3.39.0...v3.39.1) (2026-10-24)
+
+### Bug Fixes
+
+* **filemanager:** keep pagination clickable after main content reload ([75bc84c](https://github.com/kdbsoft/dockercart/commit/75bc84c0c5c4079ab02fd03552f67438887065a1))
+
 ## [3.39.0](https://github.com/kdbsoft/dockercart/compare/v3.38.1...v3.39.0) (2026-10-24)
 
 ### Features
