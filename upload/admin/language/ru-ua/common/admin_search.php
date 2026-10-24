@@ -10,6 +10,7 @@ $_['text_product']         = 'Товары';
 $_['text_category']        = 'Категории';
 $_['text_manufacturer']    = 'Производители';
 $_['text_information']     = 'Статьи';
+$_['text_blog']            = 'Статьи блога';
 $_['text_order']           = 'Заказы';
 $_['text_customer']        = 'Покупатели';
 $_['text_no_results']      = 'Ничего не найдено';

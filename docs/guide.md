@@ -23,6 +23,7 @@
 17. [Admin REST API](#17-admin-rest-api)
 18. [Webhooks](#18-webhooks)
 19. [Product Files (public downloads)](#19-product-files-public-downloads)
+20. [Admin Global Search & Manticore Indexing](#20-admin-global-search--manticore-indexing)
 
 ---
 
@@ -1717,3 +1718,56 @@ tab entry and the list section. `product/product_file/download` increments
 `tools/tests/cases/product_file_model.php` guards the storage-key format, the
 save/reconcile contract, payload deletion (including path-traversal safety) and
 the copy behaviour.
+
+---
+
+## 20. Admin Global Search & Manticore Indexing
+
+The panel header search box (`common/admin_search` + `common/admin_search/suggest`)
+queries Manticore, not SQL. Every searchable entity is a separate RT index declared
+in `docker/manticore/manticore.conf` and populated by the search module.
+
+| Type | Index | Multilingual | Admin route (permission gate) |
+|---|---|---|---|
+| `product` | `products` | yes (`id = product_id * 100 + language_id`) | `catalog/product` |
+| `category` | `categories` | yes | `catalog/category` |
+| `manufacturer` | `manufacturers` | no | `catalog/manufacturer` |
+| `information` | `information` | yes | `catalog/information` |
+| `blog` | `blog_posts` | yes (`id = post_id * 100 + language_id`) | `extension/module/dockercart_blog_post` |
+| `order` | `orders` | no | `sale/order` |
+| `customer` | `customers` | no | `customer/customer` |
+
+`ModelCommonAdminSearch` owns the type → index → permission map (`$permissions`,
+`getIndexName()`, `isMultilingualIndex()`); `ControllerCommonAdminSearch::getAvailableTypes()`
+hides a type whose route the current user cannot `access`. Results carry a deep link
+into the matching edit page (`buildEditLink()`), and `suggest()` feeds the header
+autocomplete (icons in `common/header.twig` → `getLucideIcon()`).
+
+### Keeping an index in sync
+
+* **On write:** `oc_event` rows route model `after` triggers to
+  `ControllerExtensionModuleDockercartSearch::event*()` handlers, which re-index the
+  affected document(s) for every language. Blog posts use
+  `admin/model/extension/module/dockercart_blog_post/{addPost,editPost,deletePost,copyPost}/after`
+  (migration `20261028_blog_search_index.sql`).
+* **Full rebuild:** `php /var/www/html/bin/dockercart_search_reindex.php`
+  (`ModelExtensionModuleDockercartSearch::reindexAll()` truncates and repopulates every
+  index). It runs at first boot and as the daily `manticore_search_reindex` scheduler
+  task, and is also exposed as the module's **Reindex** button.
+
+### Adding a searchable entity
+
+1. Declare the RT table in `docker/manticore/manticore.conf` (fields + attrs +
+   morphology/`min_infix_len`). The runtime `CREATE TABLE` fallback cannot set table
+   options on this Manticore build, so the config is the source of truth — a
+   **manticore restart** is required to create/alter the table.
+2. Add `index*` / `delete*` / `reindex*` methods to
+   `ModelExtensionModuleDockercartSearch`, wire them into `reindexAll()` /
+   `applySchemaUpdates()` and the CLI output.
+3. Register the `after` event(s) in a migration and implement the handler in the
+   search controller.
+4. Add the type to `ModelCommonAdminSearch` (permissions, index name, multilingual
+   flag, label, name/subtitle extraction, edit link) and to
+   `ControllerCommonAdminSearch::getAvailableTypes()`.
+5. Add `text_<type>` to `common/admin_search.php` in all three locales, the type pill
+   in `common/admin_search.twig`, and the autocomplete icon in `common/header.twig`.

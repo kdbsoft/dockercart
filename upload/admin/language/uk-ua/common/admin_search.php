@@ -10,6 +10,7 @@ $_['text_product']         = 'Товари';
 $_['text_category']        = 'Категорії';
 $_['text_manufacturer']    = 'Виробники';
 $_['text_information']     = 'Статті';
+$_['text_blog']            = 'Статті блогу';
 $_['text_order']           = 'Замовлення';
 $_['text_customer']        = 'Покупці';
 $_['text_no_results']      = 'Нічого не знайдено';

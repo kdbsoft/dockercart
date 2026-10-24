@@ -110,13 +110,14 @@ $result = $model->reindexAll();
 
 if ($result['success']) {
 	printf(
-		"[dockercart-reindex] Completed: %d products, %d categories, %d manufacturers, %d information pages, %d orders, %d customers\n",
+		"[dockercart-reindex] Completed: %d products, %d categories, %d manufacturers, %d information pages, %d orders, %d customers, %d blog posts\n",
 		$result['products'],
 		$result['categories'],
 		$result['manufacturers'],
 		$result['information'],
 		$result['orders'],
-		$result['customers']
+		$result['customers'],
+		$result['blog_posts']
 	);
 	exit(0);
 } else {

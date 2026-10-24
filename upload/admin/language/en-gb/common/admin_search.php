@@ -10,6 +10,7 @@ $_['text_product']         = 'Products';
 $_['text_category']        = 'Categories';
 $_['text_manufacturer']    = 'Manufacturers';
 $_['text_information']     = 'Information';
+$_['text_blog']            = 'Blog articles';
 $_['text_order']           = 'Orders';
 $_['text_customer']        = 'Customers';
 $_['text_no_results']      = 'No results found';

@@ -22,6 +22,7 @@ class ModelCommonAdminSearch extends Model {
         'category'     => 'catalog/category',
         'manufacturer' => 'catalog/manufacturer',
         'information'  => 'catalog/information',
+        'blog'         => 'extension/module/dockercart_blog_post',
         'order'        => 'sale/order',
         'customer'     => 'customer/customer',
     ];
@@ -51,6 +52,7 @@ class ModelCommonAdminSearch extends Model {
             'category'     => 'categories',
             'manufacturer' => 'manufacturers',
             'information'  => 'information',
+            'blog'         => 'blog_posts',
             'order'        => 'orders',
             'customer'     => 'customers',
         ];
@@ -164,7 +166,7 @@ class ModelCommonAdminSearch extends Model {
     }
 
     private function isMultilingualIndex($type) {
-        return in_array($type, ['product', 'category', 'information']);
+        return in_array($type, ['product', 'category', 'information', 'blog']);
     }
 
     public function suggest($query) {
@@ -182,6 +184,7 @@ class ModelCommonAdminSearch extends Model {
             'category'     => 3,
             'manufacturer' => 3,
             'information'  => 3,
+            'blog'         => 3,
             'order'        => 5,
             'customer'     => 5,
         ];
@@ -361,6 +364,7 @@ class ModelCommonAdminSearch extends Model {
             'category'     => $this->language->get('text_category'),
             'manufacturer' => $this->language->get('text_manufacturer'),
             'information'  => $this->language->get('text_information'),
+            'blog'         => $this->language->get('text_blog'),
             'order'        => $this->language->get('text_order'),
             'customer'     => $this->language->get('text_customer'),
         ];
@@ -376,6 +380,8 @@ class ModelCommonAdminSearch extends Model {
             case 'manufacturer':
                 return $row['name'] ?? '';
             case 'information':
+                return $row['title'] ?? '';
+            case 'blog':
                 return $row['title'] ?? '';
             case 'order':
                 $firstname = $row['firstname'] ?? '';
@@ -402,6 +408,21 @@ class ModelCommonAdminSearch extends Model {
                 return '';
             case 'information':
                 return '';
+            case 'blog':
+                $author = $row['author_name'] ?? '';
+                $published = !empty($row['date_published']) ? date('Y-m-d', (int)$row['date_published']) : '';
+                $categories = $row['categories'] ?? '';
+                $parts = [];
+                if ($author) {
+                    $parts[] = $author;
+                }
+                if ($published) {
+                    $parts[] = $published;
+                }
+                if ($categories) {
+                    $parts[] = $categories;
+                }
+                return implode(' | ', $parts);
             case 'order':
                 $order_id = (int)$row['id'];
                 $email = $row['email'] ?? '';
@@ -435,6 +456,8 @@ class ModelCommonAdminSearch extends Model {
                 return $this->url->link('catalog/manufacturer/edit', 'user_token=' . $user_token . '&manufacturer_id=' . $entity_id, true);
             case 'information':
                 return $this->url->link('catalog/information/edit', 'user_token=' . $user_token . '&information_id=' . $entity_id, true);
+            case 'blog':
+                return $this->url->link('extension/module/dockercart_blog_post/edit', 'user_token=' . $user_token . '&post_id=' . $entity_id, true);
             case 'order':
                 return $this->url->link('sale/order/info', 'user_token=' . $user_token . '&order_id=' . $entity_id, true);
             case 'customer':

@@ -71,6 +71,9 @@
                 {% if 'information' in types %}
                 <li{% if active_type == 'information' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=information"><i data-lucide="file-text" width="14" height="14"></i> {{ text_information }}{% if type_totals.information is defined %} ({{ type_totals.information }}){% endif %}</a></li>
                 {% endif %}
+                {% if 'blog' in types %}
+                <li{% if active_type == 'blog' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=blog"><i data-lucide="newspaper" width="14" height="14"></i> {{ text_blog }}{% if type_totals.blog is defined %} ({{ type_totals.blog }}){% endif %}</a></li>
+                {% endif %}
                 {% if 'order' in types %}
                 <li{% if active_type == 'order' %} class="active"{% endif %}><a href="{{ action }}&user_token={{ user_token }}&search={{ search|url_encode }}&type=order"><i data-lucide="shopping-cart" width="14" height="14"></i> {{ text_order }}{% if type_totals.order is defined %} ({{ type_totals.order }}){% endif %}</a></li>
                 {% endif %}
@@ -91,7 +94,7 @@
                     {% for result in results %}
                     <tr data-href="{{ result.href }}">
                       <td class="text-left">
-                        <span class="label label-{{ result.type == 'product' ? 'primary' : (result.type == 'category' ? 'success' : (result.type == 'manufacturer' ? 'info' : (result.type == 'information' ? 'warning' : (result.type == 'order' ? 'danger' : 'default')))) }}">
+                        <span class="label label-{{ result.type == 'product' ? 'primary' : (result.type == 'category' ? 'success' : (result.type == 'manufacturer' ? 'info' : (result.type == 'information' ? 'warning' : (result.type == 'blog' ? 'default' : (result.type == 'order' ? 'danger' : 'default'))))) }}">
                           {{ result.type_label }}
                         </span>
                       </td>

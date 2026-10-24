@@ -84,6 +84,7 @@ class ControllerCommonAdminSearch extends Controller {
         $data['text_category'] = $this->language->get('text_category');
         $data['text_manufacturer'] = $this->language->get('text_manufacturer');
         $data['text_information'] = $this->language->get('text_information');
+        $data['text_blog'] = $this->language->get('text_blog');
         $data['text_order'] = $this->language->get('text_order');
         $data['text_customer'] = $this->language->get('text_customer');
         $data['text_showing'] = $this->language->get('text_showing');
@@ -147,6 +148,7 @@ class ControllerCommonAdminSearch extends Controller {
             'category'     => 'catalog/category',
             'manufacturer' => 'catalog/manufacturer',
             'information'  => 'catalog/information',
+            'blog'         => 'extension/module/dockercart_blog_post',
             'order'        => 'sale/order',
             'customer'     => 'customer/customer',
         ];

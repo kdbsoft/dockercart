@@ -175,7 +175,8 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
                     $result['products'],
                     $result['categories'],
                     $result['manufacturers'],
-                    $result['information']
+                    $result['information'],
+                    $result['blog_posts']
                 );
             } else {
                 $json['success'] = false;
@@ -738,6 +739,43 @@ class ControllerExtensionModuleDockercartSearch extends Controller {
             $this->model_extension_module_dockercart_search->deleteInformation($args[0]);
 
             $this->logger->info("Information page {$args[0]} deleted from index");
+        }
+    }
+
+    public function eventBlogPostAdd($route, $args, $output) {
+        $this->load->model('extension/module/dockercart_search');
+        $this->load->model('localisation/language');
+
+        $languages = $this->model_localisation_language->getLanguages();
+
+        foreach ($languages as $language) {
+            $this->model_extension_module_dockercart_search->indexBlogPost($output, $language['language_id']);
+        }
+
+        $this->logger->info("Blog post {$output} indexed for all languages");
+    }
+
+    public function eventBlogPostEdit($route, $args) {
+        if (isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->load->model('localisation/language');
+
+            $languages = $this->model_localisation_language->getLanguages();
+
+            foreach ($languages as $language) {
+                $this->model_extension_module_dockercart_search->indexBlogPost($args[0], $language['language_id']);
+            }
+
+            $this->logger->info("Blog post {$args[0]} re-indexed for all languages");
+        }
+    }
+
+    public function eventBlogPostDelete($route, $args) {
+        if (isset($args[0])) {
+            $this->load->model('extension/module/dockercart_search');
+            $this->model_extension_module_dockercart_search->deleteBlogPost($args[0]);
+
+            $this->logger->info("Blog post {$args[0]} deleted from index");
         }
     }
 

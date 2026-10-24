@@ -72,6 +72,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'information'  => 0,
             'orders'       => 0,
             'customers'    => 0,
+            'blog_posts'   => 0,
             'error'        => ''
         ];
 
@@ -92,6 +93,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $manticore->truncate('information');
             $manticore->truncate('orders');
             $manticore->truncate('customers');
+            $manticore->truncate('blog_posts');
 
             $result['products'] = $this->reindexProducts();
             $result['categories'] = $this->reindexCategories();
@@ -99,6 +101,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $result['information'] = $this->reindexInformation();
             $result['orders'] = $this->reindexOrders();
             $result['customers'] = $this->reindexCustomers();
+            $result['blog_posts'] = $this->reindexBlogPosts();
 
         } catch (\Throwable $e) {
             $result['success'] = false;
@@ -155,6 +158,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
         $this->createOrderIndexSchema();
         $this->createCustomerIndexSchema();
+        $this->createBlogPostIndexSchema();
     }
 
     /**
@@ -839,6 +843,171 @@ class ModelExtensionModuleDockercartSearch extends Model {
     }
 
     /**
+     * Create the blog_posts RT table when it is missing.
+     *
+     * Manticore 6.x does not support CREATE TABLE IF NOT EXISTS, so the table
+     * is normally declared in manticore.conf; this is a runtime fallback for
+     * volumes created before the table was added to the config.
+     */
+    public function createBlogPostIndexSchema() {
+        $manticore = $this->getManticore();
+
+        if (!$manticore->connect()) {
+            return false;
+        }
+
+        $existing = $manticore->describe('blog_posts');
+
+        if ($existing) {
+            return true;
+        }
+
+        $manticore->query("CREATE TABLE blog_posts (
+            id BIGINT PRIMARY KEY,
+            title TEXT,
+            excerpt TEXT,
+            content TEXT,
+            meta_title TEXT,
+            meta_description TEXT,
+            meta_keywords TEXT,
+            tags TEXT,
+            author_name TEXT,
+            categories TEXT,
+            store_id BIGINT,
+            language_id BIGINT,
+            status BIGINT,
+            featured BIGINT,
+            views BIGINT,
+            author_id BIGINT,
+            date_published BIGINT,
+            date_added BIGINT,
+            date_modified BIGINT,
+            image TEXT
+        )");
+
+        return true;
+    }
+
+    /**
+     * Index a single blog post for one language (composite id post_id*100+language_id).
+     */
+    public function indexBlogPost($post_id, $language_id = null) {
+        if ($language_id === null) {
+            $language_id = $this->config->get('config_language_id');
+        }
+
+        $manticore = $this->getManticore();
+
+        $query = $this->db->query("
+            SELECT bp.*, bpd.name, bpd.description, bpd.content, bpd.meta_title,
+                   bpd.meta_description, bpd.meta_keyword, ba.name AS author_name
+            FROM " . DB_PREFIX . "blog_post bp
+            LEFT JOIN " . DB_PREFIX . "blog_post_description bpd
+                ON (bp.post_id = bpd.post_id AND bpd.language_id = '" . (int)$language_id . "')
+            LEFT JOIN " . DB_PREFIX . "blog_author ba
+                ON (bp.author_id = ba.author_id)
+            WHERE bp.post_id = '" . (int)$post_id . "'
+        ");
+
+        if (!$query->num_rows) {
+            return false;
+        }
+
+        $post = $query->row;
+
+        // Tags for this post/language.
+        $tags_query = $this->db->query("
+            SELECT tag FROM " . DB_PREFIX . "blog_post_tag
+            WHERE post_id = '" . (int)$post_id . "'
+            AND language_id = '" . (int)$language_id . "'
+        ");
+
+        $tags = [];
+
+        foreach ($tags_query->rows as $row) {
+            $tags[] = (string)$row['tag'];
+        }
+
+        // Category names for this post/language.
+        $categories_query = $this->db->query("
+            SELECT bcd.name FROM " . DB_PREFIX . "blog_post_to_category bpc
+            INNER JOIN " . DB_PREFIX . "blog_category_description bcd
+                ON (bpc.category_id = bcd.category_id AND bcd.language_id = '" . (int)$language_id . "')
+            WHERE bpc.post_id = '" . (int)$post_id . "'
+        ");
+
+        $categories = [];
+
+        foreach ($categories_query->rows as $row) {
+            $categories[] = (string)$row['name'];
+        }
+
+        $doc = [
+            'id'               => (int)$post_id * 100 + (int)$language_id,
+            'store_id'         => (int)$this->config->get('config_store_id'),
+            'language_id'      => (int)$language_id,
+            'status'           => (int)$post['status'],
+            'featured'         => (int)$post['featured'],
+            'views'            => (int)$post['views'],
+            'author_id'        => (int)$post['author_id'],
+            'date_published'   => strtotime((string)$post['date_published']) ?: 0,
+            'date_added'       => strtotime((string)$post['date_added']) ?: 0,
+            'date_modified'    => strtotime((string)$post['date_modified']) ?: 0,
+            'title'            => (string)($post['name'] ?? ''),
+            'excerpt'          => strip_tags(html_entity_decode((string)($post['description'] ?? ''), ENT_QUOTES, 'UTF-8')),
+            'content'          => strip_tags(html_entity_decode((string)($post['content'] ?? ''), ENT_QUOTES, 'UTF-8')),
+            'meta_title'       => (string)($post['meta_title'] ?? ''),
+            'meta_description' => (string)($post['meta_description'] ?? ''),
+            'meta_keywords'    => (string)($post['meta_keyword'] ?? ''),
+            'tags'             => implode(' ', $tags),
+            'author_name'      => (string)($post['author_name'] ?? ''),
+            'categories'       => implode(' ', $categories),
+            'image'            => (string)($post['image'] ?? ''),
+        ];
+
+        return $manticore->replace('blog_posts', $doc);
+    }
+
+    /**
+     * Delete a blog post from the index across all languages.
+     */
+    public function deleteBlogPost($post_id) {
+        $manticore = $this->getManticore();
+        $this->load->model('localisation/language');
+
+        $languages = $this->model_localisation_language->getLanguages();
+
+        foreach ($languages as $language) {
+            $doc_id = (int)$post_id * 100 + (int)$language['language_id'];
+            $manticore->delete('blog_posts', $doc_id);
+        }
+
+        return true;
+    }
+
+    /**
+     * Reindex all published blog posts for every language.
+     */
+    private function reindexBlogPosts() {
+        $this->load->model('localisation/language');
+
+        $languages = $this->model_localisation_language->getLanguages();
+
+        $count = 0;
+
+        $posts = $this->db->query("SELECT post_id FROM " . DB_PREFIX . "blog_post WHERE status = 1");
+
+        foreach ($posts->rows as $post) {
+            foreach ($languages as $language) {
+                $this->indexBlogPost($post['post_id'], $language['language_id']);
+            }
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
      * Build searchable code string for article-like fields.
      * Adds compact variant without spaces/underscores/hyphens.
      *
@@ -926,7 +1095,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $this->load->model('localisation/language');
 
         $languages = $this->model_localisation_language->getLanguages();
-        $tables = ['products', 'categories', 'manufacturers', 'information', 'orders', 'customers'];
+        $tables = ['products', 'categories', 'manufacturers', 'information', 'orders', 'customers', 'blog_posts'];
 
         $result = [
             'success' => true,

@@ -100,7 +100,7 @@ $_['error_upload']      = 'Please select a CSV file to upload!';
 // Success
 $_['text_connection_success'] = 'Successfully connected to Manticore Search!';
 $_['text_connection_failed'] = 'Failed to connect to Manticore Search!';
-$_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages';
+$_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages, %s blog posts';
 $_['text_reindex_failed'] = 'Reindexing failed!';
 $_['text_reindex_warning'] = 'Reindexing may take several minutes for large catalogs (>10,000 products).';
 $_['text_reindexing'] = 'Reindexing...';
@@ -112,5 +112,5 @@ $_['text_confirm_delete'] = 'Delete this mapping?';
 $_['text_import_success'] = 'Import completed: %s mappings imported.';
 $_['text_import_skipped'] = 'Skipped invalid rows: %s.';
 
-$_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages';
+$_['text_reindex_success'] = 'Reindexing completed: %s products, %s categories, %s manufacturers, %s information pages, %s blog posts';
 $_['text_reindex_failed'] = 'Reindexing failed!';
