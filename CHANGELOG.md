@@ -1,3 +1,9 @@
+## [3.37.1](https://github.com/kdbsoft/dockercart/compare/v3.37.0...v3.37.1) (2026-10-24)
+
+### Bug Fixes
+
+* **sale:** sort returns by status column alias ([30e0722](https://github.com/kdbsoft/dockercart/commit/30e07229c2b258e137c6b9533dbed723b9907dab))
+
 ## [3.37.0](https://github.com/kdbsoft/dockercart/compare/v3.36.0...v3.37.0) (2026-10-23)
 
 ### Features
