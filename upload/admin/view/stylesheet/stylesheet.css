@@ -2008,6 +2008,15 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 	color: var(--dc-surface);
 }
 
+/* Pagination under the image grid (inside main column, not full modal width) */
+.filemanager-pagination {
+	padding: 8px 0 0;
+	margin-top: 8px;
+	border-top: 1px solid var(--dc-gray-100);
+	display: flex;
+	justify-content: center;
+}
+
 /* File grid */
 .filemanager-grid {
 	display: grid;

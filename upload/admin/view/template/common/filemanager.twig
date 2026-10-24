@@ -82,10 +82,11 @@
             </div>
             {% endfor %}
           </div>
+          <div class="filemanager-pagination">{{ pagination }}</div>
         </div>
       </div>
     </div>
-    <div class="modal-footer">{{ pagination }}</div>
+    <div class="modal-footer" id="filemanager-footer" style="display:none"></div>
   </div>
 </div>
 <script type="text/javascript"><!--
@@ -282,7 +283,7 @@ function fmLoadMain(url) {
 	$.get(url, function(html) {
 		var $doc = $($.parseHTML(html));
 		$('#filemanager-main').html($doc.find('#filemanager-main').html());
-		$('#filemanager .modal-footer').html($doc.find('#filemanager .modal-footer').html());
+		$('#filemanager-footer').html($doc.find('#filemanager-footer').html());
 		fmUpdateActiveTree(fmCurrentDirectory);
 		fmBindEvents();
 		fmApplySize();
@@ -312,7 +313,7 @@ $('#modal-image').off('click', '#button-refresh').on('click', '#button-refresh',
 	fmReloadFull($(this).attr('href'));
 });
 
-// Delegated so it keeps working after fmLoadMain() replaces .modal-footer content
+// Delegated so it keeps working after fmLoadMain() replaces the footer content
 $('#modal-image').off('click', '.pagination a').on('click', '.pagination a', function(e) {
 	e.preventDefault();
 	fmLoadMain($(this).attr('href'));
