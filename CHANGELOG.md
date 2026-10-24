@@ -1,3 +1,14 @@
+## [3.40.0](https://github.com/kdbsoft/dockercart/compare/v3.39.1...v3.40.0) (2026-10-24)
+
+### Features
+
+* add ImageContrast helper for hero text color ([572fb29](https://github.com/kdbsoft/dockercart/commit/572fb29e8f506f5b760e3c01b3e9d101775f45ad))
+* render blog post preview image at natural aspect ratio and auto hero text color ([8003190](https://github.com/kdbsoft/dockercart/commit/800319065ccf9ae0f900cfe1b4d5e2de4c99cd99))
+
+### Bug Fixes
+
+* decode file manager directory paths with plus as space ([ff7e695](https://github.com/kdbsoft/dockercart/commit/ff7e695b79b427857fe8acf1ada7f2aecd597385))
+
 ## [3.39.1](https://github.com/kdbsoft/dockercart/compare/v3.39.0...v3.39.1) (2026-10-24)
 
 ### Bug Fixes
