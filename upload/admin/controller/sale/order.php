@@ -1,6 +1,20 @@
 <?php
 class ControllerSaleOrder extends Controller {
 	private $error = array();
+
+	/**
+	 * Store default (base) currency code — every order amount is persisted in it.
+	 */
+	private function baseCurrencyCode() {
+		return (string)$this->config->get('config_currency');
+	}
+
+	/**
+	 * Format an amount stored in the store base currency (value factor 1).
+	 */
+	private function formatBaseCurrency($amount) {
+		return $this->currency->format((float)$amount, $this->baseCurrencyCode(), 1);
+	}
 // List of recently edited files:
 	public function index() {
 		$this->load->language('sale/order');
@@ -157,9 +171,7 @@ class ControllerSaleOrder extends Controller {
 			}
 
 			$order_localizer = new OrderLocalizer($this->registry);
-			$currency_code = $order_info['currency_code'];
-			$currency_value = $order_info['currency_value'];
-			$payment_status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount'], $this->currency->getDecimalPlace($currency_code), $currency_value);
+			$payment_status = $this->model_sale_order->getPaymentStatus($order_info['total'], $order_info['paid_amount'], $this->currency->getDecimalPlace($this->baseCurrencyCode()), 1);
 
 			$rows[] = array(
 				$order_id,
@@ -172,8 +184,8 @@ class ControllerSaleOrder extends Controller {
 				$order_info['order_status'] ? $order_info['order_status'] : $this->language->get('text_missing'),
 				$this->language->get('text_payment_status_' . $payment_status),
 				isset($items_count[(int)$order_id]) ? $items_count[(int)$order_id] : 0,
-				$this->currency->format($order_info['total'], $currency_code, $currency_value),
-				$this->currency->format($order_info['paid_amount'], $currency_code, $currency_value),
+				$this->formatBaseCurrency($order_info['total']),
+				$this->formatBaseCurrency($order_info['paid_amount']),
 				str_replace('|', ' | ', (string)$order_info['tracking_number']),
 				$order_info['comment']
 			);
@@ -496,7 +508,7 @@ class ControllerSaleOrder extends Controller {
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
 			$order_localizer = new OrderLocalizer($this->registry);
-			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($this->baseCurrencyCode()), 1);
 
 			$shipping_sums = isset($order_shipping_sums[(int)$result['order_id']]) ? $order_shipping_sums[(int)$result['order_id']] : array('ordered' => 0, 'shipped' => 0);
 			$shipping_status = $this->model_sale_order->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
@@ -517,7 +529,7 @@ class ControllerSaleOrder extends Controller {
 				'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($payment_status),
 				'payment_method' => $order_localizer->paymentMethodTitle($result),
 				'invoice_no' => (int)$result['invoice_no'] > 0 ? $result['invoice_prefix'] . $result['invoice_no'] : '',
-				'paid_amount'   => $this->currency->format($result['paid_amount'], $result['currency_code'], $result['currency_value']),
+				'paid_amount'   => $this->formatBaseCurrency($result['paid_amount']),
 				'shipping_status' => $shipping_status,
 				'shipping_status_text' => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
 				'shipping_status_badge_class' => $this->getShippingStatusBadgeClass($shipping_status),
@@ -527,7 +539,7 @@ class ControllerSaleOrder extends Controller {
 				'shipping_method' => $order_localizer->shippingMethodTitle($result),
 				'items_count'   => isset($order_items[(int)$result['order_id']]) ? $order_items[(int)$result['order_id']] : 0,
 				'tracking_number' => $result['tracking_number'],
-				'total'         => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+				'total'         => $this->formatBaseCurrency($result['total']),
 				'date_added'    => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
 				'shipping_code' => $result['shipping_code'],
 				'view'          => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'] . $url, true),
@@ -1107,9 +1119,7 @@ class ControllerSaleOrder extends Controller {
 			} else {
 				$total = (float)$order_info['total'];
 				$paid_amount = (float)$order_info['paid_amount'];
-				$currency_code = $order_info['currency_code'];
-				$currency_value = $order_info['currency_value'];
-				$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
+				$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($this->baseCurrencyCode()), 1);
 
 				$order_localizer = new OrderLocalizer($this->registry);
 				$payments = [];
@@ -1119,7 +1129,7 @@ class ControllerSaleOrder extends Controller {
 
 					$payments[] = [
 						'order_payment_id' => (int)$payment['order_payment_id'],
-						'amount'           => $this->currency->format(abs($amount), $currency_code, $currency_value),
+						'amount'           => $this->formatBaseCurrency(abs($amount)),
 						'amount_raw'       => $amount,
 						'is_reversal'      => $amount < 0,
 						'payment_method'   => $order_localizer->paymentEntryTitle($payment),
@@ -1142,11 +1152,11 @@ class ControllerSaleOrder extends Controller {
 				$json['order_id'] = $order_id;
 				$json['payment_status'] = $status;
 				$json['payment_status_text'] = $this->language->get('text_payment_status_' . $status);
-				$json['total'] = $this->currency->format($total, $currency_code, $currency_value);
+				$json['total'] = $this->formatBaseCurrency($total);
 				$json['total_raw'] = $total;
-				$json['paid_amount'] = $this->currency->format($paid_amount, $currency_code, $currency_value);
+				$json['paid_amount'] = $this->formatBaseCurrency($paid_amount);
 				$json['paid_amount_raw'] = $paid_amount;
-				$json['remaining'] = $this->currency->format(max(0, $total - $paid_amount), $currency_code, $currency_value);
+				$json['remaining'] = $this->formatBaseCurrency(max(0, $total - $paid_amount));
 				$json['remaining_raw'] = max(0, $total - $paid_amount);
 				$json['overpaid_raw'] = max(0, $paid_amount - $total);
 				$json['payments'] = $payments;
@@ -1286,7 +1296,7 @@ class ControllerSaleOrder extends Controller {
 						'id'       => '#' . $result['order_id'],
 						'name'     => $result['customer'],
 						'subtitle' => date($this->language->get('datetime_format'), strtotime($result['date_added'])) . ' · ' . ($result['order_status'] ? $result['order_status'] : $this->language->get('text_missing')),
-						'meta'     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+						'meta'     => $this->formatBaseCurrency($result['total']),
 						'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['order_id'], true)
 					);
 				}
@@ -1298,7 +1308,7 @@ class ControllerSaleOrder extends Controller {
 						'id'       => '#' . $result['id'],
 						'name'     => trim(($row['firstname'] ?? '') . ' ' . ($row['lastname'] ?? '')),
 						'subtitle' => date($this->language->get('datetime_format'), (int)($row['date_added'] ?? 0)) . ' · ' . ($row['order_status_name'] ? $row['order_status_name'] : $this->language->get('text_missing')),
-						'meta'     => $this->currency->format((float)($row['total'] ?? 0), $row['currency_code'] ?? $this->config->get('config_currency'), $this->currency->getValue($row['currency_code'] ?? $this->config->get('config_currency'))),
+						'meta'     => $this->formatBaseCurrency((float)($row['total'] ?? 0)),
 						'href'     => $this->url->link('sale/order_detail', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $result['id'], true)
 					);
 				}

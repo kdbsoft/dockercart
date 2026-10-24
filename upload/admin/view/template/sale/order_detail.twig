@@ -471,6 +471,12 @@
               <span class="dcx-sidebar-card__label">{{ entry_store }}</span>
               <span class="dcx-sidebar-card__value">{{ store_name }}</span>
             </div>
+            {% if order_currency_is_foreign %}
+            <div class="dcx-sidebar-card__field">
+              <span class="dcx-sidebar-card__label">{{ text_order_currency }}</span>
+              <span class="dcx-sidebar-card__value">{{ order_currency_code }} — {{ order_currency_total }}</span>
+            </div>
+            {% endif %}
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_order_status }}</span>
               <span class="dcx-sidebar-card__value">{{ order_status }}</span>
@@ -1467,7 +1473,7 @@ function restoreCatalogPrice(btn) {
 			}
 			const priceInput = card.querySelector('input[data-field="price"]');
 			const qtyInput = card.querySelector('input[data-field="quantity"]');
-			if (priceInput) priceInput.value = (parseFloat(j.price_raw) || 0).toFixed(getCurrencyDecimals());
+			if (priceInput) { priceInput.value = (parseFloat(j.price_raw) || 0).toFixed(getCurrencyDecimals()); priceInput.defaultValue = priceInput.value; }
 			if (qtyInput) qtyInput.defaultValue = qtyInput.value;
 			const restoreBtn = card.querySelector('[data-restore-catalog-price]');
 			if (restoreBtn) restoreBtn.style.display = 'none';
@@ -2529,6 +2535,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		priceInput.type = 'text';
 		priceInput.className = 'form-control edit-only';
 		priceInput.value = (parseFloat(p.price_raw) || 0).toFixed(decimals);
+		priceInput.defaultValue = priceInput.value;
 		priceInput.dataset.field = 'price';
 		priceInput.style.display = editing ? '' : 'none';
 		priceDiv.appendChild(priceView);
@@ -2559,6 +2566,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		qtyInputEl.type = 'number';
 		qtyInputEl.className = 'form-control edit-only';
 		qtyInputEl.value = p.quantity;
+		qtyInputEl.defaultValue = qtyInputEl.value;
 		qtyInputEl.min = '0';
 		qtyInputEl.step = 'any';
 		qtyInputEl.dataset.field = 'quantity';
@@ -2574,6 +2582,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		discInput.type = 'number';
 		discInput.className = 'form-control';
 		discInput.value = '0';
+		discInput.defaultValue = '0';
 		discInput.min = '0';
 		discInput.max = '100';
 		discInput.step = '0.5';

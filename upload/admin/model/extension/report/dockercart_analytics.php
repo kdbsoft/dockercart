@@ -70,8 +70,8 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			COUNT(DISTINCT o.customer_id) AS unique_customers,
 			COALESCE(SUM((SELECT SUM(op.quantity) FROM `" . DB_PREFIX . "order_product` op WHERE op.order_id = o.order_id)), 0) AS total_products,
 			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2), 0) AS conversion_rate,
-			COALESCE(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END), 0) AS revenue,
-			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) / NULLIF(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END), 0), 2), 0) AS aov
+			COALESCE(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END), 0) AS revenue,
+			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) / NULLIF(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END), 0), 2), 0) AS aov
 		FROM `" . DB_PREFIX . "order` o
 		WHERE o.order_status_id > '0'";
 
@@ -94,7 +94,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			op.name,
 			op.model,
 			SUM(op.quantity) AS quantity,
-			COALESCE(SUM(op.total / o.currency_value), 0) AS total
+			COALESCE(SUM(op.total), 0) AS total
 		FROM " . DB_PREFIX . "order_product op
 		INNER JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id)
 		WHERE {$status_cond}";
@@ -164,8 +164,8 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			COUNT(*) AS total_orders,
 			SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed_orders,
 			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2), 0) AS conversion_rate,
-			COALESCE(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END), 0) AS revenue,
-			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) / NULLIF(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END), 0), 2), 0) AS aov,
+			COALESCE(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END), 0) AS revenue,
+			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) / NULLIF(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END), 0), 2), 0) AS aov,
 			COALESCE(SUM(op_agg.quantity), 0) AS products,
 			COALESCE(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END), 0) AS completed_count
 		FROM `" . DB_PREFIX . "order` o
@@ -227,9 +227,9 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 		$sql = "SELECT
 			DATE(o.date_added) AS date_start,
 			COUNT(*) AS total_orders,
-			COALESCE(SUM(o.total / o.currency_value), 0) AS revenue,
+			COALESCE(SUM(o.total), 0) AS revenue,
 			COALESCE(SUM(op_agg.quantity), 0) AS products,
-			COALESCE(ROUND(SUM(o.total / o.currency_value) / NULLIF(COUNT(*), 0), 2), 0) AS aov,
+			COALESCE(ROUND(SUM(o.total) / NULLIF(COUNT(*), 0), 2), 0) AS aov,
 			COALESCE(ROUND(SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2), 0) AS conversion_rate,
 			SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed_orders
 		FROM `" . DB_PREFIX . "order` o
@@ -431,7 +431,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 		$sql = "SELECT
 			cd.name AS category_name,
 			COALESCE(SUM(op.quantity), 0) AS quantity_sold,
-			COALESCE(SUM(op.total / o.currency_value), 0) AS revenue
+			COALESCE(SUM(op.total), 0) AS revenue
 		FROM " . DB_PREFIX . "order_product op
 		INNER JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id)
 		LEFT JOIN " . DB_PREFIX . "product p ON (op.product_id = p.product_id AND p.main_category_id > 0)
@@ -557,7 +557,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			t.medium,
 			COUNT(DISTINCT t.session_id) AS sessions,
 			COUNT(DISTINCT o.order_id) AS orders,
-			COALESCE(SUM(o.total / o.currency_value), 0) AS revenue
+			COALESCE(SUM(o.total), 0) AS revenue
 		FROM `" . DB_PREFIX . "dockercart_traffic_source` t
 		LEFT JOIN `" . DB_PREFIX . "order` o ON (o.session_id = t.session_id AND o.order_status_id > '0')";
 
@@ -609,7 +609,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			op.model,
 			SUM(op.quantity) AS quantity,
 			COUNT(DISTINCT o.order_id) AS orders,
-			COALESCE(SUM(op.total / o.currency_value), 0) AS total
+			COALESCE(SUM(op.total), 0) AS total
 		FROM " . DB_PREFIX . "order_product op
 		INNER JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id)
 		WHERE {$status_cond}";
@@ -644,7 +644,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 		$sql = "SELECT
 			o.utm_medium AS medium,
 			COUNT(*) AS orders,
-			COALESCE(SUM(o.total / o.currency_value), 0) AS revenue
+			COALESCE(SUM(o.total), 0) AS revenue
 		FROM `" . DB_PREFIX . "order` o
 		WHERE o.order_status_id > '0' AND o.utm_medium <> ''";
 
@@ -665,7 +665,7 @@ class ModelExtensionReportDockercartAnalytics extends Model {
 			o.utm_source AS source,
 			COUNT(*) AS orders,
 			COUNT(DISTINCT o.customer_id) AS customers,
-			COALESCE(SUM(o.total / o.currency_value), 0) AS revenue
+			COALESCE(SUM(o.total), 0) AS revenue
 		FROM `" . DB_PREFIX . "order` o
 		WHERE o.order_status_id > '0' AND o.utm_source <> '' AND o.utm_medium = 'social'";
 

@@ -140,7 +140,7 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 
 		switch ($period) {
 			case 'today':
-				$sql = "SELECT FLOOR(HOUR(o.date_added) / 2) * 2 AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) = CURDATE() GROUP BY FLOOR(HOUR(o.date_added) / 2) * 2 ORDER BY FLOOR(HOUR(o.date_added) / 2) * 2 ASC";
+				$sql = "SELECT FLOOR(HOUR(o.date_added) / 2) * 2 AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) = CURDATE() GROUP BY FLOOR(HOUR(o.date_added) / 2) * 2 ORDER BY FLOOR(HOUR(o.date_added) / 2) * 2 ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -159,7 +159,7 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 			case 'week':
 				$week_start = date('Y-m-d', strtotime('monday this week'));
 				$week_end = date('Y-m-d', strtotime('sunday this week'));
-				$sql = "SELECT DATE(o.date_added) AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $week_start . "' AND DATE(o.date_added) <= '" . $week_end . "' GROUP BY DATE(o.date_added) ORDER BY DATE(o.date_added) ASC";
+				$sql = "SELECT DATE(o.date_added) AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $week_start . "' AND DATE(o.date_added) <= '" . $week_end . "' GROUP BY DATE(o.date_added) ORDER BY DATE(o.date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -179,7 +179,7 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 				$month_start = date('Y-m-01');
 				$month_end = date('Y-m-t');
 				$days_in_month = (int)date('t');
-				$sql = "SELECT DATE(o.date_added) AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $month_start . "' AND DATE(o.date_added) <= '" . $month_end . "' GROUP BY DATE(o.date_added) ORDER BY DATE(o.date_added) ASC";
+				$sql = "SELECT DATE(o.date_added) AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $month_start . "' AND DATE(o.date_added) <= '" . $month_end . "' GROUP BY DATE(o.date_added) ORDER BY DATE(o.date_added) ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -198,7 +198,7 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 			case 'year':
 				$year_start = date('Y-01-01');
 				$year_end = date('Y-12-31');
-				$sql = "SELECT DATE_FORMAT(o.date_added, '%Y-%m') AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $year_start . "' AND DATE(o.date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(o.date_added, '%Y-%m') ORDER BY DATE_FORMAT(o.date_added, '%Y-%m') ASC";
+				$sql = "SELECT DATE_FORMAT(o.date_added, '%Y-%m') AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' AND DATE(o.date_added) >= '" . $year_start . "' AND DATE(o.date_added) <= '" . $year_end . "' GROUP BY DATE_FORMAT(o.date_added, '%Y-%m') ORDER BY DATE_FORMAT(o.date_added, '%Y-%m') ASC";
 				$result = $this->db->query($sql);
 				$raw = array();
 				foreach ($result->rows as $row) {
@@ -216,7 +216,7 @@ class ControllerExtensionDashboardDockercartAov extends Controller {
 				break;
 			case 'all':
 			default:
-				$sql = "SELECT DATE_FORMAT(o.date_added, '%Y') AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total / o.currency_value ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' GROUP BY DATE_FORMAT(o.date_added, '%Y') ORDER BY DATE_FORMAT(o.date_added, '%Y') ASC";
+				$sql = "SELECT DATE_FORMAT(o.date_added, '%Y') AS bucket, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN o.total ELSE 0 END) AS revenue, SUM(CASE WHEN o.order_status_id {$complete_cond} THEN 1 ELSE 0 END) AS completed FROM `" . DB_PREFIX . "order` o WHERE o.order_status_id > '0' GROUP BY DATE_FORMAT(o.date_added, '%Y') ORDER BY DATE_FORMAT(o.date_added, '%Y') ASC";
 				$result = $this->db->query($sql);
 				$data = array();
 				foreach ($result->rows as $row) {

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 class ControllerSaleOrderDetail extends Controller {
-	private const INVOICE_RENDER_VERSION = 'qr-v8';
+	private const INVOICE_RENDER_VERSION = 'qr-v9';
 
 	private array $error = [];
 	private ?OrderLocalizer $order_localizer = null;
@@ -58,6 +58,23 @@ class ControllerSaleOrderDetail extends Controller {
 		}
 
 		return $this->order_localizer;
+	}
+
+	/**
+	 * Store default (base) currency code. Every order amount is persisted in this
+	 * currency, so the admin order UI shows and edits amounts as-is in it.
+	 */
+	private function baseCurrencyCode(): string {
+		return (string)$this->config->get('config_currency');
+	}
+
+	/**
+	 * Format an amount that is already stored in the store base currency. The
+	 * value factor is passed explicitly (1) so the result never depends on the
+	 * stored rate of the default currency row.
+	 */
+	private function formatBaseCurrency($amount): string {
+		return $this->currency->format((float)$amount, $this->baseCurrencyCode(), 1);
 	}
 
 	public function index(): void {
@@ -270,9 +287,16 @@ class ControllerSaleOrderDetail extends Controller {
 		$this->load->model('localisation/country');
 		$data['countries'] = $this->model_localisation_country->getCountries();
 
-		$data['currency_code'] = $order_info['currency_code'];
-		$data['currency_value'] = $order_info['currency_value'];
-		$data['currency_decimal_place'] = $this->currency->getDecimalPlace($order_info['currency_code']);
+		// Order amounts are persisted in the store base currency, so the admin UI
+		// shows and edits everything in config_currency. The original order
+		// currency is kept as a reference note only.
+		$data['currency_code'] = $this->baseCurrencyCode();
+		$data['currency_value'] = 1;
+		$data['currency_decimal_place'] = $this->currency->getDecimalPlace($this->baseCurrencyCode());
+		$data['order_currency_code'] = $order_info['currency_code'];
+		$data['order_currency_value'] = $order_info['currency_value'];
+		$data['order_currency_total'] = $this->currency->format($order_info['total'], $order_info['currency_code'], $order_info['currency_value']);
+		$data['order_currency_is_foreign'] = $order_info['currency_code'] !== $this->baseCurrencyCode();
 
 		$this->load->model('tool/image');
 		$this->load->model('catalog/product');
@@ -325,10 +349,10 @@ class ControllerSaleOrderDetail extends Controller {
 				'warehouse'        => (string)($product['warehouse_name'] ?? ''),
 				'option'           => $option_data,
 				'quantity'         => $product['quantity'],
-				'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'            => $this->formatBaseCurrency($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0)),
 				'price_raw'        => $product['price'],
 				'tax_raw'          => $product['tax'],
-				'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'total'            => $this->formatBaseCurrency($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)),
 				'total_raw'        => $product['total'],
 				'discount_percent' => $order_product_discounts[(int)$product['order_product_id']] ?? 0,
 				'price_override'   => isset($order_product_overrides[(int)$product['order_product_id']]),
@@ -346,7 +370,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$data['totals'][] = [
 				'code'  => $total['code'],
 				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
-				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+				'text'  => $this->formatBaseCurrency($total['value']),
 				'value' => $total['value'],
 			];
 		}
@@ -395,7 +419,7 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['affiliate_firstname'] = $order_info['affiliate_firstname'];
 		$data['affiliate_lastname'] = $order_info['affiliate_lastname'];
 		$data['affiliate_id'] = (int)$order_info['affiliate_id'];
-		$data['commission'] = $this->currency->format($order_info['commission'], $order_info['currency_code'], $order_info['currency_value']);
+		$data['commission'] = $this->formatBaseCurrency($order_info['commission']);
 		$data['commission_total'] = $this->model_customer_customer->getTotalTransactionsByOrderId($order_id);
 
 		$data['customer_type'] = $this->getCustomerType($order_info);
@@ -588,8 +612,10 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
 		$data['tracking_number'] = $order_info['tracking_number'];
 		$data['comment'] = $order_info['comment'];
-		$data['currency_code'] = $order_info['currency_code'];
-		$data['currency_value'] = $order_info['currency_value'];
+		$data['currency_code'] = $this->baseCurrencyCode();
+		$data['currency_value'] = 1;
+		$data['order_currency_code'] = $order_info['currency_code'];
+		$data['order_currency_value'] = $order_info['currency_value'];
 
 		$order_localizer = $this->orderLocalizer();
 		$products = $this->model_sale_order->getOrderProducts($order_id);
@@ -612,8 +638,8 @@ class ControllerSaleOrderDetail extends Controller {
 				'model'    => $product['model'],
 				'option'   => implode(', ', $option_data),
 				'quantity' => $product['quantity'],
-				'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'    => $this->formatBaseCurrency($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0)),
+				'total'    => $this->formatBaseCurrency($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)),
 			];
 		}
 
@@ -624,7 +650,7 @@ class ControllerSaleOrderDetail extends Controller {
 		foreach ($totals as $total) {
 			$data['totals'][] = [
 				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
-				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+				'text'  => $this->formatBaseCurrency($total['value']),
 			];
 		}
 
@@ -747,8 +773,10 @@ class ControllerSaleOrderDetail extends Controller {
 		$data['shipping_method'] = $this->orderLocalizer()->shippingMethodTitle($order_info);
 		$data['tracking_number'] = $order_info['tracking_number'];
 		$data['comment'] = $order_info['comment'];
-		$data['currency_code'] = $order_info['currency_code'];
-		$data['currency_value'] = $order_info['currency_value'];
+		$data['currency_code'] = $this->baseCurrencyCode();
+		$data['currency_value'] = 1;
+		$data['order_currency_code'] = $order_info['currency_code'];
+		$data['order_currency_value'] = $order_info['currency_value'];
 
 		$order_localizer = $this->orderLocalizer();
 		$products = $this->model_sale_order->getOrderProducts($order_id);
@@ -771,8 +799,8 @@ class ControllerSaleOrderDetail extends Controller {
 				'model'    => $product['model'],
 				'option'   => implode(', ', $option_data),
 				'quantity' => $product['quantity'],
-				'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
-				'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+				'price'    => $this->formatBaseCurrency($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0)),
+				'total'    => $this->formatBaseCurrency($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)),
 			];
 		}
 
@@ -783,16 +811,16 @@ class ControllerSaleOrderDetail extends Controller {
 		foreach ($totals as $total) {
 			$data['totals'][] = [
 				'title' => $this->orderLocalizer()->totalTitle($total, $shipping_method_title),
-				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+				'text'  => $this->formatBaseCurrency($total['value']),
 			];
 		}
 
 		$paid_amount = (float)$order_info['paid_amount'];
 		$total_amount = (float)$order_info['total'];
 
-		$data['paid_amount'] = $this->currency->format($paid_amount, $order_info['currency_code'], $order_info['currency_value']);
-		$data['total_amount'] = $this->currency->format($total_amount, $order_info['currency_code'], $order_info['currency_value']);
-		$data['balance_due'] = $this->currency->format(max(0, $total_amount - $paid_amount), $order_info['currency_code'], $order_info['currency_value']);
+		$data['paid_amount'] = $this->formatBaseCurrency($paid_amount);
+		$data['total_amount'] = $this->formatBaseCurrency($total_amount);
+		$data['balance_due'] = $this->formatBaseCurrency(max(0, $total_amount - $paid_amount));
 
 		return $data;
 	}
@@ -932,7 +960,7 @@ class ControllerSaleOrderDetail extends Controller {
 				foreach ($entries as $entry) {
 					if (($entry['type'] ?? 'history') === 'payment') {
 						$amount = (float)$entry['amount'];
-						$amount_text = $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']);
+						$amount_text = $this->formatBaseCurrency(abs($amount));
 						$status_name = '<span class="badge ' . ($amount >= 0 ? 'badge-success' : 'badge-danger') . '">' . ($amount >= 0 ? '+' : '−') . ' ' . $amount_text . '</span>';
 						$payment_method = $this->orderLocalizer()->paymentEntryTitle($entry);
 					} elseif ((int)$entry['order_status_id'] === 0) {
@@ -1143,7 +1171,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			$decimal_place = (int)$this->currency->getDecimalPlace($order_info['currency_code'] ?? '');
+			$decimal_place = (int)$this->currency->getDecimalPlace($this->baseCurrencyCode());
 			$paid_amount = round((float)($order_info['paid_amount'] ?? 0), $decimal_place);
 			$amount = round($amount, $decimal_place);
 
@@ -1156,7 +1184,7 @@ class ControllerSaleOrderDetail extends Controller {
 			} elseif ($amount > $paid_amount) {
 				$json['error'] = $this->language->get('error_refund_too_large');
 			} else {
-				$amount_text = $this->currency->format($amount, $order_info['currency_code'], $order_info['currency_value']);
+				$amount_text = $this->formatBaseCurrency($amount);
 				$note = sprintf($this->language->get('text_refund_note_added'), $amount_text);
 
 				if (!$this->model_sale_order->addOrderRefund($order_id, $amount, $comment ?: $note, 0, 'text_refund_note_added', [$amount_text])) {
@@ -1195,7 +1223,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$this->load->model('sale/order');
 			$order_info = $this->model_sale_order->getOrder($order_id);
 
-			$decimal_place = (int)$this->currency->getDecimalPlace($order_info['currency_code'] ?? '');
+			$decimal_place = (int)$this->currency->getDecimalPlace($this->baseCurrencyCode());
 			$paid_amount = round((float)($order_info['paid_amount'] ?? 0), $decimal_place);
 			$amount = round($amount, $decimal_place);
 
@@ -1441,7 +1469,9 @@ class ControllerSaleOrderDetail extends Controller {
 			if ($field === 'quantity') {
 				$this->model_sale_order->updateOrderProductQuantity($order_product_id, $order_id, $value);
 			} elseif ($field === 'price') {
-				$this->model_sale_order->updateOrderProductPrice($order_product_id, $order_id, $value);
+				// Product prices are edited in the store base currency, the same
+				// currency order_product stores them in.
+				$this->model_sale_order->updateOrderProductPrice($order_product_id, $order_id, (float)$value);
 			} else {
 				$json['error'] = $this->language->get('error_action');
 			}
@@ -1464,15 +1494,11 @@ class ControllerSaleOrderDetail extends Controller {
 					$unit_tax = $product['tax'] / $quantity;
 
 					$json['success'] = $this->language->get('text_order_saved');
-					$json['product_total'] = $this->currency->format(
-						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
-						$order_info['currency_code'],
-						$order_info['currency_value']
+					$json['product_total'] = $this->formatBaseCurrency(
+						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)
 					);
-					$json['product_price'] = $this->currency->format(
-						$product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0),
-						$order_info['currency_code'],
-						$order_info['currency_value']
+					$json['product_price'] = $this->formatBaseCurrency(
+						$product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0)
 					);
 					$json['product_quantity'] = (int)$product['quantity'];
 					$json['totals'] = $this->buildTotalsJson($order_id, $order_info);
@@ -1515,15 +1541,11 @@ class ControllerSaleOrderDetail extends Controller {
 
 				if ($product && !isset($json['error'])) {
 					$json['success'] = $this->language->get('text_order_saved');
-					$json['product_total'] = $this->currency->format(
-						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0),
-						$order_info['currency_code'],
-						$order_info['currency_value']
+					$json['product_total'] = $this->formatBaseCurrency(
+						$product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)
 					);
-					$json['product_price'] = $this->currency->format(
-						$product['price'],
-						$order_info['currency_code'],
-						$order_info['currency_value']
+					$json['product_price'] = $this->formatBaseCurrency(
+						$product['price']
 					);
 					$json['price_raw'] = $product['price'];
 					$json['tax_raw'] = $product['tax'];
@@ -1617,10 +1639,10 @@ class ControllerSaleOrderDetail extends Controller {
 						'variant_sku'      => $product['variant_sku'],
 						'option'           => $option_data,
 						'quantity'         => $product['quantity'],
-						'price'            => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0), $order_info['currency_code'], $order_info['currency_value']),
+						'price'            => $this->formatBaseCurrency($product['price'] + ($this->config->get('config_tax') ? $unit_tax : 0)),
 						'price_raw'        => $product['price'],
 						'tax_raw'          => $product['tax'],
-						'total'            => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+						'total'            => $this->formatBaseCurrency($product['total'] + ($this->config->get('config_tax') ? $product['tax'] : 0)),
 						'total_raw'        => $product['total'],
 						'discount_percent' => 0,
 						'thumb'            => $thumb,
@@ -1744,11 +1766,11 @@ class ControllerSaleOrderDetail extends Controller {
 						$unit_price = $pricing['price'] + ($include_tax ? $pricing['tax'] : 0);
 						$line_total = $pricing['total'] + ($include_tax ? $pricing['tax_total'] : 0);
 
-						$json['price'] = $this->currency->format($unit_price, $order_info['currency_code'], $order_info['currency_value']);
+						$json['price'] = $this->formatBaseCurrency($unit_price);
 						$json['price_raw'] = $pricing['price'];
-						$json['tax'] = $this->currency->format($pricing['tax'], $order_info['currency_code'], $order_info['currency_value']);
+						$json['tax'] = $this->formatBaseCurrency($pricing['tax']);
 						$json['tax_raw'] = $pricing['tax'];
-						$json['total'] = $this->currency->format($line_total, $order_info['currency_code'], $order_info['currency_value']);
+						$json['total'] = $this->formatBaseCurrency($line_total);
 						$json['total_raw'] = $line_total;
 						$json['quantity'] = $pricing['quantity'];
 						$json['stock'] = (float)$pricing['stock'];
@@ -1784,7 +1806,7 @@ class ControllerSaleOrderDetail extends Controller {
 			$json[] = [
 				'code'  => $total['code'],
 				'title' => $total['title'],
-				'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value']),
+				'text'  => $this->formatBaseCurrency($total['value']),
 				'value' => (float)$total['value'],
 			];
 		}
@@ -2115,14 +2137,12 @@ class ControllerSaleOrderDetail extends Controller {
 				} else {
 					$paid_amount = (float)$order_info['paid_amount'] + $amount;
 					$total = (float)$order_info['total'];
-					$currency_code = $order_info['currency_code'];
-					$currency_value = $order_info['currency_value'];
-					$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
+					$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($this->baseCurrencyCode()), 1);
 
 					$note_params = [
-						$this->currency->format($amount, $currency_code, $currency_value),
-						$this->currency->format($paid_amount, $currency_code, $currency_value),
-						$this->currency->format($total, $currency_code, $currency_value),
+						$this->formatBaseCurrency($amount),
+						$this->formatBaseCurrency($paid_amount),
+						$this->formatBaseCurrency($total),
 					];
 
 					$this->model_sale_order->addOrderNote(
@@ -2135,7 +2155,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 					if ($status === 'overpaid') {
 						$overpaid_params = [
-							$this->currency->format($paid_amount - $total, $currency_code, $currency_value),
+							$this->formatBaseCurrency($paid_amount - $total),
 						];
 
 						$this->model_sale_order->addOrderNote(
@@ -2183,7 +2203,7 @@ class ControllerSaleOrderDetail extends Controller {
 					$json['error'] = $this->language->get('error_action');
 				} else {
 					$reversed_params = [
-						$this->currency->format((float)$payment['amount'], $order_info['currency_code'], $order_info['currency_value']),
+						$this->formatBaseCurrency((float)$payment['amount']),
 					];
 
 					$this->model_sale_order->addOrderNote(
@@ -2222,7 +2242,7 @@ class ControllerSaleOrderDetail extends Controller {
 				$json['error'] = $this->language->get('error_action');
 			} else {
 				$overpaid = (float)$order_info['paid_amount'] - (float)$order_info['total'];
-				$overpaid_rounded = round($overpaid * (float)$order_info['currency_value'], (int)$this->currency->getDecimalPlace($order_info['currency_code']));
+				$overpaid_rounded = round($overpaid, (int)$this->currency->getDecimalPlace($this->baseCurrencyCode()));
 
 				if ($overpaid_rounded <= 0) {
 					$json['error'] = $this->language->get('error_no_overpayment');
@@ -2233,7 +2253,7 @@ class ControllerSaleOrderDetail extends Controller {
 						$json['error'] = $this->language->get('error_action');
 					} else {
 						$overpaid_removed_params = [
-							$this->currency->format($overpaid, $order_info['currency_code'], $order_info['currency_value']),
+							$this->formatBaseCurrency($overpaid),
 						];
 
 						$this->model_sale_order->addOrderNote(
@@ -2348,9 +2368,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$total = (float)$order_info['total'];
 		$paid_amount = (float)$order_info['paid_amount'];
-		$currency_code = $order_info['currency_code'];
-		$currency_value = $order_info['currency_value'];
-		$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($currency_code), $currency_value);
+		$status = $this->model_sale_order->getPaymentStatus($total, $paid_amount, $this->currency->getDecimalPlace($this->baseCurrencyCode()), 1);
 
 		return [
 			'payment_status'             => $status,
@@ -2358,12 +2376,12 @@ class ControllerSaleOrderDetail extends Controller {
 			'payment_status_text'        => $this->language->get('text_payment_status_' . $status),
 			'payment_status_badge_class' => $this->getPaymentStatusBadgeClass($status),
 			'payment_status_header_badge_class' => $this->getPaymentStatusHeaderBadgeClass($status),
-			'paid_amount'                => $this->currency->format($paid_amount, $currency_code, $currency_value),
+			'paid_amount'                => $this->formatBaseCurrency($paid_amount),
 			'paid_amount_raw'            => $paid_amount,
-			'total'                      => $this->currency->format($total, $currency_code, $currency_value),
+			'total'                      => $this->formatBaseCurrency($total),
 			'total_raw'                  => $total,
-			'payment_remaining'          => $this->currency->format(max(0, $total - $paid_amount), $currency_code, $currency_value),
-			'payment_overpaid'           => $this->currency->format(max(0, $paid_amount - $total), $currency_code, $currency_value),
+			'payment_remaining'          => $this->formatBaseCurrency(max(0, $total - $paid_amount)),
+			'payment_overpaid'           => $this->formatBaseCurrency(max(0, $paid_amount - $total)),
 			'payment_progress'           => $this->getPaymentProgress($total, $paid_amount),
 			'payments'                   => $this->getPaymentsViewData($order_id, $order_info),
 			'payment_methods'            => $this->getAvailablePaymentMethods(),
@@ -2380,7 +2398,7 @@ class ControllerSaleOrderDetail extends Controller {
 
 			$data[] = [
 				'order_payment_id' => (int)$payment['order_payment_id'],
-				'amount'           => $this->currency->format(abs($amount), $order_info['currency_code'], $order_info['currency_value']),
+				'amount'           => $this->formatBaseCurrency(abs($amount)),
 				'amount_raw'       => $amount,
 				'is_reversal'      => $amount < 0,
 				'payment_method'   => $this->orderLocalizer()->paymentEntryTitle($payment),
@@ -2456,12 +2474,9 @@ class ControllerSaleOrderDetail extends Controller {
 			return;
 		}
 
-		$currency_code = $order_info['currency_code'];
-		$currency_value = $order_info['currency_value'];
-
 		$total_changed_params = [
-			$this->currency->format($old_total, $currency_code, $currency_value),
-			$this->currency->format($new_total, $currency_code, $currency_value),
+			$this->formatBaseCurrency($old_total),
+			$this->formatBaseCurrency($new_total),
 		];
 
 		$this->model_sale_order->addOrderNote(
@@ -2474,9 +2489,9 @@ class ControllerSaleOrderDetail extends Controller {
 
 		$overpaid = (float)$order_info['paid_amount'] - $new_total;
 
-		if (round($overpaid * (float)$currency_value, (int)$this->currency->getDecimalPlace($currency_code)) > 0) {
+		if (round($overpaid, (int)$this->currency->getDecimalPlace($this->baseCurrencyCode())) > 0) {
 			$overpaid_params = [
-				$this->currency->format($overpaid, $currency_code, $currency_value),
+				$this->formatBaseCurrency($overpaid),
 			];
 
 			$this->model_sale_order->addOrderNote(
@@ -2790,6 +2805,13 @@ class ControllerSaleOrderDetail extends Controller {
 					if (!empty($product_info['isbn'])) $codes[] = ['label' => $this->language->get('text_isbn'), 'value' => $product_info['isbn']];
 					if (!empty($product_info['mpn'])) $codes[] = ['label' => $this->language->get('text_mpn'), 'value' => $product_info['mpn']];
 
+					// Every amount in the card is shown in the store base currency;
+					// variant prices come from the catalog in the product's own
+					// currency, so normalise them to base first.
+					$currency_code = $this->baseCurrencyCode();
+					$currency_value = 1;
+					$product_currency_id = (int)($product_info['currency_id'] ?? 0);
+
 					$variant_data = null;
 					$order_options = [];
 					$order_product = null;
@@ -2831,14 +2853,17 @@ class ControllerSaleOrderDetail extends Controller {
 									}
 								}
 
+								$variant_price_base = (float)$this->currency->convertProductPrice($variant_effective_price, $product_currency_id);
+								$variant_base_price_base = (float)$this->currency->convertProductPrice($variant_base_price, $product_currency_id);
+
 								$variant_data = [
 									'model' => $v['model'] ?? '',
 									'sku'  => $v['sku'] ?? '',
 									'upc'  => $v['upc'] ?? '',
 									'ean'  => $v['ean'] ?? '',
 									'mpn'  => $v['mpn'] ?? '',
-									'price' => $this->currency->format($variant_effective_price, $this->config->get('config_currency')),
-									'price_from' => $variant_effective_price < $variant_base_price ? $this->currency->format($variant_base_price, $this->config->get('config_currency')) : '',
+									'price' => $this->currency->format($variant_price_base, $currency_code, $currency_value),
+									'price_from' => $variant_effective_price < $variant_base_price ? $this->currency->format($variant_base_price_base, $currency_code, $currency_value) : '',
 									'stock' => (int)$v['quantity'],
 								];
 								if (!empty($v['model'])) $codes[] = ['label' => $this->language->get('text_variant_model'), 'value' => $v['model']];
@@ -2861,9 +2886,6 @@ class ControllerSaleOrderDetail extends Controller {
 
 					$description = strip_tags(htmlspecialchars_decode($product_info['description'] ?? '', ENT_QUOTES));
 					$description = trim(preg_replace('/\s+/', ' ', $description));
-
-					$currency_code = $order_info['currency_code'] ?? $this->config->get('config_currency');
-					$currency_value = $order_info['currency_value'] ?? 1;
 
 					$stock = ($variant_data && isset($variant_data['stock'])) ? $variant_data['stock'] : ($product_info['quantity'] ?? 0);
 
@@ -2970,8 +2992,10 @@ class ControllerSaleOrderDetail extends Controller {
 						$order_info = $this->model_sale_order->getOrder($order_id);
 					}
 
-					$currency_code = ($order_info && !empty($order_info['currency_code'])) ? $order_info['currency_code'] : $this->config->get('config_currency');
-					$currency_value = ($order_info && !empty($order_info['currency_value'])) ? (float)$order_info['currency_value'] : 1.0;
+					// Customer balances and order totals are stored in the store base
+					// currency.
+					$currency_code = $this->baseCurrencyCode();
+					$currency_value = 1;
 
 					$initials = mb_strtoupper(mb_substr($customer_info['firstname'], 0, 1) . mb_substr($customer_info['lastname'], 0, 1));
 

@@ -69,7 +69,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 			$customer_type = $this->getCustomerType($result);
 			$customer_type_badge_class = $this->getCustomerTypeBadgeClass($result);
 			$status_badge_class = $this->getOrderStatusBadgeClass((int)$result['order_status_id'], $processing_statuses, $complete_statuses, $fraud_status);
-			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($result['currency_code']), $result['currency_value']);
+			$payment_status = $this->model_sale_order->getPaymentStatus($result['total'], $result['paid_amount'], $this->currency->getDecimalPlace($this->config->get('config_currency')), 1);
 
 			$shipping_sums = isset($order_shipping_sums[(int)$order_id]) ? $order_shipping_sums[(int)$order_id] : array('ordered' => 0, 'shipped' => 0);
 			$shipping_status = $this->model_sale_order->getShippingStatus((float)$shipping_sums['ordered'], (float)$shipping_sums['shipped']);
@@ -111,7 +111,7 @@ class ControllerExtensionDashboardRecent extends Controller {
 				'shipping_status_text'      => $shipping_status ? $this->language->get('text_shipping_status_' . $shipping_status) : '',
 				'shipping_status_badge_class' => $this->getShippingStatusBadgeClass($shipping_status),
 				'date_added'                => date($this->language->get('datetime_format'), strtotime($result['date_added'])),
-				'total'                     => $this->currency->format($result['total'], $result['currency_code'], $result['currency_value']),
+				'total'                     => $this->currency->format($result['total'], $this->config->get('config_currency'), 1),
 				'view'                      => $this->url->link('sale/order/info', 'user_token=' . $this->session->data['user_token'] . '&order_id=' . $order_id, true),
 				'payment_method'            => $order_localizer->paymentMethodTitle($result),
 				'shipping_method'           => $order_localizer->shippingMethodTitle($result),
