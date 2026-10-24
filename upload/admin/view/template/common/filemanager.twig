@@ -272,7 +272,12 @@ function fmBindEvents() {
 
 function fmLoadMain(url) {
 	var match = url.match(/[?&]directory=([^&]*)/);
-	fmCurrentDirectory = match ? decodeURIComponent(match[1]) : '';
+	// Server-generated links (pagination, directory/parent) encode the path with
+	// PHP urlencode(), so a space arrives as "+" — decodeURIComponent() would
+	// leave it as a literal "+" and every later action would target a wrong
+	// directory. A literal "+" is always encoded as %2B by urlencode(), so
+	// translating "+" to %20 is safe.
+	fmCurrentDirectory = match ? decodeURIComponent(match[1].replace(/\+/g, '%20')) : '';
 
 	$.get(url, function(html) {
 		var $doc = $($.parseHTML(html));
