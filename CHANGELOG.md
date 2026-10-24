@@ -1,3 +1,9 @@
+## [3.39.0](https://github.com/kdbsoft/dockercart/compare/v3.38.1...v3.39.0) (2026-10-24)
+
+### Features
+
+* **api:** expose currency_id on product and variant resources ([029d65e](https://github.com/kdbsoft/dockercart/commit/029d65e6e54832f64ac6f2cba62fd483a8dd7933))
+
 ## [3.38.1](https://github.com/kdbsoft/dockercart/compare/v3.38.0...v3.38.1) (2026-10-24)
 
 ## [3.38.0](https://github.com/kdbsoft/dockercart/compare/v3.37.1...v3.38.0) (2026-10-24)
