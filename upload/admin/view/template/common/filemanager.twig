@@ -160,10 +160,8 @@ function fmBindEvents() {
 		fmLoadMain($(this).attr('href'));
 	});
 
-	$('#filemanager-main .pagination a').on('click', function(e) {
-		e.preventDefault();
-		fmLoadMain($(this).attr('href'));
-	});
+	// Pagination lives in .modal-footer (outside #filemanager-main) and is
+	// handled by a delegated listener on #modal-image — see below.
 
 	$('#filemanager-main input[name=\'search\']').on('keydown', function(e) {
 		if (e.which == 13) {
@@ -279,7 +277,7 @@ function fmLoadMain(url) {
 	$.get(url, function(html) {
 		var $doc = $($.parseHTML(html));
 		$('#filemanager-main').html($doc.find('#filemanager-main').html());
-		$('.modal-footer').html($doc.find('.modal-footer').html());
+		$('#filemanager .modal-footer').html($doc.find('#filemanager .modal-footer').html());
 		fmUpdateActiveTree(fmCurrentDirectory);
 		fmBindEvents();
 		fmApplySize();
@@ -307,6 +305,12 @@ $('#modal-image').off('click', '#button-parent').on('click', '#button-parent', f
 $('#modal-image').off('click', '#button-refresh').on('click', '#button-refresh', function(e) {
 	e.preventDefault();
 	fmReloadFull($(this).attr('href'));
+});
+
+// Delegated so it keeps working after fmLoadMain() replaces .modal-footer content
+$('#modal-image').off('click', '.pagination a').on('click', '.pagination a', function(e) {
+	e.preventDefault();
+	fmLoadMain($(this).attr('href'));
 });
 
 $('#modal-image').off('click', '#button-delete').on('click', '#button-delete', function(e) {
