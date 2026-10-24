@@ -15,11 +15,17 @@ $(document).ready(function() {
 		tinymce.init({
 			selector: '#' + element.id,
 			license_key: 'gpl',
-			height: 300,
+			height: 375,
 			branding: false,
 			promotion: false,
 			menubar: false,
-			content_style: 'body { font-size: 13px; font-family: inherit; }',
+			content_style: [
+				"@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');",
+				"body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #333; }",
+				"body :not(code):not(pre):not(kbd):not(samp):not(tt) { font-family: inherit !important; }",
+				"body code, body pre, body kbd, body samp, body tt { font-family: Monaco, Menlo, 'Ubuntu Mono', monospace; }"
+			].join('\n'),
+			invalid_styles: 'font-family font-size',
 			plugins: 'advlist autolink lists link image media table code fullscreen searchreplace visualblocks',
 			toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media table | code fullscreen',
 			sandbox_iframes: false,
