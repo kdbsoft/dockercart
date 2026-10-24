@@ -99,6 +99,22 @@ Tailwind utilities so the built output stays in sync.
   them after `setConfigurableOptions`. Changing the hash format is a **breaking change**.
   See `docs/guide.md` §11 for the full data model.
 
+## Product pricing & multi-currency
+
+- Products are **multi-currency aware**: `oc_product.currency_id` holds the currency a
+  product's `price` — and all of its variant, option and customer-group prices — is
+  denominated in. `0`/`NULL` means the store default currency (`config_currency`).
+- **Always normalise to the base currency** before formatting, summing or comparing:
+  `Cart\Currency::convertProductPrice($amount, $product_currency_id)`
+  (`upload/system/library/cart/currency.php`). `Currency::format()` treats its input as
+  base currency. The storefront, the Manticore index (`dockercart_search`) and order line
+  math (`ModelSaleOrder`) all follow this rule — do the same in new pricing code.
+- The admin REST API accepts `currency_id` on `POST`/`PUT`/`PATCH /v1/products` and returns
+  it on every product resource (`Product` schema) and on `GET /v1/products/{id}/variants`
+  (`VariantList`). `GET /v1/meta/currencies` maps the id to `code`/`value`. API prices are
+  returned **as stored, in the product's own currency** (4-decimal strings) — the API never
+  converts them.
+
 ## Store settings (`oc_setting`) — save semantics
 
 - `editSetting($code, $data)` **deletes ALL rows with that `code` first**, then re-inserts

@@ -336,6 +336,10 @@ final class Product {
 			'quantity_step'    => (float)($product['quantity_step'] ?? 0),
 			'subtract'         => (int)($product['subtract'] ?? 0),
 			'price'            => \Dockercart\Api\Serializer::money($product['price'] ?? 0),
+			// Currency the price (and every variant/option/customer-group price) is
+			// denominated in; 0 means the store default. Prices are returned as
+			// stored, never converted by the API.
+			'currency_id'      => (int)($product['currency_id'] ?? 0),
 			'points'           => (int)($product['points'] ?? 0),
 			'status'           => (int)($product['status'] ?? 0),
 			'image'            => (string)($product['image'] ?? ''),
