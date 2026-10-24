@@ -39,10 +39,10 @@
           {% for row in rows %}
           <tr>
             <td>
-              <a href="{{ warehouse_edit_url }}&warehouse_id={{ row.warehouse_id }}" target="_blank" class="js-wh-card" data-wh-id="{{ row.warehouse_id }}">{{ row.warehouse_name }}</a>
+              <a href="{{ warehouse_edit_url }}&warehouse_id={{ row.warehouse_id }}" target="_blank" class="js-wh-card row-title-link" data-wh-id="{{ row.warehouse_id }}">{{ row.warehouse_name }}</a>
             </td>
             <td>
-              <a href="{{ product_edit_url }}&product_id={{ row.product_id }}" target="_blank" class="js-p-card" data-product-id="{{ row.product_id }}" data-variant-id="{{ row.variant_id }}" data-wh-id="{{ row.warehouse_id }}">{{ row.product_name }}</a>
+              <a href="{{ product_edit_url }}&product_id={{ row.product_id }}" target="_blank" class="js-p-card row-title-link" data-product-id="{{ row.product_id }}" data-variant-id="{{ row.variant_id }}" data-wh-id="{{ row.warehouse_id }}">{{ row.product_name }}</a>
             </td>
             <td>{{ row.product_model }}</td>
             <td>{{ row.variant_sku }}</td>

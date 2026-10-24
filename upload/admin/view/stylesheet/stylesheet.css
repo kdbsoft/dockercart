@@ -1099,10 +1099,15 @@ input[type="checkbox"]:checked::after, .checkbox input[type="checkbox"]:checked:
 
 .row-title-link {
     font-weight: 500;
+    text-decoration: none;
+    transition: color 0.18s ease;
 }
 
+/* Hovering anywhere in the name cell highlights the link, not just the text */
+td:hover .row-title-link,
 .row-title-link:hover {
-    text-decoration: underline;
+    color: var(--dc-primary);
+    text-decoration: none;
 }
 
 .table a {
@@ -4222,4 +4227,87 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     .dc-option-section {
         overflow: hidden;
     }
+}
+
+/* ── Product list: keep column widths stable with long names / many categories ── */
+.dc-product-list {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 820px;
+}
+
+.dc-product-list > thead > tr > td.dc-col-check {
+    width: 36px;
+}
+
+.dc-product-list > thead > tr > td.dc-col-name {
+    width: 30%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-model {
+    width: 12%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-category {
+    width: 17%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-manufacturer {
+    width: 12%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-quantity {
+    width: 11%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-store {
+    width: 6%;
+}
+
+.dc-product-list > thead > tr > td.dc-col-status {
+    width: 9%;
+}
+
+.dc-product-list > tbody > tr > td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.dc-product-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.dc-product-cell .product-image-edit {
+    flex: 0 0 auto;
+    display: block;
+    line-height: 0;
+}
+
+.dc-product-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.dc-col-category .inline-edit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dc-cell-clamp {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.dc-col-category .inline-edit-icon {
+    flex: 0 0 auto;
 }

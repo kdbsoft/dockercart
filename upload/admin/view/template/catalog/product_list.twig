@@ -40,17 +40,17 @@ small.text-muted svg { vertical-align: middle; }
 
     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
               <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover dc-product-list">
                   <thead>
                     <tr>
-                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
-                      <td class="text-left">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}" class="sortable">{{ column_name }}</a> {% endif %}</td>
-                      <td class="text-left">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }} sortable">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}" class="sortable">{{ column_model }}</a> {% endif %}</td>
-                      <td class="text-left">{{ column_category }}</td>
-                      <td class="text-left">{% if sort == 'm.name' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }} sortable">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}" class="sortable">{{ column_manufacturer }}</a> {% endif %}</td>
-                      <td class="text-right">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
-                      <td class="text-center">{{ column_store }}</td>
-                      <td class="text-left">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-center dc-col-check"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                      <td class="text-left dc-col-name">{% if sort == 'pd.name' %} <a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a> {% else %} <a href="{{ sort_name }}" class="sortable">{{ column_name }}</a> {% endif %}</td>
+                      <td class="text-left dc-col-model">{% if sort == 'p.model' %} <a href="{{ sort_model }}" class="{{ order|lower }} sortable">{{ column_model }}</a> {% else %} <a href="{{ sort_model }}" class="sortable">{{ column_model }}</a> {% endif %}</td>
+                      <td class="text-left dc-col-category">{{ column_category }}</td>
+                      <td class="text-left dc-col-manufacturer">{% if sort == 'm.name' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }} sortable">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}" class="sortable">{{ column_manufacturer }}</a> {% endif %}</td>
+                      <td class="text-right dc-col-quantity">{% if sort == 'p.quantity' %} <a href="{{ sort_quantity }}" class="{{ order|lower }} sortable">{{ column_quantity }}</a> {% else %} <a href="{{ sort_quantity }}" class="sortable">{{ column_quantity }}</a> {% endif %}</td>
+                      <td class="text-center dc-col-store">{{ column_store }}</td>
+                      <td class="text-left dc-col-status">{% if sort == 'p.status' %} <a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}" class="sortable">{{ column_status }}</a> {% endif %}</td>
                     </tr>
                   </thead>
                   <tbody>
@@ -63,12 +63,12 @@ small.text-muted svg { vertical-align: middle; }
                       {% else %}
                       <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
                       {% endif %}</td>
-                    <td class="text-left" style="white-space:nowrap;">
-                      <input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" /><a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}" style="display:inline-block;vertical-align:middle;margin-right:8px;">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i data-lucide="camera" width="24" height="24"></i></span> {% endif %}</a>
-                      <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="name" data-value="{{ product.name_raw }}">
-                        {{ product.name }}
-                        <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
-                      </span>
+                    <td class="text-left">
+                      <input type="hidden" id="input-image-{{ product.product_id }}" value="{{ product.image_path }}" />
+                      <div class="dc-product-cell">
+                        <a href="javascript:void(0);" class="product-image-edit" id="thumb-image-{{ product.product_id }}" data-product-id="{{ product.product_id }}">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i data-lucide="camera" width="24" height="24"></i></span> {% endif %}</a>
+                        <a href="{{ product.edit }}" class="row-title-link dc-product-name">{{ product.name }}</a>
+                      </div>
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="model" data-value="{{ product.model_raw }}">
@@ -78,7 +78,7 @@ small.text-muted svg { vertical-align: middle; }
                     </td>
                     <td class="text-left">
                       <span class="inline-edit" data-product-id="{{ product.product_id }}" data-field="categories" data-value="{{ product.categories_raw }}">
-                        {{ product.categories|raw }}
+                        <span class="dc-cell-clamp"{% if product.categories %} data-toggle="tooltip" title="{{ product.categories|striptags }}"{% endif %}>{{ product.categories|raw }}</span>
                         <i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>
                       </span>
                     </td>
@@ -357,84 +357,6 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 				$span.removeClass('editing'); $span.html($span.data('display'));
 			}
 		});
-	} else if (field === 'name') {
-		var productId = $span.data('product-id');
-
-		$.ajax({
-			url: 'index.php?route=catalog/product/getName&user_token={{ user_token }}&product_id=' + productId,
-			dataType: 'json',
-			success: function(json) {
-				if (json['error']) {
-					$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-					setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
-					return;
-				}
-
-				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
-				$.each(json['languages'], function(i, lang) {
-					var val = json['names'][lang.language_id] || '';
-					html += '<div style="margin-bottom:2px;">';
-					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
-					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
-					html += '</div>';
-				});
-				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button> <button type="button" class="btn btn-default btn-xs inline-edit-name-cancel">{{ button_cancel }}</button></div>';
-				html += '</div>';
-
-				$span.html(html);
-				$span.find('input').first().focus();
-
-				var reverted = false;
-				$span.on('click', '.inline-edit-name-cancel', function() {
-					reverted = true;
-					$span.removeClass('editing'); $span.html($span.data('display'));
-				});
-
-				$span.on('click', '.inline-edit-name-save', function() {
-					var names = {};
-					$span.find('.inline-edit-name-input').each(function() {
-						names[$(this).data('lang-id')] = $(this).val();
-					});
-
-					$.ajax({
-						url: 'index.php?route=catalog/product/updateNames&user_token={{ user_token }}',
-						type: 'post',
-						dataType: 'json',
-						data: { product_id: productId, names: names },
-						success: function(res) {
-							if (res['error']) {
-								$span.append(' <span class="text-danger inline-edit-error">' + res['error'] + '</span>');
-								setTimeout(function() { $span.find('.inline-edit-error').remove(); }, 3000);
-							} else {
-								reverted = true;
-								$span.data('value', res['value_html']);
-								$span.removeClass('editing'); $span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-								lucide.createIcons({ nodes: [$span[0]] });
-							}
-						},
-						error: function() {
-							$span.removeClass('editing'); $span.html($span.data('display'));
-						}
-					});
-				});
-
-				$span.find('.inline-edit-name-input').on('keydown', function(e) {
-					if (e.which === 27) {
-						reverted = true;
-						$span.removeClass('editing'); $span.html($span.data('display'));
-					}
-				});
-
-				$(document).one('click', function(e) {
-					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
-						$span.removeClass('editing'); $span.html($span.data('display'));
-					}
-				});
-			},
-			error: function() {
-				$span.removeClass('editing'); $span.html($span.data('display'));
-			}
-		});
 	} else if (field === 'manufacturer') {
 		var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
 		$select.append('<option value="0"' + (rawValue == 0 ? ' selected' : '') + '>{{ text_none }}</option>');
@@ -637,8 +559,10 @@ $(document).on('click', '#category-tree-confirm', function() {
 			} else {
 				var $span = $('.inline-edit[data-product-id="' + currentProductId + '"][data-field="categories"]');
 				$span.data('value', categoryIds.join(','));
-				$span.removeClass('editing'); $span.html(json['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				$span.removeClass('editing');
+				$span.html('<span class="dc-cell-clamp">' + json['value_html'] + '</span><i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
 				lucide.createIcons({ nodes: [$span[0]] });
+				$span.find('.dc-cell-clamp').attr('title', $('<div>').html(json['value_html']).text()).attr('data-toggle', 'tooltip').tooltip({container: 'body', html: true});
 			}
 		},
 		error: function() {

@@ -50,7 +50,7 @@
                 <input type="checkbox" name="selected[]" value="{{ attribute.attribute_id }}" />
                 {% endif %}</td>
               <td class="text-left">
-                <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="name" data-value="{{ attribute.name_raw }}">{{ attribute.name }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
+                <a href="{{ attribute.edit }}" class="row-title-link">{{ attribute.name }}</a>
               </td>
               <td class="text-left">
                 <span class="inline-edit" data-attribute-id="{{ attribute.attribute_id }}" data-field="attribute_group_id" data-value="{{ attribute.attribute_group_id_raw }}">{{ attribute.attribute_group }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>
@@ -168,82 +168,6 @@ $(document).on('click', '.inline-edit-icon', function(e) {
 
 		$select.on('blur', function() {
 			if (!saved) {
-				$span.removeClass('editing'); $span.html($span.data('display'));
-			}
-		});
-	} else if (field === 'name') {
-		$.ajax({
-			url: 'index.php?route=catalog/attribute/getName&user_token={{ user_token }}&attribute_id=' + attributeId,
-			dataType: 'json',
-			success: function(json) {
-				if (json['error']) {
-					$span.removeClass('editing'); $span.html($span.data('display') + ' <span class="text-danger inline-edit-error">' + json['error'] + '</span>');
-					setTimeout(function() { $span.removeClass('editing'); $span.html($span.data('display')); }, 3000);
-					return;
-				}
-
-				var html = '<div class="inline-edit-names" style="white-space:nowrap;">';
-				$.each(json.languages, function(i, lang) {
-					var val = json.names[lang.language_id] || '';
-					html += '<div style="margin-bottom:2px;">';
-					html += '<span style="font-weight:bold;font-size:11px;margin-right:4px;">' + lang.name + ':</span>';
-					html += '<input type="text" class="form-control input-sm inline-edit-name-input" data-lang-id="' + lang.language_id + '" value="' + val.replace(/"/g, '&quot;') + '" style="width:200px;display:inline-block;">';
-					html += '</div>';
-				});
-				html += '<div style="margin-top:4px;"><button type="button" class="btn btn-primary btn-xs inline-edit-name-save">{{ button_save }}</button> <button type="button" class="btn btn-default btn-xs inline-edit-name-cancel">{{ button_cancel }}</button></div>';
-				html += '</div>';
-
-				$span.html(html);
-				$span.find('input').first().focus();
-
-				var reverted = false;
-				$span.on('click', '.inline-edit-name-cancel', function() {
-					reverted = true;
-					$span.removeClass('editing'); $span.html($span.data('display'));
-				});
-
-				$span.on('click', '.inline-edit-name-save', function() {
-					var names = {};
-					$span.find('.inline-edit-name-input').each(function() {
-						names[$(this).data('lang-id')] = $(this).val();
-					});
-
-					$.ajax({
-						url: 'index.php?route=catalog/attribute/updateNames&user_token={{ user_token }}',
-						type: 'post',
-						dataType: 'json',
-						data: { attribute_id: attributeId, names: names },
-						success: function(res) {
-							if (res['error']) {
-								$span.append(' <span class="text-danger inline-edit-error">' + res['error'] + '</span>');
-								setTimeout(function() { $span.find('.inline-edit-error').remove(); }, 3000);
-							} else {
-								reverted = true;
-								$span.data('value', res['value_html']);
-								$span.removeClass('editing'); $span.html(res['value_html'] + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
-								lucide.createIcons({ nodes: [$span[0]] });
-							}
-						},
-						error: function() {
-							$span.removeClass('editing'); $span.html($span.data('display'));
-						}
-					});
-				});
-
-				$span.find('.inline-edit-name-input').on('keydown', function(e) {
-					if (e.which === 27) {
-						reverted = true;
-						$span.removeClass('editing'); $span.html($span.data('display'));
-					}
-				});
-
-				$(document).one('click', function(e) {
-					if (!$(e.target).closest('.inline-edit-names').length && !reverted) {
-						$span.removeClass('editing'); $span.html($span.data('display'));
-					}
-				});
-			},
-			error: function() {
 				$span.removeClass('editing'); $span.html($span.data('display'));
 			}
 		});

@@ -47,7 +47,7 @@
                 {% else %}
                 <input type="checkbox" name="selected[]" value="{{ warehouse.warehouse_id }}" />
                 {% endif %}</td>
-              <td class="text-left">{{ warehouse.name }}</td>
+              <td class="text-left"><a href="{{ warehouse.edit }}" class="row-title-link">{{ warehouse.name }}</a></td>
               <td class="text-left">
                 {% if warehouse.type == 'physical' %}<span class="label label-info">{{ warehouse.type }}</span>
                 {% elseif warehouse.type == 'dropship' %}<span class="label label-warning">{{ warehouse.type }}</span>

@@ -48,7 +48,7 @@
               {% else %}
               <input type="checkbox" name="selected[]" value="{{ seo_url.query }}|{{ seo_url.store_id }}" />
               {% endif %}</td>
-            <td class="text-left">{{ seo_url.query }}</td>
+            <td class="text-left"><a href="{{ seo_url.edit }}" class="row-title-link">{{ seo_url.query }}</a></td>
             <td class="text-left">{{ seo_url.store }}</td>
             <td class="text-left">
               {% for language in languages %}
