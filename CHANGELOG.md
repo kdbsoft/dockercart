@@ -1,3 +1,14 @@
+## [3.43.0](https://github.com/kdbsoft/dockercart/compare/v3.42.0...v3.43.0) (2026-10-25)
+
+### Features
+
+* **catalog:** render brand descriptions as prose and clarify product file limits ([f0ceb9e](https://github.com/kdbsoft/dockercart/commit/f0ceb9ed6c05178dea21fd8367a412e74800cf50))
+
+### Bug Fixes
+
+* **admin:** keep option-set selector inline in product form toolbar ([e6b17e4](https://github.com/kdbsoft/dockercart/commit/e6b17e4cd2b77bf907af9091f88d0e3fe69fc279))
+* **manticore:** tolerate mysqli exceptions and normalize RT table ids ([69b6ecf](https://github.com/kdbsoft/dockercart/commit/69b6ecfd5477865452f17b54097f2cba2a6e97dd))
+
 ## [3.42.0](https://github.com/kdbsoft/dockercart/compare/v3.41.0...v3.42.0) (2026-10-25)
 
 ### Features
