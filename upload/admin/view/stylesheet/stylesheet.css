@@ -624,7 +624,7 @@ textarea.form-control {
 }
 
 .dc-promo-card__grid .input-group-btn .btn {
-    height: 34px;
+    height: 30px;
     border-radius: 0 var(--dc-radius-md) var(--dc-radius-md) 0;
 }
 
@@ -3509,25 +3509,28 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 /* ── Option Manager ── */
 .dc-opt-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 6px;
 }
 
+/* One option value = one compact row: value, price, points, weight + actions */
 .dc-opt-card {
-    border: 1px solid var(--dc-border);
-    border-radius: var(--dc-radius-lg);
+    display: grid;
+    grid-template-columns: 18px minmax(110px, 1.4fr) repeat(3, minmax(80px, 1fr)) auto;
+    gap: 4px 6px;
+    align-items: end;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-md);
     background: var(--dc-surface);
+    padding: 5px 8px;
     transition: box-shadow var(--dc-transition-fast);
     position: relative;
+    cursor: grab;
 }
 
 .dc-opt-card:hover {
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-
-.dc-opt-card {
-    cursor: grab;
 }
 
 .dc-opt-card:active {
@@ -3538,7 +3541,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     color: var(--dc-gray-400);
     font-size: 15px;
     line-height: 1;
-    padding: 0 6px 0 0;
+    padding: 0 2px 0 0;
     flex-shrink: 0;
     align-self: center;
     cursor: inherit;
@@ -3561,30 +3564,24 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     transform: scale(1.02);
 }
 
-.dc-opt-card__header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    user-select: none;
-}
-
-.dc-opt-card__title {
-    flex: 1;
-    font-weight: 600;
-    font-size: 13px;
-    color: var(--dc-gray-700);
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .dc-opt-card__badges {
     display: flex;
     gap: 6px;
     flex-shrink: 0;
     align-items: center;
+}
+
+.dc-opt-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+}
+
+.dc-opt-card__actions .btn-xs {
+    padding: 1px 5px;
+    line-height: 20px;
+    font-size: 11px;
 }
 
 .dc-opt-badge {
@@ -3612,13 +3609,10 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .dc-opt-badge--hit {
-    background: var(--dc-surface)3e0;
+    background: var(--dc-orange-50);
     color: var(--dc-orange-700);
 }
 
-.dc-opt-card__hit {
-    margin-top: 6px;
-}
 
 .dc-opt-card__hit-label {
     display: inline-flex;
@@ -3634,61 +3628,61 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     color: var(--dc-amber-500);
 }
 
-.dc-opt-card__body {
-    padding: 8px 10px 10px;
-    border-top: 1px solid var(--dc-gray-100);
-}
-
-.dc-opt-card__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 8px;
+.dc-opt-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
 }
 
 .dc-opt-card__field label {
     display: block;
-    font-size: 11px;
+    font-size: 9px;
     color: var(--dc-text-muted);
-    margin-bottom: 2px;
-    font-weight: 500;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .dc-opt-card__field input,
 .dc-opt-card__field select {
-    height: 30px;
-    padding: 0 8px;
-    line-height: 28px;
-    font-size: 12px;
+    height: 24px;
+    padding: 0 6px;
+    line-height: 22px;
+    font-size: 11.5px;
+    width: 100%;
 }
 
 .dc-opt-card__field .option-value-prefix-group {
     width: 100%;
 }
 
+/* Keep the reference geometry (55px / 18px right padding) - the custom
+   chevron of `select.form-control` is painted at `right 12px center` and is
+   16px wide, so a narrower box makes the arrow overlap the +/- sign. */
 .dc-opt-card__field .option-value-prefix-select {
-    height: 30px;
-    padding: 0 8px;
-    line-height: 28px;
+    width: 55px;
+    height: 24px;
+    padding: 0 18px 0 6px;
+    line-height: 22px;
     text-align: left;
-    font-size: 18px;
+    font-size: 13px;
 }
 
 .dc-opt-card__field .option-value-prefix-select option {
     font-size: 14px;
     font-weight: 700;
-    padding: 3px 6px;
+    padding: 2px 6px;
 }
 
 .dc-opt-card__field .option-value-prefix-input {
-    height: 30px;
-    padding: 0 8px;
-    line-height: 28px;
-}
-
-.dc-opt-card__cg {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--dc-border);
+    height: 24px;
+    padding: 0 6px;
+    line-height: 22px;
 }
 
 .dc-opt-card__cg-toggle {
@@ -3697,7 +3691,10 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 .dc-opt-card__cg-body {
-    margin-top: 6px;
+    grid-column: 1 / -1;
+    margin-top: 2px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--dc-border);
 }
 
 .dc-opt-card__cg-row {
@@ -3747,89 +3744,240 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 .dc-opt-actions {
     display: flex;
+    align-items: center;
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 8px;
     flex-wrap: wrap;
 }
 
-/* Option section layout */
+.dc-opt-actions__hint {
+    font-size: 11px;
+    color: var(--dc-text-muted);
+    margin-left: 2px;
+}
+
+/* Single value field of the simple options (text, textarea, date, ...) */
+.dc-opt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 460px;
+}
+
+.dc-opt-field__label {
+    font-size: 10px;
+    color: var(--dc-text-muted);
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.dc-opt-field .form-control {
+    height: 30px;
+    font-size: 12.5px;
+}
+
+.dc-opt-field textarea.form-control {
+    height: auto;
+}
+
+/* Option section layout - every simple option is a collapsible sub-section */
 .dc-options-add-row {
     margin-bottom: 16px;
 }
 
+.dc-opts-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--dc-border-soft);
+    border-radius: var(--dc-radius-lg);
+    background: var(--dc-surface-alt);
+}
+
+.dc-opts-toolbar__title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
+}
+
+.dc-opts-toolbar__title small {
+    font-weight: 500;
+    color: var(--dc-text-muted);
+}
+
+.dc-opts-toolbar__label {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--dc-text-muted);
+    white-space: nowrap;
+}
+
+.dc-opts-toolbar__saved {
+    color: var(--dc-green-600);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.dc-opts-toolbar__spacer {
+    flex: 1 1 auto;
+}
+
+.dc-opts-toolbar .form-control {
+    width: auto;
+    min-width: 170px;
+    height: 30px;
+    font-size: 12.5px;
+}
+
+.dc-opts-toolbar .label {
+    font-size: 11.5px;
+}
+
+.dc-opts-list {
+    margin-top: 4px;
+}
+
 .dc-option-section {
     border: 1px solid var(--dc-border);
-    border-radius: var(--dc-radius-lg);
+    border-radius: var(--dc-radius-md);
     background: var(--dc-surface);
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+    overflow: hidden;
 }
 
 .dc-option-section__header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: 8px;
+    padding: 5px 10px;
+    background: var(--dc-gray-50);
+    transition: background var(--dc-transition-fast);
+}
+
+.dc-option-section__header:hover {
     background: var(--dc-gray-100);
-    border-bottom: 1px solid var(--dc-border);
-    border-radius: 4px 4px 0 0;
-    flex-wrap: wrap;
+}
+
+.dc-option-section__toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    cursor: pointer;
+    color: var(--dc-text-dark);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.dc-option-section__lead {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--dc-text-dark);
+}
+
+.dc-option-section__chevron {
+    display: flex;
+    flex: 0 0 auto;
+    color: var(--dc-text-muted);
+    transition: transform .2s ease;
+}
+
+.dc-option-section--collapsed .dc-option-section__chevron {
+    transform: rotate(-90deg);
 }
 
 .dc-option-section__title {
     font-weight: 600;
-    font-size: 14px;
-    color: var(--dc-gray-700);
+    font-size: 12.5px;
+    color: var(--dc-text-dark);
+    white-space: nowrap;
 }
 
 .dc-option-section__type {
-    font-size: 12px;
+    font-size: 10.5px;
+    font-weight: 500;
     color: var(--dc-text-muted);
+    white-space: nowrap;
 }
 
 .dc-option-section__controls {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+    flex: 0 0 auto;
 }
 
 .dc-option-section__required {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--dc-gray-600);
+    gap: 4px;
+    font-size: 11px;
+    color: var(--dc-text-muted);
     margin: 0;
+    white-space: nowrap;
 }
 
-.dc-option-section__required select {
-    width: 70px;
-    height: 28px;
-    padding: 0 4px;
-    line-height: 26px;
-    font-size: 12px;
+/* High specificity: the panel-wide `.dcx-panel-body .form-control` rule would
+   otherwise blow this select up to 34px and stretch the whole header row. */
+.dc-option-section .dc-option-section__required select.form-control,
+.dcx-panel-body .dc-option-section__required select.form-control {
+    width: 54px;
+    height: 21px;
+    padding: 0 2px;
+    line-height: 19px;
+    font-size: 11px;
+}
+
+.dc-option-section__remove {
+    padding: 2px 5px;
+    line-height: 1;
+    font-size: 11px;
 }
 
 .dc-option-section__body {
-    padding: 14px;
+    padding: 8px 10px 10px;
+    border-top: 1px solid var(--dc-border-soft);
 }
 
-.dc-option-section__body > .form-group {
-    margin-bottom: 10px;
+.dc-option-section--collapsed .dc-option-section__body {
+    display: none;
 }
 
-.dc-option-section--collapsed .dc-option-section__header {
-    border-bottom: none;
-    border-radius: 4px;
+.dc-option-section__error {
+    margin: 8px 10px 0;
+    padding: 6px 10px;
+}
+
+.dc-option-section__error + .dc-option-section__body {
+    border-top: 0;
 }
 
 .dc-option-section__values {
     flex: 1 1 auto;
-    min-width: 120px;
-    max-width: 55%;
-    margin-left: 8px;
-    font-size: 12px;
-    color: var(--dc-gray-600);
+    min-width: 80px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--dc-text-muted);
     line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3838,7 +3986,6 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 
 @media (max-width: 768px) {
     .dc-option-section__values {
-        max-width: 100%;
         white-space: normal;
         flex-basis: 100%;
         margin-left: 0;
@@ -4206,6 +4353,16 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 }
 
 /* ── Responsive: option value cards ── */
+@media (max-width: 900px) {
+    .dc-opt-card {
+        grid-template-columns: 20px minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .dc-opt-card__actions {
+        grid-column: 2 / -1;
+        justify-content: flex-start;
+    }
+}
+
 @media (max-width: 480px) {
     .dc-opt-cards {
         grid-template-columns: 1fr;

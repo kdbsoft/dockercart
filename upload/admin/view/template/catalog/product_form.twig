@@ -179,7 +179,6 @@
                   <div class="dcx-panel-head__icon"><i data-lucide="credit-card" width="18" height="18"></i></div>
                   <div>
                     <div class="dcx-panel-title">{{ text_panel_pricing_title }}</div>
-
                   </div>
                 </div>
                 <div class="dcx-panel-body">
@@ -260,6 +259,373 @@
                     <div class="dcx-field" style="display:none" id="dc-pricing-variants-col">
                       <label class="dcx-label dc-price-head"><i data-lucide="tag" width="14" height="14"></i> {{ text_variant_price_title }} <span class="dc-price-badge" id="dc-price-badge">0</span><span class="dc-price-range" id="dc-price-range"></span></label>
                       <div class="dc-price-block" id="dc-pricing-variants"></div>
+                    </div>
+                    <div class="dc-promo-section dc-promo-section--collapsed" id="dc-promo-section">
+                      <div class="dc-promo-section__head">
+                        <button type="button" class="dc-promo-section__toggle" id="dc-promo-toggle" aria-expanded="false" aria-controls="dc-promo-section-body">
+                          <span class="dc-promo-section__chevron"><i data-lucide="chevron-down" width="14" height="14"></i></span>
+                          <span class="dc-promo-section__icon"><i data-lucide="percent" width="14" height="14"></i></span>
+                          <span class="dc-promo-section__title">{{ text_panel_promo_title }}</span>
+                          <span class="dc-promo-stat dc-promo-stat--active" id="dc-promo-active-count" hidden data-toggle="tooltip" title="{{ text_promo_active_help }}"><i data-lucide="circle-check" width="11" height="11"></i><b class="dc-promo-stat__num">0</b><span class="dc-promo-stat__label">{{ text_promo_active }}</span></span>
+                          <span class="dc-promo-stat dc-promo-stat--expired" id="dc-promo-expired-count" hidden data-toggle="tooltip" title="{{ text_promo_expired_help }}"><i data-lucide="triangle-alert" width="11" height="11"></i><b class="dc-promo-stat__num">0</b><span class="dc-promo-stat__label">{{ text_promo_expired }}</span></span>
+                          <span class="dc-promo-stat dc-promo-stat--scheduled" id="dc-promo-scheduled-count" hidden data-toggle="tooltip" title="{{ text_promo_scheduled_help }}"><i data-lucide="clock" width="11" height="11"></i><b class="dc-promo-stat__num">0</b><span class="dc-promo-stat__label">{{ text_promo_scheduled }}</span></span>
+                          <span data-toggle="tooltip" title="{{ text_panel_promo_subtitle }}"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span>
+                        </button>
+                        <div class="dc-variant-promo-controls" id="promo-variant-controls" hidden>
+                        <button type="button" class="btn btn-default btn-xs dc-variant-expand-all"><i data-lucide="chevron-down" width="12" height="12"></i> {{ text_variant_group_expand_all }}</button>
+                        <button type="button" class="btn btn-default btn-xs dc-variant-collapse-all"><i data-lucide="chevron-up" width="12" height="12"></i> {{ text_variant_group_collapse_all }}</button>
+                      </div>
+                      <div class="dc-promo-add" id="promo-add-wrap">
+                          <button type="button" class="btn btn-default btn-sm dc-promo-add-btn" id="promo-add-btn" aria-haspopup="true" aria-expanded="false">
+                            <i data-lucide="plus" width="13" height="13"></i> {{ button_add }} <i data-lucide="chevron-down" width="11" height="11"></i>
+                          </button>
+                          <div class="dc-promo-add-menu" id="promo-add-menu" hidden>
+                            <button type="button" data-promo-add="discount"><i data-lucide="percent" width="13" height="13"></i> {{ text_promo_discount }}</button>
+                            <button type="button" data-promo-add="special"><i data-lucide="star" width="13" height="13"></i> {{ text_promo_special }}</button>
+                            <button type="button" data-promo-add="gift"><i data-lucide="gift" width="13" height="13"></i> {{ text_promo_gift }}</button>
+                            <button type="button" data-promo-add="bxgy"><i data-lucide="repeat" width="13" height="13"></i> {{ text_promo_bxgy }}</button>
+                            <button type="button" data-promo-add="bundle"><i data-lucide="layers" width="13" height="13"></i> {{ text_promo_bundle }}</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="dc-promo-section__body" id="dc-promo-section-body">
+                        <div id="promo-container">
+                          {% for promo in all_promotions %}
+                            {% if promo.promo_type == 'discount' %}
+                            {% if is_configurable and promo_variants and not promo.variant_id %}
+                            <div class="dc-promo-card dc-promo-card--locked" id="discount-row{{ promo.row_index }}">
+                            <span class="dc-promo-card__type dc-promo-card__type--discount"><i data-lucide="percent" width="12" height="12"></i> {{ text_promo_discount }}</span>
+                              <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
+                              <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                              {% set locked_cg_name = '' %}
+                              {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
+                              <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_quantity }}: {{ promo.quantity }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
+                              <div class="dc-promo-card__actions">
+                                <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                              </div>
+                            </div>
+                            {% else %}
+                          <div class="dc-promo-card" id="discount-row{{ promo.row_index }}">
+                          <span class="dc-promo-card__type dc-promo-card__type--discount"><i data-lucide="percent" width="12" height="12"></i> {{ text_promo_discount }}</span>
+                            <div class="dc-promo-card__actions">
+                              <label class="dc-promo-card__toggle">
+                                <input type="checkbox" name="product_discount[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
+                                <span>{{ entry_auto_renew }}</span>
+                              </label>
+                              <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                            </div>
+                            <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                            <div class="dc-promo-card__grid">
+                              {% if is_configurable and promo_variants %}
+                              <div class="dc-promo-card__field dc-promo-card__field--wide">
+                                <label>{{ entry_variant }}</label>
+                                <select name="product_discount[{{ promo.row_index }}][variant_id]" class="form-control">
+                                  {% for pv in promo_variants %}
+                                    {% if promo.variant_id == pv.variant_id %}
+                                      <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                                    {% else %}
+                                      <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                                    {% endif %}
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              {% endif %}
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_customer_group }}</label>
+                                <select name="product_discount[{{ promo.row_index }}][customer_group_id]" class="form-control">
+                                  {% for customer_group in customer_groups %}
+                                    {% if customer_group.customer_group_id == promo.customer_group_id %}
+                                      <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                                    {% else %}
+                                      <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                                    {% endif %}
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_quantity }}</label>
+                                <input type="text" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" placeholder="{{ entry_quantity }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_priority }}</label>
+                                <input type="text" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_price }}</label>
+                                <input type="text" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_start }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_end }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                            {% endif %}
+                            {% elseif promo.promo_type == 'special' %}
+                            {% if is_configurable and promo_variants and not promo.variant_id %}
+                            <div class="dc-promo-card dc-promo-card--locked" id="special-row{{ promo.row_index }}">
+                            <span class="dc-promo-card__type dc-promo-card__type--special"><i data-lucide="star" width="12" height="12"></i> {{ text_promo_special }}</span>
+                              <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
+                              <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                              {% set locked_cg_name = '' %}
+                              {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
+                              <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
+                              <div class="dc-promo-card__actions">
+                                <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                              </div>
+                            </div>
+                            {% else %}
+                          <div class="dc-promo-card" id="special-row{{ promo.row_index }}">
+                          <span class="dc-promo-card__type dc-promo-card__type--special"><i data-lucide="star" width="12" height="12"></i> {{ text_promo_special }}</span>
+                            <div class="dc-promo-card__actions">
+                              <label class="dc-promo-card__toggle">
+                                <input type="checkbox" name="product_special[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
+                                <span>{{ entry_auto_renew }}</span>
+                              </label>
+                              <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                            </div>
+                            <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                            <div class="dc-promo-card__grid">
+                              {% if is_configurable and promo_variants %}
+                              <div class="dc-promo-card__field dc-promo-card__field--wide">
+                                <label>{{ entry_variant }}</label>
+                                <select name="product_special[{{ promo.row_index }}][variant_id]" class="form-control">
+                                  {% for pv in promo_variants %}
+                                    {% if promo.variant_id == pv.variant_id %}
+                                      <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                                    {% else %}
+                                      <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
+                                    {% endif %}
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              {% endif %}
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_customer_group }}</label>
+                                <select name="product_special[{{ promo.row_index }}][customer_group_id]" class="form-control">
+                                  {% for customer_group in customer_groups %}
+                                    {% if customer_group.customer_group_id == promo.customer_group_id %}
+                                      <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
+                                    {% else %}
+                                      <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
+                                    {% endif %}
+                                  {% endfor %}
+                                </select>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_priority }}</label>
+                                <input type="text" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_price }}</label>
+                                <input type="text" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_start }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_end }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                            {% endif %}
+                            {% elseif promo.promo_type == 'gift' %}
+                          <div class="dc-promo-card" id="gift-row{{ promo.row_index }}">
+                          <span class="dc-promo-card__type dc-promo-card__type--gift"><i data-lucide="gift" width="12" height="12"></i> {{ text_promo_gift }}</span>
+                            <div class="dc-promo-card__actions">
+                              <label class="dc-promo-card__toggle">
+                                <input type="checkbox" name="product_gift[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
+                                <span>{{ entry_auto_renew }}</span>
+                              </label>
+                              <button type="button" onclick="removePromoCard('gift-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                            </div>
+                            <input type="hidden" name="product_gift[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                            <div class="dc-promo-card__grid">
+                              <div class="dc-promo-card__field dc-promo-card__field--wide">
+                                <label>{{ entry_gift_product }}</label>
+                                <div style="position:relative;">
+                                  <input type="text" name="product_gift[{{ promo.row_index }}][gift_product_name]" value="{{ promo.gift_product_name }}" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off"/>
+                                  <input type="hidden" name="product_gift[{{ promo.row_index }}][gift_product_id]" value="{{ promo.gift_product_id }}"/>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_minimum }}</label>
+                                <input type="text" name="product_gift[{{ promo.row_index }}][minimum_quantity]" value="{{ promo.minimum_quantity }}" placeholder="{{ entry_minimum }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_start }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_gift[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_end }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_gift[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                            {% elseif promo.promo_type == 'bxgy' %}
+                          <div class="dc-promo-card" id="bxgy-row{{ promo.row_index }}">
+                          <span class="dc-promo-card__type dc-promo-card__type--bxgy"><i data-lucide="repeat" width="12" height="12"></i> {{ text_promo_bxgy }}</span>
+                            <div class="dc-promo-card__actions">
+                              <label class="dc-promo-card__toggle">
+                                <input type="checkbox" name="product_bxgy[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
+                                <span>{{ entry_auto_renew }}</span>
+                              </label>
+                              <button type="button" onclick="removePromoCard('bxgy-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                            </div>
+                            <input type="hidden" name="product_bxgy[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                            <div class="dc-promo-card__grid">
+                              <div class="dc-promo-card__field dc-promo-card__field--wide">
+                                <label>{{ entry_bxgy_reward_product }}</label>
+                                <div style="position:relative;">
+                                  <input type="text" name="product_bxgy[{{ promo.row_index }}][reward_product_name]" value="{{ promo.reward_product_name }}" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off"/>
+                                  <input type="hidden" name="product_bxgy[{{ promo.row_index }}][reward_product_id]" value="{{ promo.reward_product_id }}"/>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_bxgy_trigger_quantity }}</label>
+                                <input type="text" name="product_bxgy[{{ promo.row_index }}][trigger_quantity]" value="{{ promo.trigger_quantity }}" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_bxgy_discount_value }}</label>
+                                <input type="text" name="product_bxgy[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_bxgy_discount_value }}" class="form-control"/>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_start }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_bxgy[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_end }}</label>
+                                <div class="input-group date">
+                                  <input type="text" name="product_bxgy[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
+                                  <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                            {% elseif promo.promo_type == 'bundle' %}
+                          <div class="dc-promo-card dc-promo-card--bundle" id="bundle-row{{ promo.row_index }}">
+                          <span class="dc-promo-card__type dc-promo-card__type--bundle"><i data-lucide="layers" width="12" height="12"></i> {{ text_promo_bundle }}</span>
+                            <div class="dc-promo-card__actions">
+                              <label class="dc-promo-card__toggle">
+                                <input type="checkbox" name="product_bundle[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
+                                <span>{{ entry_auto_renew }}</span>
+                              </label>
+                              <button type="button" onclick="removeBundleCard('bundle-row{{ promo.row_index }}', {{ promo.bundle_id }})" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
+                            </div>
+                            <input type="hidden" name="product_bundle[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
+                            <div class="dc-promo-card__grid">
+                              <div class="dc-promo-card__field" style="display:none;">
+                                <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_id]" value="{{ promo.bundle_id }}" />
+                              </div>
+                              <div class="dc-promo-card__field dc-promo-card__field--wide">
+                                <label>{{ entry_bundle_products }}</label>
+                                <div style="position:relative;">
+                                  <input type="text" name="product_bundle[{{ promo.row_index }}][bundle_products_text]" value="" placeholder="{{ entry_bundle_products }}" class="form-control bundle-product-input" autocomplete="off" />
+                                </div>
+                                <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_product_ids]" value="{{ promo.product_ids_csv }}" />
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_discount_type }}</label>
+                                <select name="product_bundle[{{ promo.row_index }}][discount_type]" class="form-control">
+                                  <option value="percentage" {% if promo.discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
+                                  <option value="fixed" {% if promo.discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
+                                </select>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_discount_value }}</label>
+                                <input type="text" name="product_bundle[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_discount_value }}" class="form-control" />
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_start }}</label>
+                                <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
+                              </div>
+                              <div class="dc-promo-card__field">
+                                <label>{{ entry_date_end }}</label>
+                                <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
+                              </div>
+                            </div>
+                            <label class="dc-bundle-products-label">{{ text_bundle_selected_products }}</label>
+                            <div class="bundle-selected-products" id="bundle-selected-{{ promo.row_index }}">
+                              {% for bp in promo.products %}
+                              <span class="dc-chip" data-product-id="{{ bp.product_id }}">{{ bp.name|escape }} ({{ bp.price }}) <button type="button" onclick="removeBundleProduct(this, {{ bp.product_id }})" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
+                              {% endfor %}
+                            </div>
+                          </div>
+                            {% endif %}
+                          {% endfor %}
+
+                          <div class="dc-promo-empty" id="promo-empty" style="display:none"><i data-lucide="tag" width="24" height="24" style="opacity:0.25;margin-bottom:4px;"></i><div>{{ text_no_promo }}</div></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dc-rewards-section dc-rewards-section--collapsed" id="dc-rewards-section">
+                      <div class="dc-rewards-section__head">
+                        <button type="button" class="dc-rewards-section__toggle" id="dc-rewards-toggle" aria-expanded="false" aria-controls="dc-rewards-body">
+                          <span class="dc-rewards-section__chevron"><i data-lucide="chevron-down" width="14" height="14"></i></span>
+                          <span class="dc-rewards-section__icon"><i data-lucide="trophy" width="14" height="14"></i></span>
+                          <span class="dc-rewards-section__title">{{ text_panel_rewards_title }}</span>
+                          <span data-toggle="tooltip" title="{{ text_panel_rewards_subtitle }}"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span>
+                        </button>
+                      </div>
+                      <div class="dc-rewards-section__body" id="dc-rewards-body">
+                        <div class="dc-rewards-grid">
+                          <div class="dc-rewards-cell dc-rewards-cell--points">
+                            <label class="dc-rewards-label" for="input-points">{{ text_rewards_purchase_title }} <span data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span></label>
+                            <input type="text" name="points" value="{{ points }}" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
+                          </div>
+                          <div class="dc-rewards-cell dc-rewards-cell--groups">
+                            <div class="dc-rewards-label">{{ text_rewards_earned_title }}</div>
+                            <div class="dc-rewards-groups">
+                              {% for customer_group in customer_groups %}
+                              <div class="dc-rewards-group">
+                                <span class="dc-rewards-group__name" title="{{ customer_group.name|e('html_attr') }}">{{ customer_group.name }}</span>
+                                <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
+                              </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -630,19 +996,32 @@
                   </div>
                 </div>
                 <div class="dcx-panel-body">
-                  <div class="dc-option-mode-selector" style="margin-bottom:15px;padding:10px 15px;background:#f7f7f7;border-radius:4px">
-                    <label style="margin:0;font-weight:600">{{ entry_option_mode }}:</label>
-                    <span id="dc-option-mode-label" class="label {% if is_configurable %}label-primary{% else %}label-default{% endif %}" style="font-size:13px">
+                  <div class="dc-opts-toolbar dc-option-mode-selector">
+                    <span class="dc-opts-toolbar__title">{{ tab_options }} <small id="dc-option-count">({{ product_options|length }})</small></span>
+                    <span id="dc-option-mode-label" class="label {% if is_configurable %}label-primary{% else %}label-default{% endif %}">
                       <i data-lucide="circle" width="10" height="10"></i> {% if is_configurable %}{{ text_mode_combined }}{% else %}{{ text_mode_simple }}{% endif %}
                     </span>
-                    <button type="button" id="dc-toggle-mode-btn" class="btn btn-sm btn-default">
+                    <button type="button" id="dc-toggle-mode-btn" class="btn btn-xs btn-default">
                       {% if is_configurable %}
-                        <i data-lucide="arrow-left" width="14" height="14"></i> {{ text_switch_to_simple }}
+                        <i data-lucide="arrow-left" width="13" height="13"></i> {{ text_switch_to_simple }}
                       {% else %}
-                        {{ text_switch_to_combined }} <i data-lucide="arrow-right" width="14" height="14"></i>
+                        {{ text_switch_to_combined }} <i data-lucide="arrow-right" width="13" height="13"></i>
                       {% endif %}
                     </button>
-                    <span id="dc-mode-saved" style="color:green;display:none;font-size:12px"><i data-lucide="check" width="14" height="14"></i> {{ text_success_mode }}</span>
+                    <span id="dc-mode-saved" class="dc-opts-toolbar__saved" style="display:none"><i data-lucide="check" width="13" height="13"></i> {{ text_success_mode }}</span>
+                    <span class="dc-opts-toolbar__spacer"></span>
+                    <label for="dc-option-set-select" class="dc-opts-toolbar__label">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}" data-toggle="tooltip"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span></label>
+                    <select id="dc-option-set-select" class="form-control input-sm">
+                      <option value=""></option>
+                      {% for option_set in option_sets %}
+                      <option value="{{ option_set.option_set_id }}">{{ option_set.name }} ({{ option_set.option_count }})</option>
+                      {% else %}
+                      <option value="" disabled="disabled">{{ text_no_option_sets }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-default btn-sm" onclick="loadOptionSet();">
+                      <i data-lucide="download" width="13" height="13"></i> {{ button_option_set_load }}
+                    </button>
                   </div>
 
                   <div id="dc-variants-section" {% if not is_configurable %}style="display:none"{% endif %}>
@@ -652,46 +1031,30 @@
                     {% include 'catalog/product_variants.twig' %}
                   </div>
 
-                  <div style="margin-top: 30px">
-                    <h4>{{ tab_options }} <small id="dc-option-count">({{ product_options|length }})</small></h4>
-                    <div class="dc-opt-set-toolbar" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                      <label for="dc-option-set-select" style="margin:0;white-space:nowrap;">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}" data-toggle="tooltip"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                      <select id="dc-option-set-select" class="form-control" style="width:auto;display:inline-block;min-width:220px;">
-                        <option value=""></option>
-                        {% for option_set in option_sets %}
-                        <option value="{{ option_set.option_set_id }}">{{ option_set.name }} ({{ option_set.option_count }})</option>
-                        {% else %}
-                        <option value="" disabled="disabled">{{ text_no_option_sets }}</option>
-                        {% endfor %}
-                      </select>
-                      <button type="button" class="btn btn-default btn-sm" onclick="loadOptionSet();">
-                        <i data-lucide="download" width="14" height="14"></i> {{ button_option_set_load }}
-                      </button>
-                    </div>
+                  <div class="dc-opts-list">
                     <div id="dc-options-container">
                       {% set option_row = 0 %}
                       {% set option_value_row = 0 %}
                       {% for product_option in product_options %}
-                        <div class="dc-option-section{% if product_option.is_axis %} dc-option-axis{% endif %}{% if product_option.is_axis and is_configurable %} dc-option-section--collapsed{% endif %}" id="option-section{{ option_row }}">
+                        {% set opt_static = product_option.is_axis and is_configurable %}
+                        {% set opt_summary = '' %}
+                        {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
+                          {% set opt_names = [] %}
+                          {% for product_option_value in product_option.product_option_value %}
+                            {% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{% set opt_names = opt_names|merge([ov.name]) %}{% endif %}{% endfor %}
+                          {% endfor %}
+                          {% set opt_summary = opt_names|join(', ') %}
+                        {% elseif product_option.value is not empty %}
+                          {% set opt_summary = product_option.value %}
+                        {% endif %}
+                        <div class="dc-option-section{% if product_option.is_axis %} dc-option-axis{% endif %}{% if not opt_static and error_option[product_option.option_id] is not defined %} dc-option-section--collapsed{% endif %}" id="option-section{{ option_row }}">
                           <div class="dc-option-section__header">
-                            <span class="dc-option-section__title">{{ product_option.name }}</span>
-                            <span class="dc-option-section__type">({{ product_option.type }})</span>
-                            {% if product_option.is_axis %}<span class="dc-axis-badge" title="{{ entry_axis_lock_warning|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_variant|e('html') }}</span>{% endif %}
-                            {% if product_option.is_axis and is_configurable %}
-                            <span class="dc-option-section__values">
-                              {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
-                                {% set _axis_value_names = [] %}
-                                {% for product_option_value in product_option.product_option_value %}
-                                  {% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{% set _axis_value_names = _axis_value_names|merge([ov.name]) %}{% endif %}{% endfor %}
-                                {% endfor %}
-                                {% if _axis_value_names|length %}{{ _axis_value_names|join(', ') }}{% else %}<span class="text-muted">—</span>{% endif %}
-                              {% elseif product_option.value is not empty %}
-                                {{ product_option.value }}
-                              {% else %}
-                                <span class="text-muted">—</span>
-                              {% endif %}
-                            </span>
-                            {% endif %}
+                            {% if opt_static %}<span class="dc-option-section__lead">{% else %}<button type="button" class="dc-option-section__toggle" data-option-section="option-section{{ option_row }}" aria-expanded="{% if error_option[product_option.option_id] is defined %}true{% else %}false{% endif %}" aria-controls="option-section{{ option_row }}-body">{% endif %}
+                              <span class="dc-option-section__title">{{ product_option.name }}</span>
+                              <span class="dc-option-section__type">({{ product_option.type }})</span>
+                              {% if product_option.is_axis %}<span class="dc-axis-badge" title="{{ entry_axis_lock_warning|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_variant|e('html') }}</span>{% endif %}
+                              {% if opt_summary %}<span class="dc-option-section__values">{{ opt_summary }}</span>{% endif %}
+                            {% if opt_static %}</span>{% else %}</button>{% endif %}
                             <div class="dc-option-section__controls">
                               <label class="dc-option-section__required">
                                 <span>{{ entry_required }}:</span>
@@ -706,16 +1069,17 @@
                                 </select>
                               </label>
                               {% if not product_option.is_axis %}
-                              <button type="button" class="btn btn-danger btn-sm" onclick="dcRemoveOption('{{ option_row }}')">
-                                <i data-lucide="trash-2" width="14" height="14"></i> {{ button_remove }}
+                              <button type="button" class="btn btn-danger btn-xs dc-option-section__remove" onclick="dcRemoveOption('{{ option_row }}')" data-toggle="tooltip" title="{{ button_remove }}">
+                                <i data-lucide="trash-2" width="13" height="13"></i>
                               </button>
                               {% endif %}
                             </div>
+                            {% if not opt_static %}<span class="dc-option-section__chevron" aria-hidden="true"><i data-lucide="chevron-down" width="14" height="14"></i></span>{% endif %}
                           </div>
                           {% if error_option[product_option.option_id] is defined %}
-                          <div class="alert alert-danger" style="margin:5px 15px"><i data-lucide="circle-alert" width="14" height="14"></i> {{ error_option[product_option.option_id] }}</div>
+                          <div class="alert alert-danger dc-option-section__error"><i data-lucide="circle-alert" width="14" height="14"></i> {{ error_option[product_option.option_id] }}</div>
                           {% endif %}
-                          {% if product_option.is_axis and is_configurable %}
+                          {% if opt_static %}
                           <div style="display:none">
                             <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
                             <input type="hidden" name="product_option[{{ option_row }}][name]" value="{{ product_option.name|e('html_attr') }}"/>
@@ -737,180 +1101,153 @@
                           {% if product_option.is_axis %}
                           <div class="dc-axis-info-banner"><i data-lucide="info" width="14" height="14"></i> {{ entry_axis_lock_warning }}</div>
                           {% endif %}
-                          <div class="dc-option-section__body">
+                          <div class="dc-option-section__body" id="option-section{{ option_row }}-body">
                             <input type="hidden" name="product_option[{{ option_row }}][product_option_id]" value="{{ product_option.product_option_id }}"/>
                             <input type="hidden" name="product_option[{{ option_row }}][name]" value="{{ product_option.name|e('html_attr') }}"/>
                             <input type="hidden" name="product_option[{{ option_row }}][option_id]" value="{{ product_option.option_id }}"/>
                             <input type="hidden" name="product_option[{{ option_row }}][type]" value="{{ product_option.type }}"/>
-                          {% if product_option.type == 'text' %}
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-10">
-                                <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control"/>
+                            {% if product_option.type == 'text' %}
+                            <div class="dc-opt-field">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control"/>
+                            </div>
+                            {% endif %}
+                            {% if product_option.type == 'textarea' %}
+                            <div class="dc-opt-field">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <textarea name="product_option[{{ option_row }}][value]" rows="3" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control">{{ product_option.value }}</textarea>
+                            </div>
+                            {% endif %}
+                            {% if product_option.type == 'file' %}
+                            <div class="dc-opt-field" style="display:none">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control"/>
+                            </div>
+                            {% endif %}
+                            {% if product_option.type == 'date' %}
+                            <div class="dc-opt-field">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <div class="input-group date">
+                                <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD" id="input-value{{ option_row }}" class="form-control"/>
+                                <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                               </div>
                             </div>
-                          {% endif %}
-                          {% if product_option.type == 'textarea' %}
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-10">
-                                <textarea name="product_option[{{ option_row }}][value]" rows="5" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control">{{ product_option.value }}</textarea>
+                            {% endif %}
+                            {% if product_option.type == 'time' %}
+                            <div class="dc-opt-field">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <div class="input-group time">
+                                <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="HH:mm" id="input-value{{ option_row }}" class="form-control"/>
+                                <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                               </div>
                             </div>
-                          {% endif %}
-                          {% if product_option.type == 'file' %}
-                            <div class="form-group" style="display: none;">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-10">
-                                <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" id="input-value{{ option_row }}" class="form-control"/>
+                            {% endif %}
+                            {% if product_option.type == 'datetime' %}
+                            <div class="dc-opt-field">
+                              <label class="dc-opt-field__label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
+                              <div class="input-group datetime">
+                                <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value{{ option_row }}" class="form-control"/>
+                                <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
                               </div>
                             </div>
-                          {% endif %}
-                          {% if product_option.type == 'date' %}
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-3">
-                                <div class="input-group date">
-                                  <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD" id="input-value{{ option_row }}" class="form-control"/> <span class="input-group-btn">
-                <button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button>
-                              </span></div>
-                              </div>
-                            </div>
-                          {% endif %}
-                          {% if product_option.type == 'time' %}
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-10">
-                                <div class="input-group time">
-                                  <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="HH:mm" id="input-value{{ option_row }}" class="form-control"/> <span class="input-group-btn">
-                              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-                              </span></div>
-                              </div>
-                            </div>
-                          {% endif %}
-                          {% if product_option.type == 'datetime' %}
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label" for="input-value{{ option_row }}">{{ entry_option_value }}</label>
-                              <div class="col-sm-10">
-                                <div class="input-group datetime">
-                                  <input type="text" name="product_option[{{ option_row }}][value]" value="{{ product_option.value }}" placeholder="{{ entry_option_value }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value{{ option_row }}" class="form-control"/> <span class="input-group-btn">
-                              <button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button>
-                              </span></div>
-                              </div>
-                            </div>
-                          {% endif %}
-                          {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
+                            {% endif %}
+                            {% if product_option.type == 'select' or product_option.type == 'radio' or product_option.type == 'checkbox' or product_option.type == 'image' or product_option.type == 'color' %}
                             <div class="dc-opt-cards" id="option-value{{ option_row }}">
                               {% for product_option_value in product_option.product_option_value %}
                                 <div class="dc-opt-card" id="option-value-row{{ option_value_row }}">
-                                  <div class="dc-opt-card__header">
-                                    <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder }}" aria-hidden="true"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>
-                                    <span class="dc-opt-card__title">{% for ov in option_values[product_option.option_id]|default([]) %}{% if ov.option_value_id == product_option_value.option_value_id %}{{ ov.name }}{% endif %}{% endfor %}</span>
-<span class="dc-opt-card__badges">
-                                       {% if product_option_value.is_hit %}<span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit }}</span>{% endif %}
-                                       {% if product_option_value.price != 0 %}
-                                        <span class="dc-opt-badge dc-opt-badge--price" data-badge="price">{{ product_option_value.price_prefix }}{{ product_option_value.price }}</span>
-                                      {% else %}
-                                        <span class="dc-opt-badge dc-opt-badge--price" data-badge="price" style="display:none"></span>
+                                  <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
+                                  <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="0"/>
+                                  <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][sort_order]" value="{{ option_value_row }}" class="dc-opt-sort-order"/>
+                                  <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder }}" aria-hidden="true"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>
+                                  <div class="dc-opt-card__field dc-opt-card__field--value">
+                                    <label>{{ entry_option_value }}</label>
+                                    <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" class="form-control"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                      {% if option_values[product_option.option_id] %}
+                                        {% for option_value in option_values[product_option.option_id] %}
+                                          <option value="{{ option_value.option_value_id }}"{% if option_value.option_value_id == product_option_value.option_value_id %} selected="selected"{% endif %}>{{ option_value.name }}</option>
+                                        {% endfor %}
                                       {% endif %}
-                                    </span>
-                                     <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove"{% if product_option.is_axis %} style="display:none"{% endif %} onclick="$(this).closest('.dc-opt-card').remove();" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
+                                    </select>
                                   </div>
-                                  <div class="dc-opt-card__body">
-                                    <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][product_option_value_id]" value="{{ product_option_value.product_option_value_id }}"/>
-                                    <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="0"/>
-                                    <input type="hidden" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][sort_order]" value="{{ option_value_row }}" class="dc-opt-sort-order"/>
-<div class="dc-opt-card__grid">
-                                        <div class="dc-opt-card__field">
-                                          <label>{{ entry_option_value }}</label>
-                                          <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][option_value_id]" class="form-control"{% if product_option.is_axis %} disabled="disabled"{% endif %} onchange="dcUpdateCardTitle(this)">
-                                           {% if option_values[product_option.option_id] %}
-                                             {% for option_value in option_values[product_option.option_id] %}
-                                               <option value="{{ option_value.option_value_id }}"{% if option_value.option_value_id == product_option_value.option_value_id %} selected="selected"{% endif %}>{{ option_value.name }}</option>
-                                             {% endfor %}
-                                           {% endif %}
-                                         </select>
-                                       </div>
-                                        <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
-                                          <label>{{ entry_price }}</label>
-                                         <div class="option-value-prefix-group">
-                                           <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
-                                             <option value="+"{% if product_option_value.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                             <option value="-"{% if product_option_value.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                           </select>
-                                           <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price]" value="{{ product_option_value.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly" data-axis-price="1"{% endif %} oninput="dcUpdateBadges(this)" />
-                                         </div>
-                                       </div>
-                                       <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
-                                         <label>{{ entry_option_points }}</label>
-                                         <div class="option-value-prefix-group">
-                                           <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
-                                             <option value="+"{% if product_option_value.points_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                             <option value="-"{% if product_option_value.points_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                           </select>
-                                           <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points]" value="{{ product_option_value.points }}" placeholder="{{ entry_points }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
-                                         </div>
-                                       </div>
-                                       <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
-                                         <label>{{ entry_weight }}</label>
-                                         <div class="option-value-prefix-group">
-                                           <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
-                                             <option value="+"{% if product_option_value.weight_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                             <option value="-"{% if product_option_value.weight_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                           </select>
-                                           <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
-                                        </div>
-                                      </div>
+                                  <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                    <label>{{ entry_price }}</label>
+                                    <div class="option-value-prefix-group">
+                                      <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                        <option value="+"{% if product_option_value.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                        <option value="-"{% if product_option_value.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                      </select>
+                                      <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][price]" value="{{ product_option_value.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly" data-axis-price="1"{% endif %} />
                                     </div>
+                                  </div>
+                                  <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                    <label>{{ entry_option_points }}</label>
+                                    <div class="option-value-prefix-group">
+                                      <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                        <option value="+"{% if product_option_value.points_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                        <option value="-"{% if product_option_value.points_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                      </select>
+                                      <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][points]" value="{{ product_option_value.points }}" placeholder="{{ entry_points }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
+                                    </div>
+                                  </div>
+                                  <div class="dc-opt-card__field{% if product_option.is_axis %} dc-opt-card__field--locked{% endif %}">
+                                    <label>{{ entry_weight }}</label>
+                                    <div class="option-value-prefix-group">
+                                      <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight_prefix]" class="form-control option-value-prefix-select"{% if product_option.is_axis %} disabled="disabled"{% endif %}>
+                                        <option value="+"{% if product_option_value.weight_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                        <option value="-"{% if product_option_value.weight_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                      </select>
+                                      <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][weight]" value="{{ product_option_value.weight }}" placeholder="{{ entry_weight }}" class="form-control option-value-prefix-input"{% if product_option.is_axis %} readonly="readonly"{% endif %} />
+                                    </div>
+                                  </div>
+                                  <div class="dc-opt-card__actions">
+                                    <span class="dc-opt-card__badges">
+                                      {% if product_option_value.is_hit %}<span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit }}</span>{% endif %}
+                                    </span>
                                     {% if product_option.type == 'color' %}
-                                    <div class="dc-opt-card__hit">
-                                      <label class="dc-opt-card__hit-label">
-                                        <input type="checkbox" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="1"{% if product_option_value.is_hit %} checked{% endif %}{% if product_option.is_axis %} disabled="disabled"{% endif %} onchange="$(this).closest('.dc-opt-card').find('input[name$=\\'[is_hit\\']]').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)"/>
-                                        <i data-lucide="star" width="14" height="14"></i> {{ entry_hit }}
-                                      </label>
-                                    </div>
+                                    <label class="dc-opt-card__hit-label" title="{{ entry_hit }}">
+                                      <input type="checkbox" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][is_hit]" value="1"{% if product_option_value.is_hit %} checked{% endif %}{% if product_option.is_axis %} disabled="disabled"{% endif %} onchange="$(this).closest('.dc-opt-card').find('input[name$=\\'[is_hit\\']]').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)"/>
+                                      <i data-lucide="star" width="13" height="13"></i>
+                                    </label>
                                     {% endif %}
                                     {% if not product_option.is_axis %}
-                                    <div class="dc-opt-card__cg">
-                                      <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest('.dc-opt-card__cg').find('.dc-opt-card__cg-body').slideToggle(150);">
-                                        <i data-lucide="users" width="14" height="14"></i> {{ entry_option_value_cg_price }}
-                                      </button>
-                                      <div class="dc-opt-card__cg-body" style="display:{% if product_option_value.customer_group_prices|length > 0 %}block{% else %}none{% endif %}">
-                                        <div class="dc-cg-prices" id="option-value-cg{{ option_row }}-{{ option_value_row }}">
-                                          {% set cg_row = 0 %}
-                                          {% for cg_price in product_option_value.customer_group_prices %}
-                                            <div class="dc-opt-card__cg-row">
-                                              <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][customer_group_id]" class="form-control">
-                                                {% for customer_group in customer_groups %}
-                                                  <option value="{{ customer_group.customer_group_id }}"{% if customer_group.customer_group_id == cg_price.customer_group_id %} selected="selected"{% endif %}>{{ customer_group.name }}</option>
-                                                {% endfor %}
-                                              </select>
-                                              <div class="option-value-prefix-group">
-                                                <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price_prefix]" class="form-control option-value-prefix-select">
-                                                  <option value="+"{% if cg_price.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
-                                                  <option value="-"{% if cg_price.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
-                                                </select>
-                                                <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price]" value="{{ cg_price.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input" />
-                                              </div>
-                                              <button type="button" onclick="$(this).closest('.dc-opt-card__cg-row').remove();" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="14" height="14"></i></button>
-                                            </div>
-                                            {% set cg_row = cg_row + 1 %}
-                                          {% endfor %}
-                                        </div>
-                                        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, '{{ option_row }}', '{{ option_value_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add }}</button>
-                                      </div>
-                                    </div>
+                                    <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" data-toggle="tooltip" title="{{ entry_option_value_cg_price }}" onclick="event.stopPropagation();$(this).closest('.dc-opt-card').find('.dc-opt-card__cg-body').slideToggle(150);">
+                                      <i data-lucide="users" width="13" height="13"></i>
+                                    </button>
                                     {% endif %}
+                                    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove"{% if product_option.is_axis %} style="display:none"{% endif %} onclick="$(this).closest('.dc-opt-card').remove();" data-toggle="tooltip" title="{{ button_remove }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>
+                                  </div>
+                                  <div class="dc-opt-card__cg-body" style="display:{% if product_option_value.customer_group_prices|length > 0 %}block{% else %}none{% endif %}">
+                                    <div class="dc-cg-prices" id="option-value-cg{{ option_row }}-{{ option_value_row }}">
+                                      {% set cg_row = 0 %}
+                                      {% for cg_price in product_option_value.customer_group_prices %}
+                                        <div class="dc-opt-card__cg-row">
+                                          <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][customer_group_id]" class="form-control">
+                                            {% for customer_group in customer_groups %}
+                                              <option value="{{ customer_group.customer_group_id }}"{% if customer_group.customer_group_id == cg_price.customer_group_id %} selected="selected"{% endif %}>{{ customer_group.name }}</option>
+                                            {% endfor %}
+                                          </select>
+                                          <div class="option-value-prefix-group">
+                                            <select name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price_prefix]" class="form-control option-value-prefix-select">
+                                              <option value="+"{% if cg_price.price_prefix == '+' %} selected="selected"{% endif %}>+</option>
+                                              <option value="-"{% if cg_price.price_prefix == '-' %} selected="selected"{% endif %}>-</option>
+                                            </select>
+                                            <input type="text" name="product_option[{{ option_row }}][product_option_value][{{ option_value_row }}][customer_group_price][{{ cg_row }}][price]" value="{{ cg_price.price }}" placeholder="{{ entry_price }}" class="form-control option-value-prefix-input" />
+                                          </div>
+                                          <button type="button" onclick="$(this).closest('.dc-opt-card__cg-row').remove();" class="btn btn-danger btn-xs"><i data-lucide="circle-minus" width="14" height="14"></i></button>
+                                        </div>
+                                        {% set cg_row = cg_row + 1 %}
+                                      {% endfor %}
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-xs" onclick="addOptionValueCgPrice(this, '{{ option_row }}', '{{ option_value_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add }}</button>
                                   </div>
                                 </div>
                                 {% set option_value_row = option_value_row + 1 %}
                               {% endfor %}
                             </div>
-                            {% if not product_option.is_axis %}
-                            <small class="form-text text-muted" style="display:block; margin-top:6px;">{{ text_drag_to_reorder }}</small>
                             <div class="dc-opt-actions">
-                              <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue('{{ option_row }}');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_add }}</button>
-                              <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues('{{ option_row }}');"><i data-lucide="square-plus" width="14" height="14"></i> {{ button_add_all_values }}</button>
+                              <button type="button" class="btn btn-default btn-xs" onclick="addOptionValue('{{ option_row }}');"><i data-lucide="circle-plus" width="13" height="13"></i> {{ button_option_value_add }}</button>
+                              <button type="button" class="btn btn-default btn-xs" onclick="addAllOptionValues('{{ option_row }}');"><i data-lucide="square-plus" width="13" height="13"></i> {{ button_add_all_values }}</button>
+                              <span class="dc-opt-actions__hint">{{ text_drag_to_reorder }}</span>
                             </div>
                             {% endif %}
                             <select id="option-values{{ option_row }}" style="display: none;">
@@ -920,16 +1257,15 @@
                                 {% endfor %}
                               {% endif %}
                             </select>
+                          </div>
                           {% endif %}
                         </div>
-                          {% endif %}
-                      </div>
                       {% set option_row = option_row + 1 %}
                     {% endfor %}
                     </div>
-                    <div class="dc-opt-add" style="margin-top: 15px; padding: 15px; background: var(--dc-gray-50); border-radius: var(--dc-radius-lg); border: 1px dashed var(--dc-primary-active);">
-                      <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--dc-primary-active);"><i data-lucide="circle-plus" width="16" height="16"></i> {{ button_option_add }}</h4>
-                      <div class="dcx-tree-select"
+                    <div class="dc-opt-add">
+                      <span class="dc-opt-add__label"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_add }}</span>
+                      <div class="dcx-tree-select dc-opt-add__select"
                            data-url="index.php?route=catalog/option/tree&user_token={{ user_token }}"
                            data-id-key="option_id"
                            data-none-text="{{ text_none }}"
@@ -947,366 +1283,6 @@
                           <div class="dcx-tree-select__list"></div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="dcx-panel" style="margin-top: 16px;">
-                <div class="dcx-panel-head">
-                  <div class="dcx-panel-head__icon"><i data-lucide="percent" width="18" height="18"></i></div>
-                  <div>
-                    <div class="dcx-panel-title">{{ text_panel_promo_title }} <span data-toggle="tooltip" title="{{ text_panel_promo_subtitle }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
-                  </div>
-                </div>
-                <div class="dcx-panel-body">
-                  <div class="dc-promo-tabs" id="promo-tabs">
-                    <button type="button" class="dc-promo-tab dc-promo-tab--active" data-promo-tab="discount"><i data-lucide="percent" width="12" height="12"></i><span>{{ text_promo_discount }}</span><span class="dc-promo-tab__count" id="promo-count-discount">0</span></button>
-                    <button type="button" class="dc-promo-tab" data-promo-tab="special"><i data-lucide="star" width="12" height="12"></i><span>{{ text_promo_special }}</span><span class="dc-promo-tab__count" id="promo-count-special">0</span></button>
-                    <button type="button" class="dc-promo-tab" data-promo-tab="gift"><i data-lucide="gift" width="12" height="12"></i><span>{{ text_promo_gift }}</span><span class="dc-promo-tab__count" id="promo-count-gift">0</span></button>
-                    <button type="button" class="dc-promo-tab" data-promo-tab="bxgy"><i data-lucide="repeat" width="12" height="12"></i><span>{{ text_promo_bxgy }}</span><span class="dc-promo-tab__count" id="promo-count-bxgy">0</span></button>
-                    <button type="button" class="dc-promo-tab" data-promo-tab="bundle"><i data-lucide="layers" width="12" height="12"></i><span>{{ text_promo_bundle }}</span><span class="dc-promo-tab__count" id="promo-count-bundle">0</span></button>
-                  </div>
-                  <div id="promo-container">
-                    {% for promo in all_promotions %}
-                      {% if promo.promo_type == 'discount' %}
-                      {% if is_configurable and promo_variants and not promo.variant_id %}
-                      <div class="dc-promo-card dc-promo-card--locked" id="discount-row{{ promo.row_index }}">
-                        <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
-                        <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                        {% set locked_cg_name = '' %}
-                        {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
-                        <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_quantity }}: {{ promo.quantity }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
-                        <div class="dc-promo-card__actions">
-                          <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                        </div>
-                      </div>
-                      {% else %}
-                    <div class="dc-promo-card" id="discount-row{{ promo.row_index }}">
-                      <div class="dc-promo-card__actions">
-                        <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_discount[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
-                          <span>{{ entry_auto_renew }}</span>
-                        </label>
-                        <button type="button" onclick="removePromoCard('discount-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                      </div>
-                      <input type="hidden" name="product_discount[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <div class="dc-promo-card__grid">
-                        {% if is_configurable and promo_variants %}
-                        <div class="dc-promo-card__field dc-promo-card__field--wide">
-                          <label>{{ entry_variant }}</label>
-                          <select name="product_discount[{{ promo.row_index }}][variant_id]" class="form-control">
-                            {% for pv in promo_variants %}
-                              {% if promo.variant_id == pv.variant_id %}
-                                <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
-                              {% else %}
-                                <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </div>
-                        {% endif %}
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_customer_group }}</label>
-                          <select name="product_discount[{{ promo.row_index }}][customer_group_id]" class="form-control">
-                            {% for customer_group in customer_groups %}
-                              {% if customer_group.customer_group_id == promo.customer_group_id %}
-                                <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
-                              {% else %}
-                                <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_quantity }}</label>
-                          <input type="text" name="product_discount[{{ promo.row_index }}][quantity]" value="{{ promo.quantity }}" placeholder="{{ entry_quantity }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_priority }}</label>
-                          <input type="text" name="product_discount[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_price }}</label>
-                          <input type="text" name="product_discount[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_start }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_discount[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_end }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_discount[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                      {% endif %}
-                      {% elseif promo.promo_type == 'special' %}
-                      {% if is_configurable and promo_variants and not promo.variant_id %}
-                      <div class="dc-promo-card dc-promo-card--locked" id="special-row{{ promo.row_index }}">
-                        <span class="dc-axis-badge" data-toggle="tooltip" title="{{ text_promo_locked_help|e('html_attr') }}"><i data-lucide="lock" width="10" height="10"></i> {{ text_promo_scope_product }}</span>
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][customer_group_id]" value="{{ promo.customer_group_id }}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][auto_renew]" value="{% if promo.auto_renew %}1{% else %}0{% endif %}" />
-                        <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                        {% set locked_cg_name = '' %}
-                        {% for cg in customer_groups %}{% if cg.customer_group_id == promo.customer_group_id %}{% set locked_cg_name = cg.name %}{% endif %}{% endfor %}
-                        <span class="dc-locked-summary">{{ locked_cg_name }} &middot; {{ entry_price }}: {{ promo.price }} &middot; P{{ promo.priority }}{% if promo.date_start %} &middot; {{ promo.date_start }}{% endif %}{% if promo.date_end %} &ndash; {{ promo.date_end }}{% endif %}{% if promo.auto_renew %} &middot; {{ entry_auto_renew }}{% endif %}</span>
-                        <div class="dc-promo-card__actions">
-                          <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                        </div>
-                      </div>
-                      {% else %}
-                    <div class="dc-promo-card" id="special-row{{ promo.row_index }}">
-                      <div class="dc-promo-card__actions">
-                        <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_special[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
-                          <span>{{ entry_auto_renew }}</span>
-                        </label>
-                        <button type="button" onclick="removePromoCard('special-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                      </div>
-                      <input type="hidden" name="product_special[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <div class="dc-promo-card__grid">
-                        {% if is_configurable and promo_variants %}
-                        <div class="dc-promo-card__field dc-promo-card__field--wide">
-                          <label>{{ entry_variant }}</label>
-                          <select name="product_special[{{ promo.row_index }}][variant_id]" class="form-control">
-                            {% for pv in promo_variants %}
-                              {% if promo.variant_id == pv.variant_id %}
-                                <option value="{{ pv.variant_id }}" selected="selected">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
-                              {% else %}
-                                <option value="{{ pv.variant_id }}">{{ pv.label }}{{ pv.is_default ? ' ' ~ text_variant_is_default : '' }}</option>
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </div>
-                        {% endif %}
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_customer_group }}</label>
-                          <select name="product_special[{{ promo.row_index }}][customer_group_id]" class="form-control">
-                            {% for customer_group in customer_groups %}
-                              {% if customer_group.customer_group_id == promo.customer_group_id %}
-                                <option value="{{ customer_group.customer_group_id }}" selected="selected">{{ customer_group.name }}</option>
-                              {% else %}
-                                <option value="{{ customer_group.customer_group_id }}">{{ customer_group.name }}</option>
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_priority }}</label>
-                          <input type="text" name="product_special[{{ promo.row_index }}][priority]" value="{{ promo.priority }}" placeholder="{{ entry_priority }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_price }}</label>
-                          <input type="text" name="product_special[{{ promo.row_index }}][price]" value="{{ promo.price }}" placeholder="{{ entry_price }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_start }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_special[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_end }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_special[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                      {% endif %}
-                      {% elseif promo.promo_type == 'gift' %}
-                    <div class="dc-promo-card" id="gift-row{{ promo.row_index }}">
-                      <div class="dc-promo-card__actions">
-                        <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_gift[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
-                          <span>{{ entry_auto_renew }}</span>
-                        </label>
-                        <button type="button" onclick="removePromoCard('gift-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                      </div>
-                      <input type="hidden" name="product_gift[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <div class="dc-promo-card__grid">
-                        <div class="dc-promo-card__field dc-promo-card__field--wide">
-                          <label>{{ entry_gift_product }}</label>
-                          <div style="position:relative;">
-                            <input type="text" name="product_gift[{{ promo.row_index }}][gift_product_name]" value="{{ promo.gift_product_name }}" placeholder="{{ entry_gift_product }}" class="form-control" autocomplete="off"/>
-                            <input type="hidden" name="product_gift[{{ promo.row_index }}][gift_product_id]" value="{{ promo.gift_product_id }}"/>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_minimum }}</label>
-                          <input type="text" name="product_gift[{{ promo.row_index }}][minimum_quantity]" value="{{ promo.minimum_quantity }}" placeholder="{{ entry_minimum }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_start }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_gift[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_end }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_gift[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                      {% elseif promo.promo_type == 'bxgy' %}
-                    <div class="dc-promo-card" id="bxgy-row{{ promo.row_index }}">
-                      <div class="dc-promo-card__actions">
-                        <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_bxgy[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
-                          <span>{{ entry_auto_renew }}</span>
-                        </label>
-                        <button type="button" onclick="removePromoCard('bxgy-row{{ promo.row_index }}')" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                      </div>
-                      <input type="hidden" name="product_bxgy[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <div class="dc-promo-card__grid">
-                        <div class="dc-promo-card__field dc-promo-card__field--wide">
-                          <label>{{ entry_bxgy_reward_product }}</label>
-                          <div style="position:relative;">
-                            <input type="text" name="product_bxgy[{{ promo.row_index }}][reward_product_name]" value="{{ promo.reward_product_name }}" placeholder="{{ entry_bxgy_reward_product }}" class="form-control" autocomplete="off"/>
-                            <input type="hidden" name="product_bxgy[{{ promo.row_index }}][reward_product_id]" value="{{ promo.reward_product_id }}"/>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_bxgy_trigger_quantity }}</label>
-                          <input type="text" name="product_bxgy[{{ promo.row_index }}][trigger_quantity]" value="{{ promo.trigger_quantity }}" placeholder="{{ entry_bxgy_trigger_quantity }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_bxgy_discount_value }}</label>
-                          <input type="text" name="product_bxgy[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_bxgy_discount_value }}" class="form-control"/>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_start }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_bxgy[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_end }}</label>
-                          <div class="input-group date">
-                            <input type="text" name="product_bxgy[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control"/>
-                            <span class="input-group-btn"><button class="btn btn-default" type="button"><i data-lucide="calendar" width="14" height="14"></i></button></span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                      {% elseif promo.promo_type == 'bundle' %}
-                    <div class="dc-promo-card dc-promo-card--bundle" id="bundle-row{{ promo.row_index }}">
-                      <div class="dc-promo-card__actions">
-                        <label class="dc-promo-card__toggle">
-                          <input type="checkbox" name="product_bundle[{{ promo.row_index }}][auto_renew]" value="1" class="auto-renew-cb" {% if promo.auto_renew %}checked{% endif %} />
-                          <span>{{ entry_auto_renew }}</span>
-                        </label>
-                        <button type="button" onclick="removeBundleCard('bundle-row{{ promo.row_index }}', {{ promo.bundle_id }})" class="dc-promo-card__remove" title="{{ button_remove }}"><i data-lucide="x" width="14" height="14"></i></button>
-                      </div>
-                      <input type="hidden" name="product_bundle[{{ promo.row_index }}][date_added]" value="{{ promo.date_added }}" />
-                      <div class="dc-promo-card__grid">
-                        <div class="dc-promo-card__field" style="display:none;">
-                          <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_id]" value="{{ promo.bundle_id }}" />
-                        </div>
-                        <div class="dc-promo-card__field dc-promo-card__field--wide">
-                          <label>{{ entry_bundle_products }}</label>
-                          <div style="position:relative;">
-                            <input type="text" name="product_bundle[{{ promo.row_index }}][bundle_products_text]" value="" placeholder="{{ entry_bundle_products }}" class="form-control bundle-product-input" autocomplete="off" />
-                          </div>
-                          <input type="hidden" name="product_bundle[{{ promo.row_index }}][bundle_product_ids]" value="{{ promo.product_ids_csv }}" />
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_discount_type }}</label>
-                          <select name="product_bundle[{{ promo.row_index }}][discount_type]" class="form-control">
-                            <option value="percentage" {% if promo.discount_type == 'percentage' %}selected{% endif %}>{{ text_percentage }}</option>
-                            <option value="fixed" {% if promo.discount_type == 'fixed' %}selected{% endif %}>{{ text_fixed }}</option>
-                          </select>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_discount_value }}</label>
-                          <input type="text" name="product_bundle[{{ promo.row_index }}][discount_value]" value="{{ promo.discount_value }}" placeholder="{{ entry_discount_value }}" class="form-control" />
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_start }}</label>
-                          <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_start]" value="{{ promo.date_start }}" placeholder="{{ entry_date_start }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
-                        </div>
-                        <div class="dc-promo-card__field">
-                          <label>{{ entry_date_end }}</label>
-                          <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
-                        </div>
-                      </div>
-                      <label class="dc-bundle-products-label">{{ text_bundle_selected_products }}</label>
-                      <div class="bundle-selected-products" id="bundle-selected-{{ promo.row_index }}">
-                        {% for bp in promo.products %}
-                        <span class="dc-chip" data-product-id="{{ bp.product_id }}">{{ bp.name|escape }} ({{ bp.price }}) <button type="button" onclick="removeBundleProduct(this, {{ bp.product_id }})" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
-                        {% endfor %}
-                      </div>
-                    </div>
-                      {% endif %}
-                    {% endfor %}
-
-                    <div class="dc-promo-empty" id="promo-empty" style="display:none"><i data-lucide="tag" width="32" height="32" style="opacity:0.25;margin-bottom:6px;"></i><div>{{ text_no_promo }}</div></div>
-                  </div>
-                  <div class="dc-promo-actions"{% if is_configurable and promo_variants %} style="display:none"{% endif %}>
-                    <button type="button" class="dc-promo-add-btn" id="promo-add-btn">
-                      <i data-lucide="plus" width="14" height="14"></i> {{ button_add }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="dcx-panel" style="margin-top: 16px;">
-                <div class="dcx-panel-head">
-                  <div class="dcx-panel-head__icon"><i data-lucide="trophy" width="18" height="18"></i></div>
-                  <div>
-                    <div class="dcx-panel-title">{{ text_panel_rewards_title }} <span data-toggle="tooltip" title="{{ text_panel_rewards_subtitle }}"><i data-lucide="circle-question-mark" width="16" height="16" class="text-muted"></i></span></div>
-                  </div>
-                </div>
-                <div class="dcx-panel-body">
-                  <div class="dcx-fields dcx-fields--row">
-                    <div class="dcx-field" style="flex:0 0 auto;">
-                      <label class="dcx-label" for="input-points">{{ entry_points }} <span data-toggle="tooltip" title="{{ help_points }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
-                      <div style="max-width:160px;">
-                        <input type="text" name="points" value="{{ points }}" placeholder="{{ entry_points }}" id="input-points" class="form-control"/>
-                      </div>
-                    </div>
-                    <div id="rewards-container" class="table-responsive" style="flex:1 1 auto;min-width:220px;">
-                      <table class="table table-bordered dcx-table dcx-table--reward">
-                        <thead>
-                          <tr>
-                            <td class="text-left">{{ entry_customer_group }}</td>
-                            <td class="text-left" style="width: 200px;">{{ entry_reward }}</td>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for customer_group in customer_groups %}
-                          <tr>
-                            <td class="text-left">{{ customer_group.name }}</td>
-                            <td class="text-left">
-                              <input type="text" name="product_reward[{{ customer_group.customer_group_id }}][points]" value="{{ product_reward[customer_group.customer_group_id] ? product_reward[customer_group.customer_group_id].points }}" placeholder="{{ entry_reward }}" class="form-control"/>
-                            </td>
-                          </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
                     </div>
                   </div>
                 </div>
@@ -2094,8 +2070,10 @@
 	  var html = '';
 	  html += '<div class="dc-option-section" id="option-section' + option_row + '">';
 	  html += '  <div class="dc-option-section__header">';
-	  html += '    <span class="dc-option-section__title">' + item['label'] + '</span>';
-	  html += '    <span class="dc-option-section__type">(' + item['type'] + ')</span>';
+	  html += '    <button type="button" class="dc-option-section__toggle" data-option-section="option-section' + option_row + '" aria-expanded="true" aria-controls="option-section' + option_row + '-body">';
+	  html += '      <span class="dc-option-section__title">' + item['label'] + '</span>';
+	  html += '      <span class="dc-option-section__type">(' + item['type'] + ')</span>';
+	  html += '    </button>';
 	  html += '    <div class="dc-option-section__controls">';
 	  html += '      <label class="dc-option-section__required">';
 	  html += '        <span>{{ entry_required|e('js') }}:</span>';
@@ -2104,64 +2082,66 @@
 	  html += '          <option value="0">{{ text_no|e('js') }}</option>';
 	  html += '        </select>';
 	  html += '      </label>';
-	  html += '      <button type="button" class="btn btn-danger btn-sm" onclick="dcRemoveOption(\'' + option_row + '\');">';
-	  html += '        <i data-lucide="trash-2" width="14" height="14"></i> {{ button_remove|e('js') }}';
+	  html += '      <button type="button" class="btn btn-danger btn-xs dc-option-section__remove" onclick="dcRemoveOption(\'' + option_row + '\');" data-toggle="tooltip" title="{{ button_remove|e('js') }}">';
+	  html += '        <i data-lucide="trash-2" width="13" height="13"></i>';
 	  html += '      </button>';
 	  html += '    </div>';
+	  html += '    <span class="dc-option-section__chevron" aria-hidden="true"><i data-lucide="chevron-down" width="14" height="14"></i></span>';
 	  html += '  </div>';
-	  html += '  <div class="dc-option-section__body">';
+	  html += '  <div class="dc-option-section__body" id="option-section' + option_row + '-body">';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_id]" value="" />';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][name]" value="' + item['label'] + '" />';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][option_id]" value="' + item['value'] + '" />';
 	  html += '    <input type="hidden" name="product_option[' + option_row + '][type]" value="' + item['type'] + '" />';
 
 	  if (item['type'] == 'text') {
-		  html += '    <div class="form-group">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-10"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control" /></div>';
+		  html += '    <div class="dc-opt-field">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control" />';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'textarea') {
-		  html += '    <div class="form-group">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-10"><textarea name="product_option[' + option_row + '][value]" rows="5" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control"></textarea></div>';
+		  html += '    <div class="dc-opt-field">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <textarea name="product_option[' + option_row + '][value]" rows="3" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control"></textarea>';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'file') {
-		  html += '    <div class="form-group" style="display: none;">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-10"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control" /></div>';
+		  html += '    <div class="dc-opt-field" style="display: none;">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" id="input-value' + option_row + '" class="form-control" />';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'date') {
-		  html += '    <div class="form-group">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-3"><div class="input-group date"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="YYYY-MM-DD" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div>';
+		  html += '    <div class="dc-opt-field">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <div class="input-group date"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="YYYY-MM-DD" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'time') {
-		  html += '    <div class="form-group">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-10"><div class="input-group time"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div>';
+		  html += '    <div class="dc-opt-field">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <div class="input-group time"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'datetime') {
-		  html += '    <div class="form-group">';
-		  html += '      <label class="col-sm-2 control-label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
-		  html += '      <div class="col-sm-10"><div class="input-group datetime"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div></div>';
+		  html += '    <div class="dc-opt-field">';
+		  html += '      <label class="dc-opt-field__label" for="input-value' + option_row + '">{{ entry_option_value|e('js') }}</label>';
+		  html += '      <div class="input-group datetime"><input type="text" name="product_option[' + option_row + '][value]" value="" placeholder="{{ entry_option_value|e('js') }}" data-date-format="YYYY-MM-DD HH:mm" id="input-value' + option_row + '" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>';
 		  html += '    </div>';
 	  }
 
 	  if (item['type'] == 'select' || item['type'] == 'radio' || item['type'] == 'checkbox' || item['type'] == 'image' || item['type'] == 'color') {
 		  html += '    <div class="dc-opt-cards" id="option-value' + option_row + '"></div>';
 		  html += '    <div class="dc-opt-actions">';
-		  html += '      <button type="button" class="btn btn-primary btn-sm" onclick="addOptionValue(\'' + option_row + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_add|e('js') }}</button>';
-		  html += '      <button type="button" class="btn btn-default btn-sm" onclick="addAllOptionValues(\'' + option_row + '\');"><i data-lucide="square-plus" width="14" height="14"></i> {{ button_add_all_values|e('js') }}</button>';
+		  html += '      <button type="button" class="btn btn-default btn-xs" onclick="addOptionValue(\'' + option_row + '\');"><i data-lucide="circle-plus" width="13" height="13"></i> {{ button_option_value_add|e('js') }}</button>';
+		  html += '      <button type="button" class="btn btn-default btn-xs" onclick="addAllOptionValues(\'' + option_row + '\');"><i data-lucide="square-plus" width="13" height="13"></i> {{ button_add_all_values|e('js') }}</button>';
+		  html += '      <span class="dc-opt-actions__hint">{{ text_drag_to_reorder|e('js') }}</span>';
 		  html += '    </div>';
 
 		  html += '    <select id="option-values' + option_row + '" style="display: none;">';
@@ -2273,29 +2253,13 @@
 	  var html = '';
 	  var optionType = $('#option-section' + option_row + ' input[name$="[type]"]').val();
 	  html += '<div class="dc-opt-card" id="option-value-row' + ovRow + '">';
-	  html += '  <div class="dc-opt-card__header">';
-  html += '    <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder }}" aria-hidden="true"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>';
-	  html += '    <span class="dc-opt-card__title">' + (optionValueName || '') + '</span>';
-	  html += '    <span class="dc-opt-card__badges">';
-	  if (isHit) {
-		  html += '      <span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit|e('js') }}</span>';
-	  }
-	  if (parseFloat(price) != 0) {
-		  html += '      <span class="dc-opt-badge dc-opt-badge--price" data-badge="price">' + price_prefix + price + '</span>';
-	  } else {
-		  html += '      <span class="dc-opt-badge dc-opt-badge--price" data-badge="price" style="display:none"></span>';
-	  }
-	  html += '    </span>';
-	  html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(this).closest(\'.dc-opt-card\').remove();" data-toggle="tooltip" title="{{ button_remove|e('js') }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
-	  html += '  </div>';
-	  html += '  <div class="dc-opt-card__body">';
-	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][product_option_value_id]" value="" />';
-	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="0" />';
-	  html += '    <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][sort_order]" value="' + ovRow + '" class="dc-opt-sort-order" />';
-	  html += '    <div class="dc-opt-card__grid">';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_option_value|e('js') }}</label>';
-	  html += '        <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][option_value_id]" class="form-control" onchange="dcUpdateCardTitle(this)">';
+	  html += '  <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][product_option_value_id]" value="" />';
+	  html += '  <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="0" />';
+	  html += '  <input type="hidden" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][sort_order]" value="' + ovRow + '" class="dc-opt-sort-order" />';
+	  html += '  <span class="dc-opt-card__handle" title="{{ text_drag_to_reorder|e('js') }}" aria-hidden="true"><i data-lucide="grip-vertical" width="14" height="14" class="slide-drag-handle"></i></span>';
+	  html += '  <div class="dc-opt-card__field dc-opt-card__field--value">';
+	  html += '    <label>{{ entry_option_value|e('js') }}</label>';
+	  html += '    <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][option_value_id]" class="form-control">';
 	  var optsHtml = $('#option-values' + option_row).html();
 	  if (optionValueId) {
 		  optsHtml = optsHtml.replace(/value="([^"]*)"/g, function(match, val) {
@@ -2303,58 +2267,60 @@
 		  });
 	  }
 	  html += optsHtml;
-	  html += '        </select>';
-	  html += '      </div>';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_price|e('js') }}</label>';
-	  html += '        <div class="option-value-prefix-group">';
-	  html += '          <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][price_prefix]" class="form-control option-value-prefix-select">';
-	  html += '            <option value="+"' + (price_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
-	  html += '            <option value="-"' + (price_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
-	  html += '          </select>';
-	  html += '          <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][price]" value="' + price + '" placeholder="{{ entry_price|e('js') }}" class="form-control option-value-prefix-input" oninput="dcUpdateBadges(this)" />';
-	  html += '        </div>';
-	  html += '      </div>';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_option_points|e('js') }}</label>';
-	  html += '        <div class="option-value-prefix-group">';
-	  html += '          <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][points_prefix]" class="form-control option-value-prefix-select">';
-	  html += '            <option value="+"' + (points_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
-	  html += '            <option value="-"' + (points_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
-	  html += '          </select>';
-	  html += '          <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][points]" value="' + points + '" placeholder="{{ entry_points|e('js') }}" class="form-control option-value-prefix-input" />';
-	  html += '        </div>';
-	  html += '      </div>';
-	  html += '      <div class="dc-opt-card__field">';
-	  html += '        <label>{{ entry_weight|e('js') }}</label>';
-	  html += '        <div class="option-value-prefix-group">';
-	  html += '          <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][weight_prefix]" class="form-control option-value-prefix-select">';
-	  html += '            <option value="+"' + (weight_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
-	  html += '            <option value="-"' + (weight_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
-	  html += '          </select>';
-	  html += '          <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][weight]" value="' + weight + '" placeholder="{{ entry_weight|e('js') }}" class="form-control option-value-prefix-input" />';
-	  html += '        </div>';
-	  html += '      </div>';
+	  html += '    </select>';
+	  html += '  </div>';
+	  html += '  <div class="dc-opt-card__field">';
+	  html += '    <label>{{ entry_price|e('js') }}</label>';
+	  html += '    <div class="option-value-prefix-group">';
+	  html += '      <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][price_prefix]" class="form-control option-value-prefix-select">';
+	  html += '        <option value="+"' + (price_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
+	  html += '        <option value="-"' + (price_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
+	  html += '      </select>';
+	  html += '      <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][price]" value="' + price + '" placeholder="{{ entry_price|e('js') }}" class="form-control option-value-prefix-input" />';
 	  html += '    </div>';
+	  html += '  </div>';
+	  html += '  <div class="dc-opt-card__field">';
+	  html += '    <label>{{ entry_option_points|e('js') }}</label>';
+	  html += '    <div class="option-value-prefix-group">';
+	  html += '      <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][points_prefix]" class="form-control option-value-prefix-select">';
+	  html += '        <option value="+"' + (points_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
+	  html += '        <option value="-"' + (points_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
+	  html += '      </select>';
+	  html += '      <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][points]" value="' + points + '" placeholder="{{ entry_points|e('js') }}" class="form-control option-value-prefix-input" />';
+	  html += '    </div>';
+	  html += '  </div>';
+	  html += '  <div class="dc-opt-card__field">';
+	  html += '    <label>{{ entry_weight|e('js') }}</label>';
+	  html += '    <div class="option-value-prefix-group">';
+	  html += '      <select name="product_option[' + option_row + '][product_option_value][' + ovRow + '][weight_prefix]" class="form-control option-value-prefix-select">';
+	  html += '        <option value="+"' + (weight_prefix == '+' ? ' selected="selected"' : '') + '>+</option>';
+	  html += '        <option value="-"' + (weight_prefix == '-' ? ' selected="selected"' : '') + '>-</option>';
+	  html += '      </select>';
+	  html += '      <input type="text" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][weight]" value="' + weight + '" placeholder="{{ entry_weight|e('js') }}" class="form-control option-value-prefix-input" />';
+	  html += '    </div>';
+	  html += '  </div>';
+	  html += '  <div class="dc-opt-card__actions">';
+	  html += '    <span class="dc-opt-card__badges">';
+	  if (isHit) {
+		  html += '      <span class="dc-opt-badge dc-opt-badge--hit">{{ entry_hit|e('js') }}</span>';
+	  }
+	  html += '    </span>';
 	  if (optionType === 'color') {
-		  html += '    <div class="dc-opt-card__hit">';
-		  html += '      <label class="dc-opt-card__hit-label">';
-		  html += '        <input type="checkbox" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="1" onchange="$(this).closest(\'.dc-opt-card\').find(\'input[name$=\\\'[is_hit\\\']\').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)" />';
-		  html += '        <i data-lucide="star" width="14" height="14"></i> {{ entry_hit|e('js') }}';
-		  html += '      </label>';
-		  html += '    </div>';
+		  html += '    <label class="dc-opt-card__hit-label" title="{{ entry_hit|e('js') }}">';
+		  html += '      <input type="checkbox" name="product_option[' + option_row + '][product_option_value][' + ovRow + '][is_hit]" value="1" onchange="$(this).closest(\'.dc-opt-card\').find(\'input[name$=\\\'[is_hit]\\\']\').val(this.checked ? 1 : 0);dcUpdateHitBadge(this)" />';
+		  html += '      <i data-lucide="star" width="13" height="13"></i>';
+		  html += '    </label>';
 	  }
 	  if (!$('#option-section' + option_row).hasClass('dc-option-axis')) {
-	  html += '    <div class="dc-opt-card__cg">';
-	  html += '      <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" onclick="event.stopPropagation();$(this).closest(\'.dc-opt-card__cg\').find(\'.dc-opt-card__cg-body\').slideToggle(150);">';
-	  html += '        <i data-lucide="users" width="14" height="14"></i> {{ entry_option_value_cg_price|e('js') }}';
-	  html += '      </button>';
-	  html += '      <div class="dc-opt-card__cg-body" style="display:none">';
-	  html += '        <div class="dc-cg-prices" id="option-value-cg' + option_row + '-' + ovRow + '"></div>';
-	  html += '        <button type="button" class="btn btn-primary btn-xs" style="margin-top:4px;" onclick="addOptionValueCgPrice(this, \'' + option_row + '\', \'' + ovRow + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add|e('js') }}</button>';
-	  html += '      </div>';
-	  html += '    </div>';
+		  html += '    <button type="button" class="btn btn-default btn-xs dc-opt-card__cg-toggle" data-toggle="tooltip" title="{{ entry_option_value_cg_price|e('js') }}" onclick="event.stopPropagation();$(this).closest(\'.dc-opt-card\').find(\'.dc-opt-card__cg-body\').slideToggle(150);">';
+		  html += '      <i data-lucide="users" width="13" height="13"></i>';
+		  html += '    </button>';
 	  }
+	  html += '    <button type="button" class="btn btn-danger btn-xs dc-opt-card__remove" onclick="$(this).closest(\'.dc-opt-card\').remove();" data-toggle="tooltip" title="{{ button_remove|e('js') }}"><i data-lucide="circle-minus" width="14" height="14"></i></button>';
+	  html += '  </div>';
+	  html += '  <div class="dc-opt-card__cg-body" style="display:none">';
+	  html += '    <div class="dc-cg-prices" id="option-value-cg' + option_row + '-' + ovRow + '"></div>';
+	  html += '    <button type="button" class="btn btn-primary btn-xs" onclick="addOptionValueCgPrice(this, \'' + option_row + '\', \'' + ovRow + '\');"><i data-lucide="circle-plus" width="14" height="14"></i> {{ button_option_value_cg_price_add|e('js') }}</button>';
 	  html += '  </div>';
 	  html += '</div>';
 
@@ -2415,30 +2381,6 @@
 	  lucide.createIcons();
   }
 
-  function dcUpdateBadges(el) {
-	  var $card = $(el).closest('.dc-opt-card');
-	  var qty = $card.find('input[name$="[quantity]"]').val();
-	  var price = $card.find('input[name$="[price]"]').not('[name*="customer_group"]').val();
-	  var price_prefix = $card.find('select[name$="[price_prefix]"]').not('[name*="customer_group"]').val();
-
-	  var $qtyBadge = $card.find('[data-badge="qty"]');
-	  $qtyBadge.text(qty + ' {{ text_qty_short|e('js') }}');
-	  $qtyBadge.removeClass('dc-opt-badge--qty-ok dc-opt-badge--qty-zero');
-	  $qtyBadge.addClass(parseFloat(qty) > 0 ? 'dc-opt-badge--qty-ok' : 'dc-opt-badge--qty-zero');
-
-	  var $priceBadge = $card.find('[data-badge="price"]');
-	  if (parseFloat(price) != 0) {
-		  $priceBadge.text(price_prefix + price).show();
-	  } else {
-		  $priceBadge.hide();
-	  }
-  }
-
-  function dcUpdateCardTitle(sel) {
-	  var name = $(sel).find('option:selected').text();
-	  $(sel).closest('.dc-opt-card').find('.dc-opt-card__title').text(name);
-  }
-
   function dcUpdateHitBadge(cb) {
 	  var $card = $(cb).closest('.dc-opt-card');
 	  var $badges = $card.find('.dc-opt-card__badges');
@@ -2451,134 +2393,288 @@
 	  }
   }
 
-  var dcPromoTypes = ['discount', 'special', 'gift', 'bxgy', 'bundle'];
-  var dcPromoActiveTab = 'discount';
+  // Every simple option is a collapsible sub-section of the Options panel.
+  // The whole header toggles (like the promo variant groups); the required
+  // select and the remove button must not.
+  $(document).on('click', '.dc-option-section__header', function(e) {
+	  var $toggle = $(this).find('.dc-option-section__toggle');
+	  if (!$toggle.length || $(e.target).closest('.dc-option-section__controls').length) {
+		  return;
+	  }
+	  var $section = $(this).closest('.dc-option-section');
+	  var collapsed = $section.hasClass('dc-option-section--collapsed');
+	  $section.toggleClass('dc-option-section--collapsed', !collapsed);
+	  $toggle.attr('aria-expanded', collapsed ? 'true' : 'false');
+  });
 
   var dcPromoVariants = {{ promo_variants|json_encode|raw }};
   var dcIsConfigurable = {{ is_configurable ? 'true' : 'false' }};
 
-  function dcUpdatePromoAddBtn() {
-	  var isGrouped = dcIsConfigurable && dcPromoVariants.length && (dcPromoActiveTab === 'discount' || dcPromoActiveTab === 'special');
-	  $('.dc-promo-actions').toggle(!isGrouped);
+  var dcPromoTypeMeta = {
+	  discount: { icon: 'percent', label: {{ text_promo_discount|json_encode|raw }} },
+	  special: { icon: 'star', label: {{ text_promo_special|json_encode|raw }} },
+	  gift: { icon: 'gift', label: {{ text_promo_gift|json_encode|raw }} },
+	  bxgy: { icon: 'repeat', label: {{ text_promo_bxgy|json_encode|raw }} },
+	  bundle: { icon: 'layers', label: {{ text_promo_bundle|json_encode|raw }} }
+  };
+  var dcPromoTypeOrder = { discount: 0, special: 1, gift: 2, bxgy: 3, bundle: 4 };
+  var dcPromoProductLevelLabel = {{ text_promo_product_level|json_encode|raw }};
+
+  function dcPromoTypeOf($card) {
+	  var m = ($card.attr('id') || '').match(/^(discount|special|gift|bxgy|bundle)-row/);
+	  return m ? m[1] : '';
   }
 
-  function switchPromoTab(type) {
-	  if (dcPromoTypes.indexOf(type) === -1) {
-		  return;
+  function dcPromoIsGrouped() {
+	  return dcIsConfigurable && dcPromoVariants.length > 0;
+  }
+
+  function dcExpandPromoSection() {
+	  $('#dc-promo-section').removeClass('dc-promo-section--collapsed');
+	  $('#dc-promo-toggle').attr('aria-expanded', 'true');
+  }
+
+  function dcPromoTypeLabelHtml(type) {
+	  var meta = dcPromoTypeMeta[type];
+	  if (!meta) return '';
+	  return '<span class="dc-promo-card__type dc-promo-card__type--' + type + '"><i data-lucide="' + meta.icon + '" width="12" height="12"></i> ' + $('<i>').text(meta.label).html() + '</span>';
+  }
+
+  function dcAddPromoTypeLabels() {
+	  $('#promo-container .dc-promo-card').each(function() {
+		  var $card = $(this);
+		  if ($card.children('.dc-promo-card__type').length) return;
+		  var html = dcPromoTypeLabelHtml(dcPromoTypeOf($card));
+		  if (html) $card.prepend(html);
+	  });
+  }
+
+  function dcSortPromoCards($scope) {
+	  var $cards = $scope.children('.dc-promo-card');
+	  // Skip the DOM move when the order is already correct (moving nodes blurs the focused field)
+	  var order = $cards.map(function() {
+		  var t = dcPromoTypeOrder[dcPromoTypeOf($(this))];
+		  return t === undefined ? 99 : t;
+	  }).get();
+	  var sorted = true;
+	  for (var i = 1; i < order.length; i++) {
+		  if (order[i] < order[i - 1]) { sorted = false; break; }
 	  }
-
-	  dcPromoActiveTab = type;
-	  $('#promo-tabs .dc-promo-tab').removeClass('dc-promo-tab--active');
-	  $('#promo-tabs .dc-promo-tab[data-promo-tab="' + type + '"]').addClass('dc-promo-tab--active');
-	  $('#promo-container .dc-promo-pane').hide();
-	  $('#promo-pane-' + type).show();
-	  dcUpdatePromoEmptyState();
-	  dcUpdatePromoAddBtn();
+	  if (sorted) return;
+	  $cards.sort(function(a, b) {
+		  var ta = dcPromoTypeOrder[dcPromoTypeOf($(a))];
+		  var tb = dcPromoTypeOrder[dcPromoTypeOf($(b))];
+		  if (ta === undefined) ta = 99;
+		  if (tb === undefined) tb = 99;
+		  return ta - tb;
+	  });
+	  $cards.appendTo($scope);
   }
 
-  // Group server-rendered promo cards into per-type panes (tabs).
-  function dcGroupPromoCards() {
-	  dcPromoTypes.forEach(function(type) {
-		  if ($('#promo-pane-' + type).length === 0) {
-			  $('#promo-container').append('<div class="dc-promo-pane" id="promo-pane-' + type + '"></div>');
-		  }
-	  });
-
-	  $('#promo-container > .dc-promo-card').each(function() {
-		  var m = ($(this).attr('id') || '').match(/^(discount|special|gift|bxgy|bundle)-row/);
-
-		  if (m) {
-			  $(this).appendTo('#promo-pane-' + m[1]);
-		  }
-	  });
+  function dcFocusPromoCard($card) {
+	  if (!$card || !$card.length) return;
+	  setTimeout(function() {
+		  var $field = $card.find('input, select').filter(function() {
+			  return $(this).is(':visible') && $(this).attr('type') !== 'hidden';
+		  }).first();
+		  if ($field.length) $field.trigger('focus');
+	  }, 0);
   }
 
-  function dcRefreshPromoTabs() {
-	  dcPromoTypes.forEach(function(type) {
-		  var $pane = $('#promo-pane-' + type);
-		  // Count nested promo cards (inside variant groups or directly in pane)
-		  var n = $pane.find('.dc-promo-card').length;
-		  var $count = $('#promo-count-' + type);
-		  $count.text(n);
-
-		  if (n > 0) {
-			  $count.show();
-		  } else {
-			  $count.hide();
-		  }
+  function dcEnsureProductLevelLabel() {
+	  var $container = $('#promo-container');
+	  var $label = $container.children('.dc-promo-group-label');
+	  var $product = $container.children('.dc-promo-card').filter(function() {
+		  var t = dcPromoTypeOf($(this));
+		  return t === 'gift' || t === 'bxgy' || t === 'bundle';
 	  });
-
-	  dcUpdatePromoEmptyState();
-	  dcUpdatePromoAddBtn();
-	  if (dcIsConfigurable && dcPromoVariants.length) {
-		  dcUpdateVariantGroupCounts();
+	  if (dcPromoIsGrouped() && $product.length) {
+		  if (!$label.length) {
+			  $product.first().before('<div class="dc-promo-group-label"><i data-lucide="package" width="14" height="14"></i> ' + $('<i>').text(dcPromoProductLevelLabel).html() + '</div>');
+			  lucide.createIcons();
+		  }
+	  } else if ($label.length) {
+		  $label.remove();
 	  }
+  }
+
+  function dcOrganizePromoCards() {
+	  dcAddPromoTypeLabels();
+	  if (dcPromoIsGrouped()) {
+		  dcBuildVariantGroups();
+	  }
+	  dcSortPromoCards($('#promo-container'));
   }
 
   function dcUpdatePromoEmptyState() {
-	  var $pane = $('#promo-pane-' + dcPromoActiveTab);
+	  var total = $('#promo-container .dc-promo-card').length;
 	  var $empty = $('#promo-empty');
-
-	  if (!$pane.length) { $empty.hide(); return; }
-
-	  // For variant-grouped tabs (discount/special when configurable) empty is handled per group
-	  var isGrouped = dcIsConfigurable && dcPromoVariants.length && (dcPromoActiveTab === 'discount' || dcPromoActiveTab === 'special');
-	  if (isGrouped) {
-		  $empty.hide();
-		  // Per-group empty placeholders already indicate empty variants; global empty is not needed
-		  return;
-	  }
-
-	  if ($pane.find('.dc-promo-card').length === 0) {
-		  $pane.append($empty);
-		  $empty.show();
-	  } else {
-		  $empty.hide();
-	  }
+	  $('#promo-container').append($empty);
+	  $empty.toggle(total === 0 && !dcPromoIsGrouped());
   }
 
-  $(document).on('click', '.dc-promo-tab', function() {
-	  switchPromoTab($(this).data('promo-tab'));
+  // Reference date (server side) used to tell running / expired / scheduled promotions apart
+  var dcPromoToday = '{{ promo_today }}';
+
+  function dcPromoCardState($card) {
+	  var ds = (($card.find('input[name$="[date_start]"]').first().val()) || '').trim();
+	  var de = (($card.find('input[name$="[date_end]"]').first().val()) || '').trim();
+	  if (ds === '0000-00-00') ds = '';
+	  if (de === '0000-00-00') de = '';
+	  if (de && de < dcPromoToday) return 'expired';
+	  if (ds && ds > dcPromoToday) return 'scheduled';
+	  return 'active';
+  }
+
+  function dcUpdatePromoStats() {
+	  var active = 0, expired = 0, scheduled = 0;
+	  $('#promo-container .dc-promo-card').each(function() {
+		  var $card = $(this);
+		  var state = dcPromoCardState($card);
+		  if (state === 'expired') {
+			  expired++;
+		  } else if (state === 'scheduled') {
+			  scheduled++;
+		  } else {
+			  active++;
+		  }
+		  $card.toggleClass('dc-promo-card--expired', state === 'expired');
+		  if ($card.attr('data-promo-state') !== state) {
+			  $card.attr('data-promo-state', state);
+			  var $badge = $card.find('.dc-promo-card__state');
+			  if (state === 'expired') {
+				  if (!$badge.length) {
+					  $badge = $('<span class="dc-promo-card__state"><i data-lucide="triangle-alert" width="11" height="11"></i> {{ text_promo_expired_badge|e('js') }}</span>');
+					  $card.children('.dc-promo-card__actions').prepend($badge);
+					  lucide.createIcons();
+				  }
+			  } else {
+				  $badge.remove();
+			  }
+		  }
+	  });
+	  var $active = $('#dc-promo-active-count');
+	  $active.find('.dc-promo-stat__num').text(active);
+	  $active.prop('hidden', active === 0);
+	  var $expired = $('#dc-promo-expired-count');
+	  $expired.find('.dc-promo-stat__num').text(expired);
+	  $expired.prop('hidden', expired === 0);
+	  var $scheduled = $('#dc-promo-scheduled-count');
+	  $scheduled.find('.dc-promo-stat__num').text(scheduled);
+	  $scheduled.prop('hidden', scheduled === 0);
+  }
+
+  function dcRefreshPromoState() {
+	  dcAddPromoTypeLabels();
+	  dcSortPromoCards($('#promo-container'));
+	  var total = $('#promo-container .dc-promo-card').length;
+	  $('#promo-variant-controls').prop('hidden', !(dcPromoIsGrouped() && dcPromoVariants.length > 1));
+	  if (dcPromoIsGrouped()) {
+		  dcUpdateVariantGroupCounts();
+	  }
+	  dcEnsureProductLevelLabel();
+	  dcUpdatePromoStats();
+	  dcUpdatePromoEmptyState();
+  }
+
+  function dcClosePromoAddMenu() {
+	  $('#promo-add-menu').prop('hidden', true);
+	  $('#promo-add-btn').attr('aria-expanded', 'false');
+  }
+
+  function dcBuildPromoAddMenu() {
+	  var $grouped = $('#promo-add-menu [data-promo-add="discount"], #promo-add-menu [data-promo-add="special"]');
+	  $grouped.prop('hidden', dcPromoIsGrouped());
+  }
+
+  $(document).on('click', '#dc-promo-toggle', function() {
+	  var $section = $('#dc-promo-section');
+	  $section.toggleClass('dc-promo-section--collapsed');
+	  $(this).attr('aria-expanded', $section.hasClass('dc-promo-section--collapsed') ? 'false' : 'true');
   });
 
-  dcGroupPromoCards();
-  if (typeof dcBuildVariantGroups === 'function') { dcBuildVariantGroups(); }
-  dcRefreshPromoTabs();
-  switchPromoTab('discount');
+  // Reward points live in a collapsible sub-section of the Pricing panel.
+  function dcRewardsHasValues() {
+	  if ((parseInt($('#input-points').val(), 10) || 0) > 0) {
+		  return true;
+	  }
+	  var has = false;
+	  $('#dc-rewards-body input[name^="product_reward"]').each(function() {
+		  if ((parseInt($(this).val(), 10) || 0) > 0) {
+			  has = true;
+			  return false;
+		  }
+	  });
+	  return has;
+  }
+
+  function dcSetRewardsExpanded(expanded) {
+	  $('#dc-rewards-section').toggleClass('dc-rewards-section--collapsed', !expanded);
+	  $('#dc-rewards-toggle').attr('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  $(document).on('click', '#dc-rewards-toggle', function() {
+	  dcSetRewardsExpanded($('#dc-rewards-section').hasClass('dc-rewards-section--collapsed'));
+  });
+
+  // Products that already use points open the section right away.
+  $(document).ready(function() {
+	  if (dcRewardsHasValues()) {
+		  dcSetRewardsExpanded(true);
+	  }
+  });
+
+  // Keep the active / expired / scheduled counters in sync while the dates are edited
+  $(document).on('change keyup', '#promo-container input[name$="[date_start]"], #promo-container input[name$="[date_end]"]', function() {
+	  dcUpdatePromoStats();
+  });
+
+  $(document).on('click', '#promo-add-btn', function(e) {
+	  e.stopPropagation();
+	  if ($('#promo-add-menu').prop('hidden')) {
+		  $('#promo-add-menu').prop('hidden', false);
+		  $(this).attr('aria-expanded', 'true');
+	  } else {
+		  dcClosePromoAddMenu();
+	  }
+  });
+
+  $(document).on('click', '#promo-add-menu [data-promo-add]', function(e) {
+	  e.stopPropagation();
+	  dcClosePromoAddMenu();
+	  addPromoCard($(this).data('promo-add'));
+  });
+
+  $(document).on('click', function(e) {
+	  if (!$(e.target).closest('#promo-add-wrap').length) {
+		  dcClosePromoAddMenu();
+	  }
+  });
+
+  dcOrganizePromoCards();
+  dcBuildPromoAddMenu();
+  dcRefreshPromoState();
   lucide.createIcons();
 
   function removePromoCard(cardId) {
 	  var $card = $('#' + cardId);
-	  var $pane = $card.closest('.dc-promo-pane');
 	  var $group = $card.closest('.dc-variant-promo-group');
 	  $card.remove();
 	  if ($group.length) {
-		  var $body = $group.find('.dc-variant-promo-group__body');
-		  var remaining = $body.find('.dc-promo-card').length;
-		  var $count = $group.find('.dc-variant-promo-group__count');
-		  $count.text(remaining);
-		  $count.toggleClass('dc-variant-promo-group__count--zero', remaining === 0);
-		  if (remaining === 0 && $body.find('.dc-variant-promo-group__empty').length === 0) {
-			  $body.prepend('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
-			  lucide.createIcons();
-		  }
+		  dcUpdateVariantGroupCounts();
 	  }
-	  dcRefreshPromoTabs();
+	  dcRefreshPromoState();
   }
 
   function addPromoCard(type) {
+	  dcExpandPromoSection();
 	  if (type === 'discount') addDiscount();
 	  else if (type === 'special') addSpecial();
 	  else if (type === 'gift') addGift();
 	  else if (type === 'bxgy') addBxgy();
 	  else if (type === 'bundle') addBundle();
-	  dcRefreshPromoTabs();
+	  dcRefreshPromoState();
   }
-
-  $('#promo-add-btn').on('click', function(e) {
-	  e.stopPropagation();
-	  addPromoCard(dcPromoActiveTab);
-  });
 
   function dcPromoVariantFieldHtml(inputName, selectedId) {
     if (!dcIsConfigurable || !dcPromoVariants.length) {
@@ -2609,190 +2705,153 @@
   }
 
   function dcUpdateVariantGroupCounts() {
-    if (!dcIsConfigurable || !dcPromoVariants.length) return;
-    ['discount','special'].forEach(function(type) {
-      var $pane = $('#promo-pane-' + type);
-      $pane.find('.dc-variant-promo-group').each(function() {
-        var $group = $(this);
-        var $body = $group.find('.dc-variant-promo-group__body');
-        var n = $body.find('.dc-promo-card').length;
-        var $cnt = $group.find('.dc-variant-promo-group__count').first();
-        $cnt.text(n);
-        $cnt.toggleClass('dc-variant-promo-group__count--zero', n === 0);
-      });
-    });
+	  $('#promo-container .dc-variant-promo-group').each(function() {
+		  var $group = $(this);
+		  var $body = $group.find('.dc-variant-promo-group__body');
+		  var n = $body.find('.dc-promo-card').length;
+		  var $cnt = $group.find('.dc-variant-promo-group__count').first();
+		  $cnt.text(n);
+		  $cnt.toggleClass('dc-variant-promo-group__count--zero', n === 0);
+		  var $empty = $body.find('.dc-variant-promo-group__empty');
+		  if (n === 0 && !$empty.length) {
+			  $body.find('.dc-variant-promo-group__add').before('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
+		  } else if (n > 0 && $empty.length) {
+			  $empty.remove();
+		  }
+	  });
+  }
+
+  function dcVariantGroupAddHtml(variantId) {
+	  return '<div class="dc-variant-promo-group__add">'
+		  + '<button type="button" class="btn btn-default btn-xs" onclick="addPromoForVariant(\'discount\',' + variantId + ')"><i data-lucide="percent" width="12" height="12"></i> {{ text_promo_discount|e('js') }}</button>'
+		  + '<button type="button" class="btn btn-default btn-xs" onclick="addPromoForVariant(\'special\',' + variantId + ')"><i data-lucide="star" width="12" height="12"></i> {{ text_promo_special|e('js') }}</button>'
+		  + '</div>';
+  }
+
+  function dcBindVariantGroupEvents() {
+	  $(document).off('click.dcVariantGroup').on('click.dcVariantGroup', '#promo-container .dc-variant-promo-group__header', function() {
+		  $(this).closest('.dc-variant-promo-group').toggleClass('dc-variant-promo-group--collapsed');
+	  });
+	  $(document).off('click.dcVariantExpand').on('click.dcVariantExpand', '.dc-variant-expand-all', function() {
+		  $('#promo-container .dc-variant-promo-group').removeClass('dc-variant-promo-group--collapsed');
+	  });
+	  $(document).off('click.dcVariantCollapse').on('click.dcVariantCollapse', '.dc-variant-collapse-all', function() {
+		  $('#promo-container .dc-variant-promo-group').addClass('dc-variant-promo-group--collapsed');
+	  });
+	  $(document).off('change.dcVariantMove').on('change.dcVariantMove', '#promo-container .dc-promo-card select[name$="[variant_id]"]', function() {
+		  var $sel = $(this);
+		  var $card = $sel.closest('.dc-promo-card');
+		  var newVid = parseInt($sel.val()) || 0;
+		  var $targetGroup = $('#promo-container .dc-variant-promo-group[data-variant-id="' + newVid + '"]');
+		  if (!$targetGroup.length) return;
+		  var $targetBody = $targetGroup.find('.dc-variant-promo-group__body');
+		  var $targetAdd = $targetBody.find('.dc-variant-promo-group__add');
+		  if ($targetAdd.length) $card.insertBefore($targetAdd); else $targetBody.append($card);
+		  dcUpdateVariantGroupCounts();
+		  dcRefreshPromoState();
+		  $targetGroup.removeClass('dc-variant-promo-group--collapsed');
+		  lucide.createIcons();
+	  });
   }
 
   function dcBuildVariantGroups() {
-    if (!dcIsConfigurable || !dcPromoVariants.length) return;
-    ['discount','special'].forEach(function(type) {
-      var $pane = $('#promo-pane-' + type);
-      if (!$pane.length) return;
-      if ($pane.find('.dc-variant-promo-group').length) return;
-      var $cards = $pane.children('.dc-promo-card');
-      // Also include locked cards that are direct children
-      if (!$cards.length && $pane.find('.dc-promo-card').length === 0) {
-        $cards = $pane.find('.dc-promo-card');
-      }
-      // Collect cards by variant
-      var groups = {};
-      var lockedCards = [];
-      $cards.each(function() {
-        var $card = $(this);
-        if ($card.hasClass('dc-promo-card--locked')) {
-          lockedCards.push($card);
-          return;
-        }
-        var $sel = $card.find('select[name$="[variant_id]"]');
-        var vid = $sel.length ? (parseInt($sel.val()) || 0) : 0;
-        // If card has variant select but val is 0 due to not yet selected, treat as first variant
-        if (vid === 0 && $sel.length && dcPromoVariants.length) {
-          vid = parseInt(dcPromoVariants[0].variant_id);
-          $sel.val(vid);
-        }
-        var key = String(vid);
-        if (!groups[key]) groups[key] = [];
-        groups[key].push($card);
-      });
+	  if (!dcPromoIsGrouped()) return;
+	  var $container = $('#promo-container');
+	  var $cards = $container.find('.dc-promo-card').filter(function() {
+		  var t = dcPromoTypeOf($(this));
+		  return t === 'discount' || t === 'special';
+	  });
 
-      // If pane was empty after previous grouping attempt (no cards), groups will be empty
-      // Clear pane for rebuilding but keep global empty placeholder aside
-      var $empty = $('#promo-empty').detach();
-      $pane.empty();
+	  var groups = {};
+	  var lockedCards = [];
+	  var $newGroups = $();
+	  $cards.each(function() {
+		  var $card = $(this);
+		  if ($card.hasClass('dc-promo-card--locked')) { lockedCards.push($card); return; }
+		  var $sel = $card.find('select[name$="[variant_id]"]');
+		  var vid = $sel.length ? (parseInt($sel.val()) || 0) : 0;
+		  if (vid === 0 && $sel.length && dcPromoVariants.length) {
+			  vid = parseInt(dcPromoVariants[0].variant_id);
+			  $sel.val(vid);
+		  }
+		  var key = String(vid);
+		  if (!groups[key]) groups[key] = [];
+		  groups[key].push($card);
+	  });
 
-      // Controls: expand / collapse all (only when there is at least one variant group)
-      if (dcPromoVariants.length > 1) {
-        var $controls = $('<div class="dc-variant-promo-controls"></div>');
-        $controls.append('<button type="button" class="btn btn-default btn-xs dc-variant-expand-all"><i data-lucide="chevron-down" width="12" height="12"></i> {{ text_variant_group_expand_all|e('js') }}</button>');
-        $controls.append('<button type="button" class="btn btn-default btn-xs dc-variant-collapse-all"><i data-lucide="chevron-up" width="12" height="12"></i> {{ text_variant_group_collapse_all|e('js') }}</button>');
-        $pane.append($controls);
-      }
+	  // Drop previously built groups (cards are re-parented below; detach keeps handlers)
+	  $container.find('.dc-variant-promo-group').detach();
 
-      if (lockedCards.length) {
-        var $lockedGroup = $('<div class="dc-variant-promo-group dc-variant-promo-group--locked" data-variant-id="0"></div>');
-        var lockedHeader = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title"><i data-lucide="lock" width="12" height="12"></i> {{ text_promo_scope_product|e('js') }} <span class="dc-variant-promo-group__count">' + lockedCards.length + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
-        $lockedGroup.append(lockedHeader);
-        var $lockedBody = $('<div class="dc-variant-promo-group__body"></div>');
-        lockedCards.forEach(function($c){ $lockedBody.append($c); });
-        $lockedGroup.append($lockedBody);
-        // locked group collapsed by default if many variant groups
-        $lockedGroup.addClass('dc-variant-promo-group--collapsed');
-        $pane.append($lockedGroup);
-      }
+	  if (lockedCards.length) {
+		  var $lockedGroup = $('<div class="dc-variant-promo-group dc-variant-promo-group--locked" data-variant-id="0"></div>');
+		  var lockedHeader = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title"><i data-lucide="lock" width="12" height="12"></i> {{ text_promo_scope_product|e('js') }} <span class="dc-variant-promo-group__count">' + lockedCards.length + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+		  $lockedGroup.append(lockedHeader);
+		  var $lockedBody = $('<div class="dc-variant-promo-group__body"></div>');
+		  lockedCards.forEach(function($c) { $lockedBody.append($c); });
+		  $lockedGroup.append($lockedBody);
+		  $lockedGroup.addClass('dc-variant-promo-group--collapsed');
+		  $newGroups = $newGroups.add($lockedGroup);
+	  }
 
-      dcPromoVariants.forEach(function(v) {
-        var vid = String(v.variant_id);
-        var list = groups[vid] || [];
-        var count = list.length;
-        var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + vid + '"></div>');
-        var labelEsc = $('<span>').text(v.label).html();
-        var isDef = v.is_default ? ' <span class="dc-variant-promo-group__default">{{ text_variant_is_default|e('js') }}</span>' : '';
-        var countClass = count ? '' : ' dc-variant-promo-group__count--zero';
-        var headerHtml = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">' + labelEsc + isDef + ' <span class="dc-variant-promo-group__count' + countClass + '">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
-        $group.append(headerHtml);
-        var $body = $('<div class="dc-variant-promo-group__body"></div>');
-        if (count) {
-          list.forEach(function($c){ $body.append($c); });
-        } else {
-          $body.append('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
-        }
-        $body.append('<div class="dc-variant-promo-group__add"><button type="button" class="btn btn-default btn-xs" onclick="addPromoForVariant(\'' + type + '\',' + v.variant_id + ')"><i data-lucide="plus" width="12" height="12"></i> {{ button_add|e('js') }}</button></div>');
-        $group.append($body);
-        $group.addClass('dc-variant-promo-group--collapsed');
-        $pane.append($group);
-      });
+	  dcPromoVariants.forEach(function(v) {
+		  var vid = String(v.variant_id);
+		  var list = groups[vid] || [];
+		  var count = list.length;
+		  var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + vid + '"></div>');
+		  var labelEsc = $('<span>').text(v.label).html();
+		  var isDef = v.is_default ? ' <span class="dc-variant-promo-group__default">{{ text_variant_is_default|e('js') }}</span>' : '';
+		  var countClass = count ? '' : ' dc-variant-promo-group__count--zero';
+		  var headerHtml = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">' + labelEsc + isDef + ' <span class="dc-variant-promo-group__count' + countClass + '">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+		  $group.append(headerHtml);
+		  var $body = $('<div class="dc-variant-promo-group__body"></div>');
+		  list.forEach(function($c) { $body.append($c); });
+		  if (!count) {
+			  $body.append('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
+		  }
+		  $body.append(dcVariantGroupAddHtml(v.variant_id));
+		  $group.append($body);
+		  $group.addClass('dc-variant-promo-group--collapsed');
+		  $newGroups = $newGroups.add($group);
+	  });
 
-      // Orphan groups for variant_ids not in dcPromoVariants but with cards
-      Object.keys(groups).forEach(function(k){
-        var found = dcPromoVariants.some(function(v){ return String(v.variant_id)===k; });
-        if (!found && k!=='0') {
-          var list = groups[k];
-          var count = list.length;
-          var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + k + '"></div>');
-          var headerHtml2 = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">#' + k + ' <span class="dc-variant-promo-group__count">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
-          $group.append(headerHtml2);
-          var $body2 = $('<div class="dc-variant-promo-group__body"></div>');
-          list.forEach(function($c){ $body2.append($c); });
-          $group.append($body2);
-          $group.addClass('dc-variant-promo-group--collapsed');
-          $pane.append($group);
-        }
-      });
+	  Object.keys(groups).forEach(function(k) {
+		  var found = dcPromoVariants.some(function(v) { return String(v.variant_id) === k; });
+		  if (!found && k !== '0') {
+			  var list = groups[k];
+			  var count = list.length;
+			  var $group = $('<div class="dc-variant-promo-group" data-variant-id="' + k + '"></div>');
+			  var headerHtml2 = '<div class="dc-variant-promo-group__header"><span class="dc-variant-promo-group__title">#' + k + ' <span class="dc-variant-promo-group__count">' + count + '</span></span><span class="dc-variant-promo-group__toggle"><i data-lucide="chevron-down" width="14" height="14"></i></span></div>';
+			  $group.append(headerHtml2);
+			  var $body2 = $('<div class="dc-variant-promo-group__body"></div>');
+			  list.forEach(function($c) { $body2.append($c); });
+			  $body2.append(dcVariantGroupAddHtml(parseInt(k) || 0));
+			  $group.append($body2);
+			  $group.addClass('dc-variant-promo-group--collapsed');
+			  $newGroups = $newGroups.add($group);
+		  }
+	  });
 
-      // Re-append global empty if pane still has no cards overall (will be handled by dcUpdatePromoEmptyState)
-      // Keep groups even when empty; hide per-group empty placeholders if global empty shown is handled there
-      lucide.createIcons();
-    });
+	  // Variant groups stay above the product-level cards
+	  var $anchor = $container.children('.dc-promo-card').first();
+	  $newGroups.each(function() {
+		  if ($anchor.length) {
+			  $(this).insertBefore($anchor);
+		  } else {
+			  $container.append(this);
+		  }
+	  });
 
-    // Bind header toggle (delegated)
-    $(document).off('click.dcVariantGroup').on('click.dcVariantGroup', '.dc-variant-promo-group__header', function(){
-      $(this).closest('.dc-variant-promo-group').toggleClass('dc-variant-promo-group--collapsed');
-    });
-    // Expand / collapse all
-    $(document).off('click.dcVariantExpand').on('click.dcVariantExpand', '.dc-variant-expand-all', function(){
-      $(this).closest('.dc-promo-pane').find('.dc-variant-promo-group').removeClass('dc-variant-promo-group--collapsed');
-    });
-    $(document).off('click.dcVariantCollapse').on('click.dcVariantCollapse', '.dc-variant-collapse-all', function(){
-      $(this).closest('.dc-promo-pane').find('.dc-variant-promo-group').addClass('dc-variant-promo-group--collapsed');
-    });
-    // Handle moving card when variant selector changes
-    $(document).off('change.dcVariantMove').on('change.dcVariantMove', '#promo-pane-discount select[name$="[variant_id]"], #promo-pane-special select[name$="[variant_id]"]', function(){
-      var $sel = $(this);
-      var $card = $sel.closest('.dc-promo-card');
-      var newVid = parseInt($sel.val()) || 0;
-      var $pane = $card.closest('.dc-promo-pane');
-      var type = ($pane.attr('id')||'').replace('promo-pane-','');
-      var $targetGroup = $pane.find('.dc-variant-promo-group[data-variant-id="' + newVid + '"]');
-      if (!$targetGroup.length) return;
-      var $targetBody = $targetGroup.find('.dc-variant-promo-group__body');
-      var $targetAdd = $targetBody.find('.dc-variant-promo-group__add');
-      // Move card before the add button
-      if ($targetAdd.length) $card.insertBefore($targetAdd); else $targetBody.append($card);
-      // Cleanup source group empty state
-      var $sourceGroup = $card.data('sourceGroup'); // not needed
-      // Update counts for all groups in pane
-      $pane.find('.dc-variant-promo-group').each(function(){
-        var $g = $(this);
-        var cnt = $g.find('.dc-variant-promo-group__body .dc-promo-card').length;
-        var $cnt = $g.find('.dc-variant-promo-group__count').first();
-        $cnt.text(cnt);
-        $cnt.toggleClass('dc-variant-promo-group__count--zero', cnt===0);
-        var $empty = $g.find('.dc-variant-promo-group__empty');
-        if (cnt===0 && !$empty.length) {
-          $g.find('.dc-variant-promo-group__body').prepend('<div class="dc-variant-promo-group__empty">{{ text_variant_group_empty|e('js') }}</div>');
-        } else if (cnt>0) {
-          $empty.remove();
-        }
-      });
-      dcRefreshPromoTabs();
-      // Ensure target group is expanded
-      $targetGroup.removeClass('dc-variant-promo-group--collapsed');
-      lucide.createIcons();
-    });
+	  dcBindVariantGroupEvents();
+	  lucide.createIcons();
   }
 
   function addPromoForVariant(type, variantId) {
-    // Switch to the correct promo tab first
-    switchPromoTab(type);
-    if (type === 'discount') addDiscount(variantId);
-    else if (type === 'special') addSpecial(variantId);
-    // Expand the target group
-    var $g = $('#promo-pane-' + type + ' .dc-variant-promo-group[data-variant-id="' + variantId + '"]');
-    $g.removeClass('dc-variant-promo-group--collapsed');
-    dcRefreshPromoTabs();
-  }
-
-  // Initial variant grouping – runs after all promo helpers are defined
-  // (the earlier dcGroupPromoCards() call already populated panes per type)
-  if (dcIsConfigurable && dcPromoVariants.length) {
-    // If groups not yet built (early call was before function definition), build now
-    if ($('#promo-pane-discount .dc-variant-promo-group').length === 0 && $('#promo-pane-special .dc-variant-promo-group').length === 0) {
-      dcBuildVariantGroups();
-      dcRefreshPromoTabs();
-      // Keep the initially active tab as discount after regrouping
-      switchPromoTab(dcPromoActiveTab);
-      lucide.createIcons();
-    }
+	  dcExpandPromoSection();
+	  if (type === 'discount') addDiscount(variantId);
+	  else if (type === 'special') addSpecial(variantId);
+	  var $g = $('#promo-container .dc-variant-promo-group[data-variant-id="' + variantId + '"]');
+	  $g.removeClass('dc-variant-promo-group--collapsed');
+	  dcRefreshPromoState();
   }
 
 
@@ -2838,30 +2897,28 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  // Place card into variant group if grouping is active, otherwise directly into pane
-	  var $paneD = $('#promo-pane-discount');
-	  if (dcIsConfigurable && dcPromoVariants.length && $paneD.find('.dc-variant-promo-group').length) {
-		  var $targetGroupD = $paneD.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
+	  // Place card into its variant group if grouping is active, otherwise directly into the list
+	  var $containerD = $('#promo-container');
+	  var $cardD = $(html);
+	  if (dcPromoIsGrouped() && $containerD.find('.dc-variant-promo-group').length) {
+		  var $targetGroupD = $containerD.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
 		  if ($targetGroupD.length) {
 			  var $bodyD = $targetGroupD.find('.dc-variant-promo-group__body');
 			  var $addBtnD = $bodyD.find('.dc-variant-promo-group__add');
-			  // Create jQuery element from html to insert before add button
-			  var $newCardD = $(html);
-			  if ($addBtnD.length) $newCardD.insertBefore($addBtnD); else $bodyD.append($newCardD);
-			  // Remove empty placeholder if exists
+			  if ($addBtnD.length) $cardD.insertBefore($addBtnD); else $bodyD.append($cardD);
 			  $bodyD.find('.dc-variant-promo-group__empty').remove();
-			  html = null;
 			  $targetGroupD.removeClass('dc-variant-promo-group--collapsed');
 		  } else {
-			  $paneD.append(html);
+			  $containerD.append($cardD);
 		  }
 	  } else {
-		  $paneD.append(html);
+		  $containerD.append($cardD);
 	  }
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ pickTime: false });
 	  discount_row++;
-	  dcRefreshPromoTabs();
+	  dcFocusPromoCard($cardD);
+	  dcRefreshPromoState();
   }
 
   var special_row = {{ special_row }};
@@ -2903,27 +2960,27 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  var $paneS = $('#promo-pane-special');
-	  if (dcIsConfigurable && dcPromoVariants.length && $paneS.find('.dc-variant-promo-group').length) {
-		  var $targetGroupS = $paneS.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
+	  var $containerS = $('#promo-container');
+	  var $cardS = $(html);
+	  if (dcPromoIsGrouped() && $containerS.find('.dc-variant-promo-group').length) {
+		  var $targetGroupS = $containerS.find('.dc-variant-promo-group[data-variant-id="' + selVid + '"]');
 		  if ($targetGroupS.length) {
 			  var $bodyS = $targetGroupS.find('.dc-variant-promo-group__body');
 			  var $addBtnS = $bodyS.find('.dc-variant-promo-group__add');
-			  var $newCardS = $(html);
-			  if ($addBtnS.length) $newCardS.insertBefore($addBtnS); else $bodyS.append($newCardS);
+			  if ($addBtnS.length) $cardS.insertBefore($addBtnS); else $bodyS.append($cardS);
 			  $bodyS.find('.dc-variant-promo-group__empty').remove();
-			  html = null;
 			  $targetGroupS.removeClass('dc-variant-promo-group--collapsed');
 		  } else {
-			  $paneS.append(html);
+			  $containerS.append($cardS);
 		  }
 	  } else {
-		  $paneS.append(html);
+		  $containerS.append($cardS);
 	  }
 	  lucide.createIcons();
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  special_row++;
-	  dcRefreshPromoTabs();
+	  dcFocusPromoCard($cardS);
+	  dcRefreshPromoState();
   }
 
   var gift_row = {{ gift_row }};
@@ -2958,11 +3015,13 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-pane-gift').append(html);
+	  var $cardGift = $(html);
+	  $('#promo-container').append($cardGift);
 	  lucide.createIcons();
 	  giftAutocomplete(gift_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  gift_row++;
+	  dcFocusPromoCard($cardGift);
   }
 
   function giftAutocomplete(gift_row) {
@@ -3041,11 +3100,13 @@
 	  html += '  </div>';
 	  html += '</div>';
 
-	  $('#promo-pane-bxgy').append(html);
+	  var $cardBxgy = $(html);
+	  $('#promo-container').append($cardBxgy);
 	  lucide.createIcons();
 	  bxgyAutocomplete(bxgy_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  bxgy_row++;
+	  dcFocusPromoCard($cardBxgy);
   }
 
   function bxgyAutocomplete(bxgy_row) {
@@ -3130,11 +3191,13 @@
 	  html += '  <div class="bundle-selected-products" id="bundle-selected-' + bundle_row + '"></div>';
 	  html += '</div>';
 
-	  $('#promo-pane-bundle').append(html);
+	  var $cardBundle = $(html);
+	  $('#promo-container').append($cardBundle);
 	  lucide.createIcons();
 	  bundleAutocomplete(bundle_row);
 	  $('.date').datetimepicker({ language: '{{ datepicker }}', pickTime: false });
 	  bundle_row++;
+	  dcFocusPromoCard($cardBundle);
   }
 
   function bundleAutocomplete(row) {
@@ -3195,11 +3258,11 @@
 		  if (!confirm('{{ text_bundle_delete_confirm }}')) return;
 		  $.post('index.php?route=catalog/product/deleteBundle&user_token={{ user_token }}', { bundle_id: bundleId }, function(json) {
 			  $('#' + cardId).remove();
-			  dcRefreshPromoTabs();
+			  dcRefreshPromoState();
 		  }, 'json');
 	  } else {
 		  $('#' + cardId).remove();
-		  dcRefreshPromoTabs();
+		  dcRefreshPromoState();
 	  }
   }
 

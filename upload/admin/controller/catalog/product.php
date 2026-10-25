@@ -1131,6 +1131,8 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_panel_gifts_subtitle']       = $this->language->get('text_panel_gifts_subtitle');
 		$data['text_panel_rewards_title']        = $this->language->get('text_panel_rewards_title');
 		$data['text_panel_rewards_subtitle']     = $this->language->get('text_panel_rewards_subtitle');
+		$data['text_rewards_purchase_title']     = $this->language->get('text_rewards_purchase_title');
+		$data['text_rewards_earned_title']      = $this->language->get('text_rewards_earned_title');
 		$data['text_panel_seo_title']            = $this->language->get('text_panel_seo_title');
 		$data['text_panel_seo_subtitle']         = $this->language->get('text_panel_seo_subtitle');
 		$data['text_panel_design_title']         = $this->language->get('text_panel_design_title');
@@ -1142,6 +1144,7 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_panel_promo_title']    = $this->language->get('text_panel_promo_title');
 		$data['text_panel_promo_subtitle'] = $this->language->get('text_panel_promo_subtitle');
 		$data['text_no_promo']             = $this->language->get('text_no_promo');
+		$data['text_promo_product_level']  = $this->language->get('text_promo_product_level');
 		$data['text_promo_discount']       = $this->language->get('text_promo_discount');
 		$data['text_promo_special']        = $this->language->get('text_promo_special');
 		$data['text_promo_gift']           = $this->language->get('text_promo_gift');
@@ -2558,6 +2561,9 @@ class ControllerCatalogProduct extends Controller {
 		$data['discount_row'] = count($data['product_discounts']);
 		$data['special_row']  = count($data['product_specials']);
 		$data['gift_row']     = count($data['product_gifts']);
+
+		// Reference date used by the admin UI to tell running / expired / scheduled promotions apart
+		$data['promo_today'] = date('Y-m-d');
 		$data['bxgy_row']     = count($data['product_bxgy_rules']);
 		$data['bundle_row']   = count($data['product_bundles']);
 

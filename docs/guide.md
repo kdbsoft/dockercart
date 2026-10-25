@@ -721,7 +721,7 @@ Configurable products support per-variant special prices via the
 
 BXGY promotions give customers a discount on a reward product when they buy a
 qualifying trigger product. Rules are configured per-product in the admin
-product edit form (Promotions section), similar to Gift Promotions.
+product edit form under Pricing → Promotions, similar to Gift Promotions.
 
 ### Data Model
 
@@ -761,7 +761,7 @@ Library: `system/library/bxgy.php`
 
 ### Admin UI
 
-- Open product → Promotions section → Add Promotion → Buy X Get Y.
+- Open product → Pricing → Promotions → Add → Buy X Get Y.
 - Each BXGY card has: Reward Product (autocomplete), Trigger Quantity,
   Discount Type (Free/Percentage), Discount Value, Date Range, Auto-renew.
 
