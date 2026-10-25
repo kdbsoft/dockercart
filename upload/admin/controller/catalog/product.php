@@ -1521,6 +1521,14 @@ class ControllerCatalogProduct extends Controller {
 			$data['discontinued'] = 0;
 		}
 
+		if (isset($this->request->post['no_online_payment'])) {
+			$data['no_online_payment'] = (int)$this->request->post['no_online_payment'];
+		} elseif (!empty($product_info)) {
+			$data['no_online_payment'] = (int)($product_info['no_online_payment'] ?? 0);
+		} else {
+			$data['no_online_payment'] = 0;
+		}
+
 		if (isset($this->request->post['status'])) {
 			$data['status'] = $this->request->post['status'];
 		} elseif (!empty($product_info)) {

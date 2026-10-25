@@ -6587,6 +6587,15 @@
             ],
             "default": 0
           },
+          "no_online_payment": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "default": 0,
+            "description": "1 = the product cannot be paid online; offline payment methods only."
+          },
           "call_for_price": {
             "type": "integer",
             "enum": [

@@ -103,6 +103,7 @@ final class Product {
 			'subtract'         => 1,
 			'preorder'         => 0,
 			'discontinued'     => 0,
+			'no_online_payment' => 0,
 			'call_for_price'   => 0,
 			'date_available'   => date('Y-m-d'),
 			'manufacturer_id'  => 0,
@@ -150,7 +151,7 @@ final class Product {
 			}
 		}
 
-		foreach (['subtract', 'preorder', 'discontinued', 'call_for_price', 'manufacturer_id', 'main_category_id', 'shipping', 'points', 'currency_id', 'weight_class_id', 'length_class_id', 'tax_class_id', 'sort_order', 'status'] as $key) {
+		foreach (['subtract', 'preorder', 'discontinued', 'no_online_payment', 'call_for_price', 'manufacturer_id', 'main_category_id', 'shipping', 'points', 'currency_id', 'weight_class_id', 'length_class_id', 'tax_class_id', 'sort_order', 'status'] as $key) {
 			if (array_key_exists($key, $data)) {
 				$payload[$key] = (int)$data[$key];
 			}
@@ -427,6 +428,7 @@ final class Product {
 			'subtract'         => ['int', 'in:0,1'],
 			'preorder'         => ['int', 'in:0,1'],
 			'discontinued'     => ['int', 'in:0,1'],
+			'no_online_payment' => ['int', 'in:0,1'],
 			'call_for_price'   => ['int', 'in:0,1'],
 			'date_available'   => ['date'],
 			'manufacturer_id'  => ['int', 'min:0'],

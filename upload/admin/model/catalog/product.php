@@ -46,6 +46,8 @@ class ModelCatalogProduct extends Model
                 (int) ($data["preorder"] ?? 0) .
                 "', discontinued = '" .
                 (int) ($data["discontinued"] ?? 0) .
+                "', no_online_payment = '" .
+                (int) ($data["no_online_payment"] ?? 0) .
                 "', date_available = '" .
                 $this->db->escape($data["date_available"]) .
                 "', manufacturer_id = '" .
@@ -1172,6 +1174,8 @@ class ModelCatalogProduct extends Model
                 (int) ($data["preorder"] ?? 0) .
                 "', discontinued = '" .
                 (int) ($data["discontinued"] ?? 0) .
+                "', no_online_payment = '" .
+                (int) ($data["no_online_payment"] ?? 0) .
                 "', date_available = '" .
                 $this->db->escape($data["date_available"]) .
                 "', manufacturer_id = '" .
