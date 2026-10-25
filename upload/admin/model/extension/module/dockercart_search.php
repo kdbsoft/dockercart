@@ -636,7 +636,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore->query("CREATE TABLE orders (
-            id BIGINT PRIMARY KEY,
+            id BIGINT,
             order_number TEXT,
             firstname TEXT,
             lastname TEXT,
@@ -693,7 +693,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore->query("CREATE TABLE customers (
-            id BIGINT PRIMARY KEY,
+            id BIGINT,
             firstname TEXT,
             lastname TEXT,
             email TEXT,
@@ -863,7 +863,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
         }
 
         $manticore->query("CREATE TABLE blog_posts (
-            id BIGINT PRIMARY KEY,
+            id BIGINT,
             title TEXT,
             excerpt TEXT,
             content TEXT,
@@ -964,6 +964,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'categories'       => implode(' ', $categories),
             'image'            => (string)($post['image'] ?? ''),
         ];
+
+        // Self-heal: the blog_posts RT table is declared in manticore.conf, but
+        // volumes created before that config change never got the table. Creating
+        // it here (idempotent, no-op when it already exists) keeps article saves
+        // working on stale Manticore instances.
+        $this->createBlogPostIndexSchema();
 
         return $manticore->replace('blog_posts', $doc);
     }

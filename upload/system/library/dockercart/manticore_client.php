@@ -86,9 +86,20 @@ class ManticoreClient {
             return false;
         }
 
-        // Suppress warnings from mysqli for expected server-side errors (eg. "field already in schema").
-        // We still read the error via $this->connection->error when $result` is false.
-        $result = @$this->connection->query($query);
+        try {
+            // Suppress warnings from mysqli for expected server-side errors (eg. "field already in schema").
+            // We still read the error via $this->connection->error when $result is false.
+            $result = @$this->connection->query($query);
+        } catch (\Throwable $e) {
+            // PHP 8.1+ enables mysqli's exception mode by default, so server-side
+            // errors (eg. "table does not exist") are thrown as
+            // mysqli_sql_exception instead of just emitting a warning. The `@`
+            // operator does NOT suppress exceptions. Callers of query() expect a
+            // clean false + getLastError() contract — a broken search index must
+            // never bubble up and roll back an order or an article save.
+            $this->last_error = 'Query error: ' . $e->getMessage();
+            return false;
+        }
 
         if (!$result) {
             $this->last_error = 'Query error: ' . $this->connection->error;
