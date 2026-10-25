@@ -3831,6 +3831,7 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
 .dc-opts-toolbar .form-control {
     width: auto;
     min-width: 170px;
+    max-width: 220px;
     height: 30px;
     font-size: 12.5px;
 }

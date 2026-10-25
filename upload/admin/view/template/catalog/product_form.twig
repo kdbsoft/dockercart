@@ -1010,18 +1010,20 @@
                     </button>
                     <span id="dc-mode-saved" class="dc-opts-toolbar__saved" style="display:none"><i data-lucide="check" width="13" height="13"></i> {{ text_success_mode }}</span>
                     <span class="dc-opts-toolbar__spacer"></span>
-                    <label for="dc-option-set-select" class="dc-opts-toolbar__label">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}" data-toggle="tooltip"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span></label>
-                    <select id="dc-option-set-select" class="form-control input-sm">
-                      <option value=""></option>
-                      {% for option_set in option_sets %}
-                      <option value="{{ option_set.option_set_id }}">{{ option_set.name }} ({{ option_set.option_count }})</option>
-                      {% else %}
-                      <option value="" disabled="disabled">{{ text_no_option_sets }}</option>
-                      {% endfor %}
-                    </select>
-                    <button type="button" class="btn btn-default btn-sm" onclick="loadOptionSet();">
-                      <i data-lucide="download" width="13" height="13"></i> {{ button_option_set_load }}
-                    </button>
+                    <div class="dc-opts-toolbar__set-group" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:nowrap;">
+                      <label for="dc-option-set-select" class="dc-opts-toolbar__label" style="margin:0;white-space:nowrap;">{{ text_option_set_selector }} <span title="{{ text_help_option_set }}" data-toggle="tooltip"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span></label>
+                      <select id="dc-option-set-select" class="form-control input-sm" style="max-width:220px;">
+                        <option value=""></option>
+                        {% for option_set in option_sets %}
+                        <option value="{{ option_set.option_set_id }}">{{ option_set.name }} ({{ option_set.option_count }})</option>
+                        {% else %}
+                        <option value="" disabled="disabled">{{ text_no_option_sets }}</option>
+                        {% endfor %}
+                      </select>
+                      <button type="button" class="btn btn-default btn-sm" onclick="loadOptionSet();" style="white-space:nowrap;">
+                        <i data-lucide="download" width="13" height="13"></i> {{ button_option_set_load }}
+                      </button>
+                    </div>
                   </div>
 
                   <div id="dc-variants-section" {% if not is_configurable %}style="display:none"{% endif %}>
