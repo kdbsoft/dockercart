@@ -13,9 +13,6 @@
         } %}
         <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-blue-400 mb-1"><span class="w-4 h-px bg-blue-400"></span>{{ text_brand }}</p>
         <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{{ heading_title }}</h1>
-        {% if description %}
-        <p class="text-sm sm:text-base text-gray-200 mt-2 max-w-xl line-clamp-2">{{ description|striptags }}</p>
-        {% endif %}
       </div>
     </div>
   </section>
@@ -149,6 +146,16 @@
           </div>
           {% endif %}
 
+          {% else %}
+          <div class="flex flex-col items-center justify-center py-24 text-center">
+            <i data-lucide="package-x" class="w-16 h-16 text-gray-200 mb-4"></i>
+            <p class="text-lg font-semibold text-gray-500">{{ text_empty }}</p>
+            <a href="{{ continue }}" class="mt-6 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition">
+              {{ button_continue }}
+            </a>
+          </div>
+          {% endif %}
+
           {% if description %}
           <div class="mt-10 bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-8">
                 <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-2"><span class="w-4 h-px bg-gray-300"></span>{{ text_about_brand }}</p>
@@ -169,16 +176,6 @@
                 <p class="text-sm font-semibold text-gray-900">{{ text_support_desc }}</p>
               </div>
             </div>
-          </div>
-          {% endif %}
-
-          {% else %}
-          <div class="flex flex-col items-center justify-center py-24 text-center">
-            <i data-lucide="package-x" class="w-16 h-16 text-gray-200 mb-4"></i>
-            <p class="text-lg font-semibold text-gray-500">{{ text_empty }}</p>
-            <a href="{{ continue }}" class="mt-6 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition">
-              {{ button_continue }}
-            </a>
           </div>
           {% endif %}
         </div>
