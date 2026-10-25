@@ -1,3 +1,17 @@
+## [3.41.0](https://github.com/kdbsoft/dockercart/compare/v3.40.0...v3.41.0) (2026-10-25)
+
+### Features
+
+* **admin:** inline price editing on product list ([5fbffb8](https://github.com/kdbsoft/dockercart/commit/5fbffb87e8de03b37b77319d5372c311592451bd))
+* **admin:** reflect toolbar search in list filters ([f91e0e7](https://github.com/kdbsoft/dockercart/commit/f91e0e7195e03b41dffa9f7e534f3d222e62620e))
+* **admin:** rework product form promotions, rewards and option card UI ([b9c5a44](https://github.com/kdbsoft/dockercart/commit/b9c5a44749f03dd1daf57fcc5f764abc90c8a33c))
+* **search:** index blog posts in Manticore admin search ([d553b05](https://github.com/kdbsoft/dockercart/commit/d553b05e70e0ecec749f46be9104289a5b383e31))
+
+### Bug Fixes
+
+* **catalog:** correct empty-state and description layout on manufacturer page ([9185eec](https://github.com/kdbsoft/dockercart/commit/9185eec73b926d53a42d66f6da7ca817babb5656))
+* **filemanager:** move pagination into main content column ([9eb8023](https://github.com/kdbsoft/dockercart/commit/9eb80237708bb78cc3c4bd8006f6d9d24834771f))
+
 ## [3.40.0](https://github.com/kdbsoft/dockercart/compare/v3.39.1...v3.40.0) (2026-10-24)
 
 ### Features
