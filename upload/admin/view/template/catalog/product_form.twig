@@ -886,10 +886,9 @@
                       </div>
                     </div>
                     <div class="dcx-field">
-                      <label class="dcx-label"><i data-lucide="paperclip" width="14" height="14"></i> {{ text_panel_files_title }}</label>
+                      <label class="dcx-label"><i data-lucide="paperclip" width="14" height="14"></i> {{ text_panel_files_title }} <span data-toggle="tooltip" title="{{ text_files_allowed|format(product_file_allowed_extensions, product_file_max_size) }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span></label>
                       <div class="dc-files-guide">
                         <div class="dc-files-guide__row"><i data-lucide="file-text" width="14" height="14"></i> <span>{{ text_files_instructions }}</span></div>
-                        <div class="dc-files-guide__row"><i data-lucide="shield-check" width="14" height="14"></i> <span>{{ text_files_allowed|format(product_file_allowed_extensions, product_file_max_size) }}</span></div>
                       </div>
                       <div style="margin: 10px 0;">
                         <button type="button" id="button-file-upload" class="btn btn-default" data-loading-text="{{ text_loading }}"><i data-lucide="upload" width="14" height="14"></i> {{ button_file_upload }}</button>
