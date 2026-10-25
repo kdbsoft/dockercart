@@ -1,3 +1,13 @@
+## [3.42.0](https://github.com/kdbsoft/dockercart/compare/v3.41.0...v3.42.0) (2026-10-25)
+
+### Features
+
+* **catalog:** add no_online_payment product flag ([95aa7c4](https://github.com/kdbsoft/dockercart/commit/95aa7c41cb2ba39df6ff29c052454e1529d039cc))
+
+### Bug Fixes
+
+* **admin:** group discontinued and no_online_payment checkboxes in product form ([4af1574](https://github.com/kdbsoft/dockercart/commit/4af1574c8449e9be8810800be50ab17b3a297f7f))
+
 ## [3.41.0](https://github.com/kdbsoft/dockercart/compare/v3.40.0...v3.41.0) (2026-10-25)
 
 ### Features
