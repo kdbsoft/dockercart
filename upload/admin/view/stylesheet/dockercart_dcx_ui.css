@@ -1466,6 +1466,14 @@ div.dcx-field.required > .dcx-label:before {
     margin-right: 2px;
     color: var(--dc-text-muted);
 }
+.dcx-tree-select__checkbox--checked,
+.dcx-tree-select__checkbox:has(input:checked) {
+    color: var(--dc-primary);
+}
+.dcx-tree-select__checkbox--checked svg,
+.dcx-tree-select__checkbox:has(input:checked) svg {
+    stroke-width: 2.5;
+}
 .dcx-tree-select__checkbox input[type="checkbox"] {
     display: none;
 }
