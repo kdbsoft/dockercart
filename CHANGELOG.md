@@ -1,3 +1,10 @@
+## [3.44.0](https://github.com/kdbsoft/dockercart/compare/v3.43.0...v3.44.0) (2026-10-27)
+
+### Features
+
+* **admin:** highlight checked tree-select checkboxes ([9842706](https://github.com/kdbsoft/dockercart/commit/9842706e0820c8e270e70a899e30f7cdbad6d0ba))
+* **scheduler:** add hourly extension store cache warm task ([18a2764](https://github.com/kdbsoft/dockercart/commit/18a2764efd02ca5d81033b600ded90a405d1a2f8))
+
 ## [3.43.0](https://github.com/kdbsoft/dockercart/compare/v3.42.0...v3.43.0) (2026-10-25)
 
 ### Features
