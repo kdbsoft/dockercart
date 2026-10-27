@@ -347,10 +347,16 @@ git fetch --prune origin "$BRANCH"
 
 LOCAL=$(git rev-parse @)
 REMOTE=$(git rev-parse "origin/$BRANCH")
-BASE=$(git merge-base @ "origin/$BRANCH")
+# A force-push upstream can leave the local branch with no common ancestor
+# (git merge-base exits 1 with empty output). Under `set -e` that would kill the
+# script before it can report why, so tolerate the failure and branch on it.
+BASE=$(git merge-base @ "origin/$BRANCH" || true)
 write_host_git_state || log "Warning: could not record host git state."
 
-if [ "$LOCAL" = "$REMOTE" ]; then
+if [ -z "$BASE" ]; then
+    log "Error: no common ancestor with origin/$BRANCH (history rewritten upstream). Manual intervention required: git fetch && git reset --hard origin/$BRANCH"
+    exit 1
+elif [ "$LOCAL" = "$REMOTE" ]; then
     log "Code is already up to date."
 elif [ "$LOCAL" = "$BASE" ]; then
 	log "Pulling updates (fast-forward only)..."
