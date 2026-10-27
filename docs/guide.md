@@ -74,7 +74,31 @@ No web installer is involved — there is no `/install` directory.
 Ready-made extensions for DockerCart are available in the official store:
 **https://store.dockercart.net**
 
-Install via admin panel: **Extensions → Installer → upload `.ocmod.zip`**.
+Install via admin panel: **Extensions → Installer → upload `.ocmod.zip`**, or
+browse **Extensions → Add-ons Store** (`extension/store`), which installs and
+updates packages directly.
+
+#### Update badge in the admin sidebar
+
+The sidebar menu item of the Add-ons Store (and the parent Extensions menu)
+shows a green badge with the number of installed add-ons that have a newer
+version in the store catalog. The badge is computed on every admin page load
+from `oc_dockercart_extension_meta` compared against the **local YML catalog
+cache** (`storage/dockercart/extension_store/yml_<lang>.xml`) — it never makes
+a network request on page load, so it renders instantly but only knows what
+the cached catalog snapshot contains.
+
+The cache is kept fresh two ways:
+
+- opening the Add-ons Store page re-fetches the catalog when the cache is older
+  than `CACHE_TTL` (30 min), and the page's "refresh cache" button clears it;
+- the hourly scheduler task `dockercart_store_cache_warm`
+  (`bin/dockercart_store_cache_warm.php`, system task, hidden from the
+  scheduler UI) re-fetches the catalog for every admin language, so the badge
+  stays current without anyone visiting the store.
+
+On a fresh install where the store page was never opened and the scheduler has
+not run yet, the badge stays `0` until the first cache fill.
 
 ---
 
