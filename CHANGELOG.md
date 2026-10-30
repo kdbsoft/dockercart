@@ -1,3 +1,10 @@
+## [3.44.1](https://github.com/kdbsoft/dockercart/compare/v3.44.0...v3.44.1) (2026-10-27)
+
+### Bug Fixes
+
+* **update:** handle rewritten upstream history without crashing ([15c71f1](https://github.com/kdbsoft/dockercart/commit/15c71f19196fe9a64beb15f0415e77362fdd3069))
+* **update:** pass db password to mariadb client via env var ([c9ad73c](https://github.com/kdbsoft/dockercart/commit/c9ad73ce84e5071eb6ac26f6c81587b146091a9a))
+
 ## [3.44.0](https://github.com/kdbsoft/dockercart/compare/v3.43.0...v3.44.0) (2026-10-27)
 
 ### Features
