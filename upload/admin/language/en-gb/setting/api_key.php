@@ -70,7 +70,10 @@ $_['entry_rate_limit']             = 'Rate limit';
 $_['entry_ip_allowlist']           = 'IP allowlist';
 $_['entry_api_status']             = 'API enabled';
 $_['entry_api_rate_limit']         = 'Default rate limit';
+$_['entry_api_anon_rate_limit']    = 'Unknown client requests (per minute, per IP)';
 $_['entry_api_log_retention_days'] = 'Journal retention (days)';
+$_['entry_api_customer_status']    = 'Customer API enabled';
+$_['entry_api_customer_max_keys']  = 'Max keys per customer';
 $_['entry_api_require_if_match'] = 'Require If-Match on updates';
 
 // Help
@@ -82,7 +85,10 @@ $_['help_expires']                 = 'Leave empty for a key that never expires. 
 $_['help_rate_limit']              = 'Requests per minute for this key. 0 uses the default of';
 $_['help_ip_allowlist']            = 'Optional. One IP or CIDR block per line (IPv4 or IPv6). Empty = any address.';
 $_['help_api_status']              = 'Global switch. When disabled, every API request answers HTTP 503.';
+$_['help_api_customer_status']     = 'Global switch for the storefront API (/store-api/v1). When disabled, every customer API request answers HTTP 503.';
+$_['help_api_customer_max_keys']   = 'How many API keys a customer may create on their account.';
 $_['help_api_rate_limit']          = 'Requests per minute per key, unless the key sets its own limit.';
+$_['help_api_anon_rate_limit']     = 'Budget for requests without a valid key, applied before the key lookup. Protects the key table and the journal from unauthenticated flooding. 0 uses the default of 60.';
 $_['help_api_log_retention_days']  = 'Journal rows older than this are purged by the daily scheduler task. 0 disables cleanup.';
 $_['help_api_require_if_match']  = 'When enabled, PUT/PATCH/DELETE without an If-Match header are rejected with HTTP 428, so two clients can never overwrite each other. Leave it off for simple one-way integrations: a provided If-Match is always validated (HTTP 412 on a stale copy).';
 

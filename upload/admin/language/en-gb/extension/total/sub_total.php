@@ -18,3 +18,7 @@ $_['entry_sort_order'] = 'Sort Order';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify sub-total total!';
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_sub_total'] = 'Sub-Total';

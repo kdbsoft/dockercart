@@ -153,6 +153,10 @@ class ModelSaleReturn extends Model {
 			$implode[] = "r.order_id = '" . (int)$data['filter_order_id'] . "'";
 		}
 
+		if (!empty($data['filter_customer_id'])) {
+			$implode[] = "r.customer_id = '" . (int)$data['filter_customer_id'] . "'";
+		}
+
 		if (!empty($data['filter_customer'])) {
 			$implode[] = "CONCAT(r.firstname, ' ', r.lastname) LIKE '" . $this->db->escape($data['filter_customer']) . "%'";
 		}
@@ -245,6 +249,10 @@ class ModelSaleReturn extends Model {
 
 		if (!empty($data['filter_order_id'])) {
 			$implode[] = "r.order_id = '" . $this->db->escape($data['filter_order_id']) . "'";
+		}
+
+		if (!empty($data['filter_customer_id'])) {
+			$implode[] = "r.customer_id = '" . (int)$data['filter_customer_id'] . "'";
 		}
 
 		if (!empty($data['filter_product'])) {

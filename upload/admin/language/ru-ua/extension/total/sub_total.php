@@ -12,3 +12,7 @@ $_['text_success'] = 'Успех: Вы успешно изменили пром�
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_sub_total'] = 'Сумма';

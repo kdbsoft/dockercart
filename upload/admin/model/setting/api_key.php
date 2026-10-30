@@ -24,34 +24,39 @@ class ModelSettingApiKey extends Model {
 	/**
 	 * Creates a key.
 	 *
-	 * @param array $data name, comment, user_id, user_group_id, status,
-	 *                    expires_at, ip_allowlist, rate_limit
+	 * @param array $data name, comment, user_id, customer_id, user_group_id,
+	 *                    status, expires_at, ip_allowlist, rate_limit, scopes
 	 * @return array{api_key_id: int, token: string}
 	 */
 	public function addKey(array $data): array {
 		$token = \Dockercart\Api\KeyRepository::generateToken();
 
 		$user_id = (int)($data['user_id'] ?? 0);
+		$customer_id = (int)($data['customer_id'] ?? 0);
 		$user_group_id = (int)($data['user_group_id'] ?? 0);
 
 		// An owned key inherits the group of its owner — the group select is
-		// only relevant for shared keys.
+		// only relevant for shared keys. A customer key has no admin group.
 		if ($user_id) {
 			$owner = $this->getOwner($user_id);
 
 			if ($owner) {
 				$user_group_id = (int)$owner['user_group_id'];
 			}
+		} elseif ($customer_id) {
+			$user_group_id = 0;
 		}
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "api_key` SET
 			`name` = '" . $this->db->escape((string)$data['name']) . "',
 			`user_id` = '" . $user_id . "',
+			`customer_id` = '" . $customer_id . "',
 			`comment` = '" . $this->db->escape((string)($data['comment'] ?? '')) . "',
 			`prefix` = '" . $this->db->escape($token['prefix']) . "',
 			`token_hash` = '" . $this->db->escape($token['token_hash']) . "',
 			`user_group_id` = '" . $user_group_id . "',
 			`status` = '" . (int)($data['status'] ?? 1) . "',
+			`scopes` = " . $this->scopesSql($data['scopes'] ?? null) . ",
 			`expires_at` = " . (!empty($data['expires_at']) ? "'" . $this->db->escape((string)$data['expires_at']) . "'" : 'NULL') . ",
 			`ip_allowlist` = '" . $this->db->escape((string)($data['ip_allowlist'] ?? '')) . "',
 			`rate_limit` = '" . (int)($data['rate_limit'] ?? 0) . "',
@@ -66,6 +71,7 @@ class ModelSettingApiKey extends Model {
 
 	public function editKey(int $api_key_id, array $data): void {
 		$user_id = (int)($data['user_id'] ?? 0);
+		$customer_id = (int)($data['customer_id'] ?? 0);
 		$user_group_id = (int)($data['user_group_id'] ?? 0);
 
 		if ($user_id) {
@@ -74,19 +80,34 @@ class ModelSettingApiKey extends Model {
 			if ($owner) {
 				$user_group_id = (int)$owner['user_group_id'];
 			}
+		} elseif ($customer_id) {
+			$user_group_id = 0;
 		}
 
 		$this->db->query("UPDATE `" . DB_PREFIX . "api_key` SET
 			`name` = '" . $this->db->escape((string)$data['name']) . "',
 			`user_id` = '" . $user_id . "',
+			`customer_id` = '" . $customer_id . "',
 			`comment` = '" . $this->db->escape((string)($data['comment'] ?? '')) . "',
 			`user_group_id` = '" . $user_group_id . "',
 			`status` = '" . (int)($data['status'] ?? 1) . "',
+			`scopes` = " . $this->scopesSql($data['scopes'] ?? null) . ",
 			`expires_at` = " . (!empty($data['expires_at']) ? "'" . $this->db->escape((string)$data['expires_at']) . "'" : 'NULL') . ",
 			`ip_allowlist` = '" . $this->db->escape((string)($data['ip_allowlist'] ?? '')) . "',
 			`rate_limit` = '" . (int)($data['rate_limit'] ?? 0) . "',
 			`date_modified` = NOW()
 			WHERE `api_key_id` = '" . $api_key_id . "'");
+	}
+
+	/**
+	 * Encodes a scope list for the `scopes` column (NULL = inherit all).
+	 *
+	 * @param mixed $scopes
+	 */
+	private function scopesSql($scopes): string {
+		$encoded = \Dockercart\Api\CustomerScopes::encode($scopes);
+
+		return $encoded === null ? 'NULL' : "'" . $this->db->escape($encoded) . "'";
 	}
 
 	/**
@@ -143,10 +164,20 @@ class ModelSettingApiKey extends Model {
 	 * Key list with the group name, the owner and the request count of the last
 	 * 24 hours.
 	 *
-	 * @param array $filter user_id (owner), user_group_id
+	 * By default only admin/shared keys are returned: customer keys are managed
+	 * from the customer form, so the central list stays admin-only. Pass
+	 * `customer_id` to list the keys of one customer instead.
+	 *
+	 * @param array $filter user_id (owner), user_group_id, customer_id
 	 */
 	public function getKeys(array $filter = []): array {
 		$where = '';
+
+		if (array_key_exists('customer_id', $filter)) {
+			$where .= " AND k.`customer_id` = '" . (int)$filter['customer_id'] . "'";
+		} else {
+			$where .= " AND k.`customer_id` = '0'";
+		}
 
 		if (!empty($filter['user_id'])) {
 			$where .= " AND k.`user_id` = '" . (int)$filter['user_id'] . "'";
@@ -169,9 +200,38 @@ class ModelSettingApiKey extends Model {
 	}
 
 	public function getTotalKeys(): int {
-		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "api_key`");
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "api_key` WHERE `customer_id` = '0'");
 
 		return (int)$query->row['total'];
+	}
+
+	/**
+	 * Number of keys a customer owns (used to enforce the per-account cap).
+	 */
+	public function getTotalKeysByCustomer(int $customer_id): int {
+		$query = $this->db->query("SELECT COUNT(*) AS `total` FROM `" . DB_PREFIX . "api_key` WHERE `customer_id` = '" . $customer_id . "'");
+
+		return (int)$query->row['total'];
+	}
+
+	/**
+	 * Per-account key cap (config_api_customer_max_keys, default 100).
+	 */
+	public function getMaxCustomerKeys(): int {
+		$max = (int)$this->config->get('config_api_customer_max_keys');
+
+		return $max > 0 ? $max : 100;
+	}
+
+	public function canAddCustomerKey(int $customer_id): bool {
+		return $this->getTotalKeysByCustomer($customer_id) < $this->getMaxCustomerKeys();
+	}
+
+	/**
+	 * Drops every key of a customer (called when the customer is deleted).
+	 */
+	public function deleteKeysByCustomer(int $customer_id): void {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "api_key` WHERE `customer_id` = '" . $customer_id . "'");
 	}
 
 	/**

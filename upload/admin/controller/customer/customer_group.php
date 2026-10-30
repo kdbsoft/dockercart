@@ -344,6 +344,34 @@ class ControllerCustomerCustomerGroup extends Controller {
 			$data['markup_percent'] = 0;
 		}
 
+		// Customer API access: a scope set granted to every customer of the group.
+		if (isset($this->request->post['api_status'])) {
+			$data['api_status'] = (int)$this->request->post['api_status'];
+		} elseif (!empty($customer_group_info)) {
+			$data['api_status'] = (int)($customer_group_info['api_status'] ?? 0);
+		} else {
+			$data['api_status'] = 0;
+		}
+
+		$api_scopes = $this->request->post['api_scopes'] ?? ($customer_group_info['api_scopes'] ?? null);
+
+		$data['api_scopes'] = is_array($api_scopes)
+			? \Dockercart\Api\CustomerScopes::sanitize($api_scopes)
+			: \Dockercart\Api\CustomerScopes::decode($api_scopes);
+
+		$data['customer_scopes'] = array();
+
+		foreach (\Dockercart\Api\CustomerScopes::labels() as $scope => $label_key) {
+			$data['customer_scopes'][$scope] = $this->language->get($label_key);
+		}
+
+		// A group grant is useless while the global storefront API switch is off.
+		$data['api_global_enabled'] = $this->config->has('config_api_customer_status') && (int)$this->config->get('config_api_customer_status') === 1;
+		$data['api_global_warning'] = (int)$data['api_status'] === 1 && !$data['api_global_enabled'];
+		$data['api_settings_url'] = $this->user->hasPermission('access', 'setting/api_key')
+			? $this->url->link('setting/api_key', 'user_token=' . $this->session->data['user_token'], true)
+			: '';
+
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');

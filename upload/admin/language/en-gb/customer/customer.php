@@ -160,3 +160,77 @@ $_['error_bank_account_number'] = 'Account Number required!';
 // Empty state
 $_['text_empty_title']       = 'No customers yet';
 $_['text_empty_description'] = 'Customer accounts and their order history live here. Add your first customer.';
+
+// Customer API access
+$_['text_api_card']                = 'API access';
+$_['text_api_inherit']             = 'Inherit from customer group';
+$_['entry_api_status']             = 'API access';
+$_['entry_api_scopes']             = 'Allowed scopes';
+$_['help_api_status']              = 'Override the group setting for this customer: inherit, force on or force off.';
+$_['help_api_scopes']              = 'What this customer may reach. When enabled, this list replaces the group scopes.';
+$_['text_api_global_disabled']     = 'The storefront API is disabled globally: the customer will not see the "API" section in the account, and requests to /store-api/v1 answer HTTP 503.';
+$_['button_api_settings']          = 'Open API settings';
+$_['text_scope_products_read']     = 'Read products';
+$_['text_scope_orders_read']       = 'Read orders';
+$_['text_scope_returns_read']      = 'Read returns';
+$_['text_scope_returns_write']     = 'Create returns';
+$_['text_scope_checkout_write'] = 'Creating orders';
+
+// Customer API keys
+$_['text_api_keys']                = 'API keys';
+$_['text_api_keys_help']           = 'Storefront API keys of this customer (served under /store-api/v1).';
+$_['text_api_keys_empty']          = 'This customer has no API keys yet.';
+$_['text_api_enabled']             = 'Enabled';
+$_['text_api_disabled']            = 'Disabled';
+$_['text_api_expired']             = 'Expired';
+$_['text_api_never']               = 'Never';
+$_['text_api_limit']               = 'limit';
+$_['text_api_minute']              = 'min';
+$_['text_api_token_once']          = 'Copy the token now — it is shown only once';
+$_['text_api_token_help']          = 'Store it in a password manager. Only a hash is kept in the database, so the token cannot be recovered later.';
+$_['text_api_key_created']         = 'API key "%s" created.';
+$_['text_api_key_rotated']         = 'A new token was generated for "%s". The previous token no longer works.';
+$_['text_api_key_revoked']         = 'API key "%s" revoked.';
+$_['text_api_key_enabled']         = 'API key "%s" enabled.';
+$_['text_api_key_deleted']         = 'API key "%s" deleted.';
+$_['text_api_key_limit_reached']   = 'This customer has reached the limit of %s API keys.';
+
+$_['column_api_name']              = 'Name';
+$_['column_api_prefix']            = 'Token prefix';
+$_['column_api_status']            = 'Status';
+$_['column_api_expires']           = 'Expires';
+$_['column_api_last_used']         = 'Last used';
+$_['column_api_requests']          = 'Requests (24h / total)';
+$_['column_api_action']            = 'Action';
+
+$_['entry_api_key_name']           = 'Name';
+$_['entry_api_key_comment']        = 'Comment';
+$_['entry_api_key_expires']        = 'Expires at';
+$_['entry_api_key_rate_limit']     = 'Rate limit';
+$_['entry_api_key_ip_allowlist']   = 'IP allowlist';
+$_['entry_api_key_scopes']         = 'Scopes';
+
+$_['help_api_key_expires']         = 'Leave empty for a key that never expires.';
+$_['help_api_key_rate_limit']      = 'Requests per minute. 0 uses the global default.';
+$_['help_api_key_ip_allowlist']    = 'Optional. One IP or CIDR block. Empty = any address.';
+$_['help_api_key_scopes']          = 'Leave all unchecked to grant the full effective scope set of the customer.';
+
+$_['button_api_key_add']           = 'Add key';
+$_['button_api_key_create']        = 'Create key';
+$_['button_api_key_rotate']        = 'Rotate token';
+$_['button_api_key_revoke']        = 'Revoke';
+$_['button_api_key_enable']        = 'Enable';
+$_['button_api_key_delete']        = 'Delete';
+$_['button_api_key_copy']          = 'Copy';
+
+$_['text_api_key_rotate_confirm']  = 'Generate a new token? The current token stops working immediately.';
+$_['text_api_key_revoke_confirm']  = 'Revoke this key? Requests using it will fail with HTTP 401.';
+$_['text_api_key_delete_confirm']  = 'Delete this key permanently? The request journal is kept.';
+
+$_['error_api_permission']         = 'Warning: You do not have permission to modify API keys!';
+$_['error_api_customer']           = 'Warning: Customer not found!';
+$_['error_api_name']               = 'Name must be between 1 and 128 characters!';
+$_['error_api_expires']            = 'Expiry date must be a valid date (YYYY-MM-DD) or empty!';
+$_['error_api_ip_allowlist']       = 'The IP allowlist may contain only IP addresses or CIDR blocks!';
+$_['error_api_key']                = 'Warning: API key not found!';
+$_['error_api_key_limit']          = 'This customer has reached the limit of %s API keys!';

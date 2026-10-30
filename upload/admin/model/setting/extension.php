@@ -12,6 +12,27 @@ class ModelSettingExtension extends Model {
 		return $extension_data;
 	}
 
+	/**
+	 * Full extension rows of a type.
+	 *
+	 * The storefront model of the same route (upload/catalog/model/setting/
+	 * extension.php) declares the very same class, so only one of the two can
+	 * exist in a request. The admin MVC tree wins in the panel and in the two
+	 * API applications, which means the catalog checkout models — loaded by the
+	 * customer API through Dockercart\Api\CatalogModels — see this
+	 * implementation when they call $this->load->model('setting/extension').
+	 * Keeping the catalog's getExtensions() here makes those models behave
+	 * exactly like they do on the storefront.
+	 *
+	 * @param string $type total|shipping|payment|fraud|…
+	 * @return array<int, array>
+	 */
+	public function getExtensions($type) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "extension` WHERE `type` = '" . $this->db->escape($type) . "'");
+
+		return $query->rows;
+	}
+
 	public function install($type, $code) {
 		$extensions = $this->getInstalled($type);
 

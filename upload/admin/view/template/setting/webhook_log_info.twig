@@ -61,7 +61,7 @@
             <div class="dcx-panel-body">
               <dl class="dl-horizontal" style="margin-bottom:0;">
                 <dt>{{ entry_subscription }}</dt>
-                <dd><a href="{{ subscription_link }}">{{ delivery.subscription_name }}</a><div class="text-muted small"><code>{{ delivery.url }}</code></div></dd>
+                <dd><a href="{{ subscription_link }}">{{ delivery.subscription_name|e }}</a><div class="text-muted small"><code>{{ delivery.url|e }}</code></div></dd>
                 <dt>{{ text_attempts_used }}</dt>
                 <dd>{{ delivery.attempts }}</dd>
                 <dt>{{ column_date }}</dt><dd>{{ delivery.date_added }}</dd>
@@ -71,13 +71,13 @@
                 <dt>{{ column_response }}</dt>
                 <dd>
                   {% if delivery.response_code %}<code>{{ delivery.response_code }}</code>{% endif %}
-                  {% if delivery.last_error %}<div class="text-danger">{{ delivery.last_error }}</div>{% endif %}
+                  {% if delivery.last_error %}<div class="text-danger">{{ delivery.last_error|e }}</div>{% endif %}
                 </dd>
               </dl>
               {% if delivery.response_body %}
               <div class="dcx-field" style="margin-top:16px;">
                 <label class="dcx-label">{{ text_response }}</label>
-                <pre style="max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.response_body }}</pre>
+                <pre style="max-height:280px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.response_body|e }}</pre>
               </div>
               {% endif %}
             </div>
@@ -92,7 +92,7 @@
               </div>
             </div>
             <div class="dcx-panel-body">
-              <pre id="webhook-payload" style="max-height:520px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.payload_pretty }}</pre>
+              <pre id="webhook-payload" style="max-height:520px;overflow:auto;white-space:pre-wrap;word-break:break-all;">{{ delivery.payload_pretty|e }}</pre>
             </div>
           </div>
         </div>

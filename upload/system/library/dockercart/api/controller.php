@@ -27,6 +27,21 @@ abstract class Controller extends \Controller {
 		return $this->registry->get('api_context');
 	}
 
+	/**
+	 * The authenticated customer of a store-api request. The startup pre-action
+	 * already guarantees it exists, so a missing principal is a bug, not a client
+	 * error — fail closed with 401 rather than leaking data.
+	 */
+	protected function customerPrincipal(): CustomerPrincipal {
+		$principal = $this->context()->customer_principal;
+
+		if (!$principal instanceof CustomerPrincipal) {
+			throw new HttpException(Error::UNAUTHORIZED);
+		}
+
+		return $principal;
+	}
+
 	protected function responder(): Response {
 		return $this->registry->get('api_response');
 	}
@@ -63,6 +78,27 @@ abstract class Controller extends \Controller {
 
 	protected function queryInt(string $key, int $default = 0): int {
 		return isset($this->request->get[$key]) ? (int)$this->request->get[$key] : $default;
+	}
+
+	/**
+	 * Integer query parameter that is either absent (null) or a valid number.
+	 *
+	 * A filter the client sent must never be silently dropped: "?status_id=abc"
+	 * would otherwise become 0 and the caller would receive an unfiltered list
+	 * while believing it had filtered.
+	 */
+	protected function queryOptionalInt(string $key): ?int {
+		if (!isset($this->request->get[$key]) || $this->request->get[$key] === '') {
+			return null;
+		}
+
+		$value = (string)$this->request->get[$key];
+
+		if (!preg_match('/^-?\d+$/', $value)) {
+			throw new HttpException(Error::VALIDATION_FAILED, [$key => ['must be an integer']]);
+		}
+
+		return (int)$value;
 	}
 
 	/**

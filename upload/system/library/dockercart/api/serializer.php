@@ -68,6 +68,13 @@ final class Serializer {
 	}
 
 	/**
+	 * Character length, the same measure the Validator's max/min rules use.
+	 */
+	private static function length(string $value): int {
+		return function_exists('utf8_strlen') ? utf8_strlen($value) : mb_strlen($value, 'UTF-8');
+	}
+
+	/**
 	 * Converts a list of DB rows into a list of ids (e.g. category/store links).
 	 */
 	public static function ids(array $rows, string $column): array {
@@ -91,6 +98,41 @@ final class Serializer {
 	 */
 	public static function encodeText($value): string {
 		return htmlspecialchars((string)$value, ENT_COMPAT, 'UTF-8');
+	}
+
+	/**
+	 * encodeText() for a value that must fit a VARCHAR-like column (characters).
+	 *
+	 * The panel escapes a form value (Request::clean()) *before* it validates the
+	 * length, so the panel validates the escaped length. The API validates the
+	 * plain value and escapes afterwards: this helper puts both on the same
+	 * footing and turns an HTML-heavy payload into a 422 instead of a
+	 * "Data too long for column" database error.
+	 *
+	 * @throws HttpException when the escaped value does not fit
+	 */
+	public static function encodeTextWithin(string $field, $value, int $max_chars): string {
+		$encoded = self::encodeText($value);
+
+		if (self::length($encoded) > $max_chars) {
+			throw new HttpException(Error::VALIDATION_FAILED, [$field => ['max:' . $max_chars]]);
+		}
+
+		return $encoded;
+	}
+
+	/**
+	 * Same as encodeTextWithin(), for TEXT columns that are measured in bytes
+	 * (MySQL TEXT = 65535 bytes).
+	 */
+	public static function encodeTextWithinBytes(string $field, $value, int $max_bytes): string {
+		$encoded = self::encodeText($value);
+
+		if (strlen($encoded) > $max_bytes) {
+			throw new HttpException(Error::VALIDATION_FAILED, [$field => ['max_bytes:' . $max_bytes]]);
+		}
+
+		return $encoded;
 	}
 
 	/**

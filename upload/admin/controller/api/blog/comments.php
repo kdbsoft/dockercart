@@ -72,10 +72,14 @@ class ControllerApiBlogComments extends \Dockercart\Api\Controller {
 
 		$this->load->model('extension/module/dockercart_blog_comment');
 
+		// author/text are rendered unescaped by the storefront blog (autoescape is
+		// off) and by the panel list, so they are escaped exactly like the panel
+		// form does it (Request::clean()). Fields that were not sent keep their
+		// stored (already escaped) value.
 		$this->model_extension_module_dockercart_blog_comment->editComment($comment_id, [
-			'author' => (string)($data['author'] ?? $comment['author']),
+			'author' => isset($data['author']) ? Serializer::encodeTextWithin('author', $data['author'], 64) : (string)$comment['author'],
 			'email'  => (string)($data['email'] ?? $comment['email']),
-			'text'   => (string)($data['text'] ?? $comment['text']),
+			'text'   => isset($data['text']) ? Serializer::encodeTextWithinBytes('text', $data['text'], 65535) : (string)$comment['text'],
 			'rating' => (int)($data['rating'] ?? $comment['rating']),
 			'status' => (int)($data['status'] ?? $comment['status']),
 		]);
@@ -133,10 +137,9 @@ class ControllerApiBlogComments extends \Dockercart\Api\Controller {
 			'post_id'     => (int)$comment['post_id'],
 			'post_name'   => isset($comment['post_name']) ? Serializer::decodeText($comment['post_name']) : '',
 			'customer_id' => (int)$comment['customer_id'],
-			'author'      => (string)$comment['author'],
+			'author'      => Serializer::decodeText($comment['author'] ?? ''),
 			'email'       => (string)$comment['email'],
-			'text'        => Serializer::decodeText($comment['text']),
-			'rating'      => (int)$comment['rating'],
+			'text'        => Serializer::decodeText($comment['text'] ?? ''),			'rating'      => (int)$comment['rating'],
 			'status'      => (int)$comment['status'],
 			'date_added'  => Serializer::datetime($comment['date_added']),
 		];

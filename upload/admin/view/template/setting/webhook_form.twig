@@ -81,7 +81,7 @@
                 <div class="dcx-fields">
                   <div class="dcx-field required">
                     <label class="dcx-label" for="input-name">{{ entry_name }}</label>
-                    <input type="text" name="name" value="{{ name }}" id="input-name" class="form-control" maxlength="128" placeholder="{{ entry_name }}" />
+                    <input type="text" name="name" value="{{ name|e }}" id="input-name" class="form-control" maxlength="128" placeholder="{{ entry_name }}" />
                     {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
                     <div class="dcx-field-help">{{ help_name }}</div>
                   </div>

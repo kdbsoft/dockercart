@@ -184,12 +184,42 @@ final class Response {
 		// Persist the answer for a retried POST (Idempotency-Key) before it is
 		// flushed, so a crash between send() and output() cannot create a
 		// duplicate on the next retry while nothing is stored.
-		/** @var Idempotency $idempotency */
-		$idempotency = $this->registry->get('api_idempotency');
-
-		$idempotency->store($this->context, (string)$json, $status, $headers);
+		$this->storeIdempotentAnswer((string)$json, $status, array_merge($headers, ['Content-Type: ' . $content_type]));
 
 		$response->setOutput((string)$json);
+	}
+
+	/**
+	 * Persists — or drops — the oc_api_idempotency row of the current request.
+	 *
+	 * Both answer paths go through here: Response::send() for a normal answer and
+	 * Response::emitEmergency() for a problem document. A request that never
+	 * reaches send() (a validation failure, a conflict, a refused precondition, a
+	 * fatal error) would otherwise leave its 5 minute lock behind and every retry
+	 * with the same Idempotency-Key would be answered with
+	 * 409 idempotency_in_progress instead of the stored answer.
+	 *
+	 * A 5xx answer deletes the row (the client may retry), anything else is stored
+	 * verbatim for a replay.
+	 */
+	private function storeIdempotentAnswer(string $body, int $status, array $headers = []): void {
+		if ($this->context->idempotency_id <= 0 || $this->context->replay_payload !== null) {
+			return;
+		}
+
+		try {
+			/** @var Idempotency $idempotency */
+			$idempotency = $this->registry->get('api_idempotency');
+
+			$idempotency->store($this->context, $body, $status, $headers);
+		} catch (\Throwable $exception) {
+			// Bookkeeping must never replace the answer that is about to be sent.
+			$log = $this->registry->has('log') ? $this->registry->get('log') : null;
+
+			if ($log) {
+				$log->write('API idempotency: ' . $exception->getMessage());
+			}
+		}
 	}
 
 	/**
@@ -206,6 +236,13 @@ final class Response {
 
 		$problem = $this->problem($code, $status, $fields, $detail);
 
+		$json = (string)json_encode($problem, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+
+		// The request may have taken an Idempotency-Key lock before the action
+		// failed: store the problem document (or drop the lock for a 5xx) so the
+		// client can either see the same answer again or really retry.
+		$this->storeIdempotentAnswer($json, $status, ['Content-Type: application/problem+json; charset=utf-8']);
+
 		if (!headers_sent()) {
 			http_response_code($status);
 			header('Content-Type: application/problem+json; charset=utf-8');
@@ -213,6 +250,6 @@ final class Response {
 			header('Cache-Control: no-store, no-cache, must-revalidate');
 		}
 
-		echo json_encode($problem, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+		echo $json;
 	}
 }

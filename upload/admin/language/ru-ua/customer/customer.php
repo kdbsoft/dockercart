@@ -150,3 +150,77 @@ $_['text_activity_error']     = 'Не удалось загрузить этот
 // Empty state
 $_['text_empty_title']       = 'Пока нет покупателей';
 $_['text_empty_description'] = 'Здесь хранятся аккаунты покупателей и история заказов. Добавьте первого покупателя.';
+
+// Customer API access
+$_['text_api_card']                = 'Доступ к API';
+$_['text_api_inherit']             = 'Наследовать от группы покупателей';
+$_['entry_api_status']             = 'Доступ к API';
+$_['entry_api_scopes']             = 'Разрешённые области';
+$_['help_api_status']              = 'Переопределите настройку группы для этого покупателя: наследовать, принудительно включить или выключить.';
+$_['help_api_scopes']              = 'К чему имеет доступ этот покупатель. При включении этот список заменяет области группы.';
+$_['text_api_global_disabled']     = 'API витрины отключён глобально: покупатель не увидит раздел «API» в личном кабинете, а запросы к /store-api/v1 получат ответ HTTP 503.';
+$_['button_api_settings']          = 'Открыть настройки API';
+$_['text_scope_products_read']     = 'Просмотр товаров';
+$_['text_scope_orders_read']       = 'Просмотр заказов';
+$_['text_scope_returns_read']      = 'Просмотр возвратов';
+$_['text_scope_returns_write']     = 'Создание возвратов';
+$_['text_scope_checkout_write'] = 'Оформление заказов';
+
+// Customer API keys
+$_['text_api_keys']                = 'API-ключи';
+$_['text_api_keys_help']           = 'Ключи API витрины этого покупателя (доступны по /store-api/v1).';
+$_['text_api_keys_empty']          = 'У этого покупателя пока нет API-ключей.';
+$_['text_api_enabled']             = 'Включён';
+$_['text_api_disabled']            = 'Отключён';
+$_['text_api_expired']             = 'Истёк';
+$_['text_api_never']               = 'Никогда';
+$_['text_api_limit']               = 'лимит';
+$_['text_api_minute']              = 'мин';
+$_['text_api_token_once']          = 'Скопируйте токен сейчас — он показывается только один раз';
+$_['text_api_token_help']          = 'Сохраните его в менеджере паролей. В базе хранится только хеш, поэтому восстановить токен позже невозможно.';
+$_['text_api_key_created']         = 'API-ключ "%s" создан.';
+$_['text_api_key_rotated']         = 'Для "%s" создан новый токен. Прежний токен больше не работает.';
+$_['text_api_key_revoked']         = 'API-ключ "%s" отозван.';
+$_['text_api_key_enabled']         = 'API-ключ "%s" включён.';
+$_['text_api_key_deleted']         = 'API-ключ "%s" удалён.';
+$_['text_api_key_limit_reached']   = 'Покупатель достиг лимита в %s API-ключей.';
+
+$_['column_api_name']              = 'Название';
+$_['column_api_prefix']            = 'Префикс токена';
+$_['column_api_status']            = 'Статус';
+$_['column_api_expires']           = 'Истекает';
+$_['column_api_last_used']         = 'Последнее использование';
+$_['column_api_requests']          = 'Запросы (24ч / всего)';
+$_['column_api_action']            = 'Действие';
+
+$_['entry_api_key_name']           = 'Название';
+$_['entry_api_key_comment']        = 'Комментарий';
+$_['entry_api_key_expires']        = 'Истекает';
+$_['entry_api_key_rate_limit']     = 'Лимит запросов';
+$_['entry_api_key_ip_allowlist']   = 'Список IP';
+$_['entry_api_key_scopes']         = 'Области';
+
+$_['help_api_key_expires']         = 'Оставьте пустым для ключа без срока действия.';
+$_['help_api_key_rate_limit']      = 'Запросов в минуту. 0 — использовать глобальное значение.';
+$_['help_api_key_ip_allowlist']    = 'Необязательно. Один IP или CIDR-блок. Пусто = любой адрес.';
+$_['help_api_key_scopes']          = 'Оставьте все флажки снятыми, чтобы выдать полный набор областей покупателя.';
+
+$_['button_api_key_add']           = 'Добавить ключ';
+$_['button_api_key_create']        = 'Создать ключ';
+$_['button_api_key_rotate']        = 'Обновить токен';
+$_['button_api_key_revoke']        = 'Отозвать';
+$_['button_api_key_enable']        = 'Включить';
+$_['button_api_key_delete']        = 'Удалить';
+$_['button_api_key_copy']          = 'Копировать';
+
+$_['text_api_key_rotate_confirm']  = 'Создать новый токен? Текущий токен перестанет работать немедленно.';
+$_['text_api_key_revoke_confirm']  = 'Отозвать этот ключ? Запросы с ним будут отклоняться с HTTP 401.';
+$_['text_api_key_delete_confirm']  = 'Удалить ключ безвозвратно? Журнал запросов сохранится.';
+
+$_['error_api_permission']         = 'Внимание: у вас нет разрешения на изменение API-ключей!';
+$_['error_api_customer']           = 'Внимание: покупатель не найден!';
+$_['error_api_name']               = 'Название должно содержать от 1 до 128 символов!';
+$_['error_api_expires']            = 'Дата истечения должна быть корректной (ГГГГ-ММ-ДД) или пустой!';
+$_['error_api_ip_allowlist']       = 'Список IP может содержать только IP-адреса или CIDR-блоки!';
+$_['error_api_key']                = 'Внимание: API-ключ не найден!';
+$_['error_api_key_limit']          = 'Покупатель достиг лимита в %s API-ключей!';

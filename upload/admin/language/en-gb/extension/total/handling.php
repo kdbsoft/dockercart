@@ -24,3 +24,7 @@ $_['help_total']       = 'The checkout total the order must reach before this or
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify handling fee total!';
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_handling'] = 'Handling Fee';

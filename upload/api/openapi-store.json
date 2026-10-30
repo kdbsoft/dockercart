@@ -1,0 +1,6636 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DockerCart Store API",
+    "version": "1.0.0",
+    "description": "Customer-facing REST API for the DockerCart storefront: a registered buyer can browse the catalogue, read their own orders and returns, create return requests, and place an order with the same steps as the DockerCart one-page checkout (cart → addresses → shipping quote → payment method → confirm → payment).\n\n**Authentication** — send `Authorization: Bearer <token>` (or `X-Api-Key: <token>`). Keys are created by the customer in the account area (Account > API) or by an operator in the panel (Customers > edit customer). A key belongs to exactly one customer and can never be used on the admin API (`/api/v1/...`), and vice versa.\n\n**Scopes** — what a key may reach is the intersection of the scopes granted to the customer (group default, overridable per customer) and the scopes stored on the key itself: `products:read`, `orders:read`, `returns:read`, `returns:write`, `checkout:write`. A missing scope is `403 forbidden`.\n\n**Envelope** — successful responses use `{\"data\": …}` (`meta` on collections). Failures are RFC 9457 problem documents (`application/problem+json`) with `type`, `title`, `status`, `detail`, `instance` plus the extensions `code`, `request_id` and (on 422) `fields`.\n\n**Dates** — ISO-8601. **Money** — fixed point strings in the store base currency with 4 decimals.\n\n**Text** — free text is stored escaped for the panel and returned as plain text: send the value you want the operator to see (markup is escaped, not interpreted) and expect the same string back on read. Do not pre-encode entities; a `GET → PUT/PATCH` round trip is stable.\n\n**Concurrency** — every single-resource GET returns a strong `ETag`; use `If-None-Match` for cheap 304 polling and `If-Match` on `PUT /v1/addresses/{address_id}`.\n\n**Retries** — every `POST` accepts an `Idempotency-Key` header (8-128 printable characters); repeating the same request with the same key and body replays the stored answer. `POST /v1/checkout/{checkout_id}/confirm` is the one call that creates an order, so always send a key with it.\n\n**Ordering** — the cart is the customer's real cart (the website sees the same lines). A checkout session holds the addresses, the chosen shipping/payment code, the comment and the terms agreement, and reserves stock while it is open; `missing` tells a client what still blocks `confirm`.\n\n**Discovery** — `GET /v1/openapi.json` (no key required) returns this document; the account area renders the same file.\n\n**Payments** — `POST /v1/checkout/{checkout_id}/payment` starts the payment of the confirmed order through the payment method the buyer chose and answers what the client has to do: `kind` is `external` (open `redirect_url` in a browser/WebView), `internal` (a page of this store — nothing to pay online), `html` (render `html`) or `none` (nothing to do; show `instructions`, e.g. cash on delivery). The answer is stored on the checkout and replayed on every repeat, so a retried request never opens a second gateway session; `refresh=1` re-runs it while the order has not moved on."
+  },
+  "servers": [
+    {
+      "url": "/store-api",
+      "description": "Same host as the storefront."
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Orders",
+      "description": "The authenticated customer's own orders."
+    },
+    {
+      "name": "Returns",
+      "description": "The authenticated customer's own return requests (RMA)."
+    },
+    {
+      "name": "Products",
+      "description": "Catalogue products and configurable variants, priced for the authenticated customer."
+    },
+    {
+      "name": "Cart",
+      "description": "The authenticated customer's cart (shared with the storefront). Quote and change it before checking out."
+    },
+    {
+      "name": "Checkout",
+      "description": "The checkout session: addresses, shipping quote, payment method, terms and the order placement."
+    },
+    {
+      "name": "Addresses",
+      "description": "The authenticated customer's address book."
+    },
+    {
+      "name": "Categories",
+      "description": "Storefront category navigation."
+    },
+    {
+      "name": "Meta",
+      "description": "Reference data for building return, checkout and address payloads."
+    },
+    {
+      "name": "Discovery",
+      "description": "The public OpenAPI document."
+    }
+  ],
+  "paths": {
+    "/v1/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "List products",
+        "operationId": "listStoreProducts",
+        "description": "Paginated list of products visible on the storefront (enabled, available and assigned to the request store). Amounts are effective for the authenticated customer's group, normalised to the store base currency and tax-inclusive.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Matches name, model, sku/upc/ean/jan/isbn/mpn and variant codes."
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sub_category",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ],
+              "default": 1
+            },
+            "description": "Include products of descendant categories (default 1)."
+          },
+          {
+            "name": "manufacturer_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "in_stock",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "name": "special",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "description": "Only products with an active special for the customer group."
+          },
+          {
+            "name": "product_ids",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated product ids."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "price",
+                "date_added",
+                "sort_order",
+                "rating"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductSummary"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products/{product_id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get a product",
+        "operationId": "getStoreProduct",
+        "description": "The full product card: descriptions, media, options, attributes, availability, discounts, configurable variants and related products.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Product id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)."
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown or not visible product.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products/{product_id}/variants": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "List a product's variants",
+        "operationId": "listStoreProductVariants",
+        "description": "The configurable axes, every enabled variant (effective price, stock, image) and the aggregated price/stock range.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Product id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ProductVariants"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)."
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown or not visible product.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "List categories",
+        "operationId": "listStoreCategories",
+        "description": "Paginated flat list of enabled categories assigned to the request store.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "parent_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Only direct children of this category (default 0 = root)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/categories/tree": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Category tree",
+        "operationId": "getStoreCategoryTree",
+        "description": "The whole visible category tree below `parent_id`, nested through `children`.",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "parent_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Root of the returned subtree (default 0)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CategoryTree"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/categories/{category_id}": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Get a category",
+        "operationId": "getStoreCategory",
+        "description": "A single category with its breadcrumb path.",
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Category id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for names/descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Category"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)."
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown or not visible category.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "List own orders",
+        "operationId": "listStoreOrders",
+        "description": "Paginated list of the authenticated customer's orders. Orders that are not visible to the customer (deleted / status 0) are excluded.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for joined descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "status_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date_added",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "date_preset",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "order_id",
+                "order_status",
+                "date_added",
+                "date_modified",
+                "total"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of orders.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderSummary"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/{order_id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get an own order",
+        "operationId": "getStoreOrder",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Order id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The order with lines, totals and history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)."
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/{order_id}/history": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Order status history",
+        "operationId": "getStoreOrderHistory",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Order id."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status history, oldest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderHistory"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/returns": {
+      "get": {
+        "tags": [
+          "Returns"
+        ],
+        "summary": "List own returns",
+        "operationId": "listStoreReturns",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code for joined descriptions (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "order_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date_added",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "return_id",
+                "order_id",
+                "type",
+                "status",
+                "date_added"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of returns.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReturnSummary"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Returns"
+        ],
+        "summary": "Create a return request",
+        "operationId": "createStoreReturn",
+        "description": "Creates a return request for one of the authenticated customer's own orders. Contact details, prices and the return status are taken from the order / store defaults; the return starts in the default return status and moves stock and money only when the panel completes it. Supports the `Idempotency-Key` header.",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created return request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Return"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency-Key conflict or in-progress.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed; `fields` maps the problems per field.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/returns/{return_id}": {
+      "get": {
+        "tags": [
+          "Returns"
+        ],
+        "summary": "Get an own return",
+        "operationId": "getStoreReturn",
+        "parameters": [
+          {
+            "name": "return_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Return id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The return with lines and status history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Return"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified (If-None-Match matched)."
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta/return-reasons": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Return reasons",
+        "operationId": "listStoreReturnReasons",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReturnReason"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta/return-actions": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Return actions",
+        "operationId": "listStoreReturnActions",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ReturnAction"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "OpenAPI document",
+        "operationId": "getStoreOpenapi",
+        "security": [],
+        "description": "The only unauthenticated endpoint. Cacheable (ETag + max-age=300).",
+        "responses": {
+          "200": {
+            "description": "The OpenAPI 3.0 document.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified."
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart": {
+      "get": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Read the cart",
+        "operationId": "getStoreCart",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Empty the cart",
+        "operationId": "clearStoreCart",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/items": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Add a line to the cart",
+        "operationId": "addStoreCartItem",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/items/{cart_id}": {
+      "patch": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Change the quantity of a line",
+        "operationId": "updateStoreCartItem",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Cart line id."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItemUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Remove a line",
+        "operationId": "removeStoreCartItem",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Cart line id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/coupon": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Apply a coupon",
+        "operationId": "applyStoreCartCoupon",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "coupon"
+                ],
+                "properties": {
+                  "coupon": {
+                    "type": "string",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Remove the coupon",
+        "operationId": "removeStoreCartCoupon",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/voucher": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Apply a gift voucher",
+        "operationId": "applyStoreCartVoucher",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "voucher"
+                ],
+                "properties": {
+                  "voucher": {
+                    "type": "string",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Remove the gift voucher",
+        "operationId": "removeStoreCartVoucher",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/reward": {
+      "post": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Spend reward points",
+        "operationId": "applyStoreCartReward",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "reward"
+                ],
+                "properties": {
+                  "reward": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Reward points to spend; must not exceed the customer balance nor the points the cart can spend."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Stop spending reward points",
+        "operationId": "removeStoreCartReward",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Cart"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/shipping-methods": {
+      "get": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Shipping quotes for an address",
+        "operationId": "quoteStoreCartShipping",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Quote for a saved address (all other query parameters are ignored)."
+          },
+          {
+            "name": "country_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "zone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "postcode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShippingQuote"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cart/payment-methods": {
+      "get": {
+        "tags": [
+          "Cart"
+        ],
+        "summary": "Payment methods for the cart total",
+        "operationId": "listStoreCartPaymentMethods",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Quote for a saved address (all other query parameters are ignored)."
+          },
+          {
+            "name": "country_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "zone_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "postcode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addresses": {
+      "get": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "List the address book",
+        "operationId": "listStoreAddresses",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Address"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "Create an address",
+        "operationId": "createStoreAddress",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addresses/{address_id}": {
+      "get": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "Read an address",
+        "operationId": "getStoreAddress",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Address id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "Update an address",
+        "operationId": "updateStoreAddress",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Address id."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Address"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "`If-Match` does not match the current representation.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "Delete an address",
+        "operationId": "deleteStoreAddress",
+        "parameters": [
+          {
+            "name": "address_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Address id."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "`If-Match` does not match the current representation.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/checkout": {
+      "get": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Read the current checkout session",
+        "operationId": "getStoreCheckout",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Checkout"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Open a checkout session",
+        "operationId": "createStoreCheckout",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Checkout"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Checkout"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The resource is in a state that does not allow this action.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/checkout/{checkout_id}": {
+      "get": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Read a checkout session",
+        "operationId": "getStoreCheckoutById",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Checkout"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Update a checkout session",
+        "operationId": "updateStoreCheckout",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Checkout"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkout has already been completed (its order exists).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Applies the changes and answers with the new state. A session that already placed its order is `409 checkout_completed`."
+      },
+      "delete": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Cancel a checkout session",
+        "operationId": "cancelStoreCheckout",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cancelled; the stock hold is released."
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkout has already been completed (its order exists).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Cancels the session and releases the stock hold. A session that already placed its order is `409 checkout_completed` (the order is not cancelled)."
+      }
+    },
+    "/v1/checkout/{checkout_id}/shipping-methods": {
+      "get": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Refresh the shipping quotes",
+        "operationId": "quoteStoreCheckoutShipping",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ShippingQuote"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkout has already been completed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Quotes the shipping methods for the session's address. A completed session is `409 checkout_completed`."
+      }
+    },
+    "/v1/checkout/{checkout_id}/payment-methods": {
+      "get": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Refresh the payment methods",
+        "operationId": "listStoreCheckoutPaymentMethods",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PaymentMethod"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkout has already been completed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Lists the payment methods for the session's address and the current cart total. A completed session is `409 checkout_completed`."
+      }
+    },
+    "/v1/checkout/{checkout_id}/confirm": {
+      "post": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Place the order",
+        "operationId": "confirmStoreCheckout",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agree": {
+                    "type": "boolean"
+                  }
+                },
+                "description": "An empty body, or `{\"agree\": true}` to accept the terms right away."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Order"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A cart line cannot be fulfilled from stock.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The payload or the checkout state is invalid; `fields` lists the problems.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "description": "Places the order and answers with it (`201`). The session stays readable as `completed` — `GET /v1/checkout/{checkout_id}` still returns its `order_id` — but it can never be confirmed twice (`409 checkout_completed`). Start the payment with `POST /v1/checkout/{checkout_id}/payment`."
+      }
+    },
+    "/v1/checkout/{checkout_id}/payment": {
+      "post": {
+        "tags": [
+          "Checkout"
+        ],
+        "summary": "Start the payment of the confirmed order",
+        "description": "Runs the payment extension's own execution step for the method chosen at checkout (`payment_code`) and returns what the client has to do next.\n\n`kind`:\n- `external` — `redirect_url` points at another host: open it in a browser or WebView (Stripe, PayPal, LiqPay, …).\n- `internal` — `redirect_url` is a page of this store only; nothing has to be paid online (the built-in method sends the buyer to the success page).\n- `html` — render `html` (an inline form, bank details, …).\n- `none` — nothing to do; show `instructions` (cash on delivery, bank transfer, …).\n\nThe answer is stored on the checkout and replayed verbatim, so repeating the request is safe — send an `Idempotency-Key` and a lost response can be recovered. `refresh=1` re-runs the module (an expired gateway session) but only while the order status is still the one the previous call left behind; once the payment moved the order on, it answers `409 payment_already_started` instead of charging twice.\n\nThe request body is passed through to the module as POSTed fields, for gateways that expect the payment form data in the request.",
+        "operationId": "startStoreCheckoutPayment",
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Checkout session id."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Re-run the payment module instead of replaying the stored answer (only while the order has not moved on)."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Optional; forwarded to the payment module's own fields (card data, coupon code, …). The API itself reads nothing from it."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CheckoutPayment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkout has not been confirmed yet, the method is no longer available, or the payment has already moved the order on.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The payment method failed to start the payment (gateway error).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta/countries": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Countries",
+        "operationId": "listStoreCountries",
+        "parameters": [
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Country"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/meta/countries/{country_id}/zones": {
+      "get": {
+        "tags": [
+          "Meta"
+        ],
+        "summary": "Zones of a country",
+        "operationId": "listStoreZones",
+        "parameters": [
+          {
+            "name": "country_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Language code used for the extension labels (`en-gb`, `ru-ua`, `uk-ua`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Zone"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown resource, or a resource of another customer (never disclosed).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, unknown, expired or revoked key.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The key is not allowed to perform this action (missing scope or API access disabled).",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-key rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The customer API is disabled.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "dcapi_<48 hex>"
+      }
+    },
+    "schemas": {
+      "Problem": {
+        "type": "object",
+        "description": "RFC 9457 problem details (Content-Type: application/problem+json).",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "urn:dockercart:api:error:validation_failed"
+          },
+          "title": {
+            "type": "string",
+            "example": "Unprocessable Content"
+          },
+          "status": {
+            "type": "integer",
+            "example": 422
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "example": "/v1/orders"
+          },
+          "code": {
+            "type": "string",
+            "example": "validation_failed"
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "request_id": {
+            "type": "string",
+            "example": "0f5c9b1e2d3a4b5c"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "code"
+        ]
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "pages": {
+            "type": "integer"
+          }
+        }
+      },
+      "OrderSummary": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "integer"
+          },
+          "invoice_no": {
+            "type": "integer"
+          },
+          "invoice_prefix": {
+            "type": "string"
+          },
+          "order_status_id": {
+            "type": "integer"
+          },
+          "order_status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string",
+            "description": "Fixed-point money, 4 decimals."
+          },
+          "tracking_number": {
+            "type": "string",
+            "description": "`|`-separated list of tracking numbers (empty when none)."
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "OrderAddress": {
+        "type": "object",
+        "properties": {
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "address_1": {
+            "type": "string"
+          },
+          "address_2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "zone": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderProduct": {
+        "type": "object",
+        "properties": {
+          "order_product_id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "order_option_id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "OrderTotal": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "OrderHistory": {
+        "type": "object",
+        "properties": {
+          "order_history_id": {
+            "type": "integer"
+          },
+          "order_status_id": {
+            "type": "integer"
+          },
+          "order_status": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Order": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "order_id": {
+                "type": "integer"
+              },
+              "invoice_no": {
+                "type": "integer"
+              },
+              "invoice_prefix": {
+                "type": "string"
+              },
+              "order_status_id": {
+                "type": "integer"
+              },
+              "order_status": {
+                "type": "string"
+              },
+              "total": {
+                "type": "string",
+                "description": "Fixed-point money, 4 decimals."
+              },
+              "tracking_number": {
+                "type": "string",
+                "description": "`|`-separated list of tracking numbers (empty when none)."
+              },
+              "date_added": {
+                "type": "string",
+                "nullable": true
+              },
+              "date_modified": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "firstname": {
+                "type": "string"
+              },
+              "lastname": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "telephone": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "currency_code": {
+                "type": "string"
+              },
+              "currency_value": {
+                "type": "number"
+              },
+              "payment_method": {
+                "type": "string"
+              },
+              "shipping_method": {
+                "type": "string"
+              },
+              "payment_address": {
+                "type": "object",
+                "properties": {
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string"
+                  },
+                  "address_1": {
+                    "type": "string"
+                  },
+                  "address_2": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "postcode": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "zone": {
+                    "type": "string"
+                  }
+                }
+              },
+              "shipping_address": {
+                "type": "object",
+                "properties": {
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string"
+                  },
+                  "address_1": {
+                    "type": "string"
+                  },
+                  "address_2": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "postcode": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "zone": {
+                    "type": "string"
+                  }
+                }
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "order_product_id": {
+                      "type": "integer"
+                    },
+                    "product_id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "number"
+                    },
+                    "price": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "string"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "order_option_id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "totals": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    },
+                    "sort_order": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "order_history_id": {
+                      "type": "integer"
+                    },
+                    "order_status_id": {
+                      "type": "integer"
+                    },
+                    "order_status": {
+                      "type": "string"
+                    },
+                    "comment": {
+                      "type": "string"
+                    },
+                    "date_added": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReturnSummary": {
+        "type": "object",
+        "properties": {
+          "return_id": {
+            "type": "integer"
+          },
+          "order_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "full",
+              "partial"
+            ]
+          },
+          "product": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "refunded": {
+            "type": "boolean"
+          },
+          "opened": {
+            "type": "boolean"
+          },
+          "return_reason_id": {
+            "type": "integer"
+          },
+          "return_action_id": {
+            "type": "integer"
+          },
+          "return_status_id": {
+            "type": "integer"
+          },
+          "return_status": {
+            "type": "string"
+          },
+          "date_ordered": {
+            "type": "string",
+            "nullable": true
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReturnProduct": {
+        "type": "object",
+        "properties": {
+          "order_product_id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "variant_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnHistory": {
+        "type": "object",
+        "properties": {
+          "return_status_id": {
+            "type": "integer"
+          },
+          "return_status": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Return": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "return_id": {
+                "type": "integer"
+              },
+              "order_id": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "partial"
+                ]
+              },
+              "product": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "integer"
+              },
+              "refunded": {
+                "type": "boolean"
+              },
+              "opened": {
+                "type": "boolean"
+              },
+              "return_reason_id": {
+                "type": "integer"
+              },
+              "return_action_id": {
+                "type": "integer"
+              },
+              "return_status_id": {
+                "type": "integer"
+              },
+              "return_status": {
+                "type": "string"
+              },
+              "date_ordered": {
+                "type": "string",
+                "nullable": true
+              },
+              "date_added": {
+                "type": "string",
+                "nullable": true
+              },
+              "date_modified": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "order_product_id": {
+                      "type": "integer"
+                    },
+                    "product_id": {
+                      "type": "integer"
+                    },
+                    "variant_id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "quantity": {
+                      "type": "integer"
+                    },
+                    "price": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "return_status_id": {
+                      "type": "integer"
+                    },
+                    "return_status": {
+                      "type": "string"
+                    },
+                    "comment": {
+                      "type": "string"
+                    },
+                    "date_added": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ReturnReason": {
+        "type": "object",
+        "properties": {
+          "return_reason_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnAction": {
+        "type": "object",
+        "properties": {
+          "return_action_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ReturnLineInput": {
+        "type": "object",
+        "required": [
+          "order_product_id",
+          "quantity"
+        ],
+        "properties": {
+          "order_product_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ReturnInput": {
+        "type": "object",
+        "required": [
+          "order_id",
+          "products",
+          "return_reason_id"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "integer"
+          },
+          "products": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "order_product_id",
+                "quantity"
+              ],
+              "properties": {
+                "order_product_id": {
+                  "type": "integer"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "return_reason_id": {
+            "type": "integer"
+          },
+          "return_action_id": {
+            "type": "integer"
+          },
+          "opened": {
+            "type": "boolean"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 65535
+          },
+          "date_ordered": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "ProductSummary": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "description": "Relative path inside `image/` (empty when none)."
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "thumb_url": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "special": {
+            "type": "string",
+            "nullable": true,
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "base_price": {
+            "type": "string",
+            "nullable": true,
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "currency_code": {
+            "type": "string",
+            "description": "Store base currency code every amount is expressed in."
+          },
+          "is_configurable": {
+            "type": "boolean"
+          },
+          "price_min": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "price_max": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "in_stock": {
+            "type": "boolean"
+          },
+          "preorder": {
+            "type": "boolean"
+          },
+          "discontinued": {
+            "type": "boolean"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "reviews": {
+            "type": "integer"
+          },
+          "manufacturer": {
+            "type": "object",
+            "properties": {
+              "manufacturer_id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "main_category_id": {
+            "type": "integer"
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProductDescription": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "meta_title": {
+            "type": "string"
+          },
+          "meta_description": {
+            "type": "string"
+          },
+          "meta_keyword": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductImage": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductVideo": {
+        "type": "object",
+        "properties": {
+          "video_type": {
+            "type": "string"
+          },
+          "video": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductAttribute": {
+        "type": "object",
+        "properties": {
+          "attribute_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductOptionValue": {
+        "type": "object",
+        "properties": {
+          "product_option_value_id": {
+            "type": "integer"
+          },
+          "option_value_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "price_prefix": {
+            "type": "string",
+            "enum": [
+              "+",
+              "-"
+            ]
+          },
+          "is_hit": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProductOption": {
+        "type": "object",
+        "properties": {
+          "product_option_id": {
+            "type": "integer"
+          },
+          "option_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "is_configurable_axis": {
+            "type": "boolean"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductOptionValue"
+            }
+          }
+        }
+      },
+      "ProductCategory": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryPathNode"
+            }
+          }
+        }
+      },
+      "CategoryPathNode": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductMeasurement": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductDimensions": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductDiscount": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number"
+          },
+          "price": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          }
+        }
+      },
+      "ProductVariantValue": {
+        "type": "object",
+        "properties": {
+          "option_id": {
+            "type": "integer"
+          },
+          "option_value_id": {
+            "type": "integer"
+          },
+          "value_name": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductVariant": {
+        "type": "object",
+        "properties": {
+          "variant_id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "upc": {
+            "type": "string"
+          },
+          "ean": {
+            "type": "string"
+          },
+          "jan": {
+            "type": "string"
+          },
+          "isbn": {
+            "type": "string"
+          },
+          "mpn": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "base_price": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "special": {
+            "type": "string",
+            "nullable": true,
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "subtract": {
+            "type": "integer"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "weight_class_id": {
+            "type": "integer"
+          },
+          "length": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "image": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductVariantValue"
+            }
+          }
+        }
+      },
+      "VariantAxis": {
+        "type": "object",
+        "properties": {
+          "option_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "option_value_id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "VariantAggregated": {
+        "type": "object",
+        "properties": {
+          "price_min": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "price_max": {
+            "type": "string",
+            "description": "Fixed-point money (4 decimals) in the store base currency, tax included."
+          },
+          "total_stock": {
+            "type": "number"
+          },
+          "variants_in_stock": {
+            "type": "integer"
+          },
+          "total_variants": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductVariants": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "currency_id": {
+            "type": "integer",
+            "description": "0 = store default. Amounts are already normalised to the base currency."
+          },
+          "is_configurable": {
+            "type": "boolean"
+          },
+          "default_variant_id": {
+            "type": "integer"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariantAxis"
+            }
+          },
+          "aggregated": {
+            "$ref": "#/components/schemas/VariantAggregated"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductVariant"
+            }
+          }
+        }
+      },
+      "Product": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "descriptions": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/ProductDescription"
+                }
+              },
+              "images": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductImage"
+                }
+              },
+              "videos": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductVideo"
+                }
+              },
+              "attributes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductAttribute"
+                }
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductOption"
+                }
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductCategory"
+                }
+              },
+              "reward": {
+                "type": "object",
+                "properties": {
+                  "points": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "weight": {
+                "$ref": "#/components/schemas/ProductMeasurement"
+              },
+              "dimensions": {
+                "$ref": "#/components/schemas/ProductDimensions"
+              },
+              "discounts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductDiscount"
+                }
+              },
+              "variants": {
+                "$ref": "#/components/schemas/ProductVariants"
+              },
+              "related": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductSummary"
+                }
+              },
+              "upsell": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductSummary"
+                }
+              },
+              "accessory": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProductSummary"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer"
+          },
+          "parent_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          },
+          "product_count": {
+            "type": "integer",
+            "description": "Visible products assigned directly to the category."
+          },
+          "path": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryPathNode"
+            }
+          }
+        }
+      },
+      "CategoryTree": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Category"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CategoryTree"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CartOption": {
+        "type": "object",
+        "description": "Chosen value of one product option.",
+        "properties": {
+          "product_option_id": {
+            "type": "integer"
+          },
+          "product_option_value_id": {
+            "type": "integer"
+          },
+          "option_id": {
+            "type": "integer"
+          },
+          "option_value_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "CartLine": {
+        "type": "object",
+        "properties": {
+          "cart_id": {
+            "type": "integer",
+            "description": "Line id — use it in PATCH/DELETE /v1/cart/items/{cart_id}."
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "variant_id": {
+            "type": "integer"
+          },
+          "variant_sku": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "thumb_url": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "quantity_step": {
+            "type": "number"
+          },
+          "price": {
+            "type": "string",
+            "description": "Fixed-point money in the store base currency, 4 decimals."
+          },
+          "price_net": {
+            "type": "string",
+            "description": "Unit price before tax, 4 decimals."
+          },
+          "total": {
+            "type": "string",
+            "description": "Fixed-point money in the store base currency, 4 decimals."
+          },
+          "total_net": {
+            "type": "string",
+            "description": "Line total before tax, 4 decimals."
+          },
+          "tax": {
+            "type": "string",
+            "description": "Tax amount per unit, 4 decimals."
+          },
+          "tax_class_id": {
+            "type": "integer"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "reward_points": {
+            "type": "integer"
+          },
+          "shipping": {
+            "type": "boolean"
+          },
+          "in_stock": {
+            "type": "boolean",
+            "description": "Reservation aware: active stock holds of other sessions are already subtracted."
+          },
+          "preorder": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartOption"
+            }
+          },
+          "bxgy": {
+            "nullable": true,
+            "description": "Buy-X-get-Y discount applied to this line, null when none.",
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "original_price": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CartTotal": {
+        "type": "object",
+        "description": "One line of the storefront total pipeline (sub-total, shipping, coupon, tax, total, …).",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "description": "Fixed-point money in the store base currency, 4 decimals."
+          },
+          "text": {
+            "type": "string",
+            "description": "Formatted amount in the store base currency."
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "CartWarning": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "minimum_quantity",
+              "out_of_stock"
+            ]
+          },
+          "cart_id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "CartApplied": {
+        "type": "object",
+        "properties": {
+          "coupon": {
+            "type": "string",
+            "nullable": true
+          },
+          "voucher": {
+            "type": "string",
+            "nullable": true
+          },
+          "reward": {
+            "type": "integer",
+            "description": "Reward points spent on this cart."
+          },
+          "vouchers": {
+            "type": "integer",
+            "description": "Number of gift vouchers bought in this cart."
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "description": "The customer's cart — the same records the website uses.",
+        "properties": {
+          "cart": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartLine"
+            }
+          },
+          "items": {
+            "type": "integer",
+            "description": "Number of lines."
+          },
+          "units": {
+            "type": "number",
+            "description": "Sum of the line quantities."
+          },
+          "weight": {
+            "type": "number"
+          },
+          "totals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartTotal"
+            }
+          },
+          "total": {
+            "type": "string",
+            "description": "Fixed-point money in the store base currency, 4 decimals."
+          },
+          "total_text": {
+            "type": "string"
+          },
+          "currency_code": {
+            "type": "string"
+          },
+          "has_shipping": {
+            "type": "boolean"
+          },
+          "has_stock": {
+            "type": "boolean"
+          },
+          "has_download": {
+            "type": "boolean"
+          },
+          "applied": {
+            "$ref": "#/components/schemas/CartApplied"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartWarning"
+            }
+          }
+        }
+      },
+      "CartItemInput": {
+        "type": "object",
+        "required": [
+          "product_id"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Defaults to the product minimum quantity. Above the minimum it must follow the product quantity step."
+          },
+          "variant_id": {
+            "type": "integer",
+            "description": "Required for a configurable product; the variant pins the axis option values."
+          },
+          "options": {
+            "type": "object",
+            "description": "`{product_option_id: product_option_value_id}` for select/radio/color options and `{product_option_id: \"text\"}` for text/date/file options.",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ShippingQuote": {
+        "type": "object",
+        "description": "One available shipping quote. `code` is what you send back as `shipping_code`.",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null when the method does not quote a price (calculated later)."
+          },
+          "tax_class_id": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "description": "One available payment method. `code` is what you send back as `payment_code`.",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "integer"
+          },
+          "stock_hold_minutes": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Per-method stock hold window; null uses the store default."
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "address_id": {
+            "type": "integer"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string"
+          },
+          "address_1": {
+            "type": "string"
+          },
+          "address_2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "country_id": {
+            "type": "integer"
+          },
+          "country": {
+            "type": "string"
+          },
+          "iso_code_2": {
+            "type": "string"
+          },
+          "iso_code_3": {
+            "type": "string"
+          },
+          "address_format": {
+            "type": "string"
+          },
+          "zone_id": {
+            "type": "integer"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "zone_code": {
+            "type": "string"
+          },
+          "custom_field": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "is_default": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddressInput": {
+        "type": "object",
+        "required": [
+          "address_1",
+          "city",
+          "country_id"
+        ],
+        "properties": {
+          "firstname": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "lastname": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "company": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "address_1": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "address_2": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "postcode": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "country_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "zone_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "custom_field": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Checkout": {
+        "type": "object",
+        "properties": {
+          "checkout_id": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "completed"
+            ],
+            "description": "`completed` once `confirm` placed the order; a completed session answers with the summary fields only."
+          },
+          "order_id": {
+            "type": "integer",
+            "description": "Order created by `confirm` (0 while the checkout is open)."
+          },
+          "payment_started": {
+            "type": "boolean",
+            "description": "Whether `POST /v1/checkout/{checkout_id}/payment` already produced an answer."
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "tax_number": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "agree": {
+            "type": "boolean",
+            "description": "Whether the checkout terms are accepted."
+          },
+          "payment_address": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              }
+            ]
+          },
+          "shipping_address": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              }
+            ]
+          },
+          "shipping_code": {
+            "type": "string",
+            "description": "Empty when no (still) valid quote is selected."
+          },
+          "payment_code": {
+            "type": "string",
+            "description": "Empty when no (still) valid method is selected."
+          },
+          "shipping_method": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ShippingQuote"
+              }
+            ]
+          },
+          "payment_method": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "shipping_methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShippingQuote"
+            }
+          },
+          "payment_methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethod"
+            }
+          },
+          "cart": {
+            "$ref": "#/components/schemas/Cart"
+          },
+          "missing": {
+            "type": "array",
+            "description": "What still blocks the order; empty means confirm will succeed.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cart",
+                "stock",
+                "agree",
+                "payment_address",
+                "shipping_address",
+                "shipping_method",
+                "payment_method"
+              ]
+            }
+          },
+          "can_confirm": {
+            "type": "boolean"
+          },
+          "date_added": {
+            "type": "string",
+            "nullable": true
+          },
+          "date_modified": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "description": "A checkout session. While `status` is `open` the whole representation is returned; once it is `completed` the response is the summary only (`checkout_id`, `status`, `order_id`, `payment_started`, `date_added`, `date_modified`)."
+      },
+      "CheckoutInput": {
+        "type": "object",
+        "description": "Everything is optional: defaults come from the customer record and the default address book entry.",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "agree": {
+            "type": "boolean"
+          },
+          "payment_address": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AddressInput"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "address_id"
+                ],
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "save": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ],
+            "description": "A saved address (`{\"address_id\": 3}`) or an inline address. Add `\"save\": true` to store an inline address in the address book."
+          },
+          "shipping_address": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AddressInput"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "address_id"
+                ],
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "save": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ],
+            "description": "A saved address (`{\"address_id\": 3}`) or an inline address. Add `\"save\": true` to store an inline address in the address book."
+          },
+          "ship_to_payment_address": {
+            "type": "boolean",
+            "description": "Ship to the payment address (default true when no shipping address is sent)."
+          }
+        }
+      },
+      "CheckoutUpdateInput": {
+        "type": "object",
+        "description": "Everything is optional: defaults come from the customer record and the default address book entry.",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "agree": {
+            "type": "boolean"
+          },
+          "payment_address": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AddressInput"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "address_id"
+                ],
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "save": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ],
+            "description": "A saved address (`{\"address_id\": 3}`) or an inline address. Add `\"save\": true` to store an inline address in the address book."
+          },
+          "shipping_address": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AddressInput"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "address_id"
+                ],
+                "properties": {
+                  "address_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "save": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ],
+            "description": "A saved address (`{\"address_id\": 3}`) or an inline address. Add `\"save\": true` to store an inline address in the address book."
+          },
+          "ship_to_payment_address": {
+            "type": "boolean",
+            "description": "Ship to the payment address (default true when no shipping address is sent)."
+          },
+          "shipping_code": {
+            "type": "string",
+            "description": "A `code` from `shipping_methods`; an empty string clears the choice."
+          },
+          "payment_code": {
+            "type": "string",
+            "description": "A `code` from `payment_methods`; an empty string clears the choice."
+          }
+        }
+      },
+      "Country": {
+        "type": "object",
+        "properties": {
+          "country_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iso_code_2": {
+            "type": "string"
+          },
+          "iso_code_3": {
+            "type": "string"
+          },
+          "postcode_required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Zone": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "integer"
+          },
+          "country_id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "CartItemUpdateInput": {
+        "type": "object",
+        "required": [
+          "quantity"
+        ],
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "New quantity; 0 removes the line. Must respect the product minimum quantity."
+          }
+        }
+      },
+      "CheckoutPayment": {
+        "type": "object",
+        "description": "What the client has to do to pay the confirmed order. `kind` tells the four cases apart.",
+        "properties": {
+          "order_id": {
+            "type": "integer"
+          },
+          "payment_code": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string",
+            "description": "Payment extension that produced the answer."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "external",
+              "internal",
+              "html",
+              "none"
+            ],
+            "description": "external: open `redirect_url`; internal: a page of this store only; html: render `html`; none: nothing to pay online, show `instructions`."
+          },
+          "redirect_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "Set for `external` and `internal`."
+          },
+          "html": {
+            "type": "string",
+            "nullable": true,
+            "description": "Set for `html`."
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Title (and terms) of the payment method."
+          },
+          "gateway": {
+            "type": "object",
+            "description": "Extra scalar fields the module returned (bespoke gateways); `{}` when there are none."
+          },
+          "created_at": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshed_at": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,3 +16,7 @@ $_['text_success'] = 'Успех: Вы изменили общую сумму к
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_low_order_fee'] = 'Низкая комиссия за заказ';

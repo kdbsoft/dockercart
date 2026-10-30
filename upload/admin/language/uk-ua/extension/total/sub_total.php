@@ -11,3 +11,7 @@ $_['text_total'] = 'Підсумок';
 // Subtitle
 
 $_['text_edit_subtitle'] = 'Налаштуйте параметри та опції доповнення';
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_sub_total'] = 'Проміжний підсумок';

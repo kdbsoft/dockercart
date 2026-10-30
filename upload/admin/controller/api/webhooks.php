@@ -304,7 +304,10 @@ class ControllerApiWebhooks extends \Dockercart\Api\Controller {
 	 */
 	private function subscriptionInput(array $body, array $current): array {
 		$data = [
-			'name'         => array_key_exists('name', $body) ? (string)$body['name'] : (string)($current['name'] ?? ''),
+			// The name is rendered by the panel list and form, so it is escaped on
+			// write like Request::clean() does for the panel form (an omitted field
+			// keeps its stored, already escaped value).
+			'name'         => array_key_exists('name', $body) ? Serializer::encodeTextWithin('name', (string)$body['name'], 128) : (string)($current['name'] ?? ''),
 			'url'          => array_key_exists('url', $body) ? (string)$body['url'] : (string)($current['url'] ?? ''),
 			'events'       => array_key_exists('events', $body) ? (array)$body['events'] : (array)($current['events_list'] ?? []),
 			'filters'      => array_key_exists('filters', $body) ? $body['filters'] : (array)($current['filters_array'] ?? []),
@@ -389,7 +392,7 @@ class ControllerApiWebhooks extends \Dockercart\Api\Controller {
 	private function subscriptionResponse(array $subscription): array {
 		return [
 			'webhook_id'      => (int)$subscription['subscription_id'],
-			'name'            => (string)$subscription['name'],
+			'name'            => Serializer::decodeText($subscription['name'] ?? ''),
 			'url'             => (string)$subscription['url'],
 			'events'          => array_values((array)$subscription['events_list']),
 			'filters'         => (object)(array)$subscription['filters_array'],

@@ -19,6 +19,12 @@ final class KeyRepository {
 	public const TOKEN_PREFIX = 'dcapi_';
 	public const PREFIX_LENGTH = 14;
 
+	/**
+	 * Pre-authentication request budget per client IP (per minute) when
+	 * config_api_anon_rate_limit is not set.
+	 */
+	public const DEFAULT_ANON_RATE_LIMIT = 60;
+
 	private \DB $db;
 	private \Cache $cache;
 	private \Config $config;
@@ -162,6 +168,42 @@ final class KeyRepository {
 		$window = (int)floor(time() / 60);
 		$reset = ($window + 1) * 60;
 		$cache_key = 'api_rate_' . (int)($key['api_key_id'] ?? 0) . '_' . $window;
+
+		$count = (int)$this->cache->get($cache_key) + 1;
+
+		$this->cache->set($cache_key, $count);
+
+		return [
+			'limit'     => $limit,
+			'remaining' => max(0, $limit - $count),
+			'reset'     => $reset,
+			'exceeded'  => ($count > $limit),
+		];
+	}
+
+	/**
+	 * Pre-authentication throttle, per client IP.
+	 *
+	 * Runs *before* the key lookup, so a client without a valid token cannot turn
+	 * the API into a database amplifier (one oc_api_key query per request) or write
+	 * one journal row per attempt. Keys get their own, separate budget in
+	 * rateLimit().
+	 *
+	 * @return array{limit: int, remaining: int, reset: int, exceeded: bool}
+	 */
+	public function rateLimitAnonymous(string $ip): array {
+		$limit = (int)$this->config->get('config_api_anon_rate_limit');
+
+		if ($limit <= 0) {
+			$limit = self::DEFAULT_ANON_RATE_LIMIT;
+		}
+
+		$window = (int)floor(time() / 60);
+		$reset = ($window + 1) * 60;
+
+		// Hashed so the key is safe for every cache backend (an IPv6 literal
+		// contains ':' which the file adaptor strips) and does not leak the IP.
+		$cache_key = 'api_anon_rate_' . sha1($ip === '' ? 'unknown' : $ip) . '_' . $window;
 
 		$count = (int)$this->cache->get($cache_key) + 1;
 

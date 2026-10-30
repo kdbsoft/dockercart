@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<title>{{ heading_docs }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="{{ favicon_url }}" />
+<link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="{{ tokens_css_url }}" />
+<link rel="stylesheet" href="{{ swagger_css_url }}" />
+<link rel="stylesheet" href="{{ docs_css_url }}" />
+</head>
+<body class="dc-api-docs">
+	<header class="dc-docs-bar">
+		<a class="dc-docs-bar__back" href="{{ back }}"><i data-lucide="arrow-left" width="16" height="16"></i> {{ button_back }}</a>
+		<span class="dc-docs-bar__title">{{ heading_docs }}</span>
+		<span class="dc-docs-bar__url"><code>{{ api_base_url }}</code></span>
+		<span class="dc-docs-bar__spacer"></span>
+		<a class="dc-docs-bar__link" href="{{ keys }}"><i data-lucide="key-round" width="14" height="14"></i> {{ button_keys }}</a>
+	</header>
+	<div class="dc-docs-page">
+		<div id="swagger-ui"></div>
+	</div>
+	<script src="{{ lucide_js_url }}"></script>
+	<script src="{{ swagger_js_url }}"></script>
+	<script type="text/javascript"><!--
+window.addEventListener('load', function () {
+	if (window.lucide && typeof window.lucide.createIcons === 'function') {
+		window.lucide.createIcons();
+	}
+
+	window.ui = SwaggerUIBundle({
+		url: '{{ spec_url|escape('js') }}',
+		dom_id: '#swagger-ui',
+		deepLinking: true,
+		docExpansion: 'none',
+		filter: true,
+		persistAuthorization: true,
+		tryItOutEnabled: true,
+		displayRequestDuration: true,
+		presets: [SwaggerUIBundle.presets.apis],
+		layout: 'BaseLayout'
+	});
+});
+//--></script>
+</body>
+</html>

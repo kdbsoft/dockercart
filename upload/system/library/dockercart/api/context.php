@@ -33,6 +33,12 @@ final class Context {
 
 	public ?Principal $principal = null;
 
+	/** Customer principal of a store-api request (null on the admin api app). */
+	public ?CustomerPrincipal $customer_principal = null;
+
+	/** Required scope of the matched store-api endpoint (null for public endpoints). */
+	public ?string $scope = null;
+
 	public string $request_id = '';
 	public float $started_at = 0.0;
 

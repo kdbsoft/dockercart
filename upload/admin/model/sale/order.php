@@ -345,6 +345,10 @@ class ModelSaleOrder extends Model {
 			$sql .= " AND o.order_id = '" . (int)$data['filter_order_id'] . "'";
 		}
 
+		if (!empty($data['filter_customer_id'])) {
+			$sql .= " AND o.customer_id = '" . (int)$data['filter_customer_id'] . "'";
+		}
+
 		if (!empty($data['filter_customer'])) {
 			$filter_customer = (string)$data['filter_customer'];
 			$phone_digits = preg_replace('/\D+/', '', $filter_customer);
@@ -634,6 +638,10 @@ class ModelSaleOrder extends Model {
 
 		if (!empty($data['filter_order_id'])) {
 			$sql .= " AND order_id = '" . (int)$data['filter_order_id'] . "'";
+		}
+
+		if (!empty($data['filter_customer_id'])) {
+			$sql .= " AND customer_id = '" . (int)$data['filter_customer_id'] . "'";
 		}
 
 		if (!empty($data['filter_customer'])) {

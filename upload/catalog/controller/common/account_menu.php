@@ -2,6 +2,7 @@
 class ControllerCommonAccountMenu extends Controller {
 	public function index() {
 		$this->load->language('account/account');
+		$this->load->language('account/api');
 
 		$route = $this->request->get['route'] ?? '';
 
@@ -14,6 +15,15 @@ class ControllerCommonAccountMenu extends Controller {
 		$data['account_href'] = $this->url->link('account/account', '', true);
 		$data['register_href'] = $this->url->link('account/register', '', true);
 		$data['customer_logged'] = (bool)$this->customer->isLogged();
+
+		// The API entry is shown only when the customer's effective access is on.
+		$api_enabled = false;
+
+		if ((int)$this->config->get('config_api_customer_status') === 1 && $this->customer->isLogged()) {
+			$api_enabled = \Dockercart\Api\CustomerAccess::isEnabledForCustomer($this->db, (int)$this->customer->getId());
+		}
+
+		$data['api_enabled'] = $api_enabled;
 
 		$data['menu_items'] = array(
 			array(
@@ -48,6 +58,12 @@ class ControllerCommonAccountMenu extends Controller {
 					'text' => $this->language->get('text_newsletter'),
 					'href' => $this->url->link('account/newsletter', '', true),
 					'icon' => 'mail',
+				),
+				'account/api' => array(
+					'text' => $this->language->get('text_api'),
+					'href' => $this->url->link('account/api', '', true),
+					'icon' => 'key-round',
+					'status' => $api_enabled ? 1 : 0,
 				),
 				),
 		),

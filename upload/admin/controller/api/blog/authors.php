@@ -121,6 +121,17 @@ class ControllerApiBlogAuthors extends \Dockercart\Api\Controller {
 
 		$data = $this->validateRequest($body, $rules);
 
+		// The author name and bio are rendered by the storefront blog with
+		// autoescape off, so they are escaped on write (the panel form is escaped
+		// by Request::clean()) and decoded again by authorResponse().
+		if (array_key_exists('name', $data)) {
+			$data['name'] = Serializer::encodeTextWithin('name', $data['name'], 255);
+		}
+
+		if (array_key_exists('bio', $data)) {
+			$data['bio'] = Serializer::encodeTextWithinBytes('bio', $data['bio'], 65535);
+		}
+
 		$defaults = [
 			'email'      => '',
 			'image'      => '',
@@ -152,10 +163,10 @@ class ControllerApiBlogAuthors extends \Dockercart\Api\Controller {
 	private function authorResponse(array $author): array {
 		return [
 			'author_id'    => (int)$author['author_id'],
-			'name'         => (string)$author['name'],
+			'name'         => Serializer::decodeText($author['name'] ?? ''),
 			'email'        => (string)$author['email'],
 			'image'        => (string)$author['image'],
-			'bio'          => Serializer::decodeText($author['bio']),
+			'bio'          => Serializer::decodeText($author['bio'] ?? ''),
 			'status'       => (int)$author['status'],
 			'sort_order'   => (int)$author['sort_order'],
 			'date_added'   => Serializer::datetime($author['date_added'] ?? ''),

@@ -18,3 +18,9 @@ $_['entry_sort_order'] = 'Sort Order';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify reward points total!';
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_reward'] = 'Reward Points (%s)';
+$_['text_order_id'] = 'Order ID: #%s';
+$_['text_reward_refunded'] = 'Refund for order #%s';

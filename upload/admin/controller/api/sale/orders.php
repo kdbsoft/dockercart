@@ -48,8 +48,8 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 
 		if ($status !== '') {
 			$filters['filter_order_status'] = $status;
-		} elseif ($this->queryString('status_id') !== '') {
-			$filters['filter_order_status_id'] = $this->queryInt('status_id');
+		} elseif (($status_id = $this->queryOptionalInt('status_id')) !== null) {
+			$filters['filter_order_status_id'] = $status_id;
 		}
 
 		$sorting = $this->sorting(
@@ -103,8 +103,8 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 			$products[] = [
 				'order_product_id' => (int)$product['order_product_id'],
 				'product_id'       => (int)$product['product_id'],
-				'name'             => (string)$product['name'],
-				'model'            => (string)$product['model'],
+				'name'             => Serializer::decodeText($product['name'] ?? ''),
+				'model'            => (string)($product['model'] ?? ''),
 				'quantity'         => (float)$product['quantity'],
 				'price'            => Serializer::money($product['price']),
 				'total'            => Serializer::money($product['total']),
@@ -145,12 +145,12 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 			'store_id'         => (int)$order['store_id'],
 			'store_name'       => (string)($order['store_name'] ?? ''),
 			'customer_id'      => (int)$order['customer_id'],
-			'firstname'        => (string)$order['firstname'],
-			'lastname'         => (string)$order['lastname'],
+			'firstname'        => Serializer::decodeText($order['firstname'] ?? ''),
+			'lastname'         => Serializer::decodeText($order['lastname'] ?? ''),
 			'email'            => (string)($order['email'] ?? ''),
-			'telephone'        => (string)($order['telephone'] ?? ''),
-			'tax_number'       => (string)($order['tax_number'] ?? ''),
-			'comment'          => (string)($order['comment'] ?? ''),
+			'telephone'        => Serializer::decodeText($order['telephone'] ?? ''),
+			'tax_number'       => Serializer::decodeText($order['tax_number'] ?? ''),
+			'comment'          => Serializer::decodeText($order['comment'] ?? ''),
 			'currency_code'    => (string)$order['currency_code'],
 			'currency_value'   => (float)$order['currency_value'],
 			'paid_amount'      => Serializer::money($order['paid_amount'] ?? 0),
@@ -159,26 +159,26 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 			'shipping_method'  => (string)($order['shipping_method'] ?? ''),
 			'shipping_code'    => (string)($order['shipping_code'] ?? ''),
 			'payment_address'  => [
-				'firstname'  => (string)($order['payment_firstname'] ?? ''),
-				'lastname'   => (string)($order['payment_lastname'] ?? ''),
-				'company'    => (string)($order['payment_company'] ?? ''),
-				'address_1'  => (string)($order['payment_address_1'] ?? ''),
-				'address_2'  => (string)($order['payment_address_2'] ?? ''),
-				'city'       => (string)($order['payment_city'] ?? ''),
-				'postcode'   => (string)($order['payment_postcode'] ?? ''),
+				'firstname'  => Serializer::decodeText($order['payment_firstname'] ?? ''),
+				'lastname'   => Serializer::decodeText($order['payment_lastname'] ?? ''),
+				'company'    => Serializer::decodeText($order['payment_company'] ?? ''),
+				'address_1'  => Serializer::decodeText($order['payment_address_1'] ?? ''),
+				'address_2'  => Serializer::decodeText($order['payment_address_2'] ?? ''),
+				'city'       => Serializer::decodeText($order['payment_city'] ?? ''),
+				'postcode'   => Serializer::decodeText($order['payment_postcode'] ?? ''),
 				'country'    => (string)($order['payment_country'] ?? ''),
 				'country_id' => (int)($order['payment_country_id'] ?? 0),
 				'zone'       => (string)($order['payment_zone'] ?? ''),
 				'zone_id'    => (int)($order['payment_zone_id'] ?? 0),
 			],
 			'shipping_address' => [
-				'firstname'  => (string)($order['shipping_firstname'] ?? ''),
-				'lastname'   => (string)($order['shipping_lastname'] ?? ''),
-				'company'    => (string)($order['shipping_company'] ?? ''),
-				'address_1'  => (string)($order['shipping_address_1'] ?? ''),
-				'address_2'  => (string)($order['shipping_address_2'] ?? ''),
-				'city'       => (string)($order['shipping_city'] ?? ''),
-				'postcode'   => (string)($order['shipping_postcode'] ?? ''),
+				'firstname'  => Serializer::decodeText($order['shipping_firstname'] ?? ''),
+				'lastname'   => Serializer::decodeText($order['shipping_lastname'] ?? ''),
+				'company'    => Serializer::decodeText($order['shipping_company'] ?? ''),
+				'address_1'  => Serializer::decodeText($order['shipping_address_1'] ?? ''),
+				'address_2'  => Serializer::decodeText($order['shipping_address_2'] ?? ''),
+				'city'       => Serializer::decodeText($order['shipping_city'] ?? ''),
+				'postcode'   => Serializer::decodeText($order['shipping_postcode'] ?? ''),
 				'country'    => (string)($order['shipping_country'] ?? ''),
 				'country_id' => (int)($order['shipping_country_id'] ?? 0),
 				'zone'       => (string)($order['shipping_zone'] ?? ''),
@@ -225,7 +225,9 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 		// reported as 409 invalid_transition.
 		$this->request->post = [
 			'order_status_id' => (int)$data['order_status_id'],
-			'comment'         => (string)($data['comment'] ?? ''),
+			// The history comment is rendered as HTML in the panel timeline, so it is
+			// escaped here (the panel form is cleaned by Request::clean()).
+			'comment'         => Serializer::encodeTextWithinBytes('comment', (string)($data['comment'] ?? ''), 65535),
 			'notify'          => !empty($data['notify']) ? 1 : 0,
 			'override'        => 0,
 		];
@@ -279,6 +281,10 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 
 			if ($field === 'tracking_number') {
 				$this->assertTrackingNumber($value);
+			} else {
+				// The order comment is rendered as HTML in the panel (autoescape is
+				// off), so it is escaped here just like the panel form does it.
+				$value = Serializer::encodeTextWithinBytes('comment', $value, 65535);
 			}
 
 			$this->load->model('sale/order');
@@ -295,7 +301,21 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 
 			$this->requireOrderModify();
 
-			$this->request->post = ['field' => $field, 'value' => (string)$body[$field]];
+			// email is validated by the panel action; the two contact fields are
+			// bounded here (varchar(32)) so an over-long value is a 422 instead of a
+			// "Data too long" 500, and escaped like Request::clean() would (the order
+			// page renders them unescaped).
+			$rules = $field === 'email'
+				? ['email' => ['email', 'max:96']]
+				: [$field => ['string', 'max:32']];
+
+			$value = (string)$this->validateRequest([$field => $body[$field]], $rules)[$field];
+
+			if ($field !== 'email') {
+				$value = Serializer::encodeTextWithin($field, $value, 32);
+			}
+
+			$this->request->post = ['field' => $field, 'value' => $value];
 
 			$result = $this->callPanelAction('sale/order/quickEdit');
 
@@ -401,7 +421,7 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 			'order_id'        => (int)$order['order_id'],
 			'invoice_no'      => (int)($order['invoice_no'] ?? 0),
 			'invoice_prefix'  => (string)($order['invoice_prefix'] ?? ''),
-			'customer'        => (string)($order['customer'] ?? ''),
+			'customer'        => Serializer::decodeText($order['customer'] ?? ''),
 			'order_status_id' => (int)$order['order_status_id'],
 			'order_status'    => (string)($order['order_status'] ?? ''),
 			'total'           => Serializer::money($order['total'] ?? 0),
@@ -432,7 +452,7 @@ class ControllerApiSaleOrders extends \Dockercart\Api\Controller {
 				'order_status_id'  => $status_id,
 				'order_status'     => $statuses[$status_id] ?? (string)($entry['status_name'] ?? ''),
 				'notify'           => Serializer::bool($entry['notify']),
-				'comment'          => (string)$entry['comment'],
+				'comment'          => Serializer::decodeText($entry['comment'] ?? ''),
 				'date_added'       => Serializer::datetime($entry['date_added']),
 			];
 		}

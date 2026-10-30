@@ -1236,7 +1236,7 @@ class ProductConfigurable {
 		$query = $this->db->query(
 			"SELECT po.product_option_id, po.product_id, po.option_id, po.required, o.type FROM "
 			. DB_PREFIX . "product_option po LEFT JOIN `" . DB_PREFIX . "option` o ON (po.option_id = o.option_id) "
-			. "WHERE po.product_id = '" . $product_id . "' AND po.option_id IN (" . implode(',', array_keys($option_ids)) . ") ORDER BY po.sort_order ASC"
+			. "WHERE po.product_id = '" . $product_id . "' AND po.option_id IN (" . implode(',', array_keys($option_ids)) . ") ORDER BY po.product_option_id ASC"
 		);
 
 		$product_option_rows = array();

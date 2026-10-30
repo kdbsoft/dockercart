@@ -138,8 +138,8 @@
                         {% if delivery.is_test %}<div><span class="label label-info">{{ text_test }}</span></div>{% endif %}
                       </td>
                       <td class="small">
-                        <strong>{{ delivery.subscription_name }}</strong>
-                        <div class="text-muted">{{ delivery.url }}</div>
+                        <strong>{{ delivery.subscription_name|e }}</strong>
+                        <div class="text-muted">{{ delivery.url|e }}</div>
                       </td>
                       <td class="small">
                         <code>{{ delivery.event_type }}</code>
@@ -165,10 +165,10 @@
                         <code>{{ delivery.response_code }}</code>
                         {% endif %}
                         {% if delivery.last_error %}
-                        <div class="text-danger">{{ delivery.last_error }}</div>
+                        <div class="text-danger">{{ delivery.last_error|e }}</div>
                         {% endif %}
                         {% if delivery.response_body %}
-                        <div class="text-muted" style="max-width:420px;word-break:break-all;">{{ delivery.response_body }}</div>
+                        <div class="text-muted" style="max-width:420px;word-break:break-all;">{{ delivery.response_body|e }}</div>
                         {% endif %}
                       </td>
                       <td class="text-right small">{{ delivery.duration_ms }} ms</td>

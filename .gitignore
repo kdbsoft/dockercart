@@ -19,6 +19,7 @@ PLAN.md
 /upload/config.php
 /upload/admin/config.php
 /upload/api/config.php
+/upload/store-api/config.php
 
 # Backup htaccess files
 .htaccess.bak*

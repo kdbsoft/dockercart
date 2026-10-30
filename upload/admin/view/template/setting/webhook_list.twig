@@ -129,7 +129,7 @@
                     {% for subscription in subscriptions %}
                     <tr>
                       <td>
-                        <strong>{{ subscription.name }}</strong>
+                        <strong>{{ subscription.name|e }}</strong>
                         {% if subscription.failures %}
                         <div class="small text-danger">
                           <i data-lucide="triangle-alert" width="12" height="12"></i> {{ text_consecutive_failures }}: {{ subscription.failures }}

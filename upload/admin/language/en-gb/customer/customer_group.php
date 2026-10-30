@@ -19,6 +19,15 @@ $_['text_edit_customer_group_subtitle'] = 'Edit customer group settings';
 $_['text_group_card'] = 'Customer Group';
 $_['text_description_card'] = 'Description';
 $_['text_settings_card'] = 'Settings';
+$_['text_api_card'] = 'API access';
+$_['text_api_card_help'] = 'Grant the storefront API to every customer of this group.';
+
+// Customer API scopes
+$_['text_scope_products_read'] = 'Read products';
+$_['text_scope_orders_read'] = 'Read orders';
+$_['text_scope_returns_read'] = 'Read returns';
+$_['text_scope_returns_write'] = 'Create returns';
+$_['text_scope_checkout_write'] = 'Creating orders';
 
 // Column
 $_['column_name']       = 'Customer Group Name';
@@ -34,9 +43,15 @@ $_['entry_approval']    = 'Approve New Customers';
 $_['entry_discount_percent'] = 'Discount (%)';
 $_['entry_markup_percent'] = 'Markup (%)';
 $_['entry_sort_order']  = 'Sort Order';
+$_['entry_api_status']  = 'API access';
+$_['entry_api_scopes']  = 'Allowed scopes';
 
 // Help
 $_['help_approval']     = 'Customers must be approved by an administrator before they can login.';
+$_['help_api_status']   = 'Enable the customer API for the group. A customer can override this individually.';
+$_['help_api_scopes']   = 'What a customer of this group may reach. Individual API keys can be narrowed further.';
+$_['text_api_global_disabled'] = 'The storefront API is disabled globally: this group gets no API access, the "API" section is hidden in the account and requests to /store-api/v1 answer HTTP 503.';
+$_['button_api_settings'] = 'Open API settings';
 
 // Error
 $_['error_permission']  = 'Warning: You do not have permission to modify customer groups!';

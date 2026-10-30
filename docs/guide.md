@@ -24,6 +24,7 @@
 18. [Webhooks](#18-webhooks)
 19. [Product Files (public downloads)](#19-product-files-public-downloads)
 20. [Admin Global Search & Manticore Indexing](#20-admin-global-search--manticore-indexing)
+21. [Customer (Storefront) REST API](#21-customer-storefront-rest-api)
 
 ---
 
@@ -1291,8 +1292,43 @@ The first request executes and its answer is stored for 24 h
 that answer verbatim (`201`, `Idempotent-Replay: true`) instead of creating a
 second product. The same key with a different body answers
 `409 idempotency_conflict`; a concurrent retry while the first is still running
-gets `409 idempotency_in_progress` (5 minute lock). 5xx answers are not stored, so
-they can be retried.
+gets `409 idempotency_in_progress` (5 minute lock).
+
+Every answer is stored, including problem documents: a retry of a request that
+failed with `422`/`404`/`409`/`412` replays the same error (with its
+`application/problem+json` content type) instead of holding a lock that blocks
+the client for five minutes. Only 5xx answers are not stored — that request's
+row (and its lock) is deleted, so a retry really executes again.
+
+### Free text, HTML and escaping
+
+Both APIs must escape free text **themselves**: the panel theme runs with Twig
+autoescape off and relies on escape-on-input (`Request::clean()` applies
+`htmlspecialchars()` to every posted value), and the REST APIs bypass
+`Request::clean()` because a JSON body would be mangled. The convention is the
+same one the product/category payloads always used:
+
+- on write — `Serializer::encodeText()` (or `encodeTextWithin()` /
+  `encodeTextWithinBytes()` when the column has a budget: the value is validated
+  on its **escaped** length, exactly like a panel form);
+- on read — `Serializer::decodeText()`, so a client sees the plain text it sent
+  and a `GET → PUT/PATCH` round trip never double-escapes.
+
+Applies to every free-text field that the panel renders unescaped: order and
+return comments (order timeline, return form/history), blog comment author/text,
+blog author name/bio, webhook name, and every customer address (`oc_address`,
+`oc_address` snapshots in `oc_api_checkout`, `oc_order` contact/address
+columns). A new API field that ends up in a template belongs on this list —
+
+```php
+// write
+['comment' => Serializer::encodeTextWithinBytes('comment', $value, 65535)]
+// read
+['comment' => Serializer::decodeText($row['comment'])]
+```
+
+`custom_field` values are the one remaining exception (they are stored as a
+JSON blob and this theme never renders them); audit that before exposing them.
 
 ### Documentation & discovery
 
@@ -1306,6 +1342,85 @@ The documentation is a **standalone page** (its own document, no panel chrome):
 Swagger UI brings its own stylesheet and does not belong into the panel
 layout. The page still requires the panel session, so the API surface stays
 undiscovered from the outside — only the OpenAPI document itself is public.
+
+### Checkout flow
+
+The API places orders through the **same pipeline** as the one-page checkout, in
+the same steps, so an order created by an app is indistinguishable from one
+created in the browser.
+
+#### The cart is the customer's cart
+
+`Cart\Cart` keeps lines in `oc_cart` keyed by `(customer_id, session_id)` and its
+constructor re-points every row of the customer onto the session id of the
+current request. The store API therefore starts the session with a **stable
+per-customer scope id** (`oc_customer.api_cart_scope`, generated on first use from
+`random_bytes()`, `stp` + 28 hex = 31 chars so `Session::start()` accepts it):
+
+- the API cart and the browser cart are two views of **one** cart — whichever
+  side touches it last moves the rows onto its own id;
+- the same id keys the `oc_session` row that holds the applied **coupon**,
+  **gift voucher** and **reward points**, which is exactly where the storefront
+  total extensions read them from;
+- the id is a real session id, so it is random and never derived from the
+  customer id; `cart_session` cookies are ignored and never sent back.
+
+`startup/store_api` only does this for `/v1/cart*` and `/v1/checkout*` — the
+read-only endpoints stay sessionless.
+
+#### Steps
+
+| Step | Call | What it does |
+|---|---|---|
+| 1 | `POST /v1/cart/items` | validates visibility, call-for-price, configurable variant, stock, minimum quantity/step and the option contract (same rules as `checkout/cart.php::add`), then writes the line |
+| 2 | `POST /v1/checkout` | opens `oc_api_checkout`: addresses (inline or `{"address_id": N}`, `"save": true` stores it), contact fields defaulted from the customer record, `agree`, comment — and takes a **stock hold** |
+| 3 | `GET /v1/checkout/{id}` / `PATCH` | returns the full state: cart, `totals`, `shipping_methods`, `payment_methods`, the selected codes and `missing[]` — the list of what still blocks the order: `cart`, `stock`, `agree`, `payment_address`, `shipping_address`, `shipping_method`, `payment_method` |
+| 4 | `PATCH` with `shipping_code` / `payment_code` | re-resolves the chosen code against the quotes that are available **right now** (a stale code is `422`) and applies the method's stock-hold window |
+| 5 | `POST /v1/checkout/{id}/confirm` | re-holds the cart, builds the order from the cart + session and calls `ModelCheckoutOrder::addOrder()` → `201` + the order representation + `Location: /store-api/v1/orders/{id}` |
+
+`confirm` is the only way to create an order (there is no `POST /v1/orders`), it
+accepts an `Idempotency-Key`, and the order write is protected by the same
+`oc_order_claim` double-submit guard as the storefront. `missing` is answered as
+`422 validation_failed` (per field); an empty cart or an unfulfillable line is
+`409 cart_empty` / `409 insufficient_stock`.
+
+After a successful confirm the cart is emptied, the checkout session and the
+order claim are dropped, the coupon/voucher/reward state is cleared and the
+stock holds stay **bound to the order** (they are released when the order is
+cancelled or its stock is subtracted — the same lifecycle as the browser
+checkout).
+
+#### Reuse, not duplication
+
+Everything runs the storefront implementation:
+
+| Piece | Source |
+|---|---|
+| cart, pricing, BXGY, reservations | `Cart\Cart`, `ProductPricingCalculator`, `DockercartStockReservation` |
+| totals pipeline | `upload/catalog/model/extension/total/*` |
+| shipping quotes / payment methods | `upload/catalog/model/extension/{shipping,payment}/*` |
+| order write, webhooks, claim, hold binding | `upload/catalog/model/checkout/order.php` |
+| warehouse allocation, ship estimates | `DockercartWarehouse` |
+
+The catalog models are loaded through `Dockercart\Api\CatalogModels`, which
+requires the catalog file and registers it under the admin loader key. Only
+routes whose class name is unique may be loaded that way — `ModelCatalogProduct`,
+`ModelSettingExtension`, the localisation models and `ModelToolImage` exist in
+both trees, so the API uses the admin model or raw SQL for those. Two small
+consequences: `upload/admin/model/setting/extension.php` also carries
+`getExtensions()` (the catalog models call it), and the admin
+`language/<locale>/extension/total/*.php` files carry the storefront strings
+(`text_sub_total`, `text_total`, …) that the totals models emit as titles.
+
+Not applied: the one-page checkout's display overrides (custom method titles,
+per-method field visibility). Prices, totals and availability are identical.
+
+#### Address book & reference data
+
+`/v1/addresses` is the customer's `oc_address` book (ownership enforced, ids
+from another account are `404`); a checkout address can reference one by id.
+`PUT`/`DELETE` honour `If-Match` like the admin API. `/v1/meta/countries` and
+`/v1/meta/countries/{id}/zones` provide the dictionary an address form needs.
 
 ### Authentication & keys
 
@@ -1349,15 +1464,24 @@ The panel pages of the API are **not** part of any standard role template
 keys; that role then also gets the *API keys* card of the user form.
 
 Global switches (**System → API → Keys → API settings**, saved with
-`updateSetting('config', …)`): `config_api_status` (kill switch → `503`),
-`config_api_rate_limit` (default per-key limit),
-`config_api_log_retention_days` (journal retention) and
-`config_api_require_if_match` (mandatory `If-Match`, strict optimistic locking).
+`updateSetting('config', …)`): `config_api_status` (kill switch → `503`, the API
+is **fail-closed**: requests are only served when the setting is `1`),
+`config_api_rate_limit` (default per-key limit), `config_api_anon_rate_limit`
+(per-IP budget for requests without a usable key, default 60 — it bounds the key
+lookup and blocks unauthenticated flooding), `config_api_log_retention_days`
+(journal retention) and `config_api_require_if_match` (mandatory `If-Match`,
+strict optimistic locking).
 
 ### Request journal
 
-Every request is journalled in `oc_api_log` (key snapshot, method, path, status,
-duration, IP, request-id, error code) and shown in **System → API → Request log**.
+Every **authenticated** request is journalled in `oc_api_log` (key snapshot,
+method, path, status, duration, IP, request-id, error code) and shown in
+**System → API → Request log**. A request that never resolves a key is not
+journalled at all: the table is keyed by `api_key_id` (the panel's per-key
+counters read it) and an unauthenticated client must not be able to insert one
+row per request — nginx already logs those `401`s, and the per-IP budget
+(`config_api_anon_rate_limit`) caps the attempts. An *invalid, expired or
+revoked* key is journalled (the row is security evidence).
 Rows are trimmed by age by the `api_log_cleanup` scheduler task
 (`bin/dockercart_api_log_cleanup.php`, daily, which also expires
 `oc_api_idempotency` rows). The journal is security evidence: it is *not* removed
@@ -1795,3 +1919,286 @@ autocomplete (icons in `common/header.twig` → `getLucideIcon()`).
    `ControllerCommonAdminSearch::getAvailableTypes()`.
 5. Add `text_<type>` to `common/admin_search.php` in all three locales, the type pill
    in `common/admin_search.twig`, and the autocomplete icon in `common/header.twig`.
+
+---
+
+## 21. Customer (Storefront) REST API
+
+The customer-facing counterpart of the admin API: a registered buyer can browse
+the **catalogue** (products, variants, categories), read their **own orders** and
+**returns**, create **return requests**, and place an **order with the same steps
+as the DockerCart one-page checkout** (cart → addresses → shipping quote →
+payment method → confirm), using a bearer token created either by the customer in
+the account area or by an operator in the panel. It is a **separate application**
+(`store_api`) served at `/store-api/v1/...`, so an admin key can never reach it
+and a customer key can never reach `/api/v1/...`.
+
+### Access model
+
+Access is granted in two layers and a key can only narrow the result:
+
+1. **Customer group** (`oc_customer_group.api_status` / `api_scopes`) — the
+   default for every customer of the group.
+2. **Customer override** (`oc_customer.api_status` / `api_scopes`) — tri-state:
+   `-1` inherit the group, `0` force off, `1` force on. When forced on, the
+   customer's own scope list **replaces** the group's (`NULL` = inherit the
+   group scopes).
+3. **Key narrowing** (`oc_api_key.scopes`) — the effective scopes of a request
+   are `key.scopes ∩ customer effective scopes`, so a key never keeps a grant
+   that was revoked later.
+
+`Dockercart\Api\CustomerAccess::resolve()` implements this and
+`Dockercart\Api\CustomerScopes` is the catalogue:
+
+| Scope | Grants |
+|---|---|
+| `products:read` | list / inspect catalogue products, configurable variants and categories |
+| `orders:read` | list / inspect own orders + history |
+| `returns:read` | list / inspect own returns, return reasons/actions meta |
+| `returns:write` | create a return for an own order |
+| `checkout:write` | read/change the own cart, keep the address book, quote shipping and payment, place an order |
+
+The customer API has its own kill switch `config_api_customer_status` and a
+per-account key cap `config_api_customer_max_keys` (default **100**), both saved
+under **System → API → Keys → API settings**. The admin API keeps its own
+`config_api_status`.
+
+### Public surface
+
+```
+GET    /store-api/v1/products                    products:read
+GET    /store-api/v1/products/{product_id}       products:read
+GET    /store-api/v1/products/{product_id}/variants products:read
+GET    /store-api/v1/categories                  products:read
+GET    /store-api/v1/categories/tree             products:read
+GET    /store-api/v1/categories/{category_id}    products:read
+GET    /store-api/v1/orders                       orders:read
+GET    /store-api/v1/orders/{order_id}            orders:read
+GET    /store-api/v1/orders/{order_id}/history    orders:read
+GET    /store-api/v1/returns                      returns:read
+GET    /store-api/v1/returns/{return_id}          returns:read
+POST   /store-api/v1/returns                      returns:write
+GET    /store-api/v1/meta/return-reasons          returns:read
+GET    /store-api/v1/meta/return-actions          returns:read
+GET    /store-api/v1/meta/countries               checkout:write
+GET    /store-api/v1/meta/countries/{id}/zones    checkout:write
+GET    /store-api/v1/openapi.json                 public
+
+# cart (shared with the website)
+GET    /store-api/v1/cart                         checkout:write
+DELETE /store-api/v1/cart                         checkout:write
+POST   /store-api/v1/cart/items                   checkout:write
+PATCH  /store-api/v1/cart/items/{cart_id}         checkout:write
+DELETE /store-api/v1/cart/items/{cart_id}         checkout:write
+POST   /store-api/v1/cart/coupon                  checkout:write
+DELETE /store-api/v1/cart/coupon                  checkout:write
+POST   /store-api/v1/cart/voucher                 checkout:write
+DELETE /store-api/v1/cart/voucher                 checkout:write
+POST   /store-api/v1/cart/reward                  checkout:write
+DELETE /store-api/v1/cart/reward                  checkout:write
+GET    /store-api/v1/cart/shipping-methods        checkout:write
+GET    /store-api/v1/cart/payment-methods         checkout:write
+
+# address book
+GET    /store-api/v1/addresses                    checkout:write
+POST   /store-api/v1/addresses                    checkout:write
+GET    /store-api/v1/addresses/{address_id}       checkout:write
+PUT    /store-api/v1/addresses/{address_id}       checkout:write
+DELETE /store-api/v1/addresses/{address_id}       checkout:write
+
+# checkout session & order placement
+GET    /store-api/v1/checkout                     checkout:write
+POST   /store-api/v1/checkout                     checkout:write
+GET    /store-api/v1/checkout/{checkout_id}       checkout:write
+PATCH  /store-api/v1/checkout/{checkout_id}       checkout:write
+DELETE /store-api/v1/checkout/{checkout_id}       checkout:write
+GET    /store-api/v1/checkout/{checkout_id}/shipping-methods  checkout:write
+GET    /store-api/v1/checkout/{checkout_id}/payment-methods   checkout:write
+POST   /store-api/v1/checkout/{checkout_id}/confirm           checkout:write
+POST   /store-api/v1/checkout/{checkout_id}/payment           checkout:write
+```
+
+The catalogue endpoints are **storefront-scoped**: only products/categories that are
+enabled, available (`date_available`) and assigned to the request store are visible.
+Amounts are the **effective price for the authenticated buyer's customer group**
+(special, quantity discount, per-group product/variant/option price, group %
+discount/markup) computed by `ProductPricingCalculator`, then normalised to the
+store base currency (`Cart\Currency::convertProductPrice()`) and taxed like the
+storefront (`Cart\Tax::calculate()` + `config_tax`); every payload carries
+`currency_code`. `GET /v1/products/{id}` returns the full product page
+(descriptions, media, options, attributes, discounts, configurable variants,
+related/upsell/accessory) and `GET /v1/products/{id}/variants` the variant matrix.
+The reused pricing models need the buyer's group and the request store, so
+`startup/store_api` sets `config_customer_group_id` from the principal and resolves
+`config_store_id` from the **host only** (re-applying the store-scoped settings).
+The store context decides currency, tax display, the enabled payment/shipping
+modules and catalogue visibility, so it is never taken from the query string
+(`?store_id` is ignored); an unknown host belongs to the main store (`0`).
+
+Envelopes, RFC 9457 problem documents, `ETag`/`If-Match`, pagination and
+`Idempotency-Key` behave exactly like the admin API (same library). Every query
+is scoped to the authenticated customer: the list endpoints filter by
+`filter_customer_id`, single-resource reads return `404` for another customer's
+id (never `403`, so ids are not disclosed), and `POST /v1/returns` snapshots the
+lines from the customer's own order and forces the store's default return
+status — the client cannot set the customer, price, amount or status.
+
+### Payment execution
+
+`POST /v1/checkout/{id}/confirm` only writes the order. The payment itself is
+started by `POST /v1/checkout/{id}/payment`, which runs the chosen payment
+extension's own execution step; the endpoint is gateway-agnostic and needs no
+registration when a new payment (or shipping) module is installed.
+
+**The answer.** `kind` says what the client has to do:
+
+| `kind` | Meaning | Field |
+|---|---|---|
+| `external` | Pay on the gateway (Stripe, PayPal, LiqPay, Portmone, …) | open `redirect_url` in a browser/WebView |
+| `internal` | The module only redirects to a page of this store, i.e. nothing to pay online (the built-in `dockercart_universal` sends the buyer to `checkout/success`) | `redirect_url` is a shop URL |
+| `html` | The module rendered markup (inline form, bank details) | render `html` |
+| `none` | The module produced nothing to do | show `instructions` (title + terms of the method) |
+
+`instructions` is always filled (method title + terms), and `gateway` carries any
+extra scalar fields a bespoke module returned next to `redirect`.
+
+**How it runs.** The store API boots the **admin** MVC tree, where
+`$this->load->controller()` and the framework `Action` only resolve
+`upload/admin/controller/…`, while a gateway lives in
+`upload/catalog/controller/extension/payment/<code>.php`.
+`Dockercart\Api\CatalogControllers` bridges one such action: it swaps the
+registry's `load` (`CatalogLoader` → catalog models, language packs, theme
+views), `url` (storefront `Url`), `response` (`PaymentResponse`, which captures
+`setOutput`/`addHeader` and turns `redirect()` into an exception instead of
+`header()+exit()`), `template_directory` (storefront theme) and the session data
+(`order_id`, `payment_method`, `shipping_method`, both addresses — snapshot and
+restored), and puts the request body into `$request->post` so a module that
+expects POSTed payment fields finds them. It calls `confirm()`, falling back to
+`index()` when the module has no execution step, and only bridges
+`extension/payment/*` and `extension/shipping/*` — a storefront checkout
+controller would be a second, unreviewed order path.
+
+**Guards.**
+
+- only a `completed` checkout of the authenticated customer, and only its own
+  order (`StoreOrder::require()` scopes by customer; `404` otherwise);
+- the method must still be installed and enabled in this store
+  (`payment_<code>_status`), otherwise `409 payment_unavailable`;
+- the answer is stored in `oc_api_checkout.payment_init` and replayed verbatim,
+  so a retried request can never open a second gateway session (the request
+  journal + `Idempotency-Key` cover the transport side);
+- `refresh=1` re-runs the module (an expired gateway session) **only** while the
+  order status is exactly what the previous init left behind; once a gateway or
+  an operator moved the order on, it answers `409 payment_already_started`
+  instead of charging twice. A first init is refused the same way when the order
+  is no longer in the status `confirm` left it in.
+
+**Limits.** A module that ends the request itself (`exit()`, or
+`header('Location: …')` + `exit` without `$this->response`) cannot be captured and
+is not supported; neither is one that loads a catalog model whose class name also
+exists in the admin tree (`catalog/product`, `localisation/*`, …) —
+`CatalogModels` refuses those up front rather than risking a class redefinition.
+The checkout module's display overrides (custom titles/descriptions from the
+one-page checkout settings) are not applied either: the API returns what the
+extension itself returns.
+
+### Authentication & keys
+
+- Token: `Authorization: Bearer <token>` (or `X-Api-Key`); `dcapi_…`, only the
+  SHA-256 hash is stored. Tokens in the query string are rejected.
+- A key belongs to exactly one customer (`oc_api_key.customer_id > 0`). Admin
+  keys (`customer_id = 0`) are rejected by `startup/store_api`; customer keys are
+  rejected by `startup/api`.
+- Optional expiry, IP allowlist (IP/CIDR) and per-minute rate limit (reuse
+  `config_api_rate_limit`).
+- **Self-service:** **Account → API** (`account/api`) lists the customer's keys
+  and lets them create (with an optional scope subset), rotate, revoke/enable and
+  delete them, up to the cap. The plain token is shown once.
+- **Admin:** the **customer edit form** shows an *API access* card (inherit /
+  on / off + scope override) and an *API keys* card (same operations). The card
+  and its actions are gated by the `setting/api_key` permission (access to view,
+  modify to act). Customer keys are **excluded** from the central
+  **System → API → Keys** list, which stays admin-only. The customer group form
+  carries the group-level *API access* card.
+
+### Documentation
+
+- `GET /store-api/v1/openapi.json` — the only unauthenticated endpoint (cacheable
+  `ETag` + `max-age=300`); answers `503` while the customer API is disabled.
+- **Account → API → Documentation** (`account/api_docs`) renders the same
+  `upload/api/openapi-store.json` through Swagger UI in a standalone page, gated
+  by the session and the customer's effective access. The Swagger bundle is
+  served from the existing `admin/view/javascript/swagger-ui/` copy.
+
+### Implementation map
+
+| Path | Role |
+|---|---|
+| `upload/store-api/index.php` | front controller (`start('store_api')`) |
+| `upload/store-api/config.php` | generated by `docker/entrypoint.sh` (requires `admin/config.php`, defines `DIR_STORE_API`) |
+| `upload/system/config/store_api.php` | app config: pre-actions `startup/startup`, `startup/error`, `startup/event`, `startup/store_api` |
+| `upload/admin/controller/startup/store_api.php` | path → route, customer auth, effective scopes, rate limit, JSON error/fatal handlers, journal |
+| `upload/admin/controller/store_api/**` | resource controllers (they call the admin models, scoped to the customer) |
+| `upload/system/library/dockercart/api/store_routes.php` | endpoint → scope whitelist |
+| `upload/system/library/dockercart/api/store_catalog.php` | storefront product/category reads + effective pricing for the customer API |
+| `upload/system/library/dockercart/api/cart_scope.php` | per-customer cart session id (`oc_customer.api_cart_scope`) |
+| `upload/system/library/dockercart/api/catalog_models.php` | loads the storefront extension/order models inside the admin MVC tree |
+| `upload/system/library/dockercart/api/store_cart.php` | cart operations, line validation and the cart representation |
+| `upload/system/library/dockercart/api/store_totals.php` | the storefront totals pipeline for the API cart |
+| `upload/system/library/dockercart/api/store_methods.php` | shipping quotes + payment methods |
+| `upload/system/library/dockercart/api/store_address.php` | address book (CRUD, validation, checkout selectors) |
+| `upload/system/library/dockercart/api/store_checkout.php` | checkout session, state machine, stock holds, order write |
+| `upload/system/library/dockercart/api/store_payment.php` | payment initialisation (runs the storefront payment extension, classifies/replays the answer) |
+| `upload/system/library/dockercart/api/catalog_controllers.php` | runs one *storefront* controller action inside the admin MVC tree (bridge) |
+| `upload/system/library/dockercart/api/catalog_loader.php` | the loader that bridge installs: catalog models, language packs, theme views |
+| `upload/system/library/dockercart/api/payment_response.php` | capturing `Response` (records output/redirect instead of emitting them) |
+| `upload/system/library/dockercart/api/store_order.php` | order representation shared by `GET /v1/orders/{id}` and `confirm` |
+| `upload/system/library/dockercart/api/customer_scopes.php` | scope catalogue |
+| `upload/system/library/dockercart/api/customer_access.php` | group/customer/key effective-access resolver |
+| `upload/system/library/dockercart/api/customer_principal.php` | principal (registered as `customer`) |
+| `upload/catalog/controller/account/api.php`, `api_docs.php` | account key manager + docs page |
+| `upload/catalog/model/account/api_key.php` | customer-scoped key storage |
+| `upload/api/openapi-store.json` | OpenAPI 3.0 document (served at `/store-api/v1/openapi.json` and to the account docs page) |
+
+The store API reuses the **admin MVC tree** (`DIR_APPLICATION = upload/admin/`),
+exactly like the admin `api` app, so it calls the regular admin models; catalog
+models are reached through `Dockercart\Api\CatalogModels` and storefront
+*controllers* through `Dockercart\Api\CatalogControllers` (see the checkout
+section). The customer-specific data access is `filter_customer_id` on
+`ModelSaleOrder::getOrders/getTotalOrders` and
+`ModelSaleReturn::getReturns/getTotalReturns`, plus `oc_api_checkout` and
+`oc_customer.api_cart_scope` (migrations
+`docker/mysql/migrations/20261030_store_api_checkout.sql` and
+`20261030_store_api_payment_init.sql`).
+
+### Web server routing
+
+nginx rewrites `/store-api/<path>` to
+`/store-api/index.php?_route_=/<path>` (`location ^~ /store-api/`), and Apache
+maps the same at the virtual-host level (`RewriteRule ^/store-api/...`). Unlike
+nginx (bind-mounted, reload only), `upload/store-api/config.php` and
+`docker/apache.conf`/`docker/entrypoint.sh` changes need `make restart`.
+
+### Extending
+
+1. add the endpoint + required scope to `Dockercart\Api\StoreRoutes::TABLE`
+   (and, for a new scope, to `CustomerScopes` plus the three locales);
+2. add the controller action in `upload/admin/controller/store_api/…` and scope
+   every query to the authenticated customer;
+3. document it in `upload/api/openapi-store.json` (the docs page and the public
+   endpoint pick it up automatically);
+4. `tools/tests/cases/customer_api_routes.php` enforces routes ↔ OpenAPI parity
+   and that every route uses a catalogue scope; `customer_api_checkout.php`
+   pins the cart-scope/session-id contract, the catalog-model guard and the
+   "orders are only created by confirm" rule; `customer_api_controllers.php`
+   pins the controller/library fixes (quantity default, language rejection,
+   group pricing, cart cache, reward points, pagination order);
+   `customer_api_payment.php` pins the payment-answer classification, the stored
+   payload shape, the bridge allowlist and the language bridge.
+   `tools/tests/live/customer_api_e2e.py` is the live end-to-end suite: it needs
+   a running stack (`make start`), creates its own customers/groups/keys, walks
+   every `/store-api/v1` endpoint (happy paths, auth/scoping, tenant isolation),
+   restores every setting/product it touched and leaves no fixtures behind.
+5. anything that touches the cart must run inside `Dockercart\Api\StoreCart`
+   (or behind a started cart session): it owns the line validation and the
+   coupon/voucher/reward state the total extensions read.

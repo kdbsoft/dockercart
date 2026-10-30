@@ -13,3 +13,8 @@ $_['text_success'] = 'Успех: Вы изменили общую стоимо�
 $_['text_edit_subtitle'] = 'Настройте параметры и опции дополнения';
 
 
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_shipping'] = 'Введите пункт назначения, чтобы получить приблизительную стоимость доставки.';
+$_['text_shipping_method'] = 'Пожалуйста, выберите предпочтительный способ доставки для этого заказа.';

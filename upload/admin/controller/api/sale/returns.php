@@ -42,8 +42,8 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 			'limit'                => $pagination['limit'],
 		];
 
-		if ($this->queryString('status_id') !== '') {
-			$filters['filter_return_status_id'] = $this->queryInt('status_id');
+		if (($status_id = $this->queryOptionalInt('status_id')) !== null) {
+			$filters['filter_return_status_id'] = $status_id;
 		}
 
 		$sorting = $this->sorting(
@@ -140,7 +140,9 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 			'return_reason_id' => (int)$data['return_reason_id'],
 			'return_action_id' => (int)($data['return_action_id'] ?? 0),
 			'return_status_id' => (int)($data['return_status_id'] ?? $this->defaultReturnStatusId()),
-			'comment'          => (string)($data['comment'] ?? ''),
+			// Escaped like Request::clean() does in the panel: the panel theme renders
+			// the return comment unescaped (autoescape is off).
+			'comment'          => Serializer::encodeTextWithinBytes('comment', (string)($data['comment'] ?? ''), 65535),
 			'date_ordered'     => (string)($data['date_ordered'] ?? date('Y-m-d', strtotime((string)$order['date_added']))),
 		];
 
@@ -160,7 +162,7 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 		$return = $this->requireReturn($return_id);
 
 		return array_merge($this->returnSummary($return), [
-			'comment'  => (string)($return['comment'] ?? ''),
+			'comment'  => Serializer::decodeText($return['comment'] ?? ''),
 			'products' => $this->productRows($return_id),
 			'history'  => $this->historyRows($return_id),
 		]);
@@ -171,15 +173,15 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 			'return_id'         => (int)$return['return_id'],
 			'order_id'          => (int)$return['order_id'],
 			'customer_id'       => (int)$return['customer_id'],
-			'customer'          => (string)($return['customer'] ?? trim(($return['firstname'] ?? '') . ' ' . ($return['lastname'] ?? ''))),
-			'firstname'         => (string)$return['firstname'],
-			'lastname'          => (string)$return['lastname'],
+			'customer'          => Serializer::decodeText($return['customer'] ?? trim(($return['firstname'] ?? '') . ' ' . ($return['lastname'] ?? ''))),
+			'firstname'         => Serializer::decodeText($return['firstname'] ?? ''),
+			'lastname'          => Serializer::decodeText($return['lastname'] ?? ''),
 			'email'             => (string)$return['email'],
-			'telephone'         => (string)$return['telephone'],
+			'telephone'         => Serializer::decodeText($return['telephone'] ?? ''),
 			'type'              => (string)$return['type'],
 			'product_id'        => (int)$return['product_id'],
-			'product'           => (string)$return['product'],
-			'model'             => (string)$return['model'],
+			'product'           => Serializer::decodeText($return['product'] ?? ''),
+			'model'             => (string)($return['model'] ?? ''),
 			'quantity'          => (int)$return['quantity'],
 			'amount'            => Serializer::money($return['amount'] ?? 0),
 			'refunded'          => Serializer::bool($return['refunded'] ?? 0),
@@ -205,8 +207,8 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 				'order_product_id' => (int)$product['order_product_id'],
 				'product_id'       => (int)$product['product_id'],
 				'variant_id'       => (int)($product['variant_id'] ?? 0),
-				'name'             => (string)$product['name'],
-				'model'            => (string)$product['model'],
+				'name'             => Serializer::decodeText($product['name'] ?? ''),
+				'model'            => (string)($product['model'] ?? ''),
 				'quantity'         => (int)$product['quantity'],
 				'price'            => Serializer::money($product['price'] ?? 0),
 				'total'            => Serializer::money($product['total'] ?? 0),
@@ -229,7 +231,7 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 				'return_status_id' => (int)$entry['return_status_id'],
 				'return_status'    => (string)$entry['status'],
 				'notify'           => Serializer::bool($entry['notify']),
-				'comment'          => (string)$entry['comment'],
+				'comment'          => Serializer::decodeText($entry['comment'] ?? ''),
 				'date_added'       => Serializer::datetime($entry['date_added']),
 			];
 		}
@@ -276,7 +278,9 @@ class ControllerApiSaleReturns extends \Dockercart\Api\Controller {
 		$this->model_sale_return->addReturnHistory(
 			$return_id,
 			(int)$data['return_status_id'],
-			(string)($data['comment'] ?? ''),
+			// The history comment is rendered with |raw in return_history.twig, so it
+			// must be escaped here (the panel form is cleaned by Request::clean()).
+			Serializer::encodeTextWithinBytes('comment', (string)($data['comment'] ?? ''), 65535),
 			!empty($data['notify']) ? 1 : 0
 		);
 

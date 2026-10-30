@@ -1,7 +1,7 @@
 <?php
 class ModelCustomerCustomerGroup extends Model {
 	public function addCustomerGroup($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "', markup_percent = '" . (float)$data['markup_percent'] . "'");
+		$this->db->query("INSERT INTO " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "', markup_percent = '" . (float)$data['markup_percent'] . "', api_status = '" . (int)($data['api_status'] ?? 0) . "', api_scopes = " . $this->scopesSql($data['api_scopes'] ?? null) . "");
 
 		$customer_group_id = $this->db->getLastId();
 
@@ -13,7 +13,7 @@ class ModelCustomerCustomerGroup extends Model {
 	}
 
 	public function editCustomerGroup($customer_group_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "', markup_percent = '" . (float)$data['markup_percent'] . "' WHERE customer_group_id = '" . (int)$customer_group_id . "'");
+		$this->db->query("UPDATE " . DB_PREFIX . "customer_group SET approval = '" . (int)$data['approval'] . "', sort_order = '" . (int)$data['sort_order'] . "', discount_percent = '" . (float)$data['discount_percent'] . "', markup_percent = '" . (float)$data['markup_percent'] . "', api_status = '" . (int)($data['api_status'] ?? 0) . "', api_scopes = " . $this->scopesSql($data['api_scopes'] ?? null) . " WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 
 		$this->db->query("DELETE FROM " . DB_PREFIX . "customer_group_description WHERE customer_group_id = '" . (int)$customer_group_id . "'");
 
@@ -96,5 +96,16 @@ class ModelCustomerCustomerGroup extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "customer_group");
 
 		return $query->row['total'];
+	}
+
+	/**
+	 * Encodes a customer scope list for the api_scopes column (NULL = none).
+	 *
+	 * @param mixed $scopes
+	 */
+	private function scopesSql($scopes): string {
+		$encoded = \Dockercart\Api\CustomerScopes::encode($scopes);
+
+		return $encoded === null ? 'NULL' : "'" . $this->db->escape($encoded) . "'";
 	}
 }

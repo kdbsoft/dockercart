@@ -100,8 +100,11 @@ class ControllerSettingApiKey extends Controller {
 
 		$data['config_api_status'] = $this->config->has('config_api_status') ? (int)$this->config->get('config_api_status') : 0;
 		$data['config_api_rate_limit'] = $this->config->has('config_api_rate_limit') ? (int)$this->config->get('config_api_rate_limit') : 120;
+		$data['config_api_anon_rate_limit'] = $this->config->has('config_api_anon_rate_limit') ? (int)$this->config->get('config_api_anon_rate_limit') : \Dockercart\Api\KeyRepository::DEFAULT_ANON_RATE_LIMIT;
 		$data['config_api_log_retention_days'] = $this->config->has('config_api_log_retention_days') ? (int)$this->config->get('config_api_log_retention_days') : 30;
 		$data['config_api_require_if_match'] = $this->config->has('config_api_require_if_match') ? (int)$this->config->get('config_api_require_if_match') : 0;
+		$data['config_api_customer_status'] = $this->config->has('config_api_customer_status') ? (int)$this->config->get('config_api_customer_status') : 0;
+		$data['config_api_customer_max_keys'] = $this->config->has('config_api_customer_max_keys') ? (int)$this->config->get('config_api_customer_max_keys') : 100;
 
 		$data['api_base_url'] = rtrim((string)HTTP_CATALOG, '/') . '/api/v1';
 
@@ -248,8 +251,11 @@ class ControllerSettingApiKey extends Controller {
 		$this->model_setting_setting->updateSetting('config', [
 			'config_api_status'             => (int)($this->request->post['config_api_status'] ?? 0),
 			'config_api_rate_limit'         => max(0, (int)($this->request->post['config_api_rate_limit'] ?? 120)),
+			'config_api_anon_rate_limit'    => max(0, (int)($this->request->post['config_api_anon_rate_limit'] ?? \Dockercart\Api\KeyRepository::DEFAULT_ANON_RATE_LIMIT)),
 			'config_api_log_retention_days' => max(0, (int)($this->request->post['config_api_log_retention_days'] ?? 30)),
 			'config_api_require_if_match'   => (int)($this->request->post['config_api_require_if_match'] ?? 0),
+			'config_api_customer_status'    => (int)($this->request->post['config_api_customer_status'] ?? 0),
+			'config_api_customer_max_keys'  => max(1, (int)($this->request->post['config_api_customer_max_keys'] ?? 100)),
 		]);
 
 		$this->session->data['success'] = $this->language->get('text_settings_saved');

@@ -206,9 +206,29 @@
                       <div class="dcx-field-help">{{ help_api_rate_limit }}</div>
                     </div>
                     <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-anon-rate-limit">{{ entry_api_anon_rate_limit }}</label>
+                      <input type="number" min="0" name="config_api_anon_rate_limit" value="{{ config_api_anon_rate_limit }}" id="input-api-anon-rate-limit" class="form-control" />
+                      <div class="dcx-field-help">{{ help_api_anon_rate_limit }}</div>
+                    </div>
+                    <div class="dcx-field" style="flex:1 1 220px;">
                       <label class="dcx-label" for="input-api-retention">{{ entry_api_log_retention_days }}</label>
                       <input type="number" min="0" name="config_api_log_retention_days" value="{{ config_api_log_retention_days }}" id="input-api-retention" class="form-control" />
                       <div class="dcx-field-help">{{ help_api_log_retention_days }}</div>
+                    </div>
+                  </div>
+                  <div class="dcx-fields dcx-fields--row">
+                    <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-customer-status">{{ entry_api_customer_status }}</label>
+                      <select name="config_api_customer_status" id="input-api-customer-status" class="form-control">
+                        <option value="1" {% if config_api_customer_status %}selected{% endif %}>{{ text_enabled }}</option>
+                        <option value="0" {% if not config_api_customer_status %}selected{% endif %}>{{ text_disabled }}</option>
+                      </select>
+                      <div class="dcx-field-help">{{ help_api_customer_status }}</div>
+                    </div>
+                    <div class="dcx-field" style="flex:1 1 220px;">
+                      <label class="dcx-label" for="input-api-customer-max-keys">{{ entry_api_customer_max_keys }}</label>
+                      <input type="number" min="1" name="config_api_customer_max_keys" value="{{ config_api_customer_max_keys }}" id="input-api-customer-max-keys" class="form-control" />
+                      <div class="dcx-field-help">{{ help_api_customer_max_keys }}</div>
                     </div>
                   </div>
                   <div class="dcx-field">

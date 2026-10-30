@@ -182,6 +182,263 @@ class ControllerCustomerCustomer extends Controller {
 		$this->getList();
 	}
 
+	/**
+	 * Creates an API key for a customer straight from the customer form.
+	 *
+	 * The key belongs to the customer and is scoped to the customer's effective
+	 * access (Dockercart\Api\CustomerAccess); the per-account cap is enforced here.
+	 */
+	public function api_key() {
+		$this->load->language('customer/customer');
+		$this->load->language('setting/api_key');
+
+		$customer_id = $this->apiKeyCustomerId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		if ($this->request->server['REQUEST_METHOD'] !== 'POST') {
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->load->model('customer/customer');
+		$this->load->model('setting/api_key');
+
+		$customer_info = $this->model_customer_customer->getCustomer($customer_id);
+
+		if (!$customer_info) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_customer');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		if (!$this->model_setting_api_key->canAddCustomerKey($customer_id)) {
+			$this->session->data['error_warning'] = sprintf($this->language->get('error_api_key_limit'), $this->model_setting_api_key->getMaxCustomerKeys());
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$name = trim((string)($this->request->post['name'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidName($name)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_name');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$expires_at = trim((string)($this->request->post['expires_at'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidExpires($expires_at)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_expires');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$allowlist = trim((string)($this->request->post['ip_allowlist'] ?? ''));
+
+		if (!\Dockercart\Api\KeyRules::isValidIpAllowlist($allowlist)) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_ip_allowlist');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$created = $this->model_setting_api_key->addKey([
+			'name'          => $name,
+			'comment'       => trim((string)($this->request->post['comment'] ?? '')),
+			'customer_id'   => $customer_id,
+			'status'        => 1,
+			'expires_at'    => $expires_at !== '' ? $expires_at . ' 23:59:59' : '',
+			'ip_allowlist'  => $allowlist,
+			'rate_limit'    => max(0, (int)($this->request->post['rate_limit'] ?? 0)),
+			'scopes'        => \Dockercart\Api\CustomerScopes::sanitize($this->request->post['scopes'] ?? []),
+		]);
+
+		// The plain token is shown exactly once, right after creation.
+		$this->session->data['api_new_token'] = $created['token'];
+		$this->session->data['api_new_token_customer'] = $customer_id;
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_created'), $name);
+
+		$this->apiKeyRedirect($customer_id);
+	}
+
+	/**
+	 * Issues a new token for one of the keys of a customer.
+	 */
+	public function api_key_rotate() {
+		$this->load->language('customer/customer');
+		$this->load->language('setting/api_key');
+
+		$customer_id = $this->apiKeyCustomerId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($customer_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->session->data['api_new_token'] = $this->model_setting_api_key->rotateKey((int)$key['api_key_id']);
+		$this->session->data['api_new_token_customer'] = $customer_id;
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_rotated'), (string)$key['name']);
+
+		$this->apiKeyRedirect($customer_id);
+	}
+
+	/**
+	 * Revokes / enables one of the keys of a customer.
+	 */
+	public function api_key_status() {
+		$this->load->language('customer/customer');
+		$this->load->language('setting/api_key');
+
+		$customer_id = $this->apiKeyCustomerId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($customer_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$status = (int)($this->request->get['status'] ?? 0);
+
+		$this->model_setting_api_key->setStatus((int)$key['api_key_id'], $status);
+
+		$this->session->data['success'] = $status
+			? sprintf($this->language->get('text_api_key_enabled'), (string)$key['name'])
+			: sprintf($this->language->get('text_api_key_revoked'), (string)$key['name']);
+
+		$this->apiKeyRedirect($customer_id);
+	}
+
+	/**
+	 * Deletes one of the keys of a customer.
+	 */
+	public function api_key_delete() {
+		$this->load->language('customer/customer');
+		$this->load->language('setting/api_key');
+
+		$customer_id = $this->apiKeyCustomerId();
+
+		if (!$this->user->hasPermission('modify', 'setting/api_key')) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_permission');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->load->model('setting/api_key');
+
+		$key = $this->apiKeyOwnedKey($customer_id);
+
+		if (!$key) {
+			$this->session->data['error_warning'] = $this->language->get('error_api_key');
+
+			$this->apiKeyRedirect($customer_id);
+
+			return;
+		}
+
+		$this->model_setting_api_key->deleteKey((int)$key['api_key_id']);
+
+		$this->session->data['success'] = sprintf($this->language->get('text_api_key_deleted'), (string)$key['name']);
+
+		$this->apiKeyRedirect($customer_id);
+	}
+
+	/**
+	 * The customer the API key actions act on.
+	 */
+	private function apiKeyCustomerId(): int {
+		return isset($this->request->get['customer_id']) ? (int)$this->request->get['customer_id'] : 0;
+	}
+
+	/**
+	 * The key of the request — only when it really belongs to the customer.
+	 */
+	private function apiKeyOwnedKey(int $customer_id): array {
+		$api_key_id = isset($this->request->get['api_key_id']) ? (int)$this->request->get['api_key_id'] : 0;
+
+		if (!$api_key_id || !$customer_id) {
+			return [];
+		}
+
+		$key = $this->model_setting_api_key->getKey($api_key_id);
+
+		if (!$key || (int)($key['customer_id'] ?? 0) !== $customer_id) {
+			return [];
+		}
+
+		return $key;
+	}
+
+	/**
+	 * Back to the form of the customer.
+	 */
+	private function apiKeyRedirect(int $customer_id): void {
+		$this->response->redirect($this->url->link('customer/customer/edit', 'user_token=' . $this->session->data['user_token'] . '&customer_id=' . $customer_id, true));
+	}
+
+	private function apiKeyDate(string $value): string {
+		if ($value === '' || $value === '0000-00-00 00:00:00' || $value === '0000-00-00') {
+			return '';
+		}
+
+		$timestamp = strtotime($value);
+
+		if ($timestamp === false) {
+			return '';
+		}
+
+		return date($this->language->get('datetime_format'), $timestamp);
+	}
+
 	public function unlock() {
 		$this->load->language('customer/customer');
 
@@ -1058,6 +1315,90 @@ class ControllerCustomerCustomer extends Controller {
 				'history_total'       => 0,
 				'ip_total'            => 0
 			);
+		}
+
+		// Customer API: tri-state access override (inherit / on / off) + scope set.
+		if (isset($this->request->post['api_status'])) {
+			$data['api_status'] = (int)$this->request->post['api_status'];
+		} elseif (!empty($customer_info)) {
+			$data['api_status'] = (int)($customer_info['api_status'] ?? -1);
+		} else {
+			$data['api_status'] = -1;
+		}
+
+		$api_scopes = $this->request->post['api_scopes'] ?? ($customer_info['api_scopes'] ?? null);
+
+		$data['api_scopes'] = is_array($api_scopes)
+			? \Dockercart\Api\CustomerScopes::sanitize($api_scopes)
+			: \Dockercart\Api\CustomerScopes::decode($api_scopes);
+
+		$data['customer_scopes'] = array();
+
+		foreach (\Dockercart\Api\CustomerScopes::labels() as $scope => $label_key) {
+			$data['customer_scopes'][$scope] = $this->language->get($label_key);
+		}
+
+		// The storefront API has a global switch on top of the per-customer grant.
+		// When it is off the customer sees no "API" section at all and every
+		// /store-api/v1 request answers 503, so the grant is silently useless.
+		$data['api_global_enabled'] = $this->config->has('config_api_customer_status') && (int)$this->config->get('config_api_customer_status') === 1;
+
+		$api_access_enabled = $data['customer_id']
+			? \Dockercart\Api\CustomerAccess::isEnabledForCustomer($this->db, (int)$data['customer_id'])
+			: (int)$data['api_status'] === 1;
+
+		$data['api_global_warning'] = $api_access_enabled && !$data['api_global_enabled'];
+		$data['api_settings_url'] = $this->user->hasPermission('access', 'setting/api_key')
+			? $this->url->link('setting/api_key', 'user_token=' . $this->session->data['user_token'], true)
+			: '';
+
+		// API keys of the customer — shown only to operators who may manage keys.
+		$data['api_can_view'] = $this->user->hasPermission('access', 'setting/api_key');
+		$data['api_can_edit'] = $this->user->hasPermission('modify', 'setting/api_key');
+		$data['api_keys'] = array();
+		$data['api_create_action'] = '';
+		$data['api_new_token'] = '';
+		$data['api_base_url'] = rtrim((string)HTTP_CATALOG, '/') . '/store-api/v1';
+		$data['api_max_keys'] = 100;
+		$data['api_can_add'] = true;
+
+		if ($data['api_can_view'] && $data['customer_id']) {
+			$this->load->model('setting/api_key');
+
+			$user_token = $this->session->data['user_token'];
+
+			foreach ($this->model_setting_api_key->getKeys(['customer_id' => $data['customer_id']]) as $key) {
+				$data['api_keys'][] = array(
+					'api_key_id'   => (int)$key['api_key_id'],
+					'name'         => (string)$key['name'],
+					'comment'      => (string)($key['comment'] ?? ''),
+					'prefix'       => (string)$key['prefix'],
+					'status_value' => (int)$key['status'],
+					'status'       => (int)$key['status'] ? $this->language->get('text_api_enabled') : $this->language->get('text_api_disabled'),
+					'expires_at'   => $this->apiKeyDate((string)($key['expires_at'] ?? '')),
+					'is_expired'   => !empty($key['expires_at']) && strtotime((string)$key['expires_at']) <= time(),
+					'last_used_at' => $this->apiKeyDate((string)($key['last_used_at'] ?? '')),
+					'requests_24h' => (int)$key['requests_24h'],
+					'requests_total' => (int)$key['requests_total'],
+					'rate_limit'   => (int)$key['rate_limit'],
+					'ip_allowlist' => (string)($key['ip_allowlist'] ?? ''),
+					'rotate'       => $this->url->link('customer/customer/api_key_rotate', 'user_token=' . $user_token . '&customer_id=' . $data['customer_id'] . '&api_key_id=' . (int)$key['api_key_id'], true),
+					'revoke'       => $this->url->link('customer/customer/api_key_status', 'user_token=' . $user_token . '&customer_id=' . $data['customer_id'] . '&api_key_id=' . (int)$key['api_key_id'] . '&status=0', true),
+					'enable'       => $this->url->link('customer/customer/api_key_status', 'user_token=' . $user_token . '&customer_id=' . $data['customer_id'] . '&api_key_id=' . (int)$key['api_key_id'] . '&status=1', true),
+					'delete'       => $this->url->link('customer/customer/api_key_delete', 'user_token=' . $user_token . '&customer_id=' . $data['customer_id'] . '&api_key_id=' . (int)$key['api_key_id'], true),
+				);
+			}
+
+			$data['api_create_action'] = $this->url->link('customer/customer/api_key', 'user_token=' . $user_token . '&customer_id=' . $data['customer_id'], true);
+			$data['api_max_keys'] = $this->model_setting_api_key->getMaxCustomerKeys();
+			$data['api_can_add'] = $this->model_setting_api_key->canAddCustomerKey($data['customer_id']);
+
+			// A freshly issued token is shown once, on the page of its owner.
+			if (!empty($this->session->data['api_new_token']) && (int)($this->session->data['api_new_token_customer'] ?? 0) === $data['customer_id']) {
+				$data['api_new_token'] = (string)$this->session->data['api_new_token'];
+
+				unset($this->session->data['api_new_token'], $this->session->data['api_new_token_customer']);
+			}
 		}
 
 		$data['header'] = $this->load->controller('common/header');

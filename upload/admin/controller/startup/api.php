@@ -251,7 +251,11 @@ class ControllerStartupApi extends Controller {
 	}
 
 	private function authenticate(\Dockercart\Api\Context $context): bool {
-		if ($this->config->has('config_api_status') && (int)$this->config->get('config_api_status') === 0) {
+		/** @var \Dockercart\Api\KeyRepository $keys */
+		$keys = $this->registry->get('api_keys');
+
+		// Fail closed: the API is only served when the store setting enables it.
+		if (!$this->config->has('config_api_status') || (int)$this->config->get('config_api_status') !== 1) {
 			$this->fail($context, \Dockercart\Api\Error::API_DISABLED);
 
 			return false;
@@ -260,23 +264,34 @@ class ControllerStartupApi extends Controller {
 		$token = $this->bearerToken();
 
 		if ($token === '') {
-			$this->fail($context, \Dockercart\Api\Error::UNAUTHORIZED);
+			if ($this->throttleAnonymous($context)) {
+				$this->fail($context, \Dockercart\Api\Error::UNAUTHORIZED);
+			}
 
 			return false;
 		}
 
-		/** @var \Dockercart\Api\KeyRepository $keys */
-		$keys = $this->registry->get('api_keys');
-
 		$key = $keys->findByToken($token);
 
 		if (!$key) {
-			$this->fail($context, \Dockercart\Api\Error::UNAUTHORIZED);
+			// A guessed token costs one indexed lookup; charge it to the per-IP
+			// budget so the endpoint cannot be used as a lookup amplifier.
+			if ($this->throttleAnonymous($context)) {
+				$this->fail($context, \Dockercart\Api\Error::UNAUTHORIZED);
+			}
 
 			return false;
 		}
 
 		$context->key = $key;
+
+		// Customer keys belong to the store API (/store-api/v1/...): they must
+		// never authenticate against the admin surface.
+		if ((int)($key['customer_id'] ?? 0) > 0) {
+			$this->fail($context, \Dockercart\Api\Error::UNAUTHORIZED);
+
+			return false;
+		}
 
 		if (!(int)$key['status']) {
 			$this->fail($context, \Dockercart\Api\Error::TOKEN_REVOKED);
@@ -330,6 +345,28 @@ class ControllerStartupApi extends Controller {
 		$keys->touch($key, $ip);
 
 		return true;
+	}
+
+	/**
+	 * Charges the per-IP budget of requests that carry no usable key.
+	 *
+	 * Only unauthenticated attempts are counted: a valid key has its own, wider
+	 * budget (KeyRepository::rateLimit()) and must never be throttled by requests
+	 * somebody else sent from the same address.
+	 *
+	 * @return bool false when the request must be answered with 429
+	 */
+	private function throttleAnonymous(\Dockercart\Api\Context $context): bool {
+		/** @var \Dockercart\Api\KeyRepository $keys */
+		$keys = $this->registry->get('api_keys');
+
+		if (!$keys->rateLimitAnonymous($this->clientIp())['exceeded']) {
+			return true;
+		}
+
+		$this->fail($context, \Dockercart\Api\Error::RATE_LIMITED);
+
+		return false;
 	}
 
 	/**
@@ -542,7 +579,11 @@ class ControllerStartupApi extends Controller {
 				}
 			}
 
-			if (!$context->log) {
+			if (!$context->log || $context->key === null) {
+				// Only authenticated attempts are journalled: oc_api_log is keyed by
+				// api_key_id (the panel usage counters read it) and an unauthenticated
+				// client must not be able to write one row per request — nginx already
+				// logs those 401s.
 				return;
 			}
 

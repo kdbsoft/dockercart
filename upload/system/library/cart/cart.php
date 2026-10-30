@@ -42,7 +42,11 @@ class Cart
 
         // Try to recover guest carts when session id has changed by using a persistent cookie.
         // This helps when session storage or session IDs rotate but the user returns shortly after.
-        if (isset($registry)) {
+        //
+        // The whole block needs a live session: the API applications start the
+        // session themselves (or not at all), and a request without a session id
+        // must never rewrite cart rows or hand out a cookie.
+        if (isset($registry) && $this->session->getId()) {
             // `request` may not always be in registry in some contexts, guard usage
             if ($registry->get("request")) {
                 $request = $registry->get("request");
@@ -889,9 +893,8 @@ class Cart
                     "bxgy_text" => $bxgy_text,
                     "bxgy_original_price" => $bxgy_original_price,
                     "reward" => $reward * $cart["quantity"],
-                    "points" => $product_query["row"]["points"]
-                        ? ($product_query["row"]["points"] + $option_points) *
-                            $cart["quantity"]
+                    "points" => $reward
+                        ? ($reward + $option_points) * $cart["quantity"]
                         : 0,
                     "tax_class_id" => $product_query["row"]["tax_class_id"],
                     "weight" =>
@@ -1009,6 +1012,10 @@ class Cart
                 $this->db->escape($this->session->getId()) .
                 "'",
         );
+
+        // The next getProducts() must see the removal: callers (the store API
+        // answers a delete with the resulting cart state) read the cache again.
+        $this->products_cache = null;
     }
 
     public function clear()

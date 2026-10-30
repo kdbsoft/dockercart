@@ -18,3 +18,7 @@ $_['entry_sort_order'] = 'Sort Order';
 
 // Error
 $_['error_permission'] = 'Warning: You do not have permission to modify gift voucher total!';
+
+
+// Storefront strings (the totals pipeline runs in the panel MVC tree too)
+$_['text_voucher'] = 'Gift Certificate (%s)';
