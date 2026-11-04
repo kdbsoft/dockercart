@@ -1,3 +1,9 @@
+## [3.45.0](https://github.com/kdbsoft/dockercart/compare/v3.44.1...v3.45.0) (2026-10-30)
+
+### Features
+
+* **api:** add storefront (customer) REST API application ([a91c32e](https://github.com/kdbsoft/dockercart/commit/a91c32ee0dee16aeccf10cd889a99f6dde963358))
+
 ## [3.44.1](https://github.com/kdbsoft/dockercart/compare/v3.44.0...v3.44.1) (2026-10-27)
 
 ### Bug Fixes
