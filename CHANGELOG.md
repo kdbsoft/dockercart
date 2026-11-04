@@ -1,3 +1,9 @@
+## [3.46.0](https://github.com/kdbsoft/dockercart/compare/v3.45.0...v3.46.0) (2026-11-04)
+
+### Features
+
+* add landing page builder with drag-and-drop sections ([f4388d0](https://github.com/kdbsoft/dockercart/commit/f4388d08d02ed82e3807201d7d5934b91daf7bb9))
+
 ## [3.45.0](https://github.com/kdbsoft/dockercart/compare/v3.44.1...v3.45.0) (2026-10-30)
 
 ### Features
