@@ -25,6 +25,7 @@
 19. [Product Files (public downloads)](#19-product-files-public-downloads)
 20. [Admin Global Search & Manticore Indexing](#20-admin-global-search--manticore-indexing)
 21. [Customer (Storefront) REST API](#21-customer-storefront-rest-api)
+22. [Landing Page Builder](#22-landing-page-builder)
 
 ---
 
@@ -2202,3 +2203,161 @@ nginx (bind-mounted, reload only), `upload/store-api/config.php` and
 5. anything that touches the cart must run inside `Dockercart\Api\StoreCart`
    (or behind a started cart session): it owns the line validation and the
    coupon/voucher/reward state the total extensions read.
+
+---
+
+## 22. Landing Page Builder
+
+Landing pages are ad-hoc, drag & drop storefront pages — not OpenCart layouts.
+A page is an ordered list of **sections (blocks)**; each block is a full-width
+section with its own container, padding, background, alignment and per-device
+visibility. Pages live at their own SEO URL (`/black-friday`), can be drafts,
+scheduled, marked `noindex` or assigned as the store home page.
+
+| Surface | Where |
+|---|---|
+| Page list | Design → Landing Pages (`design/landing`) |
+| Builder | `design/landing/builder?landing_id=N` (standalone page, no admin chrome) |
+| Storefront | `index.php?route=landing/page&landing_id=N` → `/keyword` |
+
+### Data model
+
+```
+oc_landing                       page row: name, status, chrome, is_home, noindex,
+                                 custom_css, viewed, version, publish window
+oc_landing_description           per language: slug + meta fields
+oc_landing_block                 ordered sections: code, sort_order, status,
+                                 settings (json, non-localised fields)
+oc_landing_block_description     per language: content (json, localised fields)
+oc_landing_template              reusable section sets ("My templates")
+```
+
+The slug is mirrored into `oc_seo_url` (`query = landing_id=<id>`, `store_id = 0`)
+on every save, so `/keyword` resolves through the regular SEO pipeline
+(`ControllerStartupSeoUrl`: `landing_id` decode branch + `landing/page` rewrite
+branch + `lp-<id>` fallback).
+
+### Block registry — the single source of truth
+
+`upload/system/library/dockercart/landing/blocks.php` (`Dockercart\Landing\Blocks`)
+declares every allowed block: name key, icon, palette group and the field schema.
+
+```php
+'hero' => [
+    'name' => 'block_hero', 'icon' => 'image-plus', 'group' => 'content',
+    'fields' => [
+        ['key' => 'heading', 'type' => 'text', 'localized' => true,
+         'label' => 'field_heading', 'default' => '', 'max' => 200],
+        ['key' => 'overlay', 'type' => 'number', 'localized' => false,
+         'label' => 'field_overlay', 'default' => 40, 'min' => 0, 'max' => 90],
+        …
+    ],
+],
+```
+
+* `localized = true` → stored per language in `oc_landing_block_description`;
+  `false` → shared in `oc_landing_block.settings`.
+* `Blocks::fields()` merges the block fields with the shared wrapper fields
+  (`bg_type`, `bg_color`, `bg_image`, `overlay`, `padding`, `container`, `align`,
+  `hide_desktop|tablet|mobile`, `anchor`, `custom_class`).
+* `Blocks::normalizeSettings()/normalizeContent()` cast/whitelist/truncate every
+  value (script tags and `javascript:` links are stripped), so neither the
+  builder nor the API can store anything the renderer does not expect.
+
+**Adding a block** = add the entry to `Blocks`, add the
+`catalog/view/theme/dockercart/template/landing/blocks/<code>.twig` template,
+add the data enrichment for it in `ControllerLandingPage::enrichBlock()`, add its
+label keys to the three admin language files, then run `npm run build:css`
+(Tailwind scans `upload/**/*.twig` and `upload/catalog/**/*.php`) and
+`make test` (`tools/tests/cases/landing_blocks.php` fails when a code has no
+template or a field has an unknown type).
+
+Current blocks: `hero`, `text`, `cta`, `products`, `products_carousel`,
+`categories`, `image`, `image_text`, `banner`, `spacer`, `html`.
+
+### Rendering
+
+`ControllerLandingPage` (`upload/catalog/controller/landing/page.php`):
+
+1. resolves the page by `landing_id` (set by the SEO decoder) or `slug`;
+2. gates it on `status` + publish window, unless a valid **preview token**
+   (`Dockercart\Landing\Url::verifyPreviewToken()`, HMAC of landing id + expiry
+   with `config_encryption`, 1 h) is present — drafts are 404 for the public and
+   `X-Robots-Tag: noindex` in preview;
+3. counts the view (public views only);
+4. normalises each block, enriches it (`Dockercart\Catalog\ProductCards`,
+   `ModelCatalogCategory`, `ModelDesignBanner`) and renders
+   `landing/blocks/<code>.twig`;
+5. wraps the body in `<section class="lp-block lp-block--<code>"
+   data-landing-block="<id>">` + `<div class="lp-block__body">` (container and
+   alignment classes live on the body).
+
+Sections that bring their own panel (`hero`, `cta`, `text`, `image_text`) check the
+wrapper background first: when `bg_type` is `color`/`image` they skip their own
+panel and inherit the wrapper text colour (`wrapper_text_class`, derived from the
+background luminance) instead of painting a frame inside a frame.
+
+`chrome = bare` hides `#navbar`, the mobile drawer, `.dc-header-spacer` and
+`#footer` with a small CSS override in `landing/page.twig` — the theme header is
+still rendered, so all theme JS (cart, quick view, wishlist) keeps working. No
+theme template is forked.
+
+Product prices always go through
+`Cart\Currency::convertProductPrice($price, $product_info['currency_id'])`
+(`Dockercart\Catalog\ProductCards`) — the same rule as the storefront and the
+Manticore index.
+
+### Builder UX
+
+`landing_builder.twig` + `dockercart_landing_builder.js` (admin shell) and
+`catalog/view/javascript/dockercart_landing_builder.js` (inside the iframe):
+
+* the canvas is the **real storefront page** in an iframe
+  (`…&preview_token=…&lp_builder=1`), so styles are 1:1;
+* blocks are dragged **inside the iframe** (SortableJS handle), the palette
+  drags from the admin shell (native `dataTransfer` + `lp:add` message);
+* clicking a section selects it and opens the properties panel (rendered from
+  the block schema: text/richtext via TinyMCE, images via the existing
+  `common/filemanager` modal, product/category autocomplete via
+  `design/landing/autocomplete`, colours, selects, toggles, repeaters);
+* changes autosave (debounced) through `design/landing/save` (one transaction,
+  optimistic `version` lock; the payload is sent as `application/json` and read
+  from `php://input`, because `Request::clean()` html-escapes every `$_POST`
+  value and would corrupt the JSON); a property change re-fetches **only that block**
+  (`&only_block=<id>`), a structural change reloads the iframe and restores the
+  scroll offset;
+* `Ctrl+Z` / `Ctrl+Shift+Z` undo/redo the in-memory state (50 steps),
+  `Ctrl+S` saves;
+* page settings slide-over: name, per-language slug/meta, status, chrome,
+  publish window, `noindex`, "use as store home page" (writes
+  `config_landing_home_id` through `ModelSettingSetting::updateSetting()`),
+  custom CSS;
+* "My templates": save the selected section (or the whole page) as a reusable
+  template and insert it into any other page.
+
+### Permissions
+
+`design/landing` is a normal route: `access` opens the list/builder, `modify`
+saves. `DockercartRoles` grants it to the content manager and the marketer
+(the marketer also keeps `common/filemanager` for the image picker). Administrator
+is an implicit superuser — no migration is needed.
+
+### Manual verification
+
+1. Design → Landing Pages → add a page (`black-friday`) → builder opens.
+2. Drag a hero, a product grid and a CTA into the canvas, reorder by dragging,
+   duplicate and delete a section → reload the builder and confirm the order.
+3. Switch the language tab, change the heading on `ru-ua`; open
+   `/ru-ua/black-friday`.
+4. Product grid sources: manual picks keep their order; category / on sale /
+   newest / best sellers render the expected cards (check a product stored in a
+   non-base currency shows the converted price).
+5. Publish, open `/black-friday`; switch chrome to "no navigation" and confirm
+   the nav/footer disappear while add-to-cart / quick view still work.
+6. Set a future publish date → the public URL 404s, the builder preview still
+   renders (token).
+7. Mark the page as home → `/` renders it; unset → `/` is the default home.
+8. Duplicate → `-copy` slug, draft, SEO keywords present; delete → the URL 404s
+   and the `oc_seo_url` rows are gone.
+9. Save a section as a template, insert it into another page.
+10. `viewed` increases on public views only (not in preview/builder).

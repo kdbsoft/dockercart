@@ -115,6 +115,32 @@ Tailwind utilities so the built output stays in sync.
   returned **as stored, in the product's own currency** (4-decimal strings) — the API never
   converts them.
 
+## Landing pages (drag & drop sections)
+
+- `design/landing` builds ad-hoc pages from **sections**, not from layout zones.
+  `upload/system/library/dockercart/landing/blocks.php` (`Dockercart\Landing\Blocks`)
+  is the single source of truth: code → palette group + field schema + defaults.
+  The admin builder, the admin model (which normalises every saved block) and the
+  storefront renderer all read it — never hard-code a block list anywhere else.
+- A block's translated copy lives in `oc_landing_block_description.content`
+  (JSON per language); everything else (images, ids, colours, visibility) lives
+  in `oc_landing_block.settings`. `localized` on the field decides which is which.
+- Adding a block = registry entry + `catalog/view/theme/dockercart/template/landing/blocks/<code>.twig`
+  + data enrichment in `ControllerLandingPage::enrichBlock()` + label keys in the
+  three admin locales, then `npm run build:css` (Tailwind scans PHP/Twig) and
+  `make test` (`tools/tests/cases/landing_blocks.php` guards the registry).
+- Storefront: `index.php?route=landing/page&landing_id=N` served at the page's
+  own SEO keyword (`oc_seo_url`, query `landing_id=N`; `lp-<id>` fallback).
+  Drafts are reachable only through an HMAC preview token
+  (`Dockercart\Landing\Url`, key = `config_encryption`).
+- Prices in product blocks go through `Cart\Currency::convertProductPrice()`
+  (`Dockercart\Catalog\ProductCards`) — same multi-currency rule as everywhere else.
+- `chrome = bare` hides the theme nav/footer with a CSS override inside
+  `landing/page.twig`; do not fork `common/header.twig`/`footer.twig`.
+- "Use as store home page" writes `config_landing_home_id` via
+  `ModelSettingSetting::updateSetting()` (never `editSetting('config', …)`).
+- Full data model, builder protocol and verification steps: `docs/guide.md` §22.
+
 ## Store settings (`oc_setting`) — save semantics
 
 - `editSetting($code, $data)` **deletes ALL rows with that `code` first**, then re-inserts

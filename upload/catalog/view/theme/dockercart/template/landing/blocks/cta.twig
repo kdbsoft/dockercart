@@ -1,0 +1,28 @@
+{% set is_split = settings.layout == 'split' and image %}
+{% set own_panel = not has_wrapper_bg %}
+{% set title_class = has_wrapper_bg ? wrapper_text_class : 'text-white' %}
+{% set body_class = has_wrapper_bg ? wrapper_muted_class : 'text-white/80' %}
+<div class="relative overflow-hidden {{ own_panel ? 'rounded-3xl bg-gray-900 px-6 sm:px-10 py-10 sm:py-12' : 'py-2' }}">
+	{% if image %}
+	<img src="{{ image }}" alt="" class="absolute inset-0 w-full h-full object-cover {{ own_panel ? 'opacity-30' : 'opacity-50 rounded-3xl' }}" loading="lazy" />
+	{% endif %}
+	<div class="relative z-10 {% if is_split %}grid grid-cols-1 md:grid-cols-2 gap-8 items-center{% else %}max-w-3xl mx-auto text-center{% endif %}">
+		<div>
+			{% if content.heading %}
+			<h2 class="text-2xl sm:text-3xl font-extrabold mb-3 {{ title_class }}">{{ content.heading }}</h2>
+			{% endif %}
+			{% if content.body %}
+			<p class="text-sm sm:text-base leading-relaxed {{ body_class }}">{{ content.body|nl2br }}</p>
+			{% endif %}
+		</div>
+		{% if content.button_label and settings.button_href %}
+		<div class="{% if is_split %}md:text-right{% else %}mt-6{% endif %}">
+			{% set invert = has_wrapper_bg and wrapper_is_dark %}
+			<a href="{{ settings.button_href }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition
+				{% if settings.button_style == 'secondary' %}{{ invert ? 'border border-white/40 text-white hover:bg-white/10' : 'bg-gray-900 text-white hover:bg-gray-800' }}
+				{% elseif settings.button_style == 'light' %}{{ invert ? 'bg-white text-gray-900 hover:bg-gray-100' : 'border border-gray-900/30 text-gray-900 hover:bg-gray-900/5' }}
+				{% else %}{{ invert ? 'bg-white text-gray-900 hover:bg-gray-100 shadow-lg shadow-black/20' : 'bg-blue-600 text-white hover:bg-blue-700' }}{% endif %}">{{ content.button_label }}</a>
+		</div>
+		{% endif %}
+	</div>
+</div>

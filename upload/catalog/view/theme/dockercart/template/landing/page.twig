@@ -1,0 +1,30 @@
+{{ header }}
+{% if chrome == 'bare' %}
+<style>
+	#navbar, #dc-mobile-menu, #dc-mobile-overlay, .dc-header-spacer, #footer { display: none !important; }
+	.lp-page { min-height: 100vh; }
+</style>
+{% endif %}
+{% if custom_css %}
+<style>{{ custom_css|raw }}</style>
+{% endif %}
+
+<main id="lp-page" class="lp-page{% if chrome == 'bare' %} lp-page--bare{% endif %}">
+	<div id="lp-blocks">
+		{% for block in blocks %}
+		{{ block.html|raw }}
+		{% endfor %}
+	</div>
+
+	{% if not blocks %}
+	<div class="mx-auto w-full max-w-3xl px-4 py-20 text-center">
+		{% if builder %}
+		<p class="text-sm text-gray-500">{{ text_builder_empty }}</p>
+		{% else %}
+		<p class="text-sm text-gray-500">{{ text_empty_page }}</p>
+		{% endif %}
+	</div>
+	{% endif %}
+</main>
+
+{{ footer }}

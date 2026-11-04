@@ -1,0 +1,177 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <style>
+    #form-filter .filter-field--name { flex: 0 1 280px; }
+    #form-filter .filter-field--status { flex: 0 1 200px; }
+  </style>
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="pull-right">
+            {% if can_modify %}<a href="{{ add }}" class="btn btn-primary"><i data-lucide="plus" width="16" height="16"></i> {{ button_add }}</a>
+            <button type="button" class="btn btn-danger dc-btn-selection" onclick="confirm('{{ text_confirm }}') ? $('#form-landing').submit() : false;"><i data-lucide="trash-2" width="16" height="16"></i> {{ button_delete }}</button>{% endif %}
+          </div>
+          <h1 class="page-header__title">{{ heading_title }}</h1>
+          <p class="text-muted">{{ text_list_subtitle }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i data-lucide="circle-check" width="16" height="16"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="filter-bar">
+      <div class="panel panel-default">
+        <form action="index.php" method="get" id="form-filter" class="panel-body filter-bar__form">
+          <input type="hidden" name="route" value="design/landing" />
+          <input type="hidden" name="user_token" value="{{ user_token }}" />
+          <div class="filter-field filter-field--name">
+            <label for="input-name">{{ entry_name }}</label>
+            <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+          </div>
+          <div class="filter-field filter-field--status">
+            <label for="input-status">{{ entry_status }}</label>
+            <select name="filter_status" id="input-status" class="form-control">
+              <option value="">{{ text_all }}</option>
+              <option value="1"{% if filter_status == '1' %} selected="selected"{% endif %}>{{ text_published }}</option>
+              <option value="0"{% if filter_status == '0' %} selected="selected"{% endif %}>{{ text_draft }}</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-default"><i data-lucide="funnel" width="14" height="14"></i> {{ button_filter }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-landing">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <td style="width:1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+              <td class="text-left">{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }} sortable">{{ column_name }}</a>{% else %}<a href="{{ sort_name }}" class="sortable">{{ column_name }}</a>{% endif %}</td>
+              <td class="text-left">{{ column_blocks }}</td>
+              <td class="text-left">{% if sort == 'status' %}<a href="{{ sort_status }}" class="{{ order|lower }} sortable">{{ column_status }}</a>{% else %}<a href="{{ sort_status }}" class="sortable">{{ column_status }}</a>{% endif %}</td>
+              <td class="text-right">{% if sort == 'viewed' %}<a href="{{ sort_viewed }}" class="{{ order|lower }} sortable">{{ column_viewed }}</a>{% else %}<a href="{{ sort_viewed }}" class="sortable">{{ column_viewed }}</a>{% endif %}</td>
+              <td class="text-left">{% if sort == 'date_modified' %}<a href="{{ sort_date_modified }}" class="{{ order|lower }} sortable">{{ column_date_modified }}</a>{% else %}<a href="{{ sort_date_modified }}" class="sortable">{{ column_date_modified }}</a>{% endif %}</td>
+              <td class="text-right">{{ column_action }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if landings %}
+            {% for landing in landings %}
+            <tr>
+              <td class="text-center">
+                <input type="checkbox" name="selected[]" value="{{ landing.landing_id }}" {% if landing.landing_id in selected %}checked="checked"{% endif %} />
+              </td>
+              <td class="text-left">
+                <a href="{{ landing.edit }}" class="row-title-link">{{ landing.name }}</a>
+                {% if landing.is_home %}<span class="label label-info" data-toggle="tooltip" title="{{ text_home_page }}"><i data-lucide="house" width="11" height="11"></i> {{ text_home }}</span>{% endif %}
+                <div class="text-muted"><small>/{{ landing.slug }}</small></div>
+              </td>
+              <td class="text-left">{{ landing.blocks }}</td>
+              <td class="text-left">
+                <span class="inline-edit" data-landing-id="{{ landing.landing_id }}" data-value="{{ landing.status }}" data-url="{{ landing.status_url }}">
+                  {% if landing.status %}
+                  <span class="label label-success">{{ text_published }}</span>
+                  {% else %}
+                  <span class="label label-default">{{ text_draft }}</span>
+                  {% endif %}
+                  {% if can_modify %}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>{% endif %}
+                </span>
+              </td>
+              <td class="text-right">{{ landing.viewed }}</td>
+              <td class="text-left">{{ landing.date_modified }}</td>
+              <td class="text-right">
+                <a href="{{ landing.edit }}" class="btn btn-primary btn-sm" data-toggle="tooltip" title="{{ button_edit }}"><i data-lucide="wand-sparkles" width="14" height="14"></i></a>
+                {% if landing.url %}<a href="{{ landing.url }}" target="_blank" rel="noopener" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ button_preview }}"><i data-lucide="external-link" width="14" height="14"></i></a>{% endif %}
+                {% if can_modify %}<a href="{{ landing.copy }}" class="btn btn-default btn-sm" data-toggle="tooltip" title="{{ button_copy }}"><i data-lucide="copy" width="14" height="14"></i></a>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td class="text-center" colspan="7">{{ text_no_results }}</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    <div class="pagination-wrap">
+      <div class="pagination-wrap__pages">{{ pagination }}</div>
+      <div class="pagination-wrap__results">{{ results }}</div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$(document).on('click', '.inline-edit', function(e) {
+	if ($(e.target).closest('.inline-edit-icon, select').length) return;
+	$(this).find('.inline-edit-icon').trigger('click');
+});
+
+$(document).on('click', '.inline-edit-icon', function(e) {
+	e.stopPropagation();
+
+	var $span = $(this).closest('.inline-edit');
+
+	if ($span.find('select').length) return;
+
+	var landingId = $span.data('landing-id');
+	var currentValue = $span.data('value');
+	var url = $span.data('url');
+
+	$span.data('display', $span.html());
+
+	var $select = $('<select class="form-control input-sm" style="width:auto;display:inline-block;">');
+	$select.append('<option value="1"' + (currentValue == 1 ? ' selected' : '') + '>{{ text_published }}</option>');
+	$select.append('<option value="0"' + (currentValue == 0 ? ' selected' : '') + '>{{ text_draft }}</option>');
+
+	$span.html($select);
+	$select.focus();
+
+	var saved = false;
+
+	$select.on('change', function() {
+		saved = true;
+
+		$.ajax({
+			url: url + '&status=' + $(this).val(),
+			dataType: 'json',
+			success: function(json) {
+				if (json['error']) {
+					$span.html($span.data('display'));
+					alert(json['error']);
+					return;
+				}
+
+				$span.data('value', json['status']);
+				$span.html((json['status'] == 1 ? '<span class="label label-success">{{ text_published }}</span>' : '<span class="label label-default">{{ text_draft }}</span>') + '<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i>');
+				lucide.createIcons({ nodes: [$span[0]] });
+			},
+			error: function() {
+				$span.html($span.data('display'));
+			}
+		});
+	});
+
+	$select.on('blur', function() {
+		if (!saved) {
+			$span.html($span.data('display'));
+		}
+	});
+});
+//--></script>
+{{ footer }}

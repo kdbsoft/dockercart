@@ -348,6 +348,29 @@ class ControllerStartupSeoUrl extends Controller
                 }
             }
         } elseif (
+            $route == "landing/page" &&
+            isset($data["landing_id"])
+        ) {
+            // Landing pages register one keyword per language (query
+            // landing_id=<id>); without a keyword the deterministic lp-<id>
+            // fallback keeps the URL working.
+            $landing_id = (int) $data["landing_id"];
+            $url = $this->getSeoKeyword("landing_id=" . $landing_id);
+            if ($url) {
+                unset($data["landing_id"], $data["route"]);
+            } else {
+                $fallback = $this->buildEntityFallbackKeyword(
+                    "lp",
+                    $landing_id,
+                    "landing_id=" . $landing_id,
+                    $route,
+                );
+                if ($fallback) {
+                    $url = $fallback;
+                    unset($data["landing_id"], $data["route"]);
+                }
+            }
+        } elseif (
             $route == "blog/post" &&
             (isset($data["blog_post_id"]) || isset($data["post_id"]))
         ) {
@@ -1333,6 +1356,10 @@ class ControllerStartupSeoUrl extends Controller
             } elseif ($url[0] == "information_id") {
                 $this->request->get["information_id"] = $query_value;
                 $this->request->get["route"] = "information/information";
+            } elseif ($url[0] == "landing_id") {
+                // Landing page keyword (registered by ModelDesignLanding on save)
+                $this->request->get["landing_id"] = $query_value;
+                $this->request->get["route"] = "landing/page";
             } elseif ($url[0] == "blog_post_id") {
                 // Blog post
                 $this->request->get["blog_post_id"] = $query_value;
@@ -1349,6 +1376,14 @@ class ControllerStartupSeoUrl extends Controller
                 // This is a route query like account/login or checkout/cart
                 $this->request->get["route"] = $resolved_query;
             }
+            return;
+        }
+
+        // Landing page fallback: lp-<id> (same idea as blog/post-<id>). It is
+        // only used when no keyword row exists, e.g. right after an import.
+        if (preg_match('/^lp-(\d+)$/', $keyword, $landing_match)) {
+            $this->request->get["landing_id"] = (int) $landing_match[1];
+            $this->request->get["route"] = "landing/page";
             return;
         }
 

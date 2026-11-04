@@ -1,0 +1,26 @@
+{% if products|length %}
+<div>
+	{% if content.heading or content.subheading or (content.link_label and settings.link_href) %}
+	<div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+		<div>
+			{% if content.subheading %}<p class="text-xs font-semibold uppercase tracking-widest text-blue-600 mb-1">{{ content.subheading }}</p>{% endif %}
+			{% if content.heading %}<h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ content.heading }}</h2>{% endif %}
+		</div>
+		{% if content.link_label and settings.link_href %}
+		<a href="{{ settings.link_href }}" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">{{ content.link_label }}<i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+		{% endif %}
+	</div>
+	{% endif %}
+
+	<div class="lp-product-grid grid grid-cols-1 gap-4 sm:gap-5 {{ columns_class }}">
+		{% for product in products %}
+		{% include 'dockercart/template/product/product_card_widget.twig' with {
+			product: product,
+			accent_color: accent_color,
+			btn_cart_classes: btn_cart_classes,
+			btn_quick_hover: btn_quick_hover
+		} %}
+		{% endfor %}
+	</div>
+</div>
+{% endif %}

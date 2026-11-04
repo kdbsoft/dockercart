@@ -1,0 +1,35 @@
+{% set text_class = has_wrapper_bg ? wrapper_text_class : (text_color == 'dark' ? 'text-gray-900' : 'text-white') %}
+{% set sub_class = has_wrapper_bg ? wrapper_muted_class : (text_color == 'dark' ? 'text-gray-600' : 'text-white/85') %}
+{% set own_panel = not has_wrapper_bg or image %}
+<div class="relative overflow-hidden flex flex-col justify-center {{ own_panel ? 'rounded-3xl' : '' }} {{ height_class }} {{ position_class }}"
+	style="{% if image %}background-image:url('{{ image }}');background-size:cover;background-position:center;{% endif %}">
+	{% if image and settings.image_overlay %}
+	<div class="absolute inset-0 bg-black" style="opacity: {{ (settings.image_overlay / 100)|round(2) }}"></div>
+	{% endif %}
+	{% if not has_wrapper_bg and not image %}
+	<div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
+	{% endif %}
+	<div class="relative z-10 w-full max-w-3xl px-6 sm:px-10 py-10 {{ text_class }}">
+		{% if content.badge %}
+		<p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest mb-3 px-3 py-1 rounded-full {{ text_color == 'dark' and not has_wrapper_bg ? 'bg-gray-900/10 text-gray-700' : 'bg-white/15 text-white' }}">{{ content.badge }}</p>
+		{% endif %}
+		{% if content.heading %}
+		<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4">{{ content.heading }}</h1>
+		{% endif %}
+		{% if content.subheading %}
+		<p class="text-base sm:text-lg leading-relaxed mb-6 {{ sub_class }}">{{ content.subheading|nl2br }}</p>
+		{% endif %}
+		{% if content.buttons %}
+		<div class="flex flex-wrap gap-3">
+			{% for button in content.buttons %}
+			{% if button.label and button.href %}
+			<a href="{{ button.href }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition
+				{% if button.style == 'secondary' %}bg-white text-gray-900 hover:bg-gray-100
+				{% elseif button.style == 'ghost' %}border {{ has_wrapper_bg and not wrapper_is_dark ? 'border-gray-900/30 text-gray-900 hover:bg-gray-900/5' : 'border-white/40 text-white hover:bg-white/10' }}
+				{% else %}bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/20{% endif %}">{{ button.label }}</a>
+			{% endif %}
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+</div>

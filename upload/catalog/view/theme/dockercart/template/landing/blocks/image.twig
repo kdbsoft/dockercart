@@ -1,0 +1,10 @@
+{% if image %}
+<figure class="mx-auto max-w-5xl">
+	{% if settings.href %}<a href="{{ settings.href }}">{% endif %}
+	<img src="{{ image }}" alt="{{ content.alt }}" class="w-full object-cover {{ ratio_class }} {{ settings.rounded ? 'rounded-3xl' : '' }}" loading="lazy" />
+	{% if settings.href %}</a>{% endif %}
+	{% if content.caption %}
+	<figcaption class="mt-3 text-sm text-gray-500">{{ content.caption }}</figcaption>
+	{% endif %}
+</figure>
+{% endif %}

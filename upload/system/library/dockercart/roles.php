@@ -126,6 +126,7 @@ class DockercartRoles {
 			'catalog/review',
 			'catalog/review_setting',
 			'design/banner',
+			'design/landing',
 			'design/layout',
 			'design/seo_url',
 			'extension/module/banner',
@@ -167,6 +168,7 @@ class DockercartRoles {
 			'extension/module/dockercart_newsletter',
 			'extension/module/dockercart_search',
 			'extension/module/dockercart_seo_description',
+			'design/landing',
 			'design/seo_url',
 			'marketing/abandoned_stats',
 			'marketing/contact',
@@ -258,6 +260,7 @@ class DockercartRoles {
 			'marketer' => [
 				'name'         => 'text_role_marketer',
 				'access'       => array_merge(self::COMMON_ACCESS, $seo_routes, [
+					'common/filemanager',
 					'catalog/category',
 					'catalog/information',
 					'catalog/product',
@@ -279,6 +282,7 @@ class DockercartRoles {
 				]),
 				'modify'       => array_merge($seo_routes, [
 					'common/admin_search',
+					'common/filemanager',
 					'common/profile',
 					'common/user_filter',
 				]),

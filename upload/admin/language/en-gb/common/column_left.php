@@ -37,6 +37,7 @@ $_['text_api_docs']             = 'Documentation';
 $_['text_installer']            = 'Manual Installer';
 $_['text_language']             = 'Languages';
 $_['text_layout']               = 'Layouts';
+$_['text_landing']              = 'Landing Pages';
 $_['text_localisation']         = 'References';
 $_['text_contact']              = 'Mail';
 $_['text_marketing']            = 'Marketing';

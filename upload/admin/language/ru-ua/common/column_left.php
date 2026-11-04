@@ -30,6 +30,7 @@ $_['text_information'] = 'Информация';
 $_['text_installer'] = 'Ручной установщик';
 $_['text_language'] = 'Языки';
 $_['text_layout'] = 'Макеты';
+$_['text_landing']              = 'Лендинги';
 $_['text_length_class'] = 'Классы длины';
 $_['text_localisation'] = 'Справочники';
 $_['text_log'] = 'Журналы ошибок';

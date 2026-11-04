@@ -1,0 +1,104 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <a href="{{ cancel }}" class="page-header__link">
+            <span class="page-header__back">
+              <i data-lucide="arrow-left" width="20" height="20"></i>
+            </span>
+            <span class="page-header__title">{{ text_form }}</span>
+          </a>
+          <div class="pull-right">
+            <button type="submit" form="form-landing" class="btn btn-primary"><i data-lucide="save" width="16" height="16"></i> {{ button_save }}</button>
+            <a href="{{ cancel }}" class="btn btn-default"><i data-lucide="x" width="16" height="16"></i> {{ button_cancel }}</a>
+          </div>
+        </div>
+      </div>
+      {% if error_warning %}
+      <div class="row">
+        <div class="col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="alert alert-danger alert-dismissible"><i data-lucide="circle-alert" width="16" height="16"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container-fluid">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-landing">
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-lg-12 col-xl-offset-1 col-xl-10">
+          <div class="dcx-shell">
+            <div class="dcx-panel">
+              <div class="dcx-panel-head">
+                <div class="dcx-panel-head__icon"><i data-lucide="layout-template" width="18" height="18"></i></div>
+                <div>
+                  <div class="dcx-panel-title">{{ text_form }}</div>
+                  <div class="dcx-panel-subtitle">{{ text_form_subtitle }}</div>
+                </div>
+              </div>
+              <div class="dcx-panel-body">
+                <div class="dcx-fields">
+                  <div class="dcx-field required">
+                    <label class="dcx-label" for="input-name">{{ entry_name }}</label>
+                    <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" required />
+                    {% if error_name %}<div class="text-danger">{{ error_name }}</div>{% endif %}
+                  </div>
+
+                  <div class="dcx-field required">
+                    <label class="dcx-label" for="input-slug">{{ entry_slug }}</label>
+                    <div class="input-group">
+                      <span class="input-group-addon">/</span>
+                      <input type="text" name="slug" value="{{ slug }}" placeholder="black-friday" id="input-slug" class="form-control" required />
+                    </div>
+                    {% if error_slug %}<div class="text-danger">{{ error_slug }}</div>{% endif %}
+                    <small class="text-muted">{{ help_slug }}</small>
+                    <div class="text-muted" id="slug-preview-wrap"><small>{{ text_seo_url }}: <code id="slug-preview">{{ slug ?: 'black-friday' }}</code></small></div>
+                  </div>
+
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-chrome">{{ entry_chrome }}</label>
+                    <select name="chrome" id="input-chrome" class="form-control">
+                      <option value="full"{% if chrome != 'bare' %} selected="selected"{% endif %}>{{ entry_chrome_full }}</option>
+                      <option value="bare"{% if chrome == 'bare' %} selected="selected"{% endif %}>{{ entry_chrome_bare }}</option>
+                    </select>
+                  </div>
+
+                  <div class="dcx-field">
+                    <label class="dcx-label" for="input-status">{{ entry_status }}</label>
+                    <select name="status" id="input-status" class="form-control">
+                      <option value="1"{% if status %} selected="selected"{% endif %}>{{ text_published }}</option>
+                      <option value="0"{% if not status %} selected="selected"{% endif %}>{{ text_draft }}</option>
+                    </select>
+                    <small class="text-muted">{{ help_status }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script type="text/javascript"><!--
+(function () {
+	var slug = document.getElementById('input-slug');
+	var preview = document.getElementById('slug-preview');
+
+	if (!slug || !preview) return;
+
+	slug.addEventListener('input', function () {
+		var value = slug.value.toLowerCase()
+			.replace(/[^a-z0-9._~-]+/g, '-')
+			.replace(/-{2,}/g, '-')
+			.replace(/^-+|-+$/g, '');
+
+		preview.textContent = value || 'black-friday';
+	});
+})();
+//--></script>
+{{ footer }}

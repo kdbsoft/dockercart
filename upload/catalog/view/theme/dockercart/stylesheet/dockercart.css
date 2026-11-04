@@ -1326,3 +1326,70 @@ a:hover [data-lucide="arrow-right"]{transform:translateX(4px)}
   transition: none;
   z-index: auto;
 }
+
+/* ── Landing page blocks ──────────────────────────────────────────── */
+/* The section shell is rendered by catalog controller landing/page:
+   <section class="lp-block lp-block--<code>">  +  <div class="lp-block__body"> */
+.lp-block {
+  position: relative;
+  width: 100%;
+}
+
+.lp-block__body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Background image + overlay (--lp-overlay is set inline, 0…0.9) */
+.lp-block--bg-image {
+  isolation: isolate;
+}
+
+.lp-block--bg-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(0, 0, 0, var(--lp-overlay, 0.3));
+  pointer-events: none;
+}
+
+.lp-page {
+  width: 100%;
+}
+
+/* Landing carousel: keep the block's own per-view width instead of the
+   generic module carousel flex basis. */
+.lp-carousel .dc-carousel-track > * {
+  flex: 0 0 auto;
+}
+
+.lp-html img,
+.lp-html iframe {
+  max-width: 100%;
+}
+
+/* Landing product grid: the module card template hides the rating popover only
+   inside .dc-carousel (there the carousel JS drives it), so a plain grid needs
+   the same hover behaviour the category listing cards have. */
+.lp-product-grid .dc-rating-popover {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+
+.lp-product-grid .dc-rating-hover:hover .dc-rating-popover {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lp-product-grid .dc-rating-hover {
+  position: relative;
+}
+
+.lp-product-grid .dc-rating-popover {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 50;
+}

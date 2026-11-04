@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ heading_title_builder }} — {{ landing.name }}</title>
+<link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
+<style>
+	/* Bootstrap 3 sets html{font-size:10px}, which shrinks every rem-based
+	   Tailwind utility on this page to 62.5%. Restore the 16px root so the
+	   builder chrome is sized exactly like the rest of the panel. */
+	html { font-size: 16px; }
+</style>
+<script src="view/javascript/tailwind-cdn.min.js"></script>
+<script src="view/javascript/lucide.min.js"></script>
+<script src="view/javascript/jquery/jquery-3.7.1.min.js"></script>
+<script src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+<script src="view/javascript/tinymce/tinymce.min.js"></script>
+<style>
+	html, body { height: 100%; }
+	body { margin: 0; overflow: hidden; }
+	#lp-app { height: 100vh; display: flex; flex-direction: column; }
+	#lp-canvas-frame { border: 0; background: #fff; display: block; margin: 0 auto; transition: width .2s ease; width: 100%; height: 100%; }
+	.lp-palette-item { cursor: grab; }
+	.lp-palette-item:active { cursor: grabbing; }
+	.lp-palette-item.dragging { opacity: .45; }
+	.lp-field input[type="color"] { width: 38px; height: 34px; padding: 2px; }
+	.lp-hidden { display: none !important; }
+	.lp-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+	.lp-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+	.lp-toast { animation: lpToastIn .25s ease-out; }
+	@keyframes lpToastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+	.lp-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e5e7eb; background: #fff; border-radius: 999px; padding: 3px 8px; font-size: 11px; }
+	.lp-chip button { color: #9ca3af; }
+	.lp-chip button:hover { color: #dc2626; }
+	.lp-overlay { background: rgba(15, 23, 42, .45); }
+	.lp-field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; margin-bottom: 4px; display: block; }
+	.lp-input { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 12px; color: #111827; background: #fff; }
+	.lp-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.15); }
+	.lp-invalid { border-color: #dc2626 !important; }
+	#modal-image { z-index: 100000; }
+	/* Bootstrap modal needs the backdrop above our panels */
+	.modal-backdrop { z-index: 99999; }
+	.tox-tinymce { border-radius: 6px !important; }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans text-sm">
+
+<div id="lp-app">
+
+	{# ==================== TOP BAR ==================== #}
+	<header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center gap-3 shrink-0 z-20" style="min-height:50px">
+		<a href="{{ back }}" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 shrink-0" data-toggle="tooltip" title="{{ i18n.text_back }}">
+			<i data-lucide="arrow-left" class="w-4 h-4"></i>
+		</a>
+
+		<input type="text" id="lp-name-input" value="{{ landing.name }}"
+			class="border border-gray-300 rounded px-2 py-1 text-sm w-56 focus:outline-none focus:border-blue-400 shrink-0"
+			placeholder="{{ i18n.entry_name }}" />
+
+		<span id="lp-status-badge" class="shrink-0 text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hidden"></span>
+
+		<div class="flex items-center gap-0.5 shrink-0" id="lp-lang-tabs">
+			{% for language in languages %}
+			<button type="button" class="lp-lang-tab px-2 py-1 text-xs rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+				data-lang-id="{{ language.language_id }}" data-lang-code="{{ language.code }}"
+				{% if language.language_id == default_language_id %}class="lp-lang-tab px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 font-medium"{% endif %}>{{ language.code|split('-')|first|upper }}</button>
+			{% endfor %}
+		</div>
+
+		<div class="flex-1"></div>
+
+		<div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 shrink-0" id="lp-viewport">
+			<button type="button" data-viewport="desktop" class="px-2 py-1 rounded-md text-xs bg-white shadow-sm text-gray-700" data-toggle="tooltip" title="{{ i18n.text_view_desktop }}"><i data-lucide="monitor" class="w-3.5 h-3.5"></i></button>
+			<button type="button" data-viewport="tablet" class="px-2 py-1 rounded-md text-xs text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="{{ i18n.text_view_tablet }}"><i data-lucide="tablet" class="w-3.5 h-3.5"></i></button>
+			<button type="button" data-viewport="mobile" class="px-2 py-1 rounded-md text-xs text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="{{ i18n.text_view_mobile }}"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i></button>
+		</div>
+
+		<button type="button" id="lp-undo" class="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 shrink-0" data-toggle="tooltip" title="{{ i18n.text_undo }}"><i data-lucide="undo-2" class="w-4 h-4"></i></button>
+		<button type="button" id="lp-redo" class="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 shrink-0" data-toggle="tooltip" title="{{ i18n.text_redo }}"><i data-lucide="redo-2" class="w-4 h-4"></i></button>
+
+		<button type="button" id="lp-settings-btn" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
+			<i data-lucide="settings-2" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_page_settings }}</span>
+		</button>
+
+		<a id="lp-preview-link" href="{{ preview_base }}" target="_blank" rel="noopener" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
+			<i data-lucide="external-link" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_preview }}</span>
+		</a>
+
+		<div class="flex items-center gap-2 shrink-0">
+			<span id="lp-save-state" class="text-[11px] text-gray-400"></span>
+			<button type="button" id="lp-save-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
+				<i data-lucide="save" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_save }}</span>
+			</button>
+		</div>
+	</header>
+
+	<div class="flex flex-1 overflow-hidden">
+
+		{# ==================== LEFT: PALETTE ==================== #}
+		<aside class="w-60 lg:w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+			<div class="px-3 py-2 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+				<i data-lucide="boxes" class="w-3.5 h-3.5"></i> {{ i18n.text_palette }}
+			</div>
+			<div class="px-2 py-1.5 border-b border-gray-100">
+				<input type="text" id="lp-palette-search" class="lp-input" placeholder="{{ i18n.text_search_blocks }}" />
+			</div>
+			<div class="flex-1 overflow-y-auto lp-scroll p-1.5" id="lp-palette">
+				{% for group_code, group_label in groups %}
+				<div class="lp-palette-group" data-group="{{ group_code }}">
+					<div class="lp-palette-group-title text-[10px] font-bold text-gray-400 uppercase px-2 py-1.5 tracking-wide">{{ i18n[group_label] }}</div>
+					{% for code, block in schema %}
+					{% if block.group == group_code %}
+					<div class="lp-palette-item flex items-center gap-2 px-2 py-1.5 rounded hover:bg-blue-50 text-gray-700 text-xs"
+						draggable="true" data-block-code="{{ code }}"
+						data-search="{{ i18n[block.name]|lower }} {{ code }}">
+						<i data-lucide="{{ block.icon }}" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
+						<span class="truncate">{{ i18n[block.name] }}</span>
+					</div>
+					{% endif %}
+					{% endfor %}
+				</div>
+				{% endfor %}
+			</div>
+
+			<div class="border-t border-gray-100 px-2 py-2">
+				<div class="flex items-center justify-between mb-1.5">
+					<span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{{ i18n.text_templates }}</span>
+					<button type="button" id="lp-template-save" class="text-[11px] text-blue-600 hover:text-blue-800">{{ i18n.text_save_template }}</button>
+				</div>
+				<div id="lp-template-list" class="space-y-1 max-h-40 overflow-y-auto lp-scroll text-xs"></div>
+			</div>
+		</aside>
+
+		{# ==================== CENTER: LIVE PREVIEW ==================== #}
+		<main class="flex-1 overflow-hidden flex justify-center bg-gray-200 p-3" id="lp-canvas">
+			<div id="lp-canvas-wrap" class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200">
+				<iframe id="lp-canvas-frame" src="{{ preview_base }}&lp_builder=1" title="{{ i18n.text_preview }}"></iframe>
+			</div>
+		</main>
+
+		{# ==================== RIGHT: PROPERTIES ==================== #}
+		<aside class="w-72 lg:w-80 bg-white border-l border-gray-200 flex flex-col shrink-0">
+			<div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between gap-2">
+				<span id="lp-props-title" class="font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+					<i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> {{ i18n.text_block_settings }}
+				</span>
+				<button type="button" id="lp-props-close" class="text-gray-400 hover:text-gray-700 hidden" data-toggle="tooltip" title="{{ i18n.text_back }}"><i data-lucide="x" class="w-4 h-4"></i></button>
+			</div>
+			<div id="lp-props-body" class="flex-1 overflow-y-auto lp-scroll p-3">
+				<div class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+					<i data-lucide="mouse-pointer-click" class="w-8 h-8 mb-2 text-gray-300"></i>
+					<p class="text-xs">{{ i18n.text_select_block }}</p>
+				</div>
+			</div>
+			<div id="lp-props-actions" class="hidden border-t border-gray-100 p-2 flex gap-1">
+				<button type="button" data-action="up" class="flex-1 px-2 py-1.5 text-[11px] text-gray-600 hover:bg-gray-100 rounded flex items-center justify-center gap-1"><i data-lucide="arrow-up" class="w-3 h-3"></i></button>
+				<button type="button" data-action="down" class="flex-1 px-2 py-1.5 text-[11px] text-gray-600 hover:bg-gray-100 rounded flex items-center justify-center gap-1"><i data-lucide="arrow-down" class="w-3 h-3"></i></button>
+				<button type="button" data-action="duplicate" class="flex-1 px-2 py-1.5 text-[11px] text-gray-600 hover:bg-gray-100 rounded flex items-center justify-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> {{ i18n.text_duplicate }}</button>
+				<button type="button" data-action="remove" class="flex-1 px-2 py-1.5 text-[11px] text-red-600 hover:bg-red-50 rounded flex items-center justify-center gap-1"><i data-lucide="trash-2" class="w-3 h-3"></i> {{ i18n.text_remove }}</button>
+			</div>
+		</aside>
+	</div>
+</div>
+
+{# ==================== PAGE SETTINGS SLIDE-OVER ==================== #}
+<div id="lp-settings" class="fixed inset-0 z-40 hidden">
+	<div class="absolute inset-0 lp-overlay" data-close="settings"></div>
+	<div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col">
+		<div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+			<span class="font-semibold text-sm">{{ i18n.text_page_settings }}</span>
+			<button type="button" class="text-gray-400 hover:text-gray-700" data-close="settings"><i data-lucide="x" class="w-4 h-4"></i></button>
+		</div>
+		<div class="flex-1 overflow-y-auto lp-scroll px-4 py-3 space-y-4" id="lp-settings-body"></div>
+		<div class="px-4 py-3 border-t border-gray-100 text-right">
+			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="settings">{{ i18n.button_cancel }}</button>
+		</div>
+	</div>
+</div>
+
+{# ==================== TEMPLATE SAVE DIALOG ==================== #}
+<div id="lp-template-dialog" class="fixed inset-0 z-40 hidden">
+	<div class="absolute inset-0 lp-overlay" data-close="template"></div>
+	<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 bg-white rounded-lg shadow-2xl p-4">
+		<div class="font-semibold text-sm mb-3">{{ i18n.text_save_template }}</div>
+		<label class="lp-field-label">{{ i18n.text_template_name }}</label>
+		<input type="text" id="lp-template-name" class="lp-input mb-3" />
+		<label class="flex items-center gap-2 text-xs text-gray-600 mb-4">
+			<input type="checkbox" id="lp-template-all" /> {{ i18n.text_clone_hint }}
+		</label>
+		<div class="flex justify-end gap-2">
+			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="template">{{ i18n.button_cancel }}</button>
+			<button type="button" id="lp-template-confirm" class="px-3 py-1.5 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded">{{ i18n.text_save }}</button>
+		</div>
+	</div>
+</div>
+
+<div id="lp-toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+<script>
+window.DC_LANDING = {
+	landingId: {{ landing_id }},
+	userToken: {{ user_token|json_encode|raw }},
+	urls: {
+		save: {{ save_url|json_encode|raw }},
+		token: {{ token_url|json_encode|raw }},
+		template: {{ template_url|json_encode|raw }},
+		templates: {{ templates_url|json_encode|raw }},
+		templateDelete: {{ template_delete_url|json_encode|raw }},
+		autocomplete: {{ autocomplete_url|json_encode|raw }},
+		filemanager: {{ filemanager_url|json_encode|raw }},
+		list: {{ list_url|json_encode|raw }}
+	},
+	previewBase: {{ preview_base|json_encode|raw }},
+	previewBases: {{ preview_bases|json_encode|raw }},
+	imageUrl: {{ image_url|json_encode|raw }},
+	landing: {{ landing|json_encode|raw }},
+	blocks: {{ blocks|json_encode|raw }},
+	languages: {{ languages|json_encode|raw }},
+	defaultLanguageId: {{ default_language_id }},
+	schema: {{ schema|json_encode|raw }},
+	groups: {{ groups|json_encode|raw }},
+	templates: {{ templates|json_encode|raw }},
+	banners: {{ banners|json_encode|raw }},
+	i18n: {{ i18n|json_encode|raw }}
+};
+</script>
+<script src="view/javascript/dockercart_landing_builder.js"></script>
+</body>
+</html>

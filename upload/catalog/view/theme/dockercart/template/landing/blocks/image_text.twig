@@ -1,0 +1,31 @@
+<div class="grid grid-cols-1 gap-8 lg:gap-12 items-center md:grid-cols-2">
+	<div class="{% if settings.image_position == 'right' %}md:order-2{% endif %}">
+		{% if image %}
+		<img src="{{ image }}" alt="{{ content.alt }}" class="w-full object-cover rounded-3xl {{ ratio_class }}" loading="lazy" />
+		{% endif %}
+	</div>
+	<div class="{% if settings.image_position == 'right' %}md:order-1{% endif %}">
+		{% if content.heading %}
+		<h2 class="text-2xl sm:text-3xl font-extrabold mb-4 {{ has_wrapper_bg ? wrapper_text_class : 'text-gray-900' }}">{{ content.heading }}</h2>
+		{% endif %}
+		{% if content.body %}
+		<div class="prose max-w-none prose-p:leading-relaxed prose-a:text-blue-600 mb-5 {{ has_wrapper_bg ? wrapper_prose_class : 'prose-slate prose-p:text-gray-600' }}">{{ content.body|raw }}</div>
+		{% endif %}
+		{% if bullets %}
+		<ul class="space-y-2 mb-6">
+			{% for bullet in bullets %}
+			<li class="flex items-start gap-2 text-sm {{ has_wrapper_bg ? wrapper_muted_class : 'text-gray-600' }}">
+				<i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"></i>
+				<span>{{ bullet }}</span>
+			</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+		{% if content.button_label and settings.button_href %}
+		<a href="{{ settings.button_href }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition
+			{% if settings.button_style == 'secondary' %}bg-gray-900 text-white hover:bg-gray-800
+			{% elseif settings.button_style == 'link' %}text-blue-600 hover:text-blue-700 underline underline-offset-4
+			{% else %}bg-blue-600 text-white hover:bg-blue-700{% endif %}">{{ content.button_label }}</a>
+		{% endif %}
+	</div>
+</div>

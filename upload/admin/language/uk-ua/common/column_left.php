@@ -45,6 +45,7 @@ $_['text_information'] = 'Інформація';
 $_['text_installer'] = 'Ручний інсталятор';
 $_['text_language'] = 'Мови';
 $_['text_layout'] = 'Макети';
+$_['text_landing']              = 'Лендінги';
 $_['text_length_class'] = 'Класи довжини';
 $_['text_localisation'] = 'Довідники';
 $_['text_log'] = 'Журнали помилок';

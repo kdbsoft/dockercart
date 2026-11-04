@@ -1,0 +1,38 @@
+{% if products|length %}
+<div class="lp-carousel" data-lp-carousel data-autoplay="0">
+	{% if content.heading or content.subheading or (content.link_label and settings.link_href) %}
+	<div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+		<div>
+			{% if content.subheading %}<p class="text-xs font-semibold uppercase tracking-widest text-blue-600 mb-1">{{ content.subheading }}</p>{% endif %}
+			{% if content.heading %}<h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ content.heading }}</h2>{% endif %}
+		</div>
+		{% if content.link_label and settings.link_href %}
+		<a href="{{ settings.link_href }}" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">{{ content.link_label }}<i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+		{% endif %}
+	</div>
+	{% endif %}
+
+	<div class="relative">
+		<div class="dc-carousel">
+			<button type="button" class="dc-carousel-btn dc-carousel-prev" data-lp-carousel-prev aria-label="{{ texts.text_previous|default('Previous') }}">
+				<i data-lucide="chevron-left" class="w-5 h-5"></i>
+			</button>
+			<div class="dc-carousel-track" data-lp-carousel-track>
+				{% for product in products %}
+				<div class="dc-product-item shrink-0 px-1 {{ item_width_class }}">
+					{% include 'dockercart/template/product/product_card_widget.twig' with {
+						product: product,
+						accent_color: accent_color,
+						btn_cart_classes: btn_cart_classes,
+						btn_quick_hover: btn_quick_hover
+					} %}
+				</div>
+				{% endfor %}
+			</div>
+			<button type="button" class="dc-carousel-btn dc-carousel-next" data-lp-carousel-next aria-label="{{ texts.text_next|default('Next') }}">
+				<i data-lucide="chevron-right" class="w-5 h-5"></i>
+			</button>
+		</div>
+	</div>
+</div>
+{% endif %}
