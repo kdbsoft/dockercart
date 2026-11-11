@@ -37,7 +37,7 @@
       {% endif %}
     </div>
 
-    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-post">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-post"{% if autosave_enabled %} data-autosave="1" data-autosave-interval="{{ autosave_interval }}" data-autosave-saving="{{ text_autosave_saving|e('html_attr') }}" data-autosave-saved="{{ text_autosave_saved|e('html_attr') }}" data-autosave-failed="{{ text_autosave_failed|e('html_attr') }}" data-autosave-pending="{{ text_autosave_pending|e('html_attr') }}"{% endif %}>
     <div class="row">
       <div class="col-md-12 col-sm-12 col-lg-8 col-xl-offset-1 col-xl-7">
         <div class="dcx-shell">

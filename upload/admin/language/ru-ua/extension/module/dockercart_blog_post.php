@@ -85,3 +85,9 @@ $_['text_list_subtitle'] = 'Управляйте записями блога';
 $_['text_add_post_subtitle'] = 'Создайте новую публикацию в блоге';
 $_['text_edit_post_subtitle'] = 'Редактируйте параметры и содержимое записи';
 $_['text_yes'] = 'Да';
+
+// Autosave status (see upload/admin/view/javascript/dockercart_autosave.js)
+$_['text_autosave_pending']     = 'Есть несохранённые изменения';
+$_['text_autosave_saving']      = 'Сохранение...';
+$_['text_autosave_saved']       = 'Сохранено в %s';
+$_['text_autosave_failed']      = 'Не сохранено:';

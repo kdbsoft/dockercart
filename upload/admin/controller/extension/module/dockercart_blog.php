@@ -91,6 +91,7 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		$settings = array(
 			'module_dockercart_blog_status',
 			'module_dockercart_blog_posts_per_page',
+			'module_dockercart_blog_post_autosave',
 			'module_dockercart_blog_allow_comments',
 			'module_dockercart_blog_moderate_comments',
 			'module_dockercart_blog_captcha',
@@ -110,6 +111,14 @@ class ControllerExtensionModuleDockercartBlog extends Controller {
 		}
 
 		$data['blog_status'] = isset($data['module_dockercart_blog_status']) ? (int)$data['module_dockercart_blog_status'] : 0;
+
+		// Autosave of post descriptions defaults to ON until the blog settings are
+		// saved once — mirrors Dockercart\Admin\Autosave::enabled().
+		if (!isset($this->request->post['module_dockercart_blog_post_autosave']) && !$this->config->has('module_dockercart_blog_post_autosave')) {
+			$data['module_dockercart_blog_post_autosave'] = 1;
+		} else {
+			$data['module_dockercart_blog_post_autosave'] = (int)$data['module_dockercart_blog_post_autosave'];
+		}
 
 		// Error handling
 		if (isset($this->error['warning'])) {

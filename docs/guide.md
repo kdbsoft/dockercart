@@ -26,6 +26,7 @@
 20. [Admin Global Search & Manticore Indexing](#20-admin-global-search--manticore-indexing)
 21. [Customer (Storefront) REST API](#21-customer-storefront-rest-api)
 22. [Landing Page Builder](#22-landing-page-builder)
+23. [Blog Post Autosave](#23-blog-post-autosave)
 
 ---
 
@@ -2361,3 +2362,99 @@ is an implicit superuser — no migration is needed.
    and the `oc_seo_url` rows are gone.
 9. Save a section as a template, insert it into another page.
 10. `viewed` increases on public views only (not in preview/builder).
+
+---
+
+## 23. Blog Post Autosave
+
+The blog post form is the panel's long-form description editor, so it is the only
+admin form that autosaves: while the operator writes an article, the form
+re-saves itself once a minute whenever its content differs from the last saved
+state. There is no "save draft" endpoint — the browser re-posts the form to its
+own `action` URL, i.e. the exact request the Save button makes.
+
+### Enabling / disabling
+
+Extensions → **Modules** → **DockerCart Blog** → *Module Settings* →
+**Autosave article descriptions**
+(`oc_setting`, code `module_dockercart_blog`, key
+`module_dockercart_blog_post_autosave`, `1`/`0`).
+
+The setting is **optional and defaults to on**: the row only appears after the
+blog settings form is submitted, so `Config::has()` is `false` on a fresh install
+and `Dockercart\Admin\Autosave::enabled()` returns `true`.
+`Autosave::INTERVAL` (60 s) is fixed — the form POSTs a whole article and runs
+full validation, so a tighter cadence would only add load.
+
+### How it works
+
+| Piece | File |
+|---|---|
+| Switch + cadence (single source of truth) | `upload/system/library/dockercart/admin/autosave.php` |
+| Scope: only this form opts in | `upload/admin/view/template/extension/module/dockercart_blog_post_form.twig` (`data-autosave="1"` + `data-autosave-*` options) |
+| Wiring: loads the module, passes the labels | `ControllerExtensionModuleDockercartBlogPost::getForm()` (`Autosave::enabled()`, `document->addScript()`) |
+| Browser module | `upload/admin/view/javascript/dockercart_autosave.js` |
+| Status label styles | `upload/admin/view/stylesheet/dockercart_dcx_ui.css` (`.dc-autosave-inline`) |
+
+- The form tag carries its own configuration (`data-autosave-interval`,
+  `data-autosave-{pending,saving,saved,failed}`), rendered by the template **only
+  when the switch is on**; when it is off neither the attributes nor the script
+  are emitted, so nothing else in the panel is affected.
+- The module only saves **existing** articles: the `route` must not end with
+  `/add` and the action must carry an `*_id` parameter (`post_id`). Autosaving the
+  "add" form would create a new article every minute.
+- Every tick the module calls `tinymce.triggerSave()`, serializes the form and
+  compares an FNV-1a hash of the `name=value` pairs with the last saved state —
+  an idle form is never re-posted, and programmatic widget changes are caught
+  without wiring listeners for every picker.
+- File inputs are stripped from the payload (a re-upload per minute is not
+  wanted); the request carries `_dc_autosave=1`.
+- Success = the controller called `$this->response->redirect()` (302). The fetch
+  uses `redirect: 'manual'`, so the browser gets an opaque redirect and does not
+  re-render the post list. A validation failure renders the form again with
+  `.text-danger` messages — the module shows the first one in the status label,
+  backs off (1×, 2×, 4×, max 5× the interval) and retries on the next edit.
+- **The operator always sees the outcome.** A status label is inserted into the
+  page header's `.pull-right`, immediately before the form's Save button
+  (`<button type="submit" form="form-post">`, found by that `form` attribute — the
+  button lives outside the form):
+
+  | State | Label | Colour |
+  |---|---|---|
+  | touched, not saved yet | “Unsaved changes” | muted |
+  | request running | “Saving…” | primary, pulsing dot |
+  | saved | “Autosaved at 14:03” (stays until the next edit) | green |
+  | refused | “Not saved: <first validation message>” (stays until a successful save) | red |
+
+  The time comes from the browser (`toLocaleTimeString`, HH:MM), the sentences
+  come from `extension/module/dockercart_blog_post`
+  (`text_autosave_pending/saving/saved/failed`; `%s` is the timestamp).
+- Saves are skipped while the tab is hidden, while a native save is in flight,
+  and while a request is already running.
+- The POST is an ordinary save, so the controller also leaves its usual
+  “Success: You have modified …” flash in the session — it shows up on the next
+  full page load.
+
+### Extending it to another form
+
+Autosave is deliberately scoped to one form; nothing global is wired (the shared
+header and the global Settings page are untouched). To add another form:
+
+1. Render `data-autosave="1"` plus the `data-autosave-*` options on its `<form>`
+   (see the blog post template) and load
+   `view/javascript/dockercart_autosave.js` from its controller.
+2. Add the four `text_autosave_*` labels to that module's language file.
+3. Give the `Autosave` switch a home in that module's own settings form.
+4. Run `make test` — `tools/tests/cases/admin_autosave.php` fails when a second
+   template opts in or when the wiring/locales drift.
+
+### Manual verification
+
+1. Edit an article: as soon as you type, the header shows “Unsaved changes”; after
+   ≤60 s it becomes “Autosaved at HH:MM” and the text survives a reload.
+2. Add a *new* article, type a description and wait → nothing is created.
+3. Make the form invalid (empty title) → the header shows “Not saved: …” with the
+   validation message and nothing is saved.
+4. Turn off “Autosave article descriptions” in the blog settings → the form has no
+   `data-autosave` attributes, the script is not loaded, and editing no longer
+   saves on its own.

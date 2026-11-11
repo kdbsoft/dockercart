@@ -371,6 +371,21 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		$data['cancel'] = $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true);
 
+		// Autosave of the post description (Extensions → Modules → DockerCart Blog
+		// toggle). The form only opts in when the switch is on; the module reads its
+		// cadence and labels from the data-* attributes rendered below.
+		$data['autosave_enabled'] = \Dockercart\Admin\Autosave::enabled($this->config);
+		$data['autosave_interval'] = \Dockercart\Admin\Autosave::INTERVAL;
+
+		if ($data['autosave_enabled']) {
+			$this->document->addScript('view/javascript/dockercart_autosave.js');
+
+			$data['text_autosave_saving'] = $this->language->get('text_autosave_saving');
+			$data['text_autosave_saved'] = $this->language->get('text_autosave_saved');
+			$data['text_autosave_failed'] = $this->language->get('text_autosave_failed');
+			$data['text_autosave_pending'] = $this->language->get('text_autosave_pending');
+		}
+
 		if (isset($this->request->get['post_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$post_info = $this->model_extension_module_dockercart_blog_post->getPost($this->request->get['post_id']);
 		}

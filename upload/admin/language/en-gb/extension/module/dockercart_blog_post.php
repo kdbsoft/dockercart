@@ -110,3 +110,9 @@ $_['text_select_category'] = 'Select Categories';
 $_['entry_related_product']     = 'Products';
 $_['entry_related_category']    = 'Product Categories';
 $_['entry_related_manufacturer']= 'Manufacturers';
+
+// Autosave status (see upload/admin/view/javascript/dockercart_autosave.js)
+$_['text_autosave_pending']     = 'Unsaved changes';
+$_['text_autosave_saving']      = 'Saving...';
+$_['text_autosave_saved']       = 'Autosaved at %s';
+$_['text_autosave_failed']      = 'Not saved:';

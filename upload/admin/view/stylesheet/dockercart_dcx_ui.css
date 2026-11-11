@@ -4229,3 +4229,81 @@ body .dc-address-item__default > input[type="radio"] {
 	width: 15px;
 	height: 15px;
 }
+
+
+/* ── Blog post autosave ─────────────────────────────────────────────────────
+   view/javascript/dockercart_autosave.js inserts a status label into the page
+   header's `.pull-right`, right before the form's Save button, so the operator
+   sees "Autosaved at 14:03" exactly where the action happens. This keyframe is
+   the shared "saving" pulse. */
+@keyframes dc-autosave-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: .35; }
+}
+
+/* ── Blog post autosave: inline label next to the Save button ───────────────
+   The label is created by the JS module (no template markup) and reads
+   "Unsaved changes" / "Saving..." / "Autosaved at 14:03" / "Not saved: ...". */
+.dc-autosave-inline {
+	display: inline-block;
+	max-width: 340px;
+	margin-right: 12px;
+	overflow: hidden;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 34px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: middle;
+	color: var(--dc-text-muted, #6b7280);
+	opacity: 0;
+	transition: opacity .16s ease;
+	cursor: default;
+}
+
+.dc-autosave-inline.is-visible {
+	opacity: 1;
+}
+
+.dc-autosave-inline:before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 6px;
+	border-radius: 50%;
+	background: currentColor;
+	opacity: .6;
+	vertical-align: middle;
+}
+
+.dc-autosave-inline--pending {
+	color: var(--dc-text-muted, #6b7280);
+}
+
+.dc-autosave-inline--saving {
+	color: var(--dc-primary, #5b7ea8);
+}
+
+.dc-autosave-inline--saving:before {
+	animation: dc-autosave-pulse 1s ease-in-out infinite;
+}
+
+.dc-autosave-inline--saved {
+	color: #16a34a;
+}
+
+.dc-autosave-inline--error {
+	max-width: 420px;
+	color: #dc2626;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dc-autosave-inline {
+		transition: none;
+	}
+
+	.dc-autosave-inline--saving:before {
+		animation: none;
+	}
+}

@@ -56,6 +56,15 @@
                   <div class="text-danger">{{ error_posts_per_page }}</div>
                   {% endif %}
                 </div>
+                <div class="dcx-field">
+                  <div class="dcx-checkbox-group">
+                    <label class="dcx-checkbox-label">
+                      <input type="hidden" name="module_dockercart_blog_post_autosave" value="0" />
+                      <input type="checkbox" name="module_dockercart_blog_post_autosave" value="1"{% if module_dockercart_blog_post_autosave %} checked="checked"{% endif %} /> {{ entry_post_autosave }}
+                      <span data-toggle="tooltip" title="{{ help_post_autosave }}"><i data-lucide="circle-question-mark" width="14" height="14" class="text-muted"></i></span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

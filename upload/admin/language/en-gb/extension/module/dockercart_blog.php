@@ -56,6 +56,7 @@ $_['text_contact_label'] = 'Contact';
 // Entry
 $_['entry_status']     = 'Status';
 $_['entry_posts_per_page'] = 'Posts Per Page';
+$_['entry_post_autosave'] = 'Autosave article descriptions';
 $_['entry_allow_comments'] = 'Allow Comments';
 $_['entry_moderate_comments'] = 'Moderate Comments';
 $_['entry_captcha']    = 'Use CAPTCHA';
@@ -67,6 +68,7 @@ $_['entry_latest_limit'] = 'Latest Posts Limit';
 
 // Help
 $_['help_posts_per_page'] = 'Number of posts per page in listing (recommended 10-20)';
+$_['help_post_autosave'] = 'Saves the article form automatically every minute while you edit it, so long descriptions are never lost. Enabled by default; only existing articles are updated (a new article is never created).';
 $_['help_moderate_comments'] = 'Comments require approval before publishing';
 $_['help_captcha']     = 'Spam protection when adding comments';
 $_['help_latest_limit'] = 'Number of posts in "Latest Posts" widget (1-20)';

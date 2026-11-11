@@ -257,6 +257,25 @@ Tailwind utilities so the built output stays in sync.
   <span data-toggle="tooltip" title="{{ help_text }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
   ```
 
+## Blog post autosave
+
+- **Only the blog post form** autosaves (`data-autosave="1"` plus
+  `data-autosave-*` options on its `<form>` in
+  `extension/module/dockercart_blog_post_form.twig`; the module
+  `view/javascript/dockercart_autosave.js` is loaded by that form's controller).
+  The browser re-posts the form to its own action once a minute — there is **no**
+  autosave branch in the controller. Nothing global is wired: the shared header
+  and the Settings page are untouched, so a second form must not silently opt in
+  (`tools/tests/cases/admin_autosave.php` enforces the single-template rule).
+- Switch: `module_dockercart_blog_post_autosave` in the blog settings
+  (Extensions → Modules → DockerCart Blog → *Autosave article descriptions*,
+  default **on**) resolved by `Dockercart\Admin\Autosave::enabled()`; cadence is
+  the fixed `Autosave::INTERVAL` (60 s). Only existing articles are saved
+  (`/add` routes and actions without an `*_id` parameter are skipped) and the
+  operator always sees the outcome in a status label inserted before the form's
+  Save button (“Unsaved changes” → “Saving…” → “Autosaved at HH:MM”, red
+  “Not saved: <message>”). Details: `docs/guide.md` §23.
+
 ## Custom files & `make update`
 
 `make update` runs `git pull` then re-applies migrations. It **aborts on modified tracked files**
