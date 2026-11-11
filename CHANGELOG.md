@@ -1,3 +1,9 @@
+## [3.47.0](https://github.com/kdbsoft/dockercart/compare/v3.46.0...v3.47.0) (2026-11-11)
+
+### Features
+
+* add blog post autosave to the post form ([9c8a386](https://github.com/kdbsoft/dockercart/commit/9c8a386b65615fba8d5d92a4994670a9747047b2))
+
 ## [3.46.0](https://github.com/kdbsoft/dockercart/compare/v3.45.0...v3.46.0) (2026-11-04)
 
 ### Features
