@@ -1,3 +1,18 @@
+## [3.48.0](https://github.com/kdbsoft/dockercart/compare/v3.47.0...v3.48.0) (2026-11-16)
+
+### Features
+
+* **admin:** add the missing empty-state icons and guard them ([c4e488c](https://github.com/kdbsoft/dockercart/commit/c4e488c8cfd5baaec0263b1cc6040e5e64771bf6))
+* **sale:** add an image lightbox to order product cards ([74454cd](https://github.com/kdbsoft/dockercart/commit/74454cd54a2de90e13aeedfd52462f83f6b1978f))
+* **sale:** inline-edit order status, payment and shipping in the sidebar ([fda178e](https://github.com/kdbsoft/dockercart/commit/fda178e5116a5495bf20ca8b0315754a551ba150))
+* **store:** add update-all batch update ([13684a4](https://github.com/kdbsoft/dockercart/commit/13684a4c774c859eb1990cfacb20e58081d1d2de))
+
+### Bug Fixes
+
+* **store:** render catalog changelogs as sanitized html ([2476c1c](https://github.com/kdbsoft/dockercart/commit/2476c1c4a89e39cf1a175e7ab86d72156d5f8c19))
+* **store:** reset the add-on gallery carousel on every opening ([ad64071](https://github.com/kdbsoft/dockercart/commit/ad64071683dad58ffaa1e987fced61515847fb9e))
+* **template:** log twig render failures before exiting ([68be3c9](https://github.com/kdbsoft/dockercart/commit/68be3c9c294736ed5893bf574fcbfffc1ed0cc71))
+
 ## [3.47.0](https://github.com/kdbsoft/dockercart/compare/v3.46.0...v3.47.0) (2026-11-11)
 
 ### Features
