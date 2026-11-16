@@ -13,6 +13,7 @@ node_modules/
 .commandcode/
 .clinerules/
 PLAN.md
+plans/
 
 # Config and Htaccess Files
 /upload/.htaccess
