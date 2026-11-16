@@ -103,6 +103,28 @@ The cache is kept fresh two ways:
 On a fresh install where the store page was never opened and the scheduler has
 not run yet, the badge stays `0` until the first cache fill.
 
+#### Updating everything at once
+
+The store page header shows **Update All (N)** when at least one installed add-on
+has a newer catalog version (hidden for groups without the `modify` permission
+on `extension/store`). The button is rendered from
+`DockercartExtensionStore::getAvailableUpdates()` — the same list that feeds the
+sidebar badge and the per-card *Update* state (highest catalog version per SKU,
+name from `oc_dockercart_extension_meta`, catalog name/`<model>` as fallback).
+
+The batch is **browser-driven, not a single server request**: the page walks the
+queue and posts every SKU to the regular `extension/store/update` action one at
+a time. That keeps one transaction, one file rollback and one error report per
+extension, so a broken package in the middle of the queue cannot abort the rest
+(the outcome is listed per add-on in the progress modal). Reload the page when
+the run finishes — the queue is rendered with the page.
+
+Descriptions and version changelogs come from the catalog as rich text. They are
+rendered as HTML, filtered through `DockercartExtensionStore::sanitizeHtml()`
+(`HTML_ALLOWED_TAGS` allowlist plus event-handler and `javascript:` URL
+scrubbing), so formatting shows up instead of escaped markup while scripts are
+dropped.
+
 ---
 
 ## 2. Architecture

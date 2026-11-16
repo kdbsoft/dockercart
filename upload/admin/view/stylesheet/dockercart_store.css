@@ -457,6 +457,51 @@
 	color: var(--dc-gray-700);
 }
 
+.store-panel-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.store-update-all-status {
+	font-weight: 600;
+	color: var(--dc-gray-700);
+	margin-bottom: 10px;
+}
+
+.store-update-all-progress {
+	margin-bottom: 12px;
+}
+
+.store-update-all-log {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	max-height: 240px;
+	overflow-y: auto;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.store-update-all-log li {
+	padding: 3px 0;
+	border-bottom: 1px dashed var(--dc-border-soft);
+	word-wrap: break-word;
+}
+
+.store-update-all-log li:last-child {
+	border-bottom: 0;
+}
+
+.store-update-all-log li.store-update-all-item--ok {
+	color: var(--dc-success, #16a34a);
+}
+
+.store-update-all-log li.store-update-all-item--error {
+	color: var(--dc-danger, #dc2626);
+}
+
 /* A single picture needs no arrows or dots — renderCarousel sets this class. */
 .store-modal-carousel--single .carousel-control,
 .store-modal-carousel--single .carousel-indicators {

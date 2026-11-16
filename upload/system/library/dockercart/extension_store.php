@@ -8,6 +8,11 @@ class DockercartExtensionStore {
 	const CACHE_TTL = 1800;
 	const LICENSING_CACHE_TTL = 1800;
 
+	/**
+	 * Markup the store catalog is allowed to use in descriptions and changelogs.
+	 * Everything else is dropped (see sanitizeHtml()), so a vendor changelog can
+	 * be rendered as formatted HTML without scripting the admin panel.
+	 */
 	const HTML_ALLOWED_TAGS = '<p><br><strong><em><b><i><u><s><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4><h5><h6><hr><table><thead><tbody><tr><th><td><span><div><img><figure><figcaption>';
 
 	private $registry;
@@ -177,82 +182,133 @@ class DockercartExtensionStore {
 	}
 
 	/**
-	 * Counts installed extensions with a newer version in the cached catalog.
-	 * Cache-only (no network) so it is safe to call on every admin page.
-	 * Returns 0 when the catalog cache is cold or on any failure.
+	 * Lists the installed extensions whose catalog version is newer than the
+	 * installed one. The caller may pass an already fetched catalog; otherwise
+	 * the local YML cache is used (never the network), so this is safe to call
+	 * from any admin page. Returns an empty list on any failure.
+	 *
+	 * @return array<int, array{sku: string, code: string, name: string, installed_version: string, version: string}>
 	 */
-	public function countAvailableUpdates(): int {
+	public function getAvailableUpdates(?SimpleXMLElement $yml = null): array {
 		try {
 			$db = $this->registry->get('db');
 
 			$result = $db->query(
-				"SELECT `sku`, `installed_version` FROM `" . DB_PREFIX . "dockercart_extension_meta`"
+				"SELECT `sku`, `code`, `name`, `installed_version` FROM `" . DB_PREFIX . "dockercart_extension_meta`"
 			);
 		} catch (\Throwable $e) {
-			return 0;
+			return array();
 		}
 
 		if (empty($result->num_rows)) {
-			return 0;
+			return array();
 		}
-
-		$yml = $this->getCachedYml();
 
 		if ($yml === null) {
-			return 0;
+			$yml = $this->getCachedYml();
 		}
 
-		$versions = array();
+		if ($yml === null) {
+			return array();
+		}
 
 		try {
-			if (!isset($yml->shop->offers->offer)) {
-				return 0;
-			}
-
-			foreach ($yml->shop->offers->offer as $offer) {
-				$sku = (string)$offer['id'];
-
-				if ($sku === '') {
-					continue;
-				}
-
-				$version = '';
-
-				foreach ($offer->param as $param) {
-					if ((string)$param['code'] === 'version') {
-						$version = (string)$param;
-						break;
-					}
-				}
-
-				if ($version === '') {
-					continue;
-				}
-
-				if (!isset($versions[$sku]) || version_compare($version, $versions[$sku], '>')) {
-					$versions[$sku] = $version;
-				}
-			}
+			$latest = $this->catalogLatest($yml);
 		} catch (\Throwable $e) {
-			return 0;
+			return array();
 		}
 
-		$count = 0;
+		if (empty($latest)) {
+			return array();
+		}
+
+		$updates = array();
 
 		foreach ($result->rows as $row) {
 			$sku = (string)($row['sku'] ?? '');
 			$installed = (string)($row['installed_version'] ?? '');
 
-			if ($sku === '' || $installed === '' || !isset($versions[$sku])) {
+			if ($sku === '' || $installed === '' || !isset($latest[$sku])) {
 				continue;
 			}
 
-			if (version_compare($versions[$sku], $installed, '>')) {
-				$count++;
+			if (!version_compare($latest[$sku]['version'], $installed, '>')) {
+				continue;
+			}
+
+			$name = trim((string)($row['name'] ?? ''));
+
+			if ($name === '') {
+				$name = $latest[$sku]['name'] !== '' ? $latest[$sku]['name'] : $sku;
+			}
+
+			$updates[] = array(
+				'sku' => $sku,
+				'code' => (string)($row['code'] ?? ''),
+				'name' => $name,
+				'installed_version' => $installed,
+				'version' => $latest[$sku]['version'],
+			);
+		}
+
+		usort($updates, static function (array $a, array $b): int {
+			return strcasecmp($a['name'], $b['name']);
+		});
+
+		return $updates;
+	}
+
+	/**
+	 * Counts installed extensions with a newer version in the catalog.
+	 */
+	public function countAvailableUpdates(): int {
+		return count($this->getAvailableUpdates());
+	}
+
+	/**
+	 * Highest catalog version (and display name) per SKU.
+	 *
+	 * @return array<string, array{version: string, name: string}>
+	 */
+	private function catalogLatest(SimpleXMLElement $yml): array {
+		$latest = array();
+
+		if (!isset($yml->shop->offers->offer)) {
+			return $latest;
+		}
+
+		foreach ($yml->shop->offers->offer as $offer) {
+			$sku = (string)$offer['id'];
+
+			if ($sku === '') {
+				continue;
+			}
+
+			$version = '';
+
+			foreach ($offer->param as $param) {
+				if ((string)$param['code'] === 'version') {
+					$version = (string)$param;
+					break;
+				}
+			}
+
+			if ($version === '') {
+				continue;
+			}
+
+			$name = trim((string)$offer->name);
+
+			if ($name === '') {
+				$name = trim((string)$offer->model);
+			}
+
+			if (!isset($latest[$sku]) || version_compare($version, $latest[$sku]['version'], '>')) {
+				$latest[$sku] = array('version' => $version, 'name' => $name);
 			}
 		}
 
-		return $count;
+		return $latest;
 	}
 
 	/**
@@ -811,12 +867,12 @@ class DockercartExtensionStore {
 				continue;
 			}
 
-			$changelog = $ver['changelog'] ?? '';
+			$changelog = (string)($ver['changelog'] ?? '');
 
 			if ($changelog !== '') {
 				$html .= '<div class="store-changelog-version">';
 				$html .= '<strong>v' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . '</strong>';
-				$html .= '<div class="store-changelog-content">' . htmlspecialchars($changelog, ENT_QUOTES, 'UTF-8') . '</div>';
+				$html .= '<div class="store-changelog-content">' . self::sanitizeHtml($changelog) . '</div>';
 				$html .= '</div>';
 			}
 		}

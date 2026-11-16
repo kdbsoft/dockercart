@@ -44,7 +44,12 @@
                 <div>
                   <div class="dcx-panel-title">{{ heading_title }}</div>
                 </div>
-                <div class="pull-right" style="margin-left:auto;">
+                <div class="store-panel-actions">
+                  {% if can_modify and update_queue %}
+                  <button type="button" class="btn btn-warning" id="store-update-all-btn" data-toggle="tooltip" title="{{ text_update_all_hint }}">
+                    <i data-lucide="arrow-up-circle" width="16" height="16"></i> {{ text_update_all }} ({{ update_queue|length }})
+                  </button>
+                  {% endif %}
                   <a href="{{ refresh_url }}" class="btn btn-warning btn--icon" title="{{ text_refresh }}" data-toggle="tooltip"><i data-lucide="refresh-cw" width="16" height="16"></i></a>
                 </div>
               </div>
@@ -284,6 +289,27 @@
           <i data-lucide="arrow-up" width="16" height="16"></i> <span>{{ text_update }}</span>
         </button>
         <button type="button" class="btn btn-default" data-dismiss="modal">{{ text_close }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="store-update-all-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">{{ text_update_all }}</h4>
+      </div>
+      <div class="modal-body">
+        <p class="store-update-all-status" id="store-update-all-status">{{ text_loading }}</p>
+        <div class="progress store-update-all-progress">
+          <div class="progress-bar progress-bar-warning progress-bar-striped active" id="store-update-all-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%;"></div>
+        </div>
+        <ul class="store-update-all-log" id="store-update-all-log"></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="store-update-all-close" style="display:none;" data-dismiss="modal">{{ text_close }}</button>
+        <button type="button" class="btn btn-primary" id="store-update-all-reload" style="display:none;">{{ text_reload }}</button>
       </div>
     </div>
   </div>
@@ -538,6 +564,89 @@ $(document).ready(function() {
 	var $keyModal = $('#store-key-modal');
 	var $keyModalInput = $('#key-modal-key-input');
 	var $keyModalModuleCode = $('#key-modal-module-code');
+
+	// Batch update: walk the server-rendered queue one SKU at a time so every
+	// extension keeps its own request, transaction and rollback (the same
+	// endpoint the single "Update" button uses). A failure never stops the queue.
+	var updateQueue = {{ update_queue|json_encode|raw }};
+	var updateAllRunning = false;
+
+	$('#store-update-all-btn').on('click', function() {
+		if (updateAllRunning || !updateQueue.length) return;
+
+		if (!confirm({{ text_confirm_update_all|json_encode|raw }}.replace('%s', updateQueue.length))) return;
+
+		updateAllRunning = true;
+
+		var queue = updateQueue.slice();
+		var total = queue.length;
+		var position = 0;
+		var failed = 0;
+
+		var $updateModal = $('#store-update-all-modal');
+		var $updateStatus = $('#store-update-all-status');
+		var $updateBar = $('#store-update-all-bar');
+		var $updateLog = $('#store-update-all-log');
+		var $updateReload = $('#store-update-all-reload');
+		var $updateClose = $('#store-update-all-close');
+
+		$updateLog.empty();
+		$updateReload.hide();
+		$updateClose.hide();
+		$updateBar.css('width', '0%').attr('aria-valuenow', 0).addClass('active');
+		$updateStatus.text({{ text_loading|json_encode|raw }});
+		$updateModal.modal('show');
+
+		function updateAllFinish() {
+			updateAllRunning = false;
+			$updateBar.css('width', '100%').attr('aria-valuenow', 100).removeClass('active');
+			$updateStatus.text(failed
+				? {{ text_update_all_partial|json_encode|raw }}.replace('%1$s', String(total - failed)).replace('%2$s', String(failed))
+				: {{ text_update_all_done|json_encode|raw }});
+			$('#store-update-all-btn').hide();
+			$updateClose.show();
+			$updateReload.show();
+		}
+
+		function updateAllNext() {
+			if (!queue.length) {
+				updateAllFinish();
+				return;
+			}
+
+			var item = queue.shift();
+			position++;
+
+			$updateStatus.text({{ text_update_all_progress|json_encode|raw }}
+				.replace('%1$s', String(position))
+				.replace('%2$s', String(total))
+				.replace('%3$s', item.name));
+
+			$.post('{{ update_url }}', { sku: item.sku }, function(resp) {
+				if (resp.error) {
+					failed++;
+					$updateLog.append($('<li>', { class: 'store-update-all-item--error' }).text(item.name + ' — ' + resp.error));
+				} else {
+					$updateLog.append($('<li>', { class: 'store-update-all-item--ok' }).text(item.name + ' — v' + item.installed_version + ' → v' + item.version));
+				}
+			}, 'json').fail(function() {
+				failed++;
+				$updateLog.append($('<li>', { class: 'store-update-all-item--error' }).text(item.name + ' — ' + {{ text_error|json_encode|raw }}));
+			}).always(function() {
+				var percent = Math.round(position / total * 100);
+
+				$updateBar.css('width', percent + '%').attr('aria-valuenow', percent);
+
+				updateAllNext();
+			});
+		}
+
+		updateAllNext();
+	});
+
+	$('#store-update-all-reload').on('click', function() {
+		location.reload();
+	});
 
 	$(document).on('click', '.store-license-key', function() {
 		var key = $(this).data('full-key');

@@ -25,6 +25,13 @@ class ControllerExtensionStore extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
+
+		// Batch update: the browser walks this list one SKU at a time through the
+		// regular update action, so every extension keeps its own transaction,
+		// rollback and error report instead of one long all-or-nothing request.
+		$data['update_queue'] = array();
+		$data['can_modify'] = $this->user->hasPermission('modify', 'extension/store');
+
 		if (!is_file(DIR_SYSTEM . 'library/dockercart/extension_store.php')) {
 			$data['error'] = 'Extension Store library not found.';
 			$data['categories_tree'] = array();
@@ -104,6 +111,10 @@ class ControllerExtensionStore extends Controller {
 		$data['offers'] = $offers;
 		$data['selected_category'] = $selected_category;
 		$data['licenses'] = $this->getLicensesData($yml);
+
+		if ($yml !== null) {
+			$data['update_queue'] = $store->getAvailableUpdates($yml);
+		}
 
 		$data['detail_url'] = $this->url->link('extension/store/detail', 'user_token=' . $this->session->data['user_token'], true);
 		$data['refresh_url'] = $this->url->link('extension/store/refresh', 'user_token=' . $this->session->data['user_token'], true);
