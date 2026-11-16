@@ -955,9 +955,16 @@ A horizontal stepper bar (`sale/order_flow_stages.twig`) renders under the
 page header from the configured chain, with the current stage highlighted and
 buttons for every allowed transition. Clicking a button opens a small modal
 (comment + notify customer). Terminal transitions (Cancelled/Refunded) ask for
-explicit confirmation. The previous free-form status select is still available
-in the sidebar under "Change status" with a "Force" checkbox that bypasses
-validation.
+explicit confirmation. The free-form status select is still available: click
+the **Order Status** value in the Order Details sidebar card (it is underlined
+to signal it is clickable) to open the select with a "Force" checkbox that
+bypasses validation. There is no separate "Change status" button.
+
+Clicking the **Payment Method** / **Shipping Method** values in the same card
+edits them in place — the select replaces the value, the change is saved
+immediately (`sale/order_detail/updateField`, code first so the shipping quote
+is recalculated server-side) and Enter/Escape/blur cancels. No Edit mode needed;
+the same selects are still part of the Edit-mode form and its Save button.
 
 ### Shipments (tracking numbers)
 

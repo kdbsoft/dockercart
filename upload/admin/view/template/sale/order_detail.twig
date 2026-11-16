@@ -346,6 +346,11 @@
 			<div class="dcx-sidebar-card__field">
 				<span class="dcx-sidebar-card__label">{{ entry_firstname }} / {{ entry_lastname }}</span>
 				<span class="dcx-sidebar-card__value view-only">{{ firstname }} {{ lastname }}{% if buyer_orders_text %} <span class="text-muted">({{ buyer_orders_text }})</span>{% endif %}<a href="#" class="dc-copy-btn" data-copy="{{ firstname }} {{ lastname }}" data-toggle="tooltip" title="{{ text_copy }}" onclick="event.preventDefault(); copyToClipboard(this);"><i data-lucide="copy" width="12" height="12"></i></a></span>
+				{% if customer_id %}
+				<span class="dcx-sidebar-card__value view-only">
+					<a href="#" class="btn btn-default btn-xs" onclick="event.preventDefault(); showCustomerCard({{ customer_id }});"><i data-lucide="user" width="11" height="11"></i> {{ text_view_customer }}</a>
+				</span>
+				{% endif %}
 				<div class="edit-only" style="display:none">
                 <input type="text" class="form-control" value="{{ firstname }}" data-field="firstname" placeholder="{{ entry_firstname }}" style="width:48%;display:inline-block">
                 <input type="text" class="form-control" value="{{ lastname }}" data-field="lastname" placeholder="{{ entry_lastname }}" style="width:48%;display:inline-block">
@@ -376,11 +381,6 @@
               </select>
             </div>
             {% if customer_id %}
-            <div class="dcx-sidebar-card__field" style="margin-top:4px">
-              <button type="button" class="btn btn-default btn-xs" onclick="showCustomerCard({{ customer_id }})">
-                <i data-lucide="user" width="11" height="11"></i> {{ text_view_customer }}
-              </button>
-            </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_replace_customer }}</span>
               <div class="edit-only" style="display:none">
@@ -479,8 +479,12 @@
             {% endif %}
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_order_status }}</span>
+              {% if can_status %}
+              <span class="dcx-sidebar-card__value dcx-value--action" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_flow_change_status }}" onclick="toggleFlowOverride()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleFlowOverride(); }"><span class="dcx-value__text">{{ order_status }}</span><i data-lucide="chevron-down" width="12" height="12" class="dcx-value__caret"></i></span>
+              {% else %}
               <span class="dcx-sidebar-card__value">{{ order_status }}</span>
-              <button type="button" class="btn btn-xs btn-default" style="margin-top:4px" onclick="toggleFlowOverride()"><i data-lucide="settings-2" width="12" height="12"></i> {{ text_flow_change_status }}</button>
+              {% endif %}
+              {% if can_status %}
               <div id="flow-override-block" style="display:none">
                 <select class="form-control" id="edit-order-status" style="margin-top:4px">
                   {% for status in order_statuses %}
@@ -495,6 +499,7 @@
                   <button type="button" class="btn btn-xs btn-default" onclick="toggleFlowOverride()">{{ button_cancel }}</button>
                 </div>
               </div>
+              {% endif %}
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ entry_comment }}</span>
@@ -504,7 +509,7 @@
 
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_payment_method }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="payment_method">{{ payment_method }}</span>
+              <span class="dcx-sidebar-card__value view-only{% if can_edit %} dcx-value--action{% endif %}" data-field="payment_method"{% if can_edit %} data-inline-edit="payment_method" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_edit_hint }}"{% endif %}><span class="dcx-value__text">{{ payment_method }}</span>{% if can_edit %}<i data-lucide="chevron-down" width="12" height="12" class="dcx-value__caret"></i>{% endif %}</span>
               <select class="form-control edit-only" data-field="payment_method" data-code-field="payment_code" style="display:none">
                 {% if payment_code %}
                   <option value="{{ payment_method }}" data-code="{{ payment_code }}" selected>{{ payment_method }}</option>
@@ -520,7 +525,7 @@
             </div>
             <div class="dcx-sidebar-card__field">
               <span class="dcx-sidebar-card__label">{{ text_shipping_method }}</span>
-              <span class="dcx-sidebar-card__value view-only" data-field="shipping_method">{{ shipping_method }}</span>
+              <span class="dcx-sidebar-card__value view-only{% if can_edit %} dcx-value--action{% endif %}" data-field="shipping_method"{% if can_edit %} data-inline-edit="shipping_method" role="button" tabindex="0" data-toggle="tooltip" title="{{ text_edit_hint }}"{% endif %}><span class="dcx-value__text">{{ shipping_method }}</span>{% if can_edit %}<i data-lucide="chevron-down" width="12" height="12" class="dcx-value__caret"></i>{% endif %}</span>
               <select class="form-control edit-only" data-field="shipping_method" data-code-field="shipping_code" style="display:none">
                 {% if shipping_code %}
                   <option value="{{ shipping_method }}" data-code="{{ shipping_code }}" selected>{{ shipping_method }}</option>
@@ -751,6 +756,14 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .tracking-row__remove { flex-shrink:0; }
 
 .dcx-sidebar-card__field-row { display:flex; align-items:center; gap:6px; width:100%; }
+
+/* Clickable sidebar value (change status / payment method / shipping method) */
+.dcx-value--action { display:inline; align-self:flex-start; cursor:pointer; text-decoration-line:underline; text-decoration-style:dashed; text-decoration-thickness:1px; text-decoration-color:var(--dc-border,#d1d5db); text-underline-offset:3px; transition:color .15s ease, text-decoration-color .15s ease; }
+.dcx-value--action:hover,
+.dcx-value--action:focus-visible { color:var(--dc-primary,#2563eb); text-decoration-color:currentColor; outline:none; }
+.dcx-value__caret { vertical-align:-2px; margin-left:3px; opacity:.5; }
+.dcx-value--action:hover .dcx-value__caret,
+.dcx-value--action:focus-visible .dcx-value__caret { opacity:1; }
 
 .dc-copy-btn { display:inline-flex; align-items:center; justify-content:center; color:#9ca3af; text-decoration:none !important; flex-shrink:0; }
 .dc-copy-btn:hover { color:#2563eb; }
@@ -1098,6 +1111,11 @@ function toggleSameAddress() {
 let shippingPreviewTimer = null;
 
 function onShippingMethodChange(select) {
+	// Outside Edit mode the inline editor saves the method itself and refreshes the totals
+	// from the server response; the live quote preview is only for the edit-mode form.
+	const panel = select.closest('[data-panel]');
+	if (panel && panel.dataset.editing !== 'true') return;
+
 	const codeOption = select.options[select.selectedIndex];
 	const code = codeOption ? (codeOption.dataset.code || '') : '';
 	const shipAddr = document.getElementById('edit-shipping-address');
@@ -1559,13 +1577,21 @@ function toggleFlowOverride() {
 	if (!block) return;
 	const show = block.style.display === 'none';
 	block.style.display = show ? '' : 'none';
+	if (show) {
+		const select = document.getElementById('edit-order-status');
+		if (select) select.focus();
+	}
 }
 
 function applyFlowOverride() {
 	const statusEl = document.getElementById('edit-order-status');
 	if (!statusEl || !statusEl.value) return;
+	const panel = document.querySelector('[data-panel="order-details"]');
+	const editing = !!(panel && panel.dataset.editing === 'true');
 	const commentEl = document.getElementById('edit-comment');
-	const comment = commentEl ? commentEl.value : '';
+	// The note textarea is only visible in Edit mode; outside of it the history entry
+	// must not repeat the existing order comment.
+	const comment = (editing && commentEl) ? commentEl.value : '';
 	const override = document.getElementById('flow-override-check') ? document.getElementById('flow-override-check').checked : false;
 	api('index.php?route=sale/order_detail/addHistory&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID,
 		'POST', { order_status_id: statusEl.value, comment: comment, notify: '0', override: override ? '1' : '0' })
@@ -1576,6 +1602,89 @@ function applyFlowOverride() {
 				showAlert(j.error, 'danger');
 			}
 		});
+}
+
+/* ── Inline editing of the payment / shipping method (no Edit mode needed) ── */
+let inlineEditField = null;
+
+function openInlineEdit(valueEl) {
+	const panel = valueEl.closest('[data-panel]');
+	if (!panel || panel.dataset.editing === 'true') return;
+
+	const field = valueEl.dataset.inlineEdit;
+	const select = panel.querySelector('select[data-field="' + field + '"]');
+	if (!select || inlineEditField === field) return;
+
+	if (inlineEditField) {
+		const other = panel.querySelector('select[data-field="' + inlineEditField + '"]');
+		if (other) closeInlineEdit(other);
+	}
+
+	inlineEditField = field;
+	select.dataset.previousValue = select.value;
+	select.onchange = function () { saveInlineField(valueEl, select); };
+	select.onblur = function () { if (inlineEditField === field) closeInlineEdit(select); };
+	select.onkeydown = function (e) {
+		if (e.key === 'Escape') {
+			select.value = select.dataset.previousValue;
+			closeInlineEdit(select);
+		}
+	};
+
+	valueEl.style.display = 'none';
+	select.style.display = '';
+	select.focus();
+}
+
+function closeInlineEdit(select) {
+	const panel = select.closest('[data-panel]');
+	const field = select.dataset.field;
+	const valueEl = panel ? panel.querySelector('.view-only[data-field="' + field + '"]') : null;
+	const editing = !!(panel && panel.dataset.editing === 'true');
+
+	inlineEditField = null;
+	select.onchange = select.onblur = select.onkeydown = null;
+
+	if (editing) return;
+
+	select.style.display = 'none';
+	if (valueEl) valueEl.style.display = '';
+}
+
+function saveInlineField(valueEl, select) {
+	const field = select.dataset.field;
+	const codeField = select.dataset.codeField || '';
+	const option = select.options[select.selectedIndex];
+	const value = select.value;
+	const code = option ? (option.dataset.code || '') : '';
+	const previous = select.dataset.previousValue;
+
+	closeInlineEdit(select);
+
+	if (value === previous && !codeField) return;
+
+	const url = 'index.php?route=sale/order_detail/updateField&user_token=' + USER_TOKEN + '&order_id=' + ORDER_ID;
+
+	// The code goes first: the server recalculates the shipping quote from it.
+	const start = (codeField && code) ? api(url, 'POST', { field: codeField, value: code }) : Promise.resolve({});
+
+	start.then(function () {
+		return api(url, 'POST', { field: field, value: value });
+	}).then(function (j) {
+		if (j.error) {
+			select.value = previous;
+			showAlert(j.error, 'danger');
+			return;
+		}
+		const textEl = valueEl.querySelector('.dcx-value__text');
+		if (j.value_html !== undefined) {
+			if (textEl) { textEl.textContent = j.value_html; } else { valueEl.textContent = j.value_html; }
+		}
+		if (j.totals) updateTotalsUI(j.totals, j.total_quantity);
+		showAlert(j.success || '{{ text_order_saved|e("js") }}');
+	}).catch(function () {
+		select.value = previous;
+	});
 }
 
 let flowTransitionTarget = null;
@@ -2011,6 +2120,17 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (select.matches('[data-panel="order-details"] select[data-code-field="shipping_code"]')) {
 			onShippingMethodChange(select);
 		}
+	});
+
+	// Inline editing of payment / shipping method (works outside Edit mode)
+	document.querySelectorAll('[data-inline-edit]').forEach(function (el) {
+		el.addEventListener('click', function () { openInlineEdit(el); });
+		el.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				openInlineEdit(el);
+			}
+		});
 	});
 
 	// ===================== Add product to order picker =====================
