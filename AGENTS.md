@@ -257,6 +257,21 @@ Tailwind utilities so the built output stays in sync.
   <span data-toggle="tooltip" title="{{ help_text }}"><i data-lucide="help-circle" width="14" height="14" class="text-muted"></i></span>
   ```
 
+## Admin empty states
+
+- Admin lists render `common/empty_state.twig`, which resolves its artwork with
+  `{% include 'common/empty_icons/' ~ icon ~ '.twig' %}`. A missing icon is a Twig
+  `LoaderError` **only when the list is empty**, so it looks fine on seeded data and
+  breaks on a fresh/demo DB.
+- Adding an empty state = `with { icon: 'name', … }` (icon must be a **quoted literal**)
+  plus `upload/admin/view/template/common/empty_icons/name.twig` — self-contained SVG, 200×200,
+  gradient ids prefixed by the icon name to stay unique across icons. `default.twig` is the
+  fallback used when `icon` is omitted.
+- `tools/tests/cases/empty_state_icons.php` fails the build when a referenced icon file is
+  missing, when the icon argument is not a literal, or when svg ids collide.
+- `Template\Twig::render()` appends render failures to `storage/logs/error.log` (and exits
+  non-zero) — with `display_errors=Off` that file is the only trace of a blank page.
+
 ## Blog post autosave
 
 - **Only the blog post form** autosaves (`data-autosave="1"` plus

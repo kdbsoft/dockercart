@@ -133,6 +133,8 @@ build-extension.sh
 **/dockercart_custom_*
 **/dc_custom_*
 **/custom_*
+# ...but shipped template assets may legitimately be named custom_* (empty-state icons)
+!**/empty_icons/custom_*.twig
 
 # AI agent / coding-assistant local artifacts (defensive — covers tools not yet used)
 .claude/
