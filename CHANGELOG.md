@@ -1,3 +1,9 @@
+## [3.49.0](https://github.com/kdbsoft/dockercart/compare/v3.48.0...v3.49.0) (2026-11-16)
+
+### Features
+
+* **admin:** add a spreadsheet empty-state icon ([f8112d8](https://github.com/kdbsoft/dockercart/commit/f8112d8dca4852ea9e8f03e22f6aa427d2ba5b27))
+
 ## [3.48.0](https://github.com/kdbsoft/dockercart/compare/v3.47.0...v3.48.0) (2026-11-16)
 
 ### Features
