@@ -1,34 +1,37 @@
 <?php
 namespace Template;
+
 final class Twig {
 	private $data = array();
 
 	public function set($key, $value) {
 		$this->data[$key] = $value;
 	}
-	
+
 	public function render($filename, $code = '') {
 		if (!$code) {
 			$file = DIR_TEMPLATE . $filename . '.twig';
 
-			if (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {	
-                $code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
-            } elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
-                $code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
-            } elseif (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {	
-                $code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
-            } elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
-                $code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
-            } elseif (is_file($file)) {
+			if (defined('DIR_CATALOG') && is_file(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig')) {
+				$code = file_get_contents(DIR_MODIFICATION . 'admin/view/template/' . $filename . '.twig');
+			} elseif (is_file(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig')) {
+				$code = file_get_contents(DIR_MODIFICATION . 'catalog/view/theme/' . $filename . '.twig');
+			} elseif (is_file($file)) {
 				$code = file_get_contents($file);
 			} else {
 				$dir = dirname($file);
 				$files = array();
+
 				if (is_dir($dir)) {
 					$files = array_slice(scandir($dir), 0, 50);
 				}
-				throw new \Exception('Error: Could not load template ' . $file . '! Available files in "' . $dir . '": ' . implode(', ', $files));
-				// exit not reached, exception will be handled by outer try/catch
+
+				$message = 'Error: Could not load template ' . $file . '! Available files in "' . $dir . '": ' . implode(', ', $files);
+
+				// keep throwing (the caller renders the message) but leave a trace on disk
+				$this->log($message);
+
+				throw new \Exception($message);
 			}
 		}
 
@@ -62,21 +65,52 @@ final class Twig {
 			return $twig->render($filename . '.twig', $this->data);
 		} catch (\Twig\Error\SyntaxError $e) {
 			// Syntax errors in template - most common issue
-			$msg = $e->getMessage();
-			trigger_error('Twig SyntaxError in template "' . $filename . '.twig": ' . $msg . "\n\nFull trace:\n" . $e->getTraceAsString());
-			exit();
+			$this->fail('Twig SyntaxError in template "' . $filename . '.twig": ' . $e->getMessage(), $e);
 		} catch (\Twig\Error\LoaderError $e) {
-			// Template loading issues
-			trigger_error('Twig LoaderError in template "' . $filename . '.twig": ' . $e->getMessage() . "\n\nFull trace:\n" . $e->getTraceAsString());
-			exit();
+			// Template loading issues (e.g. a missing {% include %} target)
+			$this->fail('Twig LoaderError in template "' . $filename . '.twig": ' . $e->getMessage(), $e);
 		} catch (\Twig\Error\RuntimeError $e) {
 			// Runtime errors during rendering
-			trigger_error('Twig RuntimeError in template "' . $filename . '.twig": ' . $e->getMessage() . "\n\nFull trace:\n" . $e->getTraceAsString());
-			exit();
+			$this->fail('Twig RuntimeError in template "' . $filename . '.twig": ' . $e->getMessage(), $e);
 		} catch (\Exception $e) {
 			// Generic exception
-			trigger_error('Error: Could not load template ' . $filename . '! ' . $e->getMessage() . "\n\nFull trace:\n" . $e->getTraceAsString());
-			exit();
-		}	
-	}	
+			$this->fail('Error: Could not load template ' . $filename . '! ' . $e->getMessage(), $e);
+		}
+	}
+
+	/**
+	 * Append a render failure to storage/logs/error.log.
+	 *
+	 * The response is already streaming by the time a template is rendered, so
+	 * there is nothing left to recover and the operator gets a blank page. With
+	 * `display_errors` off (docker/php.prod.ini) `trigger_error()` alone leaves no
+	 * trail: error_log points at stderr, which never reaches storage/logs. Write
+	 * the message where `Log` puts its entries instead.
+	 *
+	 * Must never throw: a logging problem may not mask the template error.
+	 */
+	private function log($message) {
+		if (!defined('DIR_LOGS') || !is_dir(DIR_LOGS) || !is_writable(DIR_LOGS)) {
+			return;
+		}
+
+		$suffix = defined('DIR_APPLICATION') ? ' [' . DIR_APPLICATION . ']' : '';
+
+		@file_put_contents(DIR_LOGS . 'error.log', date('Y-m-d G:i:s') . ' - ' . $message . $suffix . "\n", FILE_APPEND | LOCK_EX);
+	}
+
+	/**
+	 * Report a fatal render failure before terminating the request.
+	 *
+	 * A non-zero exit turns the otherwise mute "0 bytes, HTTP 200" page into a
+	 * real 500 whenever nothing has been flushed yet, so monitoring notices it.
+	 */
+	private function fail($message, \Exception $e) {
+		$message .= "\n\nFull trace:\n" . $e->getTraceAsString();
+
+		$this->log($message);
+
+		trigger_error($message);
+		exit(1);
+	}
 }
