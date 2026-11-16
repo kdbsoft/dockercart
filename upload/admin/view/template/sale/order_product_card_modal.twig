@@ -2,16 +2,16 @@
   <div class="pcm-header">
     <div class="pcm-gallery">
       {% if gallery|length > 1 %}
-      <div class="pcm-main-img" id="pcm-main-img"><img src="{{ gallery[0].full }}" alt="{{ name }}"></div>
+      <div class="pcm-main-img" id="pcm-main-img" role="button" tabindex="0" onclick="pcmOpenZoom()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); pcmOpenZoom(); }"><img src="{{ gallery[0].full }}" data-popup="{{ gallery[0].popup }}" alt="{{ name }}"><span class="pcm-zoom-badge"><i data-lucide="maximize-2" width="11" height="11"></i></span></div>
       <div class="pcm-thumbs">
         {% for g in gallery %}
-        <img src="{{ g.thumb }}" data-full="{{ g.full }}" alt="" class="pcm-thumb{% if loop.first %} pcm-thumb--active{% endif %}" onclick="pcmSwitchImage(this)">
+        <img src="{{ g.thumb }}" data-full="{{ g.full }}" data-popup="{{ g.popup }}" alt="" class="pcm-thumb{% if loop.first %} pcm-thumb--active{% endif %}" onclick="pcmSwitchImage(this)">
         {% endfor %}
       </div>
       {% elseif gallery|length == 1 %}
-      <div class="pcm-main-img"><img src="{{ gallery[0].full }}" alt="{{ name }}"></div>
+      <div class="pcm-main-img" role="button" tabindex="0" onclick="pcmOpenZoom()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); pcmOpenZoom(); }"><img src="{{ gallery[0].full }}" data-popup="{{ gallery[0].popup }}" alt="{{ name }}"><span class="pcm-zoom-badge"><i data-lucide="maximize-2" width="11" height="11"></i></span></div>
       {% else %}
-      <div class="pcm-main-img"><img src="{{ image }}" alt="{{ name }}"></div>
+      <div class="pcm-main-img"{% if popup %} role="button" tabindex="0" onclick="pcmOpenZoom()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); pcmOpenZoom(); }"{% endif %}><img src="{{ image }}"{% if popup %} data-popup="{{ popup }}"{% endif %} alt="{{ name }}">{% if popup %}<span class="pcm-zoom-badge"><i data-lucide="maximize-2" width="11" height="11"></i></span>{% endif %}</div>
       {% endif %}
     </div>
     <div class="pcm-info">

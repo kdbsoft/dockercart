@@ -966,6 +966,14 @@ immediately (`sale/order_detail/updateField`, code first so the shipping quote
 is recalculated server-side) and Enter/Escape/blur cancels. No Edit mode needed;
 the same selects are still part of the Edit-mode form and its Save button.
 
+The product card modal (order contents → click a product) makes its image
+clickable: a lightbox with the whole gallery opens, loaded lazily from the
+bundled Magnific Popup (`admin/view/javascript/jquery/magnific`). It shows the
+**original uploaded file** — the same URL the storefront product page opens
+(the popup image size settings were dropped in `0afaff87`); the lightbox is
+stacked above the card overlay (`.mfp-*` z-index overrides in
+`sale/order_detail.twig`) and Escape closes only the lightbox.
+
 ### Shipments (tracking numbers)
 
 Order tracking lives in `oc_order_shipment` / `oc_order_shipment_item`

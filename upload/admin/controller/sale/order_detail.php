@@ -2772,15 +2772,21 @@ class ControllerSaleOrderDetail extends Controller {
 					}
 
 					$images = $this->model_catalog_product->getProductImages($product_id);
+
+					// Popup image = the original uploaded file, exactly like the storefront
+					// product page (the popup size settings were dropped in 0afaff87).
+					$popup_base = HTTP_CATALOG . 'image/';
+
 					$gallery = [];
 					if ($image_full) {
-						$gallery[] = ['thumb' => $image, 'full' => $image_full];
+						$gallery[] = ['thumb' => $image, 'full' => $image_full, 'popup' => $image_full];
 					}
 					foreach ($images as $img) {
 						if (!empty($img['image']) && is_file(DIR_IMAGE . $img['image'])) {
 							$gallery[] = [
 								'thumb' => $this->model_tool_image->resize($img['image'], 80, 80),
 								'full'  => $this->model_tool_image->resize($img['image'], 300, 300),
+								'popup' => $popup_base . $img['image'],
 							];
 						}
 					}
@@ -2918,6 +2924,7 @@ class ControllerSaleOrderDetail extends Controller {
 						'reserved'    => $reserved,
 						'status'      => $product_info['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
 						'image'       => $image,
+						'popup'       => $image_full,
 						'gallery'     => $gallery,
 						'codes'       => $codes,
 						'attributes'  => $attr_data,
