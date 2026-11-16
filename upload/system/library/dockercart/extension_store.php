@@ -8,6 +8,8 @@ class DockercartExtensionStore {
 	const CACHE_TTL = 1800;
 	const LICENSING_CACHE_TTL = 1800;
 
+	const HTML_ALLOWED_TAGS = '<p><br><strong><em><b><i><u><s><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4><h5><h6><hr><table><thead><tbody><tr><th><td><span><div><img><figure><figcaption>';
+
 	private $registry;
 	private $cache_dir;
 	private $api_url;
@@ -251,6 +253,34 @@ class DockercartExtensionStore {
 		}
 
 		return $count;
+	}
+
+	/**
+	 * Sanitizes store-supplied rich text: keeps the formatting tags the catalog
+	 * uses, drops anything else and scrubs event handlers / javascript: URLs
+	 * that strip_tags() would let through.
+	 */
+	public static function sanitizeHtml(string $html): string {
+		// Drop whole script/style blocks first — strip_tags() would leave their
+		// contents behind as visible text.
+		$html = (string)preg_replace('#<(script|style)\b[^>]*>.*?</\1>#is', '', $html);
+
+		$html = strip_tags($html, self::HTML_ALLOWED_TAGS);
+
+		$replacements = array(
+			'/\son[a-z]+\s*=\s*"[^"]*"/i' => '',
+			'/\son[a-z]+\s*=\s*\'[^\']*\'/i' => '',
+			'/\son[a-z]+\s*=\s*[^\s>]+/i' => '',
+			'/\b(href|src)\s*=\s*"\s*javascript:[^"]*"/i' => '$1="#"',
+			'/\b(href|src)\s*=\s*\'\s*javascript:[^\']*\'/i' => '$1="#"',
+			'/\b(href|src)\s*=\s*javascript:[^\s>]*/i' => '$1="#"',
+		);
+
+		foreach ($replacements as $pattern => $replacement) {
+			$html = (string)preg_replace($pattern, $replacement, $html);
+		}
+
+		return $html;
 	}
 
 	public function buildCategoriesTree(SimpleXMLElement $yml): array {

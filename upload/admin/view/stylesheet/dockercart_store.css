@@ -396,11 +396,34 @@
 	margin-top: 16px;
 }
 
+.store-modal-update-changelog {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--dc-gray-100);
+}
+
 .store-changelog-title {
 	font-size: 14px;
 	font-weight: 600;
 	color: var(--dc-gray-700);
 	margin-bottom: 8px;
+}
+
+.store-changelog-version {
+	margin-bottom: 12px;
+}
+
+.store-changelog-version:last-child {
+	margin-bottom: 0;
+}
+
+.store-changelog-version > strong {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	color: var(--dc-text-muted);
 }
 
 .store-changelog-content {

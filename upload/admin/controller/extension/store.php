@@ -191,7 +191,7 @@ class ControllerExtensionStore extends Controller {
 					$yml_changelog = '';
 
 					if (isset($offer->changelog)) {
-						$yml_changelog = strip_tags((string) $offer->changelog, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4>');
+						$yml_changelog = DockercartExtensionStore::sanitizeHtml((string) $offer->changelog);
 					}
 
 					foreach ($offer->param as $param) {
@@ -215,7 +215,7 @@ class ControllerExtensionStore extends Controller {
 				$description = '';
 
 				if (isset($offer->description)) {
-					$description = strip_tags((string) $offer->description, '<p><br><strong><em><b><i><u><ul><ol><li><a><code><pre><blockquote><h1><h2><h3><h4><h5><h6><hr><table><thead><tbody><tr><th><td><span><div><img><figure><figcaption>');
+					$description = DockercartExtensionStore::sanitizeHtml((string) $offer->description);
 				}
 
 					$buy_url = '';
