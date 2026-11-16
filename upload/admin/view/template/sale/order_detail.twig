@@ -147,9 +147,10 @@
                     <a href="{{ product.href }}" target="_blank">{{ product.name }}</a>
                   </div>
                   <div class="order-product-card__meta">
-                    <span class="order-product-card__model">{{ product.model }}</span>
                     {% if product.variant_sku %}
-                      <span class="order-product-card__option" title="{{ entry_variant_sku }}">· SKU: {{ product.variant_sku }}</span>
+                      <span class="order-product-card__article">{{ product.variant_sku }}</span>
+                    {% elseif product.model %}
+                      <span class="order-product-card__article">{{ product.model }}</span>
                     {% endif %}
                     {% if product.option %}
                       {% for option in product.option %}
@@ -179,24 +180,26 @@
                   <div class="order-product-card__discount"><i data-lucide="gift" width="11" height="11"></i> {{ text_gift }}</div>
                   {% endif %}
                 </div>
-                <div class="order-product-card__price">
-                  <span class="view-only">{{ product.price }}</span>
-                  <input type="text" class="form-control edit-only" value="{{ product.price_raw|round(currency_decimal_place) }}" data-field="price" style="display:none">
-                  {% if product.price_override %}
-                  <button type="button" class="btn btn-default btn-xs edit-only" data-restore-catalog-price style="display:none" data-toggle="tooltip" title="{{ button_restore_catalog_price }}">
-                    <i data-lucide="rotate-ccw" width="12" height="12"></i>
-                  </button>
-                  {% endif %}
+                <div class="order-product-card__amounts">
+                  <div class="order-product-card__price">
+                    <span class="view-only">{{ product.price }}</span>
+                    <input type="text" class="form-control edit-only" value="{{ product.price_raw|round(currency_decimal_place) }}" data-field="price" style="display:none">
+                    {% if product.price_override %}
+                    <button type="button" class="btn btn-default btn-xs edit-only" data-restore-catalog-price style="display:none" data-toggle="tooltip" title="{{ button_restore_catalog_price }}">
+                      <i data-lucide="rotate-ccw" width="12" height="12"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                  <div class="order-product-card__mult">&times;</div>
+                  <div class="order-product-card__qty">
+                    <span class="view-only">{{ product.quantity|number_format(currency_decimal_place, '.', '') }}</span>
+                    <input type="number" class="form-control edit-only" value="{{ product.quantity }}" min="0" step="any" data-field="quantity" style="display:none">
+                  </div>
+                  <div class="order-product-card__disc edit-only" style="display:none" title="{{ entry_discount_percent }}">
+                    <span class="order-product-card__disc-prefix">&minus;</span><input type="number" class="form-control" value="{{ product.discount_percent|round(1) }}" min="0" max="100" step="0.5" data-field="discount"><span class="order-product-card__disc-suffix">%</span>
+                  </div>
+                  <div class="order-product-card__total">= {{ product.total }}</div>
                 </div>
-                <div class="order-product-card__mult">&times;</div>
-                <div class="order-product-card__qty">
-                  <span class="view-only">{{ product.quantity|number_format(currency_decimal_place, '.', '') }}</span>
-                  <input type="number" class="form-control edit-only" value="{{ product.quantity }}" min="0" step="any" data-field="quantity" style="display:none">
-                </div>
-                <div class="order-product-card__disc edit-only" style="display:none" title="{{ entry_discount_percent }}">
-                  <input type="number" class="form-control" value="{{ product.discount_percent|round(1) }}" min="0" max="100" step="0.5" data-field="discount">
-                </div>
-                <div class="order-product-card__total">= {{ product.total }}</div>
                 <div class="order-product-card__actions edit-only" style="display:none">
                   <button type="button" class="btn btn-danger btn-xs btn--icon" onclick="removeProduct(this)" data-toggle="tooltip" title="{{ button_remove }}">
                     <i data-lucide="trash-2" width="13" height="13"></i>
@@ -653,12 +656,14 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-product-card__name a { color:inherit; cursor:pointer; }
 .order-product-card__name a:hover { color:#2563eb; }
 .order-product-card__meta { font-size:11px; color:#888; margin-top:1px; }
-.order-product-card__model { color:#999; }
+/* Article (variant SKU or product model) and the shipping warehouse are operational
+   data: same colour as the product name, normal weight. No label, no duplicate code. */
+.order-product-card__article { color:var(--dc-text,#545454); }
 .order-product-card__option { color:#888; }
-.order-product-card__meta .warehouse-line { cursor:pointer; }
+.order-product-card__meta .warehouse-line { color:var(--dc-text,#545454); cursor:pointer; }
 .warehouse-line .warehouse-name { display:inline-flex; align-items:center; gap:2px; }
 .warehouse-line:hover .warehouse-name { color:#2563eb; }
-.warehouse-caret { opacity:.55; }
+.warehouse-caret { opacity:1; }
 .order-product-card__discount { font-size:11px; color:#e65100; margin-top:1px; }
 .order-product-card__price { width:90px; text-align:right; font-size:13px; color:#555; }
 .order-product-card__price input { width:90px; text-align:center; }
@@ -672,6 +677,10 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .order-product-card__disc input[type=number] { -moz-appearance:textfield; appearance:textfield; }
 .order-product-card__total { width:auto; text-align:right; font-size:13px; font-weight:600; color:#2563eb; min-width:90px; }
 .order-product-card__actions { width:30px; text-align:center; }
+/* Amounts wrapper is layout-transparent on desktop: its children stay flex items of the card. */
+.order-product-card__amounts { display:contents; }
+.order-product-card__disc-prefix,
+.order-product-card__disc-suffix { display:none; }
 
 .order-totals-card { padding:14px 20px 10px; border-top:1px solid #e5e7eb; background:#fafbfc; border-radius: 0 0 var(--dc-radius-xl) var(--dc-radius-xl); }
 .order-totals-card__row { display:flex; align-items:baseline; gap:6px; padding:4px 0; font-size:13px; color:#555; }
@@ -897,6 +906,39 @@ body.dcx-global-editing .dcx-sidebar-edit-link { display:none !important; }
 .dcx-shipment-item-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
 .dcx-shipment-item-row__name { flex:1; min-width:0; font-size:12px; color:#374151; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dcx-shipment-item-row input[type="number"] { width:76px; flex-shrink:0; }
+
+/* ---- Order Contents: mobile card layout ---- */
+@media (max-width: 767px) {
+.order-product-card { display:grid; grid-template-columns:auto 44px minmax(0,1fr) auto; grid-template-areas:"pos thumb info actions" "amounts amounts amounts amounts"; align-items:center; column-gap:10px; row-gap:8px; padding:12px; }
+.order-product-card__pos { grid-area:pos; width:auto; }
+.order-product-card__thumb { grid-area:thumb; width:44px; height:44px; }
+.order-product-card__thumb img { width:44px; height:44px; }
+.order-product-card__info { grid-area:info; }
+.order-product-card__name { font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
+.order-product-card__meta { font-size:11px; line-height:1.45; }
+.order-product-card__actions { grid-area:actions; align-self:start; width:auto; }
+.order-product-card__amounts { grid-area:amounts; display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
+.order-product-card__price { display:flex; align-items:center; gap:4px; width:auto; text-align:right; font-size:12px; }
+.order-product-card__price input { width:66px; padding-left:4px; padding-right:4px; font-size:12px; }
+.order-product-card__mult { width:auto; font-size:12px; }
+.order-product-card__qty { width:auto; font-size:12px; }
+.order-product-card__qty input { width:56px; padding-left:4px; padding-right:4px; font-size:12px; }
+.order-product-card__disc { display:flex; align-items:center; gap:2px; width:auto; }
+.order-product-card__disc input { width:46px; padding-left:4px; padding-right:4px; font-size:12px; }
+.order-product-card__disc-prefix { display:inline; font-size:12px; color:#9ca3af; }
+.order-product-card__disc-suffix { display:inline; font-size:11px; color:#9ca3af; }
+.order-product-card__total { width:auto; min-width:0; white-space:nowrap; }
+.order-add-block { margin:0 12px 12px; padding:14px; }
+.order-add-block__row { width:100%; gap:10px; }
+.order-add-block__qty { flex:1 1 auto; max-width:none; }
+.order-add-block__btn { flex:1 1 auto; }
+.order-add-block__btn .btn { width:100%; }
+.order-totals-card { padding:12px 14px 8px; }
+.order-totals-card__label { white-space:normal; }
+.order-coupon-block { padding:10px 12px; }
+.order-coupon-row { flex-wrap:wrap; }
+.order-coupon-input { flex:1 1 140px; width:auto; min-width:0; height:30px; }
+}
 </style>
 
 <script>
@@ -2620,15 +2662,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		const meta = document.createElement('div');
 		meta.className = 'order-product-card__meta';
-		const modelSpan = document.createElement('span');
-		modelSpan.className = 'order-product-card__model';
-		modelSpan.textContent = p.model || '';
-		meta.appendChild(modelSpan);
-		if (p.variant_sku) {
-			const skuSpan = document.createElement('span');
-			skuSpan.className = 'order-product-card__option';
-			skuSpan.textContent = ' · SKU: ' + p.variant_sku;
-			meta.appendChild(skuSpan);
+		// One code only: the variant SKU when the ordered product is a variant,
+		// otherwise the product model (same as the server-rendered card).
+		const article = p.variant_sku || p.model || '';
+		if (article) {
+			const articleSpan = document.createElement('span');
+			articleSpan.className = 'order-product-card__article';
+			articleSpan.textContent = article;
+			meta.appendChild(articleSpan);
 		}
 		(p.option || []).forEach(o => {
 			const optSpan = document.createElement('span');
@@ -2714,7 +2755,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		discInput.max = '100';
 		discInput.step = '0.5';
 		discInput.dataset.field = 'discount';
+		const discPrefix = document.createElement('span');
+		discPrefix.className = 'order-product-card__disc-prefix';
+		discPrefix.textContent = '\u2212';
+		discDiv.appendChild(discPrefix);
 		discDiv.appendChild(discInput);
+		const discSuffix = document.createElement('span');
+		discSuffix.className = 'order-product-card__disc-suffix';
+		discSuffix.textContent = '%';
+		discDiv.appendChild(discSuffix);
 
 		const totalDiv = document.createElement('div');
 		totalDiv.className = 'order-product-card__total';
@@ -2731,14 +2780,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		removeBtn.addEventListener('click', function() { removeProduct(this); });
 		actionsDiv.appendChild(removeBtn);
 
+		const amounts = document.createElement('div');
+		amounts.className = 'order-product-card__amounts';
+		amounts.appendChild(priceDiv);
+		amounts.appendChild(multDiv);
+		amounts.appendChild(qtyDiv);
+		amounts.appendChild(discDiv);
+		amounts.appendChild(totalDiv);
+
 		card.appendChild(posDiv);
 		card.appendChild(thumb);
 		card.appendChild(info);
-		card.appendChild(priceDiv);
-		card.appendChild(multDiv);
-		card.appendChild(qtyDiv);
-		card.appendChild(discDiv);
-		card.appendChild(totalDiv);
+		card.appendChild(amounts);
 		card.appendChild(actionsDiv);
 
 		list.appendChild(card);
