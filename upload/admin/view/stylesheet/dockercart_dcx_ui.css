@@ -2470,14 +2470,15 @@ div.dcx-field.required > .dcx-label:before {
 
 
 @media (max-width: 991px) {
-  .dcx-pills {
+  /* Stacked tabs, except the compact order-timeline pair (Add Note / Add Order History), which stays on one row */
+  .dcx-pills:not(.dcx-pills--timeline) {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 2px;
     border-radius: var(--dc-radius-lg);
   }
-  .dcx-pills > li > a {
+  .dcx-pills:not(.dcx-pills--timeline) > li > a {
     padding: 10px 14px;
     border-radius: var(--dc-radius-md);
     justify-content: center;
