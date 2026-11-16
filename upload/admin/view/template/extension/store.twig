@@ -257,7 +257,7 @@
         <h4 class="modal-title" id="store-modal-title"></h4>
       </div>
       <div class="modal-body">
-        <div id="store-modal-carousel" class="carousel slide store-modal-carousel" data-ride="carousel" style="display:none;">
+        <div id="store-modal-carousel" class="carousel slide store-modal-carousel" style="display:none;">
           <ol class="carousel-indicators" id="store-modal-indicators"></ol>
           <div class="carousel-inner" id="store-modal-carousel-inner" role="listbox"></div>
           <a class="left carousel-control" href="#store-modal-carousel" role="button" data-slide="prev">
@@ -332,6 +332,50 @@ $(document).ready(function() {
 
 	var currentDetail = null;
 
+	// Fills the gallery and recreates the Bootstrap carousel for this opening.
+	// The old instance is thrown away on purpose: one created while the modal was
+	// still empty (the old data-ride init ran on DOM ready, before any <img>
+	// existed) latches `sliding = true` on its first autoplay tick and then
+	// silently ignores every prev/next click — which is why the arrows only
+	// worked if the modal was opened in the first seconds after page load.
+	function renderCarousel(pictures) {
+		$modalIndicators.empty();
+		$modalCarouselInner.empty();
+
+		if (!pictures || !pictures.length) {
+			$modalCarousel.hide();
+
+			return;
+		}
+
+		$.each(pictures, function(i, url) {
+			var active = i === 0 ? ' active' : '';
+
+			$modalIndicators.append($('<li>', {
+				'data-target': '#store-modal-carousel',
+				'data-slide-to': i,
+				'class': active
+			}));
+
+			var $img = $('<img>', {
+				src: url,
+				alt: '',
+				css: { width: '100%', maxHeight: '400px', objectFit: 'contain' }
+			});
+
+			$modalCarouselInner.append($('<div>', { class: 'item' + active }).append($img));
+		});
+
+		// No autoplay: the gallery is browsed by hand. `interval: false` also skips
+		// Bootstrap's pause()/cycle() start-up path, so nothing ticks behind the
+		// hidden modal.
+		$modalCarousel.removeData('bs.carousel');
+		$modalCarousel.carousel({ interval: false, pause: false, wrap: pictures.length > 1 });
+
+		$modalCarousel.toggleClass('store-modal-carousel--single', pictures.length < 2);
+		$modalCarousel.show();
+	}
+
 	function showModal(sku) {
 		$modalTitle.text('{{ text_loading }}');
 		$modalCarousel.hide();
@@ -359,22 +403,7 @@ $(document).ready(function() {
 			$modalTitle.text(data.name);
 
 			if (data.pictures && data.pictures.length > 0) {
-				$modalCarousel.show();
-
-				$.each(data.pictures, function(i, url) {
-					var active = i === 0 ? ' active' : '';
-					$modalIndicators.append($('<li>', {
-						'data-target': '#store-modal-carousel',
-						'data-slide-to': i,
-						'class': active
-					}));
-					var $img = $('<img>', {
-						src: url,
-						alt: '',
-						css: { width: '100%', maxHeight: '400px', objectFit: 'contain' }
-					});
-					$modalCarouselInner.append($('<div>', { class: 'item' + active }).append($img));
-				});
+				renderCarousel(data.pictures);
 			}
 
 			if (data.description) {

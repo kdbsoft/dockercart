@@ -433,3 +433,9 @@
 .store-changelog-content strong {
 	color: var(--dc-gray-700);
 }
+
+/* A single picture needs no arrows or dots — renderCarousel sets this class. */
+.store-modal-carousel--single .carousel-control,
+.store-modal-carousel--single .carousel-indicators {
+	display: none;
+}
