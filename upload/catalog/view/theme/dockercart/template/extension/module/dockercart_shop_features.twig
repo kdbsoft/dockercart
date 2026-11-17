@@ -1,9 +1,12 @@
 {# Service assurances: a quiet ruled grid — hairline rules instead of cards. #}
+{# Five accents for at most four columns: 5 % 4 = 1, so every row starts one
+   colour further along and no column ever repeats its neighbour's tint. #}
 {% set accents = [
   { tint: 'bg-blue-50',    ring: 'ring-blue-100',    icon: 'text-blue-600' },
   { tint: 'bg-emerald-50', ring: 'ring-emerald-100', icon: 'text-emerald-600' },
   { tint: 'bg-amber-50',   ring: 'ring-amber-100',   icon: 'text-amber-600' },
-  { tint: 'bg-violet-50',  ring: 'ring-violet-100',  icon: 'text-violet-600' }
+  { tint: 'bg-violet-50',  ring: 'ring-violet-100',  icon: 'text-violet-600' },
+  { tint: 'bg-rose-50',    ring: 'ring-rose-100',    icon: 'text-rose-500' }
 ] %}
 <section id="benefits" class="bg-gray-50 border-y border-gray-100 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
@@ -22,7 +25,7 @@
        rules are painted — no outer edge rules, whatever the item count is. #}
     <div class="grid grid-cols-[repeat(auto-fit,minmax(17rem,1fr))] overflow-hidden">
       {% for feature in features %}
-        {% set accent = accents[loop.index0 % 4] %}
+        {% set accent = accents[loop.index0 % (accents|length)] %}
         <div class="group -ml-px -mt-px flex items-start gap-4 border-l border-t border-gray-200 px-0 py-6 sm:px-6">
           <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset {{ accent.tint }} {{ accent.ring }} transition-transform duration-300 ease-out motion-safe:group-hover:scale-105">
             <i data-lucide="{{ feature.icon }}" aria-hidden="true" class="h-5 w-5 {{ accent.icon }}"></i>
