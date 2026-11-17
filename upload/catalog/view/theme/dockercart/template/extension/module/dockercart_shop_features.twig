@@ -1,14 +1,14 @@
-{# Service assurances: one quiet band, hairlines instead of cards. #}
+{# Service assurances: a quiet ruled grid — hairline rules instead of cards. #}
 {% set accents = [
   { tint: 'bg-blue-50',    ring: 'ring-blue-100',    icon: 'text-blue-600' },
   { tint: 'bg-emerald-50', ring: 'ring-emerald-100', icon: 'text-emerald-600' },
   { tint: 'bg-amber-50',   ring: 'ring-amber-100',   icon: 'text-amber-600' },
   { tint: 'bg-violet-50',  ring: 'ring-violet-100',  icon: 'text-violet-600' }
 ] %}
-<section id="benefits" class="bg-gray-50 border-y border-gray-100 py-14 sm:py-16 px-4 sm:px-6 lg:px-8">
+<section id="benefits" class="bg-gray-50 border-y border-gray-100 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-7xl mx-auto">
     {% if section_title or section_subtitle %}
-    <div class="text-center mb-10">
+    <div class="text-center mb-8">
       {% if section_title %}
       <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">{{ section_title }}</h2>
       {% endif %}
@@ -18,14 +18,16 @@
     </div>
     {% endif %}
 
-    <div class="flex flex-col divide-y divide-gray-200 lg:flex-row lg:divide-y-0 lg:divide-x">
+    {# Cells overlap by 1px and the grid clips the overflow, so only the inner
+       rules are painted — no outer edge rules, whatever the item count is. #}
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(17rem,1fr))] overflow-hidden">
       {% for feature in features %}
         {% set accent = accents[loop.index0 % 4] %}
-        <div class="group flex items-start gap-4 py-6 first:pt-0 last:pb-0 lg:flex-1 lg:py-0 lg:px-7 lg:first:pl-0 lg:last:pr-0">
-          <span class="flex h-11 w-11 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset {{ accent.tint }} {{ accent.ring }} transition-transform duration-300 ease-out motion-safe:group-hover:scale-105">
-            <i data-lucide="{{ feature.icon }}" aria-hidden="true" class="h-5 w-5 lg:h-6 lg:w-6 {{ accent.icon }}"></i>
+        <div class="group -ml-px -mt-px flex items-start gap-4 border-l border-t border-gray-200 px-0 py-6 sm:px-6">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset {{ accent.tint }} {{ accent.ring }} transition-transform duration-300 ease-out motion-safe:group-hover:scale-105">
+            <i data-lucide="{{ feature.icon }}" aria-hidden="true" class="h-5 w-5 {{ accent.icon }}"></i>
           </span>
-          <div class="min-w-0">
+          <div class="min-w-0 max-w-md break-words">
             {% if feature.title %}
             <h3 class="text-[15px] font-semibold leading-snug text-gray-900">{{ feature.title }}</h3>
             {% endif %}
