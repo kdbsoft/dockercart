@@ -596,7 +596,7 @@ class ControllerCheckoutCart extends Controller {
 						}
 
 						$default_quantity = $this->getMinimumQuantity($product_info);
-						$this->cart->add($bp['product_id'], $default_quantity, array(), 0);
+						$this->cart->add($bp['product_id'], $default_quantity, array());
 					}
 				}
 
