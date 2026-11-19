@@ -15,8 +15,8 @@ $_['entry_call_for_price_status'] = 'Show "Price on request" button';
 $_['entry_call_for_price_mode'] = '"Price on request" button mode';
 $_['entry_sale_timer_status'] = 'Show sale timers';
 $_['entry_show_open_hours'] = 'Show open hours in header';
-$_['entry_logo_dark']   = 'Footer Logo (dark background)';
-$_['entry_logo_light']  = 'Header Logo (light background)';
+$_['entry_logo_dark']   = 'Logo on dark background';
+$_['entry_logo_light']  = 'Logo on light background';
 $_['entry_favicon_master'] = 'Favicon master image';
 $_['entry_menu_type']   = 'Category Menu Type';
 $_['entry_social_block'] = 'Social Icons & Links';
@@ -36,8 +36,10 @@ $_['entry_feature_text'] = 'Description';
 $_['entry_feature_sort_order'] = 'Sort Order';
 
 // Help texts
-$_['help_logo_dark']    = 'Upload a logo version optimised for dark backgrounds (used in the footer). Recommended: white or light-coloured variant of your logo. Path is relative to the /image/ directory.';
-$_['help_logo_light']   = 'Upload a logo version optimised for light backgrounds (used in the header). If empty, the store logo from settings will be used.';
+$_['help_logo_dark']    = 'Version optimised for dark backgrounds (footer, dark sections). Recommended: white or light-coloured variant of your logo. If empty, the store name is shown as text. Path is relative to the /image/ directory.';
+$_['help_logo_light']   = 'Version optimised for light backgrounds (header, light sections). If empty, the store logo from settings will be used.';
+$_['text_logo_preview_light'] = 'Preview on light';
+$_['text_logo_preview_dark']  = 'Preview on dark';
 $_['help_favicon_master'] = 'Single source image for all favicon sizes (16x16 to 128x128 + Apple touch icon).';
 $_['help_favicon_master_hint'] = 'Recommended upload: square 128x128 PNG. The theme will auto-generate favicon sizes and insert them into the site header.';
 $_['help_menu_type']    = 'Choose how categories are shown in the header: classic horizontal bar or vertical dropdown button.';

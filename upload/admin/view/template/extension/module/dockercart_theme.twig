@@ -270,6 +270,13 @@
 .dc-theme-fab-help { margin: 0; font-size: 12px; color: var(--dc-text-muted); }
 .dc-theme-messenger-name { max-width: 160px; }
 .dc-logo-card__actions-group { display: flex; flex-direction: column; gap: 6px; margin-left: 8px; }
+.dc-logo-previews { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+.dc-logo-preview { border-radius: 8px; border: 1px solid var(--dc-border-soft); display: flex; flex-direction: column; overflow: hidden; }
+.dc-logo-preview__img { display: flex; align-items: center; justify-content: center; height: 64px; padding: 8px; }
+.dc-logo-preview__img img { max-width: 100%; max-height: 48px; object-fit: contain; }
+.dc-logo-preview--light .dc-logo-preview__img { background: #ffffff; }
+.dc-logo-preview--dark .dc-logo-preview__img { background: #111827; }
+.dc-logo-preview__cap { font-size: 11px; line-height: 1; padding: 6px 8px; background: var(--dc-surface); color: var(--dc-text-muted); border-top: 1px solid var(--dc-border-soft); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dc-help-text { font-size: 12px; color: var(--dc-text-muted); margin: 0; }
 .dc-help-text--mt { font-size: 12px; color: var(--dc-text-muted); margin: 4px 0 0; }
 </style>
@@ -416,6 +423,16 @@
                       </button>
                     </div>
                   </div>
+                  <div class="dc-logo-previews">
+                    <div class="dc-logo-preview dc-logo-preview--light">
+                      <div class="dc-logo-preview__img"><img id="preview-logo-dark-light" src="{{ logo_dark_thumb }}" alt="" /></div>
+                      <div class="dc-logo-preview__cap">{{ text_logo_preview_light|default('Preview on light') }}</div>
+                    </div>
+                    <div class="dc-logo-preview dc-logo-preview--dark">
+                      <div class="dc-logo-preview__img"><img id="preview-logo-dark-dark" src="{{ logo_dark_thumb }}" alt="" /></div>
+                      <div class="dc-logo-preview__cap">{{ text_logo_preview_dark|default('Preview on dark') }}</div>
+                    </div>
+                  </div>
                   <div class="help-block dc-help-text">{{ help_logo_dark }}</div>
                 </div>
 
@@ -438,6 +455,16 @@
                       <button type="button" class="btn btn-danger btn-sm js-clear-logo" data-input="input-logo-light" data-thumb="thumb-logo-light">
                         <i data-lucide="x" width="14" height="14"></i> {{ button_clear|default('Очистить') }}
                       </button>
+                    </div>
+                  </div>
+                  <div class="dc-logo-previews">
+                    <div class="dc-logo-preview dc-logo-preview--light">
+                      <div class="dc-logo-preview__img"><img id="preview-logo-light-light" src="{{ logo_light_thumb }}" alt="" /></div>
+                      <div class="dc-logo-preview__cap">{{ text_logo_preview_light|default('Preview on light') }}</div>
+                    </div>
+                    <div class="dc-logo-preview dc-logo-preview--dark">
+                      <div class="dc-logo-preview__img"><img id="preview-logo-light-dark" src="{{ logo_light_thumb }}" alt="" /></div>
+                      <div class="dc-logo-preview__cap">{{ text_logo_preview_dark|default('Preview on dark') }}</div>
                     </div>
                   </div>
                   <div class="help-block dc-help-text">{{ help_logo_light }}</div>
@@ -1051,6 +1078,26 @@
     var thumbId = $(this).data('thumb');
     $('#' + inputId).val('');
     $('#' + thumbId + ' img').attr('src', placeholder);
+    syncLogoPreviews(thumbId);
+  });
+
+  /* ── Dual-background previews for logos ───────────────────────────── */
+  function syncLogoPreviews(thumbId) {
+    var src = $('#' + thumbId + ' img').attr('src') || '';
+    if (thumbId === 'thumb-logo-dark') {
+      $('#preview-logo-dark-light').attr('src', src);
+      $('#preview-logo-dark-dark').attr('src', src);
+    } else if (thumbId === 'thumb-logo-light') {
+      $('#preview-logo-light-light').attr('src', src);
+      $('#preview-logo-light-dark').attr('src', src);
+    }
+  }
+  ['thumb-logo-dark', 'thumb-logo-light'].forEach(function(thumbId) {
+    var node = document.getElementById(thumbId);
+    if (!node || !window.MutationObserver) return;
+    var img = node.querySelector('img');
+    if (!img) return;
+    new MutationObserver(function() { syncLogoPreviews(thumbId); }).observe(img, { attributes: true, attributeFilter: ['src'] });
   });
 
   /* ── Manual "open" buttons for logos — load filemanager directly in modal ── */
