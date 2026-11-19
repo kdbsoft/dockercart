@@ -806,18 +806,14 @@ final class StoreCatalog {
 		try {
 			$theme = (string)$this->config()->get('config_theme');
 
-			$width = (int)$this->config()->get('theme_' . $theme . '_image_thumb_width');
-			$height = (int)$this->config()->get('theme_' . $theme . '_image_thumb_height');
-
-			if ($width <= 0) {
-				$width = 200;
-			}
-
-			if ($height <= 0) {
-				$height = 200;
-			}
-
-			$resized = (string)$this->model('tool/image')->resize($image, $width, $height);
+			// ModelToolImage::resize() normalises the dimensions and falls back to
+			// 200x200 when the theme does not define a thumb size, so a missing
+			// theme_*_image_thumb_* setting degrades instead of throwing.
+			$resized = (string)$this->model('tool/image')->resize(
+				$image,
+				$this->config()->get('theme_' . $theme . '_image_thumb_width'),
+				$this->config()->get('theme_' . $theme . '_image_thumb_height')
+			);
 
 			return $resized !== '' ? $resized : $this->imageUrl($image);
 		} catch (\Throwable $exception) {

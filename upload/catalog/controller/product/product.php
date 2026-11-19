@@ -727,11 +727,14 @@ class ControllerProductProduct extends Controller {
 			$data['gifts'] = array();
 
 			foreach ($gifts as $gift) {
-				if ($gift['image']) {
-					$gift_image = $this->model_tool_image->resize($gift['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
-				} else {
-					$gift_image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
-				}
+				// Gift thumbnails are rendered at w-16 h-16 (64px, object-cover) by the
+				// theme, so reuse the product-page additional-image size instead of the
+				// thumb-size theme setting removed in dc4e2360 (no theme defines it now).
+				$gift_image = $this->model_tool_image->resize(
+					$gift['image'] ? $gift['image'] : 'placeholder.png',
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'),
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')
+				);
 
 				$data['gifts'][] = array(
 					'gift_product_id'  => $gift['gift_product_id'],
@@ -766,11 +769,12 @@ class ControllerProductProduct extends Controller {
 					continue;
 				}
 
-				if ($reward_info['image']) {
-					$reward_image = $this->model_tool_image->resize($reward_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
-				} else {
-					$reward_image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
-				}
+				// BXGY reward thumbnails share the gift thumbnail treatment.
+				$reward_image = $this->model_tool_image->resize(
+					$reward_info['image'] ? $reward_info['image'] : 'placeholder.png',
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'),
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height')
+				);
 
 				$original_price = (float)$reward_info['price'];
 

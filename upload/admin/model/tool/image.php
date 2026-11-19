@@ -14,6 +14,18 @@ class ModelToolImage extends Model {
 	 * @return string|null
 	 */
 	public function resize($filename, $width, $height, $strategy = '') {
+		// Theme image sizes are admin-editable and a theme may legitimately not
+		// define one. Image::resize() declares int parameters, so a null/0 setting
+		// would throw a TypeError (or build a 0x0 canvas) and take the whole page
+		// down - normalise here and fall back to a sane default instead.
+		$width = (int)$width;
+		$height = (int)$height;
+
+		if ($width < 1 || $height < 1) {
+			$width = 200;
+			$height = 200;
+		}
+
 		if (!is_file(DIR_IMAGE . $filename) || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $filename)), 0, strlen(DIR_IMAGE)) != str_replace('\\', '/', DIR_IMAGE)) {
 			return;
 		}
