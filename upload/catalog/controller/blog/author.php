@@ -13,7 +13,9 @@ class ControllerBlogAuthor extends Controller {
 
 		$data['show_date'] = (bool)$this->config->get('module_dockercart_blog_show_date');
 
-		if (isset($this->request->get['author_id'])) {
+		if (isset($this->request->get['blog_author_id'])) {
+			$author_id = (int)$this->request->get['blog_author_id'];
+		} elseif (isset($this->request->get['author_id'])) {
 			$author_id = (int)$this->request->get['author_id'];
 		} else {
 			$author_id = 0;
@@ -26,6 +28,7 @@ class ControllerBlogAuthor extends Controller {
 		}
 
 		$limit = (int)$this->config->get('config_limit');
+
 		if ($limit < 1) {
 			$limit = 10;
 		}
