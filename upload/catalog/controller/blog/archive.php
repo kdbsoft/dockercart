@@ -31,6 +31,12 @@ class ControllerBlogArchive extends Controller {
 			$page = 1;
 		}
 
+		$limit = (int)$this->config->get('module_dockercart_blog_posts_per_page');
+
+		if ($limit < 1) {
+			$limit = 10;
+		}
+
 		$this->document->setTitle(sprintf($this->language->get('heading_title'), $year, $month));
 
 		$data['breadcrumbs'] = array();
@@ -55,8 +61,8 @@ class ControllerBlogArchive extends Controller {
 		$filter_data = array(
 			'filter_year'  => $year,
 			'filter_month' => $month,
-			'start'        => ($page - 1) * $this->config->get('config_limit'),
-			'limit'        => $this->config->get('config_limit')
+			'start'        => ($page - 1) * $limit,
+			'limit'        => $limit
 		);
 
 		$posts = $this->model_extension_module_dockercart_blog_post->getPosts($filter_data);
@@ -99,12 +105,12 @@ class ControllerBlogArchive extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $post_total;
 		$pagination->page = $page;
-		$pagination->limit = $this->config->get('config_limit');
+		$pagination->limit = $limit;
 		$pagination->url = $this->url->link('blog/archive', 'year=' . $year . $url . '&page={page}');
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($post_total) ? (($page - 1) * $this->config->get('config_limit')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit')) > ($post_total - $this->config->get('config_limit'))) ? $post_total : ((($page - 1) * $this->config->get('config_limit')) + $this->config->get('config_limit')), $post_total, ceil($post_total / $this->config->get('config_limit')));
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($post_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($post_total - $limit)) ? $post_total : ((($page - 1) * $limit) + $limit), $post_total, ceil($post_total / $limit));
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

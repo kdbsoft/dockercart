@@ -27,7 +27,7 @@ class ControllerBlogAuthor extends Controller {
 			$page = 1;
 		}
 
-		$limit = (int)$this->config->get('config_limit');
+		$limit = (int)$this->config->get('module_dockercart_blog_posts_per_page');
 
 		if ($limit < 1) {
 			$limit = 10;
