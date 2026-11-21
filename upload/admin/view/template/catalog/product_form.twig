@@ -584,10 +584,10 @@
                                 <div class="input-group date"><input type="text" name="product_bundle[{{ promo.row_index }}][date_end]" value="{{ promo.date_end }}" placeholder="{{ entry_date_end }}" data-date-format="YYYY-MM-DD" class="form-control" /><span class="input-group-btn"><button type="button" class="btn btn-default"><i data-lucide="calendar" width="14" height="14"></i></button></span></div>
                               </div>
                             </div>
-                            <label class="dc-bundle-products-label">{{ text_bundle_selected_products }}</label>
+                            <label class="dc-bundle-products-label">{{ text_bundle_selected_products }} <span data-toggle="tooltip" title="{{ help_bundle_variant }}"><i data-lucide="circle-question-mark" width="13" height="13" class="text-muted"></i></span></label>
                             <div class="bundle-selected-products" id="bundle-selected-{{ promo.row_index }}">
                               {% for bp in promo.products %}
-                              <span class="dc-chip" data-product-id="{{ bp.product_id }}">{{ bp.name|escape }} ({{ bp.price }}) <button type="button" onclick="removeBundleProduct(this, {{ bp.product_id }})" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
+                              <span class="dc-chip dc-bundle-chip" data-product-id="{{ bp.product_id }}" data-variant-id="{{ bp.variant_id|default(0) }}" data-configurable="{{ bp.is_configurable ? '1' : '0' }}"><span class="dc-bundle-chip__name">{{ bp.name|escape }} ({{ bp.price }})</span>{% if bp.is_configurable %} <select class="form-control input-sm dc-bundle-variant" data-product-id="{{ bp.product_id }}" onchange="onBundleVariantChange(this)" title="{{ entry_bundle_variant }}"><option value="0">{{ text_bundle_variant_placeholder }}</option>{% if bp.variant_id %}<option value="{{ bp.variant_id }}" selected>{{ bp.variant_label|escape }}</option>{% endif %}</select>{% endif %} <button type="button" onclick="removeBundleProduct(this)" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>
                               {% endfor %}
                             </div>
                           </div>
@@ -3205,6 +3205,64 @@
 	  dcFocusPromoCard($cardBundle);
   }
 
+  function dcBundleVariantLabel(v) {
+	  var names = [];
+	  if (v.values && v.values.length) {
+		  for (var i = 0; i < v.values.length; i++) {
+			  if (v.values[i].name) names.push(v.values[i].name);
+		  }
+	  }
+	  var label = names.join(' / ');
+	  if (v.sku) label = label ? label + ' (' + v.sku + ')' : v.sku;
+	  else if (v.model) label = label ? label + ' [' + v.model + ']' : v.model;
+	  return label || ('#' + v.variant_id);
+  }
+
+  function dcBundleFetchVariants(productId, callback) {
+	  $.getJSON('index.php?route=catalog/product_configurable/getMatrix&user_token={{ user_token }}&product_id=' + productId, function(mj) {
+		  var variants = (mj && mj.variants) ? mj.variants : [];
+		  var defId = (mj && mj.default_variant_id) ? parseInt(mj.default_variant_id, 10) : 0;
+		  callback(variants, defId);
+	  }).fail(function() { callback([], 0); });
+  }
+
+  function dcBundleFillVariantSelect($select, variants, selectedId) {
+	  var placeholder = '{{ text_bundle_variant_placeholder|escape("js") }}';
+	  $select.empty();
+	  $select.append($('<option>').attr('value', '0').text(placeholder));
+	  $.each(variants, function(_, v) {
+		  var vid = parseInt(v.variant_id, 10);
+			  $select.append($('<option>').attr('value', vid).text(dcBundleVariantLabel(v)).prop('selected', vid === parseInt(selectedId, 10)));
+		  });
+	  $select.toggleClass('dc-bundle-variant--missing', !parseInt($select.val(), 10));
+  }
+
+  function dcBundleInitVariantSelects(row) {
+	  $('#bundle-selected-' + row + ' .dc-bundle-chip[data-configurable="1"]').each(function() {
+		  var $chip = $(this);
+		  var pid = parseInt($chip.data('product-id'), 10);
+		  var vid = parseInt($chip.data('variant-id'), 10) || 0;
+		  var $select = $chip.find('select.dc-bundle-variant');
+		  if (!$select.length) return;
+		  dcBundleFetchVariants(pid, function(variants, defId) {
+			  var selected = vid || defId || 0;
+			  dcBundleFillVariantSelect($select, variants, selected);
+			  if (selected) { $chip.attr('data-variant-id', selected); }
+			  updateBundleIds(row);
+		  });
+	  });
+  }
+
+  function onBundleVariantChange(select) {
+	  var $select = $(select);
+	  var $chip = $select.closest('.dc-chip');
+	  $chip.attr('data-variant-id', parseInt($select.val(), 10) || 0);
+	  $select.toggleClass('dc-bundle-variant--missing', !parseInt($select.val(), 10));
+	  var $card = $select.closest('.dc-promo-card');
+	  var match = $card.attr('id').match(/bundle-row(\d+)/);
+	  if (match) { updateBundleIds(match[1]); }
+  }
+
   function bundleAutocomplete(row) {
 	  var $input = $('input[name="product_bundle[' + row + '][bundle_products_text]"]');
 	  var $idsInput = $('input[name="product_bundle[' + row + '][bundle_product_ids]"]');
@@ -3218,10 +3276,11 @@
 				  success: function(json) {
 					  response($.map(json, function(item) {
 						  return {
-							  label: item['name'] + ' (' + item['model'] + ')',
+							  label: item['name'] + ' (' + item['model'] + ')' + (item['is_configurable'] ? ' [var.]' : ''),
 							  value: item['product_id'],
 							  name: item['name'],
-							  price: item['price'] ? item['price'] : ''
+							  price: item['price'] ? item['price'] : '',
+							  is_configurable: !!item['is_configurable']
 						  }
 					  }));
 				  }
@@ -3232,9 +3291,14 @@
 				  $input.val('');
 				  return;
 			  }
-			  var chipHtml = '<span class="dc-chip" data-product-id="' + item.value + '">' + escapeHtml(item.name) + ' <button type="button" onclick="removeBundleProduct(this, ' + item.value + ')" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>';
+			  var chipHtml = '<span class="dc-chip dc-bundle-chip" data-product-id="' + item.value + '" data-variant-id="0" data-configurable="' + (item.is_configurable ? '1' : '0') + '"><span class="dc-bundle-chip__name">' + escapeHtml(item.name) + '</span>';
+			  if (item.is_configurable) {
+				  chipHtml += ' <select class="form-control input-sm dc-bundle-variant dc-bundle-variant--missing" data-product-id="' + item.value + '" onchange="onBundleVariantChange(this)" title="{{ entry_bundle_variant|escape("js") }}"><option value="0">{{ text_bundle_variant_placeholder|escape("js") }}</option></select>';
+			  }
+			  chipHtml += ' <button type="button" onclick="removeBundleProduct(this)" class="dc-chip__remove"><i data-lucide="x" width="12" height="12"></i></button></span>';
 			  $well.append(chipHtml);
 			  lucide.createIcons();
+			  if (item.is_configurable) { dcBundleInitVariantSelects(row); }
 			  updateBundleIds(row);
 			  $input.val('');
 		  }
@@ -3253,7 +3317,14 @@
   function updateBundleIds(row) {
 	  var ids = [];
 	  $('#bundle-selected-' + row + ' .dc-chip').each(function() {
-		  ids.push($(this).data('product-id'));
+		  var pid = parseInt($(this).data('product-id'), 10) || 0;
+		  var vid = parseInt($(this).data('variant-id'), 10) || 0;
+		  // Keep the variant picker and the chip attribute in sync.
+		  var $sel = $(this).find('select.dc-bundle-variant');
+		  if ($sel.length) { vid = parseInt($sel.val(), 10) || 0; $(this).attr('data-variant-id', vid); }
+		  if (!pid) return;
+		  ids.push(vid > 0 ? pid + ':' + vid : String(pid));
+		  $(this).toggleClass('dc-chip--error', $(this).attr('data-configurable') === '1' && !vid);
 	  });
 	  $('input[name="product_bundle[' + row + '][bundle_product_ids]"]').val(ids.join(','));
   }
@@ -3275,7 +3346,19 @@
 	  var match = $(this).attr('name').match(/\[(\d+)\]/);
 	  if (match) {
 		  bundleAutocomplete(match[1]);
+		  dcBundleInitVariantSelects(match[1]);
+		  updateBundleIds(match[1]);
 	  }
+  });
+
+  // Keep bundle hidden CSVs in the new pid[:vid] format even if the page was
+  // rendered before variant support (plain product ids).
+  $(document).on('submit', '#form-product', function() {
+	  $('.bundle-selected-products').each(function() {
+		  var id = $(this).attr('id') || '';
+		  var match = id.match(/bundle-selected-(\d+)/);
+		  if (match) { updateBundleIds(match[1]); }
+	  });
   });
 
   var customer_group_price_row = {{ customer_group_price_row }};

@@ -9,24 +9,31 @@ class ModelExtensionTotalProductBundle extends Model {
 		}
 
 		$cart_products = $this->cart->getProducts();
-		$cart_by_product = array();
+		$cart_by_key = array();
 
 		foreach ($cart_products as $cart_product) {
 			$pid = (int)$cart_product['product_id'];
+			$vid = isset($cart_product['variant_id']) ? (int)$cart_product['variant_id'] : 0;
+			$key = $pid . ':' . $vid;
 
-			if (!isset($cart_by_product[$pid])) {
-				$cart_by_product[$pid] = array(
+			if (!isset($cart_by_key[$key])) {
+				$cart_by_key[$key] = array(
 					'quantity' => 0,
 					'price'    => (float)$cart_product['price'],
 				);
 			}
 
-			$cart_by_product[$pid]['quantity'] += (float)$cart_product['quantity'];
+			$cart_by_key[$key]['quantity'] += (float)$cart_product['quantity'];
 		}
 
 		$total_discount = 0;
 
 		foreach ($active_bundles as $bundle) {
+			// Invalid bundles (configurable without a pinned variant) never discount.
+			if (!empty($bundle_lib->findConfigurableWithoutVariant($bundle['bundle_id']))) {
+				continue;
+			}
+
 			$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
 
 			if (count($bundle_products) < 2) {
@@ -38,14 +45,16 @@ class ModelExtensionTotalProductBundle extends Model {
 
 			foreach ($bundle_products as $bp) {
 				$pid = (int)$bp['product_id'];
+				$vid = isset($bp['variant_id']) ? (int)$bp['variant_id'] : 0;
+				$key = $pid . ':' . $vid;
 
-				if (!isset($cart_by_product[$pid])) {
+				if (!isset($cart_by_key[$key])) {
 					$set_count = null;
 					break;
 				}
 
-				$qty = $cart_by_product[$pid]['quantity'];
-				$set_price += $cart_by_product[$pid]['price'];
+				$qty = $cart_by_key[$key]['quantity'];
+				$set_price += $cart_by_key[$key]['price'];
 
 				if ($set_count === null) {
 					$set_count = $qty;

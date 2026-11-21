@@ -574,6 +574,16 @@ class ControllerCheckoutCart extends Controller {
 
 		if ($bundle_id) {
 			$bundle_lib = new ProductBundle($this->registry);
+
+			if (!$bundle_lib->isBundleValid($bundle_id)) {
+				$json['error'] = $this->language->get('error_bundle_invalid');
+
+				$this->response->addHeader('Content-Type: application/json');
+				$this->response->setOutput(json_encode($json));
+
+				return;
+			}
+
 			$bundle_products = $bundle_lib->getBundleProducts($bundle_id);
 
 			if (count($bundle_products) >= 2) {
@@ -581,8 +591,12 @@ class ControllerCheckoutCart extends Controller {
 
 				$bundle_products_info = $this->model_catalog_product->getProductsByIds(array_map('intval', array_column($bundle_products, 'product_id')));
 
+				$pc_bundle = new ProductConfigurable($this->registry);
+
 				foreach ($bundle_products as $bp) {
-					$product_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
+					$bp_product_id = (int)$bp['product_id'];
+					$bp_variant_id = isset($bp['variant_id']) ? (int)$bp['variant_id'] : 0;
+					$product_info = isset($bundle_products_info[$bp_product_id]) ? $bundle_products_info[$bp_product_id] : false;
 
 					if ($product_info) {
 						if (!empty($product_info['call_for_price'])) {
@@ -590,13 +604,29 @@ class ControllerCheckoutCart extends Controller {
 							break;
 						}
 
-						if ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+						$bundle_option = array();
+
+						if ($bp_variant_id > 0) {
+							$variant_info = $pc_bundle->getVariant($bp_variant_id);
+
+							if (!$variant_info || (int)$variant_info['product_id'] !== $bp_product_id || empty($variant_info['status'])) {
+								$json['error'] = $this->language->get('error_bundle_invalid');
+								break;
+							}
+
+							if ((float)$variant_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
+								$json['error'] = $this->language->get('error_stock');
+								break;
+							}
+
+							$bundle_option = array('variant_id' => $bp_variant_id);
+						} elseif ((float)$product_info['quantity'] <= 0 && empty($product_info['preorder']) && !$this->config->get('config_stock_checkout')) {
 							$json['error'] = $this->language->get('error_stock');
 							break;
 						}
 
 						$default_quantity = $this->getMinimumQuantity($product_info);
-						$this->cart->add($bp['product_id'], $default_quantity, array());
+						$this->cart->add($bp_product_id, $default_quantity, $bundle_option);
 					}
 				}
 

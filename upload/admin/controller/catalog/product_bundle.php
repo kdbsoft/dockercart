@@ -479,7 +479,7 @@ class ControllerCatalogProductBundle extends Controller {
 		}
 
 		if (isset($this->request->post['bundle_product'])) {
-			$bundle_products = $this->request->post['bundle_product'];
+			$bundle_products = $this->model_catalog_product_bundle->normalizeBundleLines($this->request->post['bundle_product']);
 		} elseif (isset($this->request->get['bundle_id'])) {
 			$bundle_products = $this->model_catalog_product_bundle->getBundleProducts($this->request->get['bundle_id']);
 		} else {
@@ -490,12 +490,15 @@ class ControllerCatalogProductBundle extends Controller {
 
 		$data['bundle_products'] = array();
 
-		foreach ($bundle_products as $product_id) {
+		foreach ($bundle_products as $line) {
+			$product_id = is_array($line) ? (int)$line['product_id'] : (int)$line;
+			$variant_id = (is_array($line) && isset($line['variant_id'])) ? (int)$line['variant_id'] : 0;
 			$product_info = $this->model_catalog_product->getProduct($product_id);
 
 			if ($product_info) {
 				$data['bundle_products'][] = array(
 					'product_id' => $product_info['product_id'],
+					'variant_id' => $variant_id,
 					'name'       => $product_info['name'],
 					'model'      => $product_info['model'],
 					'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
@@ -549,8 +552,16 @@ class ControllerCatalogProductBundle extends Controller {
 			$this->error['name'] = $this->language->get('error_name');
 		}
 
-		if (!isset($this->request->post['bundle_product']) || count($this->request->post['bundle_product']) < 2) {
+		$bundle_lines = isset($this->request->post['bundle_product']) ? $this->model_catalog_product_bundle->normalizeBundleLines($this->request->post['bundle_product']) : array();
+
+		if (count($bundle_lines) < 2) {
 			$this->error['products'] = $this->language->get('error_products');
+		} else {
+			$missing = $this->model_catalog_product_bundle->findConfigurableWithoutVariant($bundle_lines);
+
+			if (!empty($missing)) {
+				$this->error['products'] = $this->language->get('error_bundle_variant_required');
+			}
 		}
 
 		if ((float)$this->request->post['discount_value'] <= 0) {
@@ -720,12 +731,24 @@ class ControllerCatalogProductBundle extends Controller {
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
+			$configurable_map = array();
+
+			if ($results) {
+				$ids = array_map('intval', array_column($results, 'product_id'));
+			$cfg_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_configurable WHERE product_id IN (" . implode(',', $ids) . ") AND is_configurable = '1'");
+
+				foreach ($cfg_query->rows as $cfg_row) {
+					$configurable_map[(int)$cfg_row['product_id']] = true;
+				}
+			}
+
 			foreach ($results as $result) {
 				$json[] = array(
-					'product_id' => $result['product_id'],
-					'name'       => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
-					'model'      => $result['model'],
-					'price'      => $result['price']
+					'product_id'      => $result['product_id'],
+					'name'            => strip_tags(html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8')),
+					'model'           => $result['model'],
+					'price'           => $result['price'],
+					'is_configurable' => isset($configurable_map[(int)$result['product_id']])
 				);
 			}
 		}

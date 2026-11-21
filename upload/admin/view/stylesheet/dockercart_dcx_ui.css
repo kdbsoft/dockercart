@@ -2248,6 +2248,10 @@ div.dcx-field.required > .dcx-label:before {
 .dc-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--dc-gray-100); border: 1px solid var(--dc-border); border-radius: var(--dc-radius-sm); font-size: 12px; line-height: 1.4; white-space: nowrap; }
 .dc-chip__remove { background: none; border: none; color: var(--dc-text-faint); cursor: pointer; padding: 0; margin-left: 2px; display: flex; align-items: center; border-radius: 50%; transition: color var(--dc-transition-fast); }
 .dc-chip__remove:hover { color: var(--dc-red-500); }
+.dc-bundle-chip { flex-wrap: wrap; max-width: 100%; }
+.dc-bundle-variant { max-width: 220px; }
+.dc-bundle-variant--missing { border-color: var(--dc-red-500); }
+.dc-chip--error { border-color: var(--dc-red-500); background: #fef2f2; }
 
 /* ── Coupon history ── */
 .coupon-history-list { display: flex; flex-direction: column; gap: 12px; }

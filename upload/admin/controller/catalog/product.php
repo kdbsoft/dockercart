@@ -106,8 +106,15 @@ class ControllerCatalogProduct extends Controller {
 						continue;
 					}
 
-					$product_ids = array_filter(array_map('intval', explode(',', $bundle_entry['bundle_product_ids'])));
-					$all_products = array_unique(array_merge(array((int) $product_id), $product_ids));
+					$all_products = $this->buildBundleLines((int)$product_id, explode(',', (string)$bundle_entry['bundle_product_ids']));
+
+					if (count($all_products) < 2) {
+						continue;
+					}
+
+					if (!empty($this->model_catalog_product_bundle->findConfigurableWithoutVariant($all_products))) {
+						continue;
+					}
 
 					$data = array(
 						'name'            => '',
@@ -241,8 +248,15 @@ class ControllerCatalogProduct extends Controller {
 						continue;
 					}
 
-					$product_ids = array_filter(array_map('intval', explode(',', $bundle_entry['bundle_product_ids'])));
-					$all_products = array_unique(array_merge(array($current_product_id), $product_ids));
+					$all_products = $this->buildBundleLines($current_product_id, explode(',', (string)$bundle_entry['bundle_product_ids']));
+
+					if (count($all_products) < 2) {
+						continue;
+					}
+
+					if (!empty($this->model_catalog_product_bundle->findConfigurableWithoutVariant($all_products))) {
+						continue;
+					}
 
 					$data = array(
 						'name'            => '',
@@ -1174,6 +1188,11 @@ class ControllerCatalogProduct extends Controller {
 		$data['text_bundle_delete_confirm']  = $this->language->get('text_bundle_delete_confirm');
 		$data['text_bundle_remove_confirm']  = $this->language->get('text_bundle_remove_confirm');
 		$data['text_bundle_other_products']  = $this->language->get('text_bundle_other_products');
+		$data['entry_bundle_variant']            = $this->language->get('entry_bundle_variant');
+		$data['help_bundle_variant']             = $this->language->get('help_bundle_variant');
+		$data['text_bundle_variant_placeholder'] = $this->language->get('text_bundle_variant_placeholder');
+		$data['text_bundle_variant_required']   = $this->language->get('text_bundle_variant_required');
+		$data['error_bundle_variant_required']   = $this->language->get('error_bundle_variant_required');
 
 		// Sidebar card titles
 		$data['text_seo_card']    = $this->language->get('text_seo_card');
@@ -2517,14 +2536,41 @@ class ControllerCatalogProduct extends Controller {
 				$bundle_products = $this->model_catalog_product_bundle->getBundleProducts($bundle['bundle_id']);
 				$products_for_template = array();
 
-				foreach ($bundle_products as $product_id) {
-					$product_info = $this->model_catalog_product->getProduct((int) $product_id);
+				$bundle_product_ids = array();
+
+				foreach ($bundle_products as $line) {
+					$bundle_product_ids[] = is_array($line) ? (int)$line['product_id'] : (int)$line;
+				}
+
+				$bundle_configurable_map = array();
+
+				if (!empty($bundle_product_ids)) {
+					$cfg_query = $this->db->query("SELECT product_id FROM " . DB_PREFIX . "product_configurable WHERE product_id IN (" . implode(',', array_map('intval', array_unique($bundle_product_ids))) . ") AND is_configurable = '1'");
+
+					foreach ($cfg_query->rows as $cfg_row) {
+						$bundle_configurable_map[(int)$cfg_row['product_id']] = true;
+					}
+				}
+
+				foreach ($bundle_products as $line) {
+					$product_id = is_array($line) ? (int)$line['product_id'] : (int)$line;
+					$variant_id = (is_array($line) && isset($line['variant_id'])) ? (int)$line['variant_id'] : 0;
+					$product_info = $this->model_catalog_product->getProduct($product_id);
 
 					if ($product_info) {
+						$variant_label = '';
+
+						if ($variant_id > 0) {
+							$variant_label = $this->getBundleVariantLabel($product_id, $variant_id);
+						}
+
 						$products_for_template[] = array(
-							'product_id' => $product_info['product_id'],
-							'name'       => $product_info['name'],
-							'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+							'product_id'      => $product_info['product_id'],
+							'variant_id'      => $variant_id,
+							'name'            => $product_info['name'] . ($variant_label !== '' ? ' — ' . $variant_label : ''),
+							'price'           => $this->currency->format($product_info['price'], $this->config->get('config_currency')),
+							'variant_label'   => $variant_label,
+							'is_configurable' => isset($bundle_configurable_map[$product_id])
 						);
 					}
 				}
@@ -2538,7 +2584,7 @@ class ControllerCatalogProduct extends Controller {
 					'auto_renew'      => (int) $bundle['auto_renew'],
 					'date_added'      => $bundle['date_added'] ?? '0000-00-00 00:00:00',
 					'products'        => $products_for_template,
-					'product_ids_csv' => implode(',', $bundle_products)
+					'product_ids_csv' => $this->model_catalog_product_bundle->encodeBundleLinesCsv($bundle_products)
 				);
 			}
 		}
@@ -2651,6 +2697,27 @@ class ControllerCatalogProduct extends Controller {
 
 		foreach ($product_errors as $key => $value) {
 			$this->error[$key] = $value;
+		}
+
+		// Bundles: a configurable product cannot be added without an exact variant.
+		if (!empty($this->request->post['product_bundle']) && is_array($this->request->post['product_bundle'])) {
+			$this->load->model('catalog/product_bundle');
+
+			$current_product_id = isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0;
+
+			foreach ($this->request->post['product_bundle'] as $bundle_entry) {
+				if (empty($bundle_entry['bundle_product_ids']) || empty($bundle_entry['discount_value'])) {
+					continue;
+				}
+
+				$lines = $this->buildBundleLines($current_product_id, explode(',', (string)$bundle_entry['bundle_product_ids']));
+
+				if (count($lines) >= 2 && !empty($this->model_catalog_product_bundle->findConfigurableWithoutVariant($lines))) {
+					$this->error['bundle_variant'] = $this->language->get('error_bundle_variant_required');
+					$this->error['warning'] = $this->language->get('error_bundle_variant_required');
+					break;
+				}
+			}
 		}
 
 		// A configurable product must have a default variant selected, otherwise
@@ -3433,15 +3500,22 @@ class ControllerCatalogProduct extends Controller {
 				$other_products = array();
 
 				foreach ($bundle_products as $bp) {
-					if ((int) $bp['product_id'] !== $product_id) {
-						$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+					$bp_product_id = is_array($bp) ? (int)$bp['product_id'] : (int)$bp;
+					$bp_variant_id = (is_array($bp) && isset($bp['variant_id'])) ? (int)$bp['variant_id'] : 0;
+
+					if ($bp_product_id !== $product_id) {
+						$product_info = $this->model_catalog_product->getProduct($bp_product_id);
 
 						if ($product_info) {
+							$variant_label = $bp_variant_id > 0 ? $this->getBundleVariantLabel($bp_product_id, $bp_variant_id) : '';
+
 							$other_products[] = array(
-								'product_id' => $product_info['product_id'],
-								'name'       => $product_info['name'],
-								'model'      => $product_info['model'],
-								'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+								'product_id'    => $product_info['product_id'],
+								'variant_id'    => $bp_variant_id,
+								'name'          => $product_info['name'] . ($variant_label !== '' ? ' — ' . $variant_label : ''),
+								'model'         => $product_info['model'],
+								'price'         => $this->currency->format($product_info['price'], $this->config->get('config_currency')),
+								'variant_label' => $variant_label
 							);
 						}
 					}
@@ -3514,14 +3588,20 @@ class ControllerCatalogProduct extends Controller {
 				$json['bundle']['stores'] = $this->model_catalog_product_bundle->getBundleStores($bundle_id);
 
 				foreach ($bundle_products as $bp) {
-					$product_info = $this->model_catalog_product->getProduct($bp['product_id']);
+					$bp_product_id = is_array($bp) ? (int)$bp['product_id'] : (int)$bp;
+					$bp_variant_id = (is_array($bp) && isset($bp['variant_id'])) ? (int)$bp['variant_id'] : 0;
+					$product_info = $this->model_catalog_product->getProduct($bp_product_id);
 
 					if ($product_info) {
+						$variant_label = $bp_variant_id > 0 ? $this->getBundleVariantLabel($bp_product_id, $bp_variant_id) : '';
+
 						$json['bundle']['products'][] = array(
-							'product_id' => $product_info['product_id'],
-							'name'       => $product_info['name'],
-							'model'      => $product_info['model'],
-							'price'      => $this->currency->format($product_info['price'], $this->config->get('config_currency'))
+							'product_id'    => $product_info['product_id'],
+							'variant_id'    => $bp_variant_id,
+							'name'          => $product_info['name'] . ($variant_label !== '' ? ' — ' . $variant_label : ''),
+							'model'         => $product_info['model'],
+							'price'         => $this->currency->format($product_info['price'], $this->config->get('config_currency')),
+							'variant_label' => $variant_label
 						);
 					}
 				}
@@ -3553,8 +3633,16 @@ class ControllerCatalogProduct extends Controller {
 			$current_product_id = (int) $this->request->post['product_id'];
 			$bundle_id = isset($this->request->post['bundle_id']) ? (int) $this->request->post['bundle_id'] : 0;
 
-			$all_products = array_merge(array($current_product_id), array_map('intval', $this->request->post['bundle_products']));
-			$all_products = array_unique($all_products);
+			$all_products = $this->buildBundleLines($current_product_id, $this->request->post['bundle_products']);
+
+			if (count($all_products) < 2) {
+				$json['error'] = $this->language->get('error_bundle_products');
+			} elseif (!empty($this->model_catalog_product_bundle->findConfigurableWithoutVariant($all_products))) {
+				$json['error'] = $this->language->get('error_bundle_variant_required');
+			}
+		}
+
+		if (!isset($json['error'])) {
 
 			$data = array(
 				'name'            => isset($this->request->post['name']) ? trim($this->request->post['name']) : '',
@@ -3605,10 +3693,15 @@ class ControllerCatalogProduct extends Controller {
 		if (!isset($json['error'])) {
 			$bundle_id = (int) $this->request->post['bundle_id'];
 			$product_id = (int) $this->request->post['product_id'];
+			$variant_id = isset($this->request->post['variant_id']) ? (int)$this->request->post['variant_id'] : 0;
 
 			$this->load->model('catalog/product_bundle');
 
-			$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int) $bundle_id . "' AND product_id = '" . (int) $product_id . "'");
+			if ($variant_id > 0) {
+				$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int) $bundle_id . "' AND product_id = '" . (int) $product_id . "' AND variant_id = '" . (int) $variant_id . "'");
+			} else {
+				$this->db->query("DELETE FROM " . DB_PREFIX . "product_bundle_product WHERE bundle_id = '" . (int) $bundle_id . "' AND product_id = '" . (int) $product_id . "'");
+			}
 
 			$remaining = $this->model_catalog_product_bundle->getBundleProducts($bundle_id);
 
@@ -3648,6 +3741,70 @@ class ControllerCatalogProduct extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Builds normalised bundle lines from posted values, ensuring the current
+	 * product is part of the bundle. Accepts legacy ints and "pid:vid" strings.
+	 *
+	 * @param int $current_product_id
+	 * @param array|string $posted
+	 * @return array<int, array{product_id: int, variant_id: int}>
+	 */
+	private function buildBundleLines($current_product_id, $posted) {
+		$this->load->model('catalog/product_bundle');
+
+		if (!is_array($posted)) {
+			$posted = $this->model_catalog_product_bundle->parseBundleLinesCsv((string)$posted);
+		} else {
+			$posted = $this->model_catalog_product_bundle->normalizeBundleLines($posted);
+		}
+
+		$has_current = false;
+
+		foreach ($posted as $line) {
+			if ((int)$line['product_id'] === (int)$current_product_id) {
+				$has_current = true;
+				break;
+			}
+		}
+
+		if (!$has_current && (int)$current_product_id > 0) {
+			$posted[] = array('product_id' => (int)$current_product_id, 'variant_id' => 0);
+		}
+
+		return $this->model_catalog_product_bundle->normalizeBundleLines($posted);
+	}
+
+	/**
+	 * Human-readable variant label for bundle chips ("Red / M" + SKU).
+	 */
+	private function getBundleVariantLabel($product_id, $variant_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_variant WHERE variant_id = '" . (int)$variant_id . "' AND product_id = '" . (int)$product_id . "'");
+
+		if (!$query->num_rows) {
+			return '';
+		}
+
+		$variant = $query->row;
+		$names = array();
+		$values_query = $this->db->query("SELECT ovd.name FROM " . DB_PREFIX . "product_variant_value pvv LEFT JOIN " . DB_PREFIX . "option_value_description ovd ON (pvv.option_value_id = ovd.option_value_id) WHERE pvv.variant_id = '" . (int)$variant_id . "' AND ovd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pvv.option_id ASC");
+
+		foreach ($values_query->rows as $value_row) {
+			if (!empty($value_row['name'])) {
+				$names[] = $value_row['name'];
+			}
+		}
+
+		$label = implode(' / ', $names);
+
+		if (!empty($variant['sku'])) {
+			$label = $label !== '' ? $label . ' (' . $variant['sku'] . ')' : (string)$variant['sku'];
+		} elseif (!empty($variant['model'])) {
+			$label = $label !== '' ? $label . ' [' . $variant['model'] . ']' : (string)$variant['model'];
+		}
+
+		return $label;
 	}
 
 	/**

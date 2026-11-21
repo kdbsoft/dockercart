@@ -47,6 +47,7 @@ $_['help_date_end']         = 'End date for bundle availability';
 
 $_['error_warning']         = 'Warning: Please check the form carefully for errors!';
 $_['error_products']        = 'You must select at least 2 products!';
+$_['error_bundle_variant_required'] = 'A configurable product cannot be added to a bundle without a variant — select an exact variant for each such product.';
 $_['error_discount_value']  = 'Discount Value must be greater than 0!';
 $_['error_date']            = 'Date End must be after Date Start!';
 $_['error_invalid_sort_order'] = 'Invalid sort order value!';

@@ -2183,6 +2183,12 @@ class ControllerProductProduct extends Controller {
 		$bundles = array();
 
 		foreach ($bundle_results as $bundle) {
+			// A configurable product without a pinned variant makes the whole
+			// bundle invalid — hide it until the admin fixes the bundle.
+			if (!empty($bundle_lib->findConfigurableWithoutVariant($bundle['bundle_id']))) {
+				continue;
+			}
+
 			$bundle_products = $bundle_lib->getBundleProducts($bundle['bundle_id']);
 
 			$bundle_product_ids = array();
@@ -2195,28 +2201,71 @@ class ControllerProductProduct extends Controller {
 
 			$products_data = array();
 			$original_total = 0;
+			$bundle_valid = true;
+			$pc_bundle = new ProductConfigurable($this->registry);
+			$calculator_bundle = new ProductPricingCalculator($this->registry);
 
 			foreach ($bundle_products as $bp) {
-				$bp_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
+				$bp_product_id = (int)$bp['product_id'];
+				$bp_variant_id = isset($bp['variant_id']) ? (int)$bp['variant_id'] : 0;
+				$bp_info = isset($bundle_products_info[$bp_product_id]) ? $bundle_products_info[$bp_product_id] : false;
 
-				if ($bp_info) {
+				if (!$bp_info) {
+					$bundle_valid = false;
+					break;
+				}
+
+				$variant_label = '';
+				$variant_stock = null;
+
+				if ($bp_variant_id > 0) {
+					$variant_info = $pc_bundle->getVariant($bp_variant_id);
+
+					if (!$variant_info || (int)$variant_info['product_id'] !== $bp_product_id || empty($variant_info['status'])) {
+						$bundle_valid = false;
+						break;
+					}
+
+					$variant_names = array();
+
+					if (!empty($variant_info['values'])) {
+						foreach ($variant_info['values'] as $vv) {
+							if (!empty($vv['name'])) {
+								$variant_names[] = $vv['name'];
+							}
+						}
+						}
+
+					$variant_label = implode(' / ', $variant_names);
+					$variant_stock = (float)$variant_info['quantity'];
+					$pricing = $calculator_bundle->calculate($bp_product_id, $bp_variant_id, 1);
+					$bp_price = (float)$pricing['price'];
+				} else {
 					$bp_price = (float)$bp_info['price'];
 
 					if (!is_null($bp_info['special']) && (float)$bp_info['special'] < $bp_price) {
 						$bp_price = (float)$bp_info['special'];
 					}
-
-					$original_total += $bp_price;
-
-					$products_data[] = array(
-						'product_id'  => $bp_info['product_id'],
-						'name'        => $bp_info['name'],
-						'thumb'       => $this->model_tool_image->resize($bp_info['image'], 100, 100),
-						'price'       => $this->currency->format($this->tax->calculate($bp_price, $bp_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
-						'price_value' => $bp_price,
-						'href'        => $this->url->link('product/product', 'product_id=' . $bp_info['product_id'])
-					);
 				}
+
+				$original_total += $bp_price;
+
+				$bundle_href = $this->url->link('product/product', 'product_id=' . $bp_info['product_id'] . ($bp_variant_id > 0 ? '&variant_id=' . $bp_variant_id : ''));
+
+				$products_data[] = array(
+					'product_id'   => $bp_info['product_id'],
+					'variant_id'   => $bp_variant_id,
+					'name'         => $bp_info['name'] . ($variant_label !== '' ? ' — ' . $variant_label : ''),
+					'variant_label'=> $variant_label,
+					'thumb'        => $this->model_tool_image->resize($bp_info['image'], 100, 100),
+					'price'        => $this->currency->format($this->tax->calculate($bp_price, $bp_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+					'price_value'  => $bp_price,
+					'href'         => $bundle_href
+				);
+			}
+
+			if (!$bundle_valid) {
+				continue;
 			}
 
 			if (count($products_data) >= 2) {
@@ -2237,8 +2286,19 @@ class ControllerProductProduct extends Controller {
 
 				$all_in_stock = true;
 				foreach ($bundle_products as $bp) {
-					$bp_stock_info = isset($bundle_products_info[(int)$bp['product_id']]) ? $bundle_products_info[(int)$bp['product_id']] : false;
-					if ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
+					$bp_product_id = (int)$bp['product_id'];
+					$bp_variant_id = isset($bp['variant_id']) ? (int)$bp['variant_id'] : 0;
+					$bp_stock_info = isset($bundle_products_info[$bp_product_id]) ? $bundle_products_info[$bp_product_id] : false;
+
+					if ($bp_variant_id > 0) {
+						$variant_info = $pc_bundle->getVariant($bp_variant_id);
+						$variant_qty = $variant_info ? (float)$variant_info['quantity'] : 0;
+
+						if ($variant_qty <= 0 && empty($bp_stock_info['preorder'])) {
+							$all_in_stock = false;
+							break;
+							}
+					} elseif ($bp_stock_info && (float)$bp_stock_info['quantity'] <= 0 && empty($bp_stock_info['preorder'])) {
 						$all_in_stock = false;
 						break;
 					}
