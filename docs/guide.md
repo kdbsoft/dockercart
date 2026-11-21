@@ -2247,10 +2247,12 @@ nginx (bind-mounted, reload only), `upload/store-api/config.php` and
 ## 22. Landing Page Builder
 
 Landing pages are ad-hoc, drag & drop storefront pages — not OpenCart layouts.
-A page is an ordered list of **sections (blocks)**; each block is a full-width
-section with its own container, padding, background, alignment and per-device
-visibility. Pages live at their own SEO URL (`/black-friday`), can be drafts,
-scheduled, marked `noindex` or assigned as the store home page.
+A page is a two-level tree of **blocks**: top-level blocks render as
+full-width sections (each with its own container, padding, background,
+alignment and per-device visibility), and a `section` container groups
+**widgets inside columns** (Elementor-style: section → columns → widgets).
+Pages live at their own SEO URL (`/black-friday`), can be drafts, scheduled,
+marked `noindex` or assigned as the store home page.
 
 | Surface | Where |
 |---|---|
@@ -2264,11 +2266,27 @@ scheduled, marked `noindex` or assigned as the store home page.
 oc_landing                       page row: name, status, chrome, is_home, noindex,
                                  custom_css, viewed, version, publish window
 oc_landing_description           per language: slug + meta fields
-oc_landing_block                 ordered sections: code, sort_order, status,
-                                 settings (json, non-localised fields)
+oc_landing_block                 the tree: code, parent_id (0 = top level),
+                                 slot (column index inside a section),
+                                 sort_order (position in the own group),
+                                 status, settings (json, non-localised fields)
 oc_landing_block_description     per language: content (json, localised fields)
 oc_landing_template              reusable section sets ("My templates")
 ```
+
+Hierarchy rules (enforced by `ModelDesignLanding::saveBlocks()`):
+
+* `section` containers are always top level (`parent_id = 0`); their children
+  point at the section's block id with `slot` = column index.
+* New blocks are submitted with **negative temp ids** so unsaved children can
+  reference their unsaved section; the save response returns
+  `client_id -> block_id` for every row and the builder remaps.
+* A child whose parent is not part of the saved page is **promoted to the top
+  level** instead of dropped — user content never disappears over a malformed
+  payload. `slot` is clamped to the parent structure's column count,
+  `sort_order` to 0–999.
+* Blocks missing from a save payload are deleted (a removed section takes its
+  widgets with it — the builder removes both).
 
 The slug is mirrored into `oc_seo_url` (`query = landing_id=<id>`, `store_id = 0`)
 on every save, so `/keyword` resolves through the regular SEO pipeline
@@ -2299,8 +2317,53 @@ declares every allowed block: name key, icon, palette group and the field schema
   (`bg_type`, `bg_color`, `bg_image`, `overlay`, `padding`, `container`, `align`,
   `hide_desktop|tablet|mobile`, `anchor`, `custom_class`).
 * `Blocks::normalizeSettings()/normalizeContent()` cast/whitelist/truncate every
-  value (script tags and `javascript:` links are stripped), so neither the
-  builder nor the API can store anything the renderer does not expect.
+  value, so neither the builder nor the API can store anything the renderer
+  does not expect (see *Content security* below).
+
+### Content security
+
+Twig runs with `autoescape => false` project-wide, so landing content is
+protected by **two explicit layers** instead:
+
+1. **Storage normalisation** (`Dockercart\Landing\Blocks`, the single writer
+   for every block payload — builder JSON, templates, information-page
+   conversion):
+   * `text`/`textarea` fields are `strip_tags`-ed (plain copy never stores
+     markup; textareas render as text + `nl2br`);
+   * `richtext` (`sanitizeHtml()`) drops `<script>` blocks, `on*=` handlers,
+     `srcdoc` attributes, and **scheme-whitelists** every link/media
+     attribute: only `http(s):`, `mailto:`, `tel:` and inline
+     `data:image|video|audio` survive, everything else collapses to a dead
+     `href="#"`. The whitelist runs on the raw stored value, so entity and
+     tab tricks (`jav&#x09;ascript:`, `jav&Tab;ascript:`, `jav\tascript:`)
+     that a browser would decode back inside the attribute never pass either;
+   * `image`/`link` values (`sanitizePath()`) additionally lose `"` `'` `<`
+     `>` `\\` and NUL, so they can never break out of a quoted attribute;
+   * the raw **`html` block is the one deliberate exception**: its `code`
+     field is stored as pasted (analytics snippets, embeds) and rendered
+     with `|raw`. It is a power feature for accounts trusted with
+     `modify design/landing` — treat the permission accordingly;
+   * page display fields (`oc_landing.name`, `meta_*`) follow the classic
+     form convention instead: the JSON save encodes them at the boundary
+     (`ControllerDesignLanding::encodeDisplayPayload()`, mirroring
+     `Request::clean`/`validateOwner`), the builder decodes them for its
+     inputs, so the cycle never double-encodes.
+
+2. **Render escaping**: the block templates `|escape` every plain-text output
+   (`{{ content.heading|escape }}`, `{{ item.text|escape|nl2br }}`), which also
+   covers rows saved before layer 1 existed. Only `richtext` bodies, the `html`
+   block and controller-generated markup (`section.twig` columns,
+   `page.twig` blocks) render with `|raw`. Banner titles/subtitles and
+   category names are the theme convention's exception — they are stored
+   html-encoded by their classic forms and pass through unescaped, exactly
+   like the banner module and category pages render them.
+
+The in-canvas builder bridge only accepts `postMessage` from its own parent
+window, and preview tokens are HMAC-signed with `config_encryption`
+(`Dockercart\Landing\Url`, 1 h lifetime). Shared helpers:
+`Dockercart\Landing\Text` (UTF-8 length/truncate) and `Blocks::hydrate()`
+(the single decoder for `settings`/`content` JSON rows, used by both landing
+models).
 
 **Adding a block** = add the entry to `Blocks`, add the
 `catalog/view/theme/dockercart/template/landing/blocks/<code>.twig` template,
@@ -2310,8 +2373,47 @@ label keys to the three admin language files, then run `npm run build:css`
 `make test` (`tools/tests/cases/landing_blocks.php` fails when a code has no
 template or a field has an unknown type).
 
-Current blocks: `hero`, `text`, `cta`, `products`, `products_carousel`,
-`categories`, `image`, `image_text`, `banner`, `spacer`, `html`.
+The four editorial blocks (`features`, `steps`, `faq`, `statement`) are styled
+by `upload/catalog/view/stylesheet/landing/landing-blocks.css`, which the
+landing controller loads for **every** theme. Their Twig templates use only
+`.lp-native*` classes (no Tailwind utilities), so they look the same in themes
+that do not load Tailwind. New blocks in this family belong in that shared CSS;
+blocks built from Tailwind utilities still need `npm run build:css`.
+
+Landing styling is configured once in the builder's **Site Settings** panel
+(top bar → palette icon). It stores nine design tokens in `oc_setting` under the
+separate code `dockercart_landing_design` — never in `config`, whose
+`editSetting()` deletes unlisted keys. The tokens are defined in
+`upload/system/library/dockercart/landing/design.php`: six hex colours plus
+`radius`, `padding_y` and `content_width` presets. `Design::normalize()` keeps
+colours hex-only and selects whitelisted, `Design::cssVariables()` maps them to
+`--lp-*`, and `ControllerLandingPage` puts them on `<main id="lp-page">`.
+Both shared stylesheets (`landing-blocks.css` for native editorial blocks and
+`landing-editorial.css` for hero/text/image_text/cta) consume them with `var()`
+fallbacks, so a single save restyles every landing page in every theme.
+
+Current blocks: `hero`, `text`, `cta`, `features`, `steps`, `faq`, `statement`,
+`products`, `products_carousel`, `categories`, `image`, `image_text`, `banner`,
+`section`, `spacer`, `html`.
+
+The editorial blocks have no HTML-code workflow: `features` edits a repeater of
+{icon, title, text} rows plus a 2/3/4-column layout; `steps` edits a real
+`<ol>` of ordered rows; `faq` edits {question, answer} rows rendered as native
+`<details>`; `statement` edits a short callout with a footnote. All four expose
+a `variant` setting (plain / tinted / dark) for the surface. Icon names are a
+registry whitelist, so an editor cannot inject arbitrary markup.
+
+`section` is the only **container** (`Blocks::isContainer()`): it renders a
+columns grid instead of a panel. Its `structure` field picks a preset layout
+(`1`, `2`, `2-1`, `1-2`, `3`, `4` columns) and `gap` the spacing; the grid,
+column width and gap classes come from `Blocks::gridClass()/columnClass()/
+gapClass()` as literal Tailwind strings (so the compiled stylesheet keeps
+them). Widgets dropped into a column render through
+`ControllerLandingPage::renderBlockInner()` — no `<section>` wrapper, no
+container of their own: the section owns container/padding/background, the
+widget keeps its panel styles plus its own bg/padding/alignment/visibility.
+An inner widget with an untouched default padding (`lg`, no background) drops
+the padding so columns stay tight — the section owns the vertical rhythm.
 
 ### Rendering
 
@@ -2323,12 +2425,18 @@ Current blocks: `hero`, `text`, `cta`, `products`, `products_carousel`,
    with `config_encryption`, 1 h) is present — drafts are 404 for the public and
    `X-Robots-Tag: noindex` in preview;
 3. counts the view (public views only);
-4. normalises each block, enriches it (`Dockercart\Catalog\ProductCards`,
+4. builds the tree (top-level blocks + children grouped by section/slot),
+   skipping disabled blocks outside the builder;
+5. normalises each block, enriches it (`Dockercart\Catalog\ProductCards`,
    `ModelCatalogCategory`, `ModelDesignBanner`) and renders
    `landing/blocks/<code>.twig`;
-5. wraps the body in `<section class="lp-block lp-block--<code>"
+6. wraps the body in `<section class="lp-block lp-block--<code>"
    data-landing-block="<id>">` + `<div class="lp-block__body">` (container and
-   alignment classes live on the body).
+   alignment classes live on the body); a `section` container instead renders
+   `landing/blocks/section.twig` — a responsive grid whose columns
+   (`[data-lp-slot]`) hold the widgets of that slot, each wrapped as
+   `<div class="lp-widget lp-widget--<code>" data-landing-block…>`. Containers
+   are marked `data-lp-container="1"` for the builder's drag logic.
 
 Sections that bring their own panel (`hero`, `cta`, `text`, `image_text`) check the
 wrapper background first: when `bg_type` is `color`/`image` they skip their own
@@ -2352,26 +2460,54 @@ Manticore index.
 
 * the canvas is the **real storefront page** in an iframe
   (`…&preview_token=…&lp_builder=1`), so styles are 1:1;
-* blocks are dragged **inside the iframe** (SortableJS handle), the palette
-  drags from the admin shell (native `dataTransfer` + `lp:add` message);
+* blocks are dragged **inside the iframe** (SortableJS): the page root
+  reorders sections and loose widgets, columns accept widgets pulled between
+  them (`put` filter refuses sections — sections never nest); the palette
+  drags from the admin shell as two payload types
+  (`application/x-lp-section` / `application/x-lp-block` + `lp:add` message
+  with `parentId`/`slot`/`afterId`), and every drag reports the whole tree
+  back (`lp:moveTree`) so the model stays the single source of truth;
+* the **navigator** (top bar → "Navigator") is the Elementor-style tree:
+  page → sections → columns → widgets. Rows drag between lists with the same
+  rules as the canvas, a click selects (and scrolls the canvas to) the block,
+  hover actions duplicate/delete/select;
 * clicking a section selects it and opens the properties panel (rendered from
   the block schema: text/richtext via TinyMCE, images via the existing
   `common/filemanager` modal, product/category autocomplete via
   `design/landing/autocomplete`, colours, selects, toggles, repeaters);
-* changes autosave (debounced) through `design/landing/save` (one transaction,
+* changes save **explicitly** through `design/landing/save` (one transaction,
   optimistic `version` lock; the payload is sent as `application/json` and read
   from `php://input`, because `Request::clean()` html-escapes every `$_POST`
-  value and would corrupt the JSON); a property change re-fetches **only that block**
-  (`&only_block=<id>`), a structural change reloads the iframe and restores the
-  scroll offset;
+  value and would corrupt the JSON) — the Save button or `Ctrl+S`. There is no
+  autosave: typing only marks the page dirty ("Unsaved changes" in the top
+  bar), a structural gesture (drop, duplicate, remove, move, undo/redo)
+  saves immediately so the canvas stays consistent, and switching the
+  language tab or leaving the page with unsaved changes asks whether to
+  save first. Typing still previews live: a debounced keystroke POSTs the
+  in-memory block to `landing/page&preview_block=1`, which re-renders just
+  that block through the same pipeline (read-only — no writes, no version
+  bump) and swaps the single node in the canvas (`lp:replace`); a persisted
+  property change re-fetches **only that block** (`&only_block=<id>`), while
+  a structural change reloads the iframe and restores the scroll offset;
 * `Ctrl+Z` / `Ctrl+Shift+Z` undo/redo the in-memory state (50 steps),
   `Ctrl+S` saves;
 * page settings slide-over: name, per-language slug/meta, status, chrome,
   publish window, `noindex`, "use as store home page" (writes
   `config_landing_home_id` through `ModelSettingSetting::updateSetting()`),
   custom CSS;
-* "My templates": save the selected section (or the whole page) as a reusable
-  template and insert it into any other page.
+* "My templates": save the selected section — with its widgets, the hierarchy
+  refs stay inside the template — or the whole page as a reusable set and
+  insert it into any other page (fresh temp ids are assigned on insert);
+* **language safety**: every field write targets the language selected when
+  its input was bound, never the tab that happens to be current when a
+  debounced editor/repeater timer fires; a panel re-render *flushes* pending
+  writes (same language) instead of dropping them, and a removed TinyMCE
+  editor never writes at all. In builder mode the canvas also renders
+  **strictly the selected language** — the public default-language fallback
+  for empty fields is off, so an empty field looks empty in both the panel
+  and the canvas. (Before this, a quick tab switch could wipe the body of
+  the language just edited; `20261122_landing_language_repair.sql` restored
+  the seeded information-page text blocks from the classic WYSIWYG copy.)
 
 ### Permissions
 
@@ -2386,19 +2522,100 @@ is an implicit superuser — no migration is needed.
 2. Drag a hero, a product grid and a CTA into the canvas, reorder by dragging,
    duplicate and delete a section → reload the builder and confirm the order.
 3. Switch the language tab, change the heading on `ru-ua`; open
-   `/ru-ua/black-friday`.
-4. Product grid sources: manual picks keep their order; category / on sale /
+   `/ru-ua/black-friday`. Type into a field and switch tabs immediately — the
+   text must land in the language it was typed in (panel and canvas agree; an
+   empty field shows empty, not the default language's copy).
+4. Add a **section** (layout group), set the structure to 2 columns, drop a
+   text widget into the left and an image widget into the right column;
+   drag a widget between columns, pull one out to the page level, try to
+   drag a section into a column (refused); switch the structure 4 → 1 and
+   confirm the extra columns fold into the last one after the save.
+5. Open the navigator (Navigator), drag rows to reorder sections, drag a
+   widget row into another section's column, click a row (canvas selects and
+   scrolls), duplicate a section from a row hover action (widgets follow).
+6. Product grid sources: manual picks keep their order; category / on sale /
    newest / best sellers render the expected cards (check a product stored in a
    non-base currency shows the converted price).
-5. Publish, open `/black-friday`; switch chrome to "no navigation" and confirm
+8. Publish, open `/black-friday`; switch chrome to "no navigation" and confirm
    the nav/footer disappear while add-to-cart / quick view still work.
-6. Set a future publish date → the public URL 404s, the builder preview still
+9. Set a future publish date → the public URL 404s, the builder preview still
    renders (token).
-7. Mark the page as home → `/` renders it; unset → `/` is the default home.
-8. Duplicate → `-copy` slug, draft, SEO keywords present; delete → the URL 404s
+10. Mark the page as home → `/` renders it; unset → `/` is the default home.
+11. Duplicate → `-copy` slug, draft, SEO keywords present; delete → the URL 404s
    and the `oc_seo_url` rows are gone.
-9. Save a section as a template, insert it into another page.
-10. `viewed` increases on public views only (not in preview/builder).
+12. Save a section as a template, insert it into another page.
+13. `viewed` increases on public views only (not in preview/builder).
+
+### Information pages as landing pages
+
+Every information page can be composed in the same section builder instead of
+the classic WYSIWYG: `oc_information.use_builder` toggles it, `oc_landing.
+information_id` links the page to its composed body (an *owned* landing). This
+reuses the whole builder stack — the block registry, the canvas, explicit save,
+undo/redo, section templates — with no second content editor.
+
+| Surface | Where |
+|---|---|
+| Toggle + builder link | Catalog → Information → form (Page Builder card) |
+| Builder | `design/landing/builder&landing_id=N` as usual, owned mode |
+| Storefront | the information page's own URL (`information/information`) |
+
+Rules that keep the two page types from colliding:
+
+* **Owned landings are invisible standalone**: the landing list, `getLandingBySlug()`
+  and `getTakenSlugs()` exclude `information_id IS NOT NULL`, the list actions
+  (`delete`/`copy`/`status`) refuse them, and `saveLanding()` ignores their
+  `status`, publish window, `is_home` and slugs (`syncSeoUrls` never runs).
+* **The information page owns everything public**: URL/keyword, meta tags,
+  canonical and visibility (`oc_information.status` + store). The owned landing
+  never gets `oc_seo_url` rows and `landing/page&landing_id=N` / `lp-<id>` is a
+  404 — only the information route, which plants `information_id` next to
+  `landing_id`, may render it (a valid preview token does not bypass this).
+* **Chrome is always `full`**: owned pages keep the theme header/footer; the
+  bare mode stays a standalone-only feature. `noindex` and custom CSS remain
+  per-page builder settings (Page Settings panel when nothing is selected).
+* **The builder canvas is the real information page**: `builder()` builds the
+  iframe URL from the page's own keyword, language-prefixed per tab (fallback
+  `index.php?route=information/information&information_id=N` + `switch_lang`
+  when a language has no keyword). With nothing selected the right panel
+  shows the information page settings instead of a block: status, per-
+  language SEO keyword (default store) and meta tags, all editable in place
+  (needs `modify catalog/information`, otherwise read-only). Schedule, home
+  flag and chrome stay dropped — they do not apply to information pages.
+* **The top-bar name is the information page title per language**: an owned
+  landing's `oc_landing.name` is only a default-language snapshot, so the
+  builder shows `oc_information_description.title` for the selected language
+  and edits write through `catalog/information/updateNames` (needs `modify
+  catalog/information`; without it the input is read-only). The model
+  invalidates the storefront `information.item.*` cache on every names
+  write.
+* **Enabling is conversion + fallback at once**: `ModelCatalogInformation::
+  enableBuilder()` creates the owned landing (name from the page meta/title,
+  `status = 0`) and seeds one `text` block per language — heading = page title,
+  body = the WYSIWYG copy (`Blocks::normalizeContent()` sanitizes it). The
+  WYSIWYG field itself stays: `information/information/agree()` (the checkout
+  terms checkbox) keeps rendering it, and switching the toggle off rolls the
+  storefront back to it while the sections stay saved (re-enabling does not
+  re-convert).
+* **Lifecycle**: deleting the information page cascades `deleteLanding()` (page
+  + blocks + descriptions); copying the page duplicates the landing and binds
+  the copy (`duplicateLanding($id, $new_information_id)` — slugs stay empty).
+
+Storefront flow: `ControllerInformationInformation::index()` sees `use_builder`,
+resolves the owned landing via `ModelDesignLanding::getLandingByInformation()`
+and delegates to `ControllerLandingPage` (the same sub-controller pattern
+`common/home` uses for a landing-as-home). The landing controller's owner branch
+gates on the information row (`getInformation()`: status + store + language),
+takes meta/title/breadcrumbs/canonical from `oc_information_description` and
+skips the view counter for owned pages.
+
+Permissions: no new routes — `catalog/information` and `design/landing` are
+already in the content-manager/marketer role templates. The form hides the
+toggle and the builder link from users without `modify design/landing`.
+
+Guarded by `tools/tests/cases/information_landing.php` (migration idempotency,
+owner-exclusion SQL, the delegation anchor, the 404 guard, builder owner mode,
+locale parity ×3).
 
 ---
 

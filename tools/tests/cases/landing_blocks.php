@@ -18,6 +18,32 @@ use Dockercart\Landing\Blocks;
 
 const LANDING_TEMPLATE_DIR = '/upload/catalog/view/theme/dockercart/template/landing/blocks/';
 
+const LANDING_BLOCKS_CSS = 'upload/catalog/view/stylesheet/landing/landing-blocks.css';
+
+const LANDING_EDITORIAL_CSS = 'upload/catalog/view/stylesheet/landing/landing-editorial.css';
+
+const LANDING_EDITOR_LOCALES = ['en-gb', 'uk-ua', 'ru-ua'];
+
+const LANDING_EDITOR_KEYS = [
+	'block_features', 'block_steps', 'block_faq', 'block_statement',
+	'field_intro', 'field_items', 'field_steps', 'field_questions',
+	'field_icon', 'field_item_title', 'field_item_text', 'field_question',
+	'field_answer', 'field_foot', 'field_variant',
+	'option_variant_plain', 'option_variant_soft', 'option_variant_dark',
+	'option_icon_sparkles', 'option_icon_shield_check', 'option_icon_credit_card',
+	'option_icon_truck', 'option_icon_package_check', 'option_icon_headset',
+	'option_icon_wallet', 'option_icon_landmark', 'option_icon_refresh_cw',
+	'option_icon_store',
+	'field_accent_color', 'field_surface_color', 'field_ink_color',
+	'field_muted_color', 'field_line_color', 'field_success_color',
+	'field_radius', 'field_padding_y', 'field_content_width',
+	'option_radius_none', 'option_radius_sm', 'option_radius_md',
+	'option_padding_y_xs', 'option_padding_y_sm', 'option_padding_y_md',
+	'option_padding_y_lg', 'option_padding_y_xl',
+	'option_content_width_narrow', 'option_content_width_normal',
+	'option_content_width_wide', 'option_content_width_full',
+];
+
 const LANDING_FIELD_TYPES = [
 	'text', 'textarea', 'richtext', 'code', 'number', 'toggle', 'select',
 	'color', 'image', 'link', 'products', 'categories', 'category', 'banner', 'repeater',
@@ -26,9 +52,41 @@ const LANDING_FIELD_TYPES = [
 return [
 	'registry: codes are stable and complete' => static function (): void {
 		Assert::same(
-			['hero', 'text', 'cta', 'products', 'products_carousel', 'categories', 'image', 'image_text', 'banner', 'spacer', 'html'],
+			['hero', 'text', 'cta', 'features', 'steps', 'faq', 'statement', 'products', 'products_carousel', 'categories', 'image', 'image_text', 'banner', 'section', 'spacer', 'html'],
 			Blocks::codes()
 		);
+	},
+
+	'registry: section is the only container' => static function (): void {
+		foreach (Blocks::codes() as $code) {
+			Assert::same($code === 'section', Blocks::isContainer($code), $code);
+		}
+
+		Assert::true(Blocks::schema()['section']['container']);
+		Assert::false(Blocks::schema()['hero']['container']);
+	},
+
+	'registry: section structures map to column layouts' => static function (): void {
+		Assert::same(1, Blocks::columnCount('1'));
+		Assert::same(2, Blocks::columnCount('2'));
+		Assert::same(2, Blocks::columnCount('2-1'));
+		Assert::same(4, Blocks::columnCount('4'));
+		Assert::same(1, Blocks::columnCount('nope'));
+
+		Assert::same('md:col-span-2', Blocks::columnClass('2-1', 0));
+		Assert::same('', Blocks::columnClass('2-1', 1));
+		Assert::same('md:col-span-2', Blocks::columnClass('1-2', 1));
+		Assert::same('', Blocks::columnClass('nope', 0));
+
+		Assert::contains('md:grid-cols-3', Blocks::gridClass('3'));
+		Assert::same('gap-0', Blocks::gapClass('none'));
+		Assert::same('gap-6', Blocks::gapClass('md'));
+		Assert::same('gap-6', Blocks::gapClass('nope'), 'unknown gap falls back');
+
+		$settings = Blocks::normalizeSettings('section', ['structure' => 'bogus', 'gap' => 'xl']);
+
+		Assert::same('2', $settings['structure'], 'unknown structure falls back');
+		Assert::same('md', $settings['gap']);
 	},
 
 	'registry: every block has a storefront template' => static function (): void {
@@ -37,6 +95,77 @@ return [
 				is_file(REPO_ROOT . LANDING_TEMPLATE_DIR . $code . '.twig'),
 				'missing template landing/blocks/' . $code . '.twig'
 			);
+		}
+	},
+
+	'registry: an empty repeater row with a select default is dropped' => static function (): void {
+		$content = Blocks::normalizeContent('features', [
+			'items' => [
+				['icon' => 'truck', 'title' => '', 'text' => ''],
+				['icon' => 'truck', 'title' => 'Same-day dispatch', 'text' => 'Paid before 14:00.'],
+			],
+		]);
+
+		Assert::count(1, $content['items'], 'the untouched icon default must not keep an empty row alive');
+		Assert::same('Same-day dispatch', $content['items'][0]['title']);
+	},
+
+	'registry: editor blocks have a shared theme-independent stylesheet' => static function (): void {
+		Assert::true(is_file(REPO_ROOT . '/' . LANDING_BLOCKS_CSS), 'missing shared landing block CSS');
+		Assert::true(is_file(REPO_ROOT . '/' . LANDING_EDITORIAL_CSS), 'missing editorial demo CSS');
+
+		$css = (string)file_get_contents(REPO_ROOT . '/' . LANDING_BLOCKS_CSS);
+
+		foreach (['.lp-native--features', '.lp-native--steps', '.lp-native--faq', '.lp-native--statement'] as $selector) {
+			Assert::contains($selector, $css, $selector . ' is not styled');
+		}
+
+		Assert::contains("#lp-page .lp-block--hero .lp-block__body.w-full > div", $css, 'full-width hero must not be rounded');
+		Assert::contains("#lp-page .lp-block--cta .lp-block__body.w-full > div", $css, 'full-width CTA must not be rounded');
+		Assert::contains("#lp-page .lp-block--features .lp-block__body", $css, 'native block backgrounds must be full width');
+		Assert::contains("#lp-page .lp-block--image_text li > svg", $css, 'bullet icons must not be drawn twice');
+		Assert::contains('var(--lp-accent', $css, 'native blocks must consume the accent token');
+		Assert::contains('var(--lp-pad-y', $css, 'native blocks must consume the padding token');
+
+		$editorial = (string)file_get_contents(REPO_ROOT . '/' . LANDING_EDITORIAL_CSS);
+
+		Assert::notContains('lp-story', $editorial, 'editorial CSS must not depend on a magic class');
+		Assert::contains('var(--lp-ink', $editorial, 'editorial CSS must consume the ink token');
+		Assert::contains('var(--lp-content-w', $editorial, 'editorial CSS must consume the width token');
+
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+		$admin = repo_file('upload/admin/controller/design/landing.php');
+		$template = repo_file('upload/admin/view/template/design/landing_builder.twig');
+
+		Assert::contains('openSiteSettings', $builder, 'builder can open Site Settings');
+		Assert::contains('openPageSettings', $builder, 'builder can switch back to Page Settings');
+		Assert::contains('siteDesignUrl', $builder, 'builder saves site design through its own endpoint');
+		Assert::contains('saveSiteDesign', $admin, 'admin controller exposes the save endpoint');
+		Assert::contains('site_design_schema', $template, 'builder receives the design schema');
+		Assert::notContains('lp-settings-menu', $template, 'settings button has no dropdown');
+		Assert::contains('$(\'lp-site-settings-btn\').addEventListener(\'click\', function () {', $builder, 'settings button switches the panel directly');
+		Assert::contains('lp-settings-mode-label', $template, 'settings button has a dynamic label');
+		Assert::true(
+			strpos($template, 'NAVIGATOR (PAGE TREE)') > strpos($template, 'CENTER: LIVE PREVIEW')
+			&& strpos($template, 'NAVIGATOR (PAGE TREE)') < strpos($template, 'RIGHT: PROPERTIES'),
+			'Navigator panel must sit between the canvas and Properties'
+		);
+		Assert::contains("close.classList.toggle('hidden', ui.siteSettings)", $builder, 'Site Settings has no close button');
+
+		$controller = repo_file('upload/catalog/controller/landing/page.php');
+
+		Assert::contains("'catalog/view/stylesheet/landing/landing-blocks.css", $controller, 'landing controller must load the CSS for every theme');
+		Assert::contains("'catalog/view/stylesheet/landing/landing-editorial.css", $controller, 'editorial CSS must be loaded without page Custom CSS');
+		Assert::contains('design_style', $controller, 'storefront receives global design variables');
+	},
+
+	'registry: editor block labels exist in all three locales' => static function (): void {
+		foreach (LANDING_EDITOR_LOCALES as $locale) {
+			$file = repo_file('upload/admin/language/' . $locale . '/design/landing.php');
+
+			foreach (LANDING_EDITOR_KEYS as $key) {
+				Assert::contains('$_[\'' . $key . '\']', $file, $locale . ' is missing ' . $key);
+			}
 		}
 	},
 
@@ -145,6 +274,94 @@ return [
 		Assert::notContains('onclick', $content['body']);
 	},
 
+	'normalize: richtext defangs script-capable URL schemes and srcdoc' => static function (): void {
+		$content = Blocks::normalizeContent('text', [
+			'body' => '<a href="javascript:alert(1)">x</a>' .
+				'<a href=\'vbscript:msgbox\'>y</a>' .
+				'<a href="data:text/html;base64,PHNjcmlwdD4=">z</a>' .
+				'<a href="jav&#x09;ascript:alert(2)">entity</a>' .
+				'<a href="jav&Tab;ascript:alert(3)">named</a>' .
+				'<img src="data:image/png;base64,iVBORw0KGgo=" alt="" />' .
+				'<a href="/relative">ok</a>' .
+				'<iframe srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"></iframe>',
+		]);
+
+		Assert::notContains('javascript:', $content['body']);
+		Assert::notContains('vbscript:', $content['body']);
+		Assert::notContains('data:text/html', $content['body']);
+		// The scheme whitelist runs on the raw value, so entity/tab tricks that
+		// a browser would decode back into javascript: never survive either.
+		Assert::notContains('jav&#x09;ascript:', $content['body']);
+		Assert::notContains('jav&Tab;ascript:', $content['body']);
+		Assert::notContains('srcdoc', $content['body']);
+		Assert::contains('href="#"', $content['body'], 'dangerous schemes collapse to a dead anchor');
+		Assert::contains('data:image/png;base64,iVBORw0KGgo=', $content['body'], 'inline raster images stay allowed');
+		Assert::contains('href="/relative"', $content['body'], 'relative links stay intact');
+	},
+
+	'normalize: textarea fields are plain text' => static function (): void {
+		// Textarea fields render as text + nl2br (autoescape is off in Twig),
+		// so a tag stored through them would execute on the storefront.
+		$content = Blocks::normalizeContent('faq', [
+			'intro' => '<img src=x onerror=alert(1)>Plain <b>intro</b>',
+			'items' => [
+				['question' => 'Q?', 'answer' => '<script>evil()</script>Real <i>answer</i>'],
+			],
+		]);
+
+		// strip_tags keeps the inner text (same as the text fields) but never a
+		// tag, so nothing stored through a textarea can execute on render.
+		Assert::same('Plain intro', $content['intro']);
+		Assert::same('evil()Real answer', $content['items'][0]['answer']);
+		Assert::notContains('<', $content['intro'] . $content['items'][0]['answer']);
+	},
+
+	'normalize: link and image values cannot break out of an attribute' => static function (): void {
+		$settings = Blocks::normalizeSettings('image', [
+			'href' => 'x.jpg" onerror="alert(1)',
+			'image' => "catalog/a'b\\c.jpg",
+		]);
+
+		Assert::notContains('"', $settings['href']);
+		Assert::notContains("'", $settings['image']);
+		Assert::notContains('<', $settings['href']);
+
+		// Entity-encoded and raw-tab scheme tricks a browser would decode in
+		// the attribute are refused by the prefix whitelist, not by name.
+		Assert::same('', Blocks::normalizeSettings('image', ['href' => 'jav&#x09;ascript:alert(1)'])['href']);
+		Assert::same('', Blocks::normalizeSettings('image', ['href' => "jav\tascript:alert(1)"])['href']);
+		Assert::same('', Blocks::normalizeSettings('image', ['href' => 'data:text/html,x'])['href']);
+
+		// Relative paths, queries and anchors always stay.
+		Assert::same('index.php?route=product/search&sort=p.price', Blocks::normalizeSettings('image', ['href' => 'index.php?route=product/search&sort=p.price'])['href']);
+		Assert::same('offer#faq', Blocks::normalizeSettings('image', ['href' => '/offer#faq'])['href']);
+	},
+
+	'hydrate: decodes settings and per-language content once' => static function (): void {
+		$rows = [
+			['block_id' => '7', 'parent_id' => '0', 'slot' => '1', 'code' => 'hero', 'sort_order' => '3', 'status' => '1', 'settings' => '{"height":"full"}'],
+			['block_id' => '9', 'parent_id' => '7', 'slot' => '1', 'code' => 'text', 'sort_order' => '0', 'status' => '0', 'settings' => 'not json'],
+		];
+
+		$descriptions = [
+			['block_id' => '7', 'language_id' => '1', 'content' => '{"heading":"Hi"}'],
+			['block_id' => '9', 'language_id' => '1', 'content' => '{"body":"<p>Bye</p>"}'],
+			['block_id' => '9', 'language_id' => '3', 'content' => 'broken'],
+		];
+
+		$blocks = Blocks::hydrate($rows, $descriptions);
+
+		Assert::count(2, $blocks);
+		Assert::same(7, $blocks[0]['block_id']);
+		Assert::same('hero', $blocks[0]['code']);
+		Assert::same(['height' => 'full'], $blocks[0]['settings']);
+		// language ids become ints, broken JSON becomes an empty array
+		Assert::same(['heading' => 'Hi'], $blocks[0]['content'][1]);
+		Assert::same([], $blocks[1]['settings']);
+		Assert::same(['body' => '<p>Bye</p>'], $blocks[1]['content'][1]);
+		Assert::same([], $blocks[1]['content'][3]);
+	},
+
 	'normalize: links reject script-capable schemes' => static function (): void {
 		Assert::same('', Blocks::normalizeSettings('image', ['href' => 'javascript:alert(1)'])['href']);
 		Assert::same('', Blocks::normalizeSettings('image', ['href' => 'data:text/html;base64,xx'])['href']);
@@ -185,6 +402,27 @@ return [
 		Assert::same('', $attribute, 'padding none emits nothing');
 	},
 
+	'site design: global tokens are sanitised and expose CSS variables' => static function (): void {
+		$defaults = \Dockercart\Landing\Design::defaults();
+
+		Assert::same('#2563eb', $defaults['accent_color']);
+		Assert::same('normal', $defaults['content_width']);
+		Assert::same('0px', \Dockercart\Landing\Design::cssVariables(['radius' => 'none'])['--lp-radius']);
+		Assert::same('4.75rem', \Dockercart\Landing\Design::cssVariables(['padding_y' => 'lg'])['--lp-pad-y']);
+		Assert::same('1240px', \Dockercart\Landing\Design::cssVariables(['content_width' => 'wide'])['--lp-content-w']);
+
+		$design = \Dockercart\Landing\Design::normalize([
+			'accent_color' => '#FF0000',
+			'surface_color' => 'javascript:alert(1)',
+			'radius' => 'bogus',
+		]);
+
+		Assert::same('#ff0000', $design['accent_color']);
+		Assert::same('#f6f8fc', $design['surface_color'], 'invalid colour falls back');
+		Assert::same('md', $design['radius'], 'unknown preset falls back');
+		Assert::contains('--lp-accent:#ff0000', \Dockercart\Landing\Design::styleAttribute($design));
+	},
+
 	'wrapper: responsive visibility classes' => static function (): void {
 		Assert::same('', Blocks::visibilityClass([]));
 		Assert::same('hidden', Blocks::visibilityClass(['hide_mobile' => 1, 'hide_tablet' => 1, 'hide_desktop' => 1]));
@@ -192,6 +430,10 @@ return [
 		Assert::same('hidden md:block', Blocks::visibilityClass(['hide_mobile' => 1]));
 		Assert::same('md:hidden', Blocks::visibilityClass(['hide_tablet' => 1, 'hide_desktop' => 1]));
 		Assert::same('md:hidden lg:block', Blocks::visibilityClass(['hide_tablet' => 1]));
+
+		// The old if-chain fell through for this combination and rendered the
+		// block tablet-only instead of desktop-only.
+		Assert::same('hidden md:hidden lg:block', Blocks::visibilityClass(['hide_mobile' => 1, 'hide_tablet' => 1]));
 	},
 
 	'wrapper: builder mode suppresses visibility classes' => static function (): void {

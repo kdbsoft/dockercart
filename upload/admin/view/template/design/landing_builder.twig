@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ heading_title_builder }} — {{ landing.name }}</title>
+<title>{{ heading_title_builder }} — {{ landing.name|escape }}</title>
+{% for favicon in favicon_links %}
+<link rel="{{ favicon.rel }}" type="{{ favicon.type }}" sizes="{{ favicon.sizes }}" href="{{ favicon.href }}" />
+{% endfor %}
 <link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
+<link href="view/stylesheet/dockercart_tokens.css?v={{ admin_css_version }}" type="text/css" rel="stylesheet" />
 <style>
 	/* Bootstrap 3 sets html{font-size:10px}, which shrinks every rem-based
 	   Tailwind utility on this page to 62.5%. Restore the 16px root so the
@@ -12,13 +16,27 @@
 	html { font-size: 16px; }
 </style>
 <script src="view/javascript/tailwind-cdn.min.js"></script>
+<script>
+/* DockerCart admin palette: the builder reuses the panel's muted colours
+   (primary #5b7ea8, success #5a9a6d, danger #c77070) instead of Tailwind's
+   bright defaults, so it reads as part of the admin theme. */
+tailwind.config = { theme: { extend: { colors: {
+	blue: { 50: '#f0f4f8', 100: '#dce6f0', 200: '#c3d3e3', 300: '#9db4cc', 400: '#7e97b5', 500: '#5b7ea8', 600: '#5b7ea8', 700: '#4a6d96', 800: '#3d5d82', 900: '#2f485f' },
+	emerald: { 50: '#e8f0eb', 100: '#d5e2da', 500: '#5a9a6d', 600: '#5a9a6d', 700: '#4d8c60' },
+	red: { 50: '#f5e4e4', 100: '#eccaca', 500: '#c77070', 600: '#c77070', 700: '#8b3f3f' },
+	amber: { 50: '#f5f0e0', 100: '#ece0c2', 500: '#c4a040', 600: '#c4a040', 700: '#7a6428' }
+}, fontFamily: {
+	sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+} } } };
+</script>
 <script src="view/javascript/lucide.min.js"></script>
 <script src="view/javascript/jquery/jquery-3.7.1.min.js"></script>
 <script src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
 <script src="view/javascript/tinymce/tinymce.min.js"></script>
+<script src="view/javascript/sortablejs/Sortable.min.js"></script>
 <style>
 	html, body { height: 100%; }
-	body { margin: 0; overflow: hidden; }
+	body { margin: 0; overflow: hidden; font-family: var(--dc-font-sans); }
 	#lp-app { height: 100vh; display: flex; flex-direction: column; }
 	#lp-canvas-frame { border: 0; background: #fff; display: block; margin: 0 auto; transition: width .2s ease; width: 100%; height: 100%; }
 	.lp-palette-item { cursor: grab; }
@@ -32,16 +50,81 @@
 	@keyframes lpToastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 	.lp-chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e5e7eb; background: #fff; border-radius: 999px; padding: 3px 8px; font-size: 11px; }
 	.lp-chip button { color: #9ca3af; }
-	.lp-chip button:hover { color: #dc2626; }
+	.lp-chip button:hover { color: var(--dc-danger-text); }
 	.lp-overlay { background: rgba(15, 23, 42, .45); }
 	.lp-field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; margin-bottom: 4px; display: block; }
-	.lp-input { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 12px; color: #111827; background: #fff; }
-	.lp-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.15); }
-	.lp-invalid { border-color: #dc2626 !important; }
+	.lp-input { width: 100%; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); padding: 6px 8px; font-size: 13px; color: var(--dc-gray-900); background: #fff; }
+	.lp-input:focus { outline: none; border-color: var(--dc-primary); box-shadow: 0 0 0 2px var(--dc-primary-ring); }
+	.lp-invalid { border-color: var(--dc-danger) !important; }
 	#modal-image { z-index: 100000; }
 	/* Bootstrap modal needs the backdrop above our panels */
 	.modal-backdrop { z-index: 99999; }
 	.tox-tinymce { border-radius: 6px !important; }
+	#lp-navigator { display: none; }
+	#lp-navigator.lp-nav-open { display: flex; }
+	.lp-nav-row { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 6px; cursor: grab; }
+	.lp-nav-row:hover { background: var(--dc-primary-light); }
+	.lp-nav-row.lp-nav-selected { background: #e3ebf3; }
+	.lp-nav-row.lp-nav-ghost { opacity: .4; }
+	.lp-nav-row > .lp-nav-grip { color: #cbd5e1; flex-shrink: 0; display: inline-flex; }
+	.lp-nav-row:hover > .lp-nav-grip { color: #64748b; }
+	.lp-nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.lp-nav-actions { display: none; align-items: center; flex-shrink: 0; }
+	.lp-nav-row:hover .lp-nav-actions { display: inline-flex; }
+	.lp-nav-actions button { color: #94a3b8; padding: 1px; border-radius: 4px; }
+	.lp-nav-actions button:hover { color: #334155; background: #e2e8f0; }
+	.lp-nav-actions button.lp-nav-danger:hover { color: var(--dc-danger-text); background: var(--dc-danger-light); }
+	.lp-nav-col-title { display: flex; align-items: center; gap: 5px; padding: 3px 6px 1px; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+	.lp-nav-slot { padding-left: 10px; border-left: 1px solid #f1f5f9; margin-left: 10px; }
+	/* An empty column list is a zero-height div: without a min-height rows
+	   can never be dropped into it, in the navigator or on the canvas. */
+	#lp-navigator [data-nav-slot] { min-height: 24px; border-radius: 6px; }
+	#lp-navigator [data-nav-slot]:empty { border: 1px dashed #e2e8f0; }
+	/* ---- Palette cards: 2-column grid, full-width rows for layout ---- */
+	.lp-palette-group > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--dc-text-muted); cursor: pointer; border-radius: 6px; }
+	.lp-palette-group > summary:hover { background: #f9fafb; color: var(--dc-text-dark); }
+	.lp-palette-group > summary::-webkit-details-marker { display: none; }
+	.lp-palette-group > summary .lp-chev { transition: transform .15s; }
+	.lp-palette-group:not([open]) > summary .lp-chev { transform: rotate(-90deg); }
+	.lp-group-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+	.lp-palette-grid { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 2px 2px 8px; }
+	.lp-card { position: relative; display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 6px 26px 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: grab; transition: border-color .15s, box-shadow .15s; text-align: left; }
+	.lp-card:hover { border-color: var(--dc-primary); box-shadow: var(--dc-shadow-md); }
+	.lp-card:active { cursor: grabbing; }
+	.lp-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--dc-radius-md); background: var(--dc-gray-100); color: var(--dc-text-muted); flex-shrink: 0; }
+	.lp-card:hover .lp-card-icon { background: var(--dc-primary-light); color: var(--dc-primary-active); }
+	.lp-card-label { flex: 1; min-width: 0; font-size: 12px; line-height: 1.35; color: #374151; overflow-wrap: anywhere; }
+	/* Lightweight hover hint: a thin plus, no heavy badge. */
+	.lp-card-add { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: none; align-items: center; justify-content: center; color: #111827; }
+	.lp-card-add svg { stroke-width: 1.5; }
+	.lp-card:hover .lp-card-add { display: inline-flex; }
+	/* Per-item usage count: how many blocks of this type are on the page.
+	   Vertically centered on the right; on hover it yields to the plus. */
+	.lp-card-count { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--dc-primary-light); color: var(--dc-primary-active); font-size: 10px; font-weight: 700; line-height: 1; }
+	.lp-card:hover .lp-card-count { display: none; }
+
+	/* ---- Properties tabs (Content / Style / Advanced) ---- */
+	.lp-prop-tab { flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; }
+	.lp-prop-tab:hover { color: #111827; }
+	.lp-prop-tab.lp-active { color: var(--dc-text-dark); border-bottom-color: var(--dc-primary); }
+	/* ---- Toggle switch ---- */
+	.lp-switch { position: relative; display: inline-flex; width: 34px; height: 20px; flex-shrink: 0; }
+	.lp-switch input { opacity: 0; width: 0; height: 0; }
+	.lp-switch-track { position: absolute; inset: 0; border-radius: 999px; background: #d1d5db; transition: background .15s; }
+	.lp-switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
+	.lp-switch input:checked + .lp-switch-track { background: var(--dc-primary); }
+	.lp-switch input:checked + .lp-switch-track::after { transform: translateX(14px); }
+	input[type="range"].lp-range { accent-color: var(--dc-primary); }
+	.lp-swatch { width: 22px; height: 22px; border-radius: 7px; border: 1px solid rgba(0,0,0,.12); padding: 0; }
+	.lp-swatch:hover { transform: scale(1.12); }
+	/* ---- Canvas empty state + quick add ---- */
+	#lp-empty { position: absolute; inset: 12px; display: flex; align-items: center; justify-content: center; z-index: 10; pointer-events: none; }
+	#lp-empty-inner { pointer-events: auto; }
+	#lp-quickadd { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 10; }
+	/* Dialog text must not depend on Tailwind alone: Bootstrap paints <kbd>
+	   white-on-dark by default, which is unreadable on our light chips. */
+	#lp-shortcuts { color: var(--dc-text-dark); }
+	kbd.lp-kbd { display: inline-block; padding: 1px 6px; border: 1px solid #e5e7eb; border-bottom-width: 2px; border-radius: 6px; background: #f9fafb; color: var(--dc-text-dark); font-size: 11px; font-family: inherit; }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans text-sm">
@@ -54,7 +137,7 @@
 			<i data-lucide="arrow-left" class="w-4 h-4"></i>
 		</a>
 
-		<input type="text" id="lp-name-input" value="{{ landing.name }}"
+		<input type="text" id="lp-name-input" value="{{ landing.name|escape }}"
 			class="border border-gray-300 rounded px-2 py-1 text-sm w-56 focus:outline-none focus:border-blue-400 shrink-0"
 			placeholder="{{ i18n.entry_name }}" />
 
@@ -62,9 +145,8 @@
 
 		<div class="flex items-center gap-0.5 shrink-0" id="lp-lang-tabs">
 			{% for language in languages %}
-			<button type="button" class="lp-lang-tab px-2 py-1 text-xs rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-				data-lang-id="{{ language.language_id }}" data-lang-code="{{ language.code }}"
-				{% if language.language_id == default_language_id %}class="lp-lang-tab px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 font-medium"{% endif %}>{{ language.code|split('-')|first|upper }}</button>
+			<button type="button" class="lp-lang-tab px-2 py-1 text-xs rounded {% if language.language_id == default_language_id %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-100{% endif %}"
+				data-lang-id="{{ language.language_id }}" data-lang-code="{{ language.code }}">{{ language.code|split('-')|first|upper }}</button>
 			{% endfor %}
 		</div>
 
@@ -79,9 +161,22 @@
 		<button type="button" id="lp-undo" class="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 shrink-0" data-toggle="tooltip" title="{{ i18n.text_undo }}"><i data-lucide="undo-2" class="w-4 h-4"></i></button>
 		<button type="button" id="lp-redo" class="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 shrink-0" data-toggle="tooltip" title="{{ i18n.text_redo }}"><i data-lucide="redo-2" class="w-4 h-4"></i></button>
 
-		<button type="button" id="lp-settings-btn" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
-			<i data-lucide="settings-2" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_page_settings }}</span>
+		<button type="button" id="lp-navigator-btn" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ i18n.text_navigator }}">
+			<i data-lucide="list-tree" class="w-3.5 h-3.5"></i> <span class="max-lg:hidden">{{ i18n.text_navigator }}</span> <span id="lp-navigator-count" class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold bg-gray-100 text-gray-600 rounded-full">0</span>
 		</button>
+
+		<button type="button" id="lp-site-settings-btn" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ i18n.text_site_settings }}">
+			<span id="lp-settings-mode-icon" class="inline-flex"><i data-lucide="palette" class="w-3.5 h-3.5"></i></span>
+			<span id="lp-settings-mode-label" class="max-lg:hidden">{{ i18n.text_site_settings }}</span>
+		</button>
+
+		<button type="button" id="lp-shortcuts-btn" class="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 shrink-0" data-toggle="tooltip" title="{{ i18n.text_shortcuts }}"><i data-lucide="keyboard" class="w-4 h-4"></i></button>
+
+		{% if owner_information_id %}
+		<span class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ i18n.text_owner_information }}">
+			<i data-lucide="info" class="w-3.5 h-3.5"></i>
+		</span>
+		{% endif %}
 
 		<a id="lp-preview-link" href="{{ preview_base }}" target="_blank" rel="noopener" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
 			<i data-lucide="external-link" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_preview }}</span>
@@ -89,7 +184,7 @@
 
 		<div class="flex items-center gap-2 shrink-0">
 			<span id="lp-save-state" class="text-[11px] text-gray-400"></span>
-			<button type="button" id="lp-save-btn" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded">
+			<button type="button" id="lp-save-btn" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-sm" title="Ctrl+S">
 				<i data-lucide="save" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_save }}</span>
 			</button>
 		</div>
@@ -105,27 +200,30 @@
 			<div class="px-2 py-1.5 border-b border-gray-100">
 				<input type="text" id="lp-palette-search" class="lp-input" placeholder="{{ i18n.text_search_blocks }}" />
 			</div>
-			<div class="flex-1 overflow-y-auto lp-scroll p-1.5" id="lp-palette">
+			<div class="flex-1 overflow-y-auto lp-scroll p-1.5 min-h-0" id="lp-palette">
+				{% set group_icons = {'content': 'file-text', 'commerce': 'shopping-bag', 'media': 'images', 'layout': 'layout-template'} %}
 				{% for group_code, group_label in groups %}
-				<div class="lp-palette-group" data-group="{{ group_code }}">
-					<div class="lp-palette-group-title text-[10px] font-bold text-gray-400 uppercase px-2 py-1.5 tracking-wide">{{ i18n[group_label] }}</div>
-					{% for code, block in schema %}
-					{% if block.group == group_code %}
-					<div class="lp-palette-item flex items-center gap-2 px-2 py-1.5 rounded hover:bg-blue-50 text-gray-700 text-xs"
-						draggable="true" data-block-code="{{ code }}"
-						data-search="{{ i18n[block.name]|lower }} {{ code }}">
-						<i data-lucide="{{ block.icon }}" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-						<span class="truncate">{{ i18n[block.name] }}</span>
+				<details class="lp-palette-group" data-group="{{ group_code }}" open>
+					<summary><span class="lp-group-title"><i data-lucide="{{ group_icons[group_code] ?? 'folder' }}" class="w-3.5 h-3.5 shrink-0"></i><span>{{ i18n[group_label] }}</span></span><i data-lucide="chevron-down" class="w-3 h-3 lp-chev"></i></summary>
+					<div class="lp-palette-grid">
+						{% for code, block in schema %}
+						{% if block.group == group_code %}
+						<div class="lp-palette-item lp-card" draggable="true" data-block-code="{{ code }}"
+							data-search="{{ i18n[block.name]|lower }} {{ code }}" title="{{ i18n[block.name] }}">
+							<span class="lp-card-icon"><i data-lucide="{{ block.icon }}" class="w-4 h-4"></i></span>
+							<span class="lp-card-label">{{ i18n[block.name] }}</span>
+								<span class="lp-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
+								<span class="lp-card-count hidden" data-count-for="{{ code }}">0</span>
+						</div>
+						{% endif %}
+						{% endfor %}
 					</div>
-					{% endif %}
-					{% endfor %}
-				</div>
+				</details>
 				{% endfor %}
 			</div>
-
 			<div class="border-t border-gray-100 px-2 py-2">
 				<div class="flex items-center justify-between mb-1.5">
-					<span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{{ i18n.text_templates }}</span>
+					<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{{ i18n.text_templates }}</span>
 					<button type="button" id="lp-template-save" class="text-[11px] text-blue-600 hover:text-blue-800">{{ i18n.text_save_template }}</button>
 				</div>
 				<div id="lp-template-list" class="space-y-1 max-h-40 overflow-y-auto lp-scroll text-xs"></div>
@@ -133,11 +231,37 @@
 		</aside>
 
 		{# ==================== CENTER: LIVE PREVIEW ==================== #}
-		<main class="flex-1 overflow-hidden flex justify-center bg-gray-200 p-3" id="lp-canvas">
+		<main class="flex-1 overflow-hidden flex justify-center bg-gray-200 p-3 relative" id="lp-canvas">
 			<div id="lp-canvas-wrap" class="w-full h-full bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200">
 				<iframe id="lp-canvas-frame" src="{{ preview_base }}&lp_builder=1" title="{{ i18n.text_preview }}"></iframe>
 			</div>
+			<div id="lp-empty" class="hidden">
+				<div id="lp-empty-inner" class="bg-white rounded-2xl shadow-xl px-8 py-7 max-w-sm text-center">
+					<span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 mb-3"><i data-lucide="layout-template" class="w-6 h-6"></i></span>
+					<div class="font-semibold text-sm text-gray-900 mb-1">{{ i18n.text_no_blocks }}</div>
+					<p class="text-xs text-gray-500 mb-4">{{ i18n.text_empty_hint }}</p>
+					<button type="button" id="lp-empty-section" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">{{ i18n.text_add_section }}</button>
+				</div>
+			</div>
+			<div id="lp-quickadd" class="flex items-center gap-2 pl-3 pr-1.5 py-1.5 bg-white rounded-full shadow-lg border border-gray-200">
+				<span class="flex items-center gap-1 text-[11px] text-gray-500" title="{{ i18n.text_palette }}"><i data-lucide="layers" class="w-3.5 h-3.5"></i><span id="lp-block-count">0</span></span>
+				<span class="w-px h-4 bg-gray-200"></span>
+				<button type="button" id="lp-quickadd-section" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-full"><i data-lucide="plus" class="w-3.5 h-3.5"></i> {{ i18n.text_add_section }}</button>
+			</div>
 		</main>
+
+		{# ==================== NAVIGATOR (PAGE TREE) ==================== #}
+		{# No `hidden` class here: Bootstrap's `.hidden` is `display:none !important` and would
+		   overrule `#lp-navigator.lp-nav-open` below. Visibility is owned by that rule alone. #}
+		<aside id="lp-navigator" class="w-64 bg-white border-r border-gray-200 flex-col shrink-0">
+			<div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
+				<span class="font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+					<i data-lucide="list-tree" class="w-3.5 h-3.5"></i> {{ i18n.text_navigator }}
+				</span>
+				<button type="button" id="lp-navigator-close" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+			</div>
+			<div id="lp-navigator-tree" class="flex-1 overflow-y-auto lp-scroll p-1.5 text-xs"></div>
+		</aside>
 
 		{# ==================== RIGHT: PROPERTIES ==================== #}
 		<aside class="w-72 lg:w-80 bg-white border-l border-gray-200 flex flex-col shrink-0">
@@ -146,6 +270,11 @@
 					<i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> {{ i18n.text_block_settings }}
 				</span>
 				<button type="button" id="lp-props-close" class="text-gray-400 hover:text-gray-700 hidden" data-toggle="tooltip" title="{{ i18n.text_back }}"><i data-lucide="x" class="w-4 h-4"></i></button>
+			</div>
+			<div class="px-2 flex border-b border-gray-100 hidden" id="lp-props-tabs">
+				<button type="button" data-props-tab="content" class="lp-prop-tab lp-active">{{ i18n.text_content }}</button>
+				<button type="button" data-props-tab="style" class="lp-prop-tab">{{ i18n.text_style }}</button>
+				<button type="button" data-props-tab="advanced" class="lp-prop-tab">{{ i18n.text_advanced }}</button>
 			</div>
 			<div id="lp-props-body" class="flex-1 overflow-y-auto lp-scroll p-3">
 				<div class="flex flex-col items-center justify-center h-full text-center text-gray-400">
@@ -160,27 +289,13 @@
 				<button type="button" data-action="remove" class="flex-1 px-2 py-1.5 text-[11px] text-red-600 hover:bg-red-50 rounded flex items-center justify-center gap-1"><i data-lucide="trash-2" class="w-3 h-3"></i> {{ i18n.text_remove }}</button>
 			</div>
 		</aside>
-	</div>
-</div>
 
-{# ==================== PAGE SETTINGS SLIDE-OVER ==================== #}
-<div id="lp-settings" class="fixed inset-0 z-40 hidden">
-	<div class="absolute inset-0 lp-overlay" data-close="settings"></div>
-	<div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col">
-		<div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-			<span class="font-semibold text-sm">{{ i18n.text_page_settings }}</span>
-			<button type="button" class="text-gray-400 hover:text-gray-700" data-close="settings"><i data-lucide="x" class="w-4 h-4"></i></button>
-		</div>
-		<div class="flex-1 overflow-y-auto lp-scroll px-4 py-3 space-y-4" id="lp-settings-body"></div>
-		<div class="px-4 py-3 border-t border-gray-100 text-right">
-			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="settings">{{ i18n.button_cancel }}</button>
-		</div>
 	</div>
 </div>
 
 {# ==================== TEMPLATE SAVE DIALOG ==================== #}
 <div id="lp-template-dialog" class="fixed inset-0 z-40 hidden">
-	<div class="absolute inset-0 lp-overlay" data-close="template"></div>
+	<div class="absolute inset-0 lp-overlay" data-close="template-dialog"></div>
 	<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 bg-white rounded-lg shadow-2xl p-4">
 		<div class="font-semibold text-sm mb-3">{{ i18n.text_save_template }}</div>
 		<label class="lp-field-label">{{ i18n.text_template_name }}</label>
@@ -189,8 +304,27 @@
 			<input type="checkbox" id="lp-template-all" /> {{ i18n.text_clone_hint }}
 		</label>
 		<div class="flex justify-end gap-2">
-			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="template">{{ i18n.button_cancel }}</button>
+			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="template-dialog">{{ i18n.button_cancel }}</button>
 			<button type="button" id="lp-template-confirm" class="px-3 py-1.5 text-xs bg-blue-600 text-white hover:bg-blue-700 rounded">{{ i18n.text_save }}</button>
+		</div>
+	</div>
+</div>
+
+{# ==================== SHORTCUTS HELP ==================== #}
+<div id="lp-shortcuts" class="fixed inset-0 z-40 hidden">
+	<div class="absolute inset-0 lp-overlay" data-close="shortcuts"></div>
+	<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-2xl p-4">
+		<div class="font-semibold text-sm mb-3 flex items-center gap-2"><i data-lucide="keyboard" class="w-4 h-4 text-gray-400"></i> {{ i18n.text_shortcuts }}</div>
+		<div class="space-y-1.5 text-xs text-gray-600">
+			<div class="flex items-center justify-between"><span>{{ i18n.text_save }}</span><span><kbd class="lp-kbd">Ctrl</kbd> + <kbd class="lp-kbd">S</kbd></span></div>
+			<div class="flex items-center justify-between"><span>{{ i18n.text_undo }}</span><span><kbd class="lp-kbd">Ctrl</kbd> + <kbd class="lp-kbd">Z</kbd></span></div>
+			<div class="flex items-center justify-between"><span>{{ i18n.text_redo }}</span><span><kbd class="lp-kbd">Ctrl</kbd> + <kbd class="lp-kbd">Shift</kbd> + <kbd class="lp-kbd">Z</kbd></span></div>
+			<div class="flex items-center justify-between"><span>{{ i18n.text_duplicate }}</span><span><kbd class="lp-kbd">Ctrl</kbd> + <kbd class="lp-kbd">D</kbd></span></div>
+			<div class="flex items-center justify-between"><span>{{ i18n.text_remove }}</span><span><kbd class="lp-kbd">Del</kbd></span></div>
+			<div class="flex items-center justify-between"><span>{{ i18n.text_back }}</span><span><kbd class="lp-kbd">Esc</kbd></span></div>
+		</div>
+		<div class="mt-3 text-right">
+			<button type="button" class="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded" data-close="shortcuts">{{ i18n.button_cancel }}</button>
 		</div>
 	</div>
 </div>
@@ -209,22 +343,33 @@ window.DC_LANDING = {
 		templateDelete: {{ template_delete_url|json_encode|raw }},
 		autocomplete: {{ autocomplete_url|json_encode|raw }},
 		filemanager: {{ filemanager_url|json_encode|raw }},
-		list: {{ list_url|json_encode|raw }}
+		list: {{ list_url|json_encode|raw }},
+		ownerNames: {{ owner_names_url|json_encode|raw }}
 	},
 	previewBase: {{ preview_base|json_encode|raw }},
 	previewBases: {{ preview_bases|json_encode|raw }},
+	ownerInformationId: {{ owner_information_id|json_encode|raw }},
+	ownerTitles: {{ owner_titles|json_encode|raw }},
+	canEditOwnerTitles: {{ can_edit_owner_titles ? 'true' : 'false' }},
+	owner: {{ owner|json_encode|raw }},
+	canEditOwner: {{ can_edit_owner ? 'true' : 'false' }},
 	imageUrl: {{ image_url|json_encode|raw }},
+	siteDesign: {{ site_design|json_encode|raw }},
+	siteDesignSchema: {{ site_design_schema|json_encode|raw }},
+	siteDesignUrl: {{ site_design_url|json_encode|raw }},
 	landing: {{ landing|json_encode|raw }},
 	blocks: {{ blocks|json_encode|raw }},
 	languages: {{ languages|json_encode|raw }},
 	defaultLanguageId: {{ default_language_id }},
+	initialLanguageId: {{ initial_language_id|default(default_language_id) }},
 	schema: {{ schema|json_encode|raw }},
+	structures: {{ structures|json_encode|raw }},
 	groups: {{ groups|json_encode|raw }},
 	templates: {{ templates|json_encode|raw }},
 	banners: {{ banners|json_encode|raw }},
 	i18n: {{ i18n|json_encode|raw }}
 };
 </script>
-<script src="view/javascript/dockercart_landing_builder.js"></script>
+<script src="view/javascript/dockercart_landing_builder.js?v={{ builder_js_version }}"></script>
 </body>
 </html>

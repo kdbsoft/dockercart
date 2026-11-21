@@ -20,7 +20,11 @@ class ControllerCatalogInformation extends Controller {
 		$this->load->model('catalog/information');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_catalog_information->addInformation($this->request->post);
+			$information_id = $this->model_catalog_information->addInformation($this->request->post);
+
+			if (!empty($this->request->post['use_builder']) && $this->user->hasPermission('modify', 'design/landing')) {
+				$this->model_catalog_information->enableBuilder($information_id);
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -53,6 +57,12 @@ class ControllerCatalogInformation extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_catalog_information->editInformation($this->request->get['information_id'], $this->request->post);
+
+			// Idempotent: only creates the landing (and converts the classic
+			// copy into a text block) on the first activation.
+			if (!empty($this->request->post['use_builder']) && $this->user->hasPermission('modify', 'design/landing')) {
+				$this->model_catalog_information->enableBuilder((int)$this->request->get['information_id']);
+			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -221,6 +231,7 @@ class ControllerCatalogInformation extends Controller {
 				'title_raw'      => $result['title'],
 				'sort_order'     => $result['sort_order'],
 				'sort_order_raw' => $result['sort_order'],
+				'use_builder'    => (int)$result['use_builder'],
 				'status'         => $result['status'],
 				'status_raw'     => $result['status'],
 				'edit'           => $this->url->link('catalog/information/edit', 'user_token=' . $this->session->data['user_token'] . '&information_id=' . $result['information_id'] . $url, true),
@@ -363,6 +374,7 @@ class ControllerCatalogInformation extends Controller {
 		}
 
 		$data['user_token'] = $this->session->data['user_token'];
+		$data['information_id'] = isset($this->request->get['information_id']) ? (int)$this->request->get['information_id'] : 0;
 
 		$this->load->model('localisation/language');
 
@@ -445,6 +457,27 @@ class ControllerCatalogInformation extends Controller {
 		} else {
 			$data['status'] = true;
 		}
+
+		if (isset($this->request->post['use_builder'])) {
+			$data['use_builder'] = (int)$this->request->post['use_builder'];
+		} elseif (!empty($information_info)) {
+			$data['use_builder'] = (int)$information_info['use_builder'];
+		} else {
+			$data['use_builder'] = 0;
+		}
+
+		// The builder toggle/link only makes sense for users who may open
+		// design/landing (roles already grant it to content manager/marketer).
+		$data['can_builder'] = $this->user->hasPermission('modify', 'design/landing');
+
+		$builder_landing_id = 0;
+
+		if (isset($this->request->get['information_id'])) {
+			$builder_landing_id = $this->model_catalog_information->getBuilderLandingId((int)$this->request->get['information_id']);
+		}
+
+		$data['builder_landing_id'] = $builder_landing_id;
+		$data['builder_url'] = $builder_landing_id ? $this->url->link('design/landing/builder', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $builder_landing_id, true) : '';
 
 		if (isset($this->request->post['sort_order'])) {
 			$data['sort_order'] = $this->request->post['sort_order'];
@@ -605,6 +638,70 @@ class ControllerCatalogInformation extends Controller {
 				$json['success'] = true;
 			} else {
 				$json['error'] = 'Invalid field';
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Instant content-mode switch (mirrors catalog/product_configurable::setMode).
+	 *
+	 * POST: information_id, mode = classic|builder. Enabling creates the owned
+	 * landing on first use (enableBuilder) and returns its builder URL;
+	 * disabling only flips the flag — the landing stays as the fallback.
+	 */
+	public function setBuilderMode() {
+		$this->load->language('catalog/information');
+
+		$json = array();
+
+		if (!$this->user->hasPermission('modify', 'catalog/information')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		if (!isset($this->request->post['information_id'])) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($this->request->post['mode']) || !in_array($this->request->post['mode'], array('classic', 'builder'))) {
+			$json['error'] = 'Invalid request';
+		}
+
+		if (!isset($json['error'])) {
+			$information_id = (int)$this->request->post['information_id'];
+			$mode = $this->request->post['mode'];
+
+			$this->load->model('catalog/information');
+
+			$information_info = $this->model_catalog_information->getInformation($information_id);
+
+			if (!$information_info) {
+				$json['error'] = 'Invalid request';
+			} else {
+				$builder_landing_id = 0;
+
+				if ($mode === 'builder') {
+					if (!$this->user->hasPermission('modify', 'design/landing')) {
+						$json['error'] = $this->language->get('error_permission');
+					} else {
+						$builder_landing_id = $this->model_catalog_information->enableBuilder($information_id);
+					}
+				}
+
+				if (!isset($json['error'])) {
+					$this->model_catalog_information->setBuilderMode($information_id, $mode === 'builder' ? 1 : 0);
+
+					if ($mode === 'classic') {
+						$builder_landing_id = $this->model_catalog_information->getBuilderLandingId($information_id);
+					}
+
+					$json['success'] = $this->language->get('text_success_builder_mode');
+					$json['use_builder'] = $mode === 'builder' ? 1 : 0;
+					$json['builder_landing_id'] = $builder_landing_id;
+					$json['builder_url'] = $builder_landing_id ? $this->url->link('design/landing/builder', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $builder_landing_id, true) : '';
+				}
 			}
 		}
 

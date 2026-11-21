@@ -1,0 +1,382 @@
+/**
+ * Native Page Builder blocks: features, steps, faq, statement.
+ *
+ * Loaded by ControllerLandingPage for every landing page, independently of the
+ * active store theme. The markup uses only .lp-native* classes (no Tailwind
+ * utilities), so the blocks render identically in themes that do not ship
+ * Tailwind. Theme styles may still override these rules with a more specific
+ * selector or with the page's Custom CSS field.
+ */
+
+.lp-native {
+	--lp-native-ink: var(--lp-ink, #0b1b33);
+	--lp-native-blue: var(--lp-accent, #2563eb);
+	--lp-native-line: var(--lp-line, #dce3ee);
+	--lp-native-soft: var(--lp-surface, #f6f8fc);
+	--lp-native-muted: var(--lp-muted, #5c6b7f);
+	box-sizing: border-box;
+	color: inherit;
+	font: inherit;
+	padding: var(--lp-pad-y, 4.75rem) 24px;
+}
+
+.lp-native *,
+.lp-native *::before,
+.lp-native *::after {
+	box-sizing: border-box;
+}
+
+.lp-native__inner {
+	max-width: var(--lp-content-w, 1120px);
+	margin: 0 auto;
+}
+
+/* image_text bullets draw their own check mark; hide the template's Lucide
+   placeholder (and the <svg> it becomes at runtime) so it never doubles up. */
+#lp-page .lp-block--image_text li > i[data-lucide],
+#lp-page .lp-block--image_text li > svg {
+	display: none;
+}
+
+/* Full-width backgrounds stay edge-to-edge in every theme. The inner
+   .lp-native__inner still centres the content at a comfortable measure. */
+#lp-page .lp-block--hero .lp-block__body.w-full > div,
+#lp-page .lp-block--cta .lp-block__body.w-full > div {
+	border-radius: 0;
+}
+
+#lp-page .lp-block--features .lp-block__body,
+#lp-page .lp-block--steps .lp-block__body,
+#lp-page .lp-block--faq .lp-block__body,
+#lp-page .lp-block--statement .lp-block__body {
+	max-width: none;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.lp-native--features,
+.lp-native--steps,
+.lp-native--faq,
+.lp-native--statement {
+	text-align: left;
+}
+
+.lp-native--soft {
+	background: var(--lp-native-soft);
+}
+
+.lp-native--dark {
+	background: var(--lp-native-ink);
+	color: #fff;
+}
+
+.lp-native h2,
+.lp-native h3,
+.lp-native p,
+.lp-native ol {
+	margin-top: 0;
+}
+
+.lp-native__head {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 40px;
+	align-items: end;
+	border-top: 1px solid var(--lp-native-line);
+	padding-top: 22px;
+	margin-bottom: 44px;
+}
+
+.lp-native--dark .lp-native__head {
+	border-color: rgba(255, 255, 255, .25);
+}
+
+.lp-native__title {
+	font-size: clamp(1.75rem, 3.2vw, 2.6rem);
+	line-height: 1.12;
+	letter-spacing: -.03em;
+	font-weight: 800;
+	margin: 0;
+	color: inherit;
+}
+
+.lp-native__lead {
+	font-size: 1rem;
+	line-height: 1.75;
+	color: var(--lp-native-muted);
+	margin: 0;
+}
+
+.lp-native--dark .lp-native__lead {
+	color: rgba(255, 255, 255, .74);
+}
+
+/* Feature list ---------------------------------------------------------- */
+
+.lp-native__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 38px 42px;
+}
+
+.lp-native--features .lp-native__grid[data-columns="2"] {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lp-native--features .lp-native__grid[data-columns="4"] {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lp-native__item {
+	border-top: 1px solid var(--lp-native-line);
+	padding-top: 20px;
+}
+
+.lp-native--dark .lp-native__item {
+	border-color: rgba(255, 255, 255, .25);
+}
+
+.lp-native__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: rgba(37, 99, 235, .09);
+	color: var(--lp-native-blue);
+}
+
+.lp-native--dark .lp-native__icon {
+	background: rgba(255, 255, 255, .12);
+	color: #fff;
+}
+
+.lp-native__icon svg {
+	width: 22px;
+	height: 22px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.lp-native__item-title {
+	font-size: 1.0625rem;
+	font-weight: 700;
+	margin: 18px 0 8px;
+	color: inherit;
+}
+
+.lp-native__item-text {
+	font-size: .95rem;
+	line-height: 1.7;
+	color: var(--lp-native-muted);
+	margin: 0;
+}
+
+.lp-native--dark .lp-native__item-text {
+	color: rgba(255, 255, 255, .72);
+}
+
+/* Numbered steps -------------------------------------------------------- */
+
+.lp-native__steps {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lp-native__steps[data-count="2"] {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lp-native__steps[data-count="4"] {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lp-native__steps[data-count="5"] {
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lp-native__step {
+	position: relative;
+	border-top: 1px solid var(--lp-native-line);
+	padding: 30px 24px 0 0;
+}
+
+.lp-native--dark .lp-native__step {
+	border-color: rgba(255, 255, 255, .25);
+}
+
+.lp-native__step-num {
+	position: absolute;
+	top: -15px;
+	left: 0;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: var(--lp-native-ink);
+	color: #fff;
+	display: grid;
+	place-items: center;
+	font-size: .75rem;
+	font-weight: 700;
+}
+
+.lp-native--dark .lp-native__step-num {
+	background: #fff;
+	color: var(--lp-native-ink);
+}
+
+/* FAQ ------------------------------------------------------------------- */
+
+.lp-native__faq {
+	max-width: 860px;
+	border-top: 1px solid var(--lp-native-line);
+}
+
+.lp-native--dark .lp-native__faq {
+	border-color: rgba(255, 255, 255, .25);
+}
+
+.lp-native__qa {
+	border-bottom: 1px solid var(--lp-native-line);
+}
+
+.lp-native--dark .lp-native__qa {
+	border-color: rgba(255, 255, 255, .25);
+}
+
+.lp-native__question {
+	list-style: none;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+	padding: 20px 0;
+	font-weight: 700;
+	font-size: 1.05rem;
+	color: inherit;
+}
+
+.lp-native__question::-webkit-details-marker {
+	display: none;
+}
+
+.lp-native__question::after {
+	content: '+';
+	color: var(--lp-native-blue);
+	font-size: 1.4rem;
+	font-weight: 400;
+	line-height: 1;
+	flex: none;
+}
+
+.lp-native--dark .lp-native__question::after {
+	color: #fff;
+}
+
+.lp-native__qa[open] .lp-native__question::after {
+	content: '\2212';
+}
+
+.lp-native__answer {
+	padding: 0 0 22px;
+	color: var(--lp-native-muted);
+	line-height: 1.75;
+	max-width: 720px;
+}
+
+.lp-native--dark .lp-native__answer {
+	color: rgba(255, 255, 255, .72);
+}
+
+/* Statement ------------------------------------------------------------- */
+
+.lp-native--statement .lp-native__inner {
+	max-width: 900px;
+	text-align: center;
+}
+
+.lp-native__statement {
+	font-size: clamp(1.5rem, 3vw, 2.25rem);
+	line-height: 1.32;
+	letter-spacing: -.02em;
+	font-weight: 700;
+	margin: 0 0 18px;
+}
+
+.lp-native__statement-foot {
+	color: rgba(255, 255, 255, .7);
+	margin: 0;
+}
+
+.lp-native--statement.lp-native--plain .lp-native__statement-foot,
+.lp-native--statement.lp-native--soft .lp-native__statement-foot {
+	color: var(--lp-native-muted);
+}
+
+/* Accessibility and small screens -------------------------------------- */
+
+.lp-native summary:focus-visible,
+.lp-native a:focus-visible {
+	outline: 2px solid var(--lp-native-blue);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+@media (max-width: 900px) {
+	.lp-native__head {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.lp-native__grid,
+	.lp-native--features .lp-native__grid[data-columns="4"] {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.lp-native__steps,
+	.lp-native__steps[data-count="4"],
+	.lp-native__steps[data-count="5"] {
+		grid-template-columns: 1fr;
+	}
+
+	.lp-native__step {
+		border-top: 0;
+		border-left: 1px solid var(--lp-native-line);
+		padding: 0 0 26px 28px;
+	}
+
+	.lp-native--dark .lp-native__step {
+		border-color: rgba(255, 255, 255, .25);
+	}
+
+	.lp-native__step-num {
+		top: 0;
+		left: -15px;
+	}
+}
+
+@media (max-width: 600px) {
+	.lp-native {
+		padding: 54px 20px;
+	}
+
+	.lp-native__grid,
+	.lp-native--features .lp-native__grid[data-columns="4"] {
+		grid-template-columns: 1fr;
+		gap: 26px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lp-native * {
+		animation-duration: .01ms !important;
+		transition-duration: .01ms !important;
+	}
+}

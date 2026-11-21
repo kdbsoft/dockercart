@@ -69,3 +69,17 @@ $_['error_invalid_sort_order'] = 'Invalid sort order value!';
 // Empty state
 $_['text_empty_title']       = 'No information pages yet';
 $_['text_empty_description'] = 'Add static pages like About or Terms of Service. Create your first information page.';
+
+// Page builder (information page as a landing page)
+$_['text_builder_card']      = 'Page Builder';
+$_['entry_use_builder']      = 'Compose this page in the builder';
+$_['help_use_builder']       = 'Build the page from sections (hero, products, galleries, CTA) exactly like the landing pages. The existing text is converted automatically the first time it is enabled.';
+$_['button_open_builder']    = 'Open in Builder';
+$_['text_builder_cta_hint']   = 'The page content is composed from sections in the builder.';
+$_['text_builder_pending']    = 'Save the page to enable the builder — the current text will be carried over automatically.';
+$_['text_builder_badge']      = 'Composed in the page builder';
+$_['text_mode_classic']        = 'Classic Editor';
+$_['text_mode_builder']        = 'Page Builder';
+$_['text_switch_to_builder']   = 'Switch to Page Builder';
+$_['text_switch_to_classic']   = 'Switch to Classic Editor';
+$_['text_success_builder_mode'] = 'Content mode updated.';

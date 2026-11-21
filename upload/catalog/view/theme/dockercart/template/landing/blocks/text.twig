@@ -2,7 +2,7 @@
 {% set heading_class = has_wrapper_bg ? wrapper_text_class : 'text-gray-900' %}
 <div class="{{ width_class }} mx-auto">
 	{% if content.heading %}
-	<h2 class="text-2xl sm:text-3xl font-extrabold mb-4 {{ heading_class }}">{{ content.heading }}</h2>
+	<h2 class="text-2xl sm:text-3xl font-extrabold mb-4 {{ heading_class }}">{{ content.heading|escape }}</h2>
 	{% endif %}
 	{% if content.body %}
 	<div class="prose max-w-none prose-headings:font-extrabold prose-p:leading-relaxed prose-a:text-blue-600 prose-img:rounded-2xl {{ has_wrapper_bg ? wrapper_prose_class : 'prose-slate prose-p:text-gray-600 prose-li:text-gray-600' }}">

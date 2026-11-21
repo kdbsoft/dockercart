@@ -88,7 +88,15 @@ class ControllerDesignLanding extends Controller {
 		$data['landing_id'] = $landing_id;
 		$data['user_token'] = $this->session->data['user_token'];
 
-		$data['back'] = $this->url->link('design/landing', 'user_token=' . $this->session->data['user_token'], true);
+		// A landing owned by an information page is that page's composed body:
+		// back to Catalog > Information, the canvas shows the information page
+		// URL and the page settings slide-over drops slug/status/schedule/home.
+		$owner_information_id = (int)($landing['information_id'] ?? 0);
+
+		$data['owner_information_id'] = $owner_information_id;
+		$data['back'] = $owner_information_id
+			? $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'], true)
+			: $this->url->link('design/landing', 'user_token=' . $this->session->data['user_token'], true);
 		$data['save_url'] = $this->url->link('design/landing/save', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
 		$data['token_url'] = $this->url->link('design/landing/previewToken', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
 		$data['template_url'] = $this->url->link('design/landing/saveTemplate', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
@@ -97,9 +105,21 @@ class ControllerDesignLanding extends Controller {
 		$data['autocomplete_url'] = $this->url->link('design/landing/autocomplete', 'user_token=' . $this->session->data['user_token'], true);
 		$data['filemanager_url'] = $this->url->link('common/filemanager', 'user_token=' . $this->session->data['user_token'], true);
 		$data['list_url'] = $this->url->link('design/landing', 'user_token=' . $this->session->data['user_token'], true);
+		$data['site_design'] = $this->model_design_landing->getSiteDesign();
+		$data['site_design_schema'] = \Dockercart\Landing\Design::schema();
+		$data['site_design_url'] = $this->url->link('design/landing/saveSiteDesign', 'user_token=' . $this->session->data['user_token'], true);
 
 		$preview_token = $this->makePreviewToken($landing_id);
 		$descriptions = $this->model_design_landing->getLandingDescriptions($landing_id);
+
+		// Display values are stored html-encoded (classic form / JSON save both
+		// encode at the boundary): decode them for the builder inputs, the save
+		// re-encodes. Same flow as the owner titles below.
+		foreach ($descriptions as $language_id => $row) {
+			foreach (['meta_title', 'meta_description', 'meta_keyword'] as $key) {
+				$descriptions[$language_id][$key] = html_entity_decode((string)($row[$key] ?? ''), ENT_QUOTES, 'UTF-8');
+			}
+		}
 
 		// Preview URLs use the page's own keyword path (no ?route= form: the SEO
 		// startup redirects those to the pretty URL, which would drop the
@@ -107,14 +127,37 @@ class ControllerDesignLanding extends Controller {
 		$preview_bases = [];
 		$fallback_base = HTTP_CATALOG . 'index.php?route=landing/page&landing_id=' . $landing_id;
 
+		$information_seo_urls = [];
+
+		if ($owner_information_id) {
+			$this->load->model('catalog/information');
+
+			$information_seo_urls = $this->model_catalog_information->getInformationSeoUrls($owner_information_id);
+
+			$fallback_base = HTTP_CATALOG . 'index.php?route=information/information&information_id=' . $owner_information_id;
+		}
+
 		foreach ($languages as $language) {
 			$language_id = (int)$language['language_id'];
-			$slug = trim((string)($descriptions[$language_id]['slug'] ?? ''));
 			$query = ['preview_token' => $preview_token, 'lp_builder' => 1];
 
-			if ($slug !== '') {
-				$preview_bases[$language_id] = HTTP_CATALOG . $slug . '?' . http_build_query($query);
+			if ($owner_information_id) {
+				// The owned page renders at the information page's own keyword.
+				$keyword = trim((string)($information_seo_urls[0][$language_id] ?? ''));
 			} else {
+				$keyword = trim((string)($descriptions[$language_id]['slug'] ?? ''));
+			}
+
+			if ($keyword !== '') {
+				// Language-prefixed: the prefix is the explicit language (the
+				// startup's first priority), so the canvas follows the selected
+				// tab even when several languages share one keyword - the
+				// keyword-inferred language never gets a say here.
+				$preview_bases[$language_id] = HTTP_CATALOG . $language['code'] . '/' . $keyword . '?' . http_build_query($query);
+			} else {
+				// No keyword for this language: the route form + switch_lang
+				// (enforceCleanSeoUrls leaves preview_token URLs alone, so the
+				// session language survives).
 				$preview_bases[$language_id] = $fallback_base . '&' . http_build_query($query);
 			}
 		}
@@ -125,7 +168,7 @@ class ControllerDesignLanding extends Controller {
 
 		$data['landing'] = [
 			'landing_id'     => (int)$landing['landing_id'],
-			'name'           => (string)$landing['name'],
+			'name'           => html_entity_decode((string)$landing['name'], ENT_QUOTES, 'UTF-8'),
 			'status'         => (int)$landing['status'],
 			'chrome'         => (string)$landing['chrome'],
 			'is_home'        => (int)$landing['is_home'],
@@ -138,13 +181,98 @@ class ControllerDesignLanding extends Controller {
 			'descriptions'   => $descriptions,
 		];
 
+		// An owned landing shows the information page title per language in
+		// the top bar (the landing's own name is a default-language snapshot).
+		// Edits write through to oc_information_description.title for the
+		// selected language (catalog/information/updateNames), which is what
+		// the storefront H1/meta use.
+		$data['owner_titles'] = [];
+		$data['can_edit_owner_titles'] = false;
+		$data['owner_names_url'] = '';
+		$data['owner'] = ['status' => 0, 'descriptions' => []];
+		$data['can_edit_owner'] = false;
+
+		if ($owner_information_id) {
+			$this->load->model('catalog/information');
+
+			$owner_descriptions = $this->model_catalog_information->getInformationDescriptions($owner_information_id);
+			$owner_information = $this->model_catalog_information->getInformation($owner_information_id);
+			$owner_seo_urls = $this->model_catalog_information->getInformationSeoUrls($owner_information_id);
+
+			foreach ($languages as $language) {
+				$language_id = (int)$language['language_id'];
+
+				// Titles are stored html-escaped (Request::clean over POST, same
+				// as the information form) - decode for the input display.
+				$data['owner_titles'][$language_id] = html_entity_decode((string)($owner_descriptions[$language_id]['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+			}
+
+			$data['can_edit_owner_titles'] = $this->user->hasPermission('modify', 'catalog/information');
+			$data['can_edit_owner'] = $data['can_edit_owner_titles'];
+
+			if ($data['can_edit_owner_titles']) {
+				$data['owner_names_url'] = $this->url->link('catalog/information/updateNames', 'user_token=' . $this->session->data['user_token'], true);
+			}
+
+			// Status, meta tags and the default-store SEO keyword are edited
+			// straight from the builder Page Settings. The top bar works off
+			// the same status, so the badge never disagrees with the page.
+			$data['landing']['status'] = (int)($owner_information['status'] ?? $data['landing']['status']);
+
+			$data['owner'] = [
+				'status'       => (int)($owner_information['status'] ?? 0),
+				'descriptions' => [],
+			];
+
+			foreach ($languages as $language) {
+				$language_id = (int)$language['language_id'];
+				$description = $owner_descriptions[$language_id] ?? [];
+
+				$data['owner']['descriptions'][$language_id] = [
+					'slug'             => html_entity_decode(trim((string)(($owner_seo_urls[0] ?? [])[$language_id] ?? '')), ENT_QUOTES, 'UTF-8'),
+					'meta_title'       => html_entity_decode((string)($description['meta_title'] ?? ''), ENT_QUOTES, 'UTF-8'),
+					'meta_description' => html_entity_decode((string)($description['meta_description'] ?? ''), ENT_QUOTES, 'UTF-8'),
+					'meta_keyword'     => html_entity_decode((string)($description['meta_keyword'] ?? ''), ENT_QUOTES, 'UTF-8'),
+				];
+			}
+		}
+
 		$data['blocks'] = $this->model_design_landing->getBlocks($landing_id);
 
 		$data['languages'] = array_values($languages);
 		$data['default_language_id'] = (int)$this->config->get('config_language_id');
 
+		// Deep link from the information form opens the builder on the tab
+		// language (each information language tab carries its own button).
+		$initial_language_id = (int)($this->request->get['language_id'] ?? 0);
+		$known_language_ids = array_map(static fn($language): int => (int)$language['language_id'], $languages);
+
+		if (!in_array($initial_language_id, $known_language_ids, true)) {
+			$initial_language_id = $data['default_language_id'];
+		}
+
+		$data['initial_language_id'] = $initial_language_id;
+
 		$data['schema'] = Dockercart\Landing\Blocks::schema();
 		$data['groups'] = Dockercart\Landing\Blocks::GROUPS;
+
+		// Column count per section structure preset (the navigator needs it to
+		// render one drop list per column).
+		$data['structures'] = [];
+
+		foreach (Dockercart\Landing\Blocks::all() as $code => $block) {
+			if (empty($block['container'])) {
+				continue;
+			}
+
+			foreach ($block['fields'] as $field) {
+				if (($field['key'] ?? '') === 'structure' && !empty($field['options'])) {
+					foreach (array_keys($field['options']) as $structure) {
+						$data['structures'][(string)$structure] = Dockercart\Landing\Blocks::columnCount((string)$structure);
+					}
+				}
+			}
+		}
 
 		$data['templates'] = $this->model_design_landing->getTemplates();
 
@@ -159,7 +287,17 @@ class ControllerDesignLanding extends Controller {
 
 		$data['banners'] = $banners;
 
+		// Standalone page, no admin chrome: link the store favicon here so
+		// the browser tab shows it (same source as the storefront header).
+		$data['favicon_links'] = $this->faviconLinks();
+
 		$data['i18n'] = $this->buildI18n($languages);
+
+		// Cache-bust the builder script by mtime: nginx serves static assets
+		// with long-lived immutable headers, so a plain F5 would keep running
+		// yesterday's JS against today's page.
+		$data['builder_js_version'] = (string)@filemtime(DIR_APPLICATION . 'view/javascript/dockercart_landing_builder.js');
+		$data['admin_css_version'] = (string)@filemtime(DIR_APPLICATION . 'view/stylesheet/dockercart_tokens.css');
 
 		// Do NOT load admin chrome — standalone builder page (same as design/layout/builder).
 		$this->response->setOutput($this->load->view('design/landing_builder', $data));
@@ -196,15 +334,45 @@ class ControllerDesignLanding extends Controller {
 		}
 
 		if (!isset($json['error'])) {
-			$errors = $this->model_design_landing->validateLanding($payload, $landing_id);
+			$landing = $this->model_design_landing->getLanding($landing_id);
+
+			$owned = $landing && (int)($landing['information_id'] ?? 0) > 0;
+
+			$errors = $this->model_design_landing->validateLanding($payload, $landing_id, $owned);
 
 			if ($errors) {
 				$json['fields'] = $errors;
 				$json['error'] = reset($errors);
 			}
+
+			// Owned landings edit the information page (status, meta tags,
+			// default-store SEO keyword) straight from the builder Page
+			// Settings. Validated up front; written after the landing save.
+			$owner = null;
+
+			if (!isset($json['error']) && $owned && isset($payload['owner']) && is_array($payload['owner'])) {
+				if (!$this->user->hasPermission('modify', 'catalog/information')) {
+					$json['error'] = $this->language->get('error_permission');
+				} else {
+					$owner_errors = $this->model_design_landing->validateOwner($payload['owner'], (int)$landing['information_id']);
+
+					if ($owner_errors) {
+						$json['fields'] = $owner_errors;
+						$json['error'] = reset($owner_errors);
+					} else {
+						$owner = [
+							'information_id' => (int)$landing['information_id'],
+							'status'         => !empty($payload['owner']['status']) ? 1 : 0,
+							'descriptions'   => (array)($payload['owner']['descriptions'] ?? []),
+						];
+					}
+				}
+			}
 		}
 
 		if (!isset($json['error'])) {
+			$payload = $this->encodeDisplayPayload($payload);
+
 			$result = $this->model_design_landing->saveLanding($landing_id, $payload);
 
 			if (empty($result['success'])) {
@@ -218,9 +386,56 @@ class ControllerDesignLanding extends Controller {
 			} else {
 				$json['success'] = $this->language->get('text_success_save');
 				$json['version'] = (int)$result['version'];
-				$json['blocks'] = $this->model_design_landing->getBlocks($landing_id);
+
+				if (isset($owner) && $owner['information_id'] > 0) {
+					$this->load->model('catalog/information');
+
+					$this->model_catalog_information->updateBuilderSettings($owner['information_id'], $owner['status'], $owner['descriptions']);
+
+					$keywords = [];
+
+					foreach ((array)$owner['descriptions'] as $language_id => $row) {
+						$keywords[(int)$language_id] = is_array($row) ? (string)($row['slug'] ?? '') : '';
+					}
+
+					$this->model_catalog_information->updateBuilderSeoUrls($owner['information_id'], 0, $keywords);
+				}
+
+				// Payload-order list with client_id -> block_id, so the builder syncs
+				// new/temp ids (and parent refs) without guessing by index.
+				$json['blocks'] = $result['blocks'] ?? $this->model_design_landing->getBlocks($landing_id);
 				$json['landing'] = $this->model_design_landing->getLanding($landing_id);
 			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * AJAX save for the builder's Site Settings panel: global landing tokens.
+	 */
+	public function saveSiteDesign() {
+		$this->load->language('design/landing');
+		$this->load->model('design/landing');
+
+		$json = [];
+
+		if (!$this->user->hasPermission('modify', 'design/landing')) {
+			$json['error'] = $this->language->get('error_permission');
+		}
+
+		$payload = $this->jsonBody();
+
+		if (!$payload) {
+			$json['error'] = $this->language->get('error_payload');
+		}
+
+		if (!isset($json['error'])) {
+			$this->model_design_landing->saveSiteDesign($payload);
+
+			$json['site_design'] = $this->model_design_landing->getSiteDesign();
+			$json['success'] = $this->language->get('text_site_style_saved');
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -388,6 +603,14 @@ class ControllerDesignLanding extends Controller {
 
 		if (isset($this->request->post['selected']) && $this->validateDelete()) {
 			foreach ((array)$this->request->post['selected'] as $landing_id) {
+				$landing = $this->model_design_landing->getLanding((int)$landing_id);
+
+				// Owned landings are deleted with their information page
+				// (Catalog > Information), never from here.
+				if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+					continue;
+				}
+
 				$this->model_design_landing->deleteLanding((int)$landing_id);
 			}
 
@@ -407,10 +630,16 @@ class ControllerDesignLanding extends Controller {
 		if (!$this->user->hasPermission('modify', 'design/landing')) {
 			$this->session->data['error_warning'] = $this->language->get('error_permission');
 		} elseif (isset($this->request->get['landing_id'])) {
-			$landing_id = $this->model_design_landing->duplicateLanding((int)$this->request->get['landing_id']);
+			$landing = $this->model_design_landing->getLanding((int)$this->request->get['landing_id']);
 
-			if ($landing_id) {
-				$this->session->data['success'] = $this->language->get('text_success_copy');
+			if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+				$this->session->data['error_warning'] = $this->language->get('error_owner');
+			} else {
+				$landing_id = $this->model_design_landing->duplicateLanding((int)$this->request->get['landing_id']);
+
+				if ($landing_id) {
+					$this->session->data['success'] = $this->language->get('text_success_copy');
+				}
 			}
 		}
 
@@ -432,10 +661,16 @@ class ControllerDesignLanding extends Controller {
 		$status = isset($this->request->get['status']) ? (int)$this->request->get['status'] : 0;
 
 		if (!isset($json['error']) && $landing_id > 0) {
-			$this->db->query("UPDATE `" . DB_PREFIX . "landing` SET status = '" . ($status ? 1 : 0) . "', version = version + 1, date_modified = '" . date('Y-m-d H:i:s') . "' WHERE landing_id = '" . $landing_id . "'");
+			$landing = $this->model_design_landing->getLanding($landing_id);
 
-			$json['success'] = $this->language->get('text_success');
-			$json['status'] = $status ? 1 : 0;
+			if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+				$json['error'] = $this->language->get('error_owner');
+			} else {
+				$this->model_design_landing->setStatus($landing_id, (bool)$status);
+
+				$json['success'] = $this->language->get('text_success');
+				$json['status'] = $status ? 1 : 0;
+			}
 		}
 
 		$this->response->addHeader('Content-Type: application/json');
@@ -646,6 +881,43 @@ class ControllerDesignLanding extends Controller {
 	}
 
 	/**
+	 * The builder payload arrives as JSON (php://input) and therefore skips
+	 * Request::clean(), which html-encodes every classic form POST. The page
+	 * display fields are encoded here at the boundary instead: stored encoded,
+	 * rendered raw - the same convention the theme templates rely on and the
+	 * same rule validateOwner() applies to owned pages. (Block content is NOT
+	 * touched: Blocks::normalize*() owns it.)
+	 *
+	 * @param array<string, mixed> $payload
+	 * @return array<string, mixed>
+	 */
+	private function encodeDisplayPayload(array $payload): array {
+		if (isset($payload['name'])) {
+			$payload['name'] = $this->encodeDisplayValue((string)$payload['name']);
+		}
+
+		$descriptions = isset($payload['descriptions']) && is_array($payload['descriptions']) ? $payload['descriptions'] : [];
+
+		foreach ($descriptions as $language_id => $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+
+			foreach (['meta_title', 'meta_description', 'meta_keyword'] as $key) {
+				$descriptions[$language_id][$key] = $this->encodeDisplayValue((string)($row[$key] ?? ''));
+			}
+		}
+
+		$payload['descriptions'] = $descriptions;
+
+		return $payload;
+	}
+
+	private function encodeDisplayValue(string $value): string {
+		return trim(htmlspecialchars($value, ENT_COMPAT, 'UTF-8'));
+	}
+
+	/**
 	 * Signed preview token for a landing page.
 	 */
 	private function makePreviewToken(int $landing_id): string {
@@ -654,6 +926,58 @@ class ControllerDesignLanding extends Controller {
 			Dockercart\Landing\Url::PREVIEW_TOKEN_LIFETIME,
 			(string)$this->config->get('config_encryption')
 		);
+	}
+
+	/**
+	 * Store favicon links for the standalone builder page (same source as
+	 * the storefront header: theme master icon, config_icon fallback).
+	 *
+	 * @return array<int, array<string, string>>
+	 */
+	private function faviconLinks(): array {
+		$this->load->model('tool/image');
+
+		$source = (string)$this->config->get('dockercart_theme_favicon_master');
+
+		if ($source === '') {
+			$source = (string)$this->config->get('theme_dockercart_favicon_master');
+		}
+
+		if ($source === '' || !is_file(DIR_IMAGE . $source)) {
+			$source = (string)$this->config->get('config_icon');
+		}
+
+		$links = [];
+
+		if ($source === '' || !is_file(DIR_IMAGE . $source)) {
+			return $links;
+		}
+
+		foreach ([16, 32] as $size) {
+			$href = $this->model_tool_image->resize($source, $size, $size);
+
+			if (is_string($href) && $href !== '') {
+				$links[] = [
+					'rel'   => 'icon',
+					'type'  => 'image/png',
+					'sizes' => $size . 'x' . $size,
+					'href'  => $href,
+				];
+			}
+		}
+
+		$apple = $this->model_tool_image->resize($source, 120, 120);
+
+		if (is_string($apple) && $apple !== '') {
+			$links[] = [
+				'rel'   => 'apple-touch-icon',
+				'type'  => 'image/png',
+				'sizes' => '120x120',
+				'href'  => $apple,
+			];
+		}
+
+		return $links;
 	}
 
 	/**
@@ -669,6 +993,10 @@ class ControllerDesignLanding extends Controller {
 			'text_saving',
 			'text_preview',
 			'text_page_settings',
+			'text_site_settings',
+			'text_site_settings_hint',
+			'text_site_style_saved',
+			'button_save_site_style',
 			'text_block_settings',
 			'text_select_block',
 			'text_no_blocks',
@@ -690,10 +1018,19 @@ class ControllerDesignLanding extends Controller {
 			'text_view_tablet',
 			'text_view_mobile',
 			'text_add_section',
+			'text_content',
+			'text_style',
+			'text_advanced',
+			'text_shortcuts',
+			'text_empty_hint',
 			'text_hidden_block',
 			'text_hidden_device',
 			'text_search_blocks',
 			'text_section_settings',
+			'text_navigator',
+			'text_column',
+			'text_drop_here',
+			'text_confirm_unsaved',
 			'text_no_banners',
 			'text_success',
 			'text_choose_image',
@@ -709,6 +1046,7 @@ class ControllerDesignLanding extends Controller {
 			'text_status_published',
 			'text_created',
 			'text_copy',
+			'text_owner_information',
 			'entry_name',
 			'entry_slug',
 			'entry_meta_title',
@@ -742,6 +1080,10 @@ class ControllerDesignLanding extends Controller {
 
 		foreach (Dockercart\Landing\Blocks::all() as $block) {
 			$keys[] = $block['name'];
+		}
+
+		foreach (Dockercart\Landing\Design::labelKeys() as $key) {
+			$keys[] = $key;
 		}
 
 		foreach (Dockercart\Landing\Blocks::codes() as $code) {

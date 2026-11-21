@@ -5,13 +5,19 @@
  * valid preview token and lp_builder=1, i.e. when the page is displayed inside
  * the admin builder's canvas. It makes the real storefront page editable:
  *
- *   - drag handle per section (SortableJS reorders the DOM, then the parent
- *     saves the new order),
+ *   - drag handle per block (SortableJS): top-level sections reorder at the
+ *     page root, widgets move between the columns of their section,
  *   - hover toolbar (move up/down, duplicate, delete, settings),
- *   - click selects a section (links and buttons inside are neutralised),
- *   - palette drops from the admin shell insert a new section,
+ *   - click selects a block (links and buttons inside are neutralised),
+ *   - palette drops from the admin shell insert a new section (page level)
+ *     or a new widget (into a section column or at page level),
  *   - one block can be re-rendered in place after a property change,
  *   - the scroll offset survives the reloads the parent triggers.
+ *
+ * Tree layout: the page root (#lp-blocks) holds top-level blocks; a section
+ * container (data-lp-container) holds columns ([data-lp-slot]); a column
+ * holds widgets. Every structural change reports the full tree to the parent
+ * (lp:moveTree), which owns the model and saves it.
  *
  * The parent (admin) is same-origin and speaks the lp:* protocol documented in
  * admin/view/javascript/dockercart_landing_builder.js.
@@ -32,8 +38,11 @@
 	var toolbarBlock = null;
 	var hideTimer = null;
 	var currentBlock = null;
-	var sortable = null;
+	var sortables = [];
 	var insertLine = null;
+	var dropHint = null;
+	var hoverColumn = null;
+	var LABELS = {};
 
 	/* ---------------- styles ---------------- */
 
@@ -43,8 +52,8 @@
 			'html.lp-builder-mode { scroll-behavior: auto !important; }',
 			'html.lp-builder-mode [data-landing-block] { position: relative; }',
 			'html.lp-builder-mode [data-landing-block]::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: 1px dashed transparent; z-index: 40; }',
-			'html.lp-builder-mode [data-landing-block]:hover::after { border-color: rgba(59, 130, 246, .55); }',
-			'html.lp-builder-mode [data-landing-block].lp-selected::after { border: 2px solid #3b82f6; }',
+			'html.lp-builder-mode [data-landing-block]:hover::after { border-color: rgba(91, 126, 168, .55); }',
+			'html.lp-builder-mode [data-landing-block].lp-selected::after { border: 2px solid #5b7ea8; }',
 			'html.lp-builder-mode [data-landing-block][data-lp-hidden="1"] { opacity: .55; }',
 			'html.lp-builder-mode a, html.lp-builder-mode button, html.lp-builder-mode input, html.lp-builder-mode select, html.lp-builder-mode textarea { cursor: default !important; }',
 			'.lp-block-handle { position: absolute; top: 6px; left: 6px; z-index: 70; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(17, 24, 39, .82); color: #fff; cursor: grab !important; opacity: 0; transition: opacity .15s; }',
@@ -52,15 +61,21 @@
 			'.lp-block-handle:active { cursor: grabbing !important; }',
 			'#lp-toolbar { position: fixed; z-index: 2147483000; display: none; align-items: center; gap: 2px; padding: 3px; border-radius: 8px; background: rgba(17, 24, 39, .94); color: #fff; font: 600 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 8px 22px rgba(0,0,0,.28); }',
 			'#lp-toolbar.lp-open { display: flex; }',
-			'#lp-toolbar .lp-toolbar-label { padding: 0 6px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 10px; color: #cbd5e1; }',
+			'#lp-toolbar .lp-toolbar-label { padding: 0 6px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: 10px; color: #cbd5e1; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }',
 			'#lp-toolbar button { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 0; border-radius: 5px; background: transparent; color: #e5e7eb; cursor: pointer !important; }',
 			'#lp-toolbar button:hover { background: rgba(255,255,255,.16); color: #fff; }',
 			'#lp-toolbar button.lp-danger:hover { background: rgba(220, 38, 38, .9); }',
-			'#lp-insert-line { position: fixed; z-index: 2147482999; height: 3px; background: #3b82f6; border-radius: 2px; display: none; pointer-events: none; box-shadow: 0 0 0 3px rgba(59,130,246,.25); }',
-			'#lp-drop-hint { position: fixed; z-index: 2147482998; display: none; padding: 4px 10px; border-radius: 999px; background: rgba(59,130,246,.95); color: #fff; font: 600 11px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; pointer-events: none; }',
+			'#lp-insert-line { position: fixed; z-index: 2147482999; height: 3px; background: #5b7ea8; border-radius: 2px; display: none; pointer-events: none; box-shadow: 0 0 0 3px rgba(91,126,168,.25); }',
+			'#lp-drop-hint { position: fixed; z-index: 2147482998; display: none; padding: 4px 10px; border-radius: 999px; background: rgba(91,126,168,.95); color: #fff; font: 600 11px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; pointer-events: none; }',
 			'html.lp-builder-mode body { padding-bottom: 80px; }',
 			'.lp-block-hint { position: absolute; inset: 10px; z-index: 44; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(148, 163, 184, .75); border-radius: 14px; pointer-events: none; text-align: center; padding: 10px; }',
-			'.lp-block-hint > span { max-width: 80%; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .96); color: #334155; font: 600 12px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 6px 18px rgba(15, 23, 42, .16); }'
+			'.lp-block-hint > span { max-width: 80%; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .96); color: #334155; font: 600 12px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 6px 18px rgba(15, 23, 42, .16); }',
+			'html.lp-builder-mode [data-lp-slot] { position: relative; }',
+			'html.lp-builder-mode [data-lp-slot].lp-slot-empty { min-height: 84px; }',
+			'html.lp-builder-mode [data-lp-slot].lp-slot-hover { outline: 2px dashed rgba(91, 126, 168, .8); outline-offset: -2px; }',
+			'.lp-slot-hint { position: absolute; inset: 6px; z-index: 44; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(148, 163, 184, .6); border-radius: 10px; pointer-events: none; margin: 4px 0; }',
+			'.lp-slot-hint > span { padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, .96); color: #64748b; font: 600 11px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 4px 12px rgba(15, 23, 42, .12); }',
+			'.lp-sortable-ghost { opacity: .4; }'
 		].join('\n');
 
 		document.head.appendChild(style);
@@ -113,6 +128,10 @@
 		insertLine = document.createElement('div');
 		insertLine.id = 'lp-insert-line';
 		document.body.appendChild(insertLine);
+
+		dropHint = document.createElement('div');
+		dropHint.id = 'lp-drop-hint';
+		document.body.appendChild(dropHint);
 	}
 
 	function showToolbar(block) {
@@ -124,7 +143,7 @@
 
 		var rect = block.getBoundingClientRect();
 
-		toolbar.querySelector('[data-role="label"]').textContent = block.getAttribute('data-block-code') || 'block';
+		toolbar.querySelector('[data-role="label"]').textContent = blockLabel(block);
 		toolbar.classList.add('lp-open');
 
 		var top = rect.top + 6;
@@ -146,6 +165,12 @@
 		}, 250);
 	}
 
+	function blockLabel(block) {
+		var code = block.getAttribute('data-block-code') || 'block';
+
+		return LABELS[code] || code;
+	}
+
 	/* ---------------- block helpers ---------------- */
 
 	function root() {
@@ -162,6 +187,22 @@
 
 	function blocks() {
 		return Array.prototype.slice.call(root().querySelectorAll('[data-landing-block]'));
+	}
+
+	function topBlocks() {
+		return Array.prototype.slice.call(root().querySelectorAll(':scope > [data-landing-block]'));
+	}
+
+	function columns() {
+		return Array.prototype.slice.call(root().querySelectorAll('[data-lp-slot]'));
+	}
+
+	function columnWidgets(column) {
+		return Array.prototype.slice.call(column.querySelectorAll(':scope > [data-landing-block]'));
+	}
+
+	function isContainer(block) {
+		return block && block.hasAttribute('data-lp-container');
 	}
 
 	function selectBlock(blockId, scrollIntoView) {
@@ -186,7 +227,7 @@
 		showToolbar(target);
 	}
 
-	/* ---------------- drag handles + sortable ---------------- */
+	/* ---------------- empty state hints ---------------- */
 
 	var EMPTY_HINTS = {
 		hero: 'Empty hero — select it and add a heading, image or buttons',
@@ -207,7 +248,7 @@
 			var hint = EMPTY_HINTS[code];
 			var existing = block.querySelector(':scope > .lp-block-hint');
 
-			if (!hint || code === 'spacer') {
+			if (!hint || code === 'spacer' || isContainer(block)) {
 				if (existing) existing.remove();
 				return;
 			}
@@ -231,7 +272,37 @@
 
 			existing.firstChild.textContent = hint;
 		});
+
+		// Columns without widgets show a drop hint (sections are empty frames
+		// until something is dragged into them). The marker class gives the
+		// empty slot a min-height: a zero-height column is invisible and can
+		// never be a drop target.
+		columns().forEach(function (column) {
+			var existing = column.querySelector(':scope > .lp-slot-hint');
+			var empty = columnWidgets(column).length === 0;
+
+			if (!empty) {
+				if (existing) existing.remove();
+				column.classList.remove('lp-slot-empty');
+				return;
+			}
+
+			if (!existing) {
+				existing = document.createElement('div');
+				existing.className = 'lp-slot-hint';
+				existing.appendChild(document.createElement('span'));
+				column.appendChild(existing);
+			}
+
+			if (LABELS._drop) {
+				existing.firstChild.textContent = LABELS._drop;
+			}
+
+			column.classList.add('lp-slot-empty');
+		});
 	}
+
+	/* ---------------- drag handles + sortable ---------------- */
 
 	function attachHandles() {
 		blocks().forEach(function (block) {
@@ -245,51 +316,162 @@
 		});
 	}
 
-	function initSortable() {
+	function destroySortables() {
+		sortables.forEach(function (instance) {
+			instance.destroy();
+		});
+
+		sortables = [];
+	}
+
+	function initSortables() {
+		destroySortables();
+
 		if (typeof Sortable === 'undefined') return;
 
-		sortable = new Sortable(root(), {
+		// Page root: sections and loose widgets reorder here, and widgets may
+		// be dragged OUT of a column onto the page level (put accepts anyone,
+		// the section filter only guards the column lists below). Root and
+		// columns share one group: with different names Sortable silently
+		// refuses every cross-list drop.
+		sortables.push(new Sortable(root(), {
 			animation: 160,
 			handle: '.lp-block-handle',
 			draggable: '[data-landing-block]',
 			ghostClass: 'lp-sortable-ghost',
+			group: { name: 'lp-canvas', pull: true, put: true },
 			onStart: function () {
 				document.body.style.userSelect = 'none';
 			},
-			onEnd: function () {
-				document.body.style.userSelect = '';
+			onEnd: reportStructure
+		}));
 
-				var order = blocks().map(blockIdOf).filter(Boolean);
+		// Columns: widgets move between the columns of a section (and out to
+		// the page level, same group as the root). Sections are never
+		// accepted into a column (they are page-level only).
+		columns().forEach(function (column) {
+			sortables.push(new Sortable(column, {
+				animation: 160,
+				handle: '.lp-block-handle',
+				draggable: '[data-landing-block]',
+				ghostClass: 'lp-sortable-ghost',
+				group: {
+					name: 'lp-canvas',
+					pull: true,
+					put: function (to, from, dragEl) {
+						return !isContainer(dragEl);
+					}
+				},
+				onStart: function () {
+					document.body.style.userSelect = 'none';
+				},
+				onEnd: reportStructure
+			}));
+		});
+	}
 
-				post({ type: 'lp:move', order: order });
-			}
+	/**
+	 * The full tree, as the parent's model expects it:
+	 *   [{id, parent: 0, slot: 0, order}, {id, parent: <section id>, slot, order}, …]
+	 */
+	function structureItems() {
+		var items = [];
+
+		topBlocks().forEach(function (block, index) {
+			items.push({ id: blockIdOf(block), parent: 0, slot: 0, order: index });
+
+			if (!isContainer(block)) return;
+
+			block.querySelectorAll('[data-lp-slot]').forEach(function (column) {
+				var slot = Number(column.getAttribute('data-lp-slot')) || 0;
+
+				columnWidgets(column).forEach(function (widget, order) {
+					items.push({ id: blockIdOf(widget), parent: blockIdOf(block), slot: slot, order: order });
+				});
+			});
 		});
 
-		var style = document.createElement('style');
-		style.textContent = '.lp-sortable-ghost { opacity: .4; }';
-		document.head.appendChild(style);
+		return items;
+	}
+
+	function reportStructure() {
+		document.body.style.userSelect = '';
+		post({ type: 'lp:moveTree', items: structureItems() });
 	}
 
 	/* ---------------- palette drops ---------------- */
 
-	function dropAfterBlock(event) {
+	function payloadType(event) {
+		if (!event.dataTransfer) return '';
+
+		var types = Array.prototype.slice.call(event.dataTransfer.types || []);
+
+		if (types.indexOf('application/x-lp-section') !== -1) return 'section';
+		if (types.indexOf('application/x-lp-block') !== -1) return 'widget';
+
+		return '';
+	}
+
+	function columnUnder(event) {
+		var target = event.target;
+
+		if (!target || !target.closest) return null;
+
+		return target.closest('[data-lp-slot]');
+	}
+
+	/**
+	 * The top-level block under the pointer. A pointer over a widget inside a
+	 * column belongs to the column path, not the page path, so the walk
+	 * climbs out of anything nested deeper than the page root.
+	 */
+	function topLevelTarget(event) {
 		var target = event.target.closest ? event.target.closest('[data-landing-block]') : null;
 
-		if (!target) {
-			var all = blocks();
+		while (target && target.parentElement !== root()) {
+			target = target.parentElement ? target.parentElement.closest('[data-landing-block]') : null;
+		}
 
-			return all.length ? blockIdOf(all[all.length - 1]) : 0;
+		return target;
+	}
+
+	/**
+	 * The direct widget of `column` under the pointer (its own child, not a
+	 * deeper descendant).
+	 */
+	function columnTarget(column, event) {
+		var target = event.target.closest ? event.target.closest('[data-landing-block]') : null;
+
+		while (target && target.parentElement !== column) {
+			target = target.parentElement ? target.parentElement.closest('[data-landing-block]') : null;
+		}
+
+		return target;
+	}
+
+	function previousBlock(block) {
+		var previous = block.previousElementSibling;
+
+		while (previous && !previous.hasAttribute('data-landing-block')) {
+			previous = previous.previousElementSibling;
+		}
+
+		return previous;
+	}
+
+	/**
+	 * The block id an insert lands after, judged by the pointer position
+	 * against the target's middle; 0 inserts before the first block.
+	 */
+	function insertAfter(target, event) {
+		if (!target) {
+			return 0;
 		}
 
 		var rect = target.getBoundingClientRect();
-		var middle = rect.top + rect.height / 2;
 
-		if (event.clientY <= middle) {
-			var previous = target.previousElementSibling;
-
-			while (previous && !previous.hasAttribute('data-landing-block')) {
-				previous = previous.previousElementSibling;
-			}
+		if (event.clientY <= rect.top + rect.height / 2) {
+			var previous = previousBlock(target);
 
 			return previous ? blockIdOf(previous) : 0;
 		}
@@ -297,15 +479,38 @@
 		return blockIdOf(target);
 	}
 
-	function positionInsertLine(event) {
+	function dropAfterTopLevel(event) {
+		var target = topLevelTarget(event);
+
+		if (!target) {
+			var all = topBlocks();
+
+			return all.length ? blockIdOf(all[all.length - 1]) : 0;
+		}
+
+		return insertAfter(target, event);
+	}
+
+	function dropInColumn(column, event) {
+		var section = column.closest('[data-landing-block]');
+
+		return {
+			parentId: section ? blockIdOf(section) : 0,
+			slot: Number(column.getAttribute('data-lp-slot')) || 0,
+			afterId: insertAfter(columnTarget(column, event), event)
+		};
+	}
+
+	function positionInsertLineTop(event) {
 		if (!insertLine) return;
 
-		var target = event.target.closest ? event.target.closest('[data-landing-block]') : null;
+		var target = topLevelTarget(event);
+
 		var rect;
 		var y;
 
 		if (!target) {
-			var all = blocks();
+			var all = topBlocks();
 
 			if (!all.length) {
 				insertLine.style.display = 'none';
@@ -325,42 +530,87 @@
 		insertLine.style.width = rect.width + 'px';
 	}
 
+	function positionInsertLineColumn(column, event) {
+		if (!insertLine) return;
+
+		var rect = column.getBoundingClientRect();
+		var y = rect.top + 8;
+
+		var target = columnTarget(column, event);
+
+		if (target) {
+			var targetRect = target.getBoundingClientRect();
+			y = event.clientY <= targetRect.top + targetRect.height / 2 ? targetRect.top : targetRect.bottom;
+		}
+
+		insertLine.style.display = 'block';
+		insertLine.style.top = y + 'px';
+		insertLine.style.left = rect.left + 'px';
+		insertLine.style.width = rect.width + 'px';
+	}
+
+	function clearDropHighlights() {
+		if (hoverColumn) {
+			hoverColumn.classList.remove('lp-slot-hover');
+			hoverColumn = null;
+		}
+
+		if (insertLine) insertLine.style.display = 'none';
+	}
+
 	function initDrops() {
 		document.addEventListener('dragover', function (event) {
-			if (!hasBlockPayload(event)) return;
+			var type = payloadType(event);
+
+			if (!type) return;
 
 			event.preventDefault();
 			event.dataTransfer.dropEffect = 'copy';
-			positionInsertLine(event);
+
+			var column = (type === 'widget') ? columnUnder(event) : null;
+
+			if (hoverColumn && hoverColumn !== column) {
+				hoverColumn.classList.remove('lp-slot-hover');
+				hoverColumn = null;
+			}
+
+			if (column) {
+				column.classList.add('lp-slot-hover');
+				hoverColumn = column;
+				positionInsertLineColumn(column, event);
+			} else {
+				positionInsertLineTop(event);
+			}
 		});
 
 		document.addEventListener('dragleave', function (event) {
 			if (event.target === document.documentElement) {
-				insertLine.style.display = 'none';
+				clearDropHighlights();
 			}
 		});
 
 		document.addEventListener('drop', function (event) {
-			if (!hasBlockPayload(event)) return;
+			var type = payloadType(event);
+
+			if (!type) return;
 
 			event.preventDefault();
 
-			insertLine.style.display = 'none';
+			var column = (type === 'widget') ? columnUnder(event) : null;
+			var code = event.dataTransfer.getData('application/x-lp-' + (type === 'section' ? 'section' : 'block')) || event.dataTransfer.getData('text/plain');
 
-			var code = event.dataTransfer.getData('application/x-lp-block') || event.dataTransfer.getData('text/plain');
+			clearDropHighlights();
 
 			if (!code) return;
 
-			post({ type: 'lp:add', code: code, afterId: dropAfterBlock(event) });
+			if (column) {
+				var target = dropInColumn(column, event);
+
+				post({ type: 'lp:add', code: code, parentId: target.parentId, slot: target.slot, afterId: target.afterId });
+			} else {
+				post({ type: 'lp:add', code: code, parentId: 0, slot: 0, afterId: dropAfterTopLevel(event) });
+			}
 		});
-	}
-
-	function hasBlockPayload(event) {
-		if (!event.dataTransfer) return false;
-
-		var types = Array.prototype.slice.call(event.dataTransfer.types || []);
-
-		return types.indexOf('application/x-lp-block') !== -1;
 	}
 
 	/* ---------------- selection / neutralised interaction ---------------- */
@@ -412,6 +662,13 @@
 
 	function initMessages() {
 		window.addEventListener('message', function (event) {
+			// Only the admin shell drives the canvas: anything embedded in the
+			// page (an html block iframe, a video embed) must not be able to
+			// post lp:replace/lp:select into the builder.
+			if (event.source !== window.parent) {
+				return;
+			}
+
 			var data = event.data;
 
 			if (!data || typeof data !== 'object' || typeof data.type !== 'string') {
@@ -423,38 +680,61 @@
 				selectBlock(Number(data.blockId) || 0, Boolean(data.scroll));
 			}
 
+			if (data.type === 'lp:labels') {
+				LABELS = data.labels || {};
+				markEmptyBlocks();
+			}
+
 			if (data.type === 'lp:refreshBlock') {
 				replaceBlock(Number(data.blockId), data.url);
+			}
+
+			if (data.type === 'lp:replace') {
+				replaceNode(Number(data.blockId), data.html);
 			}
 		});
 	}
 
-	function replaceBlock(blockId, url) {
+	/**
+	 * Swaps one block node for fresh markup (server preview or re-render),
+	 * keeping the drag handles, empty-state hints and sortables alive.
+	 *
+	 * @return {boolean} false when there is nothing to swap.
+	 */
+	function replaceNode(blockId, html) {
 		var block = root().querySelector('[data-landing-block="' + Number(blockId) + '"]');
 
-		if (!block || !url) return;
+		if (!block || !html) return false;
+
+		var template = document.createElement('div');
+		template.innerHTML = String(html).trim();
+
+		var replacement = template.firstElementChild;
+
+		if (!replacement || !replacement.hasAttribute('data-landing-block')) return false;
+
+		var selected = block.classList.contains('lp-selected');
+
+		block.replaceWith(replacement);
+		attachHandles();
+		markEmptyBlocks();
+		initSortables();
+
+		if (selected) {
+			replacement.classList.add('lp-selected');
+			showToolbar(replacement);
+		}
+
+		return true;
+	}
+
+	function replaceBlock(blockId, url) {
+		if (!url) return;
 
 		fetch(url, { credentials: 'same-origin' })
 			.then(function (response) { return response.text(); })
 			.then(function (html) {
-				if (!html) return;
-
-				var template = document.createElement('div');
-				template.innerHTML = html.trim();
-
-				var replacement = template.firstElementChild;
-
-				if (!replacement || !replacement.hasAttribute('data-landing-block')) return;
-
-				block.replaceWith(replacement);
-				attachHandles();
-				markEmptyBlocks();
-
-				if (sortable) {
-					sortable.destroy();
-				}
-
-				initSortable();
+				replaceNode(blockId, html);
 			})
 			.catch(function () {
 				// keep the old markup when the refresh fails
@@ -495,6 +775,41 @@
 		});
 	}
 
+	/* ---------------- keyboard: forward builder shortcuts ---------------- */
+
+	// The parent shell owns the model, so canvas keystrokes are neutralised
+	// here and forwarded as combos (lp:key). event.code keeps them working
+	// on any keyboard layout; editable targets keep their native behaviour.
+	function initKeys() {
+		document.addEventListener('keydown', function (event) {
+			var target = event.target;
+
+			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+				return;
+			}
+
+			var meta = event.ctrlKey || event.metaKey;
+			var combo = '';
+
+			if (meta && event.code === 'KeyS') {
+				combo = 'save';
+			} else if (meta && event.code === 'KeyZ') {
+				combo = event.shiftKey ? 'redo' : 'undo';
+			} else if (meta && event.code === 'KeyD') {
+				combo = 'duplicate';
+			} else if (event.key === 'Delete' || event.key === 'Backspace') {
+				combo = 'remove';
+			} else if (event.key === 'Escape') {
+				combo = 'escape';
+			}
+
+			if (!combo) return;
+
+			event.preventDefault();
+			post({ type: 'lp:key', combo: combo });
+		});
+	}
+
 	/* ---------------- post ---------------- */
 
 	function post(message) {
@@ -519,8 +834,9 @@
 		initDrops();
 		attachHandles();
 		markEmptyBlocks();
-		initSortable();
+		initSortables();
 		initScroll();
+		initKeys();
 
 		var onlyBlock = params.get('only_block');
 
@@ -528,7 +844,7 @@
 			return;
 		}
 
-		post({ type: 'lp:ready', order: blocks().map(blockIdOf) });
+		post({ type: 'lp:ready', items: structureItems() });
 	}
 
 	if (document.readyState === 'loading') {

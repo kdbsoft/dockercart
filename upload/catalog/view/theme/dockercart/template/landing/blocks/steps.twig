@@ -1,0 +1,34 @@
+{#
+	Numbered process. The numbers are meaningful (a real sequence), so the
+	markup is an ordered list — screen readers get the order without relying on
+	the visual number markers.
+#}
+<div class="lp-native lp-native--steps lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		{% set rows = [] %}
+		{% for item in content.items %}
+			{% if item.title or item.text %}
+				{% set rows = rows|merge([item]) %}
+			{% endif %}
+		{% endfor %}
+
+		{% if rows %}
+		<ol class="lp-native__steps" data-count="{{ rows|length }}">
+			{% for item in rows %}
+			<li class="lp-native__step">
+				<span class="lp-native__step-num" aria-hidden="true">{{ loop.index }}</span>
+				{% if item.title %}<h3 class="lp-native__item-title">{{ item.title|escape }}</h3>{% endif %}
+				{% if item.text %}<p class="lp-native__item-text">{{ item.text|escape|nl2br }}</p>{% endif %}
+			</li>
+			{% endfor %}
+		</ol>
+		{% endif %}
+	</div>
+</div>

@@ -29,7 +29,7 @@
 <link href="{{ style.href }}{% if style.href|slice(0,4) != 'http' and style.href|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
 {% endfor %}
 {% for script in scripts %}
-<script src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' %}?v={{ dockercart_version }}{% endif %}" type="text/javascript"></script>
+<script src="{{ script }}{% if script|slice(0,4) != 'http' and script|slice(0,2) != '//' and '?' not in script %}?v={{ dockercart_version }}{% endif %}" type="text/javascript"></script>
 {% endfor %}
 {% for favicon in favicon_links %}
 <link rel="{{ favicon.rel }}" type="{{ favicon.type }}" sizes="{{ favicon.sizes }}" href="{{ favicon.href }}" />

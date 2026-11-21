@@ -1,0 +1,13 @@
+{#
+	Section container: the columns grid of a builder section.
+		{{ grid_class }} - structure preset (1 / 2 / 2-1 / 1-2 / 3 / 4 columns)
+		{{ gap_class }}  - column gap
+	Each column carries the widgets saved for its slot (rendered wrapper-less
+	by ControllerLandingPage::renderBlockInner) and is a drop target for the
+	in-iframe builder (data-lp-slot).
+#}
+<div class="lp-section__cols {{ grid_class }} {{ gap_class }}">
+	{% for column in columns %}
+	<div class="lp-section__col {{ column.class }}" data-lp-slot="{{ column.slot }}">{{ column.html|raw }}</div>
+	{% endfor %}
+</div>

@@ -3871,6 +3871,40 @@ html[dir="rtl"] .dc-autocomplete-wrap .form-control {
     font-size: 11.5px;
 }
 
+.dc-builder-lang-cta {
+    text-align: center;
+    padding: 22px 16px;
+    margin-bottom: 15px;
+    border: 1px dashed var(--dc-border);
+    border-radius: var(--dc-radius-md);
+    background: var(--dc-surface-alt);
+}
+
+.dc-builder-lang-cta .btn svg {
+    vertical-align: -2px;
+    margin-right: 6px;
+}
+
+.dc-builder-lang-cta__title {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dc-text-dark);
+    margin-bottom: 4px;
+}
+
+.dc-builder-lang-cta__hint {
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    color: var(--dc-text-muted);
+}
+
+.dc-builder-lang-cta__pending {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--dc-text-muted);
+}
+
 .dc-opts-list {
     margin-top: 4px;
 }

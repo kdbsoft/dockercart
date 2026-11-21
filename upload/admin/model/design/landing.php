@@ -23,6 +23,9 @@ declare(strict_types=1);
 class ModelDesignLanding extends Model {
 	private const MAX_BLOCKS = 200;
 
+	/** @var array<int, int>|null cached language ids (see languageIds()) */
+	private $language_ids;
+
 	// ---------------------------------------------------------------- pages
 
 	/**
@@ -32,8 +35,11 @@ class ModelDesignLanding extends Model {
 	public function addLanding(array $data): int {
 		$now = date('Y-m-d H:i:s');
 
+		$information_id = (int)($data['information_id'] ?? 0);
+
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "landing` SET
 			name = '" . $this->db->escape((string)($data['name'] ?? '')) . "',
+			information_id = '" . $information_id . "',
 			status = '" . (!empty($data['status']) ? 1 : 0) . "',
 			chrome = '" . ((($data['chrome'] ?? 'full') === 'bare') ? 'bare' : 'full') . "',
 			is_home = '0',
@@ -48,13 +54,15 @@ class ModelDesignLanding extends Model {
 
 		$landing_id = (int)$this->db->getLastId();
 
-		$this->saveDescriptions($landing_id, (array)($data['descriptions'] ?? []));
+		// An owned landing is the composed body of an information page: no slugs,
+		// no own visibility, never the store home page.
+		$this->saveDescriptions($landing_id, (array)($data['descriptions'] ?? []), $information_id > 0);
 
 		if (isset($data['blocks']) && is_array($data['blocks'])) {
 			$this->saveBlocks($landing_id, $data['blocks']);
 		}
 
-		if (!empty($data['is_home'])) {
+		if (empty($data['information_id']) && !empty($data['is_home'])) {
 			$this->setHomePage($landing_id);
 		}
 
@@ -71,13 +79,19 @@ class ModelDesignLanding extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$query = $this->db->query("SELECT version FROM `" . DB_PREFIX . "landing` WHERE landing_id = '" . (int)$landing_id . "' FOR UPDATE");
+			$query = $this->db->query("SELECT version, information_id FROM `" . DB_PREFIX . "landing` WHERE landing_id = '" . (int)$landing_id . "' FOR UPDATE");
 
 			if (!$query->num_rows) {
 				$this->db->query("ROLLBACK");
 
 				return ['success' => false, 'conflict' => true, 'version' => 0];
 			}
+
+			// A landing owned by an information page carries only its blocks,
+			// noindex and custom CSS: visibility lives on oc_information.status,
+			// the chrome is always the full store theme and slugs are never
+			// mirrored into oc_seo_url.
+			$owned = (int)$query->row['information_id'] > 0;
 
 			$current_version = (int)$query->row['version'];
 			$sent_version = isset($data['version']) ? (int)$data['version'] : $current_version;
@@ -93,28 +107,36 @@ class ModelDesignLanding extends Model {
 
 			$set = [
 				"name = '" . $this->db->escape((string)($data['name'] ?? '')) . "'",
-				"status = '" . (!empty($data['status']) ? 1 : 0) . "'",
-				"chrome = '" . ((($data['chrome'] ?? 'full') === 'bare') ? 'bare' : 'full') . "'",
+				"chrome = '" . ($owned ? 'full' : ((($data['chrome'] ?? 'full') === 'bare') ? 'bare' : 'full')) . "'",
 				"noindex = '" . (!empty($data['noindex']) ? 1 : 0) . "'",
 				"custom_css = '" . $this->db->escape((string)($data['custom_css'] ?? '')) . "'",
-				"date_publish = " . $this->dateSql($data['date_publish'] ?? null),
-				"date_unpublish = " . $this->dateSql($data['date_unpublish'] ?? null),
-				"version = '" . (int)$new_version . "'",
-				"date_modified = '" . $now . "'",
 			];
+
+			if (!$owned) {
+				$set[] = "status = '" . (!empty($data['status']) ? 1 : 0) . "'";
+				$set[] = "date_publish = " . $this->dateSql($data['date_publish'] ?? null);
+				$set[] = "date_unpublish = " . $this->dateSql($data['date_unpublish'] ?? null);
+			}
+
+			$set[] = "version = '" . (int)$new_version . "'";
+			$set[] = "date_modified = '" . $now . "'";
 
 			$this->db->query("UPDATE `" . DB_PREFIX . "landing` SET " . implode(', ', $set) . " WHERE landing_id = '" . (int)$landing_id . "'");
 
-			$this->saveDescriptions($landing_id, (array)($data['descriptions'] ?? []));
+			$this->saveDescriptions($landing_id, (array)($data['descriptions'] ?? []), $owned);
+
+			$saved_blocks = [];
 
 			if (isset($data['blocks']) && is_array($data['blocks'])) {
-				$this->saveBlocks($landing_id, $data['blocks']);
+				$saved_blocks = $this->saveBlocks($landing_id, $data['blocks']);
 			}
 
-			if (!empty($data['is_home'])) {
-				$this->setHomePage($landing_id);
-			} else {
-				$this->clearHomePage($landing_id);
+			if (!$owned) {
+				if (!empty($data['is_home'])) {
+					$this->setHomePage($landing_id);
+				} else {
+					$this->clearHomePage($landing_id);
+				}
 			}
 
 			$this->db->query("COMMIT");
@@ -126,7 +148,9 @@ class ModelDesignLanding extends Model {
 			return ['success' => false, 'conflict' => false, 'version' => 0];
 		}
 
-		return ['success' => true, 'version' => (int)$new_version];
+		// blocks = the saved list in payload order (client_id -> real block_id),
+		// so the builder can sync its in-memory ids after an autosave.
+		return ['success' => true, 'version' => (int)$new_version, 'blocks' => $saved_blocks];
 	}
 
 	public function deleteLanding(int $landing_id): void {
@@ -156,47 +180,58 @@ class ModelDesignLanding extends Model {
 	/**
 	 * Duplicates a page with all blocks; slugs get a -copy suffix, status draft.
 	 */
-	public function duplicateLanding(int $landing_id): int {
+	public function duplicateLanding(int $landing_id, int $new_information_id = 0): int {
 		$landing = $this->getLanding($landing_id);
 
 		if (!$landing) {
 			return 0;
 		}
 
+		$owned = ((int)($landing['information_id'] ?? 0) > 0) || $new_information_id > 0;
+
 		$descriptions = $this->getLandingDescriptions($landing_id);
 		$taken = $this->getTakenSlugs();
 
 		foreach ($descriptions as $language_id => $description) {
-			$descriptions[$language_id]['slug'] = Dockercart\Landing\Url::uniqueSlug((string)$description['slug'], $taken);
-			$taken[] = $descriptions[$language_id]['slug'];
+			// An owned landing has no slugs of its own (the information page
+			// owns the SEO keyword), so there is nothing to uniquify.
+			$slug = $owned ? '' : Dockercart\Landing\Url::uniqueSlug((string)$description['slug'], $taken);
+			$descriptions[$language_id]['slug'] = $slug;
+			$taken[] = $slug;
 		}
 
 		$blocks = [];
 
 		foreach ($this->getBlocks($landing_id) as $block) {
+			// block_id keeps the source id on purpose: saveBlocks() remaps it to
+			// the freshly inserted rows, so children point at the copied section.
 			$blocks[] = [
-				'block_id' => 0,
-				'code'     => $block['code'],
-				'status'   => $block['status'],
-				'settings' => $block['settings'],
-				'content'  => $block['content'],
+				'block_id'  => (int)$block['block_id'],
+				'parent_id' => (int)$block['parent_id'],
+				'slot'      => (int)$block['slot'],
+				'sort'      => (int)$block['sort'],
+				'code'      => $block['code'],
+				'status'    => $block['status'],
+				'settings'  => $block['settings'],
+				'content'   => $block['content'],
 			];
 		}
 
 		$language_id = (int)$this->config->get('config_language_id');
-		$name = $landing['name'] . ' (copy)';
+		$name = $owned ? (string)$landing['name'] : $landing['name'] . ' (copy)';
 
 		return $this->addLanding([
-			'name'         => $name,
-			'status'       => 0,
-			'chrome'       => $landing['chrome'],
-			'noindex'      => 1,
-			'custom_css'   => $landing['custom_css'],
-			'date_publish' => null,
-			'date_unpublish' => null,
-			'descriptions' => $descriptions,
-			'blocks'       => $blocks,
-			'is_home'      => 0,
+			'name'            => $name,
+			'information_id'  => $new_information_id,
+			'status'          => 0,
+			'chrome'          => $landing['chrome'],
+			'noindex'         => $owned ? (int)$landing['noindex'] : 1,
+			'custom_css'      => $landing['custom_css'],
+			'date_publish'    => null,
+			'date_unpublish'  => null,
+			'descriptions'    => $descriptions,
+			'blocks'          => $blocks,
+			'is_home'         => 0,
 		]);
 	}
 
@@ -219,21 +254,8 @@ class ModelDesignLanding extends Model {
 		$sql = "SELECT l.*,
 			(SELECT COUNT(*) FROM `" . DB_PREFIX . "landing_block` b WHERE b.landing_id = l.landing_id) AS blocks,
 			(SELECT d.slug FROM `" . DB_PREFIX . "landing_description` d WHERE d.landing_id = l.landing_id AND d.language_id = '" . $language_id . "') AS slug
-			FROM `" . DB_PREFIX . "landing` l";
-
-		$where = [];
-
-		if (!empty($data['filter_name'])) {
-			$where[] = "l.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
-		}
-
-		if (isset($data['filter_status']) && $data['filter_status'] !== '') {
-			$where[] = "l.status = '" . (int)$data['filter_status'] . "'";
-		}
-
-		if ($where) {
-			$sql .= " WHERE " . implode(' AND ', $where);
-		}
+			FROM `" . DB_PREFIX . "landing` l
+			WHERE " . implode(' AND ', $this->landingListWhere($data));
 
 		$sort = isset($data['sort']) && in_array($data['sort'], ['name', 'status', 'viewed', 'date_modified', 'date_added'], true) ? $data['sort'] : 'date_modified';
 		$order = (isset($data['order']) && strtoupper((string)$data['order']) === 'ASC') ? 'ASC' : 'DESC';
@@ -256,9 +278,24 @@ class ModelDesignLanding extends Model {
 	 * @param array<string, mixed> $data
 	 */
 	public function getTotalLandings(array $data = []): int {
-		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "landing` l";
+		$sql = "SELECT COUNT(*) AS total FROM `" . DB_PREFIX . "landing` l WHERE " . implode(' AND ', $this->landingListWhere($data));
 
-		$where = [];
+		$query = $this->db->query($sql);
+
+		return (int)$query->row['total'];
+	}
+
+	/**
+	 * WHERE fragments shared by getLandings() and getTotalLandings(): owned
+	 * landings never show up in the list, name/status filters apply to both.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<int, string>
+	 */
+	private function landingListWhere(array $data): array {
+		// Landings owned by an information page are managed from
+		// Catalog > Information and never show up in this list.
+		$where = ["l.information_id IS NULL"];
 
 		if (!empty($data['filter_name'])) {
 			$where[] = "l.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
@@ -268,13 +305,15 @@ class ModelDesignLanding extends Model {
 			$where[] = "l.status = '" . (int)$data['filter_status'] . "'";
 		}
 
-		if ($where) {
-			$sql .= " WHERE " . implode(' AND ', $where);
-		}
+		return $where;
+	}
 
-		$query = $this->db->query($sql);
-
-		return (int)$query->row['total'];
+	/**
+	 * Publish toggle from the page list. Bumps version so an open builder
+	 * reports a conflict instead of silently overwriting the change.
+	 */
+	public function setStatus(int $landing_id, bool $status): void {
+		$this->db->query("UPDATE `" . DB_PREFIX . "landing` SET status = '" . ($status ? 1 : 0) . "', version = version + 1, date_modified = '" . date('Y-m-d H:i:s') . "' WHERE landing_id = '" . (int)$landing_id . "'");
 	}
 
 	/**
@@ -298,7 +337,9 @@ class ModelDesignLanding extends Model {
 	 * @return array<int, string>
 	 */
 	public function getTakenSlugs(int $exclude_landing_id = 0): array {
-		$query = $this->db->query("SELECT slug FROM `" . DB_PREFIX . "landing_description` WHERE slug <> '' AND landing_id <> '" . (int)$exclude_landing_id . "'");
+		$query = $this->db->query("SELECT d.slug FROM `" . DB_PREFIX . "landing_description` d
+			INNER JOIN `" . DB_PREFIX . "landing` l ON (l.landing_id = d.landing_id)
+			WHERE d.slug <> '' AND l.information_id IS NULL AND d.landing_id <> '" . (int)$exclude_landing_id . "'");
 
 		$slugs = [];
 
@@ -313,18 +354,26 @@ class ModelDesignLanding extends Model {
 	 * Validation of page settings.
 	 *
 	 * Errors are messages (resolved from design/landing) so the controller can
-	 * merge them straight into its error bag.
+	 * merge them straight into its error bag. An owned landing only validates
+	 * its name: slugs, schedule and the home-page flag do not apply to it.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array<string, mixed>
 	 */
-	public function validateLanding(array $data, int $landing_id = 0): array {
+	public function validateLanding(array $data, int $landing_id = 0, bool $owned = false): array {
 		$errors = [];
 
 		$name = trim((string)($data['name'] ?? ''));
 
 		if ($this->length($name) < 3 || $this->length($name) > 255) {
 			$errors['name'] = $this->text('error_name', 'Landing page name must be between 3 and 255 characters!');
+		}
+
+		// An owned landing (the composed body of an information page) has no
+		// slugs, no schedule and can never be the home page: its meta lives in
+		// oc_information_description and its visibility on oc_information.status.
+		if ($owned) {
+			return $errors;
 		}
 
 		$descriptions = (array)($data['descriptions'] ?? []);
@@ -374,6 +423,59 @@ class ModelDesignLanding extends Model {
 	}
 
 	/**
+	 * Validates the information-page fields edited from the builder
+	 * Page Settings (owned landings only): translated meta tags and the
+	 * default-store SEO keyword. Flat field => message map, same as
+	 * validateLanding(). Lengths mirror the information form
+	 * (utf8_strlen on the Request::clean encoding).
+	 *
+	 * @param array{status?: mixed, descriptions?: mixed} $owner
+	 * @return array<string, string>
+	 */
+	public function validateOwner(array $owner, int $information_id): array {
+		$errors = [];
+
+		$descriptions = isset($owner['descriptions']) && is_array($owner['descriptions']) ? $owner['descriptions'] : [];
+
+		foreach ($this->languageIds() as $language_id) {
+			$row = isset($descriptions[$language_id]) && is_array($descriptions[$language_id]) ? $descriptions[$language_id] : [];
+
+			foreach (['meta_title', 'meta_description', 'meta_keyword'] as $key) {
+				$value = trim(htmlspecialchars((string)($row[$key] ?? ''), ENT_COMPAT, 'UTF-8'));
+
+				if ($this->length($value) > 255) {
+					$errors['owner.' . $key . '.' . $language_id] = $this->text('error_meta_length', 'Meta title, description and keywords must not exceed 255 characters!');
+				}
+			}
+
+			$keyword = trim(htmlspecialchars((string)($row['slug'] ?? ''), ENT_COMPAT, 'UTF-8'));
+
+			if ($keyword !== '' && $this->ownerKeywordUsed($keyword, $language_id, $information_id)) {
+				$errors['owner.slug.' . $language_id] = $this->text('error_slug_used', 'SEO keyword is already in use!');
+			}
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Whether an information SEO keyword is taken on the default store by
+	 * anything but this information page (mirrors the information form
+	 * uniqueness check).
+	 */
+	private function ownerKeywordUsed(string $keyword, int $language_id, int $information_id): bool {
+		$this->load->model('design/seo_url');
+
+		foreach ($this->model_design_seo_url->getSeoUrlsByKeyword($keyword, $language_id) as $row) {
+			if ((int)($row['store_id'] ?? 0) === 0 && (string)($row['query'] ?? '') !== 'information_id=' . (int)$information_id) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Whether another page already owns this keyword in the given language.
 	 *
 	 * Looked up with the (store_id, language_id, keyword) index instead of
@@ -397,30 +499,26 @@ class ModelDesignLanding extends Model {
 	public function getBlocks(int $landing_id): array {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "landing_block` WHERE landing_id = '" . (int)$landing_id . "' ORDER BY sort_order ASC, block_id ASC");
 
+		if (!$query->num_rows) {
+			return [];
+		}
+
+		// One descriptions query instead of one per block (the builder calls
+		// this after every save).
+		$block_ids = array_map(static function ($row): int {
+			return (int)$row['block_id'];
+		}, $query->rows);
+
+		$content_query = $this->db->query("SELECT block_id, language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id IN (" . implode(',', $block_ids) . ")");
+
 		$blocks = [];
 
-		foreach ($query->rows as $row) {
-			$content_query = $this->db->query("SELECT language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id = '" . (int)$row['block_id'] . "'");
+		foreach (Dockercart\Landing\Blocks::hydrate($query->rows, $content_query->rows) as $block) {
+			$block['landing_id'] = (int)$landing_id;
+			$block['sort'] = $block['sort_order'];
+			unset($block['sort_order']);
 
-			$content = [];
-
-			foreach ($content_query->rows as $content_row) {
-				$decoded = json_decode((string)$content_row['content'], true);
-
-				$content[(int)$content_row['language_id']] = is_array($decoded) ? $decoded : [];
-			}
-
-			$settings = json_decode((string)$row['settings'], true);
-
-			$blocks[] = [
-				'block_id'   => (int)$row['block_id'],
-				'landing_id' => (int)$row['landing_id'],
-				'code'       => (string)$row['code'],
-				'status'     => (int)$row['status'],
-				'sort_order' => (int)$row['sort_order'],
-				'settings'   => is_array($settings) ? $settings : [],
-				'content'    => $content,
-			];
+			$blocks[] = $block;
 		}
 
 		return $blocks;
@@ -429,13 +527,25 @@ class ModelDesignLanding extends Model {
 	/**
 	 * Upserts every block of a page and deletes the ones that were removed.
 	 *
+	 * Hierarchy protocol (the builder payload):
+	 *   * `block_id` > 0 keeps/updates that row; `block_id` <= 0 inserts a new
+	 *     row (the builder sends unique negative temp ids for new blocks so
+	 *     children can reference them; 0 stays the legacy "anonymous new block").
+	 *   * `parent_id` points at the owning section: a submitted temp id resolves
+	 *     through this payload, a kept existing id passes through. Containers
+	 *     are forced to the top level; a child whose parent is not part of the
+	 *     saved page is PROMOTED to the top level instead of dropped, so user
+	 *     content never disappears over a malformed payload. Sections must be
+	 *     submitted before their children (the builder always does).
+	 *   * `slot` is clamped to the parent structure's column count, `sort` to
+	 *     0-999 (the position inside the own parent/slot group).
+	 *
 	 * @param array<int, array<string, mixed>> $blocks
 	 * @return array<int, array<string, mixed>> saved blocks (with real ids)
 	 */
 	public function saveBlocks(int $landing_id, array $blocks): array {
 		$landing_id = (int)$landing_id;
 		$now = date('Y-m-d H:i:s');
-		$language_ids = $this->languageIds();
 
 		$existing = [];
 
@@ -444,31 +554,53 @@ class ModelDesignLanding extends Model {
 		}
 
 		$kept = [];
-		$sort_order = 0;
+		$id_map = [];
+		$container_columns = [];
+		$saved = [];
 
 		foreach (array_slice($blocks, 0, self::MAX_BLOCKS) as $block) {
-			$code = isset($block['code']) ? (string)$block['code'] : '';
+			$normalized = $this->normalizeBlockPayload((array)$block);
 
-			if (!Dockercart\Landing\Blocks::exists($code)) {
+			if ($normalized === null) {
 				continue;
 			}
 
-			$settings = Dockercart\Landing\Blocks::normalizeSettings($code, (array)($block['settings'] ?? []));
-			$content = [];
+			$code = $normalized['code'];
+			$settings = $normalized['settings'];
+			$content = $normalized['content'];
 
-			foreach ($language_ids as $language_id) {
-				$content[$language_id] = Dockercart\Landing\Blocks::normalizeContent(
-					$code,
-					(array)($block['content'][$language_id] ?? $block['content'][(string)$language_id] ?? [])
-				);
-			}
-
-			$block_id = isset($block['block_id']) ? (int)$block['block_id'] : 0;
+			$client_id = (int)($block['block_id'] ?? 0);
 			$status = isset($block['status']) && !$block['status'] ? 0 : 1;
 
-			if ($block_id > 0 && isset($existing[$block_id])) {
+			// Hierarchy: containers stay top level, children must resolve to a
+			// container kept by this payload.
+			$parent_id = (int)($block['parent_id'] ?? 0);
+
+			if (Dockercart\Landing\Blocks::isContainer($code)) {
+				$parent_id = 0;
+			} elseif ($parent_id !== 0 && isset($id_map[$parent_id])) {
+				$parent_id = (int)$id_map[$parent_id];
+			} else {
+				$parent_id = 0;
+			}
+
+			$slot = 0;
+
+			if ($parent_id > 0) {
+				$columns = $container_columns[$parent_id] ?? 1;
+				$slot = max(0, min($columns - 1, (int)($block['slot'] ?? 0)));
+			}
+
+			$sort_order = max(0, min(999, (int)($block['sort'] ?? 0)));
+			$block_id = 0;
+
+			if ($client_id > 0 && isset($existing[$client_id])) {
+				$block_id = $client_id;
+
 				$this->db->query("UPDATE `" . DB_PREFIX . "landing_block` SET
 					code = '" . $this->db->escape($code) . "',
+					parent_id = '" . (int)$parent_id . "',
+					slot = '" . (int)$slot . "',
 					sort_order = '" . (int)$sort_order . "',
 					status = '" . (int)$status . "',
 					settings = '" . $this->db->escape((string)json_encode($settings, JSON_UNESCAPED_UNICODE)) . "',
@@ -477,6 +609,8 @@ class ModelDesignLanding extends Model {
 			} else {
 				$this->db->query("INSERT INTO `" . DB_PREFIX . "landing_block` SET
 					landing_id = '" . $landing_id . "',
+					parent_id = '" . (int)$parent_id . "',
+					slot = '" . (int)$slot . "',
 					code = '" . $this->db->escape($code) . "',
 					sort_order = '" . (int)$sort_order . "',
 					status = '" . (int)$status . "',
@@ -485,6 +619,14 @@ class ModelDesignLanding extends Model {
 					date_modified = '" . $now . "'");
 
 				$block_id = (int)$this->db->getLastId();
+			}
+
+			if ($client_id !== 0) {
+				$id_map[$client_id] = $block_id;
+			}
+
+			if (Dockercart\Landing\Blocks::isContainer($code)) {
+				$container_columns[$block_id] = Dockercart\Landing\Blocks::columnCount((string)$settings['structure']);
 			}
 
 			$this->db->query("DELETE FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id = '" . (int)$block_id . "'");
@@ -497,7 +639,16 @@ class ModelDesignLanding extends Model {
 			}
 
 			$kept[$block_id] = true;
-			$sort_order++;
+
+			$saved[] = [
+				'block_id'  => (int)$block_id,
+				'client_id' => $client_id,
+				'parent_id' => (int)$parent_id,
+				'slot'      => (int)$slot,
+				'sort'      => (int)$sort_order,
+				'code'      => $code,
+				'status'    => (int)$status,
+			];
 		}
 
 		foreach (array_keys($existing) as $block_id) {
@@ -509,7 +660,38 @@ class ModelDesignLanding extends Model {
 			$this->db->query("DELETE FROM `" . DB_PREFIX . "landing_block` WHERE block_id = '" . (int)$block_id . "'");
 		}
 
-		return $this->getBlocks($landing_id);
+		return $saved;
+	}
+
+	/**
+	 * Shared builder-payload normalisation for saveBlocks() and addTemplate():
+	 * a known block code plus cast settings and per-language content. Unknown
+	 * codes (and anything else the registry does not declare) never pass.
+	 *
+	 * @param array<string, mixed> $block
+	 * @return array{code: string, settings: array<string, mixed>, content: array<int, array<string, mixed>>}|null
+	 */
+	private function normalizeBlockPayload(array $block): ?array {
+		$code = isset($block['code']) ? (string)$block['code'] : '';
+
+		if (!Dockercart\Landing\Blocks::exists($code)) {
+			return null;
+		}
+
+		$content = [];
+
+		foreach ($this->languageIds() as $language_id) {
+			$content[$language_id] = Dockercart\Landing\Blocks::normalizeContent(
+				$code,
+				(array)($block['content'][$language_id] ?? $block['content'][(string)$language_id] ?? [])
+			);
+		}
+
+		return [
+			'code'     => $code,
+			'settings' => Dockercart\Landing\Blocks::normalizeSettings($code, (array)($block['settings'] ?? [])),
+			'content'  => $content,
+		];
 	}
 
 	// ------------------------------------------------------------ templates
@@ -541,36 +723,39 @@ class ModelDesignLanding extends Model {
 	 */
 	public function addTemplate(string $name, array $blocks): int {
 		$now = date('Y-m-d H:i:s');
-		$language_ids = $this->languageIds();
-		$normalized = [];
+		$rows = [];
 
 		foreach (array_slice($blocks, 0, self::MAX_BLOCKS) as $block) {
-			$code = isset($block['code']) ? (string)$block['code'] : '';
+			$normalized = $this->normalizeBlockPayload((array)$block);
 
-			if (!Dockercart\Landing\Blocks::exists($code)) {
+			if ($normalized === null) {
 				continue;
 			}
 
-			$content = [];
+			$parent_id = (int)($block['parent_id'] ?? 0);
 
-			foreach ($language_ids as $language_id) {
-				$content[$language_id] = Dockercart\Landing\Blocks::normalizeContent(
-					$code,
-					(array)($block['content'][$language_id] ?? $block['content'][(string)$language_id] ?? [])
-				);
+			if (Dockercart\Landing\Blocks::isContainer($normalized['code'])) {
+				$parent_id = 0;
 			}
 
-			$normalized[] = [
-				'code'     => $code,
+			// block_id stays in the stored JSON as the template-local reference a
+			// child's parent_id points at; insertTemplate() remaps both to fresh
+			// temp ids when the set is inserted into a page.
+			$rows[] = [
+				'block_id'  => (int)($block['block_id'] ?? 0),
+				'parent_id' => $parent_id,
+				'slot'      => max(0, (int)($block['slot'] ?? 0)),
+				'sort'      => max(0, min(999, (int)($block['sort'] ?? 0))),
+				'code'      => $normalized['code'],
 				'status'   => 1,
-				'settings' => Dockercart\Landing\Blocks::normalizeSettings($code, (array)($block['settings'] ?? [])),
-				'content'  => $content,
+				'settings' => $normalized['settings'],
+				'content'  => $normalized['content'],
 			];
 		}
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "landing_template` SET
 			name = '" . $this->db->escape($name) . "',
-			blocks = '" . $this->db->escape((string)json_encode($normalized, JSON_UNESCAPED_UNICODE)) . "',
+			blocks = '" . $this->db->escape((string)json_encode($rows, JSON_UNESCAPED_UNICODE)) . "',
 			date_added = '" . $now . "',
 			date_modified = '" . $now . "'");
 
@@ -603,6 +788,44 @@ class ModelDesignLanding extends Model {
 		$this->db->query("UPDATE `" . DB_PREFIX . "landing` SET is_home = '0' WHERE landing_id = '" . (int)$landing_id . "'");
 	}
 
+	// ---------------------------------------------------------- site design
+
+	/**
+	 * Global landing style shared by every page (separate setting code so a
+	 * partial editSetting('config', …) can never wipe it).
+	 *
+	 * @return array<string, string>
+	 */
+	public function getSiteDesign(): array {
+		$values = \Dockercart\Landing\Design::defaults();
+
+		$query = $this->db->query("SELECT `key`, `value` FROM `" . DB_PREFIX . "setting` WHERE `store_id` = '0' AND `code` = '" . \Dockercart\Landing\Design::SETTING_CODE . "'");
+
+		foreach ($query->rows as $row) {
+			$key = (string)$row['key'];
+
+			if (isset($values[$key])) {
+				$values[$key] = (string)$row['value'];
+			}
+		}
+
+		return \Dockercart\Landing\Design::normalize($values);
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 */
+	public function saveSiteDesign(array $data): void {
+		$design = \Dockercart\Landing\Design::normalize($data);
+		$code = \Dockercart\Landing\Design::SETTING_CODE;
+
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "setting` WHERE `store_id` = '0' AND `code` = '" . $code . "'");
+
+		foreach ($design as $key => $value) {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "setting` (`store_id`, `code`, `key`, `value`, `serialized`) VALUES ('0', '" . $code . "', '" . $this->db->escape(\Dockercart\Landing\Design::PREFIX . $key) . "', '" . $this->db->escape($value) . "', '0')");
+		}
+	}
+
 	// -------------------------------------------------------------- helpers
 
 	/**
@@ -610,7 +833,7 @@ class ModelDesignLanding extends Model {
 	 *
 	 * @param array<int, array<string, mixed>> $descriptions
 	 */
-	private function saveDescriptions(int $landing_id, array $descriptions): void {
+	private function saveDescriptions(int $landing_id, array $descriptions, bool $owned = false): void {
 		$landing_id = (int)$landing_id;
 		$language_ids = $this->languageIds();
 		$default_language_id = (int)$this->config->get('config_language_id');
@@ -628,10 +851,10 @@ class ModelDesignLanding extends Model {
 		foreach ($language_ids as $language_id) {
 			$row = isset($descriptions[$language_id]) ? (array)$descriptions[$language_id] : [];
 
-			$slug = Dockercart\Landing\Url::normalizeSlug((string)($row['slug'] ?? ''));
+			$slug = $owned ? '' : Dockercart\Landing\Url::normalizeSlug((string)($row['slug'] ?? ''));
 
 			if ($slug === '') {
-				$slug = $default_slug;
+				$slug = $owned ? '' : $default_slug;
 			}
 
 			$slugs[$language_id] = $slug;
@@ -645,7 +868,9 @@ class ModelDesignLanding extends Model {
 				meta_keyword = '" . $this->db->escape($this->truncate((string)($row['meta_keyword'] ?? ''), 255)) . "'");
 		}
 
-		$this->syncSeoUrls($landing_id, $slugs);
+		if (!$owned) {
+			$this->syncSeoUrls($landing_id, $slugs);
+		}
 	}
 
 	/**
@@ -671,9 +896,16 @@ class ModelDesignLanding extends Model {
 	}
 
 	/**
+	 * Installed language ids, cached per model instance (saveBlocks(),
+	 * saveDescriptions() and addTemplate() all ask for them).
+	 *
 	 * @return array<int, int>
 	 */
 	private function languageIds(): array {
+		if ($this->language_ids !== null) {
+			return $this->language_ids;
+		}
+
 		$this->load->model('localisation/language');
 
 		$ids = [];
@@ -682,7 +914,7 @@ class ModelDesignLanding extends Model {
 			$ids[] = (int)$language['language_id'];
 		}
 
-		return $ids;
+		return $this->language_ids = $ids;
 	}
 
 	/**
@@ -726,14 +958,10 @@ class ModelDesignLanding extends Model {
 	}
 
 	private function length(string $value): int {
-		return function_exists('utf8_strlen') ? utf8_strlen($value) : strlen($value);
+		return Dockercart\Landing\Text::length($value);
 	}
 
 	private function truncate(string $value, int $length): string {
-		if (function_exists('utf8_strlen') && function_exists('utf8_substr')) {
-			return utf8_strlen($value) > $length ? utf8_substr($value, 0, $length) : $value;
-		}
-
-		return strlen($value) > $length ? substr($value, 0, $length) : $value;
+		return Dockercart\Landing\Text::truncate($value, $length);
 	}
 }

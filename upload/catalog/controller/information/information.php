@@ -20,6 +20,25 @@ class ControllerInformationInformation extends Controller {
 
 		$information_info = $this->model_catalog_information->getInformation($information_id);
 
+		// A page composed in the landing builder renders its sections through
+		// the landing controller (the same delegation a landing-as-home page
+		// uses in common/home). The landing is resolved by the owner link, the
+		// information page keeps its own URL, meta and status gate. A preview
+		// token delegates even when the page is disabled — the landing
+		// controller verifies the token and lets the builder canvas through.
+		if (($information_info && !empty($information_info['use_builder']))
+			|| ($information_id > 0 && isset($this->request->get['preview_token']))) {
+			$this->load->model('design/landing');
+
+			$landing = $this->model_design_landing->getLandingByInformation($information_id);
+
+			if ($landing) {
+				$this->request->get['landing_id'] = (int)$landing['landing_id'];
+
+				return $this->response->setOutput($this->load->controller('landing/page'));
+			}
+		}
+
 		if ($information_info) {
 			$this->document->setTitle($information_info['meta_title']);
 			$this->document->setDescription($information_info['meta_description']);

@@ -1,0 +1,35 @@
+{#
+	Feature list: short, scannable reasons with a Lucide icon each.
+	Icons come from the registry's whitelist, never from raw user markup.
+	All styling lives in the shared landing-blocks.css so the widget renders
+	the same way in themes that do not load Tailwind.
+#}
+<div class="lp-native lp-native--features lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		{% set rows = [] %}
+		{% for item in content.items %}
+			{% if item.title or item.text %}
+				{% set rows = rows|merge([item]) %}
+			{% endif %}
+		{% endfor %}
+
+		{% if rows %}
+		<div class="lp-native__grid" data-columns="{{ settings.columns }}">
+			{% for item in rows %}
+			<article class="lp-native__item">
+				<span class="lp-native__icon" aria-hidden="true"><i data-lucide="{{ item.icon }}"></i></span>
+				{% if item.title %}<h3 class="lp-native__item-title">{{ item.title|escape }}</h3>{% endif %}
+				{% if item.text %}<p class="lp-native__item-text">{{ item.text|escape|nl2br }}</p>{% endif %}
+			</article>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+</div>

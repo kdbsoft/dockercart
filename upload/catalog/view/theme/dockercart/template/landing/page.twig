@@ -9,7 +9,7 @@
 <style>{{ custom_css|raw }}</style>
 {% endif %}
 
-<main id="lp-page" class="lp-page{% if chrome == 'bare' %} lp-page--bare{% endif %}">
+<main id="lp-page" class="lp-page{% if chrome == 'bare' %} lp-page--bare{% endif %}"{% if design_style %} style="{{ design_style }}"{% endif %}>
 	<div id="lp-blocks">
 		{% for block in blocks %}
 		{{ block.html|raw }}

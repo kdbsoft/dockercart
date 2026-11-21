@@ -1,7 +1,7 @@
 <?php
 // Heading
 $_['heading_title']  = 'Лендинги';
-$_['heading_builder'] = 'Конструктор лендингов';
+$_['heading_builder'] = 'Конструктор страниц';
 
 // Text
 $_['text_success']            = 'Настройки лендингов сохранены!';
@@ -88,6 +88,11 @@ $_['text_view_desktop']      = 'Десктоп';
 $_['text_view_tablet']       = 'Планшет';
 $_['text_view_mobile']       = 'Телефон';
 $_['text_add_section']       = 'Добавить секцию';
+$_['text_content']            = 'Контент';
+$_['text_style']              = 'Стиль';
+$_['text_advanced']           = 'Дополнительно';
+$_['text_shortcuts']           = 'Горячие клавиши';
+$_['text_empty_hint']          = 'Перетащите блок из левой панели — или начните с готовой секции';
 $_['text_hidden_block']      = 'Секция скрыта';
 $_['text_hidden_device']     = 'Скрыта на этом устройстве';
 $_['text_search_blocks']     = 'Поиск секций…';
@@ -98,6 +103,7 @@ $_['text_pick_products']     = 'Поиск товаров…';
 $_['text_pick_category']     = 'Поиск категорий…';
 $_['text_pick_banner']       = 'Выбрать баннер';
 $_['text_error_save']        = 'Не удалось сохранить страницу';
+$_['error_meta_length']       = 'Мета-теги должны быть не длиннее 255 символов!';
 $_['text_conflict']          = 'Страница изменена в другой вкладке. Перезагрузите конструктор.';
 $_['text_back']              = 'Назад';
 $_['text_status_draft']      = 'Черновик';
@@ -123,8 +129,13 @@ $_['block_categories']        = 'Плитка категорий';
 $_['block_image']             = 'Изображение';
 $_['block_image_text']        = 'Изображение + текст';
 $_['block_banner']            = 'Слайдер баннеров';
+$_['block_section']            = 'Секция';
 $_['block_spacer']            = 'Отступ / разделитель';
 $_['block_html']              = 'HTML / вставка';
+$_['block_features']          = 'Преимущества';
+$_['block_steps']             = 'Этапы';
+$_['block_faq']               = 'Вопросы и ответы';
+$_['block_statement']         = 'Акцент';
 
 // Block fields
 $_['field_badge']                  = 'Бейдж';
@@ -243,3 +254,81 @@ $_['error_save']             = 'Не удалось сохранить стра�
 $_['error_conflict']         = 'Страница изменена в другой вкладке. Перезагрузите конструктор.';
 $_['error_template_name']    = 'Название шаблона должно быть от 2 до 128 символов!';
 $_['error_template_blocks']  = 'Выберите хотя бы одну секцию для сохранения в шаблон!';
+
+// Лендинги, привязанные к информационным страницам
+$_['text_owner_information'] = 'Страница управляется из Catalog > Information: URL, мета-теги, статус и SEO-ключ принадлежат информационной странице.';
+$_['error_owner']             = 'Этот лендинг — содержимое информационной страницы, управляйте им из Catalog > Information!';
+
+// Section container
+$_['field_structure']      = 'Раскладка колонок';
+$_['option_structure_1']   = 'Одна колонка';
+$_['option_structure_2']   = 'Две колонки — равные';
+$_['option_structure_2_1'] = 'Две колонки — широкая слева';
+$_['option_structure_1_2'] = 'Две колонки — широкая справа';
+$_['option_structure_3']   = 'Три колонки';
+$_['option_structure_4']   = 'Четыре колонки';
+$_['field_gap']            = 'Отступ между колонками';
+$_['option_gap_none']      = 'Нет';
+$_['option_gap_xs']        = 'Очень маленький';
+$_['option_gap_sm']        = 'Маленький';
+$_['option_gap_md']        = 'Средний';
+$_['option_gap_lg']        = 'Большой';
+$_['text_navigator']      = 'Навигатор';
+$_['text_column']         = 'Колонка %s';
+$_['text_drop_here']       = 'Перетащите виджеты сюда';
+$_['text_confirm_unsaved']  = 'Есть несохранённые изменения. Сохранить перед переключением?';
+
+// Native editorial blocks
+$_['field_intro']          = 'Вступительный текст';
+$_['field_items']          = 'Преимущества';
+$_['field_steps']          = 'Этапы';
+$_['field_questions']      = 'Вопросы';
+$_['field_icon']           = 'Иконка';
+$_['field_item_title']     = 'Заголовок';
+$_['field_item_text']      = 'Описание';
+$_['field_question']       = 'Вопрос';
+$_['field_answer']         = 'Ответ';
+$_['field_foot']           = 'Примечание';
+$_['field_variant']        = 'Фон';
+$_['option_variant_plain'] = 'Обычный';
+$_['option_variant_soft']  = 'Светлый';
+$_['option_variant_dark']  = 'Тёмный';
+$_['option_icon_sparkles']      = 'Сияние';
+$_['option_icon_shield_check']  = 'Защита';
+$_['option_icon_credit_card']   = 'Карта';
+$_['option_icon_truck']         = 'Доставка';
+$_['option_icon_package_check'] = 'Посылка';
+$_['option_icon_headset']       = 'Поддержка';
+$_['option_icon_wallet']        = 'Кошелёк';
+$_['option_icon_landmark']      = 'Банк';
+$_['option_icon_refresh_cw']    = 'Возврат';
+$_['option_icon_store']         = 'Магазин';
+
+// Site Settings panel in the landing builder
+$_['text_site_settings'] = 'Настройки сайта';
+$_['text_site_settings_hint'] = 'Стили всех лендингов. Сохраните, чтобы применить везде.';
+$_['text_site_style_saved'] = 'Стиль сайта сохранён';
+$_['button_save_site_style'] = 'Сохранить стиль';
+
+// Style-tab design controls
+$_['field_accent_color'] = 'Акцентный цвет';
+$_['field_surface_color'] = 'Цвет фона';
+$_['field_ink_color'] = 'Цвет текста';
+$_['field_muted_color'] = 'Цвет второстепенного текста';
+$_['field_line_color'] = 'Цвет линий';
+$_['field_success_color'] = 'Цвет успеха';
+$_['field_radius'] = 'Радиус углов';
+$_['field_padding_y'] = 'Вертикальный отступ';
+$_['field_content_width'] = 'Ширина контента';
+$_['option_radius_none'] = 'Нет';
+$_['option_radius_sm'] = 'Малый';
+$_['option_radius_md'] = 'Средний';
+$_['option_padding_y_xs'] = 'Очень маленький';
+$_['option_padding_y_sm'] = 'Маленький';
+$_['option_padding_y_md'] = 'Средний';
+$_['option_padding_y_lg'] = 'Большой';
+$_['option_padding_y_xl'] = 'Очень большой';
+$_['option_content_width_narrow'] = 'Узкая';
+$_['option_content_width_normal'] = 'Обычная';
+$_['option_content_width_wide'] = 'Широкая';
+$_['option_content_width_full'] = 'На всю ширину';

@@ -1,0 +1,25 @@
+{#
+	Questions and answers with native <details>: keyboard accessible and usable
+	without JavaScript or a theme-specific accordion widget.
+#}
+<div class="lp-native lp-native--faq lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		<div class="lp-native__faq">
+			{% for item in content.items %}
+				{% if item.question %}
+				<details class="lp-native__qa">
+					<summary class="lp-native__question">{{ item.question|escape }}</summary>
+					{% if item.answer %}<div class="lp-native__answer">{{ item.answer|escape|nl2br }}</div>{% endif %}
+				</details>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
+</div>

@@ -30,7 +30,20 @@ class ModelDesignLanding extends Model {
 		$query = $this->db->query("SELECT l.* FROM `" . DB_PREFIX . "landing` l
 			INNER JOIN `" . DB_PREFIX . "landing_description` d ON (d.landing_id = l.landing_id)
 			WHERE d.slug = '" . $this->db->escape($slug) . "' AND d.language_id = '" . (int)$language_id . "'
+			AND l.information_id IS NULL
 			LIMIT 1");
+
+		return $query->num_rows ? $query->row : false;
+	}
+
+	/**
+	 * The landing page bound to an information page as its composed body
+	 * (information/information delegates to landing/page for it).
+	 *
+	 * @return array<string, mixed>|false
+	 */
+	public function getLandingByInformation(int $information_id) {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "landing` WHERE information_id = '" . (int)$information_id . "' LIMIT 1");
 
 		return $query->num_rows ? $query->row : false;
 	}
@@ -75,33 +88,9 @@ class ModelDesignLanding extends Model {
 			return (int)$row['block_id'];
 		}, $query->rows);
 
-		$descriptions = [];
-
 		$content_query = $this->db->query("SELECT block_id, language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id IN (" . implode(',', $block_ids) . ")");
 
-		foreach ($content_query->rows as $row) {
-			$decoded = json_decode((string)$row['content'], true);
-
-			$descriptions[(int)$row['block_id']][(int)$row['language_id']] = is_array($decoded) ? $decoded : [];
-		}
-
-		$blocks = [];
-
-		foreach ($query->rows as $row) {
-			$block_id = (int)$row['block_id'];
-			$settings = json_decode((string)$row['settings'], true);
-
-			$blocks[] = [
-				'block_id'   => $block_id,
-				'code'       => (string)$row['code'],
-				'sort_order' => (int)$row['sort_order'],
-				'status'     => (int)$row['status'],
-				'settings'   => is_array($settings) ? $settings : [],
-				'content'    => $descriptions[$block_id] ?? [],
-			];
-		}
-
-		return $blocks;
+		return \Dockercart\Landing\Blocks::hydrate($query->rows, $content_query->rows);
 	}
 
 	/**
@@ -114,26 +103,34 @@ class ModelDesignLanding extends Model {
 			return false;
 		}
 
-		$row = $query->row;
-		$settings = json_decode((string)$row['settings'], true);
-		$content = [];
+		$content_query = $this->db->query("SELECT block_id, language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id = '" . (int)$block_id . "'");
 
-		$content_query = $this->db->query("SELECT language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id = '" . (int)$block_id . "'");
+		$blocks = \Dockercart\Landing\Blocks::hydrate([$query->row], $content_query->rows);
 
-		foreach ($content_query->rows as $content_row) {
-			$decoded = json_decode((string)$content_row['content'], true);
+		return $blocks[0] ?? false;
+	}
 
-			$content[(int)$content_row['language_id']] = is_array($decoded) ? $decoded : [];
+	/**
+	 * Children of one section (its columns' widgets), in slot/sort order.
+	 *
+	 * Used by the builder's single-block re-render (only_block=<section id>).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function getBlockChildren(int $block_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "landing_block` WHERE parent_id = '" . (int)$block_id . "' ORDER BY slot ASC, sort_order ASC, block_id ASC");
+
+		if (!$query->num_rows) {
+			return [];
 		}
 
-		return [
-			'block_id'   => (int)$row['block_id'],
-			'code'       => (string)$row['code'],
-			'sort_order' => (int)$row['sort_order'],
-			'status'     => (int)$row['status'],
-			'settings'   => is_array($settings) ? $settings : [],
-			'content'    => $content,
-		];
+		$block_ids = array_map(static function ($row) {
+			return (int)$row['block_id'];
+		}, $query->rows);
+
+		$content_query = $this->db->query("SELECT block_id, language_id, content FROM `" . DB_PREFIX . "landing_block_description` WHERE block_id IN (" . implode(',', $block_ids) . ")");
+
+		return \Dockercart\Landing\Blocks::hydrate($query->rows, $content_query->rows);
 	}
 
 	/**

@@ -1,7 +1,7 @@
 <?php
 // Heading
 $_['heading_title']  = 'Landing Pages';
-$_['heading_builder'] = 'Landing Page Builder';
+$_['heading_builder'] = 'Page Builder';
 
 // Text
 $_['text_success']            = 'Success: You have modified landing pages!';
@@ -88,6 +88,11 @@ $_['text_view_desktop']      = 'Desktop';
 $_['text_view_tablet']       = 'Tablet';
 $_['text_view_mobile']       = 'Mobile';
 $_['text_add_section']       = 'Add section';
+$_['text_content']            = 'Content';
+$_['text_style']              = 'Style';
+$_['text_advanced']           = 'Advanced';
+$_['text_shortcuts']           = 'Keyboard shortcuts';
+$_['text_empty_hint']          = 'Drag a block from the left panel — or start with a ready section';
 $_['text_hidden_block']      = 'This section is hidden';
 $_['text_hidden_device']     = 'Hidden on this device';
 $_['text_search_blocks']     = 'Search sections…';
@@ -98,6 +103,7 @@ $_['text_pick_products']     = 'Search products…';
 $_['text_pick_category']     = 'Search categories…';
 $_['text_pick_banner']       = 'Choose banner';
 $_['text_error_save']        = 'Could not save the page';
+$_['error_meta_length']       = 'Meta title, description and keywords must not exceed 255 characters!';
 $_['text_conflict']          = 'This page was modified in another tab. Reload to continue.';
 $_['text_back']              = 'Back';
 $_['text_status_draft']      = 'Draft';
@@ -123,8 +129,13 @@ $_['block_categories']        = 'Category grid';
 $_['block_image']             = 'Image';
 $_['block_image_text']        = 'Image + text';
 $_['block_banner']            = 'Banner slider';
+$_['block_section']            = 'Section';
 $_['block_spacer']            = 'Spacer / divider';
 $_['block_html']              = 'HTML / embed';
+$_['block_features']          = 'Feature list';
+$_['block_steps']             = 'Numbered steps';
+$_['block_faq']               = 'Questions & answers';
+$_['block_statement']         = 'Statement';
 
 // Block fields
 $_['field_badge']                  = 'Badge';
@@ -243,3 +254,81 @@ $_['error_save']             = 'Could not save the page!';
 $_['error_conflict']         = 'This page was modified in another tab. Reload the builder to continue.';
 $_['error_template_name']    = 'Template name must be between 2 and 128 characters!';
 $_['error_template_blocks']  = 'Select at least one section to save as a template!';
+
+// Information-page owned landings
+$_['text_owner_information'] = 'This page is managed from Catalog > Information: URL, meta tags, status and the SEO keyword belong to the information page.';
+$_['error_owner']             = 'This landing is the content of an information page — manage it from Catalog > Information!';
+
+// Section container
+$_['field_structure']      = 'Columns layout';
+$_['option_structure_1']   = 'One column';
+$_['option_structure_2']   = 'Two columns — equal';
+$_['option_structure_2_1'] = 'Two columns — wide left';
+$_['option_structure_1_2'] = 'Two columns — wide right';
+$_['option_structure_3']   = 'Three columns';
+$_['option_structure_4']   = 'Four columns';
+$_['field_gap']            = 'Column gap';
+$_['option_gap_none']      = 'None';
+$_['option_gap_xs']        = 'Extra small';
+$_['option_gap_sm']        = 'Small';
+$_['option_gap_md']        = 'Medium';
+$_['option_gap_lg']        = 'Large';
+$_['text_navigator']      = 'Navigator';
+$_['text_column']         = 'Column %s';
+$_['text_drop_here']       = 'Drop widgets here';
+$_['text_confirm_unsaved']  = 'You have unsaved changes. Save them before switching?';
+
+// Native editorial blocks
+$_['field_intro']          = 'Intro text';
+$_['field_items']          = 'Features';
+$_['field_steps']          = 'Steps';
+$_['field_questions']      = 'Questions';
+$_['field_icon']           = 'Icon';
+$_['field_item_title']     = 'Title';
+$_['field_item_text']      = 'Description';
+$_['field_question']       = 'Question';
+$_['field_answer']         = 'Answer';
+$_['field_foot']           = 'Footnote';
+$_['field_variant']        = 'Surface';
+$_['option_variant_plain'] = 'Plain';
+$_['option_variant_soft']  = 'Tinted';
+$_['option_variant_dark']  = 'Dark';
+$_['option_icon_sparkles']      = 'Sparkles';
+$_['option_icon_shield_check']  = 'Shield';
+$_['option_icon_credit_card']   = 'Card';
+$_['option_icon_truck']         = 'Delivery';
+$_['option_icon_package_check'] = 'Parcel';
+$_['option_icon_headset']       = 'Support';
+$_['option_icon_wallet']        = 'Wallet';
+$_['option_icon_landmark']      = 'Bank';
+$_['option_icon_refresh_cw']    = 'Returns';
+$_['option_icon_store']         = 'Store';
+
+// Site Settings panel in the landing builder
+$_['text_site_settings'] = 'Site settings';
+$_['text_site_settings_hint'] = 'Styles shared by every landing page. Save to apply everywhere.';
+$_['text_site_style_saved'] = 'Site style saved';
+$_['button_save_site_style'] = 'Save site style';
+
+// Style-tab design controls
+$_['field_accent_color'] = 'Accent colour';
+$_['field_surface_color'] = 'Surface colour';
+$_['field_ink_color'] = 'Ink colour';
+$_['field_muted_color'] = 'Muted text colour';
+$_['field_line_color'] = 'Border colour';
+$_['field_success_color'] = 'Success colour';
+$_['field_radius'] = 'Corner radius';
+$_['field_padding_y'] = 'Vertical padding';
+$_['field_content_width'] = 'Content width';
+$_['option_radius_none'] = 'None';
+$_['option_radius_sm'] = 'Small';
+$_['option_radius_md'] = 'Medium';
+$_['option_padding_y_xs'] = 'Extra small';
+$_['option_padding_y_sm'] = 'Small';
+$_['option_padding_y_md'] = 'Medium';
+$_['option_padding_y_lg'] = 'Large';
+$_['option_padding_y_xl'] = 'Extra large';
+$_['option_content_width_narrow'] = 'Narrow';
+$_['option_content_width_normal'] = 'Normal';
+$_['option_content_width_wide'] = 'Wide';
+$_['option_content_width_full'] = 'Full width';

@@ -1020,6 +1020,14 @@ class ControllerStartupSeoUrl extends Controller
             return;
         }
 
+        // Builder preview requests (signed with a preview_token) are admin
+        // artifacts: canonicalising them to the page keyword would pin the
+        // keyword's language and defeat the canvas language switch for
+        // languages without their own keyword. Render the route form as-is.
+        if (!empty($this->request->get["preview_token"])) {
+            return;
+        }
+
         // Build query parameter for SEO URL lookup
         $query_param = "";
         $is_blog_route = false;

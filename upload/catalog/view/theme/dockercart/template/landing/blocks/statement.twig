@@ -1,0 +1,10 @@
+{#
+	One deliberate statement, with an optional footnote. No quotes, names or
+	statistics are invented — the copy is authored in the builder per language.
+#}
+<div class="lp-native lp-native--statement lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.text %}<p class="lp-native__statement">{{ content.text|escape|nl2br }}</p>{% endif %}
+		{% if content.foot %}<p class="lp-native__statement-foot">{{ content.foot|escape|nl2br }}</p>{% endif %}
+	</div>
+</div>

@@ -133,11 +133,21 @@ class ControllerStartupStartup extends Controller {
 						$default_language_id = (int)$languages[$default_language_code]['language_id'];
 					}
 				
+					// The session language wins the tie: a visitor (or the builder
+					// canvas) that explicitly switched to ru-ua must get the ru-ua
+					// row when the same keyword exists in several languages. Only
+					// when the keyword has no row for the session language does the
+					// store default apply.
+					$session_language_id = 0;
+					if (isset($this->session->data['language']) && isset($languages[$this->session->data['language']]['language_id'])) {
+						$session_language_id = (int)$languages[$this->session->data['language']]['language_id'];
+					}
+					
 					$seo_query = $this->db->query(
 						"SELECT language_id FROM " . DB_PREFIX . "seo_url 
 						WHERE keyword = '" . $this->db->escape($seo_keyword) . "' 
 						AND store_id = '" . $store_id . "' 
-						ORDER BY (language_id = '" . $default_language_id . "') DESC
+						ORDER BY (language_id = '" . $session_language_id . "') DESC, (language_id = '" . $default_language_id . "') DESC
 						LIMIT 1"
 					);
 
@@ -146,7 +156,7 @@ class ControllerStartupStartup extends Controller {
 							"SELECT language_id FROM " . DB_PREFIX . "blog_seo_url 
 							WHERE keyword = '" . $this->db->escape($seo_keyword) . "' 
 							AND store_id = '" . $store_id . "' 
-							ORDER BY (language_id = '" . $default_language_id . "') DESC
+							ORDER BY (language_id = '" . $session_language_id . "') DESC, (language_id = '" . $default_language_id . "') DESC
 							LIMIT 1"
 						);
 					}

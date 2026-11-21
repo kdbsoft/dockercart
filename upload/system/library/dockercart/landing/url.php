@@ -94,7 +94,7 @@ final class Url {
 			return false;
 		}
 
-		$length = function_exists('utf8_strlen') ? utf8_strlen($slug) : strlen($slug);
+		$length = Text::length($slug);
 
 		if ($length < self::SLUG_MIN_LENGTH || $length > self::SLUG_MAX_LENGTH) {
 			return false;
@@ -202,14 +202,6 @@ final class Url {
 	}
 
 	private static function truncate(string $value, int $length): string {
-		if (function_exists('utf8_strlen')) {
-			if (utf8_strlen($value) > $length) {
-				return utf8_substr($value, 0, $length);
-			}
-
-			return $value;
-		}
-
-		return strlen($value) > $length ? substr($value, 0, $length) : $value;
+		return Text::truncate($value, $length);
 	}
 }

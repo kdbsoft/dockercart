@@ -1,0 +1,126 @@
+/**
+ * Default styling for the editorial landing blocks (hero, text, image_text,
+ * cta). Every colour, radius, padding and width comes from the block's Style
+ * tab through CSS variables, so no page-level Custom CSS is needed and themes
+ * without Tailwind render the same layout.
+ */
+#lp-page {
+	--ds-ink: var(--lp-ink, #0b1b33);
+	--ds-blue: var(--lp-accent, #2563eb);
+	--ds-line: var(--lp-line, #dce3ee);
+	--ds-soft: var(--lp-surface, #f6f8fc);
+	--ds-mint: var(--lp-success, #0f9d76);
+	--ds-muted: var(--lp-muted, #5c6b7f);
+	--ds-radius: var(--lp-radius, 22px);
+	font-family: inherit;
+}
+#lp-page, #lp-page * { box-sizing: border-box; }
+#lp-page h1, #lp-page h2, #lp-page h3, #lp-page p,
+#lp-page ol, #lp-page ul, #lp-page figure, #lp-page details { margin-top: 0; }
+#lp-page img { max-width: 100%; height: auto; }
+#lp-page .lp-block { position: relative; width: 100%; }
+#lp-page .lp-block__body { position: relative; z-index: 1; max-width: var(--lp-content-w, 1240px); margin: 0 auto; padding: 0 24px; }
+#lp-page .lp-block--bg-image { isolation: isolate; }
+#lp-page .lp-block--bg-image::before {
+	content: ''; position: absolute; inset: 0; z-index: 0;
+	background: rgba(0, 0, 0, var(--lp-overlay, .3)); pointer-events: none;
+}
+@media (min-width: 1024px) { #lp-page .lp-block__body { padding-left: 40px; padding-right: 40px; } }
+
+/* Hero */
+#lp-page .lp-block--hero .lp-block__body,
+#lp-page .lp-block--cta .lp-block__body { max-width: none; padding: 0; }
+#lp-page .lp-block--hero .lp-block__body > div {
+	position: relative; overflow: hidden; display: flex; flex-direction: column;
+	justify-content: center; min-height: 520px; border-radius: 0;
+	background: var(--ds-ink); padding: var(--lp-pad-y, 4rem) 24px;
+}
+#lp-page .lp-block--hero .lp-block__body > div > div:last-child {
+	position: relative; z-index: 2; width: 100%; max-width: var(--lp-content-w, 760px); margin: 0 auto;
+}
+#lp-page .lp-block--hero h1 {
+	color: #fff; font-size: clamp(2.25rem, 5vw, 4rem); line-height: 1.06;
+	letter-spacing: -.035em; font-weight: 800; margin: 0 0 20px;
+}
+#lp-page .lp-block--hero p {
+	color: rgba(255,255,255,.84); font-size: 1.0625rem; line-height: 1.7; margin: 0 0 30px;
+}
+#lp-page .lp-block--hero p:first-of-type {
+	display: inline-block; margin-bottom: 18px; padding: 7px 14px; border-radius: 999px;
+	background: rgba(255,255,255,.12); color: #fff; font-size: .8rem; line-height: 1.4;
+	letter-spacing: 0; text-transform: none; font-weight: 600;
+}
+#lp-page .lp-block--hero a {
+	display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+	padding: 13px 22px; margin: 0 10px 10px 0; border-radius: 12px;
+	background: #fff; color: var(--ds-ink); font-weight: 700; text-decoration: none;
+}
+#lp-page .lp-block--hero a + a { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.45); }
+
+/* Text */
+#lp-page .lp-block--text .lp-block__body { max-width: var(--lp-content-w, 900px); padding-top: var(--lp-pad-y, 4rem); padding-bottom: var(--lp-pad-y, 4rem); }
+#lp-page .lp-block--text h2 {
+	font-size: clamp(1.75rem, 3.2vw, 2.6rem); line-height: 1.14; letter-spacing: -.03em;
+	font-weight: 800; color: inherit; margin: 0 0 22px;
+}
+#lp-page .lp-block--text p { font-size: 1.05rem; line-height: 1.8; color: var(--ds-muted); margin: 0 0 16px; }
+
+/* Image + text */
+#lp-page .lp-block--image_text .lp-block__body { max-width: var(--lp-content-w, 1120px); padding-top: var(--lp-pad-y, 4.75rem); padding-bottom: var(--lp-pad-y, 4.75rem); }
+#lp-page .lp-block--image_text .lp-block__body > div {
+	display: grid; grid-template-columns: 1.05fr .95fr; gap: 64px; align-items: center;
+}
+#lp-page .lp-block--image_text img {
+	display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--ds-radius);
+}
+#lp-page .lp-block--image_text h2 {
+	font-size: clamp(1.75rem, 3.2vw, 2.5rem); line-height: 1.14; letter-spacing: -.03em;
+	font-weight: 800; color: inherit; margin: 0 0 20px;
+}
+#lp-page .lp-block--image_text p { color: var(--ds-muted); line-height: 1.8; margin: 0 0 18px; }
+#lp-page .lp-block--image_text ul { list-style: none; padding: 0; margin: 0 0 30px; }
+#lp-page .lp-block--image_text li {
+	position: relative; padding-left: 26px; margin-bottom: 11px; color: var(--ds-muted); line-height: 1.6;
+}
+#lp-page .lp-block--image_text li::before {
+	content: '\2713'; position: absolute; left: 0; top: 0; color: var(--ds-mint); font-weight: 700;
+}
+#lp-page .lp-block--image_text li i, #lp-page .lp-block--image_text li svg { display: none; }
+#lp-page .lp-block--image_text a {
+	display: inline-flex; align-items: center; padding: 13px 22px; border-radius: 12px;
+	background: var(--ds-blue); color: #fff; font-weight: 700; text-decoration: none;
+}
+
+/* Closing call to action */
+#lp-page .lp-block--cta .lp-block__body > div {
+	position: relative; overflow: hidden; border-radius: 0;
+	background: var(--ds-ink); padding: var(--lp-pad-y, 4rem) 32px;
+}
+#lp-page .lp-block--cta .lp-block__body > div > img {
+	position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .22;
+}
+#lp-page .lp-block--cta .lp-block__body > div > div {
+	position: relative; z-index: 2; max-width: 720px; margin: 0 auto; text-align: center;
+}
+#lp-page .lp-block--cta h2 {
+	color: #fff; font-size: clamp(1.75rem, 3.2vw, 2.6rem); line-height: 1.14;
+	letter-spacing: -.03em; font-weight: 800; margin: 0 0 14px;
+}
+#lp-page .lp-block--cta p { color: rgba(255,255,255,.78); line-height: 1.7; margin: 0 0 28px; }
+#lp-page .lp-block--cta a {
+	display: inline-flex; align-items: center; padding: 13px 22px; border-radius: 12px;
+	background: #fff; color: var(--ds-ink); font-weight: 700; text-decoration: none;
+}
+
+#lp-page a:focus-visible, #lp-page summary:focus-visible { outline: 2px solid var(--ds-blue); outline-offset: 3px; border-radius: 4px; }
+@media (max-width: 900px) {
+	#lp-page .lp-block--image_text .lp-block__body > div { grid-template-columns: 1fr; gap: 34px; }
+}
+@media (max-width: 600px) {
+	#lp-page .lp-block--hero .lp-block__body > div { min-height: 460px; padding: 52px 24px; }
+	#lp-page .lp-block--cta .lp-block__body > div { padding: 44px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	#lp-page * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+

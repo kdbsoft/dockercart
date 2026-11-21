@@ -3,18 +3,36 @@
  *
  * The canvas is the real storefront rendered in an iframe
  * (index.php?route=landing/page&…&lp_builder=1). This script owns the page
- * model, the palette, the properties panel and autosave; the iframe script
- * (catalog/view/javascript/dockercart_landing_builder.js) owns dragging and
- * selection inside the page and talks to this script by postMessage.
+ * model, the palette, the properties panel, the structure navigator and
+ * autosave; the iframe script (catalog/view/javascript/dockercart_landing_
+ * builder.js) owns dragging and selection inside the page and talks to this
+ * script by postMessage.
+ *
+ * Page model: a two-level tree. Top-level blocks render as full-width
+ * sections; a `section` container block owns columns (structure presets) and
+ * its children sit in one of them (parent_id + slot). `sort` is the position
+ * inside the own (parent_id, slot) group, renumbered before every save.
+ * New blocks carry negative temp ids so children can reference them before
+ * the server assigns real ids; the save response carries client_id -> real
+ * block_id for every row.
+ *
+ * Language safety: every field write goes to the language that was selected
+ * when the input was bound (captured at bind time), never to whatever tab is
+ * current when a debounced timer fires. Pending editor/repeater timers are
+ * flushed (not dropped) before a panel re-renders, and a removed TinyMCE
+ * editor never writes anything - this is what used to wipe neighbouring
+ * languages on a fast tab switch.
  *
  * To the iframe:
- *   lp:select        {blockId}             highlight + scroll to a block
+ *   lp:select        {blockId, scroll}     highlight + scroll to a block
  *   lp:refreshBlock  {blockId, url}        re-fetch one rendered block
+ *   lp:replace       {blockId, html}       swap one node for unsaved preview html
+ *   lp:labels        {labels}              code -> block name for the toolbar
  * From the iframe:
- *   lp:ready    {order}                    iframe is interactive
+ *   lp:ready    {items}                    iframe is interactive
  *   lp:selected {blockId}
- *   lp:add      {code, afterId}
- *   lp:move     {order: [blockId, …]}
+ *   lp:add      {code, parentId, slot, afterId}
+ *   lp:moveTree {items: [{id, parent, slot, order}]}
  *   lp:action   {action, blockId}          duplicate|remove|up|down|settings
  */
 (function () {
@@ -26,6 +44,17 @@
 	var WRAPPER_KEYS = [
 		'bg_type', 'bg_color', 'bg_image', 'overlay', 'padding', 'container',
 		'align', 'hide_desktop', 'hide_tablet', 'hide_mobile', 'anchor', 'custom_class'
+	];
+
+	// Elementor-style property tabs: every block exposes the same three tabs.
+	// Content = the block's own fields, Style = backgrounds/spacing/width,
+	// Advanced = device visibility, anchors and custom classes.
+	var STYLE_KEYS = [
+		'bg_type', 'bg_color', 'bg_image', 'overlay', 'padding', 'container', 'align'
+	];
+
+	var ADVANCED_KEYS = [
+		'hide_desktop', 'hide_tablet', 'hide_mobile', 'anchor', 'custom_class'
 	];
 
 	var state = {
@@ -41,12 +70,18 @@
 			descriptions: {}
 		},
 		blocks: [],
-		version: 1
+		version: 1,
+		// Owned landing: the information page fields edited from Page Settings.
+		owner: { status: 0, descriptions: {} },
+		// Global landing design, edited in the builder's Site Settings panel.
+		siteDesign: clone(CFG.siteDesign || {})
 	};
 
 	var ui = {
-		lang: CFG.defaultLanguageId || 1,
+		lang: CFG.initialLanguageId || CFG.defaultLanguageId || 1,
 		selectedId: 0,
+		siteSettings: false,
+		propsTab: 'content',
 		viewport: 'desktop',
 		iframeLang: null,
 		iframeReady: false,
@@ -55,14 +90,22 @@
 		dirty: false,
 		saving: false,
 		saveQueued: false,
-		saveTimer: null,
+		saveDone: [],
+		pendingOwnerTitle: null,
+		previewTimer: null,
+		previewSeq: 0,
+		previewState: null,
 		needReload: false,
 		dirtyBlocks: {},
-		pendingSelectIndex: null,
+		pendingSelectBlock: null,
 		names: {},
 		previewBase: CFG.previewBase || '',
 		tokenAt: Date.now(),
-		templates: CFG.templates || []
+		templates: CFG.templates || [],
+		fieldTimers: [],
+		navSortables: [],
+		navigatorOpen: false,
+		tempId: 0
 	};
 
 	/* ==================== helpers ==================== */
@@ -115,6 +158,47 @@
 		return null;
 	}
 
+	function languageById(languageId) {
+		for (var i = 0; i < (CFG.languages || []).length; i++) {
+			if (Number(CFG.languages[i].language_id) === Number(languageId)) {
+				return CFG.languages[i];
+			}
+		}
+
+		return { name: '', code: '' };
+	}
+
+	/**
+	 * Deep-clones a block list with fresh temp ids: children keep pointing at
+	 * their section through the id map, containers are forced to the top
+	 * level. One helper for duplicate action and template insertion.
+	 */
+	function cloneBlocks(source, transform) {
+		var idMap = {};
+		var copies = [];
+
+		(source || []).forEach(function (original) {
+			var copy = normalizeBlock(clone(original));
+
+			copy.block_id = nextTempId();
+			idMap[Number(original.block_id)] = copy.block_id;
+
+			if (isContainerBlock(copy)) {
+				copy.parent_id = 0;
+			} else if (Number(copy.parent_id)) {
+				copy.parent_id = idMap[Number(copy.parent_id)] || 0;
+			}
+
+			if (typeof transform === 'function') {
+				transform(copy, original);
+			}
+
+			copies.push(copy);
+		});
+
+		return copies;
+	}
+
 	function fieldDefinition(code, key) {
 		var schema = CFG.schema[code];
 
@@ -137,9 +221,18 @@
 		return content;
 	}
 
+	function nextTempId() {
+		ui.tempId -= 1;
+
+		return ui.tempId;
+	}
+
 	function normalizeBlock(block) {
 		block.block_id = Number(block.block_id || 0);
 		block.status = block.status === undefined ? 1 : Number(block.status);
+		block.parent_id = Number(block.parent_id || 0);
+		block.slot = Number(block.slot || 0);
+		block.sort = Number(block.sort || 0);
 		block.settings = block.settings && typeof block.settings === 'object' ? block.settings : {};
 
 		if (!block.content || typeof block.content !== 'object') {
@@ -167,19 +260,95 @@
 		return null;
 	}
 
-	function blockIndexById(id) {
-		id = Number(id);
+	function isContainerBlock(block) {
+		var schema = block ? CFG.schema[block.code] : null;
 
-		for (var i = 0; i < state.blocks.length; i++) {
-			if (Number(state.blocks[i].block_id) === id) return i;
-		}
-
-		return -1;
+		return Boolean(schema && schema.container);
 	}
 
-	function getValue(field, block) {
+	function columnCountOf(block) {
+		var structure = String((block && block.settings && block.settings.structure) || '2');
+
+		return Number((CFG.structures || {})[structure] || 2);
+	}
+
+	/**
+	 * Top-level blocks in visual order.
+	 */
+	function topLevel() {
+		return state.blocks
+			.filter(function (block) { return !Number(block.parent_id); })
+			.sort(function (a, b) { return Number(a.sort) - Number(b.sort); });
+	}
+
+	/**
+	 * The widgets of one section column, in visual order.
+	 */
+	function childrenOf(parentId, slot) {
+		return state.blocks
+			.filter(function (block) {
+				return Number(block.parent_id) === Number(parentId) && Number(block.slot) === Number(slot);
+			})
+			.sort(function (a, b) { return Number(a.sort) - Number(b.sort); });
+	}
+
+	/**
+	 * The sibling group a block belongs to (its column, or the page level).
+	 */
+	function siblingsOf(block) {
+		return Number(block.parent_id) ? childrenOf(block.parent_id, block.slot) : topLevel();
+	}
+
+	/**
+	 * Normalises the tree before it is used: orphans (parent gone) are
+	 * promoted to the page level, slots are clamped to the parent's current
+	 * structure (a 4-column section changed to 1 folds its extra columns into
+	 * the last one) and every `sort` is recomputed dense inside its group.
+	 */
+	function renumber() {
+		state.blocks.forEach(function (block) {
+			if (!Number(block.parent_id)) return;
+
+			var parent = blockById(block.parent_id);
+
+			if (!parent) {
+				block.parent_id = 0;
+				block.slot = 0;
+
+				return;
+			}
+
+			if (Number(block.slot) >= columnCountOf(parent)) {
+				block.slot = columnCountOf(parent) - 1;
+			}
+		});
+
+		topLevel().forEach(function (block, index) {
+			block.sort = index;
+		});
+
+		state.blocks.forEach(function (block) {
+			if (!Number(block.parent_id)) return;
+
+			var index = childrenOf(block.parent_id, block.slot).indexOf(block);
+
+			block.sort = index < 0 ? 0 : index;
+		});
+	}
+
+	/* ==================== field values (language-safe) ==================== */
+
+	/**
+	 * Reads a field for one language. `lang` defaults to the current tab but
+	 * every bound input passes its own captured language, so a debounced
+	 * write can never land in the tab that happens to be selected when the
+	 * timer fires.
+	 */
+	function getValue(field, block, lang) {
+		var languageId = lang === undefined ? ui.lang : lang;
+
 		if (field.localized) {
-			var content = block.content[ui.lang] || {};
+			var content = block.content[languageId] || {};
 
 			return content[field.key] !== undefined ? content[field.key] : field.default;
 		}
@@ -187,25 +356,172 @@
 		return block.settings[field.key] !== undefined ? block.settings[field.key] : field.default;
 	}
 
-	function setValue(block, field, value) {
+	function setValue(block, field, value, lang) {
+		var languageId = lang === undefined ? ui.lang : lang;
+
 		if (field.localized) {
-			if (!block.content[ui.lang]) {
-				block.content[ui.lang] = {};
+			if (!block.content[languageId]) {
+				block.content[languageId] = {};
 			}
 
-			block.content[ui.lang][field.key] = value;
+			block.content[languageId][field.key] = value;
 		} else {
 			block.settings[field.key] = value;
 		}
 	}
 
+	/**
+	 * Registers a debounced field write so a panel re-render can flush it
+	 * first (its captured language is still the right one) instead of
+	 * silently dropping the edit or letting it fire against a removed editor.
+	 */
+	function trackFieldTimer(timer, flush) {
+		var entry = { timer: timer, flush: flush };
+
+		ui.fieldTimers.push(entry);
+
+		return entry;
+	}
+
+	function flushFieldTimers() {
+		ui.fieldTimers.forEach(function (entry) {
+			clearTimeout(entry.timer);
+
+			try {
+				entry.flush();
+			} catch (error) {
+				// a removed editor or detached input must never break the panel
+			}
+		});
+
+		ui.fieldTimers = [];
+	}
+
+	/* ==================== page name (top bar) ==================== */
+
+	/**
+	 * An owned landing's top-bar name is the information page title of the
+	 * selected language (oc_information_description.title) - the landing's
+	 * own `name` is just a default-language snapshot. Standalone pages keep
+	 * their global name.
+	 */
+	function ownerTitle() {
+		return CFG.ownerTitles ? String(CFG.ownerTitles[ui.lang] || '') : '';
+	}
+
+	function syncNameInput() {
+		var input = $('lp-name-input');
+
+		if (!input || !CFG.ownerTitles) return;
+
+		input.value = ownerTitle();
+	}
+
+	/**
+	 * No autosave for the owner title either: the edit waits in
+	 * ui.pendingOwnerTitle and is flushed by the explicit save (or by the
+	 * "save?" confirmation on language switch/exit).
+	 */
+	function markOwnerTitleDirty(value) {
+		ui.pendingOwnerTitle = { lang: Number(ui.lang), value: String(value) };
+		touch({});
+	}
+
+	/**
+	 * @return {Promise<boolean>} true when nothing was pending or it saved.
+	 */
+	function flushOwnerTitle() {
+		var pending = ui.pendingOwnerTitle;
+		ui.pendingOwnerTitle = null;
+
+		if (!pending || !CFG.urls.ownerNames) {
+			return Promise.resolve(true);
+		}
+
+		var body = new URLSearchParams();
+
+		body.set('information_id', String(CFG.ownerInformationId));
+		body.set('names[' + pending.lang + ']', pending.value);
+
+		return fetch(CFG.urls.ownerNames, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: body.toString()
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (json) {
+				if (json.error) {
+					toast(json.error, 'error');
+					syncNameInput();
+					ui.pendingOwnerTitle = pending;
+					ui.dirty = true;
+					updateSaveState();
+
+					return false;
+				}
+
+				CFG.ownerTitles[pending.lang] = pending.value.trim();
+				syncNameInput();
+
+				return true;
+			})
+			.catch(function () {
+				toast(t('text_error_save', 'Could not save'), 'error');
+				syncNameInput();
+				ui.pendingOwnerTitle = pending;
+				ui.dirty = true;
+				updateSaveState();
+
+				return false;
+			});
+	}
+
+	function initNameInput() {
+		var nameInput = $('lp-name-input');
+
+		if (!nameInput) return;
+
+		if (CFG.ownerTitles && CFG.ownerInformationId) {
+			// Owned landing: the input mirrors the information page title of
+			// the selected language and edits it per language.
+			syncNameInput();
+
+			if (!CFG.canEditOwnerTitles || !CFG.urls.ownerNames) {
+				nameInput.readOnly = true;
+
+				return;
+			}
+
+			nameInput.addEventListener('input', function () {
+				if (String(ownerTitle()) === String(nameInput.value) && !ui.pendingOwnerTitle) return;
+
+				markOwnerTitleDirty(nameInput.value);
+			});
+
+			return;
+		}
+
+		nameInput.addEventListener('input', function () {
+			if (String(state.page.name) === nameInput.value) return;
+
+			trackTextEdit();
+			state.page.name = nameInput.value;
+			touch();
+		});
+
+		nameInput.addEventListener('blur', commitTextEdit);
+	}
+
 	/* ==================== history ==================== */
 
 	function snapshot() {
-		return JSON.stringify({ page: state.page, blocks: state.blocks });
+		return JSON.stringify({ page: state.page, blocks: state.blocks, owner: state.owner });
 	}
 
 	function pushHistory() {
+		// Seal any open typing session first: its snapshot is older.
+		commitTextEdit();
+
 		ui.history.push(snapshot());
 
 		if (ui.history.length > 50) {
@@ -215,17 +531,47 @@
 		ui.future = [];
 	}
 
+	// Coalesced typing history: while a text input is focused every keystroke
+	// mutates the state directly; the pre-edit snapshot is committed as ONE
+	// undo step when the field loses focus (or the panel re-renders). Typing
+	// a word and hitting undo reverts the word, not one character. While
+	// focused, Ctrl+Z stays native to the field (the keydown handler skips
+	// editable targets), exactly like Elementor.
+	var pendingTextSnapshot = null;
+
+	function trackTextEdit() {
+		if (pendingTextSnapshot === null) {
+			pendingTextSnapshot = snapshot();
+			ui.future = [];
+		}
+	}
+
+	function commitTextEdit() {
+		if (pendingTextSnapshot === null) return;
+
+		ui.history.push(pendingTextSnapshot);
+
+		if (ui.history.length > 50) {
+			ui.history.shift();
+		}
+
+		pendingTextSnapshot = null;
+	}
+
 	function restoreSnapshot(json) {
 		var parsed = JSON.parse(json);
 
 		state.page = parsed.page;
 		state.blocks = (parsed.blocks || []).map(normalizeBlock);
+		state.owner = parsed.owner && typeof parsed.owner === 'object' ? parsed.owner : { status: 0, descriptions: {} };
 		ui.dirty = true;
+		ui.pendingSelectBlock = null;
+		ui.selectedId = blockById(ui.selectedId) ? ui.selectedId : 0;
 		updateSaveState();
 		updateStatusBadge();
-		renderSettings();
 		renderProperties();
-		touch({ structural: true });
+		renderNavigator();
+		touch({ structural: true, save: true });
 	}
 
 	function undo() {
@@ -244,6 +590,13 @@
 
 	/* ==================== dirty / saving ==================== */
 
+	/**
+	 * Marks the page dirty. Nothing is sent to the server here: the page
+	 * saves only on the explicit Save button (or Ctrl+S), on a structural
+	 * action passed with `save: true` (drop, duplicate, remove, move,
+	 * undo/redo - the canvas cannot stay consistent without it) and after
+	 * a "save?" confirmation when the language tab changes.
+	 */
 	function touch(options) {
 		options = options || {};
 
@@ -257,20 +610,33 @@
 
 		ui.dirty = true;
 		updateSaveState();
-		scheduleSave(options.delay);
-	}
 
-	function scheduleSave(delay) {
-		if (ui.saveTimer) {
-			clearTimeout(ui.saveTimer);
-		}
-
-		ui.saveTimer = setTimeout(function () {
+		if (options.save) {
 			save(false);
-		}, typeof delay === 'number' ? delay : 900);
+		}
 	}
 
+	/**
+	 * The whole tree in model order (sections before their children), with
+	 * dense per-group sort numbers.
+	 */
 	function payload() {
+		renumber();
+
+		var blocks = [];
+
+		topLevel().forEach(function (block) {
+			blocks.push(block);
+
+			if (!isContainerBlock(block)) return;
+
+			for (var slot = 0; slot < columnCountOf(block); slot++) {
+				childrenOf(block.block_id, slot).forEach(function (child) {
+					blocks.push(child);
+				});
+			}
+		});
+
 		return {
 			version: state.version,
 			name: state.page.name,
@@ -282,11 +648,15 @@
 			date_publish: state.page.date_publish,
 			date_unpublish: state.page.date_unpublish,
 			descriptions: state.page.descriptions,
-			blocks: state.blocks.map(function (block) {
+			owner: CFG.ownerInformationId ? state.owner : undefined,
+			blocks: blocks.map(function (block) {
 				return {
 					block_id: Number(block.block_id) || 0,
 					code: block.code,
 					status: Number(block.status),
+					parent_id: Number(block.parent_id) || 0,
+					slot: Number(block.slot) || 0,
+					sort: Number(block.sort) || 0,
 					settings: block.settings,
 					content: block.content
 				};
@@ -294,19 +664,59 @@
 		};
 	}
 
-	function save(force) {
+	/**
+	 * Runs every `done` callback queued by save() calls that arrived while
+	 * another save was in flight (or that had nothing to do).
+	 */
+	function drainSaveDone() {
+		var list = ui.saveDone || [];
+		ui.saveDone = [];
+
+		list.forEach(function (fn) {
+			try {
+				fn();
+			} catch (error) {
+				// a post-save UI switch must never break on a callback
+			}
+		});
+	}
+
+	function save(force, done) {
+		if (done) {
+			ui.saveDone = ui.saveDone || [];
+			ui.saveDone.push(done);
+		}
+
 		if (ui.saving) {
 			ui.saveQueued = true;
 			return;
 		}
 
 		if (!ui.dirty && !force) {
+			drainSaveDone();
 			return;
 		}
 
 		ui.saving = true;
-		ui.saveTimer = null;
 		updateSaveState();
+
+		// a save re-renders from the server anyway - drop any pending preview
+		clearTimeout(ui.previewTimer);
+		ui.previewState = null;
+
+		flushOwnerTitle().then(function () {
+			proceedSave();
+		});
+	}
+
+	function proceedSave() {
+		if (!ui.dirty) {
+			ui.saving = false;
+			updateSaveState();
+			drainSaveDone();
+
+			return;
+		}
 
 		fetch(CFG.urls.save, {
 			method: 'POST',
@@ -320,6 +730,7 @@
 				if (json.error) {
 					updateSaveState();
 					toast(json.error, 'error');
+					drainSaveDone();
 
 					if (json.conflict) {
 						if (window.confirm(json.error)) {
@@ -333,11 +744,20 @@
 				ui.dirty = false;
 				state.version = Number(json.version) || state.version + 1;
 
-				// The server assigns ids to new blocks; keep the client list in sync
-				// (the save endpoint preserves the submitted order).
-				if (json.blocks && json.blocks.length === state.blocks.length) {
-					json.blocks.forEach(function (saved, index) {
-						state.blocks[index].block_id = Number(saved.block_id);
+				// The server assigns ids to new blocks; sync them back through
+				// client_id (temp or existing) so children stay attached.
+				if (json.blocks) {
+					json.blocks.forEach(function (saved) {
+						var clientId = Number(saved.client_id);
+
+						var block = clientId !== 0 ? findBlockByClientId(clientId) : null;
+
+						if (!block) return;
+
+						block.block_id = Number(saved.block_id);
+						block.parent_id = Number(saved.parent_id) || 0;
+						block.slot = Number(saved.slot) || 0;
+						block.sort = Number(saved.sort) || 0;
 					});
 				}
 
@@ -350,9 +770,13 @@
 				updateStatusBadge();
 				updatePreviewLink();
 
+				// The server is the source of truth for the hierarchy (it
+				// clamps slots to the section structure): re-render the tree
+				// so a changed `structure` preset shows its new columns.
+				renderNavigator();
+
 				if (reload) {
-					reloadIframe(ui.pendingSelectIndex);
-					ui.pendingSelectIndex = null;
+					reloadIframe();
 				} else {
 					changed.forEach(function (blockId) {
 						refreshBlock(blockId);
@@ -366,14 +790,27 @@
 				if (ui.saveQueued) {
 					ui.saveQueued = false;
 					ui.dirty = true;
-					scheduleSave(200);
+					save(false);
+				} else {
+					drainSaveDone();
 				}
 			})
 			.catch(function (error) {
 				ui.saving = false;
 				updateSaveState();
 				toast(t('text_error_save', 'Could not save') + ': ' + error.message, 'error');
+				drainSaveDone();
 			});
+	}
+
+	function findBlockByClientId(clientId) {
+		clientId = Number(clientId);
+
+		for (var i = 0; i < state.blocks.length; i++) {
+			if (Number(state.blocks[i].block_id) === clientId) return state.blocks[i];
+		}
+
+		return null;
 	}
 
 	function updateSaveState() {
@@ -448,7 +885,19 @@
 		}
 	}
 
-	function reloadIframe(selectIndex) {
+	function iframeLabels() {
+		var labels = {
+			_drop: t('text_drop_here', '')
+		};
+
+		Object.keys(CFG.schema || {}).forEach(function (code) {
+			labels[code] = t(CFG.schema[code].name, code);
+		});
+
+		return labels;
+	}
+
+	function reloadIframe() {
 		var frame = $('lp-canvas-frame');
 
 		if (!frame) return;
@@ -458,8 +907,6 @@
 		refreshToken(function () {
 			frame.src = buildPreviewUrl('_=' + Date.now());
 
-			if (selectIndex === null || selectIndex === undefined) return;
-
 			var tries = 0;
 			var wait = setInterval(function () {
 				tries++;
@@ -467,10 +914,9 @@
 				if (ui.iframeReady) {
 					clearInterval(wait);
 
-					var block = stateFramesBlock(selectIndex);
-
-					if (block && Number(block.block_id)) {
-						selectBlock(Number(block.block_id));
+					if (ui.pendingSelectBlock && Number(ui.pendingSelectBlock.block_id) > 0) {
+						selectBlock(Number(ui.pendingSelectBlock.block_id));
+						ui.pendingSelectBlock = null;
 					}
 				}
 
@@ -479,10 +925,6 @@
 				}
 			}, 150);
 		});
-	}
-
-	function stateFramesBlock(index) {
-		return state.blocks[index] || null;
 	}
 
 	function refreshBlock(blockId) {
@@ -495,6 +937,87 @@
 			blockId: blockId,
 			url: previewBaseFor(ui.lang) + '&only_block=' + blockId + '&_=' + Date.now()
 		});
+	}
+
+	/**
+	 * Unsaved live preview: re-renders ONE block from the in-memory state
+	 * (POST preview_block, read-only on the server) and swaps just that node
+	 * in the canvas. Debounced, so typing never hammers the server the way
+	 * the old autosave did - and nothing is persisted until Save.
+	 */
+	function previewPayload(block) {
+		var data = {
+			code: block.code,
+			block_id: Number(block.block_id) || 0,
+			parent_id: Number(block.parent_id) || 0,
+			status: Number(block.status) ? 1 : 0,
+			settings: block.settings,
+			language_id: ui.lang,
+			content: (block.content && block.content[ui.lang]) || {}
+		};
+
+		if (isContainerBlock(block)) {
+			data.children = [];
+
+			for (var slot = 0; slot < columnCountOf(block); slot++) {
+				childrenOf(block.block_id, slot).forEach(function (child) {
+					data.children.push({
+						code: child.code,
+						block_id: Number(child.block_id) || 0,
+						slot: slot,
+						status: Number(child.status) ? 1 : 0,
+						settings: child.settings,
+						content: (child.content && child.content[ui.lang]) || {}
+					});
+				});
+			}
+		}
+
+		return data;
+	}
+
+	function schedulePreview(block) {
+		if (!block || !ui.iframeReady || ui.saving) return;
+
+		clearTimeout(ui.previewTimer);
+
+		var blockId = Number(block.block_id) || 0;
+
+		ui.previewTimer = setTimeout(function () {
+			previewBlock(blockId);
+		}, 600);
+	}
+
+	function previewBlock(blockId) {
+		var block = blockById(blockId);
+
+		if (!block || !ui.iframeReady || ui.saving) return;
+
+		var seq = ++ui.previewSeq;
+
+		ui.previewState = { blockId: Number(blockId), lang: ui.lang, seq: seq };
+
+		fetch(previewBaseFor(ui.lang) + '&preview_block=1&_=' + Date.now(), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(previewPayload(block))
+		})
+			.then(function (response) { return response.text(); })
+			.then(function (html) {
+				if (!ui.previewState || ui.previewState.seq !== seq || ui.previewState.lang !== ui.lang) return;
+				if (!html) return;
+
+				postToIframe({ type: 'lp:replace', blockId: Number(blockId), html: html });
+
+				// A section preset change re-shapes the navigator columns too.
+				if (isContainerBlock(block)) {
+					renderNavigator();
+				}
+			})
+			.catch(function () {
+				// a failed preview is retried on the next keystroke; the
+				// explicit save always re-renders from the server anyway
+			});
 	}
 
 	function onIframeMessage(event) {
@@ -514,11 +1037,7 @@
 			case 'lp:ready':
 				ui.iframeReady = true;
 
-				// Open with the first section selected, so the properties panel is
-				// never an empty dead end on the first visit.
-				if (!ui.selectedId && state.blocks.length && Number(state.blocks[0].block_id)) {
-					selectBlock(Number(state.blocks[0].block_id));
-				}
+				postToIframe({ type: 'lp:labels', labels: iframeLabels() });
 				break;
 
 			case 'lp:selected':
@@ -526,15 +1045,23 @@
 				break;
 
 			case 'lp:add':
-				addBlock(data.code, Number(data.afterId) || 0);
+				addBlock(data.code, {
+					parentId: Number(data.parentId) || 0,
+					slot: Number(data.slot) || 0,
+					afterId: Number(data.afterId) || 0
+				});
 				break;
 
-			case 'lp:move':
-				applyOrder((data.order || []).map(Number));
+			case 'lp:moveTree':
+				applyTree(data.items || []);
 				break;
 
 			case 'lp:action':
 				performAction(data.action, Number(data.blockId) || ui.selectedId);
+				break;
+
+			case 'lp:key':
+				remoteKey(String(data.combo || ''));
 				break;
 		}
 	}
@@ -543,16 +1070,32 @@
 
 	function selectBlock(blockId, fromIframe) {
 		ui.selectedId = Number(blockId) || 0;
+		ui.siteSettings = false;
 
 		if (!fromIframe) {
 			postToIframe({ type: 'lp:select', blockId: ui.selectedId });
 		}
 
 		renderProperties();
+		renderNavigator();
 	}
 
-	function addBlock(code, afterId) {
+	function addBlock(code, target) {
 		if (!CFG.schema[code]) return;
+
+		target = target || {};
+
+		var parentId = Number(target.parentId) || 0;
+		var afterId = Number(target.afterId) || 0;
+		var slot = Number(target.slot) || 0;
+
+		// Sections only live at the page level; widgets dropped at the page
+		// level stay loose full-width sections (backwards compatible).
+		if (isContainerBlock({ code: code })) {
+			parentId = 0;
+		} else if (parentId && !isContainerBlock(blockById(parentId))) {
+			parentId = 0;
+		}
 
 		pushHistory();
 
@@ -570,103 +1113,179 @@
 		});
 
 		var block = normalizeBlock({
-			block_id: 0,
+			block_id: nextTempId(),
 			code: code,
 			status: 1,
+			parent_id: parentId,
+			slot: slot,
 			settings: settings,
 			content: content
 		});
 
-		var index = blockIndexById(afterId);
+		var anchor = afterId ? blockById(afterId) : null;
 
-		if (index >= 0) {
-			state.blocks.splice(index + 1, 0, block);
-			index = index + 1;
+		if (anchor && Number(anchor.parent_id) === parentId && Number(anchor.slot) === slot) {
+			// Half-step sorts keep the block right after its anchor once
+			// renumber() densifies the group.
+			block.sort = Number(anchor.sort) + 0.5;
+			state.blocks.splice(state.blocks.indexOf(anchor) + 1, 0, block);
 		} else {
+			var siblings = parentId ? childrenOf(parentId, slot) : topLevel();
+
+			block.sort = siblings.length ? Number(siblings[siblings.length - 1].sort) + 1 : 0;
 			state.blocks.push(block);
-			index = state.blocks.length - 1;
 		}
 
-		ui.pendingSelectIndex = index;
+		renumber();
+
+		ui.pendingSelectBlock = block;
 		ui.selectedId = 0;
 
-		touch({ structural: true, delay: 150 });
+		touch({ structural: true, save: true });
 		renderProperties();
+		renderNavigator();
 	}
 
 	function duplicateBlock(blockId) {
-		var index = blockIndexById(blockId);
+		var block = blockById(blockId);
 
-		if (index < 0) return;
+		if (!block) return;
 
 		pushHistory();
 
-		var copy = normalizeBlock(clone(state.blocks[index]));
-		copy.block_id = 0;
-		copy.status = 1;
+		var source = [block];
 
-		state.blocks.splice(index + 1, 0, copy);
+		// A section duplicates with its columns' widgets.
+		if (isContainerBlock(block)) {
+			for (var slot = 0; slot < columnCountOf(block); slot++) {
+				childrenOf(block.block_id, slot).forEach(function (child) {
+					source.push(child);
+				});
+			}
+		}
 
-		ui.pendingSelectIndex = index + 1;
+		// Right after the original inside its own group (the half-step sort
+		// densifies on renumber).
+		var copies = cloneBlocks(source, function (copy, original) {
+			copy.sort = Number(original.sort) + 0.5;
+		});
+
+		var anchorIndex = state.blocks.indexOf(block);
+
+		if (anchorIndex >= 0) {
+			var args = [anchorIndex + 1, 0].concat(copies);
+			state.blocks.splice.apply(state.blocks, args);
+		} else {
+			copies.forEach(function (copy) {
+				state.blocks.push(copy);
+			});
+		}
+
+		renumber();
+
+		ui.pendingSelectBlock = copies[0];
 		ui.selectedId = 0;
 
-		touch({ structural: true, delay: 150 });
+		touch({ structural: true, save: true });
 		renderProperties();
+		renderNavigator();
 	}
 
 	function removeBlock(blockId) {
-		var index = blockIndexById(blockId);
+		var block = blockById(blockId);
 
-		if (index < 0) return;
-
-		pushHistory();
-
-		state.blocks.splice(index, 1);
-		ui.selectedId = 0;
-		ui.dirtyBlocks = {};
-
-		touch({ structural: true, delay: 150 });
-		renderProperties();
-	}
-
-	function moveBlock(blockId, direction) {
-		var index = blockIndexById(blockId);
-
-		if (index < 0) return;
-
-		var target = direction === 'up' ? index - 1 : index + 1;
-
-		if (target < 0 || target >= state.blocks.length) return;
+		if (!block) return;
 
 		pushHistory();
 
-		var block = state.blocks.splice(index, 1)[0];
-		state.blocks.splice(target, 0, block);
+		var doomed = [block];
 
-		touch({ structural: true, delay: 150 });
-		postToIframe({ type: 'lp:select', blockId: blockId });
-	}
-
-	function applyOrder(order) {
-		if (!order.length) return;
-
-		var ordered = [];
-
-		order.forEach(function (id) {
-			var block = blockById(id);
-
-			if (block) ordered.push(block);
-		});
-
-		if (ordered.length !== state.blocks.length) {
-			reloadIframe();
-			return;
+		if (isContainerBlock(block)) {
+			state.blocks.forEach(function (other) {
+				if (Number(other.parent_id) === Number(block.block_id)) {
+					doomed.push(other);
+				}
+			});
 		}
 
-		pushHistory();
-		state.blocks = ordered;
+		state.blocks = state.blocks.filter(function (other) {
+			return doomed.indexOf(other) === -1;
+		});
 
-		touch({ structural: true, delay: 150 });
+		if (doomed.some(function (other) { return Number(other.block_id) === Number(ui.selectedId); })) {
+			ui.selectedId = 0;
+		}
+
+		ui.dirtyBlocks = {};
+
+		touch({ structural: true, save: true });
+		renderProperties();
+		renderNavigator();
+	}
+
+	/**
+	 * Up/down within the block's own sibling group (its column, or the page).
+	 */
+	function moveBlock(blockId, direction) {
+		var block = blockById(blockId);
+
+		if (!block) return;
+
+		var siblings = siblingsOf(block);
+		var index = siblings.indexOf(block);
+		var target = direction === 'up' ? index - 1 : index + 1;
+
+		if (target < 0 || target >= siblings.length) return;
+
+		pushHistory();
+
+		var neighbour = siblings[target];
+		var sort = Number(block.sort);
+
+		block.sort = Number(neighbour.sort);
+		neighbour.sort = sort;
+
+		renumber();
+
+		touch({ structural: true, save: true });
+		postToIframe({ type: 'lp:select', blockId: blockId });
+		renderNavigator();
+	}
+
+	/**
+	 * Applies a full tree (from the iframe drag or the navigator) to the model.
+	 *
+	 * items: [{id, parent, slot, order}]
+	 */
+	function applyTree(items) {
+		if (!items.length) return;
+
+		var known = 0;
+
+		items.forEach(function (item) {
+			if (blockById(item.id)) known++;
+		});
+
+		// A report that matches nothing came from a stale canvas - applying it
+		// would wipe the model, so it is dropped instead.
+		if (!known) return;
+
+		pushHistory();
+
+		items.forEach(function (item) {
+			var block = blockById(item.id);
+
+			if (!block) return;
+
+			block.parent_id = Number(item.parent) || 0;
+			block.slot = Number(item.slot) || 0;
+			block.sort = Number(item.order) || 0;
+		});
+
+		renumber();
+
+		touch({ structural: true, save: true });
+		renderNavigator();
 	}
 
 	function performAction(action, blockId) {
@@ -691,6 +1310,34 @@
 		}
 	}
 
+	/**
+	 * A shortcut pressed while the canvas iframe has focus: the iframe
+	 * neutralises the browser default and forwards the combo here, so
+	 * Ctrl+S / Del / Esc work the same on the canvas and in the panels.
+	 */
+	function remoteKey(combo) {
+		switch (combo) {
+			case 'save':
+				save(true);
+				break;
+			case 'undo':
+				undo();
+				break;
+			case 'redo':
+				redo();
+				break;
+			case 'duplicate':
+				if (ui.selectedId) performAction('duplicate', ui.selectedId);
+				break;
+			case 'remove':
+				if (ui.selectedId) performAction('remove', ui.selectedId);
+				break;
+			case 'escape':
+				selectBlock(0);
+				break;
+		}
+	}
+
 	/* ==================== palette ==================== */
 
 	function initPalette() {
@@ -701,8 +1348,13 @@
 			var item = event.target.closest('.lp-palette-item');
 			if (!item) return;
 
-			event.dataTransfer.setData('application/x-lp-block', item.getAttribute('data-block-code'));
-			event.dataTransfer.setData('text/plain', item.getAttribute('data-block-code'));
+			var code = item.getAttribute('data-block-code');
+			var isSection = isContainerBlock({ code: code });
+
+			// Sections and widgets are two payload types: the iframe accepts
+			// widgets into columns, sections only at the page level.
+			event.dataTransfer.setData(isSection ? 'application/x-lp-section' : 'application/x-lp-block', code);
+			event.dataTransfer.setData('text/plain', code);
 			event.dataTransfer.effectAllowed = 'copy';
 			item.classList.add('dragging');
 		});
@@ -716,7 +1368,7 @@
 			var item = event.target.closest('.lp-palette-item');
 			if (!item) return;
 
-			addBlock(item.getAttribute('data-block-code'), ui.selectedId);
+			addBlock(item.getAttribute('data-block-code'), clickTarget());
 		});
 
 		var search = $('lp-palette-search');
@@ -734,11 +1386,39 @@
 						if (match) visible++;
 					});
 
+					// A <details> group: open it while searching so matches stay visible.
+					if (group.tagName === 'DETAILS' && query && visible) {
+						group.open = true;
+					}
+
 					group.style.display = visible ? '' : 'none';
 				});
 			});
 		}
 	}
+
+	/**
+	 * Where a palette CLICK inserts: into the selected block's group after
+	 * it, or at the end of the page (sections always at the page level).
+	 */
+	function clickTarget() {
+		var selected = blockById(ui.selectedId);
+
+		if (!selected) return { parentId: 0, slot: 0, afterId: 0 };
+
+		if (isContainerBlock(selected)) {
+			// A section is selected: insert after it at the page level.
+			return { parentId: 0, slot: 0, afterId: Number(selected.block_id) };
+		}
+
+		return {
+			parentId: Number(selected.parent_id) || 0,
+			slot: Number(selected.slot) || 0,
+			afterId: Number(selected.block_id) || 0
+		};
+	}
+
+	/* ==================== templates ==================== */
 
 	function renderTemplates() {
 		var list = $('lp-template-list');
@@ -781,22 +1461,47 @@
 		$('lp-template-confirm').addEventListener('click', saveTemplateDialog);
 	}
 
+	function templateSourceBlocks() {
+		var selected = blockById(ui.selectedId);
+
+		if (selected) {
+			var blocks = [selected];
+
+			if (isContainerBlock(selected)) {
+				for (var slot = 0; slot < columnCountOf(selected); slot++) {
+					childrenOf(selected.block_id, slot).forEach(function (child) {
+						blocks.push(child);
+					});
+				}
+			}
+
+			return blocks;
+		}
+
+		return state.blocks.slice();
+	}
+
 	function insertTemplate(templateId) {
 		for (var i = 0; i < ui.templates.length; i++) {
 			if (Number(ui.templates[i].template_id) !== Number(templateId)) continue;
 
 			pushHistory();
 
-			ui.templates[i].blocks.forEach(function (source) {
-				var block = normalizeBlock(clone(source));
-				block.block_id = 0;
-				state.blocks.push(block);
+			var inserted = cloneBlocks(ui.templates[i].blocks || [], function (copy) {
+				copy.status = 1;
 			});
 
-			ui.pendingSelectIndex = state.blocks.length - 1;
+			inserted.forEach(function (copy) {
+				state.blocks.push(copy);
+			});
 
-			touch({ structural: true, delay: 150 });
+			renumber();
+
+			ui.pendingSelectBlock = inserted[inserted.length - 1] || null;
+
+			touch({ structural: true, save: true });
 			toast(t('text_insert_template', 'Template inserted'));
+			renderNavigator();
 			return;
 		}
 	}
@@ -843,20 +1548,25 @@
 			return;
 		}
 
-		var blocks = all
-			? state.blocks
-			: state.blocks.filter(function (block) {
-				return Number(block.block_id) === Number(ui.selectedId);
-			});
+		var blocks = all ? state.blocks.slice() : templateSourceBlocks();
 
 		if (!blocks.length) {
-			blocks = state.blocks;
+			blocks = state.blocks.slice();
 		}
 
 		var body = {
 			name: name,
 			blocks: blocks.map(function (block) {
-				return { code: block.code, status: 1, settings: block.settings, content: block.content };
+				return {
+					block_id: Number(block.block_id) || 0,
+					code: block.code,
+					status: 1,
+					parent_id: Number(block.parent_id) || 0,
+					slot: Number(block.slot) || 0,
+					sort: Number(block.sort) || 0,
+					settings: block.settings,
+					content: block.content
+				};
 			})
 		};
 
@@ -889,22 +1599,51 @@
 
 		if (!body) return;
 
+		updateSettingsMenu();
+
+		// Flush pending debounced writes first - they still know their own
+		// language and editor; after tinymce.remove() they would either write
+		// to the wrong tab or read a dead editor (the old data-wiping race).
+		flushFieldTimers();
+		commitTextEdit();
+
 		if (typeof tinymce !== 'undefined') {
 			tinymce.remove();
 		}
 
 		var block = blockById(ui.selectedId);
+		var tabs = $('lp-props-tabs');
 
 		if (!block) {
-			body.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-center text-gray-400">' +
-				'<i data-lucide="mouse-pointer-click" class="w-8 h-8 mb-2 text-gray-300"></i>' +
-				'<p class="text-xs">' + esc(t('text_select_block', 'Select a block to edit it')) + '</p></div>';
+			// No selection: the right panel edits either Site Settings (global
+			// landing tokens) or the current page.
+			if (ui.siteSettings) {
+				title.innerHTML = '<i data-lucide="palette" class="w-3.5 h-3.5"></i> ' + esc(t('text_site_settings', 'Site settings'));
+				body.innerHTML = '<div class="space-y-3">' + siteSettingsHtml() + '</div>';
+				bindSiteSettings(body);
+			} else {
+				title.innerHTML = '<i data-lucide="settings-2" class="w-3.5 h-3.5"></i> ' + esc(t('text_page_settings', 'Page settings'));
+				body.innerHTML = '<div class="space-y-3">' + settingsHtml() + '</div>';
+				bindSettings(body);
+			}
 			actions.classList.add('hidden');
 
-			if (close) close.classList.add('hidden');
+			if (tabs) tabs.classList.add('hidden');
+			// Site Settings is the root panel: it has no close button.
+			if (close) close.classList.toggle('hidden', ui.siteSettings);
 
 			lucide.createIcons({ nodes: [body] });
 			return;
+		}
+
+		if (tabs) {
+			tabs.classList.remove('hidden');
+
+			var tabButtons = tabs.querySelectorAll('[data-props-tab]');
+
+			for (var ti = 0; ti < tabButtons.length; ti++) {
+				tabButtons[ti].classList.toggle('lp-active', tabButtons[ti].getAttribute('data-props-tab') === ui.propsTab);
+			}
 		}
 
 		var schema = CFG.schema[block.code] || { fields: [], name: block.code, icon: 'square' };
@@ -914,31 +1653,40 @@
 
 		if (close) close.classList.remove('hidden');
 
-		var html = '<div class="mb-3 flex items-center justify-between">' +
-			'<label class="flex items-center gap-2 text-xs text-gray-600"><input type="checkbox" data-block-status' + (Number(block.status) ? ' checked' : '') + ' /> ' + esc(t('entry_status', 'Status')) + '</label>' +
+		var html = '<div class="mb-3 flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-2">' +
+			'<label class="flex items-center gap-2 text-xs font-medium text-gray-700"><span class="lp-switch"><input type="checkbox" data-block-status' + (Number(block.status) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></span> ' + esc(t('entry_status', 'Status')) + '</label>' +
 			'<span class="text-[10px] text-gray-400">#' + Number(block.block_id) + '</span></div>';
 
-		html += '<div class="space-y-3">';
+		// Elementor-style tabs: Content holds the block's own fields, Style the
+		// shared look (backgrounds, spacing, width) and Advanced the visibility
+		// toggles, anchors and custom classes.
+		var contentHtml = '';
+		var styleHtml = '';
+		var advancedHtml = '';
 
 		schema.fields.forEach(function (field) {
-			if (WRAPPER_KEYS.indexOf(field.key) !== -1) return;
+			var rendered = field.type === 'repeater' ? renderRepeater(block, field) : renderField(block, field);
 
-			html += field.type === 'repeater' ? renderRepeater(block, field) : renderField(block, field);
+			if (STYLE_KEYS.indexOf(field.key) !== -1) {
+				styleHtml += rendered;
+			} else if (ADVANCED_KEYS.indexOf(field.key) !== -1) {
+				advancedHtml += rendered;
+			} else {
+				contentHtml += rendered;
+			}
 		});
 
-		html += '</div>';
+		var activeHtml = ui.propsTab === 'style' ? styleHtml : (ui.propsTab === 'advanced' ? advancedHtml : contentHtml);
 
-		html += '<details class="mt-4 border-t border-gray-100 pt-3">' +
-			'<summary class="cursor-pointer text-[11px] font-bold text-gray-400 uppercase tracking-wide">' + esc(t('text_section_settings', 'Section settings')) + '</summary>' +
-			'<div class="space-y-3 mt-3">';
+		html += '<div class="space-y-3">' + activeHtml + '</div>';
 
-		schema.fields.forEach(function (field) {
-			if (WRAPPER_KEYS.indexOf(field.key) === -1) return;
-
-			html += renderField(block, field);
-		});
-
-		html += '</div></details>';
+		// The device-visibility toggles are useful everywhere, so every tab
+		// keeps them one click away (like Elementor's responsive bar).
+		if (ui.propsTab !== 'advanced' && advancedHtml) {
+			html += '<details class="mt-4 border-t border-gray-100 pt-3">' +
+				'<summary class="cursor-pointer text-[11px] font-bold text-gray-400 uppercase tracking-wide">' + esc(t('text_advanced', 'Advanced')) + '</summary>' +
+				'<div class="space-y-3 mt-3">' + advancedHtml + '</div></details>';
+		}
 
 		body.innerHTML = html;
 
@@ -969,13 +1717,21 @@
 				break;
 
 			case 'number':
-				html += '<input type="number" id="' + id + '" class="lp-input" data-input value="' + esc(value) + '"' +
-					(field.min !== undefined ? ' min="' + Number(field.min) + '"' : '') +
-					(field.max !== undefined ? ' max="' + Number(field.max) + '"' : '') + ' />';
+				// Bounded numbers get an Elementor-style slider next to the input:
+				// drag for a live preview, type for an exact value.
+				if (field.min !== undefined && field.max !== undefined) {
+					html += '<div class="flex items-center gap-2">' +
+						'<input type="range" class="lp-range flex-1" data-input-range value="' + esc(value) + '" min="' + Number(field.min) + '" max="' + Number(field.max) + '" />' +
+						'<input type="number" id="' + id + '" class="lp-input text-center" style="width:4rem" data-input value="' + esc(value) + '" min="' + Number(field.min) + '" max="' + Number(field.max) + '" /></div>';
+				} else {
+					html += '<input type="number" id="' + id + '" class="lp-input" data-input value="' + esc(value) + '" />';
+				}
 				break;
 
 			case 'toggle':
-				html += '<label class="flex items-center gap-2 text-xs text-gray-600"><input type="checkbox" id="' + id + '" data-input' + (Number(value) ? ' checked' : '') + ' /> ' + label + '</label>';
+				html += '<div class="flex items-center justify-between gap-2 py-0.5">' +
+					'<label class="text-xs text-gray-700" for="' + id + '">' + label + '</label>' +
+					'<span class="lp-switch"><input type="checkbox" id="' + id + '" data-input' + (Number(value) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></span></div>';
 				break;
 
 			case 'select':
@@ -993,12 +1749,23 @@
 				html += '<div class="flex items-center gap-2">' +
 					'<input type="color" id="' + id + '" data-input value="' + esc(value || '#ffffff') + '" />' +
 					'<input type="text" class="lp-input" data-input-text value="' + esc(value) + '" placeholder="#ffffff" />' +
+					'</div>' +
+					'<div class="flex items-center gap-1.5 mt-1.5" data-swatches>' +
+					'<button type="button" class="lp-swatch" data-swatch="" title="—" style="background:linear-gradient(135deg,#fff 0 46%,#c77070 46% 54%,#fff 54% 100%)"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#ffffff" style="background:#ffffff"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#f1f5f9" style="background:#f1f5f9"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#111827" style="background:#111827"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#5b7ea8" style="background:#5b7ea8"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#059669" style="background:#059669"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#d97706" style="background:#d97706"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#dc2626" style="background:#dc2626"></button>' +
+					'<button type="button" class="lp-swatch" data-swatch="#7c3aed" style="background:#7c3aed"></button>' +
 					'</div>';
 				break;
 
 			case 'image':
 				html += '<div class="flex items-start gap-2">' +
-					'<div class="w-16 h-16 rounded border border-gray-200 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center">' +
+					'<div class="w-20 h-20 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center">' +
 					(value ? '<img src="' + esc(CFG.imageUrl + value) + '" alt="" class="w-full h-full object-cover" data-image-preview />' : '<i data-lucide="image" class="w-5 h-5 text-gray-300"></i>') +
 					'</div>' +
 					'<div class="flex-1 min-w-0">' +
@@ -1121,13 +1888,19 @@
 	}
 
 	function bindProperties(container, block) {
+		// Language captured at bind time: every write below goes to THIS tab,
+		// no matter which tab is current when a debounce fires.
+		var lang = ui.lang;
+
 		var statusInput = container.querySelector('[data-block-status]');
 
 		if (statusInput) {
 			statusInput.addEventListener('change', function () {
 				pushHistory();
 				block.status = statusInput.checked ? 1 : 0;
-				touch({ structural: true });
+				touch({ blockId: block.block_id });
+				schedulePreview(block);
+				renderNavigator();
 			});
 		}
 
@@ -1137,7 +1910,7 @@
 			if (!field) return;
 
 			if (field.type === 'repeater') {
-				bindRepeater(fieldEl, block, field);
+				bindRepeater(fieldEl, block, field, lang);
 				return;
 			}
 
@@ -1158,13 +1931,21 @@
 					return input.value;
 				};
 
+				var coalesce = ['text', 'textarea', 'code', 'link'].indexOf(field.type) !== -1;
+
 				var apply = function () {
 					var value = read();
 
-					if (getValue(field, block) === value) return;
+					if (getValue(field, block, lang) === value) return;
 
-					pushHistory();
-					setValue(block, field, value);
+					// Text writes coalesce into one undo step per focus session;
+					// discrete controls keep one step per change.
+					if (coalesce) {
+						trackTextEdit();
+					} else {
+						pushHistory();
+					}
+					setValue(block, field, value, lang);
 
 					if (field.type === 'color') {
 						var text = fieldEl.querySelector('[data-input-text]');
@@ -1173,21 +1954,19 @@
 					}
 
 					touch({ blockId: block.block_id });
+					schedulePreview(block);
 				};
 
-				var eventName = ['text', 'textarea', 'code', 'link'].indexOf(field.type) !== -1 ? 'input' : 'change';
+				var eventName = coalesce ? 'input' : 'change';
 
 				input.addEventListener(eventName, apply);
 
+				if (coalesce) {
+					input.addEventListener('blur', commitTextEdit);
+				}
+
 				if (field.type === 'richtext') {
-					initRichText(input, function (value) {
-						var fieldBlock = block;
-
-						if (getValue(field, fieldBlock) === value) return;
-
-						setValue(fieldBlock, field, value);
-						touch({ blockId: fieldBlock.block_id });
-					});
+					initRichText(input, block, field, lang);
 				}
 			});
 
@@ -1204,12 +1983,59 @@
 
 					pushHistory();
 					colorPicker.value = value;
-					setValue(block, field, value);
+					setValue(block, field, value, lang);
 					touch({ blockId: block.block_id });
 				});
 
 				colorPicker.addEventListener('input', function () {
 					colorText.value = colorPicker.value;
+				});
+			}
+
+			var swatches = fieldEl.querySelector('[data-swatches]');
+
+			if (swatches && colorPicker) {
+				swatches.addEventListener('click', function (event) {
+					var swatch = event.target.closest('[data-swatch]');
+
+					if (!swatch) return;
+
+					var swatchValue = swatch.getAttribute('data-swatch') || '';
+
+					pushHistory();
+					colorPicker.value = swatchValue || '#ffffff';
+					setValue(block, field, swatchValue, lang);
+
+					if (colorText) colorText.value = swatchValue;
+
+					touch({ blockId: block.block_id });
+					schedulePreview(block);
+				});
+			}
+
+			// The slider drags live (one history entry per drag), the number
+				// input keeps the exact value with the usual change handling.
+			var range = fieldEl.querySelector('[data-input-range]');
+
+			if (range) {
+				var numberInput = fieldEl.querySelector('input[type="number"][data-input]');
+				var rangePushed = false;
+
+				range.addEventListener('input', function () {
+					if (!rangePushed) {
+						pushHistory();
+						rangePushed = true;
+					}
+
+					if (numberInput) numberInput.value = range.value;
+
+					setValue(block, field, parseInt(range.value, 10) || 0, lang);
+					touch({ blockId: block.block_id });
+					schedulePreview(block);
+				});
+
+				range.addEventListener('change', function () {
+					rangePushed = false;
 				});
 			}
 
@@ -1220,7 +2046,7 @@
 				pick.addEventListener('click', function () {
 					openMediaPicker(function (path) {
 						pushHistory();
-						setValue(block, field, path);
+						setValue(block, field, path, lang);
 
 						var input = fieldEl.querySelector('[data-input]');
 						if (input) input.value = path;
@@ -1230,7 +2056,7 @@
 						if (preview) {
 							preview.src = CFG.imageUrl + path;
 						} else {
-							var box = fieldEl.querySelector('.w-16');
+							var box = fieldEl.querySelector('.w-20');
 
 							if (box) {
 								box.innerHTML = '<img src="' + esc(CFG.imageUrl + path) + '" alt="" class="w-full h-full object-cover" data-image-preview />';
@@ -1238,6 +2064,7 @@
 						}
 
 						touch({ blockId: block.block_id });
+						schedulePreview(block);
 					});
 				});
 			}
@@ -1245,7 +2072,7 @@
 			if (clear) {
 				clear.addEventListener('click', function () {
 					pushHistory();
-					setValue(block, field, '');
+					setValue(block, field, '', lang);
 
 					var input = fieldEl.querySelector('[data-input]');
 					if (input) input.value = '';
@@ -1254,14 +2081,15 @@
 					if (preview) preview.remove();
 
 					touch({ blockId: block.block_id });
+					schedulePreview(block);
 				});
 			}
 
-			bindPickers(fieldEl, block, field);
+			bindPickers(fieldEl, block, field, lang);
 		});
 	}
 
-	function bindPickers(fieldEl, block, field) {
+	function bindPickers(fieldEl, block, field, lang) {
 		var chips = fieldEl.querySelector('[data-chips]');
 		var single = fieldEl.querySelector('[data-single]');
 		var search = fieldEl.querySelector('[data-autocomplete]');
@@ -1273,15 +2101,16 @@
 
 				if (!chip) return;
 
-				var values = (getValue(field, block) || []).slice();
+				var values = (getValue(field, block, lang) || []).slice();
 				var id = Number(chip.getAttribute('data-id'));
 
 				if (event.target.closest('[data-chip-remove]')) {
 					pushHistory();
 					values = values.filter(function (value) { return Number(value) !== id; });
-					setValue(block, field, values);
+					setValue(block, field, values, lang);
 					chip.remove();
 					touch({ blockId: block.block_id });
+					schedulePreview(block);
 				}
 
 				if (event.target.closest('[data-chip-up]')) {
@@ -1292,9 +2121,10 @@
 					pushHistory();
 					values.splice(index, 1);
 					values.splice(index - 1, 0, id);
-					setValue(block, field, values);
+					setValue(block, field, values, lang);
 					renderProperties();
 					touch({ blockId: block.block_id });
+					schedulePreview(block);
 				}
 			});
 		}
@@ -1304,7 +2134,8 @@
 				if (!event.target.closest('[data-chip-remove]')) return;
 
 				pushHistory();
-				setValue(block, field, 0);
+				setValue(block, field, 0, lang);
+				schedulePreview(block);
 
 				var chip = single.querySelector('.lp-chip');
 				if (chip) chip.classList.add('hidden');
@@ -1320,18 +2151,20 @@
 			ui.names[type + ':' + id] = item.name;
 
 			if (chips) {
-				var values = (getValue(field, block) || []).slice();
+				var values = (getValue(field, block, lang) || []).slice();
 
 				if (values.map(Number).indexOf(id) === -1) {
 					pushHistory();
 					values.push(id);
-					setValue(block, field, values);
+					setValue(block, field, values, lang);
 					touch({ blockId: block.block_id });
 					renderProperties();
+					schedulePreview(block);
 				}
 			} else if (single) {
 				pushHistory();
-				setValue(block, field, id);
+				setValue(block, field, id, lang);
+				schedulePreview(block);
 
 				var chip = single.querySelector('.lp-chip');
 				chip.classList.remove('hidden');
@@ -1343,9 +2176,9 @@
 		});
 	}
 
-	function bindRepeater(fieldEl, block, field) {
+	function bindRepeater(fieldEl, block, field, lang) {
 		var rowsEl = fieldEl.querySelector('[data-repeater-rows]');
-		var timer = null;
+		var entry = null;
 
 		function sync() {
 			var rows = [];
@@ -1360,20 +2193,39 @@
 				rows.push(row);
 			});
 
-			setValue(block, field, rows);
-			clearTimeout(timer);
-			timer = setTimeout(function () {
-				touch({ blockId: block.block_id });
-			}, 700);
+			setValue(block, field, rows, lang);
 		}
 
-		rowsEl.addEventListener('input', sync);
-		rowsEl.addEventListener('change', sync);
+		function schedule() {
+			trackTextEdit();
+
+			if (entry) {
+				clearTimeout(entry.timer);
+				ui.fieldTimers = ui.fieldTimers.filter(function (item) { return item !== entry; });
+			}
+
+			var timer = setTimeout(function () {
+				sync();
+				touch({ blockId: block.block_id });
+				schedulePreview(block);
+				ui.fieldTimers = ui.fieldTimers.filter(function (item) { return item !== entry; });
+			}, 700);
+
+			entry = trackFieldTimer(timer, function () {
+				sync();
+				touch({ blockId: block.block_id });
+				schedulePreview(block);
+			});
+		}
+
+		rowsEl.addEventListener('input', schedule);
+		rowsEl.addEventListener('change', schedule);
+		rowsEl.addEventListener('focusout', commitTextEdit);
 
 		fieldEl.querySelector('[data-repeater-add]').addEventListener('click', function () {
 			pushHistory();
 
-			var rows = (getValue(field, block) || []).slice();
+			var rows = (getValue(field, block, lang) || []).slice();
 			var max = field.max_rows || 6;
 
 			if (rows.length >= max) return;
@@ -1385,9 +2237,10 @@
 			});
 
 			rows.push(row);
-			setValue(block, field, rows);
+			setValue(block, field, rows, lang);
 			renderProperties();
 			touch({ blockId: block.block_id });
+			schedulePreview(block);
 		});
 
 		rowsEl.addEventListener('click', function (event) {
@@ -1397,120 +2250,13 @@
 
 			var rowEl = event.target.closest('[data-repeater-row]');
 			var index = Number(rowEl.getAttribute('data-repeater-row'));
-			var rows = (getValue(field, block) || []).slice();
+			var rows = (getValue(field, block, lang) || []).slice();
 
 			rows.splice(index, 1);
-			setValue(block, field, rows);
+			setValue(block, field, rows, lang);
 			renderProperties();
 			touch({ blockId: block.block_id });
-		});
-	}
-
-	/* ==================== page settings ==================== */
-
-	function openSettings() {
-		renderSettings();
-		$('lp-settings').classList.remove('hidden');
-	}
-
-	function renderSettings() {
-		var body = $('lp-settings-body');
-		if (!body) return;
-
-		var descriptions = state.page.descriptions || {};
-		var html = '';
-
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_name', 'Name')) + '</label>' +
-			'<input type="text" class="lp-input" data-page="name" value="' + esc(state.page.name) + '" /></div>';
-
-		(CFG.languages || []).forEach(function (language) {
-			var id = Number(language.language_id);
-			var description = descriptions[id] || {};
-
-			html += '<div class="border border-gray-100 rounded p-2 space-y-2">' +
-				'<div class="text-[11px] font-semibold text-gray-500 flex items-center gap-1">' +
-				'<i data-lucide="languages" class="w-3 h-3"></i> ' + esc(language.name) +
-				' <span class="text-[9px] text-gray-400">' + esc(String(language.code).toUpperCase()) + '</span></div>' +
-				'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_slug', 'SEO keyword')) + '</label>' +
-				'<div class="flex items-center gap-1"><span class="text-gray-400 text-xs">/</span>' +
-				'<input type="text" class="lp-input" data-desc="' + id + '" data-key="slug" value="' + esc(description.slug || '') + '" /></div></div>' +
-				'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_title', 'Meta title')) + '</label>' +
-				'<input type="text" class="lp-input" data-desc="' + id + '" data-key="meta_title" value="' + esc(description.meta_title || '') + '" /></div>' +
-				'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_description', 'Meta description')) + '</label>' +
-				'<textarea rows="2" class="lp-input" data-desc="' + id + '" data-key="meta_description">' + esc(description.meta_description || '') + '</textarea></div>' +
-				'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_keyword', 'Meta keywords')) + '</label>' +
-				'<input type="text" class="lp-input" data-desc="' + id + '" data-key="meta_keyword" value="' + esc(description.meta_keyword || '') + '" /></div>' +
-				'</div>';
-		});
-
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_status', 'Status')) + '</label>' +
-			'<select class="lp-input" data-page="status">' +
-			'<option value="1"' + (Number(state.page.status) ? ' selected' : '') + '>' + esc(t('text_status_published', 'Published')) + '</option>' +
-			'<option value="0"' + (!Number(state.page.status) ? ' selected' : '') + '>' + esc(t('text_status_draft', 'Draft')) + '</option></select></div>';
-
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_chrome', 'Header / footer')) + '</label>' +
-			'<select class="lp-input" data-page="chrome">' +
-			'<option value="full"' + (state.page.chrome !== 'bare' ? ' selected' : '') + '>' + esc(t('entry_chrome_full', 'Standard theme header & footer')) + '</option>' +
-			'<option value="bare"' + (state.page.chrome === 'bare' ? ' selected' : '') + '>' + esc(t('entry_chrome_bare', 'No navigation (bare page)')) + '</option></select></div>';
-
-		html += '<div class="lp-field"><label class="flex items-center gap-2 text-xs"><input type="checkbox" data-page="is_home"' + (Number(state.page.is_home) ? ' checked' : '') + ' /> ' + esc(t('entry_is_home', 'Use as store home page')) + '</label></div>';
-		html += '<div class="lp-field"><label class="flex items-center gap-2 text-xs"><input type="checkbox" data-page="noindex"' + (Number(state.page.noindex) ? ' checked' : '') + ' /> ' + esc(t('entry_noindex', 'noindex (hide from search engines)')) + '</label></div>';
-
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_publish', 'Publish from')) + '</label>' +
-			'<input type="datetime-local" class="lp-input" data-page="date_publish" value="' + esc(state.page.date_publish || '') + '" /></div>';
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_unpublish', 'Publish until')) + '</label>' +
-			'<input type="datetime-local" class="lp-input" data-page="date_unpublish" value="' + esc(state.page.date_unpublish || '') + '" /></div>';
-
-		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_custom_css', 'Custom CSS')) + '</label>' +
-			'<textarea rows="5" class="lp-input font-mono text-[11px]" data-page="custom_css">' + esc(state.page.custom_css || '') + '</textarea></div>';
-
-		html += '<div class="text-[11px] text-gray-400">' + esc(t('entry_viewed', 'Views')) + ': ' + Number(CFG.landing.viewed || 0) + '</div>';
-
-		body.innerHTML = html;
-
-		lucide.createIcons({ nodes: [body] });
-
-		body.querySelectorAll('[data-page]').forEach(function (input) {
-			var key = input.getAttribute('data-page');
-			var refresh = ['status', 'chrome', 'is_home', 'noindex', 'custom_css'].indexOf(key) !== -1;
-
-			var handler = function () {
-				var value = input.type === 'checkbox' ? (input.checked ? 1 : 0) : input.value;
-
-				if (String(state.page[key]) === String(value)) return;
-
-				pushHistory();
-				state.page[key] = value;
-
-				if (key === 'name') {
-					$('lp-name-input').value = value;
-				}
-
-				if (key === 'status') {
-					updateStatusBadge();
-				}
-
-				touch({ structural: refresh, delay: 800 });
-			};
-
-			input.addEventListener((input.type === 'checkbox' || input.tagName === 'SELECT') ? 'change' : 'input', handler);
-		});
-
-		body.querySelectorAll('[data-desc]').forEach(function (input) {
-			var languageId = Number(input.getAttribute('data-desc'));
-			var key = input.getAttribute('data-key');
-
-			input.addEventListener('input', function () {
-				if (!state.page.descriptions[languageId]) {
-					state.page.descriptions[languageId] = {};
-				}
-
-				if (String(state.page.descriptions[languageId][key] || '') === String(input.value)) return;
-
-				pushHistory();
-				state.page.descriptions[languageId][key] = input.value;
-				touch({ delay: 1000 });
-			});
+			schedulePreview(block);
 		});
 	}
 
@@ -1573,12 +2319,34 @@
 		});
 	}
 
-	/* ==================== rich text ==================== */
+	/* ==================== rich text (language-safe) ==================== */
 
-	function initRichText(textarea, onChange) {
+	function initRichText(textarea, block, field, lang) {
 		if (typeof tinymce === 'undefined' || !textarea.id) return;
 
-		var timer = null;
+		var editor = null;
+		var entry = null;
+
+		var readEditor = function () {
+			// A removed editor never writes: its content is gone with the
+			// panel that owned it (this guard is what used to wipe languages).
+			if (!editor || editor.removed) return null;
+
+			return editor.getContent();
+		};
+
+		var flush = function () {
+			var value = readEditor();
+
+			if (value === null) return;
+			if (getValue(field, block, lang) === value) return;
+
+			setValue(block, field, value, lang);
+			touch({ blockId: block.block_id });
+			schedulePreview(block);
+
+			ui.fieldTimers = ui.fieldTimers.filter(function (item) { return item !== entry; });
+		};
 
 		tinymce.init({
 			target: textarea,
@@ -1599,15 +2367,297 @@
 					callback(CFG.imageUrl + path, { alt: '' });
 				});
 			},
-			setup: function (editor) {
-				editor.on('change keyup undo redo setcontent', function () {
-					clearTimeout(timer);
-					timer = setTimeout(function () {
-						onChange(editor.getContent());
-					}, 500);
+			setup: function (initialized) {
+				editor = initialized;
+
+				initialized.on('change keyup undo redo setcontent', function () {
+					trackTextEdit();
+
+					if (entry) {
+						clearTimeout(entry.timer);
+						ui.fieldTimers = ui.fieldTimers.filter(function (item) { return item !== entry; });
+					}
+
+					// Debounced write into the language captured at bind time;
+					// a panel re-render flushes it (same language) instead of
+					// letting it fire against a removed editor.
+					entry = trackFieldTimer(setTimeout(flush, 500), flush);
+				});
+
+				// One undo step per editing session: flush the last keystrokes,
+				// then seal the snapshot taken on the first change.
+				initialized.on('blur', function () {
+					if (entry) {
+						clearTimeout(entry.timer);
+					flush();
+					}
+
+					commitTextEdit();
 				});
 			}
 		});
+	}
+
+	/* ==================== navigator (structure tree) ==================== */
+
+	function blockHint(block) {
+		var code = block.code;
+		var schema = CFG.schema[code] || {};
+		var hintKey = schema.hint || (code === 'section' ? 'structure' : 'heading');
+		var value = block.content && block.content[ui.lang] ? block.content[ui.lang][hintKey] : '';
+
+		if (typeof value === 'string' && value !== '') {
+			value = value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+			return value.length > 24 ? value.slice(0, 24) + '…' : value;
+		}
+
+		return '';
+	}
+
+	function navigatorRow(block) {
+		var schema = CFG.schema[block.code] || { icon: 'square', name: block.code };
+		var hint = blockHint(block);
+		var hidden = Number(block.status) ? '' : ' opacity-50';
+
+		return '<div class="lp-nav-row' + (Number(block.block_id) === Number(ui.selectedId) ? ' lp-nav-selected' : '') + hidden + '"' +
+			' data-block-id="' + Number(block.block_id) + '"' +
+			(isContainerBlock(block) ? ' data-lp-container="1"' : '') + '>' +
+			'<span class="lp-nav-grip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>' +
+			'<span class="inline-flex items-center justify-center shrink-0 text-gray-400"><i data-lucide="' + esc(schema.icon || 'square') + '" class="w-3.5 h-3.5"></i></span>' +
+			'<span class="lp-nav-label">' + esc(t(schema.name, block.code)) +
+			(hint ? ' <span class="text-gray-400 font-normal">· ' + esc(hint) + '</span>' : '') + '</span>' +
+			'<span class="lp-nav-actions">' +
+			'<button type="button" data-nav-action="settings" title="' + esc(t('text_block_settings', 'Settings')) + '"><i data-lucide="settings-2" class="w-3 h-3"></i></button>' +
+			'<button type="button" data-nav-action="duplicate" title="' + esc(t('text_duplicate', 'Duplicate')) + '"><i data-lucide="copy" class="w-3 h-3"></i></button>' +
+			'<button type="button" class="lp-nav-danger" data-nav-action="remove" title="' + esc(t('text_remove', 'Remove')) + '"><i data-lucide="trash-2" class="w-3 h-3"></i></button>' +
+			'</span></div>';
+	}
+
+	function renderNavigator() {
+		var tree = $('lp-navigator-tree');
+		if (!tree) return;
+
+		var blocks = topLevel();
+		var html = '';
+
+		if (!blocks.length) {
+			html = '<div class="text-gray-400 text-[11px] px-2 py-3 text-center">' + esc(t('text_no_blocks', 'The page is empty')) + '</div>';
+		} else {
+			blocks.forEach(function (block) {
+				html += navigatorUnit(block);
+			});
+		}
+
+		tree.innerHTML = '<div id="lp-nav-root" class="space-y-0.5">' + html + '</div>';
+
+		lucide.createIcons({ nodes: [tree] });
+		bindNavigator(tree);
+		updateCanvasState();
+	}
+
+	/**
+	 * One top-level unit: the block row plus (for a section) the drop lists of
+	 * its columns. The unit is what dragging moves at the page level.
+	 */
+	function navigatorUnit(block) {
+		var html = '<div class="lp-nav-item"' +
+			' data-lp-container="' + (isContainerBlock(block) ? '1' : '0') + '"' +
+			' data-block-id="' + Number(block.block_id) + '">' +
+			navigatorRow(block);
+
+		if (isContainerBlock(block)) {
+			var columnLabel = t('text_column', 'Column %s');
+
+			for (var slot = 0; slot < columnCountOf(block); slot++) {
+				html += '<div class="lp-nav-slot">' +
+					'<div class="lp-nav-col-title"><i data-lucide="columns-2" class="w-3 h-3"></i> ' + esc(columnLabel.replace('%s', String(slot + 1))) + '</div>' +
+					'<div class="space-y-0.5" data-nav-slot="' + slot + '">';
+
+				childrenOf(block.block_id, slot).forEach(function (child) {
+					html += navigatorRow(child);
+				});
+
+				html += '</div></div>';
+			}
+		}
+
+		return html + '</div>';
+	}
+
+	function bindNavigator(tree) {
+		destroyNavigatorSortables();
+
+		tree.querySelectorAll('.lp-nav-row').forEach(function (row) {
+			row.addEventListener('click', function (event) {
+				var action = event.target.closest('[data-nav-action]');
+				var blockId = Number(row.getAttribute('data-block-id'));
+
+				if (action) {
+					event.stopPropagation();
+					performAction(action.getAttribute('data-nav-action'), blockId);
+					return;
+				}
+
+				selectBlock(blockId);
+				postToIframe({ type: 'lp:select', blockId: blockId, scroll: true });
+			});
+		});
+
+		if (typeof Sortable === 'undefined') return;
+
+		// One shared group: rows move between the page level and any column.
+		// Sections themselves stay at the page level - the column put-filter
+		// refuses containers (Sortable needs the same group name on both
+		// sides, otherwise cross-list drops are silently rejected).
+		var NAV_GROUP = 'lp-nav';
+
+		var rootList = tree.querySelector('#lp-nav-root');
+
+		if (rootList) {
+			ui.navSortables.push(new Sortable(rootList, {
+				animation: 140,
+				handle: '.lp-nav-grip',
+				draggable: '.lp-nav-item',
+				ghostClass: 'lp-nav-ghost',
+				group: {
+					name: NAV_GROUP,
+					pull: true,
+					put: true
+				},
+				onEnd: function () {
+					applyTree(navigatorItems(tree));
+				}
+			}));
+		}
+
+		tree.querySelectorAll('[data-nav-slot]').forEach(function (list) {
+			ui.navSortables.push(new Sortable(list, {
+				animation: 140,
+				handle: '.lp-nav-grip',
+				draggable: '.lp-nav-row',
+				ghostClass: 'lp-nav-ghost',
+				group: {
+					name: NAV_GROUP,
+					pull: true,
+					put: function (to, from, dragEl) {
+						// Section units (.lp-nav-item) and section rows
+						// (.lp-nav-row) both carry data-lp-container="1".
+						return dragEl.getAttribute('data-lp-container') !== '1';
+					}
+				},
+				onEnd: function () {
+					applyTree(navigatorItems(tree));
+				}
+			}));
+		});
+	}
+
+	function destroyNavigatorSortables() {
+		(ui.navSortables || []).forEach(function (instance) {
+			instance.destroy();
+		});
+
+		ui.navSortables = [];
+	}
+
+	/**
+	 * The tree as the model expects it, read back from the navigator DOM
+	 * after a drag (same shape the iframe reports).
+	 */
+	/**
+	 * The tree as the model expects it, read back from the navigator DOM
+	 * after a drag (same shape the iframe reports). Root children are units;
+	 * a bare row may appear there after a cross-list drop.
+	 */
+	function navigatorItems(tree) {
+		var items = [];
+		var rootList = tree.querySelector('#lp-nav-root');
+
+		if (!rootList) return items;
+
+		Array.prototype.slice.call(rootList.children).forEach(function (unit, index) {
+			var row = unit.classList && unit.classList.contains('lp-nav-row')
+				? unit
+				: unit.querySelector('.lp-nav-row');
+
+			if (!row || !row.hasAttribute('data-block-id')) return;
+
+			var id = Number(row.getAttribute('data-block-id'));
+
+			items.push({ id: id, parent: 0, slot: 0, order: index });
+
+			Array.prototype.slice.call(unit.querySelectorAll('[data-nav-slot]')).forEach(function (list) {
+				var slot = Number(list.getAttribute('data-nav-slot')) || 0;
+
+				Array.prototype.slice.call(list.querySelectorAll('.lp-nav-row')).forEach(function (childRow, order) {
+					var childId = Number(childRow.getAttribute('data-block-id'));
+
+					if (childId) {
+						items.push({ id: childId, parent: id, slot: slot, order: order });
+					}
+				});
+			});
+		});
+
+		return items;
+	}
+
+	/* ==================== canvas state ==================== */
+
+	// Per-item usage counts in the palette: how many blocks of each type
+	// are currently on the page (badges stay hidden while unused).
+	function updatePaletteCounts() {
+		var counts = {};
+
+		state.blocks.forEach(function(block) {
+			counts[block.code] = (counts[block.code] || 0) + 1;
+		});
+
+		document.querySelectorAll('#lp-palette [data-count-for]').forEach(function(badge) {
+			var total = counts[badge.getAttribute('data-count-for')] || 0;
+
+			badge.textContent = String(total);
+			badge.classList.toggle('hidden', total === 0);
+		});
+	}
+
+	// Empty-state overlay, block counter and navigator badge.
+	function updateCanvasState() {
+		var empty = $('lp-empty');
+		var count = $('lp-block-count');
+		var navCount = $('lp-navigator-count');
+		var total = state.blocks.length;
+
+		if (empty) empty.classList.toggle('hidden', total > 0);
+		if (count) count.textContent = String(total);
+		if (navCount) navCount.textContent = String(total);
+
+		updatePaletteCounts();
+	}
+
+	function initNavigator() {
+		var button = $('lp-navigator-btn');
+		var panel = $('lp-navigator');
+		var close = $('lp-navigator-close');
+
+		if (!button || !panel) return;
+
+		var toggle = function (open) {
+			ui.navigatorOpen = typeof open === 'boolean' ? open : !ui.navigatorOpen;
+
+			panel.classList.toggle('lp-nav-open', ui.navigatorOpen);
+
+			if (ui.navigatorOpen) {
+				renderNavigator();
+			}
+		};
+
+		button.addEventListener('click', function () { toggle(); });
+
+		if (close) {
+			close.addEventListener('click', function () { toggle(false); });
+		}
 	}
 
 	/* ==================== media picker (reuses common/filemanager) ==================== */
@@ -1657,6 +2707,316 @@
 		});
 	}
 
+	/* ==================== page settings ==================== */
+
+	// Page Settings live in the right panel whenever no block is selected
+	// (renderProperties), not in a separate slide-over.
+	function openSiteSettings() {
+		selectBlock(0);
+		ui.siteSettings = true;
+		renderProperties();
+		renderNavigator();
+	}
+
+	function openPageSettings() {
+		selectBlock(0);
+	}
+
+	function updateSettingsMenu() {
+		// The trigger always offers the *other* panel: Site -> Page, Page -> Site.
+		var label = $('lp-settings-mode-label');
+		var icon = $('lp-settings-mode-icon');
+		var toggle = $('lp-site-settings-btn');
+		var nextLabel = ui.siteSettings ? 'text_page_settings' : 'text_site_settings';
+		var nextFallback = ui.siteSettings ? 'Page settings' : 'Site settings';
+		var nextIcon = ui.siteSettings ? 'settings-2' : 'palette';
+
+		if (label) label.textContent = t(nextLabel, nextFallback);
+
+		if (icon) {
+			icon.innerHTML = '<i data-lucide="' + nextIcon + '" class="w-3.5 h-3.5"></i>';
+
+			if (window.lucide) lucide.createIcons({ nodes: [icon] });
+		}
+
+		if (toggle) {
+			toggle.setAttribute('title', t(nextLabel, nextFallback));
+			toggle.setAttribute('data-original-title', t(nextLabel, nextFallback));
+		}
+
+	}
+
+	function siteSettingsHtml() {
+		var schema = CFG.siteDesignSchema || {};
+		var design = state.siteDesign || {};
+		var html = '<p class="text-[11px] leading-relaxed text-gray-500 mb-3">' +
+			esc(t('text_site_settings_hint', 'Styles shared by every landing page.')) + '</p>';
+
+		Object.keys(schema).forEach(function (key) {
+			var field = schema[key];
+			var label = esc(t(field.label, key));
+			var value = String(design[key] !== undefined ? design[key] : field.default);
+
+			html += '<div class="lp-field"><label class="lp-field-label">' + label + '</label>';
+
+			if (field.type === 'color') {
+				html += '<div class="flex items-center gap-2">' +
+					'<input type="color" class="w-9 h-9 p-0 border border-gray-200 rounded" data-site-color="' + esc(key) + '" value="' + esc(value) + '" />' +
+					'<input type="text" class="lp-input font-mono text-[11px]" data-site="' + esc(key) + '" value="' + esc(value) + '" /></div>';
+			} else {
+				html += '<select class="lp-input" data-site="' + esc(key) + '">';
+
+				Object.keys(field.options || {}).forEach(function (option) {
+					html += '<option value="' + esc(option) + '"' + (value === option ? ' selected' : '') + '>' +
+						esc(t(field.options[option], option)) + '</option>';
+				});
+
+				html += '</select>';
+			}
+
+			html += '</div>';
+		});
+
+		html += '<button type="button" id="lp-site-style-save" class="w-full mt-2 px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded">' +
+			esc(t('button_save_site_style', 'Save site style')) + '</button>';
+
+		return html;
+	}
+
+	function bindSiteSettings(container) {
+		container.querySelectorAll('[data-site]').forEach(function (input) {
+			var key = input.getAttribute('data-site');
+			var sync = function () {
+				var value = input.value;
+
+				state.siteDesign[key] = value;
+
+				container.querySelectorAll('[data-site-color="' + key + '"]').forEach(function (picker) {
+					picker.value = /^#[0-9a-f]{6}$/i.test(value) ? value : '#2563eb';
+				});
+
+				container.querySelectorAll('[data-site="' + key + '"]').forEach(function (field) {
+					if (field !== input) field.value = value;
+				});
+			};
+
+			input.addEventListener('input', sync);
+			input.addEventListener('change', sync);
+		});
+
+		container.querySelectorAll('[data-site-color]').forEach(function (picker) {
+			picker.addEventListener('input', function () {
+				var key = picker.getAttribute('data-site-color');
+
+				state.siteDesign[key] = picker.value;
+
+				container.querySelectorAll('[data-site="' + key + '"]').forEach(function (field) {
+					field.value = picker.value;
+				});
+			});
+		});
+
+		var save = container.querySelector('#lp-site-style-save');
+
+		if (save) {
+			save.addEventListener('click', function () {
+				save.disabled = true;
+
+				fetch(CFG.siteDesignUrl, {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(state.siteDesign)
+				}).then(function (response) { return response.json(); }).then(function (json) {
+					save.disabled = false;
+
+					if (json.error) {
+						toast(json.error);
+						return;
+					}
+
+					if (json.site_design) state.siteDesign = json.site_design;
+
+					toast(json.success || t('text_saved', 'Saved'));
+					reloadIframe();
+				}).catch(function () {
+					save.disabled = false;
+					toast(t('text_error_save', 'Could not save'));
+				});
+			});
+		}
+	}
+
+	/**
+	 * The published/draft select of the Page Settings panel, shared by the
+	 * standalone page (data-page) and the owned information page
+	 * (data-owner, disabled without modify catalog/information).
+	 */
+	function statusSelectHtml(attr, value) {
+		return '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_status', 'Status')) + '</label>' +
+			'<select class="lp-input" ' + attr + '>' +
+			'<option value="1"' + (Number(value) ? ' selected' : '') + '>' + esc(t('text_status_published', 'Published')) + '</option>' +
+			'<option value="0"' + (!Number(value) ? ' selected' : '') + '>' + esc(t('text_status_draft', 'Draft')) + '</option></select></div>';
+	}
+
+	/**
+	 * The per-language SEO/meta group of the Page Settings panel, shared by
+	 * the standalone page (data-desc) and the owned information page
+	 * (data-owner-desc, read-only without modify catalog/information).
+	 */
+	function descriptionGroupHtml(attr, descriptions, disabled) {
+		var language = languageById(ui.lang);
+		var description = descriptions[Number(ui.lang)] || {};
+		var dis = disabled ? ' disabled' : '';
+
+		return '<div class="border border-gray-100 rounded p-2 space-y-2">' +
+			'<div class="text-[11px] font-semibold text-gray-500 flex items-center gap-1">' +
+			'<i data-lucide="languages" class="w-3 h-3"></i> ' + esc(language.name) +
+			' <span class="text-[9px] text-gray-400">' + esc(String(language.code).toUpperCase()) + '</span></div>' +
+			'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_slug', 'SEO keyword')) + '</label>' +
+			'<div class="flex items-center gap-1"><span class="text-gray-400 text-xs">/</span>' +
+			'<input type="text" class="lp-input" ' + attr + '="' + Number(ui.lang) + '" data-key="slug" value="' + esc(description.slug || '') + '"' + dis + ' /></div></div>' +
+			'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_title', 'Meta title')) + '</label>' +
+			'<input type="text" class="lp-input" ' + attr + '="' + Number(ui.lang) + '" data-key="meta_title" value="' + esc(description.meta_title || '') + '"' + dis + ' /></div>' +
+			'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_description', 'Meta description')) + '</label>' +
+			'<textarea rows="2" class="lp-input" ' + attr + '="' + Number(ui.lang) + '" data-key="meta_description"' + dis + '>' + esc(description.meta_description || '') + '</textarea></div>' +
+			'<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_meta_keyword', 'Meta keywords')) + '</label>' +
+			'<input type="text" class="lp-input" ' + attr + '="' + Number(ui.lang) + '" data-key="meta_keyword" value="' + esc(description.meta_keyword || '') + '"' + dis + ' /></div>' +
+			'</div>';
+	}
+
+	function settingsHtml() {
+		var descriptions = state.page.descriptions || {};
+		var html = '';
+
+		// An owned landing is the composed body of an information page: its
+		// status, URL, meta tags and SEO keyword are edited here, straight
+		// in the builder, instead of Catalog > Information.
+		if (CFG.ownerInformationId) {
+			html += statusSelectHtml('data-owner="status"' + (CFG.canEditOwner ? '' : ' disabled'), state.owner.status);
+			html += descriptionGroupHtml('data-owner-desc', state.owner.descriptions || {}, !CFG.canEditOwner);
+		}
+
+		if (!CFG.ownerInformationId) {
+			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_name', 'Name')) + '</label>' +
+				'<input type="text" class="lp-input" data-page="name" value="' + esc(state.page.name) + '" /></div>';
+
+			html += descriptionGroupHtml('data-desc', descriptions, false);
+
+			html += statusSelectHtml('data-page="status"', state.page.status);
+
+			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_chrome', 'Header / footer')) + '</label>' +
+				'<select class="lp-input" data-page="chrome">' +
+				'<option value="full"' + (state.page.chrome !== 'bare' ? ' selected' : '') + '>' + esc(t('entry_chrome_full', 'Standard theme header & footer')) + '</option>' +
+				'<option value="bare"' + (state.page.chrome === 'bare' ? ' selected' : '') + '>' + esc(t('entry_chrome_bare', 'No navigation (bare page)')) + '</option></select></div>';
+
+			html += '<div class="lp-field"><label class="flex items-center gap-2 text-xs"><input type="checkbox" data-page="is_home"' + (Number(state.page.is_home) ? ' checked' : '') + ' /> ' + esc(t('entry_is_home', 'Use as store home page')) + '</label></div>';
+		}
+
+		html += '<div class="lp-field"><label class="flex items-center gap-2 text-xs"><input type="checkbox" data-page="noindex"' + (Number(state.page.noindex) ? ' checked' : '') + ' /> ' + esc(t('entry_noindex', 'noindex (hide from search engines)')) + '</label></div>';
+
+		if (!CFG.ownerInformationId) {
+			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_publish', 'Publish from')) + '</label>' +
+				'<input type="datetime-local" class="lp-input" data-page="date_publish" value="' + esc(state.page.date_publish || '') + '" /></div>';
+			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_unpublish', 'Publish until')) + '</label>' +
+				'<input type="datetime-local" class="lp-input" data-page="date_unpublish" value="' + esc(state.page.date_unpublish || '') + '" /></div>';
+		}
+
+		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_custom_css', 'Custom CSS')) + '</label>' +
+			'<textarea rows="5" class="lp-input font-mono text-[11px]" data-page="custom_css">' + esc(state.page.custom_css || '') + '</textarea></div>';
+
+		if (!CFG.ownerInformationId) {
+			html += '<div class="text-[11px] text-gray-400">' + esc(t('entry_viewed', 'Views')) + ': ' + Number(CFG.landing.viewed || 0) + '</div>';
+		}
+
+		return html;
+	}
+
+	function bindSettings(container) {
+		container.querySelectorAll('[data-page]').forEach(function (input) {
+			var key = input.getAttribute('data-page');
+			var refresh = ['status', 'chrome', 'is_home', 'noindex', 'custom_css'].indexOf(key) !== -1;
+
+			var coalesce = !(input.type === 'checkbox' || input.tagName === 'SELECT');
+
+			var handler = function () {
+				var value = input.type === 'checkbox' ? (input.checked ? 1 : 0) : input.value;
+
+				if (String(state.page[key]) === String(value)) return;
+
+				if (coalesce) {
+					trackTextEdit();
+				} else {
+					pushHistory();
+				}
+				state.page[key] = value;
+
+				if (key === 'name') {
+					$('lp-name-input').value = value;
+				}
+
+				if (key === 'status') {
+					updateStatusBadge();
+				}
+
+				touch({ structural: refresh });
+			};
+
+			input.addEventListener(coalesce ? 'input' : 'change', handler);
+
+			if (coalesce) {
+				input.addEventListener('blur', commitTextEdit);
+			}
+		});
+
+		bindDescriptionInputs(container, 'data-desc', state.page.descriptions);
+
+		// Owned landing: status, URL and meta tags of the information page.
+		// Single visible status — it also drives the top bar badge.
+		container.querySelectorAll('[data-owner="status"]').forEach(function (input) {
+			input.addEventListener('change', function () {
+				var value = input.value === '1' ? 1 : 0;
+
+				if (Number(state.owner.status) === value) return;
+
+				pushHistory();
+				state.owner.status = value;
+				state.page.status = value;
+				updateStatusBadge();
+				touch();
+			});
+		});
+
+		bindDescriptionInputs(container, 'data-owner-desc', state.owner.descriptions);
+	}
+
+	/**
+	 * Per-language description inputs of the Page Settings panel (slug and
+	 * meta fields). Writes go to the language named in the data attribute -
+	 * the one the input was rendered for - never to the currently selected
+	 * tab, and text edits coalesce into one undo step per focus session.
+	 */
+	function bindDescriptionInputs(container, attr, descriptions) {
+		container.querySelectorAll('[' + attr + ']').forEach(function (input) {
+			var languageId = Number(input.getAttribute(attr));
+			var key = input.getAttribute('data-key');
+
+			input.addEventListener('input', function () {
+				if (!descriptions[languageId]) {
+					descriptions[languageId] = {};
+				}
+
+				if (String(descriptions[languageId][key] || '') === String(input.value)) return;
+
+				trackTextEdit();
+				descriptions[languageId][key] = input.value;
+				touch();
+			});
+
+			input.addEventListener('blur', commitTextEdit);
+		});
+	}
+
 	/* ==================== language / viewport / token ==================== */
 
 	function initLanguageTabs() {
@@ -1671,18 +3031,35 @@
 
 			if (languageId === ui.lang) return;
 
-			ui.lang = languageId;
+			var go = function () {
+				// renderProperties() flushes pending edits into the language they
+				// were typed in before the panel switches to the new one.
+				ui.lang = languageId;
 
-			tabs.querySelectorAll('.lp-lang-tab').forEach(function (button) {
-				button.className = 'lp-lang-tab px-2 py-1 text-xs rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100';
-			});
+				tabs.querySelectorAll('.lp-lang-tab').forEach(function (button) {
+					button.className = 'lp-lang-tab px-2 py-1 text-xs rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100';
+				});
 
-			tab.className = 'lp-lang-tab px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 font-medium';
+				tab.className = 'lp-lang-tab px-2 py-1 text-xs rounded bg-blue-50 text-blue-700 font-medium';
 
-			renderProperties();
-			renderSettings();
+				renderProperties();
+				renderNavigator();
+				syncNameInput();
 
-			reloadIframe();
+				reloadIframe();
+			};
+
+			// No autosave: switching the tab keeps the edits in memory, so an
+			// explicit question replaces the silent background save.
+			if (ui.dirty && !ui.saving) {
+				if (window.confirm(t('text_confirm_unsaved', 'You have unsaved changes. Save them before switching?'))) {
+					save(true, go);
+				} else {
+					go();
+				}
+			} else {
+				go();
+			}
 		});
 	}
 
@@ -1759,14 +3136,20 @@
 
 		state.version = Number(CFG.landing.version) || 1;
 		state.blocks = (CFG.blocks || []).map(normalizeBlock);
+		state.owner = clone(CFG.owner && typeof CFG.owner === 'object' ? CFG.owner : { status: 0, descriptions: {} });
+
+		if (!state.owner.descriptions || typeof state.owner.descriptions !== 'object' || Array.isArray(state.owner.descriptions)) {
+			state.owner.descriptions = {};
+		}
 
 		initPalette();
 		initLanguageTabs();
 		initViewport();
 		initTemplates();
+		initNavigator();
 		renderTemplates();
 		renderProperties();
-		renderSettings();
+		renderNavigator();
 		updateStatusBadge();
 		updateSaveState();
 		updatePreviewLink();
@@ -1777,23 +3160,58 @@
 			frame.src = buildPreviewUrl('_=' + Date.now());
 		}
 
-		var nameInput = $('lp-name-input');
+		initNameInput();
 
-		if (nameInput) {
-			nameInput.addEventListener('input', function () {
-				if (String(state.page.name) === nameInput.value) return;
+		// Properties tabs (Content / Style / Advanced).
+		var propsTabs = $('lp-props-tabs');
 
-				pushHistory();
-				state.page.name = nameInput.value;
-				touch({ delay: 900 });
+		if (propsTabs) {
+			propsTabs.addEventListener('click', function (event) {
+				var tab = event.target.closest('[data-props-tab]');
+
+				if (!tab) return;
+
+				ui.propsTab = tab.getAttribute('data-props-tab');
+				renderProperties();
+			});
+		}
+
+		// One-click section start: appends at the end of the page, like the
+		// Elementor "+" between sections.
+		var addSectionEnd = function () {
+			var tops = topLevel();
+			var afterId = tops.length ? Number(tops[tops.length - 1].block_id) || 0 : 0;
+
+			addBlock('section', { parentId: 0, slot: 0, afterId: afterId });
+		};
+
+		if ($('lp-quickadd-section')) $('lp-quickadd-section').addEventListener('click', addSectionEnd);
+		if ($('lp-empty-section')) $('lp-empty-section').addEventListener('click', addSectionEnd);
+
+		if ($('lp-shortcuts-btn')) $('lp-shortcuts-btn').addEventListener('click', function () {
+				$('lp-shortcuts').classList.remove('hidden');
+		});
+
+		if ($('lp-site-settings-btn')) {
+			$('lp-site-settings-btn').addEventListener('click', function () {
+				if (ui.siteSettings) {
+					openPageSettings();
+				} else {
+					openSiteSettings();
+				}
 			});
 		}
 
 		$('lp-save-btn').addEventListener('click', function () { save(true); });
 		$('lp-undo').addEventListener('click', undo);
 		$('lp-redo').addEventListener('click', redo);
-		$('lp-settings-btn').addEventListener('click', openSettings);
-		$('lp-props-close').addEventListener('click', function () { selectBlock(0); });
+		$('lp-props-close').addEventListener('click', function () {
+			if (ui.siteSettings || ui.selectedId) {
+				openPageSettings();
+			} else {
+				openSiteSettings();
+			}
+		});
 
 		document.querySelectorAll('[data-close]').forEach(function (element) {
 			element.addEventListener('click', function () {
@@ -1816,38 +3234,59 @@
 		document.addEventListener('keydown', function (event) {
 			var target = event.target;
 
-			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+				return;
+			}
+
+			// Esc returns from a block to Page Settings, then to Site Settings.
+			// Site Settings is the root panel and cannot be closed.
+			if (event.key === 'Escape') {
+				if (ui.selectedId) {
+					selectBlock(0);
+				} else if (!ui.siteSettings) {
+					openSiteSettings();
+				}
+
+				return;
+			}
+
+			// Del removes the selected block (with the usual confirmation).
+			if ((event.key === 'Delete' || event.key === 'Backspace') && ui.selectedId) {
+				event.preventDefault();
+				performAction('remove', ui.selectedId);
 				return;
 			}
 
 			var meta = event.ctrlKey || event.metaKey;
 
-			if (meta && event.key.toLowerCase() === 'z') {
+			// event.code (not key) so shortcuts fire on any keyboard layout —
+			// with event.key a Russian layout turns Ctrl+D into Ctrl+В.
+			if (meta && event.code === 'KeyZ') {
 				event.preventDefault();
 				event.shiftKey ? redo() : undo();
 			}
 
-			if (meta && event.key.toLowerCase() === 's') {
+			if (meta && event.code === 'KeyS') {
 				event.preventDefault();
 				save(true);
 			}
-		});
 
-		window.addEventListener('beforeunload', function (event) {
-			if (!ui.dirty && !ui.saving) return;
+			if (meta && event.code === 'KeyD') {
+				event.preventDefault();
 
-			event.preventDefault();
-			event.returnValue = '';
-		});
-
-		window.addEventListener('focus', function () {
-			if (ui.dirty && !ui.saving) {
-				scheduleSave(200);
+				if (ui.selectedId) performAction('duplicate', ui.selectedId);
 			}
 		});
 
-		window.addEventListener('online', function () {
-			if (ui.dirty) save(false);
+		// No autosave: the page is sent only by the explicit Save action
+		// (button, Ctrl+S), by a structural change, or after the "save?"
+		// confirmation. Leaving with unsaved changes asks via the native
+		// dialog below.
+		window.addEventListener('beforeunload', function (event) {
+			if (!ui.dirty && !ui.saving && !ui.pendingOwnerTitle) return;
+
+			event.preventDefault();
+			event.returnValue = '';
 		});
 
 		lucide.createIcons();
