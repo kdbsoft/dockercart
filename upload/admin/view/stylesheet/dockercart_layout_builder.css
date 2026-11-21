@@ -47,13 +47,11 @@
 	.lb-card-add { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: none; align-items: center; justify-content: center; color: #111827; }
 	.lb-card-add svg { stroke-width: 1.5; }
 	.lb-card:hover .lb-card-add { display: inline-flex; }
-	/* Per-item usage count: how many modules of this type are on the page.
-	   Vertically centered on the right; on hover it yields to the plus. */
-	.lb-card-count { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--dc-primary-light); color: var(--dc-primary-active); font-size: 10px; font-weight: 700; line-height: 1; }
-	.lb-card:hover .lb-card-count { display: none; }
 	/* ---- Admin input look, same as Page Builder ---- */
-	.lb-input { width: 100%; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); padding: 6px 8px; font-size: 13px; color: var(--dc-gray-900); background: #fff; }
+	.lb-input { width: 100%; height: 32px; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); padding: 6px 8px; font-size: 13px; color: var(--dc-gray-900); background: #fff; }
 	.lb-input:focus { outline: none; border-color: var(--dc-primary); box-shadow: 0 0 0 2px var(--dc-primary-ring); }
+	/* Same chevron as the panel's select.form-control. */
+	select.lb-input { appearance: none; -webkit-appearance: none; background-image: var(--dc-select-chevron); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
 	.lb-input[readonly] { background: #f9fafb; color: #6b7280; }
 	.lb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 	.lb-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }

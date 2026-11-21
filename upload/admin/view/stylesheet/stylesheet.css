@@ -481,7 +481,7 @@ a:hover, a:focus {
 select.form-control {
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: var(--dc-select-chevron);
     background-repeat: no-repeat;
     background-position: right 12px center;
     padding-right: 38px;

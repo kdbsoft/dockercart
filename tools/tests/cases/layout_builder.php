@@ -31,6 +31,15 @@ function layout_builder_language(string $locale): array {
 }
 
 return [
+	'ui: selects use the shared dockercart chevron' => static function (): void {
+		$css = repo_file('upload/admin/view/stylesheet/dockercart_layout_builder.css');
+
+		Assert::contains('width: 100%; height: 32px;', $css, 'inputs and selects share one height');
+		Assert::contains('select.lb-input', $css);
+		Assert::contains('var(--dc-select-chevron)', $css);
+		Assert::contains('--dc-select-chevron:', repo_file('upload/admin/view/stylesheet/dockercart_tokens.css'));
+	},
+
 	'hidden: positions outside the canvas are rendered as untouched inputs' => static function (): void {
 		$tpl = repo_file('upload/admin/view/template/design/layout_builder.twig');
 

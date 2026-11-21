@@ -87,7 +87,6 @@ tailwind.config = { theme: { extend: { colors: {
 						<span class="lb-card-icon"><i data-lucide="{{ extension.icon }}" class="w-4 h-4"></i></span>
 						<span class="lb-card-label">{{ display_name }}</span>
 						<span class="lb-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
-						<span class="lb-card-count hidden" data-count-for="{{ module.code }}">0</span>
 					</div>
 					{% endfor %}
 				{% else %}
@@ -99,7 +98,6 @@ tailwind.config = { theme: { extend: { colors: {
 					<span class="lb-card-icon"><i data-lucide="{{ extension.icon }}" class="w-4 h-4"></i></span>
 					<span class="lb-card-label">{{ extension.name }}</span>
 					<span class="lb-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
-					<span class="lb-card-count hidden" data-count-for="{{ extension.code }}">0</span>
 				</div>
 				{% endif %}
 			</div>

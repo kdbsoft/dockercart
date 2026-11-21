@@ -29,7 +29,6 @@
 		initCardEventDelegation();
 		initPropertiesPanel();
 		initRoutes();
-		updatePaletteCounts();
 	}
 
 	// ==================== SORTABLEJS ====================
@@ -166,25 +165,6 @@
 		};
 	}
 
-	// ==================== MODULE COUNT ====================
-
-	// Per-item usage counts in the palette (badges stay hidden while unused).
-	function updatePaletteCounts() {
-		var counts = {};
-
-		document.querySelectorAll('#page-canvas .module-card').forEach(function(card) {
-			var code = card.getAttribute('data-module-code');
-			if (code) counts[code] = (counts[code] || 0) + 1;
-		});
-
-		document.querySelectorAll('#module-palette [data-count-for]').forEach(function(badge) {
-			var total = counts[badge.getAttribute('data-count-for')] || 0;
-
-			badge.textContent = String(total);
-			badge.classList.toggle('hidden', total === 0);
-		});
-	}
-
 	// ==================== ZONE EMPTY STATES ====================
 
 	function updateEmptyStates() {
@@ -207,8 +187,6 @@
 				}
 			}
 		});
-
-		updatePaletteCounts();
 	}
 
 	// ==================== CARD EVENT DELEGATION ====================
