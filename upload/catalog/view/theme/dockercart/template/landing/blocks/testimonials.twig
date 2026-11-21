@@ -1,0 +1,42 @@
+{#
+	Customer quotes in a simple card grid. Everything is plain, editor-entered
+	copy: no review queries and no avatar images. Stars are text glyphs so the
+	block does not depend on the storefront initialising Lucide.
+#}
+<div class="lp-native lp-native--testimonials lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		{% set rows = [] %}
+		{% for item in content.items %}
+			{% if item.quote or item.author %}
+				{% set rows = rows|merge([item]) %}
+			{% endif %}
+		{% endfor %}
+
+		{% if rows %}
+		<div class="lp-native__quotes" data-columns="{{ settings.columns }}">
+			{% for item in rows %}
+				{% set rating = item.rating|default(0) + 0 %}
+			<article class="lp-native__quote-card">
+				{% if rating > 0 %}
+				<span class="lp-native__stars" aria-label="{{ rating }}/5">{% for i in 1..5 %}<span aria-hidden="true" class="{{ i <= rating ? 'lp-native__star--on' : 'lp-native__star--off' }}">{{ i <= rating ? '★' : '☆' }}</span>{% endfor %}</span>
+				{% endif %}
+				{% if item.quote %}<blockquote class="lp-native__quote">{{ item.quote|escape|nl2br }}</blockquote>{% endif %}
+				{% if item.author or item.role %}
+				<footer class="lp-native__quote-author">
+					{% if item.author %}<span class="lp-native__quote-name">{{ item.author|escape }}</span>{% endif %}
+					{% if item.role %}<span class="lp-native__quote-role">{{ item.role|escape }}</span>{% endif %}
+				</footer>
+				{% endif %}
+			</article>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+</div>

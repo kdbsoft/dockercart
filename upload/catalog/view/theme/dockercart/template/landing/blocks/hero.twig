@@ -1,12 +1,10 @@
 {% set text_class = has_wrapper_bg ? wrapper_text_class : (text_color == 'dark' ? 'text-gray-900' : 'text-white') %}
 {% set sub_class = has_wrapper_bg ? wrapper_muted_class : (text_color == 'dark' ? 'text-gray-600' : 'text-white/85') %}
-{% set own_panel = not has_wrapper_bg or image %}
-<div class="relative overflow-hidden flex flex-col justify-center {{ own_panel ? 'rounded-3xl' : '' }} {{ height_class }} {{ position_class }}"
-	style="{% if image %}background-image:url('{{ image }}');background-size:cover;background-position:center;{% endif %}">
-	{% if image and settings.image_overlay %}
-	<div class="absolute inset-0 bg-black" style="opacity: {{ (settings.image_overlay / 100)|round(2) }}"></div>
-	{% endif %}
-	{% if not has_wrapper_bg and not image %}
+{# The background image and its overlay live in the Style tab (shared
+   wrapper settings), so the block never paints a second background. #}
+{% set own_panel = not has_wrapper_bg %}
+<div class="relative overflow-hidden flex flex-col justify-center {{ own_panel ? 'rounded-3xl lp-panel-own' : 'lp-panel-wrapper-bg' }} {{ height_class }} {{ position_class }}">
+	{% if not has_wrapper_bg %}
 	<div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-950"></div>
 	{% endif %}
 	<div class="relative z-10 w-full max-w-3xl px-6 sm:px-10 py-10 {{ text_class }}">

@@ -55,6 +55,34 @@ function landing_preview_method(): string {
 }
 
 return [
+	'preview: the external tab is a clean page with a way back' => static function (): void {
+		$admin = (string)file_get_contents(REPO_ROOT . '/upload/admin/controller/design/landing.php');
+		$page = (string)file_get_contents(REPO_ROOT . '/upload/catalog/controller/landing/page.php');
+		$twig = (string)file_get_contents(REPO_ROOT . '/upload/catalog/view/theme/dockercart/template/landing/page.twig');
+		$js = (string)file_get_contents(REPO_ROOT . '/upload/admin/view/javascript/dockercart_landing_builder.js');
+
+		Assert::contains('preview_public_bases', $admin, 'the Preview link must not carry lp_builder');
+		Assert::contains('builder_back', $admin, 'the back link is sent encrypted');
+		Assert::contains('publicPreviewBaseFor(', $js);
+		Assert::contains("link.href = publicPreviewBaseFor(ui.lang) + '&_=' + Date.now()", $js);
+		Assert::contains('$preview && !$builder', $page, 'the notice is for the external tab only');
+		Assert::contains('isBuilderBackUrl(', $page, 'the decrypted link is validated');
+		Assert::contains("bar.id = 'lp-preview-bar'", $twig);
+		Assert::contains('text_back_to_builder', $twig);
+		Assert::contains('position: fixed', $twig, 'the notice stays on top while scrolling');
+		Assert::contains('body.lp-has-preview #navbar', $twig, 'the fixed shop header is pushed below the notice');
+		Assert::contains('body.lp-has-preview .dc-header-spacer', $twig, 'the page content keeps its offset');
+		Assert::contains('document.body.insertBefore(bar, document.body.firstChild)', $twig, 'the notice is injected inside body, before the header content');
+		Assert::contains("document.body.classList.add('lp-has-preview')", $twig);
+
+		foreach (['en-gb', 'ru-ua', 'uk-ua'] as $locale) {
+			$lang = (string)file_get_contents(REPO_ROOT . '/upload/catalog/language/' . $locale . '/landing/landing.php');
+
+			Assert::contains("\$_['text_preview_mode']", $lang, $locale);
+			Assert::contains("\$_['text_back_to_builder']", $lang, $locale);
+		}
+	},
+
 	'preview: the builder-only branch renders from the POSTed payload' => static function (): void {
 		$src = (string)file_get_contents(LANDING_PREVIEW_PAGE);
 

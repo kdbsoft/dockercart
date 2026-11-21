@@ -11,3 +11,5 @@ $_['text_view_all']       = 'Дивитися все';
 $_['text_previous']       = 'Назад';
 $_['text_next']           = 'Вперед';
 $_['text_products']       = 'Товари';
+$_['text_preview_mode']   = 'Режим попереднього перегляду — блоки тут не редагуються';
+$_['text_back_to_builder'] = 'Повернутися до Builder';

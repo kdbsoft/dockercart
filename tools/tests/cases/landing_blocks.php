@@ -42,6 +42,14 @@ const LANDING_EDITOR_KEYS = [
 	'option_padding_y_lg', 'option_padding_y_xl',
 	'option_content_width_narrow', 'option_content_width_normal',
 	'option_content_width_wide', 'option_content_width_full',
+
+	'block_testimonials', 'block_stats', 'block_pricing',
+	'field_quotes', 'field_quote', 'field_author', 'field_role', 'field_rating',
+	'option_rating_0', 'option_rating_1', 'option_rating_2', 'option_rating_3',
+	'option_rating_4', 'option_rating_5',
+	'field_value', 'field_label', 'field_plans', 'field_plan', 'field_price',
+	'field_description', 'field_features', 'field_featured',
+	'option_plan_standard', 'option_plan_featured',
 ];
 
 const LANDING_FIELD_TYPES = [
@@ -52,7 +60,7 @@ const LANDING_FIELD_TYPES = [
 return [
 	'registry: codes are stable and complete' => static function (): void {
 		Assert::same(
-			['hero', 'text', 'cta', 'features', 'steps', 'faq', 'statement', 'products', 'products_carousel', 'categories', 'image', 'image_text', 'banner', 'section', 'spacer', 'html'],
+			['hero', 'text', 'cta', 'features', 'steps', 'faq', 'statement', 'testimonials', 'stats', 'products', 'products_carousel', 'pricing', 'categories', 'image', 'image_text', 'banner', 'section', 'spacer', 'html'],
 			Blocks::codes()
 		);
 	},
@@ -116,8 +124,12 @@ return [
 
 		$css = (string)file_get_contents(REPO_ROOT . '/' . LANDING_BLOCKS_CSS);
 
-		foreach (['.lp-native--features', '.lp-native--steps', '.lp-native--faq', '.lp-native--statement'] as $selector) {
+		foreach (['.lp-native--features', '.lp-native--steps', '.lp-native--faq', '.lp-native--statement', '.lp-native--testimonials', '.lp-native--stats', '.lp-native--pricing'] as $selector) {
 			Assert::contains($selector, $css, $selector . ' is not styled');
+		}
+
+		foreach (['testimonials', 'stats', 'pricing'] as $code) {
+			Assert::contains('#lp-page .lp-block--' . $code . ' .lp-block__body', $css, $code . ' must use the full-width editorial body');
 		}
 
 		Assert::contains("#lp-page .lp-block--hero .lp-block__body.w-full > div", $css, 'full-width hero must not be rounded');
@@ -151,12 +163,114 @@ return [
 			'Navigator panel must sit between the canvas and Properties'
 		);
 		Assert::contains("close.classList.toggle('hidden', ui.siteSettings)", $builder, 'Site Settings has no close button');
+		Assert::contains('view/stylesheet/stylesheet.css?v={{ admin_stylesheet_version }}', $template, 'the injected filemanager needs the admin stylesheet');
+		Assert::contains('admin_stylesheet_version', $admin, 'the stylesheet must be cache-busted like the other admin assets');
+		Assert::contains('function openMediaPicker(', $builder, 'the builder reuses common/filemanager');
+		Assert::contains('<span class="font-semibold whitespace-nowrap">{{ i18n.text_back }}</span>', $template, 'Back has a label like Layout Manager');
+		Assert::notContains('id="lp-name-input"', $template, 'no page name field in the top bar');
 
 		$controller = repo_file('upload/catalog/controller/landing/page.php');
 
 		Assert::contains("'catalog/view/stylesheet/landing/landing-blocks.css", $controller, 'landing controller must load the CSS for every theme');
 		Assert::contains("'catalog/view/stylesheet/landing/landing-editorial.css", $controller, 'editorial CSS must be loaded without page Custom CSS');
 		Assert::contains('design_style', $controller, 'storefront receives global design variables');
+	},
+
+	'background: hero and cta use the shared Style image' => static function (): void {
+		foreach (['hero', 'cta'] as $code) {
+			foreach (Blocks::fields($code) as $field) {
+				Assert::false(
+					$field['type'] === 'image' && in_array($field['key'], ['image', 'image_mobile'], true),
+					$code . ' still owns a second background image field'
+				);
+			}
+		}
+
+		$wrappers = array_column(Blocks::wrapperFields(), 'key');
+
+		Assert::true(in_array('bg_image', $wrappers, true));
+		Assert::true(in_array('bg_image_mobile', $wrappers, true));
+
+		$hero = Blocks::normalizeSettings('hero', ['image' => 'catalog/hero.jpg', 'image_overlay' => 55]);
+
+		Assert::same('catalog/hero.jpg', $hero['bg_image'], 'old hero images migrate');
+		Assert::same(55, $hero['overlay'], 'old hero overlay migrates');
+		Assert::same('image', $hero['bg_type'], 'a migrated image must be enabled');
+
+		$cta = Blocks::normalizeSettings('cta', ['image' => 'catalog/cta.jpg']);
+
+		Assert::same('catalog/cta.jpg', $cta['bg_image'], 'old cta images migrate');
+		Assert::same('image', $cta['bg_type']);
+
+		$styles = Blocks::wrapperStyles('hero', [
+			'bg_type' => 'image',
+			'bg_image' => 'catalog/desktop.jpg',
+			'bg_image_mobile' => 'catalog/mobile.jpg',
+		]);
+
+		Assert::contains('catalog/mobile.jpg', $styles['--lp-bg-image-mobile']);
+
+		$hero_twig = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/hero.twig');
+		$cta_twig = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/cta.twig');
+		$css = repo_file('upload/catalog/view/stylesheet/landing/landing-editorial.css');
+
+		Assert::notContains('settings.image', $hero_twig);
+		Assert::notContains('<img src="{{ image }}', $cta_twig);
+		Assert::contains('lp-panel-wrapper-bg { background: transparent', $css, 'the wrapper background must not be hidden');
+		Assert::contains('lp-block--bg-mobile { background-image: var(--lp-bg-image-mobile)', $css);
+
+		$builder_js = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+		$builder_php = repo_file('upload/admin/controller/design/landing.php');
+
+		Assert::contains("'bg_type', 'bg_color', 'bg_image', 'bg_image_mobile'", $builder_js, 'mobile background belongs to Style');
+		Assert::contains('$blocks = $this->model_design_landing->getBlocks($landing_id);', $builder_php);
+		Assert::contains('Dockercart\\Landing\\Blocks::normalizeSettings($code, (array)$block[\'settings\'])', $builder_php, 'the builder must show migrated settings');
+	},
+
+	'editor: selects use the shared dockercart chevron' => static function (): void {
+		$template = repo_file('upload/admin/view/template/design/landing_builder.twig');
+
+		Assert::contains('select.lp-input', $template);
+		Assert::contains('var(--dc-select-chevron)', $template);
+		Assert::contains('input.lp-input, select.lp-input { height: 32px; }', $template, 'inputs and selects share one height');
+		Assert::contains('.lp-align-group { display: inline-flex; align-items: stretch; overflow: hidden; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); background: #fff; height: 32px; }', $template, 'alignment segments match the inputs');
+	},
+
+	'editor: left/center/right selects use icon buttons' => static function (): void {
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+
+		Assert::contains('function isAlignmentOptions(', $builder);
+		Assert::contains('function renderAlignmentOptions(', $builder);
+		Assert::contains('function bindAlignmentField(', $builder, 'the segmented control is clickable without hidden radios');
+		Assert::contains('data-align-value=', $builder);
+		Assert::contains('class="lp-align-group"', $builder);
+		Assert::notContains('type="radio" class="hidden" data-input', $builder);
+		Assert::contains('.lp-align-group button[aria-pressed="true"]', repo_file('upload/admin/view/template/design/landing_builder.twig'));
+
+		foreach (['align-start-vertical', 'align-center-vertical', 'align-end-vertical'] as $icon) {
+			Assert::contains($icon, $builder, 'missing alignment icon ' . $icon);
+		}
+
+		foreach (Blocks::codes() as $code) {
+			foreach (Blocks::fields($code) as $field) {
+				$keys = array_keys((array)($field['options'] ?? []));
+
+				if (!$keys || array_diff($keys, ['left', 'center', 'right'])) {
+					continue;
+				}
+
+				Assert::true($field['type'] === 'select', $code . '.' . $field['key'] . ' must stay a select in the registry');
+			}
+		}
+	},
+
+	'editor: advanced fields live only in the Advanced tab' => static function (): void {
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+		$template = repo_file('upload/admin/view/template/design/landing_builder.twig');
+
+		Assert::contains('data-props-tab="advanced"', $template, 'the dedicated tab must stay');
+		Assert::contains("ui.propsTab === 'advanced' ? advancedHtml : contentHtml", $builder);
+		Assert::notContains('<details class="mt-4 border-t border-gray-100 pt-3">', $builder, 'no duplicate Advanced block under Content/Style');
 	},
 
 	'registry: editor block labels exist in all three locales' => static function (): void {
@@ -367,6 +481,53 @@ return [
 		Assert::same('', Blocks::normalizeSettings('image', ['href' => 'data:text/html;base64,xx'])['href']);
 		Assert::same('https://example.com/a', Blocks::normalizeSettings('image', ['href' => 'https://example.com/a'])['href']);
 		Assert::same('black-friday', Blocks::normalizeSettings('image', ['href' => '/black-friday'])['href']);
+	},
+
+	'normalize: default select values do not keep new repeater rows alive' => static function (): void {
+		$quotes = Blocks::normalizeContent('testimonials', [
+			'items' => [
+				['quote' => '', 'author' => '', 'role' => '', 'rating' => '0'],
+				['quote' => '', 'author' => '', 'role' => '', 'rating' => '4'],
+				['quote' => 'Great service', 'author' => 'Ann', 'role' => '', 'rating' => '5'],
+			],
+		]);
+
+		Assert::count(1, $quotes['items'], 'a select alone must not keep an empty quote alive');
+		Assert::same('5', $quotes['items'][0]['rating']);
+
+		$plans = Blocks::normalizeContent('pricing', [
+			'items' => [
+				['plan' => '', 'price' => '', 'description' => '', 'features' => '', 'button_label' => '', 'button_href' => '', 'featured' => 'no'],
+				['plan' => 'Pro', 'price' => '9 €', 'description' => '', 'features' => "One\nTwo", 'button_label' => '', 'button_href' => '', 'featured' => 'yes'],
+			],
+		]);
+
+		Assert::count(1, $plans['items'], 'the default featured flag must not keep an empty plan alive');
+		Assert::same("One\nTwo", $plans['items'][0]['features'], 'textarea newlines survive normalisation');
+		Assert::same('yes', $plans['items'][0]['featured']);
+	},
+
+	'editor: repeater rows support multiline subfields' => static function (): void {
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+
+		Assert::contains("} else if (sub.type === 'textarea') {", $builder);
+		Assert::contains('rows="3" data-repeater-key="', $builder, 'quotes and plan features are textareas in the panel');
+	},
+
+	'templates: new editorial blocks escape copy and split feature lines' => static function (): void {
+		$quotes = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/testimonials.twig');
+		$stats = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/stats.twig');
+		$pricing = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/pricing.twig');
+
+		foreach (['testimonials' => $quotes, 'stats' => $stats, 'pricing' => $pricing] as $code => $template) {
+			Assert::contains('lp-native--' . $code, $template);
+			Assert::contains('|escape', $template);
+			Assert::notContains('|raw', $template, $code . ' must never render editor copy as HTML');
+		}
+
+		Assert::contains('lp-native__star--on', $quotes);
+		Assert::contains('data-columns', $stats);
+		Assert::contains('|split("\n")', $pricing, 'pricing features are one bullet per line');
 	},
 
 	'normalize: repeater rows are bounded and empty rows dropped' => static function (): void {

@@ -61,6 +61,16 @@ final class Blocks {
 		'dark'  => 'option_variant_dark',
 	];
 
+	/** Star ratings offered by the `testimonials` block (0 = unrated). */
+	private const RATINGS = [
+		'0' => 'option_rating_0',
+		'1' => 'option_rating_1',
+		'2' => 'option_rating_2',
+		'3' => 'option_rating_3',
+		'4' => 'option_rating_4',
+		'5' => 'option_rating_5',
+	];
+
 	/**
 	 * Section structures: preset column layouts of the `section` container.
 	 *
@@ -107,9 +117,6 @@ final class Blocks {
 				['key' => 'badge', 'type' => 'text', 'localized' => true, 'label' => 'field_badge', 'default' => '', 'max' => 64],
 				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
 				['key' => 'subheading', 'type' => 'textarea', 'localized' => true, 'label' => 'field_subheading', 'default' => '', 'max' => 500],
-				['key' => 'image', 'type' => 'image', 'localized' => false, 'label' => 'field_background_image', 'default' => ''],
-				['key' => 'image_mobile', 'type' => 'image', 'localized' => false, 'label' => 'field_background_image_mobile', 'default' => ''],
-				['key' => 'image_overlay', 'type' => 'number', 'localized' => false, 'label' => 'field_overlay', 'default' => 40, 'min' => 0, 'max' => 90],
 				['key' => 'height', 'type' => 'select', 'localized' => false, 'label' => 'field_height', 'default' => 'lg', 'options' => [
 					'sm' => 'option_height_sm',
 					'md' => 'option_height_md',
@@ -159,7 +166,6 @@ final class Blocks {
 			'fields' => [
 				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
 				['key' => 'body', 'type' => 'textarea', 'localized' => true, 'label' => 'field_text', 'default' => '', 'max' => 500],
-				['key' => 'image', 'type' => 'image', 'localized' => false, 'label' => 'field_image', 'default' => ''],
 				['key' => 'layout', 'type' => 'select', 'localized' => false, 'label' => 'field_layout', 'default' => 'center', 'options' => [
 					'center' => 'option_layout_center',
 					'split' => 'option_layout_split',
@@ -236,6 +242,47 @@ final class Blocks {
 			],
 		],
 
+		'testimonials' => [
+			'name'  => 'block_testimonials',
+			'icon'  => 'message-square-quote',
+			'group' => 'content',
+			'fields' => [
+				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
+				['key' => 'intro', 'type' => 'textarea', 'localized' => true, 'label' => 'field_intro', 'default' => '', 'max' => 500],
+				['key' => 'items', 'type' => 'repeater', 'localized' => true, 'label' => 'field_quotes', 'default' => [], 'max_rows' => 6, 'fields' => [
+					['key' => 'quote', 'type' => 'textarea', 'label' => 'field_quote', 'default' => '', 'max' => 500],
+					['key' => 'author', 'type' => 'text', 'label' => 'field_author', 'default' => '', 'max' => 100],
+					['key' => 'role', 'type' => 'text', 'label' => 'field_role', 'default' => '', 'max' => 100],
+					['key' => 'rating', 'type' => 'select', 'label' => 'field_rating', 'default' => '0', 'options' => self::RATINGS],
+				]],
+				['key' => 'columns', 'type' => 'select', 'localized' => false, 'label' => 'field_columns', 'default' => '3', 'options' => [
+					'2' => 'option_columns_2',
+					'3' => 'option_columns_3',
+				]],
+				['key' => 'variant', 'type' => 'select', 'localized' => false, 'label' => 'field_variant', 'default' => 'plain', 'options' => self::BLOCK_VARIANTS],
+			],
+		],
+
+		'stats' => [
+			'name'  => 'block_stats',
+			'icon'  => 'chart-no-axes-column',
+			'group' => 'content',
+			'fields' => [
+				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
+				['key' => 'intro', 'type' => 'textarea', 'localized' => true, 'label' => 'field_intro', 'default' => '', 'max' => 500],
+				['key' => 'items', 'type' => 'repeater', 'localized' => true, 'label' => 'field_items', 'default' => [], 'max_rows' => 6, 'fields' => [
+					['key' => 'value', 'type' => 'text', 'label' => 'field_value', 'default' => '', 'max' => 24],
+					['key' => 'label', 'type' => 'text', 'label' => 'field_label', 'default' => '', 'max' => 120],
+				]],
+				['key' => 'columns', 'type' => 'select', 'localized' => false, 'label' => 'field_columns', 'default' => '3', 'options' => [
+					'2' => 'option_columns_2',
+					'3' => 'option_columns_3',
+					'4' => 'option_columns_4',
+				]],
+				['key' => 'variant', 'type' => 'select', 'localized' => false, 'label' => 'field_variant', 'default' => 'plain', 'options' => self::BLOCK_VARIANTS],
+			],
+		],
+
 		// ------------------------------------------------------------ commerce
 		'products' => [
 			'name'  => 'block_products',
@@ -285,6 +332,33 @@ final class Blocks {
 				['key' => 'per_view', 'type' => 'number', 'localized' => false, 'label' => 'field_per_view', 'default' => 4, 'min' => 1, 'max' => 6],
 				['key' => 'link_label', 'type' => 'text', 'localized' => true, 'label' => 'field_link_label', 'default' => '', 'max' => 64],
 				['key' => 'link_href', 'type' => 'link', 'localized' => false, 'label' => 'field_link_href', 'default' => ''],
+			],
+		],
+
+		'pricing' => [
+			'name'  => 'block_pricing',
+			'icon'  => 'badge-percent',
+			'group' => 'commerce',
+			'fields' => [
+				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
+				['key' => 'intro', 'type' => 'textarea', 'localized' => true, 'label' => 'field_intro', 'default' => '', 'max' => 500],
+				['key' => 'items', 'type' => 'repeater', 'localized' => true, 'label' => 'field_plans', 'default' => [], 'max_rows' => 4, 'fields' => [
+					['key' => 'plan', 'type' => 'text', 'label' => 'field_plan', 'default' => '', 'max' => 100],
+					['key' => 'price', 'type' => 'text', 'label' => 'field_price', 'default' => '', 'max' => 40],
+					['key' => 'description', 'type' => 'text', 'label' => 'field_description', 'default' => '', 'max' => 200],
+					['key' => 'features', 'type' => 'textarea', 'label' => 'field_features', 'default' => '', 'max' => 600],
+					['key' => 'button_label', 'type' => 'text', 'label' => 'field_button_label', 'default' => '', 'max' => 64],
+					['key' => 'button_href', 'type' => 'link', 'label' => 'field_button_link', 'default' => ''],
+					['key' => 'featured', 'type' => 'select', 'label' => 'field_featured', 'default' => 'no', 'options' => [
+						'no'  => 'option_plan_standard',
+						'yes' => 'option_plan_featured',
+					]],
+				]],
+				['key' => 'columns', 'type' => 'select', 'localized' => false, 'label' => 'field_columns', 'default' => '3', 'options' => [
+					'2' => 'option_columns_2',
+					'3' => 'option_columns_3',
+				]],
+				['key' => 'variant', 'type' => 'select', 'localized' => false, 'label' => 'field_variant', 'default' => 'plain', 'options' => self::BLOCK_VARIANTS],
 			],
 		],
 
@@ -447,6 +521,7 @@ final class Blocks {
 			]],
 			['key' => 'bg_color', 'type' => 'color', 'localized' => false, 'label' => 'field_bg_color', 'default' => ''],
 			['key' => 'bg_image', 'type' => 'image', 'localized' => false, 'label' => 'field_bg_image', 'default' => ''],
+			['key' => 'bg_image_mobile', 'type' => 'image', 'localized' => false, 'label' => 'field_background_image_mobile', 'default' => ''],
 			['key' => 'overlay', 'type' => 'number', 'localized' => false, 'label' => 'field_overlay', 'default' => 30, 'min' => 0, 'max' => 90],
 			['key' => 'padding', 'type' => 'select', 'localized' => false, 'label' => 'field_padding', 'default' => 'lg', 'options' => [
 				'none' => 'option_padding_none',
@@ -615,6 +690,7 @@ final class Blocks {
 	 */
 	public static function normalizeSettings(string $code, array $settings): array {
 		$normalized = [];
+		$settings = self::migrateLegacyImages($code, $settings);
 
 		foreach (self::fields($code) as $field) {
 			if (!empty($field['localized'])) {
@@ -628,6 +704,50 @@ final class Blocks {
 		}
 
 		return $normalized;
+	}
+
+	/**
+	 * Folds the old block-owned image fields into the shared Style background.
+	 *
+	 * Hero and CTA used to carry their own `image` (plus `image_mobile` /
+	 * `image_overlay` in hero) while every other block used `bg_image` from the
+	 * wrapper. Existing pages keep their picture and their overlay after the
+	 * next save; new pages expose only one Background image, in Style.
+	 *
+	 * @param array<string, mixed> $settings
+	 * @return array<string, mixed>
+	 */
+	private static function migrateLegacyImages(string $code, array $settings): array {
+		if ($code === 'hero') {
+			$legacy = [
+				'image' => 'bg_image',
+				'image_mobile' => 'bg_image_mobile',
+				'image_overlay' => 'overlay',
+			];
+		} elseif ($code === 'cta') {
+			$legacy = ['image' => 'bg_image'];
+		} else {
+			return $settings;
+		}
+
+		$migrated = false;
+
+		foreach ($legacy as $old => $new) {
+			if (!array_key_exists($old, $settings) || $settings[$old] === '') {
+				continue;
+			}
+
+			if (empty($settings[$new])) {
+				$settings[$new] = $settings[$old];
+				$migrated = true;
+			}
+		}
+
+		if ($migrated && (string)($settings['bg_type'] ?? 'none') === 'none') {
+			$settings['bg_type'] = 'image';
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -770,6 +890,14 @@ final class Blocks {
 
 		$max_rows = isset($field['max_rows']) ? (int)$field['max_rows'] : self::MAX_REPEATER_ROWS;
 		$sub_fields = isset($field['fields']) && is_array($field['fields']) ? $field['fields'] : [];
+		$select_keys = [];
+
+		foreach ($sub_fields as $sub) {
+			if (($sub['type'] ?? '') === 'select') {
+				$select_keys[(string)$sub['key']] = true;
+			}
+		}
+
 		$rows = [];
 
 		foreach ($value as $row) {
@@ -788,9 +916,9 @@ final class Blocks {
 			$empty = true;
 
 			foreach ($normalized as $key => $sub_value) {
-				// Style and icon selects always carry a default value; a fresh
-				// empty row must still be recognised as empty and dropped.
-				if ($key === 'style' || $key === 'icon') {
+				// Selects (icon, style, rating, featured) are editor metadata, not
+				// user copy. They must not keep an otherwise empty row alive.
+				if (isset($select_keys[(string)$key])) {
 					continue;
 				}
 
@@ -1038,6 +1166,10 @@ final class Blocks {
 			$styles['background-image'] = "url('image/" . str_replace("'", '%27', (string)$settings['bg_image']) . "')";
 			$styles['background-size'] = 'cover';
 			$styles['background-position'] = 'center';
+		}
+
+		if ($bg_type === 'image' && !empty($settings['bg_image_mobile'])) {
+			$styles['--lp-bg-image-mobile'] = "url('image/" . str_replace("'", '%27', (string)$settings['bg_image_mobile']) . "')";
 		}
 
 		return $styles;

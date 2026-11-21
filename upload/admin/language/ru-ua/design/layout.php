@@ -26,7 +26,7 @@ $_['text_success'] = 'Успех: Вы изменили макеты!';
 $_['text_list_subtitle'] = 'Управляйте назначениями макетов страниц';
 
 // Builder
-$_['heading_title_builder']   = 'Конструктор макетов';
+$_['heading_title_builder']   = 'Builder макета';
 $_['text_modules_palette']    = 'Модули';
 $_['text_drop_zone']          = 'Перетащите модуль сюда';
 $_['text_no_modules']         = 'Нет назначенных модулей';

@@ -13,8 +13,9 @@
  *      inference), and the no-keyword fallback keeps the route form;
  *   3. enforceCleanSeoUrls leaves preview_token URLs alone (the fallback
  *      canvas would be canonicalised back to the default language);
- *   4. the admin shell syncs the top-bar name per language for owned
- *      landings and writes through catalog/information/updateNames;
+ *   4. the admin shell edits the owned landing's title per language in Page
+ *      Settings (no top-bar name field) and writes through
+ *      catalog/information/updateNames;
  *   5. the locales carry the builder strings.
  *
  * @package    DockerCart
@@ -101,7 +102,7 @@ return [
 		Assert::contains("'?' not in script", $header, 'the shared version append must not stack on a busted URL');
 	},
 
-	'builder: the page name is per language for owned landings' => static function (): void {
+	'builder: the owned landing title is per language in Page Settings' => static function (): void {
 		$sources = builder_language_sources();
 
 		Assert::contains('owner_titles', $sources['admin'], 'the controller passes the information titles');
@@ -110,13 +111,13 @@ return [
 		Assert::contains('ownerTitles', $sources['twig']);
 		Assert::contains('canEditOwnerTitles', $sources['twig']);
 		Assert::contains('ownerNames', $sources['twig']);
+		Assert::notContains('lp-name-input', $sources['twig'], 'the top bar has only the Back button and tools');
 
 		$js = $sources['admin_js'];
 
-		Assert::contains('function syncNameInput', $js);
-		Assert::contains('markOwnerTitleDirty', $js, 'title edits wait for the explicit save, not a debounced autosave');
+		Assert::contains('data-owner-title', $js, 'the title lives in the Page Settings panel');
+		Assert::contains('markOwnerTitleDirty(titleInput.value)', $js, 'title edits wait for the explicit save, not a debounced autosave');
 		Assert::contains('flushOwnerTitle', $js, 'the explicit save flushes the pending per-language title');
 		Assert::contains('names[', $js, 'the save posts the per-language names map');
-		Assert::contains('syncNameInput();', $js, 'the input follows the language tab');
 	},
 ];

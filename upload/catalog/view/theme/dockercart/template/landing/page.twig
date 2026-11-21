@@ -1,4 +1,36 @@
 {{ header }}
+{% if preview_bar %}
+<style>
+	/* The shop header is fixed top-0, so a notice above it must push the
+	   header down instead of overlapping it. The bar stays fixed on top,
+	   the header starts below it, and the spacer keeps the page content
+	   clear of both. z-index sits above the header but below menus. */
+	#lp-preview-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; justify-content: center; gap: 16px; height: 44px; padding: 6px 14px; background: rgba(17, 24, 39, .94); color: #fff; font: 500 13px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 4px 18px rgba(0,0,0,.2); white-space: nowrap; }
+	#lp-preview-bar a { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 6px; background: #fff; color: #111827; font-weight: 600; text-decoration: none; white-space: nowrap; }
+	#lp-preview-bar a:hover { background: #e5e7eb; }
+	body.lp-has-preview #navbar { top: 44px !important; }
+	body.lp-has-preview .dc-header-spacer { margin-top: 44px; }
+	@media (max-width: 600px) { #lp-preview-bar { gap: 8px; font-size: 12px; } #lp-preview-bar a { padding: 5px 9px; font-size: 12px; } }
+</style>
+<script>
+(function () {
+	var bar = document.createElement('div');
+	bar.id = 'lp-preview-bar';
+
+	var text = document.createElement('span');
+	text.textContent = {{ text_preview_mode|json_encode|raw }};
+
+	var link = document.createElement('a');
+	link.href = {{ preview_bar.back_url|json_encode|raw }};
+	link.textContent = {{ text_back_to_builder|json_encode|raw }};
+
+	bar.appendChild(text);
+	bar.appendChild(link);
+	document.body.insertBefore(bar, document.body.firstChild);
+	document.body.classList.add('lp-has-preview');
+})();
+</script>
+{% endif %}
 {% if chrome == 'bare' %}
 <style>
 	#navbar, #dc-mobile-menu, #dc-mobile-overlay, .dc-header-spacer, #footer { display: none !important; }

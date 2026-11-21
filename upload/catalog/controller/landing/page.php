@@ -180,6 +180,32 @@ class ControllerLandingPage extends Controller {
 			'text_view_all' => $this->language->get('text_view_all'),
 		];
 
+		// The external Preview tab (preview_token without lp_builder) gets a
+		// fixed notice with a way back into the builder. The URL arrives
+		// encrypted so the admin token is not exposed to whoever has the link.
+		$preview_bar = null;
+
+		if ($preview && !$builder && isset($this->request->get['builder_back']) && is_string($this->request->get['builder_back'])) {
+			$back_url = '';
+
+			try {
+				$decrypted = (new \Encryption())->decrypt(
+					(string)$this->config->get('config_encryption'),
+					(string)$this->request->get['builder_back']
+				);
+
+				if (is_string($decrypted) && $this->isBuilderBackUrl($decrypted)) {
+					$back_url = $decrypted;
+				}
+			} catch (\Throwable $e) {
+				$back_url = '';
+			}
+
+			if ($back_url !== '') {
+				$preview_bar = ['back_url' => $back_url];
+			}
+		}
+
 		// Two-level tree: top-level rows render as full-width sections, the
 		// children of a `section` container render inside its columns.
 		$children = [];
@@ -226,6 +252,9 @@ class ControllerLandingPage extends Controller {
 		$data['text_builder_empty'] = $language_texts['text_builder_empty'];
 		$data['text_empty_page'] = $language_texts['text_empty_page'];
 		$data['landing_texts'] = $language_texts;
+		$data['preview_bar'] = $preview_bar;
+		$data['text_preview_mode'] = $this->language->get('text_preview_mode');
+		$data['text_back_to_builder'] = $this->language->get('text_back_to_builder');
 
 		if ($builder) {
 			$this->document->addScript('catalog/view/javascript/sortable.min.js');
@@ -253,6 +282,32 @@ class ControllerLandingPage extends Controller {
 		$data['header'] = $this->load->controller('common/header');
 
 		return $this->respond($this->load->view('landing/page', $data));
+	}
+
+	/**
+	 * Only accept a decrypted back link to this host's admin builder route.
+	 */
+	private function isBuilderBackUrl(string $url): bool {
+		$parts = parse_url($url);
+
+		if (!is_array($parts) || !in_array((string)($parts['scheme'] ?? ''), ['http', 'https'], true)) {
+			return false;
+		}
+
+		$host = (string)($this->request->server['HTTP_HOST'] ?? '');
+		$host = preg_replace('/:\d+$/', '', $host);
+
+		if (strtolower((string)($parts['host'] ?? '')) !== strtolower((string)$host)) {
+			return false;
+		}
+
+		if (substr((string)($parts['path'] ?? ''), -strlen('/admin/index.php')) !== '/admin/index.php') {
+			return false;
+		}
+
+		parse_str((string)($parts['query'] ?? ''), $query);
+
+		return ($query['route'] ?? '') === 'design/landing/builder';
 	}
 
 	/**
@@ -330,6 +385,10 @@ class ControllerLandingPage extends Controller {
 			$classes .= ' lp-block--bg-image';
 		}
 
+		if ($this->hasMobileBackground($settings)) {
+			$classes .= ' lp-block--bg-mobile';
+		}
+
 		$style = $this->overlayStyleAttribute($code, $settings);
 
 		$attributes = ' class="' . htmlspecialchars($classes, ENT_QUOTES, 'UTF-8') . '"';
@@ -374,6 +433,10 @@ class ControllerLandingPage extends Controller {
 
 		$settings = \Dockercart\Landing\Blocks::normalizeSettings($code, (array)$block['settings']);
 		$content = $this->blockContent($code, (array)$block['content'], $language_id, !$builder);
+
+		// Links are stored as canonical routes so the storefront can resolve
+		// SEO keywords, the language prefix and the scheme at request time.
+		[$settings, $content] = $this->resolveLinkFields($code, $settings, $content);
 
 		$bg_type = (string)($settings['bg_type'] ?? 'none');
 		$has_wrapper_bg = in_array($bg_type, ['color', 'image'], true);
@@ -456,6 +519,13 @@ class ControllerLandingPage extends Controller {
 	}
 
 	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function hasMobileBackground(array $settings): bool {
+		return (string)($settings['bg_type'] ?? 'none') === 'image' && !empty($settings['bg_image_mobile']);
+	}
+
+	/**
 	 * The wrapper style attribute with the overlay CSS variable folded in.
 	 *
 	 * @param array<string, mixed> $settings
@@ -525,6 +595,10 @@ class ControllerLandingPage extends Controller {
 
 		if ($this->hasOverlay($settings)) {
 			$classes[] = 'lp-block--bg-image';
+		}
+
+		if ($this->hasMobileBackground($settings)) {
+			$classes[] = 'lp-block--bg-mobile';
 		}
 
 		$style = $this->overlayStyleAttribute($code, $settings);
@@ -617,6 +691,78 @@ class ControllerLandingPage extends Controller {
 	}
 
 	/**
+	 * Rewrites stored link fields to the URLs the storefront actually uses.
+	 *
+	 * The builder stores a canonical relative route ("index.php?route=…" or
+	 * the shorter "route=…" used by banners). Resolving it here — instead of
+	 * baking a keyword into the saved block — keeps SEO URLs, the language
+	 * prefix and HTTPS correct for every request, and fixes links saved before
+	 * the builder had an entity picker. Custom URLs pass through untouched.
+	 *
+	 * @param array<string, mixed> $settings
+	 * @param array<string, mixed> $content
+	 * @return array{0: array<string, mixed>, 1: array<string, mixed>}
+	 */
+	private function resolveLinkFields(string $code, array $settings, array $content): array {
+		foreach (\Dockercart\Landing\Blocks::fields($code) as $field) {
+			$key = (string)$field['key'];
+
+			if (!empty($field['localized'])) {
+				$target =& $content;
+			} else {
+				$target =& $settings;
+			}
+
+			if ($field['type'] === 'link') {
+				$target[$key] = $this->resolveLinkUrl((string)($target[$key] ?? ''));
+			} elseif ($field['type'] === 'repeater' && isset($target[$key]) && is_array($target[$key])) {
+				foreach ($target[$key] as $index => $row) {
+					if (!is_array($row)) {
+						continue;
+					}
+
+					foreach ((array)($field['fields'] ?? []) as $sub) {
+						if (($sub['type'] ?? '') !== 'link') {
+							continue;
+						}
+
+						$sub_key = (string)$sub['key'];
+						$target[$key][$index][$sub_key] = $this->resolveLinkUrl((string)($row[$sub_key] ?? ''));
+					}
+				}
+			}
+
+			unset($target);
+		}
+
+		return [$settings, $content];
+	}
+
+	/**
+	 * Turns a stored route link into a storefront URL (SEO-aware when enabled).
+	 */
+	private function resolveLinkUrl(string $link): string {
+		if ($link === '') {
+			return '';
+		}
+
+		// Defensive: storage is sanitised, but imported data must never become
+		// an executable href even if it reaches this path.
+		if (preg_match('/^\s*(javascript|vbscript|data\s*:\s*text\/html)/i', $link)) {
+			return '';
+		}
+
+		$clean = ltrim(html_entity_decode($link, ENT_QUOTES, 'UTF-8'), '/');
+
+		if (preg_match('#^(?:index\.php)?\?route=([^&]+)&(.+)$#i', $clean, $matches)
+			|| preg_match('#^route=([^&]+)&(.+)$#i', $clean, $matches)) {
+			return $this->url->link(urldecode($matches[1]), $matches[2], true);
+		}
+
+		return $link;
+	}
+
+	/**
 	 * Block specific data (products, categories, banners, images…).
 	 *
 	 * @param array<string, mixed> $block_data
@@ -631,8 +777,6 @@ class ControllerLandingPage extends Controller {
 
 		switch ($code) {
 			case 'hero':
-				$block_data['image'] = $this->imageUrl((string)($settings['image'] ?? ''), 1600, 900);
-				$block_data['image_mobile'] = $this->imageUrl((string)($settings['image_mobile'] ?? ''), 900, 1200);
 				$block_data['text_color'] = ((string)($settings['text_color'] ?? 'light') === 'dark') ? 'dark' : 'light';
 				$block_data['height_class'] = $this->heightClass((string)($settings['height'] ?? 'lg'));
 				$block_data['position_class'] = [
@@ -664,7 +808,6 @@ class ControllerLandingPage extends Controller {
 				break;
 
 			case 'cta':
-				$block_data['image'] = $this->imageUrl((string)($settings['image'] ?? ''), 800, 600);
 				break;
 
 			case 'products':
@@ -969,17 +1112,7 @@ class ControllerLandingPage extends Controller {
 	}
 
 	private function resolveBannerLink(string $link): string {
-		if ($link !== '' && preg_match('/^route=([^&]+)&(.+)$/', $link, $matches)) {
-			return $this->url->link($matches[1], $matches[2], true);
-		}
-
-		// The banner form escapes its input but keeps URL schemes intact: a
-		// stored javascript:/data:text/html link must never reach an href.
-		if ($link !== '' && preg_match('/^\s*(javascript|vbscript|data\s*:\s*text\/html)/i', $link)) {
-			return '';
-		}
-
-		return $link;
+		return $this->resolveLinkUrl($link);
 	}
 
 	private function bannerVideoUrl(string $type, string $video): string {

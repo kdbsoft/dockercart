@@ -1,0 +1,32 @@
+{#
+	Key figures: a definition list keeps label/value pairs readable for assistive
+	technology; CSS puts the value above the label visually.
+#}
+<div class="lp-native lp-native--stats lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		{% set rows = [] %}
+		{% for item in content.items %}
+			{% if item.value or item.label %}
+				{% set rows = rows|merge([item]) %}
+			{% endif %}
+		{% endfor %}
+
+		{% if rows %}
+		<dl class="lp-native__stats" data-columns="{{ settings.columns }}">
+			{% for item in rows %}
+			<div class="lp-native__stat">
+				{% if item.label %}<dt class="lp-native__stat-label">{{ item.label|escape }}</dt>{% endif %}
+				{% if item.value %}<dd class="lp-native__stat-value">{{ item.value|escape }}</dd>{% endif %}
+			</div>
+			{% endfor %}
+		</dl>
+		{% endif %}
+	</div>
+</div>

@@ -1,0 +1,48 @@
+{#
+	Presentational pricing plans: prices are plain editor copy (no automatic
+	currency conversion) and the features list is one line per bullet.
+#}
+<div class="lp-native lp-native--pricing lp-native--{{ settings.variant }}">
+	<div class="lp-native__inner">
+		{% if content.heading or content.intro %}
+		<header class="lp-native__head">
+			{% if content.heading %}<h2 class="lp-native__title">{{ content.heading|escape }}</h2>{% endif %}
+			{% if content.intro %}<p class="lp-native__lead">{{ content.intro|escape|nl2br }}</p>{% endif %}
+		</header>
+		{% endif %}
+
+		{% set rows = [] %}
+		{% for item in content.items %}
+			{% if item.plan or item.price %}
+				{% set rows = rows|merge([item]) %}
+			{% endif %}
+		{% endfor %}
+
+		{% if rows %}
+		<div class="lp-native__plans" data-columns="{{ settings.columns }}">
+			{% for item in rows %}
+			<article class="lp-native__plan{{ item.featured == 'yes' ? ' lp-native__plan--featured' : '' }}">
+				{% if item.plan %}<h3 class="lp-native__plan-name">{{ item.plan|escape }}</h3>{% endif %}
+				{% if item.price %}<div class="lp-native__price">{{ item.price|escape }}</div>{% endif %}
+				{% if item.description %}<p class="lp-native__plan-description">{{ item.description|escape|nl2br }}</p>{% endif %}
+
+				{% set features = [] %}
+				{% for line in item.features|split("\n") %}
+					{% set line = line|trim %}
+					{% if line != '' %}{% set features = features|merge([line]) %}{% endif %}
+				{% endfor %}
+				{% if features %}
+				<ul class="lp-native__plan-features">
+					{% for line in features %}<li>{{ line|escape }}</li>{% endfor %}
+				</ul>
+				{% endif %}
+
+				{% if item.button_label and item.button_href %}
+				<a class="lp-native__plan-cta" href="{{ item.button_href|escape }}">{{ item.button_label|escape }}</a>
+				{% endif %}
+			</article>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+</div>

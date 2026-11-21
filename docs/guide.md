@@ -2260,6 +2260,11 @@ marked `noindex` or assigned as the store home page.
 | Builder | `design/landing/builder?landing_id=N` (standalone page, no admin chrome) |
 | Storefront | `index.php?route=landing/page&landing_id=N` → `/keyword` |
 
+The builder is a standalone page without admin chrome, but it still loads the
+admin `stylesheet.css`: the Image Manager markup comes from
+`common/filemanager` and its layout lives in that stylesheet. Tooltips for its
+toolbar are wired in the builder script (no `common.js` here).
+
 ### Data model
 
 ```
@@ -2320,6 +2325,55 @@ declares every allowed block: name key, icon, palette group and the field schema
   value, so neither the builder nor the API can store anything the renderer
   does not expect (see *Content security* below).
 
+### Link fields
+
+Fields of type `link` (CTA / image / image+text buttons, the `features` and
+`statement` links, and the `hero` button repeater) are edited the same way as
+banner links: a type picker (**Custom URL**, product, category, manufacturer,
+information page, blog post) followed by either a URL input or an entity
+autocomplete. Only the **URL is stored** in the field — selecting an entity
+writes the canonical relative route `index.php?route=…&<id_param>=N`. Changing
+the type clears the URL; there are no separate `link_type`/`link_value` fields
+to keep in sync.
+
+`ControllerLandingPage::blockContext()` resolves every stored link through the
+catalog `Url` **at render time** (the same SEO-aware URL the rest of the
+storefront uses), so SEO keywords, the language prefix and HTTPS follow the
+current request instead of being frozen into the block. Old manually entered
+`route=…` links and the banner form's links go through the same resolver.
+
+The builder resolves the label **and the SEO URL** of an already-stored link
+through `design/landing/autocomplete?type=…&ids=N&language_id=N` (one request
+per entity type, cached in the builder session) and reuses the same endpoint
+for search. The operator sees a root-relative SEO path (`/keyword`, or
+`/<language-code>/keyword`) in the field after picking an entity — no domain or
+port; `data-link-stored` keeps the canonical route for the save payload,
+so a link remains correct for every storefront language. Suggestions
+open in the field flow — directly under the input, at the field's width — so
+they never cover neighbouring controls. The endpoint
+accepts `product`, `category`, `manufacturer`, `information` and `blog` and is
+guarded by `access` on `design/landing`. Since the persisted value is still a
+plain URL, `Blocks::sanitizePath()` and every block template are unchanged.
+
+Selects whose only options are `left` / `center` / `right` (hero content
+position, image+text image position and the shared Style alignment) are
+edited as a segmented button group with Lucide icons — the same control the
+banner form uses.
+
+### Background images
+
+There is one background per block, configured in the **Style** tab:
+`bg_type = image`, `bg_image` and (optionally) `bg_image_mobile` / `overlay`.
+Hero and CTA no longer declare their own `image` / `image_mobile` fields, so
+their Content tabs contain content only and the Style background is actually
+visible (their inner panels stay transparent over a wrapper background).
+`Blocks::normalizeSettings()` folds legacy hero/CTA images and the old
+`image_overlay` into the shared settings, so existing pages keep their picture.
+The builder normalises block settings on load, therefore a legacy picture is
+already visible in the Style tab before the next save. `image`, `image_text`
+etc. still use their own **Image** field — that one is a content picture, not a
+block background.
+
 ### Content security
 
 Twig runs with `autoescape => false` project-wide, so landing content is
@@ -2367,18 +2421,20 @@ models).
 
 **Adding a block** = add the entry to `Blocks`, add the
 `catalog/view/theme/dockercart/template/landing/blocks/<code>.twig` template,
-add the data enrichment for it in `ControllerLandingPage::enrichBlock()`, add its
-label keys to the three admin language files, then run `npm run build:css`
+add the data enrichment for it in `ControllerLandingPage::enrichBlock()` **only when
+it queries catalog data**, add its label keys to the three admin language files, then
+run `npm run build:css`
 (Tailwind scans `upload/**/*.twig` and `upload/catalog/**/*.php`) and
 `make test` (`tools/tests/cases/landing_blocks.php` fails when a code has no
 template or a field has an unknown type).
 
-The four editorial blocks (`features`, `steps`, `faq`, `statement`) are styled
-by `upload/catalog/view/stylesheet/landing/landing-blocks.css`, which the
-landing controller loads for **every** theme. Their Twig templates use only
-`.lp-native*` classes (no Tailwind utilities), so they look the same in themes
-that do not load Tailwind. New blocks in this family belong in that shared CSS;
-blocks built from Tailwind utilities still need `npm run build:css`.
+The seven editorial blocks (`features`, `steps`, `faq`, `statement`,
+`testimonials`, `stats`, `pricing`) are styled by
+`upload/catalog/view/stylesheet/landing/landing-blocks.css`, which the landing
+controller loads for **every** theme. Their Twig templates use only `.lp-native*`
+classes (no Tailwind utilities), so they look the same in themes that do not load
+Tailwind. New blocks in this family belong in that shared CSS; blocks built from
+Tailwind utilities still need `npm run build:css`.
 
 Landing styling is configured once in the builder's **Site Settings** panel
 (top bar → palette icon). It stores nine design tokens in `oc_setting` under the
@@ -2393,15 +2449,21 @@ Both shared stylesheets (`landing-blocks.css` for native editorial blocks and
 fallbacks, so a single save restyles every landing page in every theme.
 
 Current blocks: `hero`, `text`, `cta`, `features`, `steps`, `faq`, `statement`,
-`products`, `products_carousel`, `categories`, `image`, `image_text`, `banner`,
-`section`, `spacer`, `html`.
+`testimonials`, `stats`, `products`, `products_carousel`, `pricing`, `categories`,
+`image`, `image_text`, `banner`, `section`, `spacer`, `html`.
 
 The editorial blocks have no HTML-code workflow: `features` edits a repeater of
 {icon, title, text} rows plus a 2/3/4-column layout; `steps` edits a real
 `<ol>` of ordered rows; `faq` edits {question, answer} rows rendered as native
-`<details>`; `statement` edits a short callout with a footnote. All four expose
-a `variant` setting (plain / tinted / dark) for the surface. Icon names are a
-registry whitelist, so an editor cannot inject arbitrary markup.
+`<details>`; `statement` edits a short callout with a footnote. `testimonials`
+edits {quote, author, role, rating} cards in a 2/3-column grid (stars are text
+glyphs, no Lucide needed on the storefront); `stats` edits {value, label} pairs in
+2/3/4 columns; `pricing` edits plan cards with a price, a one-bullet-per-line
+feature list and an optional CTA, with one plan marked as featured. All seven
+expose a `variant` setting (plain / tinted / dark) for the surface. Repeater
+sub-fields of type `textarea` are rendered as multiline inputs, and every
+*select* sub-field is treated as editor metadata when dropping empty rows.
+Icon names are a registry whitelist, so an editor cannot inject arbitrary markup.
 
 `section` is the only **container** (`Blocks::isContainer()`): it renders a
 columns grid instead of a panel. Its `structure` field picks a preset layout
@@ -2430,6 +2492,12 @@ the padding so columns stay tight — the section owns the vertical rhythm.
 5. normalises each block, enriches it (`Dockercart\Catalog\ProductCards`,
    `ModelCatalogCategory`, `ModelDesignBanner`) and renders
    `landing/blocks/<code>.twig`;
+   The builder iframe adds `lp_builder=1` and loads the editor bridge; the
+   external **Preview** link deliberately drops that flag, so the tab shows a
+   clean storefront page without drag handles or a dead action toolbar. Its
+   `preview_token` URL carries an encrypted `builder_back` link (admin token
+   hidden), and the page renders a fixed "Preview mode" bar with **Back to
+   Builder**.
 6. wraps the body in `<section class="lp-block lp-block--<code>"
    data-landing-block="<id>">` + `<div class="lp-block__body">` (container and
    alignment classes live on the body); a `section` container instead renders
@@ -2582,10 +2650,10 @@ Rules that keep the two page types from colliding:
   language SEO keyword (default store) and meta tags, all editable in place
   (needs `modify catalog/information`, otherwise read-only). Schedule, home
   flag and chrome stay dropped — they do not apply to information pages.
-* **The top-bar name is the information page title per language**: an owned
-  landing's `oc_landing.name` is only a default-language snapshot, so the
-  builder shows `oc_information_description.title` for the selected language
-  and edits write through `catalog/information/updateNames` (needs `modify
+* **The name lives in Page Settings, not in the top bar**: an owned landing's
+  `oc_landing.name` is only a default-language snapshot, so the builder edits
+  `oc_information_description.title` for the selected language in that panel
+  and writes through `catalog/information/updateNames` (needs `modify
   catalog/information`; without it the input is read-only). The model
   invalidates the storefront `information.item.*` cache on every names
   write.

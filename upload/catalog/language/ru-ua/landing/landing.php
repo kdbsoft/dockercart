@@ -11,3 +11,5 @@ $_['text_view_all']       = 'Смотреть все';
 $_['text_previous']       = 'Назад';
 $_['text_next']           = 'Вперёд';
 $_['text_products']       = 'Товары';
+$_['text_preview_mode']   = 'Режим предпросмотра — блоки здесь не редактируются';
+$_['text_back_to_builder'] = 'Вернуться в Builder';

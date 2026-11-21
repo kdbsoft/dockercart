@@ -7,7 +7,7 @@
  *   copy           duplicate page      delete     delete pages
  *   status         publish toggle      previewToken  fresh HMAC preview token
  *   templates      JSON template list  saveTemplate / deleteTemplate
- *   autocomplete   product/category search for the properties panel
+ *   autocomplete   entity search for pickers and link fields
  *
  * Read routes need `access` on design/landing, writes additionally need
  * `modify` (see startup/permission.php and Controller::userCanModify()).
@@ -112,6 +112,17 @@ class ControllerDesignLanding extends Controller {
 		$preview_token = $this->makePreviewToken($landing_id);
 		$descriptions = $this->model_design_landing->getLandingDescriptions($landing_id);
 
+		// The external Preview tab opens without lp_builder=1 (no fake editing
+		// toolbar). It carries an encrypted link back to this builder, so the
+		// storefront visitor never sees the admin user token.
+		$builder_back_url = $this->url->link(
+			'design/landing/builder',
+			'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id,
+			true
+		);
+
+		$encrypted_back = (new \Encryption())->encrypt((string)$this->config->get('config_encryption'), $builder_back_url);
+
 		// Display values are stored html-encoded (classic form / JSON save both
 		// encode at the boundary): decode them for the builder inputs, the save
 		// re-encodes. Same flow as the owner titles below.
@@ -137,9 +148,12 @@ class ControllerDesignLanding extends Controller {
 			$fallback_base = HTTP_CATALOG . 'index.php?route=information/information&information_id=' . $owner_information_id;
 		}
 
+		$preview_public_bases = [];
+
 		foreach ($languages as $language) {
 			$language_id = (int)$language['language_id'];
 			$query = ['preview_token' => $preview_token, 'lp_builder' => 1];
+			$public_query = ['preview_token' => $preview_token, 'builder_back' => $encrypted_back];
 
 			if ($owner_information_id) {
 				// The owned page renders at the information page's own keyword.
@@ -153,17 +167,22 @@ class ControllerDesignLanding extends Controller {
 				// startup's first priority), so the canvas follows the selected
 				// tab even when several languages share one keyword - the
 				// keyword-inferred language never gets a say here.
-				$preview_bases[$language_id] = HTTP_CATALOG . $language['code'] . '/' . $keyword . '?' . http_build_query($query);
+				$path = HTTP_CATALOG . $language['code'] . '/' . $keyword . '?';
 			} else {
 				// No keyword for this language: the route form + switch_lang
 				// (enforceCleanSeoUrls leaves preview_token URLs alone, so the
 				// session language survives).
-				$preview_bases[$language_id] = $fallback_base . '&' . http_build_query($query);
+				$path = $fallback_base . '&';
 			}
+
+			$preview_bases[$language_id] = $path . http_build_query($query);
+			$preview_public_bases[$language_id] = $path . http_build_query($public_query);
 		}
 
 		$data['preview_bases'] = $preview_bases;
 		$data['preview_base'] = $preview_bases[(int)$this->config->get('config_language_id')] ?? (string)reset($preview_bases);
+		$data['preview_public_bases'] = $preview_public_bases;
+		$data['preview_public_base'] = $preview_public_bases[(int)$this->config->get('config_language_id')] ?? (string)reset($preview_public_bases);
 		$data['image_url'] = HTTP_CATALOG . 'image/';
 
 		$data['landing'] = [
@@ -237,7 +256,24 @@ class ControllerDesignLanding extends Controller {
 			}
 		}
 
-		$data['blocks'] = $this->model_design_landing->getBlocks($landing_id);
+		$blocks = $this->model_design_landing->getBlocks($landing_id);
+
+		// The builder edits the same normalised shape the renderer uses. This
+		// also folds legacy hero/CTA image settings into bg_image, so a picture
+		// already on the page is visible in the Style tab before the next save.
+		foreach ($blocks as &$block) {
+			$code = (string)$block['code'];
+
+			$block['settings'] = Dockercart\Landing\Blocks::normalizeSettings($code, (array)$block['settings']);
+
+			foreach (array_keys((array)$block['content']) as $language_id) {
+				$block['content'][(int)$language_id] = Dockercart\Landing\Blocks::normalizeContent($code, (array)$block['content'][$language_id]);
+			}
+		}
+
+		unset($block);
+
+		$data['blocks'] = $blocks;
 
 		$data['languages'] = array_values($languages);
 		$data['default_language_id'] = (int)$this->config->get('config_language_id');
@@ -298,6 +334,7 @@ class ControllerDesignLanding extends Controller {
 		// yesterday's JS against today's page.
 		$data['builder_js_version'] = (string)@filemtime(DIR_APPLICATION . 'view/javascript/dockercart_landing_builder.js');
 		$data['admin_css_version'] = (string)@filemtime(DIR_APPLICATION . 'view/stylesheet/dockercart_tokens.css');
+		$data['admin_stylesheet_version'] = (string)@filemtime(DIR_APPLICATION . 'view/stylesheet/stylesheet.css');
 
 		// Do NOT load admin chrome — standalone builder page (same as design/layout/builder).
 		$this->response->setOutput($this->load->view('design/landing_builder', $data));
@@ -538,11 +575,14 @@ class ControllerDesignLanding extends Controller {
 	}
 
 	/**
-	 * Product / category search for the properties panel (names + ids only).
+	 * Entity search for the properties panel (names + ids only).
+	 *
+	 * The product/category pickers use this endpoint as before; the link field
+	 * uses the same endpoint for products, categories, manufacturers,
+	 * information pages and blog posts. `ids` resolves the labels of links
+	 * already stored in a block (the URL itself is the only stored value).
 	 */
 	public function autocomplete() {
-		$json = [];
-
 		if (!$this->user->hasPermission('access', 'design/landing')) {
 			$this->response->addHeader('Content-Type: application/json');
 			$this->response->setOutput(json_encode([]));
@@ -550,48 +590,317 @@ class ControllerDesignLanding extends Controller {
 			return;
 		}
 
+		$types = ['product', 'category', 'manufacturer', 'information', 'blog'];
+
 		$type = isset($this->request->get['type']) ? (string)$this->request->get['type'] : 'product';
+
+		if (!in_array($type, $types, true)) {
+			$type = 'product';
+		}
+
 		$filter = isset($this->request->get['filter_name']) ? trim((string)$this->request->get['filter_name']) : '';
 		$limit = isset($this->request->get['limit']) ? max(1, min(30, (int)$this->request->get['limit'])) : 10;
+		$language_id = isset($this->request->get['language_id']) ? max(1, (int)$this->request->get['language_id']) : (int)$this->config->get('config_language_id');
 
-		if ($type === 'category') {
-			$this->load->model('catalog/category');
+		$ids = [];
 
-			foreach ($this->model_catalog_category->getCategories(['filter_name' => $filter, 'sort' => 'name', 'order' => 'ASC', 'start' => 0, 'limit' => $limit]) as $category) {
-				$json[] = [
-					'id'   => (int)$category['category_id'],
-					'name' => html_entity_decode((string)$category['name'], ENT_QUOTES, 'UTF-8'),
-				];
-			}
-		} else {
-			$this->load->model('catalog/product');
+		if (isset($this->request->get['ids'])) {
+			foreach (explode(',', (string)$this->request->get['ids']) as $part) {
+				$id = (int)$part;
 
-			foreach ($this->model_catalog_product->getProducts(['filter_search' => $filter, 'sort' => 'pd.name', 'order' => 'ASC', 'start' => 0, 'limit' => $limit]) as $product) {
-				$json[] = [
-					'id'    => (int)$product['product_id'],
-					'name'  => html_entity_decode((string)$product['name'], ENT_QUOTES, 'UTF-8'),
-					'model' => (string)$product['model'],
-				];
-			}
+				if ($id > 0 && !in_array($id, $ids, true)) {
+					$ids[] = $id;
+				}
 
-			// Keep the selection order working when ids are requested directly.
-			if (!$json && $filter === '' && isset($this->request->get['ids'])) {
-				$ids = array_filter(array_map('intval', explode(',', (string)$this->request->get['ids'])));
-
-				if ($ids) {
-					foreach ($this->model_catalog_product->getProductsByIds($ids) as $id => $product) {
-						$json[] = [
-							'id'    => (int)$id,
-							'name'  => html_entity_decode((string)$product['name'], ENT_QUOTES, 'UTF-8'),
-							'model' => (string)($product['model'] ?? ''),
-						];
-					}
+				if (count($ids) >= 30) {
+					break;
 				}
 			}
 		}
 
+		$json = $ids ? $this->linkEntityItems($type, $ids, $language_id) : $this->searchLinkEntities($type, $filter, $limit, $language_id);
+
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function searchLinkEntities(string $type, string $filter, int $limit, int $language_id): array {
+		$items = [];
+
+		switch ($type) {
+			case 'category':
+				$this->load->model('catalog/category');
+
+				foreach ($this->model_catalog_category->getCategories(['filter_name' => $filter, 'sort' => 'name', 'order' => 'ASC', 'start' => 0, 'limit' => $limit]) as $category) {
+					$items[] = [
+						'id'   => (int)$category['category_id'],
+						'name' => html_entity_decode((string)$category['name'], ENT_QUOTES, 'UTF-8'),
+					];
+				}
+
+				break;
+
+			case 'manufacturer':
+				$this->load->model('catalog/manufacturer');
+
+				foreach ($this->model_catalog_manufacturer->getManufacturers(['filter_name' => $filter, 'filter_status' => 1, 'start' => 0, 'limit' => $limit]) as $manufacturer) {
+					$items[] = [
+						'id'   => (int)$manufacturer['manufacturer_id'],
+						'name' => strip_tags(html_entity_decode((string)$manufacturer['name'], ENT_QUOTES, 'UTF-8')),
+					];
+				}
+
+				break;
+
+			case 'information':
+				$this->load->model('catalog/information');
+
+				foreach ($this->model_catalog_information->getInformations(['filter_name' => $filter, 'start' => 0, 'limit' => $limit]) as $information) {
+					$items[] = [
+						'id'   => (int)$information['information_id'],
+						'name' => strip_tags(html_entity_decode((string)($information['title'] ?? $information['name'] ?? ''), ENT_QUOTES, 'UTF-8')),
+					];
+				}
+
+				break;
+
+			case 'blog':
+				$this->load->model('extension/module/dockercart_blog_post');
+
+				foreach ($this->model_extension_module_dockercart_blog_post->getPosts(['filter_name' => $filter, 'start' => 0, 'limit' => $limit]) as $post) {
+					$items[] = [
+						'id'   => (int)$post['post_id'],
+						'name' => strip_tags(html_entity_decode((string)($post['name'] ?? ''), ENT_QUOTES, 'UTF-8')),
+					];
+				}
+
+				break;
+
+			case 'product':
+			default:
+				$this->load->model('catalog/product');
+
+				foreach ($this->model_catalog_product->getProducts(['filter_search' => $filter, 'sort' => 'pd.name', 'order' => 'ASC', 'start' => 0, 'limit' => $limit]) as $product) {
+					$items[] = [
+						'id'    => (int)$product['product_id'],
+						'name'  => html_entity_decode((string)$product['name'], ENT_QUOTES, 'UTF-8'),
+						'model' => (string)($product['model'] ?? ''),
+					];
+				}
+
+				break;
+		}
+
+		foreach ($items as &$item) {
+			$item['url'] = $this->linkSeoUrl($type, (string)$item['id'], $language_id);
+		}
+
+		unset($item);
+
+		return $items;
+	}
+
+	/**
+	 * Resolves stored link ids back to entity names for the properties panel.
+	 *
+	 * @param array<int, int> $ids
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function linkEntityItems(string $type, array $ids, int $language_id): array {
+		$items = [];
+
+		switch ($type) {
+			case 'category':
+				$this->load->model('catalog/category');
+
+				foreach ($ids as $id) {
+					$category = $this->model_catalog_category->getCategory($id);
+
+					if (!$category) {
+						continue;
+					}
+
+					$items[] = ['id' => $id, 'name' => strip_tags(html_entity_decode((string)$category['name'], ENT_QUOTES, 'UTF-8'))];
+				}
+
+				break;
+
+			case 'manufacturer':
+				$this->load->model('catalog/manufacturer');
+
+				foreach ($ids as $id) {
+					$manufacturer = $this->model_catalog_manufacturer->getManufacturer($id);
+
+					if (!$manufacturer) {
+						continue;
+					}
+
+					$items[] = ['id' => $id, 'name' => strip_tags(html_entity_decode((string)$manufacturer['name'], ENT_QUOTES, 'UTF-8'))];
+				}
+
+				break;
+
+			case 'information':
+				$this->load->model('catalog/information');
+
+				foreach ($ids as $id) {
+					$descriptions = $this->model_catalog_information->getInformationDescriptions($id);
+					$description = $descriptions[$language_id] ?? ($descriptions ? reset($descriptions) : []);
+
+					$items[] = ['id' => $id, 'name' => strip_tags(html_entity_decode((string)($description['title'] ?? ''), ENT_QUOTES, 'UTF-8'))];
+				}
+
+				break;
+
+			case 'blog':
+				$this->load->model('extension/module/dockercart_blog_post');
+
+				foreach ($ids as $id) {
+					$descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions($id);
+					$description = $descriptions[$language_id] ?? ($descriptions ? reset($descriptions) : []);
+
+					$items[] = ['id' => $id, 'name' => strip_tags(html_entity_decode((string)($description['title'] ?? ''), ENT_QUOTES, 'UTF-8'))];
+				}
+
+				break;
+
+			case 'product':
+			default:
+				$this->load->model('catalog/product');
+				$products = $this->model_catalog_product->getProductsByIds($ids);
+
+				foreach ($ids as $id) {
+					if (!isset($products[$id])) {
+						continue;
+					}
+
+					$items[] = [
+						'id'    => $id,
+						'name'  => html_entity_decode((string)$products[$id]['name'], ENT_QUOTES, 'UTF-8'),
+						'model' => (string)($products[$id]['model'] ?? ''),
+					];
+				}
+
+				break;
+		}
+
+		foreach ($items as &$item) {
+			$item['url'] = $this->linkSeoUrl($type, (string)$item['id'], $language_id);
+		}
+
+		unset($item);
+
+		return $items;
+	}
+
+	/**
+	 * Storefront URL shown for an entity in the builder.
+	 *
+	 * The block keeps the canonical route (so the catalog can apply the SEO
+	 * keyword of the visitor's language at render time); this absolute URL is
+	 * only what the operator sees after picking an entity.
+	 */
+	private function linkSeoUrl(string $type, string $value, int $language_id): string {
+		$routes = [
+			'product'      => ['product/product', 'product_id'],
+			'category'     => ['product/category', 'path'],
+			'manufacturer' => ['product/manufacturer/info', 'manufacturer_id'],
+			'information'  => ['information/information', 'information_id'],
+			'blog'         => ['blog/post', 'blog_post_id'],
+		];
+
+		if (!isset($routes[$type])) {
+			return '';
+		}
+
+		$route = $routes[$type][0];
+		$param = $routes[$type][1];
+		$fallback = 'index.php?route=' . $route . '&' . $param . '=' . rawurlencode($value);
+
+		if (!$this->config->get('config_seo_url')) {
+			return $fallback;
+		}
+
+		$keyword = $this->linkSeoKeyword($type, $value, $language_id);
+
+		if ($keyword === '') {
+			return $fallback;
+		}
+
+		$prefix = $this->linkLanguagePrefix($language_id);
+
+		// Show the SEO path only: the domain/port belong to the storefront
+		// request, not to the saved block or the properties panel.
+		return '/' . $prefix . $keyword;
+	}
+
+	/**
+	 * Builds a keyword from the same oc_seo_url / blog_seo_url rows the
+	 * storefront rewriter uses. A category path needs one keyword per segment.
+	 */
+	private function linkSeoKeyword(string $type, string $value, int $language_id): string {
+		$ids = array_filter(array_map('intval', explode('_', $value)));
+
+		if (!$ids) {
+			return '';
+		}
+
+		$keywords = [];
+
+		foreach ($ids as $id) {
+			switch ($type) {
+				case 'product':
+					$this->load->model('catalog/product');
+					$urls = $this->model_catalog_product->getProductSeoUrls($id);
+					break;
+
+				case 'category':
+					$this->load->model('catalog/category');
+					$urls = $this->model_catalog_category->getCategorySeoUrls($id);
+					break;
+
+				case 'manufacturer':
+					$this->load->model('catalog/manufacturer');
+					$urls = $this->model_catalog_manufacturer->getManufacturerSeoUrls($id);
+					break;
+
+				case 'information':
+					$this->load->model('catalog/information');
+					$urls = $this->model_catalog_information->getInformationSeoUrls($id);
+					break;
+
+				case 'blog':
+					$this->load->model('extension/module/dockercart_blog_post');
+					$urls = $this->model_extension_module_dockercart_blog_post->getPostSeoUrls($id);
+					break;
+
+				default:
+					return '';
+			}
+
+			$keyword = isset($urls[0][$language_id]) ? (string)$urls[0][$language_id] : '';
+
+			if ($keyword === '') {
+				return '';
+			}
+
+			$keywords[] = $keyword;
+		}
+
+		return implode('/', $keywords);
+	}
+
+	private function linkLanguagePrefix(int $language_id): string {
+		$default = (string)$this->config->get('config_language');
+
+		$this->load->model('localisation/language');
+		$language = $this->model_localisation_language->getLanguage($language_id);
+		$code = $language ? (string)$language['code'] : $default;
+
+		return ($code === '' || $code === $default) ? '' : $code . '/';
 	}
 
 	public function delete() {
@@ -1039,6 +1348,13 @@ class ControllerDesignLanding extends Controller {
 			'text_pick_products',
 			'text_pick_category',
 			'text_pick_banner',
+			'text_link_custom',
+			'text_link_product',
+			'text_link_category',
+			'text_link_manufacturer',
+			'text_link_information',
+			'text_link_blog',
+			'text_link_search',
 			'text_error_save',
 			'text_conflict',
 			'text_back',

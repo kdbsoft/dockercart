@@ -50,7 +50,7 @@
                     {% endif %}</td>
                   <td class="text-left">
                     <a href="{{ information.edit }}" class="row-title-link">{{ information.title }}</a>
-                    {% if information.use_builder %}<span class="label label-info" data-toggle="tooltip" title="{{ text_builder_badge }}"><i data-lucide="layout-template" width="11" height="11"></i></span>{% endif %}
+                    {% if information.use_builder %}<span class="label label-info" data-toggle="tooltip" title="{{ text_builder_badge_hint }}"><i data-lucide="layout-template" width="11" height="11"></i> {{ text_builder_badge }}</span>{% endif %}
                   </td>
                   <td class="text-right">
                     <span class="inline-edit" data-information-id="{{ information.information_id }}" data-field="sort_order" data-value="{{ information.sort_order_raw }}">{{ information.sort_order }}<i data-lucide="pencil" width="13" height="13" class="inline-edit-icon"></i></span>

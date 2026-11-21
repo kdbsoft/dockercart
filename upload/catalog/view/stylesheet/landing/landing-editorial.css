@@ -25,6 +25,12 @@
 	content: ''; position: absolute; inset: 0; z-index: 0;
 	background: rgba(0, 0, 0, var(--lp-overlay, .3)); pointer-events: none;
 }
+/* Hero/CTA used to paint an opaque panel, which hid the wrapper background
+   set in Style. With a wrapper background they only frame the content. */
+#lp-page .lp-panel-wrapper-bg { background: transparent !important; }
+@media (max-width: 600px) {
+	#lp-page .lp-block--bg-mobile { background-image: var(--lp-bg-image-mobile) !important; }
+}
 @media (min-width: 1024px) { #lp-page .lp-block__body { padding-left: 40px; padding-right: 40px; } }
 
 /* Hero */

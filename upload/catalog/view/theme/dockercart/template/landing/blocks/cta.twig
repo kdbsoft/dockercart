@@ -1,11 +1,9 @@
-{% set is_split = settings.layout == 'split' and image %}
+{# CTA uses the same Style background image as every other block. #}
+{% set is_split = settings.layout == 'split' %}
 {% set own_panel = not has_wrapper_bg %}
 {% set title_class = has_wrapper_bg ? wrapper_text_class : 'text-white' %}
 {% set body_class = has_wrapper_bg ? wrapper_muted_class : 'text-white/80' %}
-<div class="relative overflow-hidden {{ own_panel ? 'rounded-3xl bg-gray-900 px-6 sm:px-10 py-10 sm:py-12' : 'py-2' }}">
-	{% if image %}
-	<img src="{{ image }}" alt="" class="absolute inset-0 w-full h-full object-cover {{ own_panel ? 'opacity-30' : 'opacity-50 rounded-3xl' }}" loading="lazy" />
-	{% endif %}
+<div class="relative overflow-hidden {{ own_panel ? 'rounded-3xl bg-gray-900 lp-panel-own px-6 sm:px-10 py-10 sm:py-12' : 'lp-panel-wrapper-bg py-2' }}">
 	<div class="relative z-10 {% if is_split %}grid grid-cols-1 md:grid-cols-2 gap-8 items-center{% else %}max-w-3xl mx-auto text-center{% endif %}">
 		<div>
 			{% if content.heading %}

@@ -50,12 +50,32 @@
 	// Content = the block's own fields, Style = backgrounds/spacing/width,
 	// Advanced = device visibility, anchors and custom classes.
 	var STYLE_KEYS = [
-		'bg_type', 'bg_color', 'bg_image', 'overlay', 'padding', 'container', 'align'
+		'bg_type', 'bg_color', 'bg_image', 'bg_image_mobile', 'overlay', 'padding', 'container', 'align'
 	];
 
 	var ADVANCED_KEYS = [
 		'hide_desktop', 'hide_tablet', 'hide_mobile', 'anchor', 'custom_class'
 	];
+
+	// Link fields mirror the banner form: a type picker plus an entity
+	// autocomplete. The stored value stays a plain URL string, so the
+	// storefront templates and Blocks::sanitizePath() need no changes.
+	var LINK_TYPES = [
+		{ type: 'custom', label: 'text_link_custom' },
+		{ type: 'product', label: 'text_link_product' },
+		{ type: 'category', label: 'text_link_category' },
+		{ type: 'manufacturer', label: 'text_link_manufacturer' },
+		{ type: 'information', label: 'text_link_information' },
+		{ type: 'blog', label: 'text_link_blog' }
+	];
+
+	var LINK_ROUTES = {
+		product:      { route: 'product/product', param: 'product_id' },
+		category:     { route: 'product/category', param: 'path' },
+		manufacturer: { route: 'product/manufacturer/info', param: 'manufacturer_id' },
+		information:  { route: 'information/information', param: 'information_id' },
+		blog:         { route: 'blog/post', param: 'blog_post_id' }
+	};
 
 	var state = {
 		page: {
@@ -99,6 +119,7 @@
 		dirtyBlocks: {},
 		pendingSelectBlock: null,
 		names: {},
+		linkUrls: {},
 		previewBase: CFG.previewBase || '',
 		tokenAt: Date.now(),
 		templates: CFG.templates || [],
@@ -397,24 +418,15 @@
 		ui.fieldTimers = [];
 	}
 
-	/* ==================== page name (top bar) ==================== */
+	/* ==================== page title (owned landings) ==================== */
 
 	/**
-	 * An owned landing's top-bar name is the information page title of the
-	 * selected language (oc_information_description.title) - the landing's
-	 * own `name` is just a default-language snapshot. Standalone pages keep
-	 * their global name.
+	 * An owned landing's name is the information page title of the selected
+	 * language (oc_information_description.title). It is edited in Page
+	 * Settings — the top bar has no name field.
 	 */
 	function ownerTitle() {
 		return CFG.ownerTitles ? String(CFG.ownerTitles[ui.lang] || '') : '';
-	}
-
-	function syncNameInput() {
-		var input = $('lp-name-input');
-
-		if (!input || !CFG.ownerTitles) return;
-
-		input.value = ownerTitle();
 	}
 
 	/**
@@ -452,7 +464,6 @@
 			.then(function (json) {
 				if (json.error) {
 					toast(json.error, 'error');
-					syncNameInput();
 					ui.pendingOwnerTitle = pending;
 					ui.dirty = true;
 					updateSaveState();
@@ -461,55 +472,17 @@
 				}
 
 				CFG.ownerTitles[pending.lang] = pending.value.trim();
-				syncNameInput();
 
 				return true;
 			})
 			.catch(function () {
 				toast(t('text_error_save', 'Could not save'), 'error');
-				syncNameInput();
 				ui.pendingOwnerTitle = pending;
 				ui.dirty = true;
 				updateSaveState();
 
 				return false;
 			});
-	}
-
-	function initNameInput() {
-		var nameInput = $('lp-name-input');
-
-		if (!nameInput) return;
-
-		if (CFG.ownerTitles && CFG.ownerInformationId) {
-			// Owned landing: the input mirrors the information page title of
-			// the selected language and edits it per language.
-			syncNameInput();
-
-			if (!CFG.canEditOwnerTitles || !CFG.urls.ownerNames) {
-				nameInput.readOnly = true;
-
-				return;
-			}
-
-			nameInput.addEventListener('input', function () {
-				if (String(ownerTitle()) === String(nameInput.value) && !ui.pendingOwnerTitle) return;
-
-				markOwnerTitleDirty(nameInput.value);
-			});
-
-			return;
-		}
-
-		nameInput.addEventListener('input', function () {
-			if (String(state.page.name) === nameInput.value) return;
-
-			trackTextEdit();
-			state.page.name = nameInput.value;
-			touch();
-		});
-
-		nameInput.addEventListener('blur', commitTextEdit);
 	}
 
 	/* ==================== history ==================== */
@@ -1678,24 +1651,54 @@
 
 		var activeHtml = ui.propsTab === 'style' ? styleHtml : (ui.propsTab === 'advanced' ? advancedHtml : contentHtml);
 
+		// Advanced fields live only in their own tab; duplicating them as a
+		// <details> block under Content/Style made the same input appear twice
+		// and confused which one was being edited.
 		html += '<div class="space-y-3">' + activeHtml + '</div>';
-
-		// The device-visibility toggles are useful everywhere, so every tab
-		// keeps them one click away (like Elementor's responsive bar).
-		if (ui.propsTab !== 'advanced' && advancedHtml) {
-			html += '<details class="mt-4 border-t border-gray-100 pt-3">' +
-				'<summary class="cursor-pointer text-[11px] font-bold text-gray-400 uppercase tracking-wide">' + esc(t('text_advanced', 'Advanced')) + '</summary>' +
-				'<div class="space-y-3 mt-3">' + advancedHtml + '</div></details>';
-		}
 
 		body.innerHTML = html;
 
 		lucide.createIcons({ nodes: [body] });
 		bindProperties(body, block);
+		hydrateLinkLabels(body);
 	}
 
 	function fieldId(block, field) {
 		return 'lp-f-' + Number(block.block_id) + '-' + field.key;
+	}
+
+	// Left/Centre/Right selects are edited as a segmented button group with
+	// Lucide icons — the same idea as the banner form's content position.
+	var ALIGN_OPTIONS = ['left', 'center', 'right'];
+
+	var ALIGN_ICONS = {
+		left: 'align-start-vertical',
+		center: 'align-center-vertical',
+		right: 'align-end-vertical'
+	};
+
+	function isAlignmentOptions(options) {
+		var keys = Object.keys(options || {});
+
+		return keys.length > 0 && keys.every(function (key) {
+			return ALIGN_OPTIONS.indexOf(key) !== -1;
+		});
+	}
+
+	function renderAlignmentOptions(id, field, value) {
+		var options = Object.keys(field.options || {});
+		var html = '<div id="' + esc(id) + '" class="lp-align-group" data-align-options>';
+
+		options.forEach(function (option) {
+			var active = String(value) === String(option);
+
+			html += '<button type="button" data-align-value="' + esc(option) + '" aria-pressed="' + (active ? 'true' : 'false') + '">' +
+				'<i data-lucide="' + ALIGN_ICONS[option] + '"></i>' +
+				'<span>' + esc(t(field.options[option], option)) + '</span>' +
+				'</button>';
+		});
+
+		return html + '</div>';
 	}
 
 	function renderField(block, field) {
@@ -1703,8 +1706,9 @@
 		var value = getValue(field, block);
 		var label = esc(t(field.label, field.key));
 		var langBadge = field.localized ? ' <span class="text-[9px] text-gray-400">' + esc(String(langCodeById(ui.lang) || '').toUpperCase()) + '</span>' : '';
+		var alignField = field.type === 'select' && isAlignmentOptions(field.options);
 		var html = '<div class="lp-field" data-field-key="' + esc(field.key) + '" data-field-type="' + esc(field.type) + '">' +
-			'<label class="lp-field-label" for="' + id + '">' + label + langBadge + '</label>';
+			'<label class="lp-field-label"' + (alignField ? '' : ' for="' + id + '"') + '>' + label + langBadge + '</label>';
 
 		switch (field.type) {
 			case 'textarea':
@@ -1735,14 +1739,18 @@
 				break;
 
 			case 'select':
-				html += '<select id="' + id + '" class="lp-input" data-input>';
+				if (isAlignmentOptions(field.options)) {
+					html += renderAlignmentOptions(id, field, value);
+				} else {
+					html += '<select id="' + id + '" class="lp-input" data-input>';
 
-				Object.keys(field.options || {}).forEach(function (option) {
-					html += '<option value="' + esc(option) + '"' + (String(value) === String(option) ? ' selected' : '') + '>' +
-						esc(t(field.options[option], option)) + '</option>';
-				});
+					Object.keys(field.options || {}).forEach(function (option) {
+						html += '<option value="' + esc(option) + '"' + (String(value) === String(option) ? ' selected' : '') + '>' +
+							esc(t(field.options[option], option)) + '</option>';
+					});
 
-				html += '</select>';
+					html += '</select>';
+				}
 				break;
 
 			case 'color':
@@ -1793,6 +1801,9 @@
 				break;
 
 			case 'link':
+				html += renderLinkControl(value, 'data-input', id);
+				break;
+
 			case 'text':
 			default:
 				html += '<input type="text" id="' + id + '" class="lp-input" data-input value="' + esc(value) + '" />';
@@ -1802,6 +1813,109 @@
 		html += '</div>';
 
 		return html;
+	}
+
+	/**
+	 * Extracts the entity type and id from a stored URL. Both the canonical
+	 * "index.php?route=..." form and the shorter "route=..." form used by
+	 * banners are recognised; anything else stays a custom URL.
+	 */
+	function parseLinkUrl(value) {
+		var original = String(value === null || value === undefined ? '' : value).trim();
+		var query = '';
+		var mark = original.indexOf('?');
+
+		if (mark >= 0) {
+			query = original.slice(mark + 1);
+		} else if (/^route=/i.test(original)) {
+			query = original;
+		}
+
+		if (!query) return { type: 'custom', value: original };
+
+		var params = {};
+
+		query.replace(/&amp;/g, '&').split('&').forEach(function (part) {
+			var pos = part.indexOf('=');
+
+			if (pos < 0) return;
+
+			var raw = part.slice(pos + 1).replace(/\+/g, ' ');
+
+			try {
+				params[part.slice(0, pos)] = decodeURIComponent(raw);
+			} catch (e) {
+				params[part.slice(0, pos)] = raw;
+			}
+		});
+
+		var route = params.route || '';
+		var type = '';
+
+		for (var key in LINK_ROUTES) {
+			if (LINK_ROUTES[key].route === route) {
+				type = key;
+				break;
+			}
+		}
+
+		var id = type ? params[LINK_ROUTES[type].param] : '';
+
+		if (!id || !/^[0-9_]+$/.test(String(id))) {
+			return { type: 'custom', value: original };
+		}
+
+		return { type: type, value: String(id) };
+	}
+
+	function buildLinkUrl(type, value) {
+		var def = LINK_ROUTES[type];
+
+		if (!def || !value) return '';
+
+		return 'index.php?route=' + def.route + '&' + def.param + '=' + encodeURIComponent(value);
+	}
+
+	/**
+	 * One link control, used both by a plain field and by a repeater row.
+	 * `inputAttrs` decides where the canonical URL is persisted: `data-input`
+	 * for a field, `data-repeater-key` for a repeater sub-field. The URL input
+	 * itself is part of the persisted payload; the type picker and the entity
+	 * search are editor-only.
+	 */
+	function linkClearButton() {
+		var label = esc(t('text_clear', 'Clear'));
+
+		return '<button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 leading-none" data-link-clear title="' + label + '" aria-label="' + label + '"><i data-lucide="x" class="w-3 h-3"></i></button>';
+	}
+
+	function renderLinkControl(value, inputAttrs, id) {
+		var parsed = parseLinkUrl(value);
+		var options = '';
+
+		LINK_TYPES.forEach(function (item) {
+			options += '<option value="' + item.type + '"' + (parsed.type === item.type ? ' selected' : '') + '>' +
+				esc(t(item.label, item.label)) + '</option>';
+		});
+
+		var isEntity = parsed.type !== 'custom';
+
+		return '<div class="space-y-1" data-link-control data-link-lang="' + Number(ui.lang) + '">' +
+			'<select ' + (id ? 'id="' + esc(id) + '" ' : '') + 'class="lp-input" data-link-type>' + options + '</select>' +
+			'<div class="relative' + (isEntity ? ' hidden' : '') + '" data-link-custom>' +
+				'<input type="text" class="lp-input pr-7" ' + (inputAttrs || 'data-input') + ' data-link-url data-link-stored="' + esc(value) + '" value="' + esc(value) + '" placeholder="https://…" autocomplete="off" />' +
+				linkClearButton() +
+			'</div>' +
+			'<div' + (isEntity ? '' : ' class="hidden"') + ' data-link-entity>' +
+				'<div class="relative">' +
+					'<input type="text" class="lp-input pr-7" data-link-search data-link-lang="' + Number(ui.lang) + '" value="" data-link-value="' + esc(parsed.value) + '" placeholder="' + esc(t('text_link_search', 'Search…')) + '" autocomplete="off" />' +
+					linkClearButton() +
+				'</div>' +
+				'<div class="mt-1">' +
+					'<span class="text-[10px] text-gray-400 truncate" data-link-preview>' + esc(value) + '</span>' +
+				'</div>' +
+			'</div>' +
+		'</div>';
 	}
 
 	function renderMultiPicker(block, field, type) {
@@ -1866,7 +1980,9 @@
 			(field.fields || []).forEach(function (sub) {
 				var value = row[sub.key] !== undefined ? row[sub.key] : sub.default;
 
-				if (sub.type === 'select') {
+				if (sub.type === 'link') {
+					html += renderLinkControl(value, 'data-repeater-key="' + esc(sub.key) + '"', '');
+				} else if (sub.type === 'select') {
 					html += '<select class="lp-input" data-repeater-key="' + esc(sub.key) + '">';
 
 					Object.keys(sub.options || {}).forEach(function (option) {
@@ -1874,6 +1990,8 @@
 					});
 
 					html += '</select>';
+				} else if (sub.type === 'textarea') {
+					html += '<textarea class="lp-input" rows="3" data-repeater-key="' + esc(sub.key) + '" placeholder="' + esc(t(sub.label, sub.key)) + '">' + esc(String(value === undefined || value === null ? '' : value)) + '</textarea>';
 				} else {
 					html += '<input type="text" class="lp-input" data-repeater-key="' + esc(sub.key) + '" value="' + esc(value) + '" placeholder="' + esc(t(sub.label, sub.key)) + '" />';
 				}
@@ -1911,6 +2029,16 @@
 
 			if (field.type === 'repeater') {
 				bindRepeater(fieldEl, block, field, lang);
+				return;
+			}
+
+			if (field.type === 'link') {
+				bindLinkField(fieldEl, block, field, lang);
+				return;
+			}
+
+			if (field.type === 'select' && isAlignmentOptions(field.options)) {
+				bindAlignmentField(fieldEl, block, field, lang);
 				return;
 			}
 
@@ -2176,6 +2304,141 @@
 		});
 	}
 
+	function bindAlignmentField(fieldEl, block, field, lang) {
+		var buttons = fieldEl.querySelectorAll('[data-align-value]');
+
+		buttons.forEach(function (button) {
+			button.addEventListener('click', function () {
+				var value = button.getAttribute('data-align-value');
+
+				if (getValue(field, block, lang) === value) return;
+
+				pushHistory();
+				setValue(block, field, value, lang);
+
+				buttons.forEach(function (item) {
+					item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+				});
+
+				touch({ blockId: block.block_id });
+				schedulePreview(block);
+			});
+		});
+	}
+
+	/* ==================== link fields ==================== */
+
+	function bindLinkField(fieldEl, block, field, lang) {
+		var control = fieldEl.querySelector('[data-link-control]');
+
+		if (!control) return;
+
+		bindLinkControl(control, function () {
+			return getValue(field, block, lang);
+		}, function (url, coalesce) {
+			if (getValue(field, block, lang) === url) return;
+
+			if (coalesce) {
+				trackTextEdit();
+			} else {
+				pushHistory();
+			}
+
+			setValue(block, field, url, lang);
+			touch({ blockId: block.block_id });
+			schedulePreview(block);
+		});
+	}
+
+	function bindRepeaterLinks(rowsEl, schedule) {
+		rowsEl.querySelectorAll('[data-link-control]').forEach(function (control) {
+			var urlInput = control.querySelector('[data-link-url]');
+
+			if (!urlInput) return;
+
+			bindLinkControl(control, function () {
+				var stored = urlInput.getAttribute('data-link-stored');
+
+				return stored !== null ? stored : urlInput.value;
+			}, function (url) {
+				var stored = urlInput.getAttribute('data-link-stored');
+
+				if ((stored !== null ? stored : urlInput.value) === url) return;
+
+				schedule();
+			});
+		});
+	}
+
+	/**
+	 * Shared behaviour for the link control in a field and in a repeater row.
+	 * Only the URL (the canonical storefront link) is persisted; the type
+	 * picker and the entity search are editor state derived from that URL.
+	 */
+	function bindLinkControl(control, readUrl, writeUrl) {
+		var select = control.querySelector('[data-link-type]');
+		var custom = control.querySelector('[data-link-custom]');
+		var entity = control.querySelector('[data-link-entity]');
+		var urlInput = control.querySelector('[data-link-url]');
+		var search = control.querySelector('[data-link-search]');
+		var preview = control.querySelector('[data-link-preview]');
+		var clears = control.querySelectorAll('[data-link-clear]');
+		var lang = Number(control.getAttribute('data-link-lang')) || ui.lang;
+
+		if (!select || !custom || !entity || !urlInput || !search) return;
+
+		function updateMode() {
+			var isEntity = select.value !== 'custom';
+
+			custom.classList.toggle('hidden', isEntity);
+			entity.classList.toggle('hidden', !isEntity);
+		}
+
+		function setUrl(url, coalesce, display) {
+			if (readUrl() !== url) writeUrl(url, coalesce);
+
+			var shown = display || url;
+
+			urlInput.value = shown;
+			urlInput.setAttribute('data-link-stored', url);
+
+			if (preview) preview.textContent = shown;
+
+			search.setAttribute('data-link-value', parseLinkUrl(url).value || '');
+		}
+
+		select.addEventListener('change', function () {
+			search.value = '';
+			search.dispatchEvent(new Event('input')); // drop a stale dropdown
+			setUrl('', false);
+			updateMode();
+		});
+
+		urlInput.addEventListener('input', function () {
+			setUrl(urlInput.value, true);
+		});
+
+		clears.forEach(function (button) {
+			button.addEventListener('click', function () {
+				search.value = '';
+				setUrl('', false);
+			});
+		});
+
+		attachAutocomplete(search, function () { return select.value; }, function (item) {
+			var type = select.value;
+			var key = type + ':' + lang + ':' + item.id;
+
+			ui.names[key] = item.name;
+			ui.linkUrls[key] = item.url || '';
+			search.value = item.name;
+			// Persist the canonical route; show the SEO URL the shop will use.
+			setUrl(buildLinkUrl(type, item.id), false, item.url);
+		});
+
+		updateMode();
+	}
+
 	function bindRepeater(fieldEl, block, field, lang) {
 		var rowsEl = fieldEl.querySelector('[data-repeater-rows]');
 		var entry = null;
@@ -2187,7 +2450,10 @@
 				var row = {};
 
 				rowEl.querySelectorAll('[data-repeater-key]').forEach(function (input) {
-					row[input.getAttribute('data-repeater-key')] = input.value;
+					// A link input displays its SEO URL but persists the route.
+					var stored = input.getAttribute('data-link-stored');
+
+					row[input.getAttribute('data-repeater-key')] = stored !== null ? stored : input.value;
 				});
 
 				rows.push(row);
@@ -2218,8 +2484,14 @@
 			});
 		}
 
-		rowsEl.addEventListener('input', schedule);
-		rowsEl.addEventListener('change', schedule);
+		// Autocomplete typing and the link type picker are editor-only:
+		// bindLinkControl() writes the URL, which is the persisted value.
+		rowsEl.addEventListener('input', function (event) {
+			if (!event.target.closest('[data-link-search]')) schedule();
+		});
+		rowsEl.addEventListener('change', function (event) {
+			if (!event.target.closest('[data-link-type]')) schedule();
+		});
 		rowsEl.addEventListener('focusout', commitTextEdit);
 
 		fieldEl.querySelector('[data-repeater-add]').addEventListener('click', function () {
@@ -2258,6 +2530,8 @@
 			touch({ blockId: block.block_id });
 			schedulePreview(block);
 		});
+
+		bindRepeaterLinks(rowsEl, schedule);
 	}
 
 	/* ==================== autocomplete ==================== */
@@ -2265,6 +2539,7 @@
 	function attachAutocomplete(input, type, onSelect) {
 		var list = null;
 		var timer = null;
+		var resolveType = typeof type === 'function' ? type : function () { return type; };
 
 		function close() {
 			if (list) {
@@ -2284,7 +2559,13 @@
 			}
 
 			timer = setTimeout(function () {
-				fetch(CFG.urls.autocomplete + '&type=' + encodeURIComponent(type) + '&filter_name=' + encodeURIComponent(term))
+				var entityType = resolveType();
+
+				if (!entityType || entityType === 'custom') return;
+
+				var lang = Number(input.getAttribute('data-link-lang')) || ui.lang;
+
+			fetch(CFG.urls.autocomplete + '&type=' + encodeURIComponent(entityType) + '&language_id=' + encodeURIComponent(lang) + '&filter_name=' + encodeURIComponent(term))
 					.then(function (response) { return response.json(); })
 					.then(function (items) {
 						close();
@@ -2292,7 +2573,10 @@
 						if (!items || !items.length) return;
 
 						list = document.createElement('div');
-						list.className = 'absolute z-30 mt-1 w-56 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded shadow-lg text-xs';
+						// In the field flow, directly under the input and as wide as
+						// the field itself (the old absolute w-56 popup floated over
+						// neighbouring controls and was easy to miss).
+						list.className = 'relative z-30 mt-1 w-full max-h-56 overflow-y-auto bg-white border border-gray-200 rounded shadow-lg text-xs';
 
 						items.forEach(function (item) {
 							var button = document.createElement('button');
@@ -2300,15 +2584,15 @@
 							button.className = 'block w-full text-left px-2 py-1.5 hover:bg-blue-50 truncate';
 							button.textContent = item.name + (item.model ? ' (' + item.model + ')' : '');
 							button.addEventListener('click', function () {
+								// Clear first: the link callback puts the chosen label back.
+								input.value = '';
 								onSelect(item);
 								close();
-								input.value = '';
 							});
 							list.appendChild(button);
 						});
 
-						input.parentNode.style.position = 'relative';
-						input.parentNode.appendChild(list);
+						input.parentNode.insertAdjacentElement('afterend', list);
 					})
 					.catch(close);
 			}, 220);
@@ -2316,6 +2600,99 @@
 
 		input.addEventListener('blur', function () {
 			setTimeout(close, 200);
+		});
+	}
+
+	/**
+	 * Restores the entity labels and SEO URLs of links loaded from the DB.
+	 * The block keeps a route; the name and the SEO URL come from one request
+	 * per entity type and are cached for the lifetime of the builder page.
+	 */
+	function linkStoredUrl(control) {
+		var input = control.querySelector('[data-link-url]');
+
+		if (!input) return '';
+
+		var stored = input.getAttribute('data-link-stored');
+
+		return stored !== null ? stored : input.value;
+	}
+
+	function showLinkSeoUrl(control, url) {
+		var input = control.querySelector('[data-link-url]');
+		var preview = control.querySelector('[data-link-preview]');
+
+		if (input) input.value = url;
+		if (preview) preview.textContent = url;
+	}
+
+	function hydrateLinkLabels(root) {
+		if (!CFG.urls.autocomplete) return;
+
+		var pending = {};
+
+		root.querySelectorAll('[data-link-control]').forEach(function (control) {
+			var select = control.querySelector('[data-link-type]');
+			var type = select ? select.value : '';
+
+			if (!type || type === 'custom') return;
+
+			var lang = Number(control.getAttribute('data-link-lang')) || ui.lang;
+			var search = control.querySelector('[data-link-search]');
+			var value = parseLinkUrl(linkStoredUrl(control)).value;
+
+			if (!value) return;
+
+			var key = type + ':' + lang + ':' + value;
+
+			if (ui.names[key]) {
+				if (search) search.value = ui.names[key];
+				if (ui.linkUrls[key]) showLinkSeoUrl(control, ui.linkUrls[key]);
+
+				return;
+			}
+
+			var bucketKey = type + ':' + lang;
+
+			if (!pending[bucketKey]) pending[bucketKey] = { type: type, lang: lang, ids: [] };
+
+			if (pending[bucketKey].ids.indexOf(value) === -1) pending[bucketKey].ids.push(value);
+		});
+
+		Object.keys(pending).forEach(function (bucketKey) {
+			var bucket = pending[bucketKey];
+
+			fetch(CFG.urls.autocomplete + '&type=' + encodeURIComponent(bucket.type) + '&language_id=' + encodeURIComponent(bucket.lang) + '&ids=' + encodeURIComponent(bucket.ids.join(',')))
+				.then(function (response) { return response.json(); })
+				.then(function (items) {
+					if (!items || !items.length) return;
+
+					items.forEach(function (item) {
+						var key = bucket.type + ':' + bucket.lang + ':' + item.id;
+
+						ui.names[key] = item.name;
+						ui.linkUrls[key] = item.url || '';
+					});
+
+					root.querySelectorAll('[data-link-control]').forEach(function (control) {
+						var select = control.querySelector('[data-link-type]');
+						var lang = Number(control.getAttribute('data-link-lang')) || ui.lang;
+
+						if (!select || select.value !== bucket.type || lang !== bucket.lang || !document.body.contains(control)) return;
+
+						var search = control.querySelector('[data-link-search]');
+						var value = parseLinkUrl(linkStoredUrl(control)).value;
+						var key = bucket.type + ':' + lang + ':' + value;
+
+						// Never overwrite text the operator is typing in the search box.
+						if (search && value && !search.value && ui.names[key]) {
+							search.value = ui.names[key];
+						}
+
+						if (value && ui.linkUrls[key]) showLinkSeoUrl(control, ui.linkUrls[key]);
+					});
+				})
+				.catch(function () {});
 		});
 	}
 
@@ -2605,23 +2982,6 @@
 
 	/* ==================== canvas state ==================== */
 
-	// Per-item usage counts in the palette: how many blocks of each type
-	// are currently on the page (badges stay hidden while unused).
-	function updatePaletteCounts() {
-		var counts = {};
-
-		state.blocks.forEach(function(block) {
-			counts[block.code] = (counts[block.code] || 0) + 1;
-		});
-
-		document.querySelectorAll('#lp-palette [data-count-for]').forEach(function(badge) {
-			var total = counts[badge.getAttribute('data-count-for')] || 0;
-
-			badge.textContent = String(total);
-			badge.classList.toggle('hidden', total === 0);
-		});
-	}
-
 	// Empty-state overlay, block counter and navigator badge.
 	function updateCanvasState() {
 		var empty = $('lp-empty');
@@ -2632,8 +2992,6 @@
 		if (empty) empty.classList.toggle('hidden', total > 0);
 		if (count) count.textContent = String(total);
 		if (navCount) navCount.textContent = String(total);
-
-		updatePaletteCounts();
 	}
 
 	function initNavigator() {
@@ -2684,6 +3042,9 @@
 		$.ajax({
 			url: CFG.urls.filemanager + '&target=lp-media-field&thumb=lp-media-thumb',
 			dataType: 'html',
+			error: function () {
+				toast(t('text_error_save', 'Could not open the image manager'), 'error');
+			},
 			success: function (html) {
 				$('body').append('<div id="modal-image" class="modal" role="dialog">' + html + '</div>');
 
@@ -2702,6 +3063,18 @@
 
 				if (typeof lucide !== 'undefined') {
 					lucide.createIcons();
+				}
+
+				// The standalone builder has no admin common.js, so Bootstrap
+				// tooltips for the filemanager toolbar need wiring here (including
+				// nodes added by its AJAX directory reloads).
+				if ($.fn.tooltip) {
+					$('#modal-image [data-toggle="tooltip"]').tooltip({ container: 'body' });
+
+					$(document).off('mouseenter.lpFilemanager', '#modal-image [data-toggle="tooltip"]')
+						.on('mouseenter.lpFilemanager', '#modal-image [data-toggle="tooltip"]', function () {
+							$(this).tooltip({ container: 'body' }).tooltip('show');
+						});
 				}
 			}
 		});
@@ -2894,6 +3267,9 @@
 		// in the builder, instead of Catalog > Information.
 		if (CFG.ownerInformationId) {
 			html += statusSelectHtml('data-owner="status"' + (CFG.canEditOwner ? '' : ' disabled'), state.owner.status);
+			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_name', 'Name')) + '</label>' +
+				'<input type="text" class="lp-input" data-owner-title value="' + esc(ownerTitle()) + '"' +
+				(CFG.canEditOwnerTitles && CFG.urls.ownerNames ? '' : ' disabled') + ' /></div>';
 			html += descriptionGroupHtml('data-owner-desc', state.owner.descriptions || {}, !CFG.canEditOwner);
 		}
 
@@ -2933,6 +3309,16 @@
 	}
 
 	function bindSettings(container) {
+		var titleInput = container.querySelector('[data-owner-title]');
+
+		if (titleInput) {
+			titleInput.addEventListener('input', function () {
+				if (String(ownerTitle()) === String(titleInput.value) && !ui.pendingOwnerTitle) return;
+
+				markOwnerTitleDirty(titleInput.value);
+			});
+		}
+
 		container.querySelectorAll('[data-page]').forEach(function (input) {
 			var key = input.getAttribute('data-page');
 			var refresh = ['status', 'chrome', 'is_home', 'noindex', 'custom_css'].indexOf(key) !== -1;
@@ -2950,10 +3336,6 @@
 					pushHistory();
 				}
 				state.page[key] = value;
-
-				if (key === 'name') {
-					$('lp-name-input').value = value;
-				}
 
 				if (key === 'status') {
 					updateStatusBadge();
@@ -3044,7 +3426,6 @@
 
 				renderProperties();
 				renderNavigator();
-				syncNameInput();
 
 				reloadIframe();
 			};
@@ -3085,10 +3466,18 @@
 		});
 	}
 
+	function publicPreviewBaseFor(languageId) {
+		var bases = CFG.previewPublicBases || {};
+
+		return bases[languageId] || CFG.previewPublicBase || ui.previewBase;
+	}
+
 	function updatePreviewLink() {
 		var link = $('lp-preview-link');
 
-		if (link) link.href = ui.previewBase;
+		// The Preview tab is a clean storefront page, not another editor canvas.
+		// A fresh URL also defeats browser caching of the preview HTML.
+		if (link) link.href = publicPreviewBaseFor(ui.lang) + '&_=' + Date.now();
 	}
 
 	function refreshToken(callback) {
@@ -3108,6 +3497,14 @@
 					Object.keys(CFG.previewBases || {}).forEach(function (languageId) {
 						CFG.previewBases[languageId] = replace(CFG.previewBases[languageId], json.token);
 					});
+
+					Object.keys(CFG.previewPublicBases || {}).forEach(function (languageId) {
+						CFG.previewPublicBases[languageId] = replace(CFG.previewPublicBases[languageId], json.token);
+					});
+
+					if (CFG.previewPublicBase) {
+						CFG.previewPublicBase = replace(CFG.previewPublicBase, json.token);
+					}
 
 					ui.previewBase = replace(ui.previewBase, json.token);
 					ui.tokenAt = Date.now();
@@ -3159,8 +3556,6 @@
 		if (frame) {
 			frame.src = buildPreviewUrl('_=' + Date.now());
 		}
-
-		initNameInput();
 
 		// Properties tabs (Content / Style / Advanced).
 		var propsTabs = $('lp-props-tabs');

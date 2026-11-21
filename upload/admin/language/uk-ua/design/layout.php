@@ -29,7 +29,7 @@ $_['text_success'] = 'Успіх: Ви змінили макети!';
 $_['text_list_subtitle'] = 'Керуйте призначеннями макетів сторінок';
 
 // Builder
-$_['heading_title_builder']   = 'Конструктор макетів';
+$_['heading_title_builder']   = 'Builder макета';
 $_['text_modules_palette']    = 'Модулі';
 $_['text_drop_zone']          = 'Перетягніть модуль сюди';
 $_['text_no_modules']         = 'Немає призначених модулів';

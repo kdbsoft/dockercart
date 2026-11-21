@@ -1,7 +1,7 @@
 <?php
 // Heading
 $_['heading_title']  = 'Лендінги';
-$_['heading_builder'] = 'Конструктор сторінок';
+$_['heading_builder'] = 'Builder сторінки';
 
 // Text
 $_['text_success']            = 'Налаштування лендінгів збережено!';
@@ -96,12 +96,19 @@ $_['text_empty_hint']          = 'Перетягніть блок із ліво�
 $_['text_hidden_block']      = 'Секція прихована';
 $_['text_hidden_device']     = 'Прихована на цьому пристрої';
 $_['text_search_blocks']     = 'Пошук секцій…';
-$_['text_choose_image']      = 'Вибрати зображення';
+$_['text_choose_image']      = 'Вибрати';
 $_['text_clear']             = 'Очистити';
 $_['text_add_row']           = 'Додати';
 $_['text_pick_products']     = 'Пошук товарів…';
 $_['text_pick_category']     = 'Пошук категорій…';
 $_['text_pick_banner']       = 'Вибрати банер';
+$_['text_link_custom']       = 'Довільне посилання';
+$_['text_link_product']      = 'Товар';
+$_['text_link_category']     = 'Категорія';
+$_['text_link_manufacturer'] = 'Виробник';
+$_['text_link_information']  = 'Інформаційна сторінка';
+$_['text_link_blog']         = 'Запис блогу';
+$_['text_link_search']       = 'Пошук для вибору…';
 $_['text_error_save']        = 'Не вдалося зберегти сторінку';
 $_['error_meta_length']       = 'Мета-теги мають бути не довшими за 255 символів!';
 $_['text_conflict']          = 'Сторінку змінено в іншій вкладці. Перезавантажте конструктор.';
@@ -303,6 +310,32 @@ $_['option_icon_wallet']        = 'Гаманець';
 $_['option_icon_landmark']      = 'Банк';
 $_['option_icon_refresh_cw']    = 'Повернення';
 $_['option_icon_store']         = 'Магазин';
+
+// Testimonials, stats and pricing blocks
+$_['block_testimonials']     = 'Відгуки';
+$_['block_stats']            = 'Цифри та показники';
+$_['block_pricing']          = 'Тарифи';
+$_['field_quotes']           = 'Відгуки';
+$_['field_quote']            = 'Текст відгуку';
+$_['field_author']           = 'Автор';
+$_['field_role']             = 'Посада / компанія';
+$_['field_rating']           = 'Оцінка';
+$_['option_rating_0']        = 'Без оцінки';
+$_['option_rating_1']        = '1 зірка';
+$_['option_rating_2']        = '2 зірки';
+$_['option_rating_3']        = '3 зірки';
+$_['option_rating_4']        = '4 зірки';
+$_['option_rating_5']        = '5 зірок';
+$_['field_value']            = 'Значення';
+$_['field_label']            = 'Підпис';
+$_['field_plans']            = 'Тарифи';
+$_['field_plan']             = 'Назва тарифу';
+$_['field_price']            = 'Ціна';
+$_['field_description']      = 'Опис';
+$_['field_features']         = 'Можливості (по рядку на пункт)';
+$_['field_featured']         = 'Виділити тариф';
+$_['option_plan_standard']   = 'Звичайний';
+$_['option_plan_featured']   = 'Популярний';
 
 // Site Settings panel in the landing builder
 $_['text_site_settings'] = 'Налаштування сайту';

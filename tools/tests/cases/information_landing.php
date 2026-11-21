@@ -32,6 +32,19 @@ const INFORMATION_LANDING_KEYS = [
 	'text_builder_cta_hint',
 	'text_builder_pending',
 	'text_builder_badge',
+	'text_builder_badge_hint',
+];
+
+const INFORMATION_BUILDER_BADGE_HINTS = [
+	'en-gb' => 'The page content is composed from sections in the Builder.',
+	'ru-ua' => 'Содержимое страницы собрано из секций в Builder.',
+	'uk-ua' => 'Вміст сторінки складено з секцій у Builder.',
+];
+
+const INFORMATION_BUILDER_OPEN_LABELS = [
+	'en-gb' => 'Open in Builder',
+	'ru-ua' => 'Открыть в Builder',
+	'uk-ua' => 'Відкрити в Builder',
 ];
 
 /**
@@ -292,6 +305,7 @@ return [
 		$list = repo_file('upload/admin/view/template/catalog/information_list.twig');
 
 		Assert::contains('information.use_builder', $list, 'builder badge in the list');
+		Assert::contains('</i> {{ text_builder_badge }}</span>', $list, 'the badge must show the Builder label');
 	},
 
 	'builder shell: the settings slide-over drops owner-managed fields' => static function (): void {
@@ -313,12 +327,18 @@ return [
 			Assert::true(array_key_exists($key, $english), 'en-gb misses ' . $key);
 		}
 
+		Assert::same('Builder', $english['text_builder_badge']);
+		Assert::same(INFORMATION_BUILDER_BADGE_HINTS['en-gb'], $english['text_builder_badge_hint']);
+
 		foreach (INFORMATION_LANDING_LOCALES as $locale) {
 			$localized = read_language_file(REPO_ROOT . '/upload/admin/language/' . $locale . '/catalog/information.php');
 
 			$missing = array_values(array_diff(INFORMATION_LANDING_KEYS, array_keys($localized)));
 
 			Assert::same([], $missing, $locale . ' misses information builder keys');
+			Assert::same($english['text_builder_badge'], $localized['text_builder_badge'], $locale . ' badge label');
+			Assert::same(INFORMATION_BUILDER_BADGE_HINTS[$locale], $localized['text_builder_badge_hint'], $locale . ' badge tooltip');
+			Assert::same(INFORMATION_BUILDER_OPEN_LABELS[$locale], $localized['button_open_builder'], $locale . ' open button');
 
 			$landing = read_language_file(REPO_ROOT . '/upload/admin/language/' . $locale . '/design/landing.php');
 

@@ -53,8 +53,8 @@ return [
 		Assert::contains("html_entity_decode((string)\$landing['name']", $src, 'the builder name is decoded for display');
 		Assert::contains("html_entity_decode((string)(\$row[\$key] ?? '')", $src, 'the builder meta fields are decoded for display');
 
-		Assert::contains('{{ landing.name|escape }}', $twig, 'the top-bar name input escapes the decoded value');
-		Assert::contains("value=\"{{ landing.name|escape }}\"", $twig, 'the input attribute escapes the decoded value');
+		Assert::contains('{{ landing.name|escape }}', $twig, 'the decoded name is escaped in the document title');
+		Assert::notContains('lp-name-input', $twig, 'the top-bar name field is gone');
 	},
 
 	'templates: plain text is escaped, richtext stays raw' => static function (): void {

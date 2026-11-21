@@ -9,6 +9,9 @@
 {% endfor %}
 <link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
 <link href="view/stylesheet/dockercart_tokens.css?v={{ admin_css_version }}" type="text/css" rel="stylesheet" />
+{# The Image Manager is injected from common/filemanager (the admin shell is
+   intentionally absent here), so its stylesheet must be present too. #}
+<link href="view/stylesheet/stylesheet.css?v={{ admin_stylesheet_version }}" type="text/css" rel="stylesheet" />
 <style>
 	/* Bootstrap 3 sets html{font-size:10px}, which shrinks every rem-based
 	   Tailwind utility on this page to 62.5%. Restore the 16px root so the
@@ -55,6 +58,16 @@ tailwind.config = { theme: { extend: { colors: {
 	.lp-field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; margin-bottom: 4px; display: block; }
 	.lp-input { width: 100%; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); padding: 6px 8px; font-size: 13px; color: var(--dc-gray-900); background: #fff; }
 	.lp-input:focus { outline: none; border-color: var(--dc-primary); box-shadow: 0 0 0 2px var(--dc-primary-ring); }
+	/* One height for every single-line control (textareas keep their rows). */
+	input.lp-input, select.lp-input { height: 32px; }
+	select.lp-input { appearance: none; -webkit-appearance: none; background-image: var(--dc-select-chevron); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+	/* Alignment segments reuse the input's height/border instead of tiny pills. */
+	.lp-align-group { display: inline-flex; align-items: stretch; overflow: hidden; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); background: #fff; height: 32px; }
+	.lp-align-group button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 100%; padding: 0 12px; font-size: 13px; line-height: 30px; color: var(--dc-gray-600); background: #fff; cursor: pointer; white-space: nowrap; }
+	.lp-align-group button + button { border-left: 1px solid var(--dc-border-soft); }
+	.lp-align-group button:hover { background: var(--dc-gray-50); }
+	.lp-align-group button[aria-pressed="true"] { background: var(--dc-blue-50); color: var(--dc-primary); font-weight: 600; }
+	.lp-align-group svg { width: 15px; height: 15px; }
 	.lp-invalid { border-color: var(--dc-danger) !important; }
 	#modal-image { z-index: 100000; }
 	/* Bootstrap modal needs the backdrop above our panels */
@@ -98,10 +111,6 @@ tailwind.config = { theme: { extend: { colors: {
 	.lp-card-add { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: none; align-items: center; justify-content: center; color: #111827; }
 	.lp-card-add svg { stroke-width: 1.5; }
 	.lp-card:hover .lp-card-add { display: inline-flex; }
-	/* Per-item usage count: how many blocks of this type are on the page.
-	   Vertically centered on the right; on hover it yields to the plus. */
-	.lp-card-count { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--dc-primary-light); color: var(--dc-primary-active); font-size: 10px; font-weight: 700; line-height: 1; }
-	.lp-card:hover .lp-card-count { display: none; }
 
 	/* ---- Properties tabs (Content / Style / Advanced) ---- */
 	.lp-prop-tab { flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent; }
@@ -133,13 +142,10 @@ tailwind.config = { theme: { extend: { colors: {
 
 	{# ==================== TOP BAR ==================== #}
 	<header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center gap-3 shrink-0 z-20" style="min-height:50px">
-		<a href="{{ back }}" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 shrink-0" data-toggle="tooltip" title="{{ i18n.text_back }}">
+		<a href="{{ back }}" class="flex items-center gap-1 p-1 text-gray-500 hover:text-gray-700 no-underline hover:no-underline focus:no-underline shrink-0" aria-label="{{ i18n.text_back }}">
 			<i data-lucide="arrow-left" class="w-4 h-4"></i>
+			<span class="font-semibold whitespace-nowrap">{{ i18n.text_back }}</span>
 		</a>
-
-		<input type="text" id="lp-name-input" value="{{ landing.name|escape }}"
-			class="border border-gray-300 rounded px-2 py-1 text-sm w-56 focus:outline-none focus:border-blue-400 shrink-0"
-			placeholder="{{ i18n.entry_name }}" />
 
 		<span id="lp-status-badge" class="shrink-0 text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 hidden"></span>
 
@@ -178,7 +184,7 @@ tailwind.config = { theme: { extend: { colors: {
 		</span>
 		{% endif %}
 
-		<a id="lp-preview-link" href="{{ preview_base }}" target="_blank" rel="noopener" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
+		<a id="lp-preview-link" href="{{ preview_public_base }}" target="_blank" rel="noopener" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
 			<i data-lucide="external-link" class="w-3.5 h-3.5"></i> <span class="max-sm:hidden">{{ i18n.text_preview }}</span>
 		</a>
 
@@ -212,8 +218,7 @@ tailwind.config = { theme: { extend: { colors: {
 							data-search="{{ i18n[block.name]|lower }} {{ code }}" title="{{ i18n[block.name] }}">
 							<span class="lp-card-icon"><i data-lucide="{{ block.icon }}" class="w-4 h-4"></i></span>
 							<span class="lp-card-label">{{ i18n[block.name] }}</span>
-								<span class="lp-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
-								<span class="lp-card-count hidden" data-count-for="{{ code }}">0</span>
+							<span class="lp-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
 						</div>
 						{% endif %}
 						{% endfor %}
@@ -348,6 +353,8 @@ window.DC_LANDING = {
 	},
 	previewBase: {{ preview_base|json_encode|raw }},
 	previewBases: {{ preview_bases|json_encode|raw }},
+	previewPublicBase: {{ preview_public_base|json_encode|raw }},
+	previewPublicBases: {{ preview_public_bases|json_encode|raw }},
 	ownerInformationId: {{ owner_information_id|json_encode|raw }},
 	ownerTitles: {{ owner_titles|json_encode|raw }},
 	canEditOwnerTitles: {{ can_edit_owner_titles ? 'true' : 'false' }},

@@ -11,3 +11,5 @@ $_['text_view_all']       = 'View all';
 $_['text_previous']       = 'Previous';
 $_['text_next']           = 'Next';
 $_['text_products']       = 'Products';
+$_['text_preview_mode']   = 'Preview mode — blocks are not editable here';
+$_['text_back_to_builder'] = 'Back to Builder';

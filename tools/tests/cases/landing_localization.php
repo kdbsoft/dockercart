@@ -79,6 +79,8 @@ function landing_builder_ui_keys(): array {
 		'text_view_desktop', 'text_view_tablet', 'text_view_mobile', 'text_add_section',
 		'text_hidden_block', 'text_hidden_device', 'text_search_blocks', 'text_choose_image',
 		'text_clear', 'text_add_row', 'text_pick_products', 'text_pick_category', 'text_pick_banner',
+		'text_link_custom', 'text_link_product', 'text_link_category', 'text_link_manufacturer',
+		'text_link_information', 'text_link_blog', 'text_link_search',
 		'text_error_save', 'text_conflict', 'text_back', 'text_status_draft', 'text_status_published',
 		'text_created', 'text_copy', 'text_no_banners', 'button_save', 'button_cancel',
 		'entry_name', 'entry_slug', 'entry_meta_title', 'entry_meta_description', 'entry_meta_keyword',
@@ -153,6 +155,22 @@ return [
 			foreach (landing_language_keys(LANDING_ADMIN_LANGUAGE, $locale) as $key => $value) {
 				Assert::true(trim((string)$value) !== '', $locale . ':' . $key . ' is empty');
 			}
+		}
+	},
+
+	'admin: page and layout builders are named Builder in every locale' => static function (): void {
+		$headings = [
+			'en-gb' => ['page' => 'Page Builder', 'layout' => 'Layout Builder'],
+			'ru-ua' => ['page' => 'Builder страницы', 'layout' => 'Builder макета'],
+			'uk-ua' => ['page' => 'Builder сторінки', 'layout' => 'Builder макета'],
+		];
+
+		foreach ($headings as $locale => $expected) {
+			$landing = landing_language_keys(LANDING_ADMIN_LANGUAGE, $locale);
+			$layout = read_language_file(REPO_ROOT . '/upload/admin/language/' . $locale . '/design/layout.php');
+
+			Assert::same($expected['page'], $landing['heading_builder'], $locale . ' page builder heading');
+			Assert::same($expected['layout'], $layout['heading_title_builder'], $locale . ' layout builder heading');
 		}
 	},
 
