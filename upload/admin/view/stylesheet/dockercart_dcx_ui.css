@@ -2838,6 +2838,8 @@ div.dcx-field.required > .dcx-label:before {
 }
 .report-card--wide {
     column-span: all;
+    /* Column-spanning cards lose the preceding card's collapsed bottom margin. */
+    margin-top: 16px;
 }
 .report-chart-wrap {
     position: relative;
