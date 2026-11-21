@@ -4,90 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ heading_title_builder }} — {% set first_desc = layout_descriptions|first %}{{ first_desc.name ?? '' }}</title>
+<link rel="icon" href="{{ favicon_url }}" />
+<link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet" />
+<link href="view/stylesheet/dockercart_tokens.css?v={{ admin_css_version }}" type="text/css" rel="stylesheet" />
+<link href="view/stylesheet/dockercart_layout_builder.css?v={{ builder_css_version }}" type="text/css" rel="stylesheet" />
 <script src="view/javascript/tailwind-cdn.min.js"></script>
+<script>
+/* DockerCart admin palette: the builder reuses the panel's muted colours
+   (primary #5b7ea8, success #5a9a6d, danger #c77070) instead of Tailwind's
+   bright defaults, so it reads as part of the admin theme. */
+tailwind.config = { theme: { extend: { colors: {
+	blue: { 50: '#f0f4f8', 100: '#dce6f0', 200: '#c3d3e3', 300: '#9db4cc', 400: '#7e97b5', 500: '#5b7ea8', 600: '#5b7ea8', 700: '#4a6d96', 800: '#3d5d82', 900: '#2f485f' },
+	emerald: { 50: '#e8f0eb', 100: '#d5e2da', 500: '#5a9a6d', 600: '#5a9a6d', 700: '#4d8c60' },
+	red: { 50: '#f5e4e4', 100: '#eccaca', 500: '#c77070', 600: '#c77070', 700: '#8b3f3f' },
+	amber: { 50: '#f5f0e0', 100: '#ece0c2', 500: '#c4a040', 600: '#c4a040', 700: '#7a6428' }
+}, fontFamily: {
+	sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+} } } };
+</script>
 <script src="view/javascript/lucide.min.js"></script>
 <script src="view/javascript/sortablejs/Sortable.min.js"></script>
-<style>
-	.zone-drop-area { min-height: 60px; transition: background-color 0.2s; }
-	.zone-drop-area.sortable-ghost { opacity: 0.4; background-color: #e2e8f0; }
-	.zone-drop-area .sortable-ghost { opacity: 0.3; }
-	.module-card { cursor: grab; transition: box-shadow 0.15s, transform 0.15s; }
-	.module-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-	.module-card.sortable-chosen { box-shadow: 0 4px 16px rgba(59,130,246,0.3); transform: scale(1.02); z-index: 10; }
-	.module-card.sortable-drag { opacity: 0.7; }
-	.palette-item { cursor: grab; transition: background-color 0.15s; }
-	.palette-item:hover { background-color: #f1f5f9; }
-	.palette-item.sortable-chosen { background-color: #dbeafe; }
-	.module-card.selected { ring: 2px solid #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
-	#page-canvas { max-width: 100%; }
-	#canvas-container.viewport-tablet #page-canvas { max-width: 768px; }
-	#canvas-container.viewport-mobile #page-canvas { max-width: 375px; }
-	#canvas-container.viewport-tablet .responsive-lg-only,
-	#canvas-container.viewport-mobile .responsive-lg-only { opacity: 0.35; }
-	#canvas-container.viewport-tablet .responsive-lg-only .zone-hidden-badge,
-	#canvas-container.viewport-mobile .responsive-lg-only .zone-hidden-badge { display: inline !important; }
-	.toast { animation: toastIn 0.3s ease-out; }
-	@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-	.lang-tab { transition: all 0.15s; }
-	.lang-tab.active { background-color: #3b82f6; color: white; border-radius: 4px; }
-</style>
 </head>
 <body class="h-screen flex flex-col bg-gray-100 font-sans text-sm text-gray-800">
 
 {# ==================== TOP BAR ==================== #}
-<header class="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shrink-0 z-10" style="min-height:48px">
-	<a href="{{ back }}" class="flex items-center gap-1 text-gray-500 hover:text-gray-700 shrink-0" data-toggle="tooltip" title="{{ text_back_to_layouts }}">
+<header class="bg-white border-b border-gray-200 px-3 py-2 flex items-center gap-3 shrink-0 z-10" style="min-height:50px">
+	<a href="{{ back }}" class="flex items-center gap-1 p-1 text-gray-500 hover:text-gray-700 no-underline hover:no-underline focus:no-underline shrink-0" aria-label="{{ text_back_to_layouts }}">
 		<i data-lucide="arrow-left" class="w-4 h-4"></i>
+		<span class="font-semibold whitespace-nowrap">{{ text_back }}</span>
 	</a>
-
-	{% set first_lang_id = languages|first.language_id %}
-	<div class="flex items-center gap-1 shrink-0">
-		<input type="text" id="layout-name-input"
-			value="{{ attribute(layout_descriptions, first_lang_id).name ?? '' }}"
-			placeholder="{{ entry_name }}"
-			class="border border-gray-300 rounded px-2 py-1 text-sm w-48 focus:outline-none focus:border-blue-400"
-			data-language-id="{{ first_lang_id }}">
-	</div>
-
-	{% if languages|length > 1 %}
-	<div class="flex items-center gap-0.5 shrink-0" id="lang-tabs">
-		{% for language in languages %}
-		<button type="button" class="lang-tab px-1.5 py-0.5 text-xs text-gray-500 hover:text-gray-700 {% if loop.first %}active{% endif %}"
-			data-lang-id="{{ language.language_id }}"
-			data-lang-name="{{ attribute(layout_descriptions, language.language_id).name ?? '' }}">
-			{{ language.code|split('-')|first|upper }}
-		</button>
-		{% endfor %}
-	</div>
-	{% endif %}
 
 	<div class="flex-1"></div>
 
+	<div id="save-state" class="text-xs text-gray-400 shrink-0 whitespace-nowrap" aria-live="polite"></div>
+
 	<div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 shrink-0" id="viewport-switcher">
-		<button type="button" data-viewport="desktop" class="px-2 py-1 rounded-md text-xs font-medium bg-white shadow-sm text-gray-700" data-toggle="tooltip" title="Desktop">
+		<button type="button" data-viewport="desktop" aria-pressed="true" aria-label="{{ text_view_desktop }}" class="px-2 py-1 rounded-md text-xs font-medium bg-white shadow-sm text-gray-700">
 			<i data-lucide="monitor" class="w-3.5 h-3.5"></i>
 		</button>
-		<button type="button" data-viewport="tablet" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="Tablet">
+		<button type="button" data-viewport="tablet" aria-pressed="false" aria-label="{{ text_view_tablet }}" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700">
 			<i data-lucide="tablet" class="w-3.5 h-3.5"></i>
 		</button>
-		<button type="button" data-viewport="mobile" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700" data-toggle="tooltip" title="Mobile">
+		<button type="button" data-viewport="mobile" aria-pressed="false" aria-label="{{ text_view_mobile }}" class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700">
 			<i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
 		</button>
 	</div>
 
-	<a href="{{ preview_url }}" target="_blank" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ text_preview_page }}">
-		<i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-		<span class="hidden sm:inline">{{ text_preview_page }}</span>
-	</a>
-
-	<a href="{{ classic_url }}" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ text_back_to_classic }}">
-		<i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-		<span class="hidden sm:inline">{{ text_switch_to_classic }}</span>
-	</a>
-
-	<button type="button" id="btn-save" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded shrink-0 disabled:opacity-50">
+	<button type="button" id="btn-save" class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-sm shrink-0 disabled:opacity-50">
 		<i data-lucide="save" class="w-3.5 h-3.5"></i>
-		<span class="hidden sm:inline">{{ button_builder_save }}</span>
+		<span>{{ button_builder_save }}</span>
 	</button>
 </header>
 
@@ -96,80 +61,102 @@
 
 {# --- LEFT PANEL: Module Palette --- #}
 <aside class="w-56 lg:w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
-	<div class="px-3 py-2.5 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
-		<i data-lucide="box" class="w-3.5 h-3.5"></i>
+	<div class="px-3 py-2 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+		<i data-lucide="boxes" class="w-3.5 h-3.5"></i>
 		{{ text_modules_palette }}
 	</div>
 
 	<div class="px-2 py-1.5 border-b border-gray-100">
-		<input type="text" id="module-search" placeholder="Search modules..."
-			class="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400">
+		<input type="text" id="module-search" placeholder="{{ text_search_modules }}" class="lb-input">
 	</div>
 
-	<div class="flex-1 overflow-y-auto p-1.5" id="module-palette">
+	<div class="flex-1 overflow-y-auto lb-scroll p-1.5 min-h-0" id="module-palette">
 		{% for extension in extensions %}
-		<div class="palette-group-header text-xs font-semibold text-gray-400 uppercase px-2 py-1.5 tracking-wide" data-group-name="{{ extension.name|lower }}">{{ extension.name }}</div>
-		{% if extension.module %}
-			{% for module in extension.module %}
-			{% set display_name = extension.name ~ ' → ' ~ module.name %}
-			<div class="palette-item flex items-center gap-2 px-2 py-1.5 rounded text-gray-700 text-xs cursor-grab"
-				data-palette-code="{{ module.code }}"
-				data-palette-name="{{ module.name }}"
-				data-palette-display="{{ display_name }}">
-				<i data-lucide="grip-vertical" class="w-3 h-3 text-gray-300 shrink-0"></i>
-				<span class="truncate">{{ display_name }}</span>
+		<details class="lb-group" data-group="{{ extension.code }}" open>
+			<summary><span class="lb-group-title"><i data-lucide="{{ extension.icon }}" class="w-3.5 h-3.5 shrink-0"></i><span>{{ extension.name }}</span></span><i data-lucide="chevron-down" class="w-3 h-3 lb-chev"></i></summary>
+			<div class="lb-grid">
+				{% if extension.module %}
+					{% for module in extension.module %}
+					{% set display_name = extension.name ~ ' → ' ~ module.name %}
+					<div class="palette-item lb-card" role="button" tabindex="0"
+						data-palette-code="{{ module.code }}"
+						data-palette-name="{{ module.name }}"
+						data-palette-display="{{ display_name }}"
+						data-extension-icon="{{ extension.icon }}"
+						data-search="{{ (extension.name ~ ' ' ~ module.name ~ ' ' ~ module.code)|lower }}">
+						<span class="lb-card-icon"><i data-lucide="{{ extension.icon }}" class="w-4 h-4"></i></span>
+						<span class="lb-card-label">{{ display_name }}</span>
+						<span class="lb-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
+						<span class="lb-card-count hidden" data-count-for="{{ module.code }}">0</span>
+					</div>
+					{% endfor %}
+				{% else %}
+				<div class="palette-item lb-card" role="button" tabindex="0"
+					data-palette-code="{{ extension.code }}"
+				data-palette-name="{{ extension.name }}"
+					data-extension-icon="{{ extension.icon }}"
+					data-search="{{ (extension.name ~ ' ' ~ extension.code)|lower }}">
+					<span class="lb-card-icon"><i data-lucide="{{ extension.icon }}" class="w-4 h-4"></i></span>
+					<span class="lb-card-label">{{ extension.name }}</span>
+					<span class="lb-card-add"><i data-lucide="plus" class="w-3.5 h-3.5"></i></span>
+					<span class="lb-card-count hidden" data-count-for="{{ extension.code }}">0</span>
+				</div>
+				{% endif %}
 			</div>
-			{% endfor %}
-		{% else %}
-		<div class="palette-item flex items-center gap-2 px-2 py-1.5 rounded text-gray-700 text-xs cursor-grab"
-			data-palette-code="{{ extension.code }}"
-			data-palette-name="{{ extension.name }}">
-			<i data-lucide="grip-vertical" class="w-3 h-3 text-gray-300 shrink-0"></i>
-			<span class="truncate">{{ extension.name }}</span>
-		</div>
-		{% endif %}
+		</details>
 		{% endfor %}
 	</div>
 </aside>
 
 {# --- CENTER: Page Canvas --- #}
-<main class="flex-1 overflow-auto flex justify-center p-4 lg:p-6 bg-gray-100" id="canvas-container">
+<main class="flex-1 overflow-auto flex justify-center bg-gray-200 p-3" id="canvas-container">
 	<div class="w-full transition-all duration-200" id="page-canvas">
+
+		{# Modules outside the first route's canvas (another route's columns or a
+		   custom position) are submitted back untouched — otherwise Save deletes them. #}
+		{% if hidden_modules %}
+		<div id="hidden-modules">
+			{% for module in hidden_modules %}
+			<input type="hidden" name="hidden_module[{{ loop.index0 }}][code]" value="{{ module.code }}">
+			<input type="hidden" name="hidden_module[{{ loop.index0 }}][position]" value="{{ module.position }}">
+			<input type="hidden" name="hidden_module[{{ loop.index0 }}][sort_order]" value="{{ module.sort_order }}">
+			{% endfor %}
+		</div>
+		{% endif %}
 
 		{% macro renderZone(zone_id, zone_title, modules, text_drop_zone, text_add_module, responsive, hiddenMobileText) %}
 		<div class="mb-4{% if responsive == 'lg_only' %} responsive-lg-only{% endif %}">
-			<div class="flex items-center justify-between mb-1.5">
-				<div class="flex items-center gap-2">
-					<span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ zone_title }}</span>
-					{% if responsive == 'lg_only' %}
-					<span class="zone-hidden-badge text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full" style="display:none">{{ hiddenMobileText }}</span>
-					{% endif %}
-				</div>
-				<button type="button" class="zone-add-btn text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+			<div class="zone-head flex items-center justify-between gap-2 mb-1.5">
+				<span class="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">{{ zone_title }}</span>
+				<button type="button" class="zone-add-btn text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 shrink-0 whitespace-nowrap"
 					data-zone="{{ zone_id }}">
-					<i data-lucide="plus" class="w-3 h-3"></i> {{ text_add_module }}
+					<i data-lucide="plus" class="w-3 h-3"></i><span class="zone-add-label">{{ text_add_module }}</span>
 				</button>
 			</div>
-			<div class="zone-drop-area bg-white border-2 border-dashed border-gray-200 rounded-lg p-2 min-h-[60px] transition-colors"
+			{% if responsive == 'lg_only' %}
+			<div class="zone-hidden-note mb-1 rounded border border-dashed border-gray-300 bg-gray-50 px-2 py-1 text-[10px] text-gray-500">{{ hiddenMobileText }}</div>
+			{% endif %}
+			<div class="zone-drop-area bg-white border-2 border-dashed border-gray-200 rounded-lg p-2 min-h-[80px] transition-colors"
 				data-zone="{{ zone_id }}"{% if responsive %} data-responsive="{{ responsive }}"{% endif %}>
 				{% if modules is empty %}
-				<div class="zone-empty flex items-center justify-center h-14 text-xs text-gray-400">
-					{{ text_drop_zone }}
+				<div class="zone-empty flex items-center justify-center gap-2 h-16 text-xs text-gray-400">
+					<i data-lucide="plus" class="w-3.5 h-3.5"></i> {{ text_drop_zone }}
 				</div>
 				{% endif %}
 				{% for module in modules %}
-				<div class="module-card flex items-center gap-2 bg-white border border-gray-200 rounded px-2 py-1.5 mb-1"
+				<div class="module-card flex items-center gap-3 bg-white border border-gray-200 rounded px-3 py-2 mb-1.5"
 					data-module-idx="{{ module.idx }}"
 					data-module-code="{{ module.code }}"
 					data-module-name="{{ module.name }}"
 					data-module-edit="{{ module.edit }}">
 					<i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-gray-300 shrink-0 cursor-grab"></i>
-					<span class="flex-1 truncate text-xs font-medium">{{ module.display_name ?? module.name }}</span>
-					<button type="button" class="module-edit-btn text-gray-400 hover:text-blue-600 p-0.5" data-module-idx="{{ module.idx }}" data-toggle="tooltip" title="{{ text_edit_module }}">
-						<i data-lucide="settings" class="w-3 h-3"></i>
+					<i data-lucide="{{ module.icon ?? 'box' }}" class="w-4 h-4 text-blue-500 shrink-0"></i>
+					<span class="flex-1 truncate text-sm font-medium">{{ module.display_name ?? module.name }}</span>
+					<button type="button" class="module-edit-btn text-gray-400 hover:text-blue-600 p-1" data-module-idx="{{ module.idx }}" aria-label="{{ text_edit_module }}">
+						<i data-lucide="settings" class="w-3.5 h-3.5"></i>
 					</button>
-					<button type="button" class="module-remove-btn text-gray-400 hover:text-red-600 p-0.5" data-module-idx="{{ module.idx }}" data-toggle="tooltip" title="{{ text_remove_module }}">
-						<i data-lucide="x" class="w-3 h-3"></i>
+					<button type="button" class="module-remove-btn text-gray-400 hover:text-red-600 p-1" data-module-idx="{{ module.idx }}" aria-label="{{ text_remove_module }}">
+						<i data-lucide="x" class="w-3.5 h-3.5"></i>
 					</button>
 				</div>
 				{% endfor %}
@@ -177,8 +164,26 @@
 		</div>
 		{% endmacro %}
 
+		{# The gap to Content Bottom lives on this block, so it is identical with
+		   and without side columns (whose zone wrappers carry their own mb-4). #}
+		{% macro renderMainContent(main_text) %}
+		<div class="flex-1 mb-4 bg-white border border-gray-200 rounded-lg flex items-center justify-center" style="min-height:120px">
+			<div class="text-center p-4">
+				<i data-lucide="columns-2" class="w-5 h-5 text-gray-300 mx-auto mb-1"></i>
+				<span class="text-xs text-gray-400">{{ main_text }}</span>
+			</div>
+		</div>
+		{% endmacro %}
+
 		{% import _self as builder %}
-		{% set hiddenMobileText = 'Hidden on Mobile & Tablet' %}
+		{% set hiddenMobileText = text_hidden_mobile %}
+
+		{% if hidden_modules_notice %}
+		<div class="mb-4 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+			<i data-lucide="info" class="w-4 h-4 shrink-0 mt-px"></i>
+			<span>{{ hidden_modules_notice }}</span>
+		</div>
+		{% endif %}
 
 		{% if 'content_top' in active_positions %}
 		{{ builder.renderZone('content_top', text_content_top, modules_by_position.content_top, text_drop_zone, text_add_module, '', hiddenMobileText) }}
@@ -190,31 +195,21 @@
 		{% set rightResp = responsive_map.column_right ?? '' %}
 
 		{% if hasLeft or hasRight %}
-		<div class="flex gap-4">
+		<div class="canvas-zone-row flex gap-4">
 			{% if hasLeft %}
-			<div class="w-1/3 lg:w-1/4">
+			<div class="zone-column w-1/3 lg:w-1/4">
 				{{ builder.renderZone('column_left', text_column_left, modules_by_position.column_left, text_drop_zone, text_add_module, leftResp, hiddenMobileText) }}
 			</div>
 			{% endif %}
-			<div class="flex-1 bg-white border border-gray-200 rounded-lg flex items-center justify-center" style="min-height:120px">
-				<div class="text-center p-4">
-					<i data-lucide="columns-2" class="w-5 h-5 text-gray-300 mx-auto mb-1"></i>
-					<span class="text-xs text-gray-400">Main Content Area</span>
-				</div>
-			</div>
+			{{ builder.renderMainContent(text_main_content) }}
 			{% if hasRight %}
-			<div class="w-1/3 lg:w-1/4">
+			<div class="zone-column w-1/3 lg:w-1/4">
 				{{ builder.renderZone('column_right', text_column_right, modules_by_position.column_right, text_drop_zone, text_add_module, rightResp, hiddenMobileText) }}
 			</div>
 			{% endif %}
 		</div>
 		{% else %}
-		<div class="flex-1 bg-white border border-gray-200 rounded-lg flex items-center justify-center" style="min-height:120px">
-			<div class="text-center p-4">
-				<i data-lucide="columns-2" class="w-5 h-5 text-gray-300 mx-auto mb-1"></i>
-				<span class="text-xs text-gray-400">Main Content Area</span>
-			</div>
-		</div>
+		{{ builder.renderMainContent(text_main_content) }}
 		{% endif %}
 
 		{% if 'content_bottom' in active_positions %}
@@ -226,13 +221,42 @@
 
 {# --- RIGHT PANEL: Properties --- #}
 <aside class="w-60 lg:w-72 bg-white border-l border-gray-200 flex flex-col shrink-0" id="properties-panel">
-	<div class="px-3 py-2.5 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+	{# --- PAGE SETTINGS SECTION (page name per language) --- #}
+	<div id="panel-title-page-settings" class="px-3 py-2.5 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+		<i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
+		{{ text_page_settings }}
+	</div>
+
+	<div class="px-3 py-3 border-b border-gray-100 space-y-2">
+		{% for language in languages %}
+		<div class="layout-name-row flex items-center gap-2">
+			<label class="text-xs text-gray-400 shrink-0">{{ language.code|split('-')|first|upper }}</label>
+			<input type="text" class="flex-1 min-w-0 lb-input"
+				data-language-id="{{ language.language_id }}"
+				value="{{ attribute(layout_descriptions, language.language_id).name ?? '' }}">
+		</div>
+		{% endfor %}
+	</div>
+
+	<div id="panel-title-routes" class="px-3 py-2.5 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
+		<i data-lucide="route" class="w-3.5 h-3.5"></i>
+		{{ text_routes }}
+		<span id="routes-count" class="bg-gray-200 text-gray-700 rounded-full px-1.5 text-[10px] leading-4 normal-case tracking-normal">{{ layout_routes|length }}</span>
+	</div>
+
+	<div id="panel-title-properties" class="hidden px-3 py-2.5 border-b border-gray-100 font-semibold text-xs text-gray-500 uppercase tracking-wider flex items-center gap-2">
 		<i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
 		{{ text_properties }}
 	</div>
 
-	<div class="flex-1 p-3" id="properties-content">
-		<div class="flex flex-col items-center justify-center h-full text-center text-gray-400">
+	<div class="flex-1 overflow-y-auto lb-scroll" id="properties-content">
+		<div class="p-3 border-b border-gray-100">
+			<div id="routes-list" class="flex flex-col gap-2"></div>
+			<button type="button" id="btn-route-add" class="mt-2 flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded">
+				<i data-lucide="plus" class="w-3.5 h-3.5"></i> {{ button_route_add }}
+			</button>
+		</div>
+		<div class="p-3 flex flex-col items-center justify-center text-center text-gray-400">
 			<i data-lucide="mouse-pointer-click" class="w-8 h-8 mb-2 text-gray-300"></i>
 			<p class="text-xs">{{ text_select_module }}</p>
 		</div>
@@ -240,13 +264,12 @@
 
 	<div id="properties-form" class="p-3 hidden">
 		<div class="mb-3">
-			<label class="block text-xs font-medium text-gray-500 mb-1">{{ entry_name }}</label>
-			<input type="text" id="prop-module-name" readonly
-				class="w-full border border-gray-200 rounded px-2 py-1 text-sm bg-gray-50 text-gray-600">
+			<label class="block text-xs font-medium text-gray-500 mb-1">{{ text_module_name }}</label>
+			<input type="text" id="prop-module-name" readonly class="lb-input">
 		</div>
 		<div class="mb-3">
 			<label class="block text-xs font-medium text-gray-500 mb-1">{{ text_position }}</label>
-			<select id="prop-position" class="w-full border border-gray-200 rounded px-2 py-1 text-sm">
+			<select id="prop-position" class="lb-input">
 				<option value="content_top">{{ text_content_top }}</option>
 				<option value="column_left">{{ text_column_left }}</option>
 				<option value="column_right">{{ text_column_right }}</option>
@@ -255,8 +278,7 @@
 		</div>
 		<div class="mb-4">
 			<label class="block text-xs font-medium text-gray-500 mb-1">{{ text_sort_order }}</label>
-			<input type="number" id="prop-sort-order" min="0"
-				class="w-full border border-gray-200 rounded px-2 py-1 text-sm">
+			<input type="number" id="prop-sort-order" min="0" class="lb-input">
 		</div>
 		<div class="flex flex-col gap-2">
 			<button type="button" id="prop-edit-btn"
@@ -280,37 +302,31 @@
 <script>
 window.DOCKERCART_BUILDER = {
 	saveUrl: {{ action|json_encode|raw }},
-	classicUrl: {{ classic_url|json_encode|raw }},
-	backUrl: {{ back|json_encode|raw }},
-	previewUrl: {{ preview_url|json_encode|raw }},
 	userToken: {{ user_token|json_encode|raw }},
-	layoutId: {{ layout_id }},
-	languages: {{ languages|json_encode|raw }},
-	layoutDescriptions: {{ layout_descriptions|json_encode|raw }},
 	layoutRoutes: {{ layout_routes|json_encode|raw }},
 	layoutModules: {{ layout_modules|json_encode|raw }},
+	stores: {{ stores|json_encode|raw }},
 	activePositions: {{ active_positions|json_encode|raw }},
-	responsiveMap: {{ responsive_map|json_encode|raw }},
 	texts: {
 		dropZone: {{ text_drop_zone|json_encode|raw }},
-		addModule: {{ text_add_module|json_encode|raw }},
-		selectModule: {{ text_select_module|json_encode|raw }},
+		pickModule: {{ text_pick_module|json_encode|raw }},
+		moduleAdded: {{ text_module_added|json_encode|raw }},
+		unsaved: {{ text_unsaved_changes|json_encode|raw }},
+		saved: {{ text_saved|json_encode|raw }},
+		saving: {{ text_saving|json_encode|raw }},
+		unsavedConfirm: {{ text_unsaved_confirm|json_encode|raw }},
 		editModule: {{ text_edit_module|json_encode|raw }},
 		removeModule: {{ text_remove_module|json_encode|raw }},
-		position: {{ text_position|json_encode|raw }},
-		sortOrder: {{ text_sort_order|json_encode|raw }},
-		name: {{ entry_name|json_encode|raw }},
-		contentTop: {{ text_content_top|json_encode|raw }},
-		columnLeft: {{ text_column_left|json_encode|raw }},
-		columnRight: {{ text_column_right|json_encode|raw }},
-		contentBottom: {{ text_content_bottom|json_encode|raw }},
-		save: {{ button_builder_save|json_encode|raw }},
 		success: {{ text_success|json_encode|raw }},
-		saveError: 'Error saving layout',
-		hiddenMobile: 'Hidden on Mobile & Tablet'
+		store: {{ entry_store|json_encode|raw }},
+		route: {{ entry_route|json_encode|raw }},
+		defaultStore: {{ text_default|json_encode|raw }},
+		noRoutes: {{ text_no_routes|json_encode|raw }},
+		remove: {{ button_remove|json_encode|raw }},
+		saveError: {{ text_error_save|json_encode|raw }}
 	}
 };
 </script>
-<script src="view/javascript/dockercart_layout_builder.js"></script>
+<script src="view/javascript/dockercart_layout_builder.js?v={{ builder_js_version }}"></script>
 </body>
 </html>

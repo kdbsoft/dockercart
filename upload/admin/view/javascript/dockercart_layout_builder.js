@@ -5,33 +5,47 @@
 	var nextModuleIdx = config.layoutModules.length;
 	var selectedCardEl = null;
 	var sortables = [];
+	var dirty = false;
+	var saving = false;
+	var leaving = false;
+	var pendingZone = null;
+	var routes = (config.layoutRoutes || []).map(function(route) {
+		return {
+			store_id: String(route.store_id !== undefined ? route.store_id : 0),
+			route: route.route || ''
+		};
+	});
 
 	function init() {
 		lucide.createIcons();
 		initSortables();
 		initViewportSwitcher();
-		initLangTabs();
 		initModuleSearch();
 		initSaveButton();
 		initZoneAddButtons();
+		initPaletteAdd();
+		initDirtyTracking();
+		initShortcuts();
 		initCardEventDelegation();
 		initPropertiesPanel();
+		initRoutes();
+		updatePaletteCounts();
 	}
 
 	// ==================== SORTABLEJS ====================
 
 	function initSortables() {
-		var palette = document.getElementById('module-palette');
-		if (palette) {
-			var paletteSortable = new Sortable(palette, {
+		// One Sortable per palette group: Sortable only drags direct children
+		// of its container, and the cards live inside details > .lb-grid.
+		document.querySelectorAll('#module-palette .lb-grid').forEach(function(grid) {
+			var gridSortable = new Sortable(grid, {
 				group: { name: 'modules', pull: 'clone', put: false },
 				sort: false,
 				animation: 150,
-				filter: '.palette-group-header',
-				preventOnFilter: true
+				draggable: '.palette-item'
 			});
-			sortables.push(paletteSortable);
-		}
+			sortables.push(gridSortable);
+		});
 
 		var zones = document.querySelectorAll('.zone-drop-area');
 		zones.forEach(function(zone) {
@@ -46,6 +60,7 @@
 				},
 				onEnd: function() {
 					updateEmptyStates();
+					markDirty();
 				}
 			});
 			sortables.push(zoneSortable);
@@ -54,33 +69,32 @@
 
 	function handleDrop(evt) {
 		var item = evt.item;
-		var paletteCode = item.getAttribute('data-palette-code');
 
-		if (paletteCode) {
-			var zoneEl = evt.to.closest('.zone-drop-area') || evt.to;
-			var editUrl = buildEditUrl(paletteCode);
-			var paletteName = item.getAttribute('data-palette-name');
-			var paletteDisplay = item.getAttribute('data-palette-display') || paletteName;
-
-			setTimeout(function() {
-				var newCard = createModuleCard(paletteCode, paletteName, editUrl, paletteDisplay);
-				item.replaceWith(newCard);
-				lucide.createIcons();
-				updateEmptyStates();
-			}, 0);
-		} else {
+		if (!item.hasAttribute('data-palette-code')) {
 			updateEmptyStates();
+			return;
 		}
+
+		setTimeout(function() {
+			var meta = paletteMeta(item);
+			if (!meta) return;
+
+			var newCard = createModuleCard(meta.code, meta.name, buildEditUrl(meta.code), meta.display, meta.icon);
+			item.replaceWith(newCard);
+			lucide.createIcons();
+			updateEmptyStates();
+			markDirty();
+		}, 0);
 	}
 
 	// ==================== MODULE CARD ====================
 
-	function createModuleCard(code, name, editUrl, displayName) {
+	function createModuleCard(code, name, editUrl, displayName, icon) {
 		var idx = nextModuleIdx;
 		nextModuleIdx++;
 
 		var div = document.createElement('div');
-		div.className = 'module-card flex items-center gap-2 bg-white border border-gray-200 rounded px-2 py-1.5 mb-1';
+		div.className = 'module-card flex items-center gap-3 bg-white border border-gray-200 rounded px-3 py-2 mb-1.5';
 		div.setAttribute('data-module-idx', idx);
 		div.setAttribute('data-module-code', code);
 		div.setAttribute('data-module-name', name);
@@ -90,29 +104,34 @@
 		gripIcon.setAttribute('data-lucide', 'grip-vertical');
 		gripIcon.className = 'w-3.5 h-3.5 text-gray-300 shrink-0 cursor-grab';
 
+		var typeIcon = document.createElement('i');
+		typeIcon.setAttribute('data-lucide', icon || 'box');
+		typeIcon.className = 'w-4 h-4 text-blue-500 shrink-0';
+
 		var nameSpan = document.createElement('span');
-		nameSpan.className = 'flex-1 truncate text-xs font-medium';
+		nameSpan.className = 'flex-1 truncate text-sm font-medium';
 		nameSpan.textContent = displayName || name;
 
 		var editBtn = document.createElement('button');
 		editBtn.type = 'button';
-		editBtn.className = 'module-edit-btn text-gray-400 hover:text-blue-600 p-0.5';
-		editBtn.title = config.texts.editModule;
+		editBtn.className = 'module-edit-btn text-gray-400 hover:text-blue-600 p-1';
+		editBtn.setAttribute('aria-label', config.texts.editModule);
 		var editIcon = document.createElement('i');
 		editIcon.setAttribute('data-lucide', 'settings');
-		editIcon.className = 'w-3 h-3';
+		editIcon.className = 'w-3.5 h-3.5';
 		editBtn.appendChild(editIcon);
 
 		var removeBtn = document.createElement('button');
 		removeBtn.type = 'button';
-		removeBtn.className = 'module-remove-btn text-gray-400 hover:text-red-600 p-0.5';
-		removeBtn.title = config.texts.removeModule;
+		removeBtn.className = 'module-remove-btn text-gray-400 hover:text-red-600 p-1';
+		removeBtn.setAttribute('aria-label', config.texts.removeModule);
 		var removeIcon = document.createElement('i');
 		removeIcon.setAttribute('data-lucide', 'x');
-		removeIcon.className = 'w-3 h-3';
+		removeIcon.className = 'w-3.5 h-3.5';
 		removeBtn.appendChild(removeIcon);
 
 		div.appendChild(gripIcon);
+		div.appendChild(typeIcon);
 		div.appendChild(nameSpan);
 		div.appendChild(editBtn);
 		div.appendChild(removeBtn);
@@ -132,6 +151,40 @@
 		return url;
 	}
 
+	// Shared by drag&drop and click-to-add: both read the same palette data.
+	function paletteMeta(card) {
+		var code = card.getAttribute('data-palette-code');
+		if (!code) return null;
+
+		var name = card.getAttribute('data-palette-name') || code;
+
+		return {
+			code: code,
+			name: name,
+			display: card.getAttribute('data-palette-display') || name,
+			icon: card.getAttribute('data-extension-icon') || 'box'
+		};
+	}
+
+	// ==================== MODULE COUNT ====================
+
+	// Per-item usage counts in the palette (badges stay hidden while unused).
+	function updatePaletteCounts() {
+		var counts = {};
+
+		document.querySelectorAll('#page-canvas .module-card').forEach(function(card) {
+			var code = card.getAttribute('data-module-code');
+			if (code) counts[code] = (counts[code] || 0) + 1;
+		});
+
+		document.querySelectorAll('#module-palette [data-count-for]').forEach(function(badge) {
+			var total = counts[badge.getAttribute('data-count-for')] || 0;
+
+			badge.textContent = String(total);
+			badge.classList.toggle('hidden', total === 0);
+		});
+	}
+
 	// ==================== ZONE EMPTY STATES ====================
 
 	function updateEmptyStates() {
@@ -143,16 +196,19 @@
 			if (cards.length === 0) {
 				if (!existing) {
 					var emptyDiv = document.createElement('div');
-					emptyDiv.className = 'zone-empty flex items-center justify-center h-14 text-xs text-gray-400';
-					emptyDiv.textContent = config.texts.dropZone;
+					emptyDiv.className = 'zone-empty flex items-center justify-center gap-2 h-16 text-xs text-gray-400';
+					emptyDiv.innerHTML = '<i data-lucide="plus" class="w-3.5 h-3.5"></i> ' + config.texts.dropZone;
 					zone.appendChild(emptyDiv);
+					lucide.createIcons();
 				}
 			} else {
-				if (existing) {
+					if (existing) {
 					existing.remove();
 				}
 			}
 		});
+
+		updatePaletteCounts();
 	}
 
 	// ==================== CARD EVENT DELEGATION ====================
@@ -194,8 +250,8 @@
 		deselectModule();
 		selectedCardEl = cardEl;
 		cardEl.classList.add('selected');
-		cardEl.style.boxShadow = '0 0 0 2px #3b82f6';
-		cardEl.style.borderRadius = '5px';
+		cardEl.style.boxShadow = '0 0 0 2px #5b7ea8';
+		cardEl.style.borderRadius = '6px';
 
 		showProperties(cardEl);
 	}
@@ -216,14 +272,20 @@
 		}
 		cardEl.remove();
 		updateEmptyStates();
+		markDirty();
+	}
+
+	function setPanelMode(mode) {
+		var properties = mode === 'properties';
+
+		document.getElementById('properties-content').classList.toggle('hidden', properties);
+		document.getElementById('properties-form').classList.toggle('hidden', !properties);
+		document.getElementById('panel-title-routes').classList.toggle('hidden', properties);
+		document.getElementById('panel-title-properties').classList.toggle('hidden', !properties);
 	}
 
 	function showProperties(cardEl) {
-		var placeholder = document.getElementById('properties-content');
-		var form = document.getElementById('properties-form');
-
-		placeholder.classList.add('hidden');
-		form.classList.remove('hidden');
+		setPanelMode('properties');
 
 		var zone = cardEl.closest('.zone-drop-area');
 		var currentZone = zone ? zone.getAttribute('data-zone') : 'content_top';
@@ -245,8 +307,7 @@
 	}
 
 	function hideProperties() {
-		document.getElementById('properties-content').classList.remove('hidden');
-		document.getElementById('properties-form').classList.add('hidden');
+		setPanelMode('routes');
 	}
 
 	function initPropertiesPanel() {
@@ -316,6 +377,8 @@
 	}
 
 	function saveLayout() {
+		if (saving) return;
+
 		var modules = collectModules();
 		var body = new URLSearchParams();
 
@@ -325,32 +388,34 @@
 			body.append('layout_module[' + i + '][sort_order]', m.sort_order);
 		});
 
-		// Preserve existing routes
-		if (config.layoutRoutes) {
-			config.layoutRoutes.forEach(function(route, i) {
-				body.append('layout_route[' + i + '][store_id]', route.store_id);
-				body.append('layout_route[' + i + '][route]', route.route);
-			});
-		}
+		// Routes (edited in the Routes modal). The marker is always sent so that
+		// an emptied list clears the stored routes instead of preserving them.
+		body.append('layout_routes_sent', '1');
+		routes.forEach(function(route, i) {
+			body.append('layout_route[' + i + '][store_id]', route.store_id);
+			body.append('layout_route[' + i + '][route]', route.route);
+		});
 
-		// Layout name (current language)
-		var nameInput = document.getElementById('layout-name-input');
-		var langId = nameInput.getAttribute('data-language-id');
-		body.append('layout_description[' + langId + '][name]', nameInput.value);
-
-		// Other language names
-		var langTabs = document.querySelectorAll('.lang-tab');
-		langTabs.forEach(function(tab) {
-			var lid = tab.getAttribute('data-lang-id');
-			var lname = tab.getAttribute('data-lang-name');
-			if (lid && lid !== langId && lname) {
-				body.append('layout_description[' + lid + '][name]', lname);
+		// Layout name per language (Page Settings rows)
+		document.querySelectorAll('.layout-name-row input').forEach(function(input) {
+			var lid = input.getAttribute('data-language-id');
+			if (lid) {
+				body.append('layout_description[' + lid + '][name]', input.value);
 			}
 		});
 
+		// Modules outside this route's canvas are posted back untouched.
+		document.querySelectorAll('#hidden-modules input[name]').forEach(function(input) {
+			body.append(input.name, input.value);
+		});
+
 		var btnSave = document.getElementById('btn-save');
+		var btnLabel = btnSave.querySelector('span');
+		var saveLabel = btnLabel ? btnLabel.textContent : '';
+		saving = true;
 		btnSave.disabled = true;
 		btnSave.classList.add('opacity-50');
+		if (btnLabel) btnLabel.textContent = config.texts.saving;
 
 		fetch(config.saveUrl, {
 			method: 'POST',
@@ -362,6 +427,7 @@
 			if (data.error) {
 				showToast(data.error, 'error');
 			} else {
+				markClean();
 				showToast(config.texts.success, 'success');
 			}
 		})
@@ -369,9 +435,127 @@
 			showToast(config.texts.saveError + ': ' + err.message, 'error');
 		})
 		.finally(function() {
+			saving = false;
 			btnSave.disabled = false;
 			btnSave.classList.remove('opacity-50');
+			if (btnLabel) btnLabel.textContent = saveLabel;
 		});
+	}
+
+	// ==================== ROUTES (inline in the Properties panel) ====================
+
+	function initRoutes() {
+		document.getElementById('btn-route-add').addEventListener('click', function() {
+			routes.push({ store_id: '0', route: '' });
+			renderRoutes(true);
+			markDirty();
+		});
+
+		document.getElementById('routes-list').addEventListener('input', onRouteInput);
+		document.getElementById('routes-list').addEventListener('change', onRouteInput);
+		document.getElementById('routes-list').addEventListener('click', function(e) {
+			var btn = e.target.closest('[data-route-remove]');
+			if (!btn) return;
+			routes.splice(parseInt(btn.getAttribute('data-route-remove'), 10), 1);
+			renderRoutes(false);
+			markDirty();
+		});
+
+		renderRoutes(false);
+	}
+
+	function onRouteInput(e) {
+		var field = e.target.closest('[data-route-idx]');
+		if (!field) return;
+		var idx = parseInt(field.getAttribute('data-route-idx'), 10);
+		if (!routes[idx]) return;
+		if (field.hasAttribute('data-route-store')) {
+			routes[idx].store_id = field.value;
+		} else {
+			routes[idx].route = field.value;
+		}
+		updateRoutesCount();
+	}
+
+	function renderRoutes(focusLast) {
+		var list = document.getElementById('routes-list');
+		list.innerHTML = '';
+
+		if (routes.length === 0) {
+			var empty = document.createElement('div');
+			empty.className = 'text-center text-xs text-gray-400 py-4';
+			empty.textContent = config.texts.noRoutes;
+			list.appendChild(empty);
+		} else {
+			routes.forEach(function(route, i) {
+				list.appendChild(buildRouteRow(route, i));
+			});
+		}
+
+		lucide.createIcons();
+		updateRoutesCount();
+
+		if (focusLast) {
+			var inputs = list.querySelectorAll('input[data-route-idx]');
+			if (inputs.length) inputs[inputs.length - 1].focus();
+		}
+	}
+
+	function buildRouteRow(route, idx) {
+		var row = document.createElement('div');
+		row.className = 'border border-gray-200 rounded p-2 flex flex-col gap-1.5 bg-gray-50';
+
+		var storeSelect = document.createElement('select');
+		storeSelect.className = 'lb-input';
+		storeSelect.setAttribute('data-route-idx', idx);
+		storeSelect.setAttribute('data-route-store', '1');
+		storeSelect.setAttribute('aria-label', config.texts.store);
+
+		var defaultOpt = document.createElement('option');
+		defaultOpt.value = '0';
+		defaultOpt.textContent = config.texts.defaultStore;
+		storeSelect.appendChild(defaultOpt);
+
+		(config.stores || []).forEach(function(store) {
+			var opt = document.createElement('option');
+			opt.value = String(store.store_id);
+			opt.textContent = store.name;
+			storeSelect.appendChild(opt);
+		});
+		storeSelect.value = route.store_id;
+
+		var routeLine = document.createElement('div');
+		routeLine.className = 'flex gap-1';
+
+		var routeInput = document.createElement('input');
+		routeInput.type = 'text';
+		routeInput.className = 'flex-1 min-w-0 lb-input';
+		routeInput.placeholder = 'common/home';
+		routeInput.setAttribute('aria-label', config.texts.route);
+		routeInput.value = route.route;
+		routeInput.setAttribute('data-route-idx', idx);
+
+		var removeBtn = document.createElement('button');
+		removeBtn.type = 'button';
+		removeBtn.className = 'text-gray-400 hover:text-red-600 p-1 shrink-0';
+		removeBtn.setAttribute('aria-label', config.texts.remove);
+		removeBtn.setAttribute('data-route-remove', idx);
+		var removeIcon = document.createElement('i');
+		removeIcon.setAttribute('data-lucide', 'x');
+		removeIcon.className = 'w-3.5 h-3.5 pointer-events-none';
+		removeBtn.appendChild(removeIcon);
+
+		routeLine.appendChild(routeInput);
+		routeLine.appendChild(removeBtn);
+
+		row.appendChild(storeSelect);
+		row.appendChild(routeLine);
+
+		return row;
+	}
+
+	function updateRoutesCount() {
+		document.getElementById('routes-count').textContent = routes.length;
 	}
 
 	// ==================== TOAST ====================
@@ -380,7 +564,7 @@
 		var container = document.getElementById('toast-container');
 		var toast = document.createElement('div');
 		toast.className = 'toast px-4 py-2 rounded shadow-lg text-white text-sm max-w-xs ' +
-			(type === 'error' ? 'bg-red-600' : 'bg-green-600');
+			(type === 'error' ? 'bg-red-600' : 'bg-gray-900');
 		toast.textContent = message;
 		container.appendChild(toast);
 
@@ -405,48 +589,15 @@
 
 			container.querySelectorAll('button[data-viewport]').forEach(function(b) {
 				b.className = 'px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700';
+				b.setAttribute('aria-pressed', 'false');
 			});
 			btn.className = 'px-2 py-1 rounded-md text-xs font-medium bg-white shadow-sm text-gray-700';
+			btn.setAttribute('aria-pressed', 'true');
 
 			var canvasContainer = document.getElementById('canvas-container');
 			canvasContainer.classList.remove('viewport-tablet', 'viewport-mobile');
 			if (viewport !== 'desktop') {
 				canvasContainer.classList.add('viewport-' + viewport);
-			}
-		});
-	}
-
-	// ==================== LANGUAGE TABS ====================
-
-	function initLangTabs() {
-		var tabsContainer = document.getElementById('lang-tabs');
-		if (!tabsContainer) return;
-
-		var nameInput = document.getElementById('layout-name-input');
-
-		tabsContainer.addEventListener('click', function(e) {
-			var tab = e.target.closest('.lang-tab');
-			if (!tab) return;
-
-			tabsContainer.querySelectorAll('.lang-tab').forEach(function(t) {
-				t.classList.remove('active');
-			});
-			tab.classList.add('active');
-
-			var langId = tab.getAttribute('data-lang-id');
-			var langName = tab.getAttribute('data-lang-name');
-
-			nameInput.setAttribute('data-language-id', langId);
-			nameInput.value = langName || '';
-
-			nameInput.focus();
-		});
-
-		nameInput.addEventListener('input', function() {
-			var langId = nameInput.getAttribute('data-language-id');
-			var activeTab = tabsContainer.querySelector('.lang-tab.active');
-			if (activeTab) {
-				activeTab.setAttribute('data-lang-name', nameInput.value);
 			}
 		});
 	}
@@ -458,55 +609,189 @@
 		if (!searchInput) return;
 
 		searchInput.addEventListener('input', function() {
-			var query = this.value.toLowerCase();
-			var headers = document.querySelectorAll('.palette-group-header');
+			var query = this.value.toLowerCase().trim();
 
-			headers.forEach(function(header) {
-				var groupName = (header.getAttribute('data-group-name') || '').toLowerCase();
-				var el = header.nextElementSibling;
-				var items = [];
-				while (el && !el.classList.contains('palette-group-header')) {
-					if (el.classList.contains('palette-item')) {
-						items.push(el);
-					}
-					el = el.nextElementSibling;
-				}
+			document.querySelectorAll('#module-palette .lb-group').forEach(function(group) {
+				var visible = 0;
 
-				var hasVisible = false;
-				var headerMatch = !query || groupName.indexOf(query) !== -1;
-
-				items.forEach(function(item) {
-					var code = (item.getAttribute('data-palette-code') || '').toLowerCase();
-					var name = (item.getAttribute('data-palette-name') || '').toLowerCase();
-					var match = !query || code.indexOf(query) !== -1 || name.indexOf(query) !== -1;
+				group.querySelectorAll('.palette-item').forEach(function(item) {
+					var haystack = item.getAttribute('data-search') || '';
+					var match = !query || haystack.indexOf(query) !== -1;
 					item.style.display = match ? '' : 'none';
-					if (match) hasVisible = true;
+					if (match) visible++;
 				});
 
-				header.style.display = (headerMatch || hasVisible) ? '' : 'none';
-			});
+				// Open the group while searching so matches stay visible.
+				if (query && visible) {
+					group.open = true;
+				}
+
+				group.style.display = visible ? '' : 'none';
+				});
 		});
 	}
 
-	// ==================== ZONE ADD BUTTONS ====================
+	// ==================== UNSAVED CHANGES ====================
+
+	function initDirtyTracking() {
+		document.addEventListener('input', onEditableChange);
+		document.addEventListener('change', onEditableChange);
+
+		window.addEventListener('beforeunload', function(e) {
+			if (!dirty || leaving) return;
+			e.preventDefault();
+			e.returnValue = '';
+		});
+
+		var backLink = document.querySelector('header a[href]');
+		if (backLink) {
+			backLink.addEventListener('click', function(e) {
+				if (!dirty) return;
+
+				if (window.confirm(config.texts.unsavedConfirm || 'You have unsaved changes. Leave the builder?')) {
+					leaving = true;
+				} else {
+					e.preventDefault();
+				}
+			});
+		}
+	}
+
+	function onEditableChange(e) {
+		var target = e.target;
+		if (!target || !target.matches) return;
+
+		if (target.matches('.layout-name-row input, #routes-list input, #routes-list select, #prop-position, #prop-sort-order')) {
+			markDirty();
+		}
+	}
+
+	function markDirty() {
+		if (dirty) return;
+
+		dirty = true;
+		updateSaveState();
+	}
+
+	function markClean() {
+		dirty = false;
+		updateSaveState();
+	}
+
+	function updateSaveState() {
+		var el = document.getElementById('save-state');
+		if (!el) return;
+
+		el.textContent = dirty ? (config.texts.unsaved || '') : (config.texts.saved || '');
+		el.classList.toggle('text-amber-700', dirty);
+		el.classList.toggle('text-gray-400', !dirty);
+	}
+
+	// ==================== ZONE ADD BUTTONS / PALETTE CLICK ====================
 
 	function initZoneAddButtons() {
 		document.getElementById('page-canvas').addEventListener('click', function(e) {
 			var btn = e.target.closest('.zone-add-btn');
 			if (!btn) return;
 
-			var zoneId = btn.getAttribute('data-zone');
+			pendingZone = btn.getAttribute('data-zone');
+			clearZoneHighlight();
+			var targetZone = document.querySelector('.zone-drop-area[data-zone="' + pendingZone + '"]');
+			if (targetZone) targetZone.classList.add('zone-targeted');
+
 			var searchInput = document.getElementById('module-search');
 			if (searchInput) {
-				searchInput.focus();
 				searchInput.value = '';
 				searchInput.dispatchEvent(new Event('input'));
+				searchInput.focus();
 			}
 
-			// Highlight the search field briefly
-			if (searchInput) {
-				searchInput.style.borderColor = '#3b82f6';
-				setTimeout(function() { searchInput.style.borderColor = ''; }, 1500);
+			var zoneTitle = getZoneTitle(pendingZone);
+			if (zoneTitle && config.texts.pickModule) {
+				showToast(config.texts.pickModule.replace('%s', zoneTitle), 'success');
+			}
+		});
+	}
+
+	function clearZoneHighlight() {
+		document.querySelectorAll('.zone-drop-area.zone-targeted').forEach(function(zone) {
+			zone.classList.remove('zone-targeted');
+		});
+	}
+
+	function clearPendingZone() {
+		pendingZone = null;
+		clearZoneHighlight();
+	}
+
+	function getZoneTitle(zoneId) {
+		var zone = document.querySelector('.zone-drop-area[data-zone="' + zoneId + '"]');
+		var label = zone ? zone.parentElement.querySelector('.zone-head > span') : null;
+		return label ? label.textContent.trim() : '';
+	}
+
+	function initPaletteAdd() {
+		var palette = document.getElementById('module-palette');
+		if (!palette) return;
+
+		palette.addEventListener('click', function(e) {
+			var card = e.target.closest('.palette-item');
+			if (card) addModuleFromPalette(card);
+		});
+
+		palette.addEventListener('keydown', function(e) {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			var card = e.target.closest('.palette-item');
+			if (!card) return;
+
+			e.preventDefault();
+			addModuleFromPalette(card);
+		});
+	}
+
+	function addModuleFromPalette(card) {
+		var zoneId = pendingZone || 'content_top';
+		var targetZone = document.querySelector('.zone-drop-area[data-zone="' + zoneId + '"]');
+		if (!targetZone) return;
+
+		var meta = paletteMeta(card);
+		if (!meta) return;
+
+		var newCard = createModuleCard(meta.code, meta.name, buildEditUrl(meta.code), meta.display, meta.icon);
+
+		targetZone.appendChild(newCard);
+		lucide.createIcons();
+		updateEmptyStates();
+		markDirty();
+		clearPendingZone();
+
+		var zoneTitle = getZoneTitle(zoneId);
+		if (zoneTitle && config.texts.moduleAdded) {
+			showToast(config.texts.moduleAdded.replace('%s', zoneTitle), 'success');
+		}
+
+		newCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+		selectModule(newCard);
+	}
+
+	function initShortcuts() {
+		// Same as Page Builder: Ctrl+S saves without leaving the keyboard.
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape' && pendingZone) {
+				clearPendingZone();
+				return;
+			}
+
+			var target = e.target;
+
+			if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+				return;
+			}
+
+			// event.code (not key) so it fires on any keyboard layout.
+			if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
+				e.preventDefault();
+				saveLayout();
 			}
 		});
 	}

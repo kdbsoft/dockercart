@@ -1,0 +1,61 @@
+	/* Bootstrap 3 sets html{font-size:10px}, which shrinks every rem-based
+	   Tailwind utility on this page to 62.5%. Restore the 16px root so the
+	   builder chrome is sized exactly like the rest of the panel. */
+	html { font-size: 16px; }
+	.zone-drop-area { min-height: 60px; transition: background-color 0.2s; }
+	.zone-drop-area.sortable-ghost { opacity: 0.4; background-color: var(--dc-gray-100); }
+	.zone-drop-area .sortable-ghost { opacity: 0.3; }
+	.module-card { cursor: grab; transition: box-shadow 0.15s, transform 0.15s; }
+	.module-card:hover { box-shadow: var(--dc-shadow-md); }
+	.module-card.sortable-chosen { box-shadow: 0 4px 16px rgba(91,126,168,0.3); transform: scale(1.02); z-index: 10; }
+	.module-card.sortable-drag { opacity: 0.7; }
+	.module-card.selected { box-shadow: 0 0 0 2px var(--dc-primary); }
+	.zone-drop-area.zone-targeted { border-color: var(--dc-primary); box-shadow: 0 0 0 2px var(--dc-primary-ring); }
+	.palette-item:focus-visible, .zone-add-btn:focus-visible, .module-card button:focus-visible,
+	#btn-save:focus-visible, header a:focus-visible { outline: 2px solid var(--dc-primary); outline-offset: 2px; }
+	#page-canvas { max-width: 100%; }
+	#canvas-container.viewport-tablet #page-canvas { max-width: 768px; }
+	#canvas-container.viewport-mobile #page-canvas { max-width: 375px; }
+	/* Responsive preview: lg_only zones collapse to a labelled strip (their
+	   cards stay in the DOM so Save still sees them), always-on columns stack. */
+	.zone-hidden-note { display: none; }
+	#canvas-container.viewport-tablet .responsive-lg-only .zone-head,
+	#canvas-container.viewport-tablet .responsive-lg-only .zone-drop-area,
+	#canvas-container.viewport-mobile .responsive-lg-only .zone-head,
+	#canvas-container.viewport-mobile .responsive-lg-only .zone-drop-area { display: none !important; }
+	#canvas-container.viewport-tablet .responsive-lg-only .zone-hidden-note,
+	#canvas-container.viewport-mobile .responsive-lg-only .zone-hidden-note { display: block !important; }
+	#canvas-container.viewport-tablet .canvas-zone-row > .zone-column { width: 33.333% !important; }
+	#canvas-container.viewport-mobile .canvas-zone-row { flex-direction: column; }
+	#canvas-container.viewport-mobile .canvas-zone-row > div { width: 100% !important; }
+	#canvas-container.viewport-mobile .zone-add-label { display: none; }
+	/* ---- Palette cards: same 2-column grid as Page Builder ---- */
+	.lb-group > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--dc-text-muted); cursor: pointer; border-radius: 6px; }
+	.lb-group > summary:hover { background: #f9fafb; color: var(--dc-text-dark); }
+	.lb-group > summary::-webkit-details-marker { display: none; }
+	.lb-group > summary .lb-chev { transition: transform .15s; }
+	.lb-group:not([open]) > summary .lb-chev { transform: rotate(-90deg); }
+	.lb-group-title { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+	.lb-grid { display: grid; grid-template-columns: 1fr; gap: 4px; padding: 2px 2px 8px; }
+	.lb-card { position: relative; display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 6px 26px 6px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; cursor: grab; transition: border-color .15s, box-shadow .15s; text-align: left; }
+	.lb-card:hover { border-color: var(--dc-primary); box-shadow: var(--dc-shadow-md); }
+	.lb-card:active { cursor: grabbing; }
+	.lb-card-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--dc-radius-md); background: var(--dc-gray-100); color: var(--dc-text-muted); flex-shrink: 0; }
+	.lb-card:hover .lb-card-icon { background: var(--dc-primary-light); color: var(--dc-primary-active); }
+	.lb-card-label { flex: 1; min-width: 0; font-size: 12px; line-height: 1.35; color: #374151; overflow-wrap: anywhere; }
+	/* Lightweight hover hint: a thin plus, no heavy badge. */
+	.lb-card-add { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: none; align-items: center; justify-content: center; color: #111827; }
+	.lb-card-add svg { stroke-width: 1.5; }
+	.lb-card:hover .lb-card-add { display: inline-flex; }
+	/* Per-item usage count: how many modules of this type are on the page.
+	   Vertically centered on the right; on hover it yields to the plus. */
+	.lb-card-count { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--dc-primary-light); color: var(--dc-primary-active); font-size: 10px; font-weight: 700; line-height: 1; }
+	.lb-card:hover .lb-card-count { display: none; }
+	/* ---- Admin input look, same as Page Builder ---- */
+	.lb-input { width: 100%; border: 1px solid var(--dc-border); border-radius: var(--dc-radius-md); padding: 6px 8px; font-size: 13px; color: var(--dc-gray-900); background: #fff; }
+	.lb-input:focus { outline: none; border-color: var(--dc-primary); box-shadow: 0 0 0 2px var(--dc-primary-ring); }
+	.lb-input[readonly] { background: #f9fafb; color: #6b7280; }
+	.lb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+	.lb-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+	.toast { animation: toastIn 0.3s ease-out; }
+	@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
