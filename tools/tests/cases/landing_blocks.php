@@ -188,26 +188,29 @@ return [
 
 		$wrappers = array_column(Blocks::wrapperFields(), 'key');
 
+		Assert::true(in_array('bg_color', $wrappers, true));
 		Assert::true(in_array('bg_image', $wrappers, true));
 		Assert::true(in_array('bg_image_mobile', $wrappers, true));
+		Assert::false(in_array('bg_type', $wrappers, true), 'the background type select is gone');
 
 		$hero = Blocks::normalizeSettings('hero', ['image' => 'catalog/hero.jpg', 'image_overlay' => 55]);
 
 		Assert::same('catalog/hero.jpg', $hero['bg_image'], 'old hero images migrate');
 		Assert::same(55, $hero['overlay'], 'old hero overlay migrates');
-		Assert::same('image', $hero['bg_type'], 'a migrated image must be enabled');
+		Assert::false(array_key_exists('bg_type', $hero), 'a migrated image needs no type flag');
 
 		$cta = Blocks::normalizeSettings('cta', ['image' => 'catalog/cta.jpg']);
 
 		Assert::same('catalog/cta.jpg', $cta['bg_image'], 'old cta images migrate');
-		Assert::same('image', $cta['bg_type']);
 
 		$styles = Blocks::wrapperStyles('hero', [
-			'bg_type' => 'image',
+			'bg_color' => '#123456',
 			'bg_image' => 'catalog/desktop.jpg',
 			'bg_image_mobile' => 'catalog/mobile.jpg',
 		]);
 
+		Assert::same('#123456', $styles['background-color'], 'the colour stays under the image');
+		Assert::same("url('image/catalog/desktop.jpg')", $styles['background-image']);
 		Assert::contains('catalog/mobile.jpg', $styles['--lp-bg-image-mobile']);
 
 		$hero_twig = repo_file('upload/catalog/view/theme/dockercart/template/landing/blocks/hero.twig');
@@ -222,7 +225,19 @@ return [
 		$builder_js = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
 		$builder_php = repo_file('upload/admin/controller/design/landing.php');
 
-		Assert::contains("'bg_type', 'bg_color', 'bg_image', 'bg_image_mobile'", $builder_js, 'mobile background belongs to Style');
+		Assert::contains("'bg_color', 'bg_image', 'bg_image_mobile', 'overlay', 'padding', 'container', 'align'", $builder_js, 'mobile background belongs to Style');
+		Assert::notContains("'bg_type'", $builder_js, 'the Style tab has no background type select');
+
+		$page_controller = repo_file('upload/catalog/controller/landing/page.php');
+		Assert::notContains('bg_type', $page_controller, 'the renderer infers the background from the values');
+
+		foreach (LANDING_EDITOR_LOCALES as $locale) {
+			$locale_file = repo_file('upload/admin/language/' . $locale . '/design/landing.php');
+
+			Assert::notContains('$_[\'field_bg_type\']', $locale_file, $locale . ' still labels the removed select');
+			Assert::notContains('$_[\'option_bg_none\']', $locale_file, $locale . ' still labels the removed option');
+		}
+
 		Assert::contains('$blocks = $this->model_design_landing->getBlocks($landing_id);', $builder_php);
 		Assert::contains('Dockercart\\Landing\\Blocks::normalizeSettings($code, (array)$block[\'settings\'])', $builder_php, 'the builder must show migrated settings');
 	},
@@ -271,6 +286,61 @@ return [
 		Assert::contains('data-props-tab="advanced"', $template, 'the dedicated tab must stay');
 		Assert::contains("ui.propsTab === 'advanced' ? advancedHtml : contentHtml", $builder);
 		Assert::notContains('<details class="mt-4 border-t border-gray-100 pt-3">', $builder, 'no duplicate Advanced block under Content/Style');
+	},
+
+	'editor: visibility switches are clickable and hidden blocks are marked on canvas' => static function (): void {
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+		$template = repo_file('upload/admin/view/template/design/landing_builder.twig');
+		$canvas = repo_file('upload/catalog/view/javascript/dockercart_landing_builder.js');
+		$page = repo_file('upload/catalog/controller/landing/page.php');
+		$registry = repo_file('upload/system/library/dockercart/landing/blocks.php');
+
+		// The visible switch track is a label around a 0x0 checkbox; a bare
+		// <span> over it swallowed every click on the Advanced toggles.
+		Assert::contains('<label class="lp-switch" for="\' + id + \'"><input type="checkbox" id="\' + id + \'" data-input', $builder, 'toggle fields need a label-wrapped switch');
+		Assert::contains('<label class="lp-switch" for="\' + statusId + \'"><input type="checkbox" id="\' + statusId + \'" data-block-status', $builder, 'Status needs the same label-wrapped switch');
+		Assert::notContains('<span class="lp-switch"><input type="checkbox"', $builder, 'no unclickable switch markup');
+		Assert::contains('.lp-switch { position: relative; display: inline-flex; width: 34px; height: 20px; flex-shrink: 0; cursor: pointer; }', $template);
+		Assert::contains('.lp-switch input:focus-visible + .lp-switch-track', $template, 'keyboard focus stays visible');
+
+		foreach (['hide_desktop', 'hide_tablet', 'hide_mobile'] as $device) {
+			Assert::contains("['key' => '" . $device . "', 'type' => 'toggle', 'localized' => false", $registry, $device . ' must stay a toggle');
+		}
+
+		// Parent broadcasts the active device on switch and after every reload.
+		Assert::contains("type: 'lp:viewport',", $builder);
+		Assert::contains("label: t('text_hidden_device', 'Hidden on this device')", $builder);
+		$readyPos = strpos($builder, "case 'lp:ready':");
+		Assert::true($readyPos !== false, 'builder handles the iframe ready handshake');
+		Assert::contains('sendViewport();', substr($builder, $readyPos, 400), 'reload restores viewport feedback');
+		$viewportPos = strpos($builder, 'function initViewport()');
+		Assert::true($viewportPos !== false, 'builder has a viewport switcher');
+		Assert::contains('sendViewport();', substr($builder, $viewportPos, 900), 'viewport switch updates the canvas');
+
+		// Iframe consumes it via the data attribute the storefront shell emits.
+		Assert::contains("if (data.type === 'lp:viewport') {", $canvas);
+		Assert::contains('function hiddenOnDevice(block, device) {', $canvas);
+		Assert::contains('function syncDeviceHidden() {', $canvas);
+		Assert::contains("badge.className = 'lp-device-hidden-badge';", $canvas);
+		Assert::contains('badge.textContent = hiddenDeviceLabel;', $canvas, 'badge text comes from the admin locale');
+		Assert::contains("'html.lp-builder-mode [data-landing-block].lp-hidden-on-device { opacity: .5; }',", $canvas, 'hidden blocks are dimmed');
+		Assert::contains('.lp-device-hidden-badge { position: absolute;', $canvas, 'badge must not affect layout');
+		Assert::contains('pointer-events: none;', $canvas, 'badge stays non-interactive');
+		Assert::contains("\t\tmarkEmptyBlocks();\n\t\tsyncDeviceHidden();\n\t\tinitSortables();", $canvas, 'live preview re-applies device feedback');
+		Assert::contains("' data-lp-hide=\"' . implode(',', \$hidden_devices) . '\"'", $page, 'server still supplies per-device hide flags');
+	},
+
+	'editor: add/remove/template actions are styled as buttons' => static function (): void {
+		$builder = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
+		$template = repo_file('upload/admin/view/template/design/landing_builder.twig');
+
+		Assert::contains('px-2 py-1.5 text-[11px] font-medium leading-none text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded" data-repeater-add', $builder, 'Add row must be a compact button');
+		Assert::contains('px-2 py-1.5 text-[11px] font-medium leading-none text-red-600 bg-white hover:bg-red-50 border border-red-200 rounded" data-repeater-remove', $builder, 'Remove must be a compact button');
+		Assert::contains('text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded" data-media-pick', $builder, 'Choose must read as the primary action');
+		Assert::contains('text-gray-500 bg-white hover:text-red-600 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded" data-clear', $builder, 'Clear must be a subdued button with a destructive hover');
+		Assert::notContains('text-gray-500 hover:text-red-600 rounded" data-clear', $builder, 'no link-styled Clear');
+		Assert::contains('id="lp-template-save" class="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium leading-none text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded"', $template, 'Save template must be a compact button');
+		Assert::notContains('class="mt-1 text-[11px] text-blue-600', $builder, 'no link-styled Add row');
 	},
 
 	'registry: editor block labels exist in all three locales' => static function (): void {
@@ -352,6 +422,7 @@ return [
 		Assert::same([5, 7], $settings['product_ids'], 'ids are deduped and sanitised');
 		Assert::same('5', $settings['columns']);
 		Assert::same('#aabbcc', $settings['bg_color'], 'colours are lowercased');
+		Assert::false(array_key_exists('bg_type', $settings), 'the legacy type flag is not normalised');
 		Assert::false(array_key_exists('unknown_field', $settings));
 		Assert::false(array_key_exists('heading', $settings), 'localised fields never land in settings');
 	},
@@ -545,19 +616,25 @@ return [
 		Assert::same('primary', $content['buttons'][1]['style'], 'unknown style falls back to the default');
 	},
 
-	'wrapper: padding, background colour and background image' => static function (): void {
+	'wrapper: padding, background colour and background image compose' => static function (): void {
 		$styles = Blocks::wrapperStyles('text', [
 			'padding' => 'md',
-			'bg_type' => 'image',
+			'bg_color' => '#aabbcc',
 			'bg_image' => 'catalog/hero.jpg',
 			'overlay' => 40,
 		]);
 
 		Assert::same('2.5rem', $styles['padding-top']);
+		Assert::same('#aabbcc', $styles['background-color']);
 		Assert::same("url('image/catalog/hero.jpg')", $styles['background-image']);
 		Assert::same('cover', $styles['background-size']);
-		Assert::same(40, Blocks::overlay(['bg_type' => 'image', 'overlay' => 40]));
-		Assert::same(0, Blocks::overlay(['bg_type' => 'color', 'overlay' => 40]), 'overlay only applies to image backgrounds');
+		Assert::true(Blocks::hasWrapperBackground(['bg_color' => '#aabbcc']));
+		Assert::true(Blocks::hasWrapperBackground(['bg_image' => 'catalog/hero.jpg']));
+		Assert::false(Blocks::hasWrapperBackground(['overlay' => 40]));
+		Assert::same(40, Blocks::overlay(['bg_image' => 'catalog/hero.jpg', 'overlay' => 40]));
+		Assert::same(40, Blocks::overlay(['bg_image_mobile' => 'catalog/mobile.jpg', 'overlay' => 40]), 'a mobile image has an overlay too');
+		Assert::same(0, Blocks::overlay(['bg_color' => '#aabbcc', 'overlay' => 40]), 'colour-only backgrounds have no overlay');
+		Assert::same(0, Blocks::overlay(['bg_type' => 'image', 'overlay' => 40]), 'the old type flag alone paints nothing');
 
 		$attribute = Blocks::wrapperStyleAttribute('text', ['padding' => 'none']);
 		Assert::same('', $attribute, 'padding none emits nothing');

@@ -186,7 +186,6 @@ $_['field_autoplay']               = 'Автопрокрутка (сек, 0 = в
 $_['field_show_arrows']            = 'Показувати стрілки';
 $_['field_divider']                = 'Лінія-розділювач';
 $_['field_html']                   = 'HTML / код вставки';
-$_['field_bg_type']                = 'Фон';
 $_['field_bg_color']               = 'Колір фону';
 $_['field_bg_image']               = 'Фонове зображення';
 $_['field_padding']                = 'Вертикальні відступи';
@@ -235,9 +234,6 @@ $_['option_ratio_auto']    = 'Оригінальні';
 $_['option_ratio_square']  = 'Квадрат';
 $_['option_ratio_video']   = '16:9';
 $_['option_ratio_wide']    = '21:9';
-$_['option_bg_none']       = 'Немає';
-$_['option_bg_color']      = 'Колір';
-$_['option_bg_image']      = 'Зображення';
 $_['option_padding_none']  = 'Немає';
 $_['option_padding_xs']    = 'Дуже малі';
 $_['option_padding_sm']    = 'Малі';

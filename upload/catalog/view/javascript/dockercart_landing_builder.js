@@ -12,6 +12,8 @@
  *   - palette drops from the admin shell insert a new section (page level)
  *     or a new widget (into a section column or at page level),
  *   - one block can be re-rendered in place after a property change,
+ *   - the parent's active device viewport is mirrored via lp:viewport so blocks
+ *     hidden on that device are dimmed and badged but stay selectable,
  *   - the scroll offset survives the reloads the parent triggers.
  *
  * Tree layout: the page root (#lp-blocks) holds top-level blocks; a section
@@ -43,6 +45,8 @@
 	var dropHint = null;
 	var hoverColumn = null;
 	var LABELS = {};
+	var deviceViewport = 'desktop';
+	var hiddenDeviceLabel = 'Hidden on this device';
 
 	/* ---------------- styles ---------------- */
 
@@ -55,6 +59,8 @@
 			'html.lp-builder-mode [data-landing-block]:hover::after { border-color: rgba(91, 126, 168, .55); }',
 			'html.lp-builder-mode [data-landing-block].lp-selected::after { border: 2px solid #5b7ea8; }',
 			'html.lp-builder-mode [data-landing-block][data-lp-hidden="1"] { opacity: .55; }',
+			'html.lp-builder-mode [data-landing-block].lp-hidden-on-device { opacity: .5; }',
+			'.lp-device-hidden-badge { position: absolute; top: 8px; right: 8px; z-index: 45; display: inline-flex; align-items: center; max-width: calc(100% - 16px); padding: 4px 9px; border-radius: 999px; background: rgba(15, 23, 42, .9); color: #fff; font: 600 10px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; box-shadow: 0 4px 12px rgba(15, 23, 42, .25); pointer-events: none; }',
 			'html.lp-builder-mode a, html.lp-builder-mode button, html.lp-builder-mode input, html.lp-builder-mode select, html.lp-builder-mode textarea { cursor: default !important; }',
 			'.lp-block-handle { position: absolute; top: 6px; left: 6px; z-index: 70; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(17, 24, 39, .82); color: #fff; cursor: grab !important; opacity: 0; transition: opacity .15s; }',
 			'[data-landing-block]:hover > .lp-block-handle { opacity: 1; }',
@@ -203,6 +209,42 @@
 
 	function isContainer(block) {
 		return block && block.hasAttribute('data-lp-container');
+	}
+
+	/** Builder feedback for a device: server shell sets data-lp-hide. */
+	function hiddenOnDevice(block, device) {
+		return (block.getAttribute('data-lp-hide') || '')
+			.split(',')
+			.some(function (item) { return item.trim() === device; });
+	}
+
+	/**
+	 * Dim and badge blocks hidden on the active viewport. The block itself is
+	 * never display:none here (it must stay selectable); descendants of an
+	 * already hidden section are skipped so one toggle produces one badge.
+	 */
+	function syncDeviceHidden() {
+		blocks().forEach(function (block) {
+			var hidden = hiddenOnDevice(block, deviceViewport)
+				&& !(block.parentElement && block.parentElement.closest('[data-landing-block].lp-hidden-on-device'));
+			var badge = block.querySelector(':scope > .lp-device-hidden-badge');
+
+			block.classList.toggle('lp-hidden-on-device', hidden);
+
+			if (!hidden) {
+				if (badge) badge.remove();
+
+				return;
+			}
+
+			if (!badge) {
+				badge = document.createElement('span');
+				badge.className = 'lp-device-hidden-badge';
+				block.appendChild(badge);
+			}
+
+			badge.textContent = hiddenDeviceLabel;
+		});
 	}
 
 	function selectBlock(blockId, scrollIntoView) {
@@ -685,6 +727,12 @@
 				markEmptyBlocks();
 			}
 
+			if (data.type === 'lp:viewport') {
+				deviceViewport = typeof data.viewport === 'string' ? data.viewport : 'desktop';
+				hiddenDeviceLabel = typeof data.label === 'string' && data.label !== '' ? data.label : hiddenDeviceLabel;
+				syncDeviceHidden();
+			}
+
 			if (data.type === 'lp:refreshBlock') {
 				replaceBlock(Number(data.blockId), data.url);
 			}
@@ -718,6 +766,7 @@
 		block.replaceWith(replacement);
 		attachHandles();
 		markEmptyBlocks();
+		syncDeviceHidden();
 		initSortables();
 
 		if (selected) {

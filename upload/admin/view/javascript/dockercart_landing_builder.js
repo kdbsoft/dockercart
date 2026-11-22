@@ -28,6 +28,7 @@
  *   lp:refreshBlock  {blockId, url}        re-fetch one rendered block
  *   lp:replace       {blockId, html}       swap one node for unsaved preview html
  *   lp:labels        {labels}              code -> block name for the toolbar
+ *   lp:viewport      {viewport, label}     active device + localized hidden hint
  * From the iframe:
  *   lp:ready    {items}                    iframe is interactive
  *   lp:selected {blockId}
@@ -42,7 +43,7 @@
 	var I18N = CFG.i18n || {};
 
 	var WRAPPER_KEYS = [
-		'bg_type', 'bg_color', 'bg_image', 'overlay', 'padding', 'container',
+		'bg_color', 'bg_image', 'overlay', 'padding', 'container',
 		'align', 'hide_desktop', 'hide_tablet', 'hide_mobile', 'anchor', 'custom_class'
 	];
 
@@ -50,7 +51,7 @@
 	// Content = the block's own fields, Style = backgrounds/spacing/width,
 	// Advanced = device visibility, anchors and custom classes.
 	var STYLE_KEYS = [
-		'bg_type', 'bg_color', 'bg_image', 'bg_image_mobile', 'overlay', 'padding', 'container', 'align'
+		'bg_color', 'bg_image', 'bg_image_mobile', 'overlay', 'padding', 'container', 'align'
 	];
 
 	var ADVANCED_KEYS = [
@@ -1011,6 +1012,9 @@
 				ui.iframeReady = true;
 
 				postToIframe({ type: 'lp:labels', labels: iframeLabels() });
+				// A reloaded iframe starts at desktop; restore the chosen device so
+				// hidden-block feedback survives language switches and saves.
+				sendViewport();
 				break;
 
 			case 'lp:selected':
@@ -1626,8 +1630,13 @@
 
 		if (close) close.classList.remove('hidden');
 
+		var statusId = 'lp-status-' + Number(block.block_id);
+
 		var html = '<div class="mb-3 flex items-center justify-between rounded-lg bg-gray-50 px-2.5 py-2">' +
-			'<label class="flex items-center gap-2 text-xs font-medium text-gray-700"><span class="lp-switch"><input type="checkbox" data-block-status' + (Number(block.status) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></span> ' + esc(t('entry_status', 'Status')) + '</label>' +
+			'<div class="flex items-center gap-2 text-xs font-medium text-gray-700">' +
+				'<label class="lp-switch" for="' + statusId + '"><input type="checkbox" id="' + statusId + '" data-block-status' + (Number(block.status) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></label>' +
+				'<label for="' + statusId + '">' + esc(t('entry_status', 'Status')) + '</label>' +
+			'</div>' +
 			'<span class="text-[10px] text-gray-400">#' + Number(block.block_id) + '</span></div>';
 
 		// Elementor-style tabs: Content holds the block's own fields, Style the
@@ -1733,9 +1742,11 @@
 				break;
 
 			case 'toggle':
+				// The visible track must be inside a label: the checkbox itself is
+				// visually hidden (0x0), so a plain <span> over it is not clickable.
 				html += '<div class="flex items-center justify-between gap-2 py-0.5">' +
 					'<label class="text-xs text-gray-700" for="' + id + '">' + label + '</label>' +
-					'<span class="lp-switch"><input type="checkbox" id="' + id + '" data-input' + (Number(value) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></span></div>';
+					'<label class="lp-switch" for="' + id + '"><input type="checkbox" id="' + id + '" data-input' + (Number(value) ? ' checked' : '') + ' /><span class="lp-switch-track"></span></label></div>';
 				break;
 
 			case 'select':
@@ -1779,8 +1790,8 @@
 					'<div class="flex-1 min-w-0">' +
 					'<input type="text" id="' + id + '" class="lp-input mb-1" data-input value="' + esc(value) + '" placeholder="catalog/…/image.jpg" />' +
 					'<div class="flex gap-1">' +
-					'<button type="button" class="px-2 py-1 text-[11px] bg-gray-100 hover:bg-gray-200 rounded" data-media-pick>' + esc(t('text_choose_image', 'Choose')) + '</button>' +
-					'<button type="button" class="px-2 py-1 text-[11px] text-gray-500 hover:text-red-600 rounded" data-clear>' + esc(t('text_clear', 'Clear')) + '</button>' +
+					'<button type="button" class="inline-flex items-center px-2 py-1.5 text-[11px] font-medium leading-none text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded" data-media-pick>' + esc(t('text_choose_image', 'Choose')) + '</button>' +
+					'<button type="button" class="inline-flex items-center px-2 py-1.5 text-[11px] font-medium leading-none text-gray-500 bg-white hover:text-red-600 hover:bg-red-50 hover:border-red-200 border border-gray-200 rounded" data-clear>' + esc(t('text_clear', 'Clear')) + '</button>' +
 					'</div></div></div>';
 				break;
 
@@ -1997,10 +2008,10 @@
 				}
 			});
 
-			html += '<button type="button" class="text-[11px] text-red-500 hover:text-red-700" data-repeater-remove>' + esc(t('text_remove', 'Remove')) + '</button></div>';
+			html += '<button type="button" class="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium leading-none text-red-600 bg-white hover:bg-red-50 border border-red-200 rounded" data-repeater-remove>' + esc(t('text_remove', 'Remove')) + '</button></div>';
 		});
 
-		html += '</div><button type="button" class="mt-1 text-[11px] text-blue-600 hover:text-blue-800" data-repeater-add>+ ' + esc(t('text_add_row', 'Add')) + '</button></div>';
+		html += '</div><button type="button" class="mt-1 inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium leading-none text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded" data-repeater-add>+ ' + esc(t('text_add_row', 'Add')) + '</button></div>';
 
 		return html;
 	}
@@ -3444,6 +3455,14 @@
 		});
 	}
 
+	function sendViewport() {
+		postToIframe({
+			type: 'lp:viewport',
+			viewport: ui.viewport,
+			label: t('text_hidden_device', 'Hidden on this device')
+		});
+	}
+
 	function initViewport() {
 		var switcher = $('lp-viewport');
 		if (!switcher) return;
@@ -3463,6 +3482,8 @@
 			var wrap = $('lp-canvas-wrap');
 
 			wrap.style.maxWidth = ui.viewport === 'tablet' ? '820px' : (ui.viewport === 'mobile' ? '420px' : '');
+
+			sendViewport();
 		});
 	}
 

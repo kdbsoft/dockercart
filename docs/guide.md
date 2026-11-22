@@ -2319,8 +2319,9 @@ declares every allowed block: name key, icon, palette group and the field schema
 * `localized = true` → stored per language in `oc_landing_block_description`;
   `false` → shared in `oc_landing_block.settings`.
 * `Blocks::fields()` merges the block fields with the shared wrapper fields
-  (`bg_type`, `bg_color`, `bg_image`, `overlay`, `padding`, `container`, `align`,
-  `hide_desktop|tablet|mobile`, `anchor`, `custom_class`).
+  (`bg_color`, `bg_image`, `bg_image_mobile`, `overlay`, `padding`, `container`,
+  `align`, `hide_desktop|tablet|mobile`, `anchor`, `custom_class`). There is no
+  background-type selector: the wrapper paints whatever is filled in.
 * `Blocks::normalizeSettings()/normalizeContent()` cast/whitelist/truncate every
   value, so neither the builder nor the API can store anything the renderer
   does not expect (see *Content security* below).
@@ -2360,19 +2361,21 @@ position, image+text image position and the shared Style alignment) are
 edited as a segmented button group with Lucide icons — the same control the
 banner form uses.
 
-### Background images
+### Background colour and images
 
-There is one background per block, configured in the **Style** tab:
-`bg_type = image`, `bg_image` and (optionally) `bg_image_mobile` / `overlay`.
-Hero and CTA no longer declare their own `image` / `image_mobile` fields, so
-their Content tabs contain content only and the Style background is actually
-visible (their inner panels stay transparent over a wrapper background).
-`Blocks::normalizeSettings()` folds legacy hero/CTA images and the old
-`image_overlay` into the shared settings, so existing pages keep their picture.
-The builder normalises block settings on load, therefore a legacy picture is
-already visible in the Style tab before the next save. `image`, `image_text`
-etc. still use their own **Image** field — that one is a content picture, not a
-block background.
+A block's background is configured entirely in the **Style** tab: **Background
+colour**, **Background image** and (optionally) **Background image (mobile)**
+with **Overlay opacity**. There is no type switch — a filled-in value is active.
+Colour and image compose: CSS paints the image over the colour, so the colour
+shows while the image loads and behind transparent pixels. `overlay` applies
+whenever an image is set. Hero and CTA no longer declare their own `image` /
+`image_mobile` fields, so their Content tabs contain content only and the Style
+background is actually visible (their inner panels stay transparent over a
+wrapper background). `Blocks::normalizeSettings()` folds legacy hero/CTA images
+and the old `image_overlay` into the shared settings and drops the obsolete
+`bg_type` key, so existing pages keep their picture without a migration.
+`image`, `image_text` etc. still use their own **Image** field — that one is a
+content picture, not a block background.
 
 ### Content security
 
@@ -2507,9 +2510,10 @@ the padding so columns stay tight — the section owns the vertical rhythm.
    are marked `data-lp-container="1"` for the builder's drag logic.
 
 Sections that bring their own panel (`hero`, `cta`, `text`, `image_text`) check the
-wrapper background first: when `bg_type` is `color`/`image` they skip their own
+wrapper background first: when a colour or image is set they skip their own
 panel and inherit the wrapper text colour (`wrapper_text_class`, derived from the
-background luminance) instead of painting a frame inside a frame.
+image overlay or the background luminance) instead of painting a frame inside a
+frame.
 
 `chrome = bare` hides `#navbar`, the mobile drawer, `.dc-header-spacer` and
 `#footer` with a small CSS override in `landing/page.twig` — the theme header is
@@ -2543,6 +2547,15 @@ Manticore index.
   the block schema: text/richtext via TinyMCE, images via the existing
   `common/filemanager` modal, product/category autocomplete via
   `design/landing/autocomplete`, colours, selects, toggles, repeaters);
+* **device visibility**: the Advanced switches are label-wrapped checkboxes, so
+  clicking the visible track toggles the hidden input. Builder mode deliberately
+  omits the storefront `hidden`/`md:`/`lg:` classes so hidden blocks stay
+  selectable; instead `builderStateAttributes()` emits `data-lp-hide="desktop,…"`
+  and the admin shell sends `lp:viewport {viewport, label}` on viewport change
+  and on every iframe `lp:ready`. The iframe bridge dims matching blocks and
+  adds a non-interactive localized "Hidden on this device" badge, refreshed by
+  live `lp:replace` previews. Outside the builder `Blocks::visibilityClass()`
+  still applies the real responsive hiding;
 * changes save **explicitly** through `design/landing/save` (one transaction,
   optimistic `version` lock; the payload is sent as `application/json` and read
   from `php://input`, because `Request::clean()` html-escapes every `$_POST`

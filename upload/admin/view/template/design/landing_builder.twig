@@ -117,12 +117,13 @@ tailwind.config = { theme: { extend: { colors: {
 	.lp-prop-tab:hover { color: #111827; }
 	.lp-prop-tab.lp-active { color: var(--dc-text-dark); border-bottom-color: var(--dc-primary); }
 	/* ---- Toggle switch ---- */
-	.lp-switch { position: relative; display: inline-flex; width: 34px; height: 20px; flex-shrink: 0; }
+	.lp-switch { position: relative; display: inline-flex; width: 34px; height: 20px; flex-shrink: 0; cursor: pointer; }
 	.lp-switch input { opacity: 0; width: 0; height: 0; }
 	.lp-switch-track { position: absolute; inset: 0; border-radius: 999px; background: #d1d5db; transition: background .15s; }
 	.lp-switch-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s; }
 	.lp-switch input:checked + .lp-switch-track { background: var(--dc-primary); }
 	.lp-switch input:checked + .lp-switch-track::after { transform: translateX(14px); }
+	.lp-switch input:focus-visible + .lp-switch-track { outline: 2px solid var(--dc-primary); outline-offset: 2px; }
 	input[type="range"].lp-range { accent-color: var(--dc-primary); }
 	.lp-swatch { width: 22px; height: 22px; border-radius: 7px; border: 1px solid rgba(0,0,0,.12); padding: 0; }
 	.lp-swatch:hover { transform: scale(1.12); }
@@ -229,7 +230,7 @@ tailwind.config = { theme: { extend: { colors: {
 			<div class="border-t border-gray-100 px-2 py-2">
 				<div class="flex items-center justify-between mb-1.5">
 					<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{{ i18n.text_templates }}</span>
-					<button type="button" id="lp-template-save" class="text-[11px] text-blue-600 hover:text-blue-800">{{ i18n.text_save_template }}</button>
+					<button type="button" id="lp-template-save" class="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium leading-none text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 rounded">{{ i18n.text_save_template }}</button>
 				</div>
 				<div id="lp-template-list" class="space-y-1 max-h-40 overflow-y-auto lp-scroll text-xs"></div>
 			</div>

@@ -438,11 +438,11 @@ class ControllerLandingPage extends Controller {
 		// SEO keywords, the language prefix and the scheme at request time.
 		[$settings, $content] = $this->resolveLinkFields($code, $settings, $content);
 
-		$bg_type = (string)($settings['bg_type'] ?? 'none');
-		$has_wrapper_bg = in_array($bg_type, ['color', 'image'], true);
+		$has_wrapper_bg = \Dockercart\Landing\Blocks::hasWrapperBackground($settings);
 		$wrapper_is_dark = true;
 
-		if ($bg_type === 'color') {
+		// An image (with its dark overlay) wins over the colour underneath it.
+		if ($has_wrapper_bg && empty($settings['bg_image'])) {
 			$wrapper_is_dark = !$this->isLightColor((string)($settings['bg_color'] ?? ''));
 		}
 
@@ -522,7 +522,7 @@ class ControllerLandingPage extends Controller {
 	 * @param array<string, mixed> $settings
 	 */
 	private function hasMobileBackground(array $settings): bool {
-		return (string)($settings['bg_type'] ?? 'none') === 'image' && !empty($settings['bg_image_mobile']);
+		return !empty($settings['bg_image_mobile']);
 	}
 
 	/**
@@ -583,7 +583,7 @@ class ControllerLandingPage extends Controller {
 		// the section owns the vertical rhythm. A painted widget (bg colour /
 		// image) keeps its padding, and any explicit padding choice applies.
 		if ((string)($settings['padding'] ?? 'lg') === 'lg'
-			&& (string)($settings['bg_type'] ?? 'none') === 'none') {
+			&& !\Dockercart\Landing\Blocks::hasWrapperBackground($settings)) {
 			$settings['padding'] = 'none';
 		}
 

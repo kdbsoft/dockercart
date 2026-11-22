@@ -514,11 +514,6 @@ final class Blocks {
 	 */
 	public static function wrapperFields(): array {
 		return [
-			['key' => 'bg_type', 'type' => 'select', 'localized' => false, 'label' => 'field_bg_type', 'default' => 'none', 'options' => [
-				'none' => 'option_bg_none',
-				'color' => 'option_bg_color',
-				'image' => 'option_bg_image',
-			]],
 			['key' => 'bg_color', 'type' => 'color', 'localized' => false, 'label' => 'field_bg_color', 'default' => ''],
 			['key' => 'bg_image', 'type' => 'image', 'localized' => false, 'label' => 'field_bg_image', 'default' => ''],
 			['key' => 'bg_image_mobile', 'type' => 'image', 'localized' => false, 'label' => 'field_background_image_mobile', 'default' => ''],
@@ -546,6 +541,28 @@ final class Blocks {
 			['key' => 'anchor', 'type' => 'text', 'localized' => false, 'label' => 'field_anchor', 'default' => '', 'max' => 64],
 			['key' => 'custom_class', 'type' => 'text', 'localized' => false, 'label' => 'field_custom_class', 'default' => '', 'max' => 128],
 		];
+	}
+
+	/**
+	 * Whether the wrapper paints a background on every viewport.
+	 *
+	 * There is no type toggle: a colour, an image, or both at once are valid.
+	 * CSS paints the image over the colour, so either value alone enables the
+	 * wrapper background.
+	 *
+	 * @param array<string, mixed> $settings
+	 */
+	public static function hasWrapperBackground(array $settings): bool {
+		return !empty($settings['bg_color']) || !empty($settings['bg_image']);
+	}
+
+	/**
+	 * Whether any viewport has a background image (the overlay needs one).
+	 *
+	 * @param array<string, mixed> $settings
+	 */
+	public static function hasBackgroundImage(array $settings): bool {
+		return !empty($settings['bg_image']) || !empty($settings['bg_image_mobile']);
 	}
 
 	/**
@@ -712,7 +729,9 @@ final class Blocks {
 	 * Hero and CTA used to carry their own `image` (plus `image_mobile` /
 	 * `image_overlay` in hero) while every other block used `bg_image` from the
 	 * wrapper. Existing pages keep their picture and their overlay after the
-	 * next save; new pages expose only one Background image, in Style.
+	 * next save; new pages expose only one Background image, in Style. The old
+	 * `bg_type` flag is unnecessary — an image is active whenever its path is
+	 * set — and drops out with the rest of the unknown settings.
 	 *
 	 * @param array<string, mixed> $settings
 	 * @return array<string, mixed>
@@ -730,8 +749,6 @@ final class Blocks {
 			return $settings;
 		}
 
-		$migrated = false;
-
 		foreach ($legacy as $old => $new) {
 			if (!array_key_exists($old, $settings) || $settings[$old] === '') {
 				continue;
@@ -739,12 +756,7 @@ final class Blocks {
 
 			if (empty($settings[$new])) {
 				$settings[$new] = $settings[$old];
-				$migrated = true;
 			}
-		}
-
-		if ($migrated && (string)($settings['bg_type'] ?? 'none') === 'none') {
-			$settings['bg_type'] = 'image';
 		}
 
 		return $settings;
@@ -1156,19 +1168,20 @@ final class Blocks {
 			$styles['padding-bottom'] = $padding[$key];
 		}
 
-		$bg_type = isset($settings['bg_type']) ? (string)$settings['bg_type'] : 'none';
-
-		if ($bg_type === 'color' && !empty($settings['bg_color'])) {
+		// Colour and image are independent: when both are set CSS paints the
+		// image over the colour, so the colour remains visible while the image
+		// loads and behind any transparent pixels.
+		if (!empty($settings['bg_color'])) {
 			$styles['background-color'] = (string)$settings['bg_color'];
 		}
 
-		if ($bg_type === 'image' && !empty($settings['bg_image'])) {
+		if (!empty($settings['bg_image'])) {
 			$styles['background-image'] = "url('image/" . str_replace("'", '%27', (string)$settings['bg_image']) . "')";
 			$styles['background-size'] = 'cover';
 			$styles['background-position'] = 'center';
 		}
 
-		if ($bg_type === 'image' && !empty($settings['bg_image_mobile'])) {
+		if (!empty($settings['bg_image_mobile'])) {
 			$styles['--lp-bg-image-mobile'] = "url('image/" . str_replace("'", '%27', (string)$settings['bg_image_mobile']) . "')";
 		}
 
@@ -1196,7 +1209,7 @@ final class Blocks {
 	 * @param array<string, mixed> $settings
 	 */
 	public static function overlay(array $settings): int {
-		if ((isset($settings['bg_type']) ? (string)$settings['bg_type'] : 'none') !== 'image') {
+		if (!self::hasBackgroundImage($settings)) {
 			return 0;
 		}
 
