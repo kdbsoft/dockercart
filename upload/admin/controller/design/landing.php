@@ -905,6 +905,7 @@ class ControllerDesignLanding extends Controller {
 			'manufacturer' => ['product/manufacturer/info', 'manufacturer_id'],
 			'information'  => ['information/information', 'information_id'],
 			'blog'         => ['blog/post', 'blog_post_id'],
+			'contact'      => ['information/contact', ''],
 		];
 
 		if (!isset($routes[$type])) {
@@ -915,7 +916,9 @@ class ControllerDesignLanding extends Controller {
 		$param = $routes[$type][1];
 		// Link fields store the banner-style route without index.php; the
 		// storefront resolver applies the SEO keyword at render time.
-		$fallback = 'route=' . $route . '&' . $param . '=' . rawurlencode($value);
+		$fallback = $param !== ''
+			? 'route=' . $route . '&' . $param . '=' . rawurlencode($value)
+			: 'route=' . $route;
 
 		if (!$this->config->get('config_seo_url')) {
 			return $fallback;
@@ -939,6 +942,15 @@ class ControllerDesignLanding extends Controller {
 	 * storefront rewriter uses. A category path needs one keyword per segment.
 	 */
 	private function linkSeoKeyword(string $type, string $value, int $language_id): string {
+		// The built-in contact form is a route, not an entity: its keyword is
+		// registered for the query "information/contact" in oc_seo_url.
+		if ($type === 'contact') {
+			$this->load->model('design/seo_url');
+			$urls = $this->model_design_seo_url->getSeoUrlsByQuery('information/contact', $language_id);
+
+			return isset($urls[0]['keyword']) ? (string)$urls[0]['keyword'] : '';
+		}
+
 		$ids = array_filter(array_map('intval', explode('_', $value)));
 
 		if (!$ids) {
@@ -1451,6 +1463,7 @@ class ControllerDesignLanding extends Controller {
 			'text_link_manufacturer',
 			'text_link_information',
 			'text_link_blog',
+			'text_link_contact',
 			'text_link_search',
 			'text_error_save',
 			'text_conflict',

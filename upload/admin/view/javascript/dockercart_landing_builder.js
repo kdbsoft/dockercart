@@ -67,7 +67,8 @@
 		{ type: 'category', label: 'text_link_category' },
 		{ type: 'manufacturer', label: 'text_link_manufacturer' },
 		{ type: 'information', label: 'text_link_information' },
-		{ type: 'blog', label: 'text_link_blog' }
+		{ type: 'blog', label: 'text_link_blog' },
+		{ type: 'contact', label: 'text_link_contact' }
 	];
 
 	var LINK_ROUTES = {
@@ -75,7 +76,9 @@
 		category:     { route: 'product/category', param: 'path' },
 		manufacturer: { route: 'product/manufacturer/info', param: 'manufacturer_id' },
 		information:  { route: 'information/information', param: 'information_id' },
-		blog:         { route: 'blog/post', param: 'blog_post_id' }
+		blog:         { route: 'blog/post', param: 'blog_post_id' },
+		// A storefront route without an entity id: no autocomplete, fixed URL.
+		contact:      { route: 'information/contact', param: '' }
 	};
 
 	var state = {
@@ -1871,6 +1874,11 @@
 			}
 		}
 
+		// Route-only types (the built-in contact page) carry no id.
+		if (type && LINK_ROUTES[type].param === '') {
+			return { type: type, value: '' };
+		}
+
 		var id = type ? params[LINK_ROUTES[type].param] : '';
 
 		if (!id || !/^[0-9_]+$/.test(String(id))) {
@@ -1883,7 +1891,9 @@
 	function buildLinkUrl(type, value) {
 		var def = LINK_ROUTES[type];
 
-		if (!def || !value) return '';
+		if (!def) return '';
+		if (def.param === '') return 'route=' + def.route;
+		if (!value) return '';
 
 		return 'route=' + def.route + '&' + def.param + '=' + encodeURIComponent(value);
 	}
@@ -1911,6 +1921,7 @@
 		});
 
 		var isEntity = parsed.type !== 'custom';
+		var isRouteOnly = parsed.type === 'contact';
 
 		return '<div class="space-y-1" data-link-control data-link-lang="' + Number(ui.lang) + '">' +
 			'<select ' + (id ? 'id="' + esc(id) + '" ' : '') + 'class="lp-input" data-link-type>' + options + '</select>' +
@@ -1920,7 +1931,7 @@
 			'</div>' +
 			'<div' + (isEntity ? '' : ' class="hidden"') + ' data-link-entity>' +
 				'<div class="relative">' +
-					'<input type="text" class="lp-input pr-7" data-link-search data-link-lang="' + Number(ui.lang) + '" value="" data-link-value="' + esc(parsed.value) + '" placeholder="' + esc(t('text_link_search', 'Search…')) + '" autocomplete="off" />' +
+					'<input type="text" class="lp-input pr-7" data-link-search data-link-lang="' + Number(ui.lang) + '" value="' + (isRouteOnly ? esc(t('text_link_contact', 'Contact page')) : '') + '" data-link-value="' + esc(parsed.value) + '" placeholder="' + esc(t('text_link_search', 'Search…')) + '" autocomplete="off"' + (isRouteOnly ? ' readonly' : '') + ' />' +
 					linkClearButton() +
 				'</div>' +
 				'<div class="mt-1">' +
@@ -2422,7 +2433,9 @@
 		select.addEventListener('change', function () {
 			search.value = '';
 			search.dispatchEvent(new Event('input')); // drop a stale dropdown
-			setUrl('', false);
+			var fixed = buildLinkUrl(select.value, '');
+			setUrl(fixed, false);
+			if (select.value === 'contact') search.value = t('text_link_contact', 'Contact page');
 			updateMode();
 		});
 
@@ -2433,7 +2446,9 @@
 		clears.forEach(function (button) {
 			button.addEventListener('click', function () {
 				search.value = '';
-				setUrl('', false);
+				var fixed = buildLinkUrl(select.value, '');
+				setUrl(fixed, false);
+				if (select.value === 'contact') search.value = t('text_link_contact', 'Contact page');
 			});
 		});
 

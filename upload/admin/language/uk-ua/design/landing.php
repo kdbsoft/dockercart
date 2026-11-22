@@ -108,6 +108,7 @@ $_['text_link_category']     = 'Категорія';
 $_['text_link_manufacturer'] = 'Виробник';
 $_['text_link_information']  = 'Інформаційна сторінка';
 $_['text_link_blog']         = 'Запис блогу';
+$_['text_link_contact']      = 'Сторінка контактів';
 $_['text_link_search']       = 'Пошук для вибору…';
 $_['text_error_save']        = 'Не вдалося зберегти сторінку';
 $_['error_meta_length']       = 'Мета-теги мають бути не довшими за 255 символів!';

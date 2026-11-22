@@ -108,6 +108,7 @@ $_['text_link_category']     = 'Category';
 $_['text_link_manufacturer'] = 'Manufacturer';
 $_['text_link_information']  = 'Information page';
 $_['text_link_blog']         = 'Blog post';
+$_['text_link_contact']      = 'Contact page';
 $_['text_link_search']       = 'Search to choose…';
 $_['text_error_save']        = 'Could not save the page';
 $_['error_meta_length']       = 'Meta title, description and keywords must not exceed 255 characters!';

@@ -25,12 +25,12 @@ const LINK_FIELD_PAGE = '/upload/catalog/controller/landing/page.php';
 
 const LINK_FIELD_LOCALES = ['en-gb', 'ru-ua', 'uk-ua'];
 
-const LINK_FIELD_TYPES = ['custom', 'product', 'category', 'manufacturer', 'information', 'blog'];
+const LINK_FIELD_TYPES = ['custom', 'product', 'category', 'manufacturer', 'information', 'blog', 'contact'];
 
 const LINK_FIELD_I18N_KEYS = [
 	'text_link_custom', 'text_link_product', 'text_link_category',
 	'text_link_manufacturer', 'text_link_information', 'text_link_blog',
-	'text_link_search',
+	'text_link_contact', 'text_link_search',
 ];
 
 /**
@@ -92,6 +92,8 @@ return [
 		Assert::contains("html += renderLinkControl(value, 'data-repeater-key=\"' + esc(sub.key) + '\"', '');", $js, 'hero buttons must get the same control');
 		Assert::contains("'route=' + def.route + '&' + def.param + '='", $js, 'entity links must be stored without index.php');
 		Assert::notContains("return 'index.php?route='", $js, 'the picker must never write an index.php link');
+		Assert::contains("contact:      { route: 'information/contact', param: '' }", $js, 'the built-in contact page has no entity id');
+		Assert::contains("if (def.param === '') return 'route=' + def.route;", $js, 'route-only links need no id');
 
 		foreach (['data-link-type', 'data-link-url', 'data-link-search'] as $attribute) {
 			Assert::contains($attribute, $js, 'missing link control attribute ' . $attribute);
@@ -131,6 +133,7 @@ return [
 		Assert::contains('$this->url->link(urldecode($matches[1]), $matches[2], true)', $page, 'use the SEO-aware catalog Url');
 		Assert::contains('(?:index\\.php)?\\?route=', $page, 'both the builder and the banner route form must be recognised');
 		Assert::contains('^route=([^&]+)&(.+)$', $page);
+		Assert::contains('#^route=([^&]+)$#i', $page, 'route-only links (contact page) must resolve too');
 	},
 
 	'link: the autocomplete endpoint resolves every type and stored ids' => static function (): void {

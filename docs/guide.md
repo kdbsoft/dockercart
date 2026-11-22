@@ -2331,8 +2331,8 @@ declares every allowed block: name key, icon, palette group and the field schema
 Fields of type `link` (CTA / image / image+text buttons, the `features` and
 `statement` links, and the `hero` button repeater) are edited the same way as
 banner links: a type picker (**Custom URL**, product, category, manufacturer,
-information page, blog post) followed by either a URL input or an entity
-autocomplete. Only the **URL is stored** in the field — selecting an entity
+information page, blog post, Contact page) followed by either a URL input or an
+entity autocomplete. Only the **URL is stored** in the field — selecting an entity
 writes the canonical relative route `route=…&<id_param>=N` (the same form the
 banner form uses, without `index.php`). Changing the type clears the URL;
 there are no separate `link_type`/`link_value` fields to keep in sync.
@@ -2342,6 +2342,22 @@ catalog `Url` **at render time** (the same SEO-aware URL the rest of the
 storefront uses), so SEO keywords, the language prefix and HTTPS follow the
 current request instead of being frozen into the block. Old manually entered
 `route=…` links and the banner form's links go through the same resolver.
+
+A route without an id (`product/new_arrivals`) cannot be matched to an entity,
+so the picker shows it as **Custom URL**. When editing such a link in a builder
+page, pick the actual entity (product, category, page or post) instead: the
+field then stores `route=…&<id_param>=N`, the picker shows its type and the
+operator gets the entity name plus its SEO URL. On the demo information pages
+the About Us hero points at product 5077.
+
+The built-in contact form is **not** an information page. It has its own
+route-only link type: the field stores `route=information/contact` and the
+storefront resolves it to the SEO keyword registered for that query
+(`/contact-us`). There is a single contact page; do not assign `contact-us` (or
+the bare `contact` segment, which would shadow `/information/contact`) to a
+separate information page. Section anchors (`#our-story`) remain custom URLs.
+A system route without an entity id (`account/order`) is stored as the clean
+relative path `account/order`, not as `index.php?route=…`.
 
 The builder resolves the label **and the SEO URL** of an already-stored link
 through `design/landing/autocomplete?type=…&ids=N&language_id=N` (one request

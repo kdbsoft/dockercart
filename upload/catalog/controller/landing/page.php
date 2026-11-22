@@ -808,6 +808,12 @@ class ControllerLandingPage extends Controller {
 			return $this->url->link(urldecode($matches[1]), $matches[2], true);
 		}
 
+		// Route-only links (the built-in contact form) carry no id.
+		if (preg_match('#^(?:index\.php)?\?route=([^&]+)$#i', $clean, $matches)
+			|| preg_match('#^route=([^&]+)$#i', $clean, $matches)) {
+			return $this->url->link(urldecode($matches[1]), '', true);
+		}
+
 		return $link;
 	}
 
