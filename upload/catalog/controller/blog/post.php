@@ -37,6 +37,25 @@ class ControllerBlogPost extends Controller {
 		// Get post data
 		$post_info = $this->model_extension_module_dockercart_blog_post->getPost($post_id);
 
+		// An article composed in the landing builder renders its sections through
+		// the landing controller (the same delegation an information page or a
+		// landing-as-home page uses). The landing is resolved by the owner link,
+		// the article keeps its own URL, meta and status gate. A preview token
+		// delegates even when the post is unpublished — the landing controller
+		// verifies the token and lets the builder canvas through.
+		if (($post_info && !empty($post_info['use_builder']))
+			|| ($post_id > 0 && isset($this->request->get['preview_token']))) {
+			$this->load->model('design/landing');
+
+			$landing = $this->model_design_landing->getLandingByPost($post_id);
+
+			if ($landing) {
+				$this->request->get['landing_id'] = (int)$landing['landing_id'];
+
+				return $this->response->setOutput($this->load->controller('landing/page'));
+			}
+		}
+
 		if ($post_info && $post_info['status']) {
 			// Increment view counter
 			$this->model_extension_module_dockercart_blog_post->incrementViews($post_id);

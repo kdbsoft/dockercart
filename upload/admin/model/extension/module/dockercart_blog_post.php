@@ -30,6 +30,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
 			background_image = '" . $this->db->escape($data['background_image']) . "',
+			use_builder = '" . (int)($data['use_builder'] ?? 0) . "',
 			status = '" . (int)$data['status'] . "',
 			featured = '" . (int)$data['featured'] . "',
 			allow_comments = '" . (int)$data['allow_comments'] . "',
@@ -141,6 +142,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			author_id = '" . (int)$data['author_id'] . "',
 			image = '" . $this->db->escape($data['image']) . "',
 			background_image = '" . $this->db->escape($data['background_image']) . "',
+			use_builder = '" . (int)($data['use_builder'] ?? 0) . "',
 			status = '" . (int)$data['status'] . "',
 			featured = '" . (int)$data['featured'] . "',
 			allow_comments = '" . (int)$data['allow_comments'] . "',
@@ -272,6 +274,15 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 	 * @param int $post_id
 	 */
 	public function deletePost($post_id) {
+		// Cascade the owned landing (its composed blocks) along with the post.
+		$landing_id = $this->getBuilderLandingId((int)$post_id);
+
+		if ($landing_id) {
+			$this->load->model('design/landing');
+
+			$this->model_design_landing->deleteLanding($landing_id);
+		}
+
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_description` WHERE post_id = '" . (int)$post_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_post_to_store` WHERE post_id = '" . (int)$post_id . "'");
@@ -317,6 +328,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 		$data["author_id"] = $post["author_id"];
 		$data["image"] = $post["image"];
 		$data["background_image"] = $post["background_image"];
+		$data["use_builder"] = empty($post["use_builder"]) ? 0 : 1;
 		$data["status"] = $post["status"];
 		$data["featured"] = $post["featured"];
 		$data["allow_comments"] = $post["allow_comments"];
@@ -360,7 +372,19 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 		$data["post_seo_url"] = $seo_urls;
 
-		return $this->addPost($data);
+		$new_post_id = $this->addPost($data);
+
+		// A builder-composed copy keeps its composed page: the owned landing is
+		// duplicated with fresh block ids and bound to the new post.
+		$source_landing_id = $this->getBuilderLandingId((int)$post_id);
+
+		if ($source_landing_id) {
+			$this->load->model('design/landing');
+
+			$this->model_design_landing->duplicateLanding($source_landing_id, 0, (int)$new_post_id);
+		}
+
+		return $new_post_id;
 	}
 
 	private function getUniqueCopyName($original, $table, $column)
@@ -688,6 +712,178 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 			$name = trim((string)$name);
 			$this->db->query("UPDATE `" . DB_PREFIX . "blog_post_description` SET name = '" . $this->db->escape($name) . "' WHERE post_id = '" . (int)$post_id . "' AND language_id = '" . (int)$language_id . "'");
 		}
+	}
+
+	/**
+	 * Instant mode switch (mirrors catalog/information::setBuilderMode).
+	 *
+	 * Only flips the use_builder flag — turning the builder off keeps the
+	 * owned landing intact so it acts as the fallback when re-enabled.
+	 */
+	public function setBuilderMode($post_id, $use_builder) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET use_builder = '" . (int)(bool)$use_builder . "' WHERE post_id = '" . (int)$post_id . "'");
+	}
+
+	/**
+	 * The landing page bound to this blog post (0 when the article is written
+	 * in the classic editor or has not been converted yet).
+	 */
+	public function getBuilderLandingId($post_id) {
+		$query = $this->db->query("SELECT landing_id FROM `" . DB_PREFIX . "landing` WHERE post_id = '" . (int)$post_id . "' LIMIT 1");
+
+		return $query->num_rows ? (int)$query->row['landing_id'] : 0;
+	}
+
+	/**
+	 * Enables builder mode: creates the owned landing on first use and seeds it
+	 * with the classic content so nothing is lost (one text block per
+	 * language, heading = post title, body = the WYSIWYG copy).
+	 *
+	 * The classic content itself stays intact: it acts as the fallback when
+	 * the builder toggle is switched off again (re-enabling does not re-seed).
+	 *
+	 * @param int $post_id
+	 * @return int the owned landing_id
+	 */
+	public function enableBuilder($post_id) {
+		$post_id = (int)$post_id;
+
+		$landing_id = $this->getBuilderLandingId($post_id);
+
+		if ($landing_id) {
+			return $landing_id;
+		}
+
+		$descriptions = $this->getPostDescriptions($post_id);
+		$default_language_id = (int)$this->config->get('config_language_id');
+
+		$default = array();
+
+		if (isset($descriptions[$default_language_id])) {
+			$default = $descriptions[$default_language_id];
+		} elseif ($descriptions) {
+			$default = reset($descriptions);
+		}
+
+		$name = trim((string)($default['meta_title'] ?? ''));
+
+		if ($name === '') {
+			$name = trim((string)($default['title'] ?? ''));
+		}
+
+		if ($name === '') {
+			$name = 'Blog post';
+		}
+
+		$blocks = array();
+
+		if ($descriptions) {
+			$content = array();
+
+			foreach ($descriptions as $language_id => $description) {
+				$content[$language_id] = array(
+					'heading' => (string)$description['title'],
+					'body'    => (string)$description['content'],
+				);
+			}
+
+			$blocks[] = array(
+					'block_id' => 0,
+					'code'     => 'text',
+					'status'   => 1,
+					'settings' => array(),
+					'content'  => $content,
+					);
+		}
+
+		$this->load->model('design/landing');
+
+		// Owned landing: status/schedule/slugs are governed by the blog post
+		// itself, the storefront chrome is always the full store theme.
+		return $this->model_design_landing->addLanding(array(
+			'name'         => $name,
+			'post_id'      => $post_id,
+			'status'       => 0,
+			'chrome'       => 'full',
+			'noindex'      => 0,
+			'custom_css'   => '',
+			'descriptions' => array(),
+			'blocks'       => $blocks,
+		));
+	}
+
+	/**
+	 * Partial settings save for the landing Page Builder (owned landings).
+	 *
+	 * Writes visibility and the translated meta tags in one place so the
+	 * builder Page Settings can edit them without opening the blog module
+	 * form. Mirrors the classic form encoding (Request::clean: trim +
+	 * htmlspecialchars) so JSON saves stay byte-identical to form saves.
+	 *
+	 * @param int $post_id
+	 * @param int $status
+	 * @param array<int, array<string, string>> $descriptions meta fields per language
+	 */
+	public function updateBuilderSettings($post_id, $status, $descriptions) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "blog_post` SET status = '" . ($status ? 1 : 0) . "', date_modified = NOW() WHERE post_id = '" . (int)$post_id . "'");
+
+		foreach ($descriptions as $language_id => $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+
+			$sets = array();
+
+			foreach (array('meta_title', 'meta_description', 'meta_keyword') as $key) {
+				if (array_key_exists($key, $row)) {
+					$sets[] = "`" . $key . "` = '" . $this->db->escape($this->builderClean((string)$row[$key])) . "'";
+				}
+			}
+
+			if ($sets) {
+				$this->db->query("UPDATE `" . DB_PREFIX . "blog_post_description` SET " . implode(', ', $sets) . " WHERE post_id = '" . (int)$post_id . "' AND language_id = '" . (int)$language_id . "'");
+			}
+		}
+
+		$this->cache->delete('blog.post');
+		$this->cache->delete('blog.popular');
+		$this->cache->delete('blog.recent');
+		$this->cache->delete('blog.archive');
+	}
+
+	/**
+	 * Replaces the SEO keywords of one store (the builder edits the default
+	 * store only; other stores keep their keywords).
+	 *
+	 * @param int $post_id
+	 * @param int $store_id
+	 * @param array<int, string> $keywords keyword per language
+	 */
+	public function updateBuilderSeoUrls($post_id, $store_id, $keywords) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "blog_seo_url` WHERE query = 'blog_post_id=" . (int)$post_id . "' AND store_id = '" . (int)$store_id . "'");
+
+		foreach ($keywords as $language_id => $keyword) {
+			$keyword = $this->builderClean((string)$keyword);
+
+			if ($keyword === '') {
+				continue;
+			}
+
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "blog_seo_url` SET store_id = '" . (int)$store_id . "', language_id = '" . (int)$language_id . "', query = 'blog_post_id=" . (int)$post_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+		}
+
+		$this->load->model('design/seo_url');
+		$this->model_design_seo_url->invalidateSeoUrlCache();
+
+		$this->cache->delete('blog.post');
+	}
+
+	/**
+	 * Request::clean() without a request: trim + htmlspecialchars, exactly
+	 * what the blog post form stores.
+	 */
+	private function builderClean($value) {
+		return trim(htmlspecialchars((string)$value, ENT_COMPAT, 'UTF-8'));
 	}
 
 	private function deleteRecommendationCache($post_id) {

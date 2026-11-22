@@ -91,3 +91,16 @@ $_['text_autosave_pending']     = 'Есть несохранённые изме�
 $_['text_autosave_saving']      = 'Сохранение...';
 $_['text_autosave_saved']       = 'Сохранено в %s';
 $_['text_autosave_failed']      = 'Не сохранено:';
+
+// Builder статьи (статья блога как лендинг)
+$_['text_mode_builder']        = 'Builder страницы';
+$_['text_mode_classic']        = 'Классический редактор';
+$_['text_switch_to_builder']   = 'Перейти в Builder';
+$_['text_switch_to_classic']   = 'Вернуться в редактор';
+$_['text_success_builder_mode'] = 'Режим контента обновлён.';
+$_['button_open_builder']      = 'Открыть в Builder';
+$_['text_builder_cta_hint']    = 'Статья собирается из секций в Builder.';
+$_['text_builder_pending']     = 'Сохраните статью, чтобы включить Builder — текущий текст будет перенесён автоматически.';
+$_['text_builder_badge']       = 'Builder';
+$_['text_builder_badge_hint']  = 'Статья собрана из секций в Builder.';
+

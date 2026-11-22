@@ -116,3 +116,16 @@ $_['text_autosave_pending']     = 'Unsaved changes';
 $_['text_autosave_saving']      = 'Saving...';
 $_['text_autosave_saved']       = 'Autosaved at %s';
 $_['text_autosave_failed']      = 'Not saved:';
+
+// Page builder (blog article as a landing page)
+$_['text_mode_builder']        = 'Page Builder';
+$_['text_mode_classic']        = 'Classic Editor';
+$_['text_switch_to_builder']   = 'Switch to Page Builder';
+$_['text_switch_to_classic']   = 'Switch to Classic Editor';
+$_['text_success_builder_mode'] = 'Content mode updated.';
+$_['button_open_builder']      = 'Open in Builder';
+$_['text_builder_cta_hint']    = 'The article is composed from sections in the builder.';
+$_['text_builder_pending']     = 'Save the article to enable the builder — the current text will be carried over automatically.';
+$_['text_builder_badge']       = 'Builder';
+$_['text_builder_badge_hint']  = 'The article is composed from sections in the Builder.';
+

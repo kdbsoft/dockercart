@@ -91,3 +91,15 @@ $_['text_autosave_pending']     = 'Є незбережені зміни';
 $_['text_autosave_saving']      = 'Збереження...';
 $_['text_autosave_saved']       = 'Збережено о %s';
 $_['text_autosave_failed']      = 'Не збережено:';
+
+// Builder статті (стаття блогу як лендінг)
+$_['text_mode_builder']        = 'Builder сторінки';
+$_['text_mode_classic']        = 'Класичний редактор';
+$_['text_switch_to_builder']   = 'Перейти в Builder';
+$_['text_switch_to_classic']   = 'Повернутися в редактор';
+$_['text_success_builder_mode'] = 'Режим контенту оновлено.';
+$_['button_open_builder']      = 'Відкрити в Builder';
+$_['text_builder_cta_hint']    = 'Стаття складається з секцій у Builder.';
+$_['text_builder_pending']     = 'Збережіть статтю, щоб увімкнути Builder — поточний текст буде перенесено автоматично.';
+$_['text_builder_badge']       = 'Builder';
+$_['text_builder_badge_hint']  = 'Стаття складена з секцій у Builder.';

@@ -12,6 +12,7 @@
  * @version    1.0.3
  */
 
+use Dockercart\Landing\Blocks;
 use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {
@@ -942,6 +943,14 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $categories[] = (string)$row['name'];
         }
 
+        // A builder-composed article keeps its classic WYSIWYG content only as
+        // a fallback: the searchable text is what the composed blocks say.
+        $builder_content = '';
+
+        if (!empty($post['use_builder'])) {
+            $builder_content = $this->builderPostContent((int)$post_id, (int)$language_id);
+        }
+
         $doc = [
             'id'               => (int)$post_id * 100 + (int)$language_id,
             'store_id'         => (int)$this->config->get('config_store_id'),
@@ -955,7 +964,9 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'date_modified'    => strtotime((string)$post['date_modified']) ?: 0,
             'title'            => (string)($post['name'] ?? ''),
             'excerpt'          => strip_tags(html_entity_decode((string)($post['description'] ?? ''), ENT_QUOTES, 'UTF-8')),
-            'content'          => strip_tags(html_entity_decode((string)($post['content'] ?? ''), ENT_QUOTES, 'UTF-8')),
+            'content'          => $builder_content !== ''
+                ? $builder_content
+                : strip_tags(html_entity_decode((string)($post['content'] ?? ''), ENT_QUOTES, 'UTF-8')),
             'meta_title'       => (string)($post['meta_title'] ?? ''),
             'meta_description' => (string)($post['meta_description'] ?? ''),
             'meta_keywords'    => (string)($post['meta_keyword'] ?? ''),
@@ -972,6 +983,38 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $this->createBlogPostIndexSchema();
 
         return $manticore->replace('blog_posts', $doc);
+    }
+
+    /**
+     * Plain-text rendition of a builder-composed article: the localised block
+     * fields of its owned landing, concatenated in block order. The raw `html`
+     * block is skipped — it stores embed/analytics markup, not copy.
+     *
+     * @param int $post_id
+     * @param int $language_id
+     * @return string
+     */
+    private function builderPostContent($post_id, $language_id) {
+        $query = $this->db->query("
+            SELECT lbd.content
+            FROM " . DB_PREFIX . "landing_block lb
+            INNER JOIN " . DB_PREFIX . "landing l ON (l.landing_id = lb.landing_id AND l.post_id = '" . (int)$post_id . "')
+            LEFT JOIN " . DB_PREFIX . "landing_block_description lbd ON (lbd.block_id = lb.block_id AND lbd.language_id = '" . (int)$language_id . "')
+            WHERE lb.status = '1' AND lb.code <> 'html'
+            ORDER BY lb.sort_order ASC, lb.block_id ASC
+        ");
+
+        $parts = [];
+
+        foreach ($query->rows as $row) {
+            $text = Blocks::plainTextFromContent((string)($row['content'] ?? ''));
+
+            if ($text !== '') {
+                $parts[] = $text;
+            }
+        }
+
+        return implode(' ', $parts);
     }
 
     /**

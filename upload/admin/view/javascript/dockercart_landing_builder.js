@@ -92,7 +92,7 @@
 		},
 		blocks: [],
 		version: 1,
-		// Owned landing: the information page fields edited from Page Settings.
+		// Owned landing: the owner entity's fields edited from Page Settings.
 		owner: { status: 0, descriptions: {} },
 		// Global landing design, edited in the builder's Site Settings panel.
 		siteDesign: clone(CFG.siteDesign || {})
@@ -422,9 +422,9 @@
 	/* ==================== page title (owned landings) ==================== */
 
 	/**
-	 * An owned landing's name is the information page title of the selected
-	 * language (oc_information_description.title). It is edited in Page
-	 * Settings — the top bar has no name field.
+	 * An owned landing's name is its owner's title of the selected language
+	 * (oc_information_description.title / oc_blog_post_description.name). It
+	 * is edited in Page Settings — the top bar has no name field.
 	 */
 	function ownerTitle() {
 		return CFG.ownerTitles ? String(CFG.ownerTitles[ui.lang] || '') : '';
@@ -453,7 +453,7 @@
 
 		var body = new URLSearchParams();
 
-		body.set('information_id', String(CFG.ownerInformationId));
+		body.set(CFG.ownerIdField, String(CFG.ownerId));
 		body.set('names[' + pending.lang + ']', pending.value);
 
 		return fetch(CFG.urls.ownerNames, {
@@ -622,7 +622,7 @@
 			date_publish: state.page.date_publish,
 			date_unpublish: state.page.date_unpublish,
 			descriptions: state.page.descriptions,
-			owner: CFG.ownerInformationId ? state.owner : undefined,
+			owner: CFG.ownerId ? state.owner : undefined,
 			blocks: blocks.map(function (block) {
 				return {
 					block_id: Number(block.block_id) || 0,
@@ -3273,10 +3273,10 @@
 		var descriptions = state.page.descriptions || {};
 		var html = '';
 
-		// An owned landing is the composed body of an information page: its
-		// status, URL, meta tags and SEO keyword are edited here, straight
-		// in the builder, instead of Catalog > Information.
-		if (CFG.ownerInformationId) {
+		// An owned landing is the composed body of its owner (information
+		// page or blog post): its status, URL, meta tags and SEO keyword are
+		// edited here, straight in the builder, instead of the owner module.
+		if (CFG.ownerId) {
 			html += statusSelectHtml('data-owner="status"' + (CFG.canEditOwner ? '' : ' disabled'), state.owner.status);
 			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_name', 'Name')) + '</label>' +
 				'<input type="text" class="lp-input" data-owner-title value="' + esc(ownerTitle()) + '"' +
@@ -3284,7 +3284,7 @@
 			html += descriptionGroupHtml('data-owner-desc', state.owner.descriptions || {}, !CFG.canEditOwner);
 		}
 
-		if (!CFG.ownerInformationId) {
+		if (!CFG.ownerId) {
 			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_name', 'Name')) + '</label>' +
 				'<input type="text" class="lp-input" data-page="name" value="' + esc(state.page.name) + '" /></div>';
 
@@ -3302,7 +3302,7 @@
 
 		html += '<div class="lp-field"><label class="flex items-center gap-2 text-xs"><input type="checkbox" data-page="noindex"' + (Number(state.page.noindex) ? ' checked' : '') + ' /> ' + esc(t('entry_noindex', 'noindex (hide from search engines)')) + '</label></div>';
 
-		if (!CFG.ownerInformationId) {
+		if (!CFG.ownerId) {
 			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_publish', 'Publish from')) + '</label>' +
 				'<input type="datetime-local" class="lp-input" data-page="date_publish" value="' + esc(state.page.date_publish || '') + '" /></div>';
 			html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_date_unpublish', 'Publish until')) + '</label>' +
@@ -3312,7 +3312,7 @@
 		html += '<div class="lp-field"><label class="lp-field-label">' + esc(t('entry_custom_css', 'Custom CSS')) + '</label>' +
 			'<textarea rows="5" class="lp-input font-mono text-[11px]" data-page="custom_css">' + esc(state.page.custom_css || '') + '</textarea></div>';
 
-		if (!CFG.ownerInformationId) {
+		if (!CFG.ownerId) {
 			html += '<div class="text-[11px] text-gray-400">' + esc(t('entry_viewed', 'Views')) + ': ' + Number(CFG.landing.viewed || 0) + '</div>';
 		}
 

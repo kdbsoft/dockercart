@@ -828,6 +828,53 @@ final class Blocks {
 	}
 
 	/**
+	 * Flattens one block's localised content JSON into plain text.
+	 *
+	 * Every string value is collected recursively (repeater rows are arrays),
+	 * entity-decoded, stripped of markup and whitespace-collapsed. Used by the
+	 * blog search index, which stores a plain-text rendition of a
+	 * builder-composed article instead of the classic WYSIWYG copy. Values are
+	 * already normalised through normalizeContent(), so no field-schema
+	 * knowledge is needed here — richtext bodies keep their entities, plain
+	 * fields never carry markup in the first place.
+	 */
+	public static function plainTextFromContent(string $json): string {
+		$decoded = json_decode($json, true);
+
+		if (!is_array($decoded)) {
+			return '';
+		}
+
+		$parts = [];
+
+		self::collectPlainText($decoded, $parts);
+
+		return trim((string)preg_replace('/\s+/u', ' ', implode(' ', $parts)));
+	}
+
+	/**
+	 * @param array<int|string, mixed> $value
+	 * @param array<int, string> $parts
+	 */
+	private static function collectPlainText($value, array &$parts): void {
+		if (is_array($value)) {
+			foreach ($value as $item) {
+				self::collectPlainText($item, $parts);
+			}
+
+			return;
+		}
+
+		if (is_string($value) && $value !== '') {
+			$text = trim(strip_tags(html_entity_decode($value, ENT_QUOTES, 'UTF-8')));
+
+			if ($text !== '') {
+				$parts[] = $text;
+			}
+		}
+	}
+
+	/**
 	 * Casts one field value according to its type.
 	 *
 	 * @param array<string, mixed> $field

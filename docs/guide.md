@@ -2698,6 +2698,75 @@ Guarded by `tools/tests/cases/information_landing.php` (migration idempotency,
 owner-exclusion SQL, the delegation anchor, the 404 guard, builder owner mode,
 locale parity ×3).
 
+### Blog posts as landing pages
+
+A blog article can be composed in the same section builder — the whole page,
+like an information page: `oc_blog_post.use_builder` toggles it, `oc_landing.
+post_id` links the article to its composed page (a second owner kind next to
+`information_id`). The integration mirrors the information one rule for rule.
+
+| Surface | Where |
+|---|---|
+| Toggle + builder link | Extensions → Modules → DockerCart Blog → Posts → form (Description panel toolbar) |
+| Builder | `design/landing/builder&landing_id=N` as usual, post-owned mode |
+| Storefront | the article's own SEO URL (`blog/post`, keywords in `oc_blog_seo_url`) |
+
+Rules that keep the two owner kinds from colliding:
+
+* **Post-owned landings are invisible standalone**: the landing list,
+  `getLandingBySlug()`, `getTakenSlugs()` and the list actions
+  (`delete`/`copy`/`status`, via `ModelDesignLanding::ownerType()`) refuse
+  them; `saveLanding()` ignores their `status`, publish window, `is_home` and
+  slugs (`syncSeoUrls` never runs — `oc_seo_url` stays untouched).
+* **The article owns everything public**: URL/keyword (`oc_blog_seo_url`,
+  query `blog_post_id=N`), meta tags, canonical, breadcrumbs
+  (Home → Blog → article) and visibility (`oc_blog_post.status` + store +
+  `date_published`). `landing/page&landing_id=N` / `lp-<id>` is a 404 — only
+  the blog route, which plants `blog_post_id` next to `landing_id`, may
+  render the composed page (a valid preview token does not bypass this).
+* **Enabling is conversion + fallback at once**:
+  `ModelExtensionModuleDockercartBlogPost::enableBuilder()` creates the owned
+  landing (name from the post meta/title, `status = 0`) and seeds one `text`
+  block per language — heading = post title, body = the WYSIWYG copy. The
+  WYSIWYG field itself stays saved and acts as the fallback when the toggle is
+  switched off (re-enabling does not re-convert).
+* **Lifecycle**: deleting the post cascades `deleteLanding()` (page + blocks
+  + descriptions); copying the post duplicates the landing and binds the
+  copy (`duplicateLanding($id, 0, $new_post_id)`) with `use_builder` carried
+  over.
+* **Search stays honest**: `indexBlogPost()` reads `use_builder` and, for
+  composed articles, builds the Manticore `content` field from the localised
+  block fields of the owned landing (`Blocks::plainTextFromContent()`
+  flattens one block's content JSON into plain text; the raw `html` block is
+  skipped). The classic WYSIWYG copy is the fallback when the composed text
+  is empty.
+
+Storefront flow: `ControllerBlogPost::index()` sees `use_builder` (or a
+preview token, so the canvas works on unpublished articles), resolves the
+owned landing via `ModelDesignLanding::getLandingByPost()` and delegates to
+`ControllerLandingPage`, which gates on the catalog post row
+(`ModelExtensionModuleDockercartBlogPost::getPost()`: status + store +
+language + date), takes meta/breadcrumbs/canonical from the article and
+increments **the post's** `views` counter instead of the landing's one.
+
+Builder owner mode: the back link leads to the blog post list, the canvas
+URLs are built from the article keyword (`oc_blog_seo_url`, store 0,
+language-prefixed; fallback `index.php?route=blog/post&blog_post_id=N`), and
+the Page Settings panel edits the article's status, per-language title
+(written through `extension/module/dockercart_blog_post/updateNames`), meta
+tags and default-store keyword (validated by `validateBlogOwner()`, written by
+`updateBuilderSettings()` / `updateBuilderSeoUrls()` in the blog model). The
+top bar badge and the post list badge mark composed articles.
+
+Permissions: no new routes — `extension/module/dockercart_blog_post` and
+`design/landing` are already in the content-manager / marketer templates.
+The form hides the toggle from users without `modify design/landing`.
+
+Guarded by `tools/tests/cases/blog_post_landing.php` (migration idempotency
++ module installer, owner-exclusion SQL, the delegation anchor, the 404
+guard, builder owner mode, `enableBuilder()` conversion over `FakeDb`,
+the plain-text extractor, locale parity ×3).
+
 ---
 
 ## 23. Blog Post Autosave

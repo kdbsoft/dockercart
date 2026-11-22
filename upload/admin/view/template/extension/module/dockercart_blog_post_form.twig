@@ -49,6 +49,22 @@
               </div>
             </div>
             <div class="dcx-panel-body">
+              {% if can_builder %}
+              <div class="dc-opts-toolbar dc-builder-mode-selector">
+                <span id="dc-builder-mode-label" class="label {% if use_builder %}label-primary{% else %}label-default{% endif %}">
+                  <i data-lucide="circle" width="10" height="10"></i> {% if use_builder %}{{ text_mode_builder }}{% else %}{{ text_mode_classic }}{% endif %}
+                </span>
+                <button type="button" id="dc-toggle-builder-btn" class="btn btn-xs btn-default">
+                  {% if use_builder %}
+                    <i data-lucide="arrow-left" width="13" height="13"></i> {{ text_switch_to_classic }}
+                  {% else %}
+                    {{ text_switch_to_builder }} <i data-lucide="arrow-right" width="13" height="13"></i>
+                  {% endif %}
+                </button>
+                <span id="dc-builder-saved" class="dc-opts-toolbar__saved" style="display:none"><i data-lucide="check" width="13" height="13"></i> {{ text_success_builder_mode }}</span>
+              </div>
+              {% endif %}
+              <input type="hidden" name="use_builder" id="input-use-builder" value="{{ use_builder ? 1 : 0 }}" />
               <div class="dc-lang-frame">
               <ul class="nav nav-tabs" id="language">
                 {% for language in languages %}
@@ -70,7 +86,17 @@
                       <label class="dcx-label" for="input-excerpt{{ language.language_id }}">{{ entry_excerpt }}</label>
                       <textarea name="post_description[{{ language.language_id }}][excerpt]" rows="3" placeholder="{{ entry_excerpt }}" id="input-excerpt{{ language.language_id }}" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].excerpt }}</textarea>
                     </div>
-                    <div class="dcx-field required">
+                    <div class="dc-builder-lang-cta"{% if not use_builder %} style="display:none"{% endif %}>
+                      <div class="dc-builder-lang-cta__title">{{ entry_content }}</div>
+                      <p class="dc-builder-lang-cta__hint">{{ text_builder_cta_hint }}</p>
+                      {% if builder_url %}
+                      <a href="{{ builder_url }}&amp;language_id={{ language.language_id }}" class="btn btn-primary dc-builder-lang-open" data-lang-id="{{ language.language_id }}"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
+                      {% else %}
+                      <a href="#" class="btn btn-primary disabled dc-builder-lang-open" data-lang-id="{{ language.language_id }}" onclick="return false;"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
+                      <div class="dc-builder-lang-cta__pending">{{ text_builder_pending }}</div>
+                      {% endif %}
+                    </div>
+                    <div class="dcx-field required dc-description-field"{% if use_builder %} style="display:none"{% endif %}>
                       <label class="dcx-label" for="input-content{{ language.language_id }}">{{ entry_content }}</label>
                       <textarea name="post_description[{{ language.language_id }}][content]" placeholder="{{ entry_content }}" id="input-content{{ language.language_id }}" data-toggle="tinymce" class="form-control">{{ post_description[language.language_id] ? post_description[language.language_id].content }}</textarea>
                       {% if error_content[language.language_id] %}
@@ -537,6 +563,74 @@ $(document).on('click', '#post-product-category .dcx-tree-select__well-remove', 
 	var count = $('#post-product-category .dcx-tree-select__well-item').length;
 	$('#related-category-modal-count').text(count > 0 ? count + ' {{ entry_category }}' : '{{ button_select_category }}');
 	$('#post-product-category').toggle(count > 0);
+});
+
+// Content-mode switch: same pattern as the information form toggle — instant
+// save via setBuilderMode, local flip on the add page where there is no
+// post_id yet.
+var dcBuilderMode = {{ use_builder ? "'builder'" : "'classic'" }};
+var dcPostId = {{ post_id ? post_id : 0 }};
+
+function dcGetPostId() {
+	if (dcPostId) {
+		return dcPostId;
+	}
+	var m = /[&?]post_id=(\d+)/.exec(window.location.href);
+	return m ? m[1] : '0';
+}
+
+function dcRenderBuilderMode(mode, builderUrl) {
+	dcBuilderMode = mode;
+	var isBuilder = (mode === 'builder');
+	$('#input-use-builder').val(isBuilder ? 1 : 0);
+	$('#dc-builder-mode-label').removeClass('label-primary label-default').addClass(isBuilder ? 'label-primary' : 'label-default')
+		.html('<i data-lucide="circle" width="10" height="10"></i> ' + (isBuilder ? '{{ text_mode_builder|e("js") }}' : '{{ text_mode_classic|e("js") }}'));
+	$('#dc-toggle-builder-btn').html(isBuilder
+		? '<i data-lucide="arrow-left" width="13" height="13"></i> {{ text_switch_to_classic|e("js") }}'
+		: '{{ text_switch_to_builder|e("js") }} <i data-lucide="arrow-right" width="13" height="13"></i>');
+	$('.dc-builder-lang-cta').toggle(isBuilder);
+	$('.dc-description-field').toggle(!isBuilder);
+	if (typeof builderUrl !== 'undefined' && builderUrl) {
+		$('.dc-builder-lang-open').each(function() {
+			$(this).attr('href', builderUrl + '&language_id=' + $(this).data('lang-id')).removeClass('disabled').removeAttr('onclick');
+		});
+		$('.dc-builder-lang-cta__pending').hide();
+	} else if (isBuilder) {
+		$('.dc-builder-lang-open').each(function() {
+			$(this).attr('href', '#').addClass('disabled').attr('onclick', 'return false;');
+			var $cta = $(this).closest('.dc-builder-lang-cta');
+			if (!$cta.find('.dc-builder-lang-cta__pending').length) {
+				$cta.append('<div class="dc-builder-lang-cta__pending">{{ text_builder_pending|e("js") }}</div>');
+			}
+		});
+		$('.dc-builder-lang-cta__pending').show();
+	}
+	if (typeof lucide !== 'undefined') {
+		lucide.createIcons();
+	}
+}
+
+$('#dc-toggle-builder-btn').on('click', function() {
+	var newMode = (dcBuilderMode === 'builder') ? 'classic' : 'builder';
+	var postId = dcGetPostId();
+	if (!postId || postId == '0') {
+		dcRenderBuilderMode(newMode);
+		return;
+	}
+	$.ajax({
+		url: 'index.php?route=extension/module/dockercart_blog_post/setBuilderMode&user_token={{ user_token }}',
+		type: 'POST',
+		data: {post_id: postId, mode: newMode},
+		dataType: 'json',
+		success: function(json) {
+			if (json.error) {
+				alert(json.error);
+				return;
+			}
+			dcRenderBuilderMode(newMode, json.builder_url);
+			$('#dc-builder-saved').fadeIn(200).delay(1500).fadeOut(400);
+		}
+	});
 });
 
 //--></script>

@@ -38,15 +38,21 @@ class ControllerLandingPage extends Controller {
 			}
 		}
 
-		// A landing owned by an information page is that page's composed body:
-		// only the information route (which plants information_id next to
-		// landing_id) may render it — direct landing_id / lp-<id> hits, valid
-		// preview tokens included, stay a 404. Its URL, meta and visibility
-		// belong to the information page.
+		// A landing owned by an information page or a blog post is that owner's
+		// composed body: only the owner route (which plants information_id /
+		// blog_post_id next to landing_id) may render it — direct landing_id /
+		// lp-<id> hits, valid preview tokens included, stay a 404. Its URL, meta
+		// and visibility belong to the owner entity.
 		$owner_information_id = $landing ? (int)($landing['information_id'] ?? 0) : 0;
+		$owner_post_id = $landing ? (int)($landing['post_id'] ?? 0) : 0;
 
 		if ($owner_information_id > 0
 			&& (!isset($this->request->get['information_id']) || (int)$this->request->get['information_id'] !== $owner_information_id)) {
+			return $this->respond($this->notFound());
+		}
+
+		if ($owner_post_id > 0
+			&& (!isset($this->request->get['blog_post_id']) || (int)$this->request->get['blog_post_id'] !== $owner_post_id)) {
 			return $this->respond($this->notFound());
 		}
 
@@ -66,6 +72,7 @@ class ControllerLandingPage extends Controller {
 			&& (string)$this->request->get['lp_builder'] === '1';
 
 		$information_info = false;
+		$post_info = false;
 
 		if ($owner_information_id > 0) {
 			// Owned pages take their visibility from the information page
@@ -76,6 +83,18 @@ class ControllerLandingPage extends Controller {
 			$information_info = $this->model_catalog_information->getInformation($owner_information_id);
 
 			if (!$preview && !$information_info) {
+				return $this->respond($this->notFound());
+			}
+		} elseif ($owner_post_id > 0) {
+			// Owned article pages take their visibility from the blog post
+			// (status + store + language + date_published); a preview token
+			// bypasses the gate so the builder canvas keeps working on
+			// unpublished posts.
+			$this->load->model('extension/module/dockercart_blog_post');
+
+			$post_info = $this->model_extension_module_dockercart_blog_post->getPost($owner_post_id);
+
+			if (!$preview && !$post_info) {
 				return $this->respond($this->notFound());
 			}
 		} elseif (!$landing || (!$preview && !$this->model_design_landing->isLive($landing))) {
@@ -125,12 +144,20 @@ class ControllerLandingPage extends Controller {
 			return $this->respond($this->previewBlock($language_id));
 		}
 
-		if (!$preview && !$owner_information_id) {
+		if (!$preview && !$owner_information_id && !$owner_post_id) {
 			$this->model_design_landing->incrementViewed($landing_id);
+		}
+
+		// A composed article keeps the blog post's own view counter instead
+		// of the landing's one (mirrors the classic blog/post renderer).
+		if (!$preview && $owner_post_id > 0) {
+			$this->model_extension_module_dockercart_blog_post->incrementViews($owner_post_id);
 		}
 
 		$descriptions = $this->model_design_landing->getLandingDescriptions($landing_id);
 		$description = $descriptions[$language_id] ?? $descriptions[$this->default_language_id] ?? [];
+
+		$owner_crumbs = [];
 
 		if ($owner_information_id > 0) {
 			// Title, meta and canonical belong to the information page; the
@@ -141,6 +168,23 @@ class ControllerLandingPage extends Controller {
 			$meta_keyword = $information_info ? trim((string)$information_info['meta_keyword']) : '';
 			$page_href = $this->url->link('information/information', 'information_id=' . $owner_information_id);
 			$chrome = 'full';
+		} elseif ($owner_post_id > 0) {
+			// Title, meta and canonical belong to the blog post; the chrome
+			// is always the full store theme (never bare). The breadcrumb
+			// keeps the classic article trail: Home -> Blog -> article.
+			$name = $post_info ? (string)$post_info['name'] : (string)$landing['name'];
+			$meta_title = $post_info ? trim((string)$post_info['meta_title']) : '';
+			$meta_description = $post_info ? trim((string)$post_info['meta_description']) : '';
+			$meta_keyword = $post_info ? trim((string)$post_info['meta_keyword']) : '';
+			$page_href = $this->url->link('blog/post', 'blog_post_id=' . $owner_post_id);
+			$chrome = 'full';
+
+			$owner_crumbs = [
+				[
+					'text' => $this->language->get('text_blog_section'),
+					'href' => $this->url->link('blog/category'),
+				],
+			];
 		} else {
 			$name = (string)$landing['name'];
 			$meta_title = trim((string)($description['meta_title'] ?? ''));
@@ -159,10 +203,15 @@ class ControllerLandingPage extends Controller {
 				'text' => $this->language->get('text_home'),
 				'href' => $this->url->link('common/home'),
 			],
-			[
-				'text' => $name,
-				'href' => $page_href,
-			],
+		];
+
+		foreach ($owner_crumbs as $crumb) {
+			$data['breadcrumbs'][] = $crumb;
+		}
+
+		$data['breadcrumbs'][] = [
+			'text' => $name,
+			'href' => $page_href,
 		];
 
 		if (!$preview) {

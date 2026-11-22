@@ -183,6 +183,10 @@ tailwind.config = { theme: { extend: { colors: {
 		<span class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ i18n.text_owner_information }}">
 			<i data-lucide="info" class="w-3.5 h-3.5"></i>
 		</span>
+		{% elseif owner_post_id %}
+		<span class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded shrink-0" data-toggle="tooltip" title="{{ i18n.text_owner_post }}">
+			<i data-lucide="info" class="w-3.5 h-3.5"></i>
+		</span>
 		{% endif %}
 
 		<a id="lp-preview-link" href="{{ preview_public_base }}" target="_blank" rel="noopener" class="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded shrink-0">
@@ -356,7 +360,8 @@ window.DC_LANDING = {
 	previewBases: {{ preview_bases|json_encode|raw }},
 	previewPublicBase: {{ preview_public_base|json_encode|raw }},
 	previewPublicBases: {{ preview_public_bases|json_encode|raw }},
-	ownerInformationId: {{ owner_information_id|json_encode|raw }},
+	ownerId: {{ owner_id|json_encode|raw }},
+	ownerIdField: {{ owner_id_field|json_encode|raw }},
 	ownerTitles: {{ owner_titles|json_encode|raw }},
 	canEditOwnerTitles: {{ can_edit_owner_titles ? 'true' : 'false' }},
 	owner: {{ owner|json_encode|raw }},

@@ -277,7 +277,8 @@ return [
 			$source = information_landing_method_source('upload/admin/controller/design/landing.php', $action);
 
 			Assert::notSame('', $source, $action . ' is missing');
-			Assert::contains('information_id', $source, $action . ' must refuse owned landings');
+			// ownerType() is generic across owner kinds (information, blog post).
+			Assert::contains('ownerType', $source, $action . ' must refuse owned landings');
 		}
 	},
 
@@ -311,12 +312,14 @@ return [
 	'builder shell: the settings slide-over drops owner-managed fields' => static function (): void {
 		$twig = repo_file('upload/admin/view/template/design/landing_builder.twig');
 
-		Assert::contains('ownerInformationId', $twig);
+		// Owner identity is generic since blog posts became a second owner
+		// type: ownerId/ownerIdField carry which entity owns the landing.
+		Assert::contains('ownerId', $twig);
 		Assert::contains('text_owner_information', $twig);
 
 		$js = repo_file('upload/admin/view/javascript/dockercart_landing_builder.js');
 
-		Assert::contains('CFG.ownerInformationId', $js, 'owner mode flag');
+		Assert::contains('CFG.ownerId', $js, 'owner mode flag');
 		Assert::contains('data-page="status"', $js, 'standalone settings keep the status field');
 	},
 

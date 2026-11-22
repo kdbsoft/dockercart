@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `oc_blog_post` (
   `post_id` int(11) NOT NULL AUTO_INCREMENT,
   `author_id` int(11) NOT NULL,
   `image` varchar(255) DEFAULT NULL,
+  `use_builder` tinyint(1) NOT NULL DEFAULT '0',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `featured` tinyint(1) NOT NULL DEFAULT '0',
   `allow_comments` tinyint(1) NOT NULL DEFAULT '1',

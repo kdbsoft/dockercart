@@ -88,15 +88,22 @@ class ControllerDesignLanding extends Controller {
 		$data['landing_id'] = $landing_id;
 		$data['user_token'] = $this->session->data['user_token'];
 
-		// A landing owned by an information page is that page's composed body:
-		// back to Catalog > Information, the canvas shows the information page
-		// URL and the page settings slide-over drops slug/status/schedule/home.
-		$owner_information_id = (int)($landing['information_id'] ?? 0);
+		// A landing owned by an information page or a blog post is that owner's
+		// composed body: back to the owner module, the canvas shows the owner's
+		// own URL and the page settings slide-over drops slug/status/schedule.
+		$owner_type = $this->model_design_landing->ownerType($landing);
+		$owner_information_id = $owner_type === 'information' ? (int)($landing['information_id'] ?? 0) : 0;
+		$owner_post_id = $owner_type === 'post' ? (int)($landing['post_id'] ?? 0) : 0;
 
 		$data['owner_information_id'] = $owner_information_id;
+		$data['owner_post_id'] = $owner_post_id;
+		$data['owner_id'] = $owner_information_id ?: $owner_post_id;
+		$data['owner_id_field'] = $owner_type === 'post' ? 'post_id' : 'information_id';
 		$data['back'] = $owner_information_id
 			? $this->url->link('catalog/information', 'user_token=' . $this->session->data['user_token'], true)
-			: $this->url->link('design/landing', 'user_token=' . $this->session->data['user_token'], true);
+			: ($owner_post_id
+				? $this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true)
+				: $this->url->link('design/landing', 'user_token=' . $this->session->data['user_token'], true));
 		$data['save_url'] = $this->url->link('design/landing/save', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
 		$data['token_url'] = $this->url->link('design/landing/previewToken', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
 		$data['template_url'] = $this->url->link('design/landing/saveTemplate', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $landing_id, true);
@@ -139,6 +146,7 @@ class ControllerDesignLanding extends Controller {
 		$fallback_base = HTTP_CATALOG . 'index.php?route=landing/page&landing_id=' . $landing_id;
 
 		$information_seo_urls = [];
+		$post_seo_urls = [];
 
 		if ($owner_information_id) {
 			$this->load->model('catalog/information');
@@ -146,6 +154,12 @@ class ControllerDesignLanding extends Controller {
 			$information_seo_urls = $this->model_catalog_information->getInformationSeoUrls($owner_information_id);
 
 			$fallback_base = HTTP_CATALOG . 'index.php?route=information/information&information_id=' . $owner_information_id;
+		} elseif ($owner_post_id) {
+			$this->load->model('extension/module/dockercart_blog_post');
+
+			$post_seo_urls = $this->model_extension_module_dockercart_blog_post->getPostSeoUrls($owner_post_id);
+
+			$fallback_base = HTTP_CATALOG . 'index.php?route=blog/post&blog_post_id=' . $owner_post_id;
 		}
 
 		$preview_public_bases = [];
@@ -158,6 +172,10 @@ class ControllerDesignLanding extends Controller {
 			if ($owner_information_id) {
 				// The owned page renders at the information page's own keyword.
 				$keyword = trim((string)($information_seo_urls[0][$language_id] ?? ''));
+			} elseif ($owner_post_id) {
+				// The owned article renders at the blog post's own keyword
+				// (oc_blog_seo_url, store 0).
+				$keyword = trim((string)($post_seo_urls[0][$language_id] ?? ''));
 			} else {
 				$keyword = trim((string)($descriptions[$language_id]['slug'] ?? ''));
 			}
@@ -240,6 +258,50 @@ class ControllerDesignLanding extends Controller {
 
 			$data['owner'] = [
 				'status'       => (int)($owner_information['status'] ?? 0),
+				'descriptions' => [],
+			];
+
+			foreach ($languages as $language) {
+				$language_id = (int)$language['language_id'];
+				$description = $owner_descriptions[$language_id] ?? [];
+
+				$data['owner']['descriptions'][$language_id] = [
+					'slug'             => html_entity_decode(trim((string)(($owner_seo_urls[0] ?? [])[$language_id] ?? '')), ENT_QUOTES, 'UTF-8'),
+					'meta_title'       => html_entity_decode((string)($description['meta_title'] ?? ''), ENT_QUOTES, 'UTF-8'),
+					'meta_description' => html_entity_decode((string)($description['meta_description'] ?? ''), ENT_QUOTES, 'UTF-8'),
+					'meta_keyword'     => html_entity_decode((string)($description['meta_keyword'] ?? ''), ENT_QUOTES, 'UTF-8'),
+				];
+			}
+		} elseif ($owner_post_id) {
+			$this->load->model('extension/module/dockercart_blog_post');
+
+			$owner_descriptions = $this->model_extension_module_dockercart_blog_post->getPostDescriptions($owner_post_id);
+			$owner_post = $this->model_extension_module_dockercart_blog_post->getPost($owner_post_id);
+			$owner_seo_urls = $this->model_extension_module_dockercart_blog_post->getPostSeoUrls($owner_post_id);
+
+			// An owned landing's name is the article title of the selected
+			// language (oc_blog_post_description.name). It is edited in Page
+			// Settings and written through
+			// extension/module/dockercart_blog_post/updateNames.
+			foreach ($languages as $language) {
+				$language_id = (int)$language['language_id'];
+
+				$data['owner_titles'][$language_id] = html_entity_decode((string)($owner_descriptions[$language_id]['title'] ?? ''), ENT_QUOTES, 'UTF-8');
+			}
+
+			$data['can_edit_owner_titles'] = $this->user->hasPermission('modify', 'extension/module/dockercart_blog_post');
+			$data['can_edit_owner'] = $data['can_edit_owner_titles'];
+
+			if ($data['can_edit_owner_titles']) {
+				$data['owner_names_url'] = $this->url->link('extension/module/dockercart_blog_post/updateNames', 'user_token=' . $this->session->data['user_token'], true);
+			}
+
+			// The list badge works off the same status, so it never disagrees
+			// with the article.
+			$data['landing']['status'] = (int)($owner_post['status'] ?? $data['landing']['status']);
+
+			$data['owner'] = [
+				'status'       => (int)($owner_post['status'] ?? 0),
 				'descriptions' => [],
 			];
 
@@ -373,7 +435,8 @@ class ControllerDesignLanding extends Controller {
 		if (!isset($json['error'])) {
 			$landing = $this->model_design_landing->getLanding($landing_id);
 
-			$owned = $landing && (int)($landing['information_id'] ?? 0) > 0;
+			$owner_type = $this->model_design_landing->ownerType($landing);
+			$owned = $landing && $owner_type !== '';
 
 			$errors = $this->model_design_landing->validateLanding($payload, $landing_id, $owned);
 
@@ -382,26 +445,45 @@ class ControllerDesignLanding extends Controller {
 				$json['error'] = reset($errors);
 			}
 
-			// Owned landings edit the information page (status, meta tags,
-			// default-store SEO keyword) straight from the builder Page
-			// Settings. Validated up front; written after the landing save.
+			// Owned landings edit their owner (status, meta tags, default-store
+			// SEO keyword) straight from the builder Page Settings. Validated up
+			// front; written after the landing save.
 			$owner = null;
 
 			if (!isset($json['error']) && $owned && isset($payload['owner']) && is_array($payload['owner'])) {
-				if (!$this->user->hasPermission('modify', 'catalog/information')) {
-					$json['error'] = $this->language->get('error_permission');
-				} else {
-					$owner_errors = $this->model_design_landing->validateOwner($payload['owner'], (int)$landing['information_id']);
-
-					if ($owner_errors) {
-						$json['fields'] = $owner_errors;
-						$json['error'] = reset($owner_errors);
+				if ($owner_type === 'post') {
+					if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
+						$json['error'] = $this->language->get('error_permission');
 					} else {
-						$owner = [
-							'information_id' => (int)$landing['information_id'],
-							'status'         => !empty($payload['owner']['status']) ? 1 : 0,
-							'descriptions'   => (array)($payload['owner']['descriptions'] ?? []),
-						];
+						$owner_errors = $this->model_design_landing->validateBlogOwner($payload['owner'], (int)$landing['post_id']);
+
+						if ($owner_errors) {
+							$json['fields'] = $owner_errors;
+							$json['error'] = reset($owner_errors);
+						} else {
+							$owner = [
+								'post_id'      => (int)$landing['post_id'],
+								'status'       => !empty($payload['owner']['status']) ? 1 : 0,
+								'descriptions' => (array)($payload['owner']['descriptions'] ?? []),
+							];
+						}
+					}
+				} else {
+					if (!$this->user->hasPermission('modify', 'catalog/information')) {
+						$json['error'] = $this->language->get('error_permission');
+					} else {
+						$owner_errors = $this->model_design_landing->validateOwner($payload['owner'], (int)$landing['information_id']);
+
+						if ($owner_errors) {
+							$json['fields'] = $owner_errors;
+							$json['error'] = reset($owner_errors);
+						} else {
+							$owner = [
+								'information_id' => (int)$landing['information_id'],
+								'status'         => !empty($payload['owner']['status']) ? 1 : 0,
+								'descriptions'   => (array)($payload['owner']['descriptions'] ?? []),
+							];
+						}
 					}
 				}
 			}
@@ -424,7 +506,7 @@ class ControllerDesignLanding extends Controller {
 				$json['success'] = $this->language->get('text_success_save');
 				$json['version'] = (int)$result['version'];
 
-				if (isset($owner) && $owner['information_id'] > 0) {
+				if (isset($owner) && !empty($owner['information_id'])) {
 					$this->load->model('catalog/information');
 
 					$this->model_catalog_information->updateBuilderSettings($owner['information_id'], $owner['status'], $owner['descriptions']);
@@ -436,6 +518,19 @@ class ControllerDesignLanding extends Controller {
 					}
 
 					$this->model_catalog_information->updateBuilderSeoUrls($owner['information_id'], 0, $keywords);
+				} elseif (isset($owner) && !empty($owner['post_id'])) {
+					$this->load->model('extension/module/dockercart_blog_post');
+
+					$this->model_extension_module_dockercart_blog_post->updateBuilderSettings($owner['post_id'], $owner['status'], $owner['descriptions']);
+
+					$keywords = [];
+
+					foreach ((array)$owner['descriptions'] as $language_id => $row) {
+						$keywords[(int)$language_id] = is_array($row) ? (string)($row['slug'] ?? '') : '';
+					}
+
+					// oc_blog_seo_url (query = blog_post_id=N), default store.
+					$this->model_extension_module_dockercart_blog_post->updateBuilderSeoUrls($owner['post_id'], 0, $keywords);
 				}
 
 				// Payload-order list with client_id -> block_id, so the builder syncs
@@ -914,9 +1009,9 @@ class ControllerDesignLanding extends Controller {
 			foreach ((array)$this->request->post['selected'] as $landing_id) {
 				$landing = $this->model_design_landing->getLanding((int)$landing_id);
 
-				// Owned landings are deleted with their information page
-				// (Catalog > Information), never from here.
-				if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+				// Owned landings are deleted with their owner (the information
+				// page / the blog article), never from here.
+				if ($landing && $this->model_design_landing->ownerType($landing) !== '') {
 					continue;
 				}
 
@@ -941,7 +1036,7 @@ class ControllerDesignLanding extends Controller {
 		} elseif (isset($this->request->get['landing_id'])) {
 			$landing = $this->model_design_landing->getLanding((int)$this->request->get['landing_id']);
 
-			if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+			if ($landing && $this->model_design_landing->ownerType($landing) !== '') {
 				$this->session->data['error_warning'] = $this->language->get('error_owner');
 			} else {
 				$landing_id = $this->model_design_landing->duplicateLanding((int)$this->request->get['landing_id']);
@@ -972,7 +1067,7 @@ class ControllerDesignLanding extends Controller {
 		if (!isset($json['error']) && $landing_id > 0) {
 			$landing = $this->model_design_landing->getLanding($landing_id);
 
-			if ($landing && (int)($landing['information_id'] ?? 0) > 0) {
+			if ($landing && $this->model_design_landing->ownerType($landing) !== '') {
 				$json['error'] = $this->language->get('error_owner');
 			} else {
 				$this->model_design_landing->setStatus($landing_id, (bool)$status);
@@ -1363,6 +1458,7 @@ class ControllerDesignLanding extends Controller {
 			'text_created',
 			'text_copy',
 			'text_owner_information',
+			'text_owner_post',
 			'entry_name',
 			'entry_slug',
 			'entry_meta_title',
