@@ -90,7 +90,8 @@ return [
 		Assert::contains("case 'link':", $js);
 		Assert::contains("html += renderLinkControl(value, 'data-input', id);", $js);
 		Assert::contains("html += renderLinkControl(value, 'data-repeater-key=\"' + esc(sub.key) + '\"', '');", $js, 'hero buttons must get the same control');
-		Assert::contains("'index.php?route=' + def.route + '&' + def.param + '='", $js, 'entity links must be absolute storefront routes');
+		Assert::contains("'route=' + def.route + '&' + def.param + '='", $js, 'entity links must be stored without index.php');
+		Assert::notContains("return 'index.php?route='", $js, 'the picker must never write an index.php link');
 
 		foreach (['data-link-type', 'data-link-url', 'data-link-search'] as $attribute) {
 			Assert::contains($attribute, $js, 'missing link control attribute ' . $attribute);

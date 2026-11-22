@@ -2333,9 +2333,9 @@ Fields of type `link` (CTA / image / image+text buttons, the `features` and
 banner links: a type picker (**Custom URL**, product, category, manufacturer,
 information page, blog post) followed by either a URL input or an entity
 autocomplete. Only the **URL is stored** in the field — selecting an entity
-writes the canonical relative route `index.php?route=…&<id_param>=N`. Changing
-the type clears the URL; there are no separate `link_type`/`link_value` fields
-to keep in sync.
+writes the canonical relative route `route=…&<id_param>=N` (the same form the
+banner form uses, without `index.php`). Changing the type clears the URL;
+there are no separate `link_type`/`link_value` fields to keep in sync.
 
 `ControllerLandingPage::blockContext()` resolves every stored link through the
 catalog `Url` **at render time** (the same SEO-aware URL the rest of the

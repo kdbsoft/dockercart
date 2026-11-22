@@ -1827,9 +1827,10 @@
 	}
 
 	/**
-	 * Extracts the entity type and id from a stored URL. Both the canonical
-	 * "index.php?route=..." form and the shorter "route=..." form used by
-	 * banners are recognised; anything else stays a custom URL.
+	 * Extracts the entity type and id from a stored URL. The canonical form is
+	 * "route=..." (no index.php; shared with the banner form); legacy
+	 * "index.php?route=..." links are still recognised; anything else stays a
+	 * custom URL.
 	 */
 	function parseLinkUrl(value) {
 		var original = String(value === null || value === undefined ? '' : value).trim();
@@ -1884,7 +1885,7 @@
 
 		if (!def || !value) return '';
 
-		return 'index.php?route=' + def.route + '&' + def.param + '=' + encodeURIComponent(value);
+		return 'route=' + def.route + '&' + def.param + '=' + encodeURIComponent(value);
 	}
 
 	/**

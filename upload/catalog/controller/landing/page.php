@@ -742,11 +742,11 @@ class ControllerLandingPage extends Controller {
 	/**
 	 * Rewrites stored link fields to the URLs the storefront actually uses.
 	 *
-	 * The builder stores a canonical relative route ("index.php?route=…" or
-	 * the shorter "route=…" used by banners). Resolving it here — instead of
-	 * baking a keyword into the saved block — keeps SEO URLs, the language
-	 * prefix and HTTPS correct for every request, and fixes links saved before
-	 * the builder had an entity picker. Custom URLs pass through untouched.
+	 * The builder stores a canonical relative route ("route=…", the form used by
+	 * banners); legacy "index.php?route=…" links are resolved too. Doing it here
+	 * — instead of baking a keyword into the saved block — keeps SEO URLs, the
+	 * language prefix and HTTPS correct for every request, and fixes links saved
+	 * before the builder had an entity picker. Custom URLs pass through untouched.
 	 *
 	 * @param array<string, mixed> $settings
 	 * @param array<string, mixed> $content

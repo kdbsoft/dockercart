@@ -913,7 +913,9 @@ class ControllerDesignLanding extends Controller {
 
 		$route = $routes[$type][0];
 		$param = $routes[$type][1];
-		$fallback = 'index.php?route=' . $route . '&' . $param . '=' . rawurlencode($value);
+		// Link fields store the banner-style route without index.php; the
+		// storefront resolver applies the SEO keyword at render time.
+		$fallback = 'route=' . $route . '&' . $param . '=' . rawurlencode($value);
 
 		if (!$this->config->get('config_seo_url')) {
 			return $fallback;
