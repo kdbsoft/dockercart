@@ -1,3 +1,9 @@
+## [3.51.1](https://github.com/kdbsoft/dockercart/compare/v3.51.0...v3.51.1) (2026-11-25)
+
+### Bug Fixes
+
+* **session:** move session GC out of requests and harden file sessions ([5ff7fbc](https://github.com/kdbsoft/dockercart/commit/5ff7fbcaef402539f2736163574ce7af6d5f0694))
+
 ## [3.51.0](https://github.com/kdbsoft/dockercart/compare/v3.50.0...v3.51.0) (2026-11-25)
 
 ### Features
