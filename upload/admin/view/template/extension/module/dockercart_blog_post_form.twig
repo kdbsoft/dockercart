@@ -90,9 +90,9 @@
                       <div class="dc-builder-lang-cta__title">{{ entry_content }}</div>
                       <p class="dc-builder-lang-cta__hint">{{ text_builder_cta_hint }}</p>
                       {% if builder_url %}
-                      <a href="{{ builder_url }}&amp;language_id={{ language.language_id }}" class="btn btn-primary dc-builder-lang-open" data-lang-id="{{ language.language_id }}"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
+                      <a href="{{ builder_url }}&amp;language_id={{ language.language_id }}" class="btn btn-default dc-builder-lang-open" data-lang-id="{{ language.language_id }}"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
                       {% else %}
-                      <a href="#" class="btn btn-primary disabled dc-builder-lang-open" data-lang-id="{{ language.language_id }}" onclick="return false;"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
+                      <a href="#" class="btn btn-default disabled dc-builder-lang-open" data-lang-id="{{ language.language_id }}" onclick="return false;"><i data-lucide="layout-template" width="14" height="14"></i> {{ button_open_builder }}</a>
                       <div class="dc-builder-lang-cta__pending">{{ text_builder_pending }}</div>
                       {% endif %}
                     </div>
