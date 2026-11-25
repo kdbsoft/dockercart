@@ -16,7 +16,7 @@ use Dockercart\Layout\RouteConfig;
 
 return [
 	'map: modern grid routes keep all four zones with lg-only columns' => static function (): void {
-		foreach (['product/category', 'product/special', 'product/search', 'blog/category'] as $route) {
+		foreach (['product/category', 'product/special', 'product/search', 'product/manufacturer/info', 'blog/category'] as $route) {
 			$config = RouteConfig::forRoute($route);
 
 			Assert::same(['content_top', 'column_left', 'column_right', 'content_bottom'], $config['positions'], $route);
