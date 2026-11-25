@@ -1,3 +1,9 @@
+## [3.51.0](https://github.com/kdbsoft/dockercart/compare/v3.50.0...v3.51.0) (2026-11-25)
+
+### Features
+
+* **theme:** expose named logo variants in header and footer ([ee1db15](https://github.com/kdbsoft/dockercart/commit/ee1db15c18918e75fa9bc5ccd3351ef1b976c42c))
+
 ## [3.50.0](https://github.com/kdbsoft/dockercart/compare/v3.49.0...v3.50.0) (2026-11-25)
 
 ### Features
