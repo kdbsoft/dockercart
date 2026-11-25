@@ -1,3 +1,28 @@
+## [3.50.0](https://github.com/kdbsoft/dockercart/compare/v3.49.0...v3.50.0) (2026-11-25)
+
+### Features
+
+* **admin:** replace layout form with responsive builder ([17e40a2](https://github.com/kdbsoft/dockercart/commit/17e40a220b0d68b7224e424a9cdf2e5050bef470))
+* **blog:** compose articles with the landing builder ([94a8115](https://github.com/kdbsoft/dockercart/commit/94a811567fd561c98300bb29884c042386e3e1d6))
+* **blog:** replace page builder with advanced description ([02138c6](https://github.com/kdbsoft/dockercart/commit/02138c60cca0468c718d9337376c206cef1410bd))
+* **catalog:** add advanced description sections ([c6fa48a](https://github.com/kdbsoft/dockercart/commit/c6fa48a9907ef9c7b1014be2e23e872e41cd0a7d))
+* **catalog:** require variants in product bundles ([3ebf8c3](https://github.com/kdbsoft/dockercart/commit/3ebf8c3f8ade94e1003650de4e5e6b8a019dab26))
+* **db:** run companion php data migrations ([6d54f59](https://github.com/kdbsoft/dockercart/commit/6d54f59899fbab6c714c2a07dd7708c5b1e2bc35))
+* **landing:** add a contact page link type ([ad3aa14](https://github.com/kdbsoft/dockercart/commit/ad3aa14e0b27e039c17e5291b296aec3d3c9620f))
+* **landing:** add sections and information page builder ([fc3b53d](https://github.com/kdbsoft/dockercart/commit/fc3b53dfcf0e9501807a4412e3e52b829f6b2478))
+* **landing:** compose backgrounds and improve builder feedback ([035239b](https://github.com/kdbsoft/dockercart/commit/035239bca38af96f01ebba30dfa227904c4eb7f3))
+* **landing:** expand sections and builder controls ([25b0ed0](https://github.com/kdbsoft/dockercart/commit/25b0ed06a99ec708847737dc08cfbe0cf14f8909))
+* **theme:** add dual-background logo previews in theme settings ([7169d50](https://github.com/kdbsoft/dockercart/commit/7169d50c957d6eaa0796650eab3d549bd0922507))
+
+### Bug Fixes
+
+* **admin:** restore report card top margin ([da5ed24](https://github.com/kdbsoft/dockercart/commit/da5ed247f63b0c99b037773a5be1da25a68dfac5))
+* **blog:** page archive and author listings with the blog setting ([c4cbcba](https://github.com/kdbsoft/dockercart/commit/c4cbcba0214c7eb98fec857eb762fcc23826ac46))
+* **blog:** read blog_author_id on the author listing ([d72e20e](https://github.com/kdbsoft/dockercart/commit/d72e20eaabce3837528d91c70efa47ebc81ec76a))
+* **catalog:** tolerate missing theme image sizes instead of crashing ([e34898d](https://github.com/kdbsoft/dockercart/commit/e34898d6152f516176fa686fd3712ca9bc1ebda3))
+* **checkout:** remove stray argument from cart add call ([b03084c](https://github.com/kdbsoft/dockercart/commit/b03084cc23127f31de537cf98dd4c579498f214a))
+* **layout:** render brand info pages with the manufacturer layout ([352b8c8](https://github.com/kdbsoft/dockercart/commit/352b8c8ce9004003ce9b228e7ca5a977c4509d9d))
+
 ## [3.49.0](https://github.com/kdbsoft/dockercart/compare/v3.48.0...v3.49.0) (2026-11-16)
 
 ### Features
