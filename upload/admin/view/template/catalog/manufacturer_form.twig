@@ -55,6 +55,7 @@
                 <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
                 {% endfor %}
               </ul>
+              {% include 'common/description_editor.twig' %}
               <div class="tab-content">
                 {% for language in languages %}
                 <div class="tab-pane" id="language{{ language.language_id }}">
@@ -69,6 +70,7 @@
                     <div class="dcx-field">
                       <label class="dcx-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
                       <textarea name="manufacturer_description[{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}" data-toggle="tinymce" class="form-control">{{ manufacturer_description[language.language_id] ? manufacturer_description[language.language_id].description }}</textarea>
+                      <p class="text-xs text-gray-400 mt-1">{{ text_classic_description_hint }}</p>
                     </div>
                     <div class="dcx-field required">
                       <label class="dcx-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>

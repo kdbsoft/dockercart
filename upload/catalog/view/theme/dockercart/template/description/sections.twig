@@ -1,0 +1,18 @@
+{#
+	Advanced Description: the stacked section list.
+
+	Rendered inside the entity page's description slot (product description
+	tab, category/manufacturer block above the listing). Every section was
+	normalised at save time (Dockcart\Description\Sections::normalizeDocument())
+	and merged for the current language (Sections::forView()) - empty
+	sections never reach this template.
+#}
+{% if description_sections %}
+<div class="dc-advanced-description space-y-12">
+	{% for section in description_sections %}
+	<div class="dc-desc-section dc-desc-section--{{ section.type }}">
+		{% include 'dockercart/template/description/sections/' ~ section.type ~ '.twig' %}
+	</div>
+	{% endfor %}
+</div>
+{% endif %}

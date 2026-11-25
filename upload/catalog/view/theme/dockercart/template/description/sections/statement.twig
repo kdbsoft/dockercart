@@ -1,0 +1,9 @@
+{# Advanced Description: large accent statement with an optional footnote. #}
+<div class="max-w-3xl mx-auto text-center">
+	{% if section.content.text %}
+	<p class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">{{ section.content.text|escape|nl2br }}</p>
+	{% endif %}
+	{% if section.content.footnote %}
+	<p class="mt-4 text-sm text-gray-400">{{ section.content.footnote|escape }}</p>
+	{% endif %}
+</div>

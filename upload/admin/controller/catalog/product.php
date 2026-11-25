@@ -1073,6 +1073,7 @@ class ControllerCatalogProduct extends Controller {
 
 	protected function getForm() {
 		$this->load->language('catalog/product');
+		$this->load->language('common/description_sections');
 
 		$data['heading_title'] = $this->language->get('heading_title');
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
@@ -1312,6 +1313,29 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		$data['product_description'] = $this->decodeDescriptionFields($data['product_description'], array('name', 'meta_title'));
+
+		// Advanced Description: one lightweight section editor shared by
+		// products, categories and manufacturers (independent of Page Builder).
+		$advanced_state = \Dockercart\Description\Admin::state(
+			$this->language,
+			$data['languages'],
+			(string)($product_info['advanced_description'] ?? ''),
+			$data['product_description'],
+			isset($this->request->post['advanced_description']) ? (string)$this->request->post['advanced_description'] : null,
+			isset($this->request->post['use_advanced_description']) ? !empty($this->request->post['use_advanced_description']) : !empty($product_info['use_advanced_description'])
+		);
+
+		foreach ($advanced_state['advanced_content'] as $language_id => $section_content) {
+			$data['product_description'][$language_id]['advanced_content'] = $section_content;
+		}
+
+		$data['use_advanced_description'] = $advanced_state['use_advanced_description'];
+		$data['advanced_description'] = $advanced_state['advanced_description'];
+		$data['advanced_editor_document'] = $advanced_state['advanced_editor_document'];
+		$data['advanced_description_json'] = $advanced_state['advanced_description_json'];
+		$data['description_editor_config'] = $advanced_state['description_editor_config'];
+		$this->document->addScript('view/javascript/dockercart_description_editor.js');
+		$this->document->addStyle('view/stylesheet/dockercart_description_editor.css');
 
 		// Product name for page header
 		if (isset($this->request->post['product_description'][$this->config->get('config_language_id')]['name'])) {

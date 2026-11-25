@@ -575,9 +575,10 @@
     </section>
 
     {% set _desc_text = description|striptags|trim %}
+    {% set _advanced = description_sections is defined and description_sections|length > 0 %}
 
     {% set _tabs = [] %}
-    {% if _desc_text is not empty %}
+    {% if _desc_text is not empty or _advanced %}
       {% set _tabs = _tabs|merge([{ key: 'description', label: tab_description, target: 'product-description' }]) %}
     {% endif %}
     {% if product_files|length > 0 %}
@@ -631,6 +632,9 @@
       <div class="mb-3">
         <h2 id="product-description-heading" class="text-xl sm:text-2xl font-bold text-gray-900">{{ tab_description }}</h2>
       </div>
+      {% if _advanced %}
+      {% include 'dockercart/template/description/sections.twig' %}
+      {% else %}
       <div class="prose prose-sm max-w-none
         prose-headings:font-extrabold prose-headings:text-gray-900
         prose-p:text-gray-600 prose-p:leading-relaxed
@@ -638,6 +642,7 @@
         prose-img:rounded-2xl prose-img:border prose-img:border-gray-100">
         {{ _desc_text is not empty ? description : heading_title }}
       </div>
+      {% endif %}
     </section>
 
     {% if product_files %}

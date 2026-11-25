@@ -1,7 +1,11 @@
 <?php
 class ModelCatalogCategory extends Model {
 	public function addCategory($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (isset($data['column']) ? (int)$data['column'] : 0) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', date_modified = NOW(), date_added = NOW()");
+		// Advanced Description: flag + shared structure (resolveSave also
+		// seeds the first-enable conversion from the classic copy).
+		[$advanced_flag, $advanced_json, $advanced_content] = \Dockercart\Description\Sections::resolveSave($data, 'category_description');
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (isset($data['column']) ? (int)$data['column'] : 0) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', use_advanced_description = '" . (int)$advanced_flag . "', advanced_description = '" . $this->db->escape($advanced_json) . "', date_modified = NOW(), date_added = NOW()");
 
 		$category_id = $this->db->getLastId();
 
@@ -24,7 +28,7 @@ class ModelCatalogCategory extends Model {
 		$this->saveCategoryBanner($category_id, $data);
 
 		foreach ($data['category_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "', advanced_content = '" . $this->db->escape($advanced_content[(int)$language_id] ?? '') . "'");
 		}
 
 		// MySQL Hierarchical Data Closure Table Pattern
@@ -83,7 +87,15 @@ class ModelCatalogCategory extends Model {
 	}
 
 	public function editCategory($category_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (isset($data['column']) ? (int)$data['column'] : 0) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', date_modified = NOW() WHERE category_id = '" . (int)$category_id . "'");
+		// Advanced Description: read the stored halves first - a classic-mode
+		// save must keep them (they act as the fallback), a first switch-on
+		// with nothing composed converts the classic copy of this save.
+		$stored_row = $this->db->query("SELECT use_advanced_description, advanced_description FROM " . DB_PREFIX . "category WHERE category_id = '" . (int)$category_id . "'")->row;
+		$stored_descriptions = $this->getCategoryDescriptions($category_id);
+
+		[$advanced_flag, $advanced_json, $advanced_content] = \Dockercart\Description\Sections::resolveSave($data, 'category_description', (string)($stored_row['advanced_description'] ?? ''), $stored_descriptions, (int)($stored_row['use_advanced_description'] ?? 0));
+
+		$this->db->query("UPDATE " . DB_PREFIX . "category SET parent_id = '" . (int)$data['parent_id'] . "', `top` = '" . (isset($data['top']) ? (int)$data['top'] : 0) . "', `column` = '" . (isset($data['column']) ? (int)$data['column'] : 0) . "', sort_order = '" . (int)$data['sort_order'] . "', status = '" . (int)$data['status'] . "', use_advanced_description = '" . (int)$advanced_flag . "', advanced_description = '" . $this->db->escape($advanced_json) . "', date_modified = NOW() WHERE category_id = '" . (int)$category_id . "'");
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "category SET image = '" . $this->db->escape($data['image']) . "' WHERE category_id = '" . (int)$category_id . "'");
@@ -106,7 +118,7 @@ class ModelCatalogCategory extends Model {
 	$this->db->query("DELETE FROM " . DB_PREFIX . "category_description WHERE category_id = '" . (int)$category_id . "'");
 
 		foreach ($data['category_description'] as $language_id => $value) {
-			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "category_description SET category_id = '" . (int)$category_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "', advanced_content = '" . $this->db->escape($advanced_content[(int)$language_id] ?? '') . "'");
 		}
 
 		// MySQL Hierarchical Data Closure Table Pattern
@@ -285,6 +297,8 @@ class ModelCatalogCategory extends Model {
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
+		$data["use_advanced_description"] = $category["use_advanced_description"] ?? 0;
+		$data["advanced_description"] = (string) ($category["advanced_description"] ?? "");
 		$data["category_store"] = $this->getCategoryStores($category_id);
 		$data["category_layout"] = $this->getCategoryLayouts($category_id);
 		$data["category_related"] = $this->getCategoryRelated($category_id);
@@ -356,6 +370,8 @@ class ModelCatalogCategory extends Model {
 		$data["category_description"] = $this->getCategoryDescriptions(
 			$category_id,
 		);
+		$data["use_advanced_description"] = $category["use_advanced_description"] ?? 0;
+		$data["advanced_description"] = (string) ($category["advanced_description"] ?? "");
 		$data["category_store"] = $this->getCategoryStores($category_id);
 		$data["category_layout"] = $this->getCategoryLayouts($category_id);
 		$data["category_related"] = $this->getCategoryRelated($category_id);
@@ -574,7 +590,8 @@ class ModelCatalogCategory extends Model {
 				'meta_title'       => $result['meta_title'],
 				'meta_description' => $result['meta_description'],
 				'meta_keyword'     => $result['meta_keyword'],
-				'description'      => $result['description']
+				'description'      => $result['description'],
+				'advanced_content' => (string) ($result['advanced_content'] ?? '')
 			);
 		}
 

@@ -1,0 +1,16 @@
+{# Advanced Description: plain text section. #}
+{% set centered = section.settings.align == 'center' %}
+<div class="{{ centered ? 'max-w-3xl mx-auto text-center' : 'max-w-4xl' }}">
+	{% if section.content.heading %}
+	<h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight mb-4">{{ section.content.heading|escape }}</h2>
+	{% endif %}
+	{% if section.content.body %}
+	<div class="prose prose-sm sm:prose-base max-w-none
+		prose-headings:font-extrabold prose-headings:text-gray-900
+		prose-p:text-gray-600 prose-p:leading-relaxed
+		prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+		prose-img:rounded-2xl prose-img:border prose-img:border-gray-100">
+		{{ section.content.body|raw }}
+	</div>
+	{% endif %}
+</div>

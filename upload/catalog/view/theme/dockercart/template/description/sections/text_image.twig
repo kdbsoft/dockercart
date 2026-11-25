@@ -1,0 +1,16 @@
+{# Advanced Description: text with a picture beside it. #}
+{% set image_first = section.settings.position == 'left' %}
+{% if section.settings.image_url %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+	<div class="{{ image_first ? '' : 'lg:order-2' }}">
+		<img src="{{ section.settings.image_url }}" alt="{{ section.content.heading|escape }}" loading="lazy" class="w-full rounded-3xl border border-gray-100 shadow-sm" />
+	</div>
+	<div class="{{ image_first ? '' : 'lg:order-1' }}">
+		{% include 'dockercart/template/description/sections/text_body.twig' %}
+	</div>
+</div>
+{% else %}
+<div class="max-w-4xl">
+	{% include 'dockercart/template/description/sections/text_body.twig' %}
+</div>
+{% endif %}

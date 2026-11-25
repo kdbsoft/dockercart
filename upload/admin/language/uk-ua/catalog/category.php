@@ -101,3 +101,25 @@ $_['text_seo_card']           = 'Посилання';
 $_['text_design_card']        = 'Тема';
 $_['text_url_handle']         = 'URL-адреса';
 $_['text_visibility']         = 'Видимість';
+
+// Advanced Description section editor
+$_['text_advanced_description'] = 'Розширений опис';
+$_['text_mode_classic'] = 'Класичний опис';
+$_['text_mode_advanced'] = 'Розширений опис';
+$_['text_classic_description_hint'] = 'Використовується для пошуку та сниппетів карток. Також служить резервним варіантом, коли розширений режим вимкнено.';
+$_['text_advanced_description_hint'] = 'Складіть опис із готових секцій. Сама сторінка залишиться без змін.';
+$_['text_add_section'] = 'Додати секцію';
+$_['text_apply_template'] = 'Застосувати шаблон';
+$_['text_empty_sections'] = 'Секцій поки немає. Виберіть шаблон або додайте секцію.';
+$_['text_move_up'] = 'Перемістити вгору';
+$_['text_move_down'] = 'Перемістити вниз';
+$_['text_remove_section'] = 'Видалити секцію';
+$_['text_add_row'] = 'Додати рядок';
+$_['text_remove_row'] = 'Видалити рядок';
+$_['text_select_image'] = 'Вибрати зображення';
+$_['text_remove_image'] = 'Видалити';
+$_['text_confirm_template'] = 'Замінити поточні секції цим шаблоном?';
+$_['text_switch_to_advanced'] = 'Переключити на розширений опис';
+$_['text_switch_to_classic'] = 'Переключити на класичний опис';
+$_['text_section_limit'] = 'Досягнуто максимальну кількість секцій.';
+$_['text_row_limit'] = 'Досягнуто максимальну кількість рядків.';

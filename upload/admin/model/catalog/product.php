@@ -1,6 +1,22 @@
 <?php
 class ModelCatalogProduct extends Model
 {
+    /**
+     * Resolves the Advanced Description payload of a save: the mode flag,
+     * the shared section structure JSON and the per-language section texts
+     * JSON (Dockcart\Description\Sections::resolveSave() owns the rules -
+     * stored-halves fallback and the first-enable conversion included).
+     *
+     * @param array $data the posted form data
+     * @param string $stored_structure_json the stored advanced_description
+     * @param array $stored_descriptions language_id => stored description row
+     * @return array{0: int, 1: string, 2: array<int, string>} flag, structure JSON, per-language content JSON
+     */
+    private function advancedDescriptionData(array $data, string $stored_structure_json = "", array $stored_descriptions = [], int $stored_use = 0)
+    {
+        return \Dockercart\Description\Sections::resolveSave($data, "product_description", $stored_structure_json, $stored_descriptions, $stored_use);
+    }
+
     public function addProduct($data)
     {
         // For configurable products the head price is derived from variants (readonly range in form) — ignore posted price
@@ -14,6 +30,11 @@ class ModelCatalogProduct extends Model
             $data['height'] = 0;
             unset($data['product_customer_group_price']);
         }
+
+        // Advanced Description: resolve the mode flag, the shared section
+        // structure and the per-language section texts before the row write
+        // (advancedDescriptionData also seeds the first-enable conversion).
+        [$advanced_flag, $advanced_json, $advanced_content] = $this->advancedDescriptionData($data);
 
         $this->db->query(
             "INSERT INTO " .
@@ -80,6 +101,10 @@ class ModelCatalogProduct extends Model
                 (int) ($data["tax_class_id"] ?? 0) .
                 "', sort_order = '" .
                 (int) $data["sort_order"] .
+                "', use_advanced_description = '" .
+                $advanced_flag .
+                "', advanced_description = '" .
+                $this->db->escape($advanced_json) .
                 "', date_added = NOW(), date_modified = NOW()",
         );
 
@@ -141,6 +166,8 @@ class ModelCatalogProduct extends Model
                     $this->db->escape($value["meta_description"]) .
                     "', meta_keyword = '" .
                     $this->db->escape($value["meta_keyword"]) .
+                    "', advanced_content = '" .
+                    $this->db->escape($advanced_content[(int) $language_id] ?? "") .
                     "'",
             );
         }
@@ -1141,6 +1168,24 @@ class ModelCatalogProduct extends Model
             unset($data['product_customer_group_price']);
         }
 
+        // Advanced Description: read the stored halves first - a classic-mode
+        // save must keep them (they act as the fallback), a first switch-on
+        // with nothing composed converts the classic copy of this save.
+        $stored_row = $this->db->query(
+            "SELECT use_advanced_description, advanced_description FROM " .
+                DB_PREFIX .
+                "product WHERE product_id = '" .
+                (int) $product_id . "'",
+        );
+        $stored_descriptions = $this->getProductDescriptions($product_id);
+
+        [$advanced_flag, $advanced_json, $advanced_content] = $this->advancedDescriptionData(
+            $data,
+            (string) ($stored_row->row["advanced_description"] ?? ""),
+            $stored_descriptions,
+            (int) ($stored_row->row["use_advanced_description"] ?? 0),
+        );
+
         $this->db->query(
             "UPDATE " .
                 DB_PREFIX .
@@ -1208,6 +1253,10 @@ class ModelCatalogProduct extends Model
                 (int) ($data["tax_class_id"] ?? 0) .
                 "', sort_order = '" .
                 (int) $data["sort_order"] .
+                "', use_advanced_description = '" .
+                $advanced_flag .
+                "', advanced_description = '" .
+                $this->db->escape($advanced_json) .
                 "', date_modified = NOW() WHERE product_id = '" .
                 (int) $product_id .
                 "'",
@@ -1277,6 +1326,8 @@ class ModelCatalogProduct extends Model
                     $this->db->escape($value["meta_description"]) .
                     "', meta_keyword = '" .
                     $this->db->escape($value["meta_keyword"]) .
+                    "', advanced_content = '" .
+                    $this->db->escape($advanced_content[(int) $language_id] ?? "") .
                     "'",
             );
         }

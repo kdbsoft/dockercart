@@ -190,6 +190,11 @@ class ControllerProductCategory extends Controller {
 			}
 
 			$data['description'] = html_entity_decode($category_info['description'], ENT_QUOTES, 'UTF-8');
+
+			// Advanced Description sections replace the classic copy above the
+			// listing when the category's mode is switched on; the classic copy
+			// stays the search snippet source.
+			$data['description_sections'] = \Dockercart\Description\View::sections($this->registry, 'category', (int)$category_id, $category_info);
 			$data['compare'] = $this->url->link('product/compare');
 
 			$url = '';

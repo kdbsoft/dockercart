@@ -185,14 +185,20 @@ class ControllerProductManufacturer extends Controller {
 					$this->document->setKeywords($manufacturer_description['meta_keyword']);
 				}
 				
-				$data['heading_title'] = $manufacturer_description['name'];
-				$data['description'] = html_entity_decode($manufacturer_description['description'], ENT_QUOTES, 'UTF-8');
+			$data['heading_title'] = $manufacturer_description['name'];
+			$data['description'] = html_entity_decode($manufacturer_description['description'], ENT_QUOTES, 'UTF-8');
 			} else {
 				// Fallback to manufacturer table
 				$this->document->setTitle($manufacturer_info['name']);
 				$data['heading_title'] = $manufacturer_info['name'];
 				$data['description'] = '';
+				$manufacturer_description = [];
 			}
+
+			// Advanced Description sections replace the classic copy above the
+			// listing when the brand's mode is switched on; the per-language
+			// section texts live in the description row.
+			$data['description_sections'] = \Dockercart\Description\View::sections($this->registry, 'manufacturer', (int)$manufacturer_id, $manufacturer_info, $manufacturer_description);
 
 			// Manufacturer logo for hero banner
 			if (!empty($manufacturer_info['image'])) {

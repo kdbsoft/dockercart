@@ -1041,7 +1041,11 @@ final class Blocks {
 		return '';
 	}
 
-	private static function sanitizePath(string $value): string {
+	/**
+	 * Sanitises a stored path/URL value (links, images). Public since the
+	 * description-sections library reuses it for the same purpose.
+	 */
+	public static function sanitizePath(string $value): string {
 		$value = trim($value);
 
 		// A stored link is either an internal storefront path ("index.php?route=...",
@@ -1111,7 +1115,12 @@ final class Blocks {
 		return (bool)preg_match('#^data:(image/(?:png|jpe?g|gif|webp|bmp)|video/|audio/)#i', $url);
 	}
 
-	private static function sanitizeHtml(string $value): string {
+	/**
+	 * Sanitises rich-text markup (drops scripts, on* handlers, srcdoc and
+	 * scheme-whitelists every link/media attribute). Public since the
+	 * description-sections library reuses it for the same purpose.
+	 */
+	public static function sanitizeHtml(string $value): string {
 		$value = trim($value);
 
 		if ($value === '') {

@@ -27,6 +27,7 @@
 21. [Customer (Storefront) REST API](#21-customer-storefront-rest-api)
 22. [Landing Page Builder](#22-landing-page-builder)
 23. [Blog Post Autosave](#23-blog-post-autosave)
+24. [Advanced Description](#24-advanced-description)
 
 ---
 
@@ -2878,3 +2879,184 @@ header and the global Settings page are untouched). To add another form:
 4. Turn off “Autosave article descriptions” in the blog settings → the form has no
    `data-autosave` attributes, the script is not loaded, and editing no longer
    saves on its own.
+
+---
+
+## 24. Advanced Description
+
+Products, categories and manufacturers can optionally replace the classic
+WYSIWYG copy in their **description slot** with a lightweight composition of
+sections. The entity page itself stays unchanged: a product keeps its gallery,
+price and tabs; a category or manufacturer keeps its listing. This is **not**
+the Landing Page Builder — no `oc_landing` rows, owner links, iframe canvas,
+preview tokens, page slugs or whole-page composition are involved.
+
+| Surface | Where |
+|---|---|
+| Product | Catalog → Products → edit → Description panel |
+| Category | Catalog → Categories → edit → Description panel |
+| Manufacturer | Catalog → Manufacturers → edit → Description panel |
+| Storefront | product description tab / category or brand block above the listing |
+
+### Mode and fallback
+
+Each entity has `use_advanced_description` (`0` = classic, `1` = sections).
+The form's mode switcher reuses the information pages' Page Builder toolbar
+(`dc-opts-toolbar`): a status chip, a toggle button and the hidden 0/1
+input - no separate save endpoint, the mode persists with the regular form
+POST. The classic per-language `description` remains visible and editable in
+the form in both modes. It keeps feeding Manticore and product-card snippets,
+is the public fallback while the mode is off, and seeds the first section
+when the mode is switched on with nothing composed yet.
+
+Turning the mode off does **not** delete the composed sections: re-enabling
+restores them. A save that omits `use_advanced_description` entirely keeps the
+stored mode, so REST/programmatic product updates cannot silently disable it.
+An explicit `0` from the form does switch it off.
+
+### Section registry
+
+`upload/system/library/dockercart/description/sections.php`
+(`Dockercart\Description\Sections`) is the single source of truth for the six
+purely descriptive section types:
+
+| Type | Fields |
+|---|---|
+| `text` | heading, rich-text body, alignment |
+| `text_image` | heading, rich-text body, image, image position |
+| `features` | heading, icon/title/text rows, 2/3/4 columns |
+| `gallery` | image/caption rows, 2/3/4 columns |
+| `stats` | value/label rows, 2/3/4 columns |
+| `statement` | large accent text, footnote |
+
+There are deliberately no FAQ, testimonials, CTA, product-grid or raw-HTML
+section types. Feature icons are a closed Lucide-name whitelist
+(`Sections::ICONS`); every type has a storefront partial under
+`upload/catalog/view/theme/dockercart/template/description/sections/`.
+
+Six preset compositions are offered immediately in the editor's numbered
+template grid, ordered by likely priority for product pages:
+
+* **01 Highlights** — icon highlights → text/image → numbers;
+* **02 Product Launch** — statement → icon highlights → numbers → centered text;
+* **03 Visual Story** — alternating text/image sections → statement;
+* **04 Lookbook** — three-column gallery → centered text → two-column gallery;
+* **05 Gift Guide** — centered introduction → four-image gallery → three icon highlights → statement;
+* **06 Campaign** — four-image gallery → statement → text/image → numbers.
+
+There is no top Add Section / Apply Template toolbar: the two-column preview
+grid is always visible, and each numbered card applies its composition. A
+compact **Add section** button below the current section list opens an inline,
+two-column picker of the six individual section types. Applying a template to
+an empty description is immediate; replacing existing sections asks for
+confirmation and closes the section picker. Individual sections can be added up to the shared
+ten-section limit, removed and reordered; repeater rows can be added and removed
+inside the chosen composition. Column counts use native radio choices; the Add
+row button has an explicit top margin. Template previews are assembled from the
+same preset documents that the client applies.
+
+The editor is embedded in the ordinary entity form and saves through
+the form's normal POST — there is no autosave and no separate builder route.
+
+### Storage
+
+Migration `docker/mysql/migrations/20261124_advanced_description.sql` adds nine
+idempotent columns:
+
+```
+oc_product|oc_category|oc_manufacturer
+  use_advanced_description  TINYINT(1) DEFAULT 0
+  advanced_description      MEDIUMTEXT NULL   shared structure + settings
+
+oc_product_description|oc_category_description|oc_manufacturer_description
+  advanced_content          MEDIUMTEXT NULL   per-language section texts
+```
+
+The shared structure is
+`{"sections":[{"sid":"s1","type":"features","settings":{…}}]}`. Images, icons,
+column counts, row order and section order live there once. The description
+row of each language stores
+`{"s1":{"heading":"…","rows":[{"title":"…"}]}}`; adding a section or row makes
+it available in every language, while the translated fields are edited on the
+matching admin language tab.
+
+`Dockercart\Description\Admin::state()` prepares the editor document and
+schema; `Admin::posted()` decodes the hidden JSON field after
+`Request::clean()` entity escaping and normalises it for form redisplay. The
+catalog models call `Sections::resolveSave()` and remain the only DB writers;
+the resolver accepts the same escaped editor JSON directly from the original
+form POST and also handles the first-enable conversion and raw-JSON copy
+payloads.
+
+### Normalisation and rendering
+
+`Sections::normalizeDocument()` is the storage boundary: unknown types and
+fields are dropped, icons/selects use whitelisted defaults, plain text is
+`strip_tags`-ed, rich text reuses `Landing\Blocks::sanitizeHtml()`, images reuse
+`Blocks::sanitizePath()`, section/row counts are capped (10/12), and duplicate
+section ids are repaired. Plain fields are escaped again by the storefront
+partials; only sanitised rich text renders with `|raw`.
+
+`Dockercart\Description\View::sections()` decodes the two halves, merges the
+current language with the default-language fallback for empty fields, skips
+sections with nothing to show, and resizes images through `model_tool_image`.
+The product/category/manufacturer controllers pass the result to
+`description/sections.twig` inside their existing description slot. Product
+queries explicitly re-alias `p.use_advanced_description`,
+`p.advanced_description` and `pd.advanced_content`: both `oc_product` and the
+joined `oc_manufacturer` now have columns with the same names, and `SELECT *`
+would otherwise let the manufacturer row overwrite the product's values.
+
+### Admin editor and permissions
+
+The shared partial is
+`upload/admin/view/template/common/description_editor.twig`; its browser module
+is `upload/admin/view/javascript/dockercart_description_editor.js` and its
+Bootstrap-based styling is
+`upload/admin/view/stylesheet/dockercart_description_editor.css`. Text bodies
+use TinyMCE; images use the existing `common/filemanager` modal. The classic
+language tabs sit above both editor modes and select the language shown in the
+advanced fields. Switching tabs saves the current rich text and refreshes the
+existing controls/TinyMCE instances in place — section DOM and editor instances
+are not rebuilt, which keeps large descriptions responsive. There are no
+per-section language badges because the active tab already provides that
+context.
+
+No new routes or permission grants are needed: the editor is part of the same
+`catalog/product`, `catalog/category` and `catalog/manufacturer` forms and their
+existing `modify` permissions. Shared labels live in
+`admin/language/<locale>/common/description_sections.php`; mode/editor labels
+are mirrored in the three entity language files for `en-gb`, `ru-ua`, `uk-ua`.
+
+Copies carry both entity columns plus every description row's
+`advanced_content`. `copyProduct()` inherits the columns through its
+`SELECT *` → `addProduct()` flow; category/manufacturer copy helpers carry
+them explicitly (including child-category copies). Deleting an entity needs
+no extra cascade because all data lives in that entity's own rows.
+
+### Verification
+
+`tools/tests/cases/advanced_description.php` guards the migration, registry,
+templates, icon whitelist, presets, normalisation limits/security, editor
+round-trip, language fallback, save resolution, the product/manufacturer column
+collision, all three form/storefront integrations, and locale parity.
+
+Manual checks:
+
+1. Enable Advanced Description on a product with classic copy → the description
+   tab shows the converted text section; search/card snippets still use the
+   classic copy.
+2. The six template cards are visible immediately, two per row. Apply each one,
+   add/remove/reorder sections and rows, pick images, switch admin language tabs
+   and save → the storefront shows the same composition. Applying to an empty
+   description needs no confirmation; replacing existing sections does. Rich
+   text and translated row fields change language without rebuilding the
+   section list; shared images and structure stay unchanged.
+3. Leave a translated field empty → the storefront falls back to the default
+   language; fill it → the translation wins.
+4. Switch the mode off → classic copy returns; switch it on again → sections
+   are still there.
+5. Repeat on a category and manufacturer; entities left in classic mode are
+   unchanged.
+6. Copy each entity → the copy owns its description; delete it → no orphaned
+   data remains.

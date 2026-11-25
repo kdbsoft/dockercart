@@ -60,3 +60,25 @@ $_['error_invalid_sort_order'] = 'Invalid sort order value!';
 // Empty state
 $_['text_empty_title']       = 'No manufacturers yet';
 $_['text_empty_description'] = 'Organize products by brand or maker. Add your first manufacturer.';
+
+// Advanced Description section editor
+$_['text_advanced_description'] = 'Advanced Description';
+$_['text_mode_classic'] = 'Classic description';
+$_['text_mode_advanced'] = 'Advanced Description';
+$_['text_classic_description_hint'] = 'Used for search and product-card snippets. It is also the fallback when Advanced Description is off.';
+$_['text_advanced_description_hint'] = 'Compose the description from ready-made sections. The page itself stays unchanged.';
+$_['text_add_section'] = 'Add section';
+$_['text_apply_template'] = 'Apply template';
+$_['text_empty_sections'] = 'No sections yet. Choose a template or add a section.';
+$_['text_move_up'] = 'Move up';
+$_['text_move_down'] = 'Move down';
+$_['text_remove_section'] = 'Remove section';
+$_['text_add_row'] = 'Add row';
+$_['text_remove_row'] = 'Remove row';
+$_['text_select_image'] = 'Select image';
+$_['text_remove_image'] = 'Remove';
+$_['text_confirm_template'] = 'Replace the current sections with this template?';
+$_['text_switch_to_advanced'] = 'Switch to Advanced Description';
+$_['text_switch_to_classic'] = 'Switch to Classic Description';
+$_['text_section_limit'] = 'The maximum number of sections has been reached.';
+$_['text_row_limit'] = 'The maximum number of rows has been reached.';

@@ -304,6 +304,8 @@ class ControllerCatalogManufacturer extends Controller {
 	}
 
 	protected function getForm() {
+		$this->load->language('common/description_sections');
+
 		$data['text_form'] = !isset($this->request->get['manufacturer_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 		$data['text_form_subtitle'] = !isset($this->request->get['manufacturer_id'])
 		    ? $this->language->get('text_add_manufacturer_subtitle')
@@ -374,6 +376,28 @@ class ControllerCatalogManufacturer extends Controller {
 		}
 
 		$data['manufacturer_description'] = $this->decodeDescriptionFields($data['manufacturer_description'], array('name', 'meta_title'));
+
+		// Advanced Description: the same section editor as the product form.
+		$advanced_state = \Dockercart\Description\Admin::state(
+			$this->language,
+			$data['languages'],
+			(string)($manufacturer_info['advanced_description'] ?? ''),
+			$data['manufacturer_description'],
+			isset($this->request->post['advanced_description']) ? (string)$this->request->post['advanced_description'] : null,
+			isset($this->request->post['use_advanced_description']) ? !empty($this->request->post['use_advanced_description']) : !empty($manufacturer_info['use_advanced_description'])
+		);
+
+		foreach ($advanced_state['advanced_content'] as $language_id => $section_content) {
+			$data['manufacturer_description'][$language_id]['advanced_content'] = $section_content;
+		}
+
+		$data['use_advanced_description'] = $advanced_state['use_advanced_description'];
+		$data['advanced_description'] = $advanced_state['advanced_description'];
+		$data['advanced_editor_document'] = $advanced_state['advanced_editor_document'];
+		$data['advanced_description_json'] = $advanced_state['advanced_description_json'];
+		$data['description_editor_config'] = $advanced_state['description_editor_config'];
+		$this->document->addScript('view/javascript/dockercart_description_editor.js');
+		$this->document->addStyle('view/stylesheet/dockercart_description_editor.css');
 
 		if (isset($this->request->post['name'])) {
 			$data['name'] = $this->request->post['name'];

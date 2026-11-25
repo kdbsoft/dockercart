@@ -207,7 +207,11 @@
           </div>
           {% endif %}
 
-          {% if description %}
+          {% if description_sections is defined and description_sections|length > 0 %}
+          <div class="mt-10">
+            {% include 'dockercart/template/description/sections.twig' %}
+          </div>
+          {% elseif description %}
           <div class="mt-10 bg-gray-50 border border-gray-100 rounded-3xl p-6 sm:p-8">
             <p class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-2"><span class="w-4 h-px bg-gray-300"></span>{{ text_category_description }}</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 leading-tight mb-4">{{ heading_title }}</h2>

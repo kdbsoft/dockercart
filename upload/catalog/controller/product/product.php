@@ -412,6 +412,11 @@ class ControllerProductProduct extends Controller {
 			$data['points'] = $product_info['points'];
 			$data['description'] = html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8');
 
+			// Advanced Description sections replace the classic copy in the
+			// description tab when the product's mode is switched on; the classic
+			// copy stays the search/card snippet source.
+			$data['description_sections'] = \Dockercart\Description\View::sections($this->registry, 'product', (int)$this->request->get['product_id'], $product_info);
+
 			// Reservation-aware "in stock" figure: active checkout holds of
 			// other buyers (their sessions) are subtracted, so the badge never
 			// promises stock that is locked in a checkout flow.

@@ -117,6 +117,11 @@ Tailwind utilities so the built output stays in sync.
 
 ## Landing pages (drag & drop sections)
 
+- **Advanced Description is a separate lightweight subsystem** for product,
+  category and manufacturer description slots — it does not use `oc_landing`
+  or the Page Builder. Its six section types, presets and normalisation live
+  in `Dockercart\Description\Sections`; see `docs/guide.md` §24.
+
 - `design/landing` builds ad-hoc pages from **sections**, not from layout zones.
   `upload/system/library/dockercart/landing/blocks.php` (`Dockercart\Landing\Blocks`)
   is the single source of truth: code → palette group + field schema + defaults.

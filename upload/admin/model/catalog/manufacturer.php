@@ -1,7 +1,11 @@
 <?php
 class ModelCatalogManufacturer extends Model {
 	public function addManufacturer($data) {
-		$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "'");
+		// Advanced Description: flag + shared structure (resolveSave also
+		// seeds the first-enable conversion from the classic copy).
+		[$advanced_flag, $advanced_json, $advanced_content] = \Dockercart\Description\Sections::resolveSave($data, 'manufacturer_description');
+
+		$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "', use_advanced_description = '" . (int)$advanced_flag . "', advanced_description = '" . $this->db->escape($advanced_json) . "'");
 
 		$manufacturer_id = $this->db->getLastId();
 
@@ -12,7 +16,7 @@ class ModelCatalogManufacturer extends Model {
 		// Insert manufacturer descriptions for all languages
 		if (isset($data['manufacturer_description'])) {
 			foreach ($data['manufacturer_description'] as $language_id => $value) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer_description SET manufacturer_id = '" . (int)$manufacturer_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer_description SET manufacturer_id = '" . (int)$manufacturer_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "', advanced_content = '" . $this->db->escape($advanced_content[(int)$language_id] ?? '') . "'");
 			}
 		}
 
@@ -51,7 +55,15 @@ class ModelCatalogManufacturer extends Model {
 	}
 
 	public function editManufacturer($manufacturer_id, $data) {
-		$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
+		// Advanced Description: read the stored halves first - a classic-mode
+		// save must keep them (they act as the fallback), a first switch-on
+		// with nothing composed converts the classic copy of this save.
+		$stored_row = $this->db->query("SELECT use_advanced_description, advanced_description FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id = '" . (int)$manufacturer_id . "'")->row;
+		$stored_descriptions = $this->getManufacturerDescriptions($manufacturer_id);
+
+		[$advanced_flag, $advanced_json, $advanced_content] = \Dockercart\Description\Sections::resolveSave($data, 'manufacturer_description', (string)($stored_row['advanced_description'] ?? ''), $stored_descriptions, (int)($stored_row['use_advanced_description'] ?? 0));
+
+		$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET sort_order = '" . (int)$data['sort_order'] . "', status = '" . (isset($data['status']) ? (int)$data['status'] : 1) . "', use_advanced_description = '" . (int)$advanced_flag . "', advanced_description = '" . $this->db->escape($advanced_json) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
 
 		if (isset($data['image'])) {
 			$this->db->query("UPDATE " . DB_PREFIX . "manufacturer SET image = '" . $this->db->escape($data['image']) . "' WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");
@@ -62,7 +74,7 @@ class ModelCatalogManufacturer extends Model {
 
 		if (isset($data['manufacturer_description'])) {
 			foreach ($data['manufacturer_description'] as $language_id => $value) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer_description SET manufacturer_id = '" . (int)$manufacturer_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "'");
+				$this->db->query("INSERT INTO " . DB_PREFIX . "manufacturer_description SET manufacturer_id = '" . (int)$manufacturer_id . "', language_id = '" . (int)$language_id . "', name = '" . $this->db->escape($value['name']) . "', description = '" . $this->db->escape($value['description']) . "', meta_title = '" . $this->db->escape($value['meta_title']) . "', meta_description = '" . $this->db->escape($value['meta_description']) . "', meta_keyword = '" . $this->db->escape($value['meta_keyword']) . "', advanced_content = '" . $this->db->escape($advanced_content[(int)$language_id] ?? '') . "'");
 			}
 		}
 
@@ -136,6 +148,8 @@ class ModelCatalogManufacturer extends Model {
 		$data["manufacturer_description"] = $this->getManufacturerDescriptions(
 			$manufacturer_id,
 		);
+		$data["use_advanced_description"] = $manufacturer["use_advanced_description"] ?? 0;
+		$data["advanced_description"] = (string) ($manufacturer["advanced_description"] ?? "");
 		$data["manufacturer_store"] = $this->getManufacturerStores(
 			$manufacturer_id,
 		);
@@ -300,7 +314,8 @@ class ModelCatalogManufacturer extends Model {
 				'description'      => $result['description'],
 				'meta_title'       => $result['meta_title'],
 				'meta_description' => $result['meta_description'],
-				'meta_keyword'     => $result['meta_keyword']
+				'meta_keyword'     => $result['meta_keyword'],
+				'advanced_content' => (string) ($result['advanced_content'] ?? '')
 			);
 		}
 
