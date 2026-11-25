@@ -448,6 +448,7 @@ DB_PASS="${DB_PASSWORD:-${MARIADB_PASSWORD:-dockercart_password}}"
 DB_NAME="${DB_DATABASE:-${MARIADB_DATABASE:-dockercart}}"
 DB_PREFIX_VALUE="${DB_PREFIX:-oc_}"
 MARIADB_CONTAINER="${MARIADB_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_mariadb}"
+APACHE_CONTAINER="${APACHE_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_apache}"
 DB_EXEC_METHOD="compose"
 
 case "$DB_PREFIX_VALUE" in
@@ -472,6 +473,14 @@ db_exec() {
         db_exec_docker "$@"
     else
         db_exec_compose "$@"
+    fi
+}
+
+data_exec() {
+    if [ "$DB_EXEC_METHOD" = "docker" ]; then
+        docker exec -i "$APACHE_CONTAINER" php "/var/www/dc-migrations/$1" 9>&-
+    else
+        compose exec -T apache php "/var/www/dc-migrations/$1"
     fi
 }
 
@@ -515,17 +524,38 @@ for migration in "$@"; do
     if [ "$(db_exec -Nse "SELECT 1 FROM \`$MIGRATION_TABLE\` WHERE filename='$escaped_filename' LIMIT 1;")" = "1" ]; then
         log "Skipping already applied migration: $filename"
         skipped_count=$((skipped_count + 1))
-        continue
+    else
+        log "Applying migration: $filename"
+        if db_exec < "$migration"; then
+            db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$escaped_filename');"
+            applied_count=$((applied_count + 1))
+            log "Applied migration: $filename"
+        else
+            log "Error: failed to apply migration $filename"
+            exit 1
+        fi
     fi
 
-    log "Applying migration: $filename"
-    if db_exec < "$migration"; then
-        db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$escaped_filename');"
-        applied_count=$((applied_count + 1))
-        log "Applied migration: $filename"
-    else
-        log "Error: failed to apply migration $filename"
-        exit 1
+    # Same-name PHP data migrations are tracked independently, so a crash
+    # after the SQL commit still resumes the data step on the next run.
+    data_migration="${migration%.sql}.php"
+    if [ -f "$data_migration" ]; then
+        data_filename=$(basename "$data_migration")
+        data_escaped_filename=$(printf '%s' "$data_filename" | sed "s/'/''/g")
+        if [ "$(db_exec -Nse "SELECT 1 FROM \`$MIGRATION_TABLE\` WHERE filename='$data_escaped_filename' LIMIT 1;")" = "1" ]; then
+            log "Skipping already applied data migration: $data_filename"
+            skipped_count=$((skipped_count + 1))
+        else
+            log "Applying data migration: $data_filename"
+            if data_exec "$data_filename"; then
+                db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$data_escaped_filename');"
+                applied_count=$((applied_count + 1))
+                log "Applied data migration: $data_filename"
+            else
+                log "Error: failed to apply data migration $data_filename"
+                exit 1
+            fi
+        fi
     fi
 done
 

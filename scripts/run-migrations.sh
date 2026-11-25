@@ -2,9 +2,11 @@
 # DockerCart - Tracked SQL migration runner (shared by start.sh and update.sh)
 #
 # Applies every *.sql file in docker/mysql/migrations/ exactly once, recording
-# applied filenames in the <prefix>schema_migrations table. Idempotent on
-# re-run: already-applied files are skipped. Migration files MUST be idempotent
-# themselves (CREATE TABLE IF NOT EXISTS, ADD COLUMN IF NOT EXISTS) per AGENTS.md.
+# applied filenames in the <prefix>schema_migrations table. A same-name .php
+# file is an optional data migration, run immediately after its SQL file and
+# tracked under its own filename. Idempotent on re-run: already-applied files
+# are skipped. Migration files MUST be idempotent themselves (CREATE TABLE IF
+# NOT EXISTS, ADD COLUMN IF NOT EXISTS) per AGENTS.md.
 #
 # Usage:
 #   ./scripts/run-migrations.sh
@@ -92,16 +94,39 @@ for migration in "${files[@]}"; do
     escaped="$(printf '%s' "$filename" | sed "s/'/''/g")"
     if [ "$(db_exec -Nse "SELECT 1 FROM \`$MIGRATION_TABLE\` WHERE filename='$escaped' LIMIT 1;" 2>/dev/null)" = "1" ]; then
         skipped=$((skipped + 1))
-        continue
-    fi
-    echo "run-migrations: applying $filename"
-    if db_exec < "$migration"; then
-        db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$escaped');"
-        applied=$((applied + 1))
-        echo "run-migrations: applied $filename"
     else
-        echo "run-migrations: ERROR applying $filename" >&2
-        exit 1
+        echo "run-migrations: applying $filename"
+        if db_exec < "$migration"; then
+            db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$escaped');"
+            applied=$((applied + 1))
+            echo "run-migrations: applied $filename"
+        else
+            echo "run-migrations: ERROR applying $filename" >&2
+            exit 1
+        fi
+    fi
+
+    # A data migration is tracked independently: if its SQL was already
+    # applied before a crash, a rerun still executes the pending PHP step.
+    data_migration="${migration%.sql}.php"
+    if [ -f "$data_migration" ]; then
+        data_filename="$(basename "$data_migration")"
+        data_escaped="$(printf '%s' "$data_filename" | sed "s/'/''/g")"
+        if [ "$(db_exec -Nse "SELECT 1 FROM \`${MIGRATION_TABLE}\` WHERE filename='$data_escaped' LIMIT 1;" 2>/dev/null)" = "1" ]; then
+            skipped=$((skipped + 1))
+            continue
+        fi
+
+        echo "run-migrations: applying data migration $data_filename"
+        if DB_HOSTNAME="$DB_HOST" DB_USERNAME="$DB_USER" DB_PASSWORD="$DB_PASS" \
+            DB_DATABASE="$DB_NAME" DB_PREFIX="$DB_PREFIX_VALUE" php "$data_migration"; then
+            db_exec -e "INSERT INTO \`$MIGRATION_TABLE\` (filename) VALUES ('$data_escaped');"
+            applied=$((applied + 1))
+            echo "run-migrations: applied data migration $data_filename"
+        else
+            echo "run-migrations: ERROR applying data migration $data_filename" >&2
+            exit 1
+        fi
     fi
 done
 
