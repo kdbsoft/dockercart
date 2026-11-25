@@ -2715,74 +2715,6 @@ Guarded by `tools/tests/cases/information_landing.php` (migration idempotency,
 owner-exclusion SQL, the delegation anchor, the 404 guard, builder owner mode,
 locale parity ×3).
 
-### Blog posts as landing pages
-
-A blog article can be composed in the same section builder — the whole page,
-like an information page: `oc_blog_post.use_builder` toggles it, `oc_landing.
-post_id` links the article to its composed page (a second owner kind next to
-`information_id`). The integration mirrors the information one rule for rule.
-
-| Surface | Where |
-|---|---|
-| Toggle + builder link | Extensions → Modules → DockerCart Blog → Posts → form (Description panel toolbar) |
-| Builder | `design/landing/builder&landing_id=N` as usual, post-owned mode |
-| Storefront | the article's own SEO URL (`blog/post`, keywords in `oc_blog_seo_url`) |
-
-Rules that keep the two owner kinds from colliding:
-
-* **Post-owned landings are invisible standalone**: the landing list,
-  `getLandingBySlug()`, `getTakenSlugs()` and the list actions
-  (`delete`/`copy`/`status`, via `ModelDesignLanding::ownerType()`) refuse
-  them; `saveLanding()` ignores their `status`, publish window, `is_home` and
-  slugs (`syncSeoUrls` never runs — `oc_seo_url` stays untouched).
-* **The article owns everything public**: URL/keyword (`oc_blog_seo_url`,
-  query `blog_post_id=N`), meta tags, canonical, breadcrumbs
-  (Home → Blog → article) and visibility (`oc_blog_post.status` + store +
-  `date_published`). `landing/page&landing_id=N` / `lp-<id>` is a 404 — only
-  the blog route, which plants `blog_post_id` next to `landing_id`, may
-  render the composed page (a valid preview token does not bypass this).
-* **Enabling is conversion + fallback at once**:
-  `ModelExtensionModuleDockercartBlogPost::enableBuilder()` creates the owned
-  landing (name from the post meta/title, `status = 0`) and seeds one `text`
-  block per language — heading = post title, body = the WYSIWYG copy. The
-  WYSIWYG field itself stays saved and acts as the fallback when the toggle is
-  switched off (re-enabling does not re-convert).
-* **Lifecycle**: deleting the post cascades `deleteLanding()` (page + blocks
-  + descriptions); copying the post duplicates the landing and binds the
-  copy (`duplicateLanding($id, 0, $new_post_id)`) with `use_builder` carried
-  over.
-* **Search stays honest**: `indexBlogPost()` reads `use_builder` and, for
-  composed articles, builds the Manticore `content` field from the localised
-  block fields of the owned landing (`Blocks::plainTextFromContent()`
-  flattens one block's content JSON into plain text; the raw `html` block is
-  skipped). The classic WYSIWYG copy is the fallback when the composed text
-  is empty.
-
-Storefront flow: `ControllerBlogPost::index()` sees `use_builder` (or a
-preview token, so the canvas works on unpublished articles), resolves the
-owned landing via `ModelDesignLanding::getLandingByPost()` and delegates to
-`ControllerLandingPage`, which gates on the catalog post row
-(`ModelExtensionModuleDockercartBlogPost::getPost()`: status + store +
-language + date), takes meta/breadcrumbs/canonical from the article and
-increments **the post's** `views` counter instead of the landing's one.
-
-Builder owner mode: the back link leads to the blog post list, the canvas
-URLs are built from the article keyword (`oc_blog_seo_url`, store 0,
-language-prefixed; fallback `index.php?route=blog/post&blog_post_id=N`), and
-the Page Settings panel edits the article's status, per-language title
-(written through `extension/module/dockercart_blog_post/updateNames`), meta
-tags and default-store keyword (validated by `validateBlogOwner()`, written by
-`updateBuilderSettings()` / `updateBuilderSeoUrls()` in the blog model). The
-top bar badge and the post list badge mark composed articles.
-
-Permissions: no new routes — `extension/module/dockercart_blog_post` and
-`design/landing` are already in the content-manager / marketer templates.
-The form hides the toggle from users without `modify design/landing`.
-
-Guarded by `tools/tests/cases/blog_post_landing.php` (migration idempotency
-+ module installer, owner-exclusion SQL, the delegation anchor, the 404
-guard, builder owner mode, `enableBuilder()` conversion over `FakeDb`,
-the plain-text extractor, locale parity ×3).
 
 ---
 
@@ -2827,7 +2759,9 @@ full validation, so a tighter cadence would only add load.
 - Every tick the module calls `tinymce.triggerSave()`, serializes the form and
   compares an FNV-1a hash of the `name=value` pairs with the last saved state —
   an idle form is never re-posted, and programmatic widget changes are caught
-  without wiring listeners for every picker.
+  without wiring listeners for every picker. The payload includes the hidden
+  `use_advanced_description` flag and the section editor's
+  `advanced_description` JSON, so autosave persists both content modes.
 - File inputs are stripped from the payload (a re-upload per minute is not
   wanted); the request carries `_dc_autosave=1`.
 - Success = the controller called `$this->response->redirect()` (302). The fetch
@@ -2884,10 +2818,11 @@ header and the global Settings page are untouched). To add another form:
 
 ## 24. Advanced Description
 
-Products, categories and manufacturers can optionally replace the classic
-WYSIWYG copy in their **description slot** with a lightweight composition of
-sections. The entity page itself stays unchanged: a product keeps its gallery,
-price and tabs; a category or manufacturer keeps its listing. This is **not**
+Products, categories, manufacturers and blog posts can optionally replace the
+classic WYSIWYG copy in their **description slot** with a lightweight composition
+of sections. The entity page itself stays unchanged: a product keeps its gallery,
+price and tabs; a category or manufacturer keeps its listing; a blog post keeps
+its hero, cover image, meta tags, recommendations and comments. This is **not**
 the Landing Page Builder — no `oc_landing` rows, owner links, iframe canvas,
 preview tokens, page slugs or whole-page composition are involved.
 
@@ -2896,7 +2831,8 @@ preview tokens, page slugs or whole-page composition are involved.
 | Product | Catalog → Products → edit → Description panel |
 | Category | Catalog → Categories → edit → Description panel |
 | Manufacturer | Catalog → Manufacturers → edit → Description panel |
-| Storefront | product description tab / category or brand block above the listing |
+| Blog post | Extensions → Modules → DockerCart Blog → Posts → edit → Description panel |
+| Storefront | product description tab / category or brand block above the listing / inside the blog article |
 
 ### Mode and fallback
 
@@ -2904,10 +2840,25 @@ Each entity has `use_advanced_description` (`0` = classic, `1` = sections).
 The form's mode switcher reuses the information pages' Page Builder toolbar
 (`dc-opts-toolbar`): a status chip, a toggle button and the hidden 0/1
 input - no separate save endpoint, the mode persists with the regular form
-POST. The classic per-language `description` remains visible and editable in
-the form in both modes. It keeps feeding Manticore and product-card snippets,
-is the public fallback while the mode is off, and seeds the first section
-when the mode is switched on with nothing composed yet.
+POST. The button names only the target mode (no "Switch to" prefix); on
+desktop the hint stays in the same row to the right of the buttons and may
+wrap into several lines inside its own column; only phones move it below.
+The hint depends on the active mode: classic mode explains what the section
+composer does, advanced mode explains that the classic copy is still used for
+search, card snippets and as a fallback. The toolbar sits **above the
+language tabs**, outside the editor, and
+the shared editor is moved into the active tab pane at runtime, so the
+composition and the translated copy are edited in one place. The classic
+per-language `description` (`content` for blog posts) remains editable in both
+modes: in advanced mode it sits behind a plain **Show classic description** /
+**Hide classic description** button, the same Show/Hide pattern used by the
+optional blocks in the product form (hidden `dcx-field`). It keeps feeding
+Manticore and card/article snippets, is the public fallback while the mode is
+off, and seeds the first section when the mode is switched on with nothing
+composed yet. Blog validation accepts either classic content or at least one
+non-empty Advanced Description section for each language (with the normal
+default-language fallback); catalog descriptions keep their existing optional
+semantics.
 
 Turning the mode off does **not** delete the composed sections: re-enabling
 restores them. A save that omits `use_advanced_description` entirely keeps the
@@ -2944,19 +2895,31 @@ template grid, ordered by likely priority for product pages:
 * **05 Gift Guide** — centered introduction → four-image gallery → three icon highlights → statement;
 * **06 Campaign** — four-image gallery → statement → text/image → numbers.
 
-There is no top Add Section / Apply Template toolbar: the two-column preview
-grid is always visible, and each numbered card applies its composition. A
-compact **Add section** button below the current section list opens an inline,
-two-column picker of the six individual section types. Applying a template to
-an empty description is immediate; replacing existing sections asks for
-confirmation and closes the section picker. Individual sections can be added up to the shared
-ten-section limit, removed and reordered; repeater rows can be added and removed
-inside the chosen composition. Column counts use native radio choices; the Add
-row button has an explicit top margin. Template previews are assembled from the
-same preset documents that the client applies.
+There is no top Add Section / Templates toolbar. On an empty description the
+two-column preview grid is shown immediately and each numbered card applies
+its composition. Once sections exist the grid folds into a compact
+**Templates** toggle next to **Add section**, so long compositions do not
+push the form fields down; the current section count is shown there too.
+Both controls open an inline panel directly under that button row and the
+panels are mutually exclusive. The button is called *Templates*, not
+*Apply template*: nothing is replaced until a card is clicked. Applying a
+template to an empty description is immediate; replacing existing sections
+asks for confirmation and closes both pickers. On phone widths the grid
+becomes one column, but each card stays horizontal (silhouette left, name
+right) and the button row wraps instead of overflowing. Individual sections can be
+added up to the shared ten-section limit, removed and reordered; repeater
+rows can be added and removed inside the chosen composition. Column counts,
+the text section's alignment and the text/image section's image position use
+native radio choices; alignment and position are banner-style segmented
+groups with Lucide icons and translated option labels instead of selects. The
+Add row button has an explicit top margin.
+Template previews are assembled from the same preset documents that the
+client applies.
 
 The editor is embedded in the ordinary entity form and saves through
-the form's normal POST — there is no autosave and no separate builder route.
+the form's normal POST — there is no separate builder route. Catalog forms do
+not autosave; the blog post form keeps its existing opt-in autosave and posts
+the editor's hidden JSON with the article.
 
 ### Storage
 
@@ -2970,7 +2933,18 @@ oc_product|oc_category|oc_manufacturer
 
 oc_product_description|oc_category_description|oc_manufacturer_description
   advanced_content          MEDIUMTEXT NULL   per-language section texts
+
+oc_blog_post
+  use_advanced_description  TINYINT(1) DEFAULT 0
+  advanced_description      MEDIUMTEXT NULL   shared structure + settings
+
+oc_blog_post_description
+  advanced_content          MEDIUMTEXT NULL   per-language section texts
 ```
+
+Migration `docker/mysql/migrations/20261125_blog_advanced_description.sql` adds
+the three blog columns idempotently. The module installer carries the same
+columns for fresh blog installs.
 
 The shared structure is
 `{"sections":[{"sid":"s1","type":"features","settings":{…}}]}`. Images, icons,
@@ -2983,10 +2957,11 @@ matching admin language tab.
 `Dockercart\Description\Admin::state()` prepares the editor document and
 schema; `Admin::posted()` decodes the hidden JSON field after
 `Request::clean()` entity escaping and normalises it for form redisplay. The
-catalog models call `Sections::resolveSave()` and remain the only DB writers;
-the resolver accepts the same escaped editor JSON directly from the original
-form POST and also handles the first-enable conversion and raw-JSON copy
-payloads.
+catalog models and the blog post model call `Sections::resolveSave()` and remain
+the only DB writers; the resolver accepts the same escaped editor JSON directly
+from the original form POST and also handles the first-enable conversion and
+raw-JSON copy payloads. Its optional classic-body key is `description` for
+catalog entities and `content` for blog posts.
 
 ### Normalisation and rendering
 
@@ -3000,57 +2975,137 @@ partials; only sanitised rich text renders with `|raw`.
 `Dockercart\Description\View::sections()` decodes the two halves, merges the
 current language with the default-language fallback for empty fields, skips
 sections with nothing to show, and resizes images through `model_tool_image`.
-The product/category/manufacturer controllers pass the result to
-`description/sections.twig` inside their existing description slot. Product
-queries explicitly re-alias `p.use_advanced_description`,
+The product/category/manufacturer controllers and `ControllerBlogPost` pass the
+result to `description/sections.twig` inside their existing description slot.
+The visible heading is kept in both modes on the three catalog pages:
+**Description** on the product, the category eyebrow + name, and the brand
+eyebrow + name. A blog post renders the section list where its classic article
+body used to be, with classic `content` as the fallback when no section is
+visible. Blog Manticore documents index both the classic copy and the visible
+section text (`Sections::plainText()`).
+Product queries explicitly re-alias `p.use_advanced_description`,
 `p.advanced_description` and `pd.advanced_content`: both `oc_product` and the
 joined `oc_manufacturer` now have columns with the same names, and `SELECT *`
 would otherwise let the manufacturer row overwrite the product's values.
 
 ### Admin editor and permissions
 
-The shared partial is
-`upload/admin/view/template/common/description_editor.twig`; its browser module
-is `upload/admin/view/javascript/dockercart_description_editor.js` and its
-Bootstrap-based styling is
-`upload/admin/view/stylesheet/dockercart_description_editor.css`. Text bodies
-use TinyMCE; images use the existing `common/filemanager` modal. The classic
-language tabs sit above both editor modes and select the language shown in the
-advanced fields. Switching tabs saves the current rich text and refreshes the
+The mode toolbar is `upload/admin/view/template/common/description_mode.twig`;
+the editor itself is `upload/admin/view/template/common/description_editor.twig`;
+its browser module is `upload/admin/view/javascript/dockercart_description_editor.js`
+and its Bootstrap-based styling is
+`upload/admin/view/stylesheet/dockercart_description_editor.css` (admin
+`--dc-*` tokens, no separate palette). Text bodies use TinyMCE; images use the
+existing `common/filemanager` modal. Stored image paths stay relative to
+`upload/image/`; the forms pass `HTTP_CATALOG . 'image/'` as the editor's
+`image_base` so saved thumbnails render (absolute URLs are left untouched).
+The classic language tabs select both the
+ordinary translated fields and the language shown in the advanced fields:
+the single editor DOM node is moved into the newly active tab pane on
+`shown.bs.tab`. Switching tabs saves the current rich text and refreshes the
 existing controls/TinyMCE instances in place — section DOM and editor instances
-are not rebuilt, which keeps large descriptions responsive. There are no
-per-section language badges because the active tab already provides that
-context.
+are not rebuilt, which keeps large descriptions responsive. In advanced mode
+the classic WYSIWYG is hidden behind the Show/Hide button but its textarea is
+still part of the form and is posted with it; in classic mode the button is
+not shown at all. There are no per-section language badges because the active
+tab already provides that context.
 
 No new routes or permission grants are needed: the editor is part of the same
-`catalog/product`, `catalog/category` and `catalog/manufacturer` forms and their
-existing `modify` permissions. Shared labels live in
+`catalog/product`, `catalog/category`, `catalog/manufacturer` and
+`extension/module/dockercart_blog_post` forms and their existing `modify`
+permissions. Shared labels live in
 `admin/language/<locale>/common/description_sections.php`; mode/editor labels
-are mirrored in the three entity language files for `en-gb`, `ru-ua`, `uk-ua`.
+are mirrored in the three catalog entity files and the blog post language file
+for `en-gb`, `ru-ua`, `uk-ua`.
 
 Copies carry both entity columns plus every description row's
 `advanced_content`. `copyProduct()` inherits the columns through its
 `SELECT *` → `addProduct()` flow; category/manufacturer copy helpers carry
-them explicitly (including child-category copies). Deleting an entity needs
-no extra cascade because all data lives in that entity's own rows.
+them explicitly (including child-category copies); `copyPost()` carries the
+blog columns and every `advanced_content` row. Deleting an entity needs no
+extra cascade because all data lives in that entity's own rows.
+
+### Blog migration away from Page Builder
+
+Blog articles no longer use `oc_landing.post_id` or `oc_blog_post.use_builder`.
+The article URL, meta tags, visibility, recommendations and comments always
+belong to the classic blog route; only its description slot changes mode.
+
+`20261125_blog_advanced_description.php` is a tracked data migration executed by
+the migration runners immediately after its same-name SQL file. It converts
+each post-owned landing through `Dockercart\Blog\AdvancedDescriptionMigration`:
+
+| Builder block | Advanced Description |
+|---|---|
+| `text` | `text` |
+| `image_text` | `text_image` (bullets/buttons retained as body copy) |
+| `features`, `stats`, `statement` | matching descriptive section |
+| `image` | one-row `gallery` |
+| hero/CTA/steps/FAQ/testimonials/commerce | `text` with the available copy; commerce widgets are not recreated |
+| `html` | `text.body`, sanitised by the Advanced Description boundary |
+| `section` | children flattened in slot/sort order |
+| `spacer` | dropped |
+
+Containers are flattened, translated repeater rows are aligned by index, and
+unsupported feature icons fall back to `sparkles`. More than ten candidate
+sections are capped by merging the overflow into a final text section. Builder
+wrapper styling and commerce widget bindings cannot be represented and are not
+copied; classic `content` always remains as the fallback.
+
+For each post the data migration writes both Advanced Description halves,
+clears the Builder flag and only then deletes the landing, its blocks and its
+descriptions in the same transaction. Existing non-empty Advanced Description
+is never overwritten. Orphan post-owned landings are deleted too, so the next
+migration (`20261126_remove_blog_builder_columns.sql`) can safely drop
+`oc_landing.post_id`, its index and `oc_blog_post.use_builder`. A failed write
+rolls back and leaves the source landing intact; the runner records the data
+migration marker only after success. The drop SQL also checks for that marker and
+fails closed, so an older runner that only applies `.sql` files cannot remove
+the legacy columns before conversion. Converted posts are re-indexed into
+Manticore on a best-effort basis.
+
+### Demo coverage
+
+The demo enables Advanced Description on **22 of 89 products** (~25%),
+including every **Top Pick** (5001 iPhone, 5006 MacBook, 5023 Ultraboost,
+5077 Anker receiver), **9 of 36 categories** and **3 of 13 manufacturers**.
+Migration `docker/mysql/migrations/20261125_demo_advanced_description.sql`
+writes both storage halves through `Sections::normalizeDocument()`, fills all
+three languages and uses the six preset compositions with images from
+`upload/image/catalog/demo/demo-seed/`. It only touches rows with an empty
+composition, so re-running it never overwrites an operator's edits.
+
+Migration `docker/mysql/migrations/20261125_demo_blog_advanced_description.sql`
+adds the second article (post 3) with all six section types and translated copy
+in all three languages. Together with the converted former Builder article
+(post 1), **2 of 7 demo posts (~29%, the closest whole-article match to 25%)**
+use the composer. Existing non-empty compositions are never overwritten.
 
 ### Verification
 
-`tools/tests/cases/advanced_description.php` guards the migration, registry,
-templates, icon whitelist, presets, normalisation limits/security, editor
-round-trip, language fallback, save resolution, the product/manufacturer column
-collision, all three form/storefront integrations, and locale parity.
+`tools/tests/cases/advanced_description.php` guards the migration, demo
+limits/security, editor round-trip, language fallback, save resolution, the
+product/manufacturer column collision, catalog form/storefront integrations,
+blog editor labels and locale parity. `tools/tests/cases/blog_post_landing.php`
+guards the Builder converter, transactional data migration, blog CRUD/copy,
+storefront/search/API integration and the complete removal of the post-owner
+Landing Page Builder protocol.
 
 Manual checks:
 
 1. Enable Advanced Description on a product with classic copy → the description
    tab shows the converted text section; search/card snippets still use the
    classic copy.
-2. The six template cards are visible immediately, two per row. Apply each one,
-   add/remove/reorder sections and rows, pick images, switch admin language tabs
-   and save → the storefront shows the same composition. Applying to an empty
-   description needs no confirmation; replacing existing sections does. Rich
-   text and translated row fields change language without rebuilding the
+2. The six template cards are visible immediately, two per row. Apply each one
+   (the grid then collapses into the **Templates** button in the bottom row),
+   add/remove/reorder sections and rows, pick images, switch admin language
+   tabs and save
+   → the storefront shows the same composition. Applying to an empty
+   description needs no confirmation; replacing existing sections does. The
+   **Show classic description** button reveals the ordinary Description field;
+   it can be edited and saved in either mode. The toolbar hint switches with
+   the active mode.
+   Rich text and translated row fields change language without rebuilding the
    section list; shared images and structure stay unchanged.
 3. Leave a translated field empty → the storefront falls back to the default
    language; fill it → the translation wins.
@@ -3058,5 +3113,11 @@ Manual checks:
    are still there.
 5. Repeat on a category and manufacturer; entities left in classic mode are
    unchanged.
-6. Copy each entity → the copy owns its description; delete it → no orphaned
+6. Edit a blog post: classic content or a non-empty Advanced Description is
+   required. The article keeps its hero/image/meta/recommendations/comments;
+   only the body switches to sections. Autosave persists both modes.
+7. Copy each entity → the copy owns its description; delete it → no orphaned
    data remains.
+8. On a staging DB with a backup, run `make migrate` twice: old Builder posts
+   are converted once, post-owned landings and legacy columns disappear, and
+   Information Page Builder / standalone Landing Pages still work.

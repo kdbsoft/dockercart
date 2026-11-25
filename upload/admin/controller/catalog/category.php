@@ -507,7 +507,8 @@ class ControllerCatalogCategory extends Controller {
 			(string)($category_info['advanced_description'] ?? ''),
 			$data['category_description'],
 			isset($this->request->post['advanced_description']) ? (string)$this->request->post['advanced_description'] : null,
-			isset($this->request->post['use_advanced_description']) ? !empty($this->request->post['use_advanced_description']) : !empty($category_info['use_advanced_description'])
+			isset($this->request->post['use_advanced_description']) ? !empty($this->request->post['use_advanced_description']) : !empty($category_info['use_advanced_description']),
+			HTTP_CATALOG . 'image/'
 		);
 
 		foreach ($advanced_state['advanced_content'] as $language_id => $section_content) {

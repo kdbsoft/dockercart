@@ -40,6 +40,7 @@ final class View {
 		'product'      => ['table' => 'product_description', 'id' => 'product_id'],
 		'category'     => ['table' => 'category_description', 'id' => 'category_id'],
 		'manufacturer' => ['table' => 'manufacturer_description', 'id' => 'manufacturer_id'],
+		'blog_post'    => ['table' => 'blog_post_description', 'id' => 'post_id'],
 	];
 
 	/**
@@ -47,7 +48,7 @@ final class View {
 	 * (or nothing survived the empty-section filtering).
 	 *
 	 * @param object $registry the catalog registry (config, loader, db, models)
-	 * @param string $entity_type product|category|manufacturer
+	 * @param string $entity_type product|category|manufacturer|blog_post
 	 * @param int $entity_id
 	 * @param array<string, mixed> $entity_row the entity row carrying
 	 *        use_advanced_description + advanced_description; for products and

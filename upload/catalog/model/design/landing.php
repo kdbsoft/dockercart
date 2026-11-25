@@ -30,7 +30,7 @@ class ModelDesignLanding extends Model {
 		$query = $this->db->query("SELECT l.* FROM `" . DB_PREFIX . "landing` l
 			INNER JOIN `" . DB_PREFIX . "landing_description` d ON (d.landing_id = l.landing_id)
 			WHERE d.slug = '" . $this->db->escape($slug) . "' AND d.language_id = '" . (int)$language_id . "'
-			AND l.information_id IS NULL AND l.post_id IS NULL
+			AND l.information_id IS NULL
 			LIMIT 1");
 
 		return $query->num_rows ? $query->row : false;
@@ -44,18 +44,6 @@ class ModelDesignLanding extends Model {
 	 */
 	public function getLandingByInformation(int $information_id) {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "landing` WHERE information_id = '" . (int)$information_id . "' LIMIT 1");
-
-		return $query->num_rows ? $query->row : false;
-	}
-
-	/**
-	 * The landing page bound to a blog post as its composed page
-	 * (blog/post delegates to landing/page for it).
-	 *
-	 * @return array<string, mixed>|false
-	 */
-	public function getLandingByPost(int $post_id) {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "landing` WHERE post_id = '" . (int)$post_id . "' LIMIT 1");
 
 		return $query->num_rows ? $query->row : false;
 	}

@@ -22,9 +22,10 @@ final class Admin {
 	 *
 	 * @param object $language OpenCart Language registry
 	 * @param array<int, array<string, mixed>> $languages language rows
+	 * @param string $image_base catalog image URL prefix for admin previews
 	 * @return array<string, mixed>
 	 */
-	public static function config(object $language, array $languages): array {
+	public static function config(object $language, array $languages, string $image_base = ''): array {
 		$language_ids = self::languageIds($languages);
 
 		$schema = Sections::localizedSchema(Sections::schema(), static fn (string $key): string => $language->get($key));
@@ -36,6 +37,7 @@ final class Admin {
 		}
 
 		return $schema + [
+			'image_base'       => $image_base,
 			'preset_documents' => $preset_documents,
 			'max_sections'     => Sections::MAX_SECTIONS,
 			'max_rows'         => Sections::MAX_ROWS,
@@ -59,9 +61,10 @@ final class Admin {
 	 *
 	 * @param array<int, array<string, mixed>> $languages
 	 * @param array<int, array<string, mixed>> $descriptions
+	 * @param string $image_base catalog image URL prefix for admin previews
 	 * @return array<string, mixed>
 	 */
-	public static function state(object $language, array $languages, string $stored_structure_json, array $descriptions, ?string $posted_json, bool $use): array {
+	public static function state(object $language, array $languages, string $stored_structure_json, array $descriptions, ?string $posted_json, bool $use, string $image_base = ''): array {
 		$language_ids = self::languageIds($languages);
 		$content = [];
 
@@ -81,7 +84,7 @@ final class Admin {
 			'advanced_editor_document'   => $document,
 			'advanced_description_json'  => (string)json_encode($document, JSON_UNESCAPED_UNICODE),
 			'advanced_content'           => $content,
-			'description_editor_config'  => self::config($language, $languages),
+			'description_editor_config'  => self::config($language, $languages, $image_base),
 		];
 	}
 
@@ -95,12 +98,10 @@ final class Admin {
 			'text_advanced_description',
 			'text_mode_classic',
 			'text_mode_advanced',
-			'text_switch_to_advanced',
-			'text_switch_to_classic',
 			'text_classic_description_hint',
 			'text_advanced_description_hint',
 			'text_add_section',
-			'text_apply_template',
+			'button_templates',
 			'text_empty_sections',
 			'text_move_up',
 			'text_move_down',
@@ -112,6 +113,8 @@ final class Admin {
 			'text_confirm_template',
 			'text_section_limit',
 			'text_row_limit',
+			'button_show_classic_description',
+			'button_hide_classic_description',
 		];
 
 		$labels = [];

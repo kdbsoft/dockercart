@@ -36,12 +36,10 @@ class ModelDesignLanding extends Model {
 		$now = date('Y-m-d H:i:s');
 
 		$information_id = (int)($data['information_id'] ?? 0);
-		$post_id = (int)($data['post_id'] ?? 0);
 
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "landing` SET
 			name = '" . $this->db->escape((string)($data['name'] ?? '')) . "',
 			information_id = '" . $information_id . "',
-			post_id = '" . $post_id . "',
 			status = '" . (!empty($data['status']) ? 1 : 0) . "',
 			chrome = '" . ((($data['chrome'] ?? 'full') === 'bare') ? 'bare' : 'full') . "',
 			is_home = '0',
@@ -56,9 +54,9 @@ class ModelDesignLanding extends Model {
 
 		$landing_id = (int)$this->db->getLastId();
 
-		// An owned landing (information page or blog post) is that owner's
-		// composed body: no slugs, no own visibility, never the store home page.
-		$owned = $information_id > 0 || $post_id > 0;
+		// An information-owned landing is that page's composed body: no
+		// slugs, no own visibility, never the store home page.
+		$owned = $information_id > 0;
 
 		$this->saveDescriptions($landing_id, (array)($data['descriptions'] ?? []), $owned);
 
@@ -83,7 +81,7 @@ class ModelDesignLanding extends Model {
 		$this->db->query("START TRANSACTION");
 
 		try {
-			$query = $this->db->query("SELECT version, information_id, post_id FROM `" . DB_PREFIX . "landing` WHERE landing_id = '" . (int)$landing_id . "' FOR UPDATE");
+			$query = $this->db->query("SELECT version, information_id FROM `" . DB_PREFIX . "landing` WHERE landing_id = '" . (int)$landing_id . "' FOR UPDATE");
 
 			if (!$query->num_rows) {
 				$this->db->query("ROLLBACK");
@@ -91,11 +89,10 @@ class ModelDesignLanding extends Model {
 				return ['success' => false, 'conflict' => true, 'version' => 0];
 			}
 
-			// A landing owned by an information page or a blog post carries only
-			// its blocks, noindex and custom CSS: visibility lives on the owner's
-			// own status, the chrome is always the full store theme and slugs are
-			// never mirrored into oc_seo_url.
-			$owned = (int)$query->row['information_id'] > 0 || (int)$query->row['post_id'] > 0;
+			// An information-owned landing carries only its blocks, noindex and
+			// custom CSS: visibility lives on the information page, the chrome is
+			// always the full store theme and slugs are never mirrored into oc_seo_url.
+			$owned = (int)$query->row['information_id'] > 0;
 
 			$current_version = (int)$query->row['version'];
 			$sent_version = isset($data['version']) ? (int)$data['version'] : $current_version;
@@ -184,15 +181,14 @@ class ModelDesignLanding extends Model {
 	/**
 	 * Duplicates a page with all blocks; slugs get a -copy suffix, status draft.
 	 */
-	public function duplicateLanding(int $landing_id, int $new_information_id = 0, int $new_post_id = 0): int {
+	public function duplicateLanding(int $landing_id, int $new_information_id = 0): int {
 		$landing = $this->getLanding($landing_id);
 
 		if (!$landing) {
 			return 0;
 		}
 
-		$owned = ((int)($landing['information_id'] ?? 0) > 0) || ((int)($landing['post_id'] ?? 0) > 0)
-			|| $new_information_id > 0 || $new_post_id > 0;
+		$owned = ((int)($landing['information_id'] ?? 0) > 0) || $new_information_id > 0;
 
 		$descriptions = $this->getLandingDescriptions($landing_id);
 		$taken = $this->getTakenSlugs();
@@ -228,7 +224,6 @@ class ModelDesignLanding extends Model {
 		return $this->addLanding([
 			'name'            => $name,
 			'information_id'  => $new_information_id,
-			'post_id'         => $new_post_id,
 			'status'          => 0,
 			'chrome'          => $landing['chrome'],
 			'noindex'         => $owned ? (int)$landing['noindex'] : 1,
@@ -301,7 +296,7 @@ class ModelDesignLanding extends Model {
 	private function landingListWhere(array $data): array {
 		// Landings owned by an information page or a blog post are managed
 		// from their owner modules and never show up in this list.
-		$where = ["l.information_id IS NULL", "l.post_id IS NULL"];
+		$where = ["l.information_id IS NULL"];
 
 		if (!empty($data['filter_name'])) {
 			$where[] = "l.name LIKE '" . $this->db->escape($data['filter_name']) . "%'";
@@ -345,7 +340,7 @@ class ModelDesignLanding extends Model {
 	public function getTakenSlugs(int $exclude_landing_id = 0): array {
 		$query = $this->db->query("SELECT d.slug FROM `" . DB_PREFIX . "landing_description` d
 			INNER JOIN `" . DB_PREFIX . "landing` l ON (l.landing_id = d.landing_id)
-			WHERE d.slug <> '' AND l.information_id IS NULL AND l.post_id IS NULL AND d.landing_id <> '" . (int)$exclude_landing_id . "'");
+			WHERE d.slug <> '' AND l.information_id IS NULL AND d.landing_id <> '" . (int)$exclude_landing_id . "'");
 
 		$slugs = [];
 
@@ -482,68 +477,15 @@ class ModelDesignLanding extends Model {
 	}
 
 	/**
-	 * Validates the blog-post fields edited from the builder Page Settings
-	 * (post-owned landings only): translated meta tags and the default-store
-	 * SEO keyword. Mirror of validateOwner() for the blog tables — the keyword
-	 * lives in oc_blog_seo_url, the meta in oc_blog_post_description.
-	 *
-	 * @param array{status?: mixed, descriptions?: mixed} $owner
-	 * @return array<string, string>
-	 */
-	public function validateBlogOwner(array $owner, int $post_id): array {
-		$errors = [];
-
-		$descriptions = isset($owner['descriptions']) && is_array($owner['descriptions']) ? $owner['descriptions'] : [];
-
-		foreach ($this->languageIds() as $language_id) {
-			$row = isset($descriptions[$language_id]) && is_array($descriptions[$language_id]) ? $descriptions[$language_id] : [];
-
-			foreach (['meta_title', 'meta_description', 'meta_keyword'] as $key) {
-				$value = trim(htmlspecialchars((string)($row[$key] ?? ''), ENT_COMPAT, 'UTF-8'));
-
-				if ($this->length($value) > 255) {
-					$errors['owner.' . $key . '.' . $language_id] = $this->text('error_meta_length', 'Meta title, description and keywords must not exceed 255 characters!');
-				}
-			}
-
-			$keyword = trim(htmlspecialchars((string)($row['slug'] ?? ''), ENT_COMPAT, 'UTF-8'));
-
-			if ($keyword !== '' && $this->blogKeywordUsed($keyword, $language_id, $post_id)) {
-				$errors['owner.slug.' . $language_id] = $this->text('error_slug_used', 'SEO keyword is already in use!');
-			}
-		}
-
-		return $errors;
-	}
-
-	/**
-	 * Whether a blog SEO keyword is taken on the default store by anything
-	 * but this blog post (mirrors the blog post form uniqueness check).
-	 */
-	private function blogKeywordUsed(string $keyword, int $language_id, int $post_id): bool {
-		$query = $this->db->query("SELECT seo_url_id FROM `" . DB_PREFIX . "blog_seo_url`
-			WHERE store_id = '0' AND language_id = '" . (int)$language_id . "'
-			AND keyword = '" . $this->db->escape($keyword) . "'
-			AND query <> 'blog_post_id=" . (int)$post_id . "'
-			LIMIT 1");
-
-		return (bool)$query->num_rows;
-	}
-
-	/**
-	 * Which entity owns this landing row, if any: 'information', 'post' or ''.
-	 * An owned landing is its owner's composed body: the owner route alone
-	 * may render it, and its own URL/visibility fields are ignored.
+	 * Which entity owns this landing row, if any: 'information' or ''.
+	 * An information-owned landing is its page's composed body: the owner
+	 * route alone may render it, and its own URL/visibility fields are ignored.
 	 *
 	 * @param array<string, mixed>|false $landing
 	 */
 	public function ownerType($landing): string {
 		if (!is_array($landing)) {
 			return '';
-		}
-
-		if ((int)($landing['post_id'] ?? 0) > 0) {
-			return 'post';
 		}
 
 		if ((int)($landing['information_id'] ?? 0) > 0) {

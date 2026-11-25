@@ -2784,6 +2784,7 @@ class ModelCatalogProduct extends Model
                 "meta_description" => $result["meta_description"],
                 "meta_keyword" => $result["meta_keyword"],
                 "tag" => $result["tag"],
+                "advanced_content" => (string) ($result["advanced_content"] ?? ""),
             ];
         }
 

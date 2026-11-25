@@ -61,12 +61,6 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 			$post_id = $this->model_extension_module_dockercart_blog_post->addPost($post_data);
 
-			// A post saved straight into builder mode gets its owned landing
-			// immediately (idempotent — a later toggle reuses it).
-			if (!empty($post_data['use_builder']) && $this->user->hasPermission('modify', 'design/landing')) {
-				$this->model_extension_module_dockercart_blog_post->enableBuilder($post_id);
-			}
-
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->response->redirect($this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true));
 		}
@@ -108,12 +102,6 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			}
 
 			$this->model_extension_module_dockercart_blog_post->editPost($this->request->get['post_id'], $post_data);
-
-			// The form's hidden use_builder input persists the mode on the
-			// classic save path; make sure the owned landing exists.
-			if (!empty($post_data['use_builder']) && $this->user->hasPermission('modify', 'design/landing')) {
-				$this->model_extension_module_dockercart_blog_post->enableBuilder((int)$this->request->get['post_id']);
-			}
 
 			$this->session->data['success'] = $this->language->get('text_success');
 			$this->response->redirect($this->url->link('extension/module/dockercart_blog_post', 'user_token=' . $this->session->data['user_token'], true));
@@ -260,7 +248,6 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 				'post_id'       => $result['post_id'],
 				'name'          => $result['name'],
 				'name_raw'      => $result['name'],
-				'use_builder'   => empty($result['use_builder']) ? 0 : 1,
 				'category'      => $category_name,
 				'category_id'   => $first_category_id,
 				'author'        => $result['author_name'],
@@ -359,6 +346,8 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 	 * Get post form
 	 */
 	protected function getForm() {
+		$this->load->language('common/description_sections');
+
 		$data['text_form'] = !isset($this->request->get['post_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 		$data['text_form_subtitle'] = !isset($this->request->get['post_id']) ? $this->language->get('text_add_post_subtitle') : $this->language->get('text_edit_post_subtitle');
 
@@ -405,29 +394,6 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 			$post_info = $this->model_extension_module_dockercart_blog_post->getPost($this->request->get['post_id']);
 		}
 
-		// Page Builder mode (the same toggle the information form carries):
-		// the flag persists through the classic form save, the toggle itself
-		// switches instantly through setBuilderMode.
-		if (isset($this->request->post['use_builder'])) {
-			$data['use_builder'] = (int)$this->request->post['use_builder'];
-		} elseif (!empty($post_info)) {
-			$data['use_builder'] = (int)$post_info['use_builder'];
-		} else {
-			$data['use_builder'] = 0;
-		}
-
-		// The builder toggle/link only makes sense for users who may open
-		// design/landing (roles already grant it to content manager/marketer).
-		$data['can_builder'] = $this->user->hasPermission('modify', 'design/landing');
-
-		$builder_landing_id = 0;
-
-		if (isset($this->request->get['post_id'])) {
-			$builder_landing_id = $this->model_extension_module_dockercart_blog_post->getBuilderLandingId((int)$this->request->get['post_id']);
-		}
-
-		$data['builder_landing_id'] = $builder_landing_id;
-		$data['builder_url'] = $builder_landing_id ? $this->url->link('design/landing/builder', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $builder_landing_id, true) : '';
 		$data['post_id'] = isset($this->request->get['post_id']) ? (int)$this->request->get['post_id'] : 0;
 
 		// Load additional models for form data
@@ -550,6 +516,29 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 
 		// Load languages for tabs
 		$data['languages'] = $this->model_localisation_language->getLanguages();
+
+		// Advanced Description shares the catalog section editor. The hidden
+		// JSON is normalised for redisplay here and again at the model boundary.
+		$advanced_state = \Dockercart\Description\Admin::state(
+			$this->language,
+			$data['languages'],
+			(string)($post_info['advanced_description'] ?? ''),
+			$data['post_description'],
+			isset($this->request->post['advanced_description']) ? (string)$this->request->post['advanced_description'] : null,
+			isset($this->request->post['use_advanced_description']) ? !empty($this->request->post['use_advanced_description']) : !empty($post_info['use_advanced_description'])
+		);
+
+		foreach ($advanced_state['advanced_content'] as $language_id => $section_content) {
+			$data['post_description'][$language_id]['advanced_content'] = $section_content;
+		}
+
+		$data['use_advanced_description'] = $advanced_state['use_advanced_description'];
+		$data['advanced_description'] = $advanced_state['advanced_description'];
+		$data['advanced_editor_document'] = $advanced_state['advanced_editor_document'];
+		$data['advanced_description_json'] = $advanced_state['advanced_description_json'];
+		$data['description_editor_config'] = $advanced_state['description_editor_config'];
+		$this->document->addScript('view/javascript/dockercart_description_editor.js');
+		$this->document->addStyle('view/stylesheet/dockercart_description_editor.css');
 
 		// Load stores for SEO URLs
 		// Include default store (store_id = 0) like core controllers
@@ -805,6 +794,29 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		if (!isset($this->request->post['post_description']) || !is_array($this->request->post['post_description']) || !count($this->request->post['post_description'])) {
 			$this->error['warning'] = $this->language->get('error_description');
 		} else {
+			$advanced_by_language = array();
+
+			if (!empty($this->request->post['use_advanced_description'])) {
+				$this->load->model('localisation/language');
+				$languages = $this->model_localisation_language->getLanguages();
+				$normalized = \Dockercart\Description\Admin::posted(
+					(string)($this->request->post['advanced_description'] ?? ''),
+					$languages
+				);
+				$default_language_id = (int)$this->config->get('config_language_id');
+
+				foreach (array_keys($this->request->post['post_description']) as $language_id) {
+					$language_id = (int)$language_id;
+					$sections = \Dockercart\Description\Sections::forView(
+						$normalized['structure'],
+						$normalized['content'],
+						$language_id,
+						$default_language_id
+					);
+					$advanced_by_language[$language_id] = $sections !== [];
+				}
+			}
+
 			// Check individual language fields
 			foreach ($this->request->post['post_description'] as $language_id => $description) {
 				// Validate title
@@ -820,8 +832,8 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 					$this->error['title'][$language_id] = $this->language->get('error_title');
 				}
 
-				// Validate content
-				if (empty($description['content'])) {
+				// Validate content (Advanced Description may replace it).
+				if (empty($description['content']) && empty($advanced_by_language[(int)$language_id])) {
 					if (!isset($this->error['content'])) {
 						$this->error['content'] = array();
 					}
@@ -862,67 +874,6 @@ class ControllerExtensionModuleDockercartBlogPost extends Controller {
 		}
 
 		return !$this->error;
-	}
-
-	public function setBuilderMode() {
-		$this->load->language('extension/module/dockercart_blog_post');
-
-		$json = array();
-
-		if (!$this->user->hasPermission('modify', 'extension/module/dockercart_blog_post')) {
-			$json['error'] = $this->language->get('error_permission');
-		}
-
-		if (!isset($this->request->post['post_id'])) {
-			$json['error'] = 'Invalid request';
-		}
-
-		if (!isset($this->request->post['mode']) || !in_array($this->request->post['mode'], array('classic', 'builder'))) {
-			$json['error'] = 'Invalid request';
-		}
-
-		if (!isset($json['error'])) {
-			$post_id = (int)$this->request->post['post_id'];
-			$mode = $this->request->post['mode'];
-
-			$this->load->model('extension/module/dockercart_blog_post');
-
-			$post_info = $this->model_extension_module_dockercart_blog_post->getPost($post_id);
-
-			if (!$post_info) {
-				$json['error'] = 'Invalid request';
-			} else {
-				$builder_landing_id = 0;
-
-				if ($mode === 'builder') {
-					if (!$this->user->hasPermission('modify', 'design/landing')) {
-						$json['error'] = $this->language->get('error_permission');
-					} else {
-						// Creates the owned landing on first use, seeded with
-						// the classic WYSIWYG copy (one text block per language).
-						$builder_landing_id = $this->model_extension_module_dockercart_blog_post->enableBuilder($post_id);
-					}
-				}
-
-				if (!isset($json['error'])) {
-					// Switching back keeps the composed sections stored: they
-					// act as the fallback when the builder is re-enabled.
-					$this->model_extension_module_dockercart_blog_post->setBuilderMode($post_id, $mode === 'builder' ? 1 : 0);
-
-					if ($mode === 'classic') {
-						$builder_landing_id = $this->model_extension_module_dockercart_blog_post->getBuilderLandingId($post_id);
-					}
-
-					$json['success'] = $this->language->get('text_success_builder_mode');
-					$json['use_builder'] = $mode === 'builder' ? 1 : 0;
-					$json['builder_landing_id'] = $builder_landing_id;
-					$json['builder_url'] = $builder_landing_id ? $this->url->link('design/landing/builder', 'user_token=' . $this->session->data['user_token'] . '&landing_id=' . $builder_landing_id, true) : '';
-				}
-			}
-		}
-
-		$this->response->addHeader('Content-Type: application/json');
-		$this->response->setOutput(json_encode($json));
 	}
 
 	public function updateField() {

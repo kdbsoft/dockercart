@@ -12,7 +12,7 @@
  * @version    1.0.3
  */
 
-use Dockercart\Landing\Blocks;
+use Dockercart\Description\Sections;
 use Dockercart\ManticoreClient;
 
 class ModelExtensionModuleDockercartSearch extends Model {
@@ -25,6 +25,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
 
     private $manticore;
     private $last_error = '';
+    private $blog_default_language_id = 0;
 
     /**
      * Get Manticore client instance
@@ -900,8 +901,8 @@ class ModelExtensionModuleDockercartSearch extends Model {
         $manticore = $this->getManticore();
 
         $query = $this->db->query("
-            SELECT bp.*, bpd.name, bpd.description, bpd.content, bpd.meta_title,
-                   bpd.meta_description, bpd.meta_keyword, ba.name AS author_name
+            SELECT bp.*, bpd.name, bpd.description, bpd.content, bpd.advanced_content,
+                   bpd.meta_title, bpd.meta_description, bpd.meta_keyword, ba.name AS author_name
             FROM " . DB_PREFIX . "blog_post bp
             LEFT JOIN " . DB_PREFIX . "blog_post_description bpd
                 ON (bp.post_id = bpd.post_id AND bpd.language_id = '" . (int)$language_id . "')
@@ -943,13 +944,12 @@ class ModelExtensionModuleDockercartSearch extends Model {
             $categories[] = (string)$row['name'];
         }
 
-        // A builder-composed article keeps its classic WYSIWYG content only as
-        // a fallback: the searchable text is what the composed blocks say.
-        $builder_content = '';
-
-        if (!empty($post['use_builder'])) {
-            $builder_content = $this->builderPostContent((int)$post_id, (int)$language_id);
-        }
+        // Keep the classic WYSIWYG copy searchable (cards/fallback) and add
+        // the visible Advanced Description text. Migrated Builder articles
+        // rely on the latter because their classic copy was only a seed.
+        $classic_content = strip_tags(html_entity_decode((string)($post['content'] ?? ''), ENT_QUOTES, 'UTF-8'));
+        $advanced_content = $this->advancedBlogText($post, (int)$language_id);
+        $search_content = trim($classic_content . ' ' . $advanced_content);
 
         $doc = [
             'id'               => (int)$post_id * 100 + (int)$language_id,
@@ -964,9 +964,7 @@ class ModelExtensionModuleDockercartSearch extends Model {
             'date_modified'    => strtotime((string)$post['date_modified']) ?: 0,
             'title'            => (string)($post['name'] ?? ''),
             'excerpt'          => strip_tags(html_entity_decode((string)($post['description'] ?? ''), ENT_QUOTES, 'UTF-8')),
-            'content'          => $builder_content !== ''
-                ? $builder_content
-                : strip_tags(html_entity_decode((string)($post['content'] ?? ''), ENT_QUOTES, 'UTF-8')),
+            'content'          => $search_content,
             'meta_title'       => (string)($post['meta_title'] ?? ''),
             'meta_description' => (string)($post['meta_description'] ?? ''),
             'meta_keywords'    => (string)($post['meta_keyword'] ?? ''),
@@ -986,35 +984,52 @@ class ModelExtensionModuleDockercartSearch extends Model {
     }
 
     /**
-     * Plain-text rendition of a builder-composed article: the localised block
-     * fields of its owned landing, concatenated in block order. The raw `html`
-     * block is skipped — it stores embed/analytics markup, not copy.
+     * Plain text from the post's Advanced Description, with the same
+     * default-language fallback as the storefront renderer.
      *
-     * @param int $post_id
-     * @param int $language_id
-     * @return string
+     * @param array<string, mixed> $post
      */
-    private function builderPostContent($post_id, $language_id) {
-        $query = $this->db->query("
-            SELECT lbd.content
-            FROM " . DB_PREFIX . "landing_block lb
-            INNER JOIN " . DB_PREFIX . "landing l ON (l.landing_id = lb.landing_id AND l.post_id = '" . (int)$post_id . "')
-            LEFT JOIN " . DB_PREFIX . "landing_block_description lbd ON (lbd.block_id = lb.block_id AND lbd.language_id = '" . (int)$language_id . "')
-            WHERE lb.status = '1' AND lb.code <> 'html'
-            ORDER BY lb.sort_order ASC, lb.block_id ASC
-        ");
+    private function advancedBlogText(array $post, int $language_id): string {
+        if (empty($post['use_advanced_description'])) {
+            return '';
+        }
 
-        $parts = [];
+        $structure = json_decode((string)($post['advanced_description'] ?? ''), true);
+        $content = json_decode((string)($post['advanced_content'] ?? ''), true);
 
-        foreach ($query->rows as $row) {
-            $text = Blocks::plainTextFromContent((string)($row['content'] ?? ''));
+        if (!is_array($structure) || !is_array($content)) {
+            return '';
+        }
 
-            if ($text !== '') {
-                $parts[] = $text;
+        $default_language_id = $this->blogDefaultLanguageId();
+        $localized = [$language_id => $content];
+
+        if ($default_language_id !== $language_id) {
+            $fallback = $this->db->query("
+                SELECT advanced_content FROM " . DB_PREFIX . "blog_post_description
+                WHERE post_id = '" . (int)$post['post_id'] . "'
+                AND language_id = '" . $default_language_id . "'
+            ")->row;
+            $decoded = json_decode((string)($fallback['advanced_content'] ?? ''), true);
+
+            if (is_array($decoded)) {
+                $localized[$default_language_id] = $decoded;
             }
         }
 
-        return implode(' ', $parts);
+        return Sections::plainText(Sections::forView($structure, $localized, $language_id, $default_language_id));
+    }
+
+    private function blogDefaultLanguageId(): int {
+        if ($this->blog_default_language_id > 0) {
+            return $this->blog_default_language_id;
+        }
+
+        $code = (string)$this->config->get('config_language');
+        $row = $this->db->query("SELECT language_id FROM " . DB_PREFIX . "language WHERE code = '" . $this->db->escape($code) . "' LIMIT 1")->row;
+        $this->blog_default_language_id = (int)($row['language_id'] ?? $this->config->get('config_language_id'));
+
+        return $this->blog_default_language_id;
     }
 
     /**

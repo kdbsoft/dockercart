@@ -110,13 +110,17 @@ final class BlogPost {
 		$output = [];
 
 		foreach ($descriptions as $language_id => $description) {
-			foreach (['title', 'excerpt', 'content', 'meta_title', 'meta_description', 'meta_keyword'] as $field) {
+			$clean = [];
+
+			foreach (['title', 'excerpt', 'content', 'meta_title', 'meta_description', 'meta_keyword', 'tags'] as $field) {
 				if (isset($description[$field])) {
-					$description[$field] = Serializer::decodeText($description[$field]);
+					$clean[$field] = $field === 'tags'
+						? (string)$description[$field]
+						: Serializer::decodeText($description[$field]);
 				}
 			}
 
-			$output[$this->languages->code((int)$language_id)] = $description;
+			$output[$this->languages->code((int)$language_id)] = $clean;
 		}
 
 		return $output;

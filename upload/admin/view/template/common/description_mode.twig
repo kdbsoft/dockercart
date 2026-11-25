@@ -1,0 +1,25 @@
+{#
+	Advanced Description: mode switcher shared by the product, category and
+	manufacturer forms. It sits above the language tabs exactly like the
+	information/blog Page Builder toolbar; the flat 0/1 flag is posted with
+	the ordinary entity form. The editor itself lives inside the active
+	language tab pane (see common/description_editor.twig).
+#}
+<div class="dc-opts-toolbar dc-ad-mode-selector" data-description-mode-root>
+	<span data-description-mode-label class="label {% if use_advanced_description %}label-primary{% else %}label-default{% endif %}">
+		<i data-lucide="circle" width="10" height="10"></i>
+		{% if use_advanced_description %}{{ text_mode_advanced }}{% else %}{{ text_mode_classic }}{% endif %}
+	</span>
+	<button type="button" data-description-mode-toggle class="btn btn-xs btn-default">
+		{% if use_advanced_description %}
+			<i data-lucide="arrow-left" width="13" height="13"></i> {{ text_mode_classic }}
+		{% else %}
+			{{ text_mode_advanced }} <i data-lucide="arrow-right" width="13" height="13"></i>
+		{% endif %}
+	</button>
+	<span class="dc-opts-toolbar__label" data-description-mode-hint>
+		{% if use_advanced_description %}{{ text_classic_description_hint }}{% else %}{{ text_advanced_description_hint }}{% endif %}
+	</span>
+	<span class="dc-opts-toolbar__spacer"></span>
+	<input type="hidden" name="use_advanced_description" value="{{ use_advanced_description ? 1 : 0 }}" />
+</div>

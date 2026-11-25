@@ -83,14 +83,15 @@ Tailwind utilities so the built output stays in sync.
   it strips `DEFINER=...` and the `config_encryption` value; creates a `.bak.*` first).
   **Do not edit `init.sql` by hand** — it is a generated dump, always regenerated from a
   live DB with `make dump-init`. Apply changes via migrations instead.
-- Migrations: `docker/mysql/migrations/YYYYMMDD_short_description.sql`.
+- Migrations: `docker/mysql/migrations/YYYYMMDD_short_description.sql`. An optional
+  same-name `.php` file is a data migration, executed immediately after the SQL and
+  tracked under its own filename in `oc_schema_migrations`.
 - Migrations **must be idempotent** (`CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`)
   and use `ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`.
-- Apply migrations with `make migrate` — runs against a **running** `mariadb` container, so
-  `make start` first. **`make migrate` does NOT track applied migrations** — it re-runs every
-  `*.sql` file each time, so it depends entirely on the idempotency rule above.
-  `make update` (→ `update.sh`) instead records applied files in `oc_schema_migrations`
-  and skips repeats; use it for normal upgrades.
+- Apply migrations with `make start` (entrypoint) or `make migrate` (running `mariadb`
+  container). Both use `scripts/run-migrations.sh`, which records applied SQL/data files
+  in `oc_schema_migrations` and skips repeats. `make update` uses the same protocol in
+  `update.sh`; use it for normal upgrades.
 - DB CLI: `make mariadb`. Backup/restore: `make backup`, `make restore`.
 - Configurable product variants use a denormalized `oc_product_variant.variant_hash`
   column (unique per `product_id`) for O(1) `resolveVariant()` lookups. The hash is
@@ -118,9 +119,11 @@ Tailwind utilities so the built output stays in sync.
 ## Landing pages (drag & drop sections)
 
 - **Advanced Description is a separate lightweight subsystem** for product,
-  category and manufacturer description slots — it does not use `oc_landing`
-  or the Page Builder. Its six section types, presets and normalisation live
-  in `Dockercart\Description\Sections`; see `docs/guide.md` §24.
+  category, manufacturer and blog post description slots — it does not use
+  `oc_landing` or the Page Builder. Its six section types, presets and normalisation
+  live in `Dockercart\Description\Sections`; see `docs/guide.md` §24. Blog posts no
+  longer have a Page Builder mode: the one-time data migration converts old
+  post-owned landings before removing the legacy columns.
 
 - `design/landing` builds ad-hoc pages from **sections**, not from layout zones.
   `upload/system/library/dockercart/landing/blocks.php` (`Dockercart\Landing\Blocks`)
@@ -284,7 +287,9 @@ Tailwind utilities so the built output stays in sync.
   `extension/module/dockercart_blog_post_form.twig`; the module
   `view/javascript/dockercart_autosave.js` is loaded by that form's controller).
   The browser re-posts the form to its own action once a minute — there is **no**
-  autosave branch in the controller. Nothing global is wired: the shared header
+  autosave branch in the controller. The payload includes the Advanced Description
+  mode flag and hidden section JSON as well as the classic TinyMCE content.
+  Nothing global is wired: the shared header
   and the Settings page are untouched, so a second form must not silently opt in
   (`tools/tests/cases/admin_autosave.php` enforces the single-template rule).
 - Switch: `module_dockercart_blog_post_autosave` in the blog settings

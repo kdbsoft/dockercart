@@ -6,6 +6,10 @@
  * templates. State lives in one editor document; a hidden input serialises
  * it for the ordinary entity-form POST. The server normalises it through
  * Dockercart\Description\Sections before anything is stored.
+ *
+ * The mode toolbar lives above the language tabs; the editor itself is
+ * moved into the active tab pane, so the composition and the translated
+ * classic copy are edited in the same place.
  */
 (function () {
 	'use strict';
@@ -15,18 +19,51 @@
 		var labels = config.labels || {};
 		var languages = config.languages || [];
 		var state = JSON.parse(root.getAttribute('data-document') || '{"sections":[]}');
-		var activeLanguage = parseInt(root.getAttribute('data-active-language'), 10) || (languages[0] ? languages[0].id : 0);
-		var modeToggle = root.querySelector('[data-description-mode-toggle]');
-		var modeLabel = root.querySelector('[data-description-mode-label]');
-		var modeInput = root.querySelector('input[name="use_advanced_description"]');
-		var workspace = root.querySelector('[data-description-workspace]');
+		var modeRoot = document.querySelector('[data-description-mode-root]');
+		var modeToggle = modeRoot ? modeRoot.querySelector('[data-description-mode-toggle]') : null;
+		var modeLabel = modeRoot ? modeRoot.querySelector('[data-description-mode-label]') : null;
+		var modeHint = modeRoot ? modeRoot.querySelector('[data-description-mode-hint]') : null;
+		var modeInput = modeRoot ? modeRoot.querySelector('input[name="use_advanced_description"]') : null;
 		var sectionsRoot = root.querySelector('[data-description-sections]');
 		var hidden = root.querySelector('input[name="advanced_description"]');
+		var templatesRoot = root.querySelector('[data-description-templates]');
 		var templateCards = root.querySelector('[data-description-template-cards]');
+		var templatesToggle = root.querySelector('[data-description-templates-toggle]');
+		var sectionCount = root.querySelector('[data-description-count]');
 		var addToggle = root.querySelector('[data-description-add-toggle]');
 		var addPanel = root.querySelector('[data-description-add-panel]');
 		var addCards = root.querySelector('[data-description-add-cards]');
+		var templatesOpen = false;
 		var imageSequence = 0;
+		// Stored image paths are relative to the catalog image folder, exactly
+		// as in the landing builder. Absolute URLs stay untouched.
+		var imageBase = config.image_base || '';
+
+		function imageUrl(path) {
+			var value = String(path || '');
+
+			if (value === '' || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(value)) return value;
+
+			return imageBase + value;
+		}
+
+		// The shared editor is rendered in the first language pane. Move it to
+		// whichever pane Bootstrap activated before any TinyMCE instance starts.
+		function placeEditorInActivePane() {
+			var link = document.querySelector('#language li.active a[href^="#language"]')
+				|| document.querySelector('#language a.active[href^="#language"]');
+			var pane = link ? document.querySelector(link.getAttribute('href')) : root.closest('.tab-pane');
+			var slot = pane ? pane.querySelector('[data-description-slot]') : null;
+
+			if (slot && root.parentNode !== slot) slot.appendChild(root);
+
+			return pane;
+		}
+
+		var activePane = placeEditorInActivePane();
+		var activeLanguage = parseInt((activePane && activePane.id || '').replace('language', ''), 10)
+			|| parseInt(root.getAttribute('data-active-language'), 10)
+			|| (languages[0] ? languages[0].id : 0);
 
 		function t(key, fallback) {
 			return labels[key] || fallback || key;
@@ -64,12 +101,80 @@
 		}
 
 		function updateSectionChoiceState() {
-			var atLimit = (state.sections || []).length >= (config.max_sections || 10);
+			var count = (state.sections || []).length;
+			var atLimit = count >= (config.max_sections || 10);
+
+			if (sectionCount) sectionCount.textContent = count + ' / ' + (config.max_sections || 10);
 
 			addCards.querySelectorAll('[data-description-add-type]').forEach(function (button) {
 				button.classList.toggle('is-disabled', atLimit);
 				button.setAttribute('aria-disabled', atLimit ? 'true' : 'false');
 			});
+		}
+
+		function setTemplatesOpen(open) {
+			templatesOpen = open;
+			templatesRoot.hidden = !open;
+			templateCards.hidden = !open;
+			if (templatesToggle) templatesToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+		}
+
+		function updateTemplateState() {
+			var hasSections = (state.sections || []).length > 0;
+
+			if (templatesToggle) templatesToggle.hidden = !hasSections;
+			if (!hasSections) setAddSectionOpen(false);
+			setTemplatesOpen(!hasSections || templatesOpen);
+		}
+
+		// Same pattern as the optional blocks in the product form: a plain
+		// Show/Hide button and an ordinary dcx-field that is toggled with it.
+		function setClassicCopy(body, open) {
+			body.style.display = open ? '' : 'none';
+
+			var toggle = document.querySelector('[data-description-classic-toggle][aria-controls="' + body.id + '"]');
+			if (!toggle) return;
+
+			var wrapper = toggle.closest('.dc-ad-classic-field');
+			if (wrapper && wrapper.hidden) return;
+
+			toggle.hidden = false;
+			toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+			var text = toggle.querySelector('[data-description-classic-toggle-text]');
+			if (text) {
+				text.textContent = open
+					? t('button_hide_classic_description', 'Hide classic description')
+					: t('button_show_classic_description', 'Show classic description');
+			}
+
+			var icon = toggle.querySelector('i[data-lucide], svg[data-lucide]');
+			if (icon) {
+				var replacement = document.createElement('i');
+				replacement.setAttribute('data-lucide', open ? 'toggle-right' : 'toggle-left');
+				replacement.setAttribute('width', '14');
+				replacement.setAttribute('height', '14');
+				icon.replaceWith(replacement);
+				if (window.lucide) lucide.createIcons({ nodes: [toggle] });
+			}
+		}
+
+		function updateClassicCopy(advanced) {
+			document.querySelectorAll('[data-description-classic-body]').forEach(function (body) {
+				var toggle = document.querySelector('[data-description-classic-toggle][aria-controls="' + body.id + '"]');
+				var wrapper = toggle ? toggle.closest('.dc-ad-classic-field') : null;
+				if (wrapper) wrapper.hidden = !advanced;
+
+				setClassicCopy(body, !advanced);
+			});
+		}
+
+		function onClassicToggleClick(event) {
+			var toggle = event.target.closest('[data-description-classic-toggle]');
+			if (!toggle) return;
+
+			var body = document.getElementById(toggle.getAttribute('aria-controls'));
+			if (body) setClassicCopy(body, body.style.display === 'none');
 		}
 
 		function ensureSectionShape(section) {
@@ -135,6 +240,7 @@
 			}
 
 			serialize();
+			updateTemplateState();
 
 			if (window.lucide) lucide.createIcons();
 			if (window.jQuery) jQuery(sectionsRoot).find('[data-toggle="tooltip"]').tooltip();
@@ -185,6 +291,25 @@
 				return '<fieldset class="dc-ad-field dc-ad-columns-field"><legend>' + esc(field.label || field.key) + '</legend>' + control + '</fieldset>';
 			}
 
+			// Banner-style segmented control: native radios with Lucide icons
+			// instead of a select (left/right image position).
+			if (field.type === 'select' && field.ui === 'icons') {
+				control = '<div class="dc-ad-position-group">';
+
+				Object.keys(field.options || {}).forEach(function (option) {
+					var optionId = id + '-' + option;
+					var icon = (field.icons || {})[option] || 'align-start-vertical';
+
+					control += '<label class="dc-ad-position-group__option" for="' + esc(optionId) + '">' +
+						'<input type="radio" id="' + esc(optionId) + '" name="' + esc(id) + '" class="dc-ad-position-group__input" value="' + esc(option) + '" data-description-path="' + path + '"' + (String(value) === option ? ' checked' : '') + ' />' +
+						'<i data-lucide="' + esc(icon) + '" width="14" height="14" aria-hidden="true"></i>' +
+						'<span class="dc-ad-position-group__text">' + esc((field.options || {})[option]) + '</span></label>';
+				});
+
+				control += '</div>';
+				return '<fieldset class="dc-ad-field dc-ad-position-field"><legend>' + esc(field.label || field.key) + '</legend>' + control + '</fieldset>';
+			}
+
 			if (field.type === 'select') {
 				control = '<select id="' + id + '" class="form-control" data-description-path="' + path + '">';
 				Object.keys(field.options || {}).forEach(function (option) {
@@ -208,7 +333,7 @@
 			imageSequence++;
 			var inputId = id + '-image-' + imageSequence;
 			var thumbId = id + '-thumb-' + imageSequence;
-			var preview = value ? '<img src="' + esc(value) + '" alt=""  />' : '<span class="text-xs text-gray-400">—</span>';
+			var preview = value ? '<img src="' + esc(imageUrl(value)) + '" alt=""  />' : '<span class="text-xs text-gray-400">—</span>';
 
 			return '<div class="dc-ad-image" data-description-image-wrap>' +
 				'<input type="hidden" id="' + inputId + '" value="' + esc(value) + '" data-description-image-input data-description-path="' + path + '" />' +
@@ -428,14 +553,24 @@
 		function setMode(value) {
 			var advanced = value === '1';
 
-			modeInput.value = advanced ? 1 : 0;
-			modeLabel.className = 'label ' + (advanced ? 'label-primary' : 'label-default');
-			modeLabel.innerHTML = '<i data-lucide="circle" width="10" height="10"></i> ' + (advanced ? t('text_mode_advanced') : t('text_mode_classic'));
-			modeToggle.innerHTML = advanced
-				? '<i data-lucide="arrow-left" width="13" height="13"></i> ' + t('text_switch_to_classic')
-				: t('text_switch_to_advanced') + ' <i data-lucide="arrow-right" width="13" height="13"></i>';
+			if (modeInput) modeInput.value = advanced ? 1 : 0;
+			if (modeLabel) {
+				modeLabel.className = 'label ' + (advanced ? 'label-primary' : 'label-default');
+				modeLabel.innerHTML = '<i data-lucide="circle" width="10" height="10"></i> ' + (advanced ? t('text_mode_advanced') : t('text_mode_classic'));
+			}
+			if (modeToggle) {
+				modeToggle.innerHTML = advanced
+					? '<i data-lucide="arrow-left" width="13" height="13"></i> ' + t('text_mode_classic')
+					: t('text_mode_advanced') + ' <i data-lucide="arrow-right" width="13" height="13"></i>';
+			}
+			if (modeHint) {
+				modeHint.textContent = advanced
+					? t('text_classic_description_hint')
+					: t('text_advanced_description_hint');
+			}
 
-			workspace.style.display = advanced ? '' : 'none';
+			root.style.display = advanced ? '' : 'none';
+			updateClassicCopy(advanced);
 
 			if (advanced) {
 				render();
@@ -467,7 +602,16 @@
 			if (!button) return;
 
 			if (button.hasAttribute('data-description-add-toggle')) {
-				setAddSectionOpen(addPanel.hidden);
+				var openAdd = addPanel.hidden;
+				setTemplatesOpen(false);
+				setAddSectionOpen(openAdd);
+				return;
+			}
+
+			if (button.hasAttribute('data-description-templates-toggle')) {
+				var openTemplates = !templatesOpen;
+				setAddSectionOpen(false);
+				setTemplatesOpen(openTemplates);
 				return;
 			}
 
@@ -492,6 +636,7 @@
 					return;
 				}
 				state.sections.push(makeSection(button.getAttribute('data-description-add-type')));
+				setTemplatesOpen(false);
 				render();
 				initRichText();
 			} else if (button.hasAttribute('data-description-template')) {
@@ -500,6 +645,7 @@
 				if (preset) {
 					state = JSON.parse(JSON.stringify(preset));
 					state.sections.forEach(ensureSectionShape);
+					setTemplatesOpen(false);
 					render();
 					initRichText();
 					setAddSectionOpen(false);
@@ -556,7 +702,7 @@
 						var input = document.getElementById(targetId);
 						var thumb = document.getElementById(thumbId);
 						if (input && input.value) {
-							if (thumb) thumb.innerHTML = '<img src="' + esc(input.value) + '" alt=""  />';
+							if (thumb) thumb.innerHTML = '<img src="' + esc(imageUrl(input.value)) + '" alt=""  />';
 							input.dispatchEvent(new Event('change', { bubbles: true }));
 						}
 					});
@@ -564,9 +710,13 @@
 			});
 		}
 
-		modeToggle.addEventListener('click', function () {
-			setMode(modeInput.value === '1' ? '0' : '1');
-		});
+		if (modeToggle) {
+			modeToggle.addEventListener('click', function () {
+				setMode(modeInput && modeInput.value === '1' ? '0' : '1');
+			});
+		}
+
+		document.addEventListener('click', onClassicToggleClick);
 
 		function refreshLanguage(previousLanguage) {
 			var previousMarker = '.content.' + previousLanguage + '.';
@@ -593,7 +743,7 @@
 
 					if (thumb) {
 						thumb.innerHTML = value
-							? '<img src="' + esc(value) + '" alt="" />'
+							? '<img src="' + esc(imageUrl(value)) + '" alt="" />'
 							: '<span class="text-xs text-gray-400">—</span>';
 					}
 				} else if (control.matches('textarea[data-description-richtext]') && window.tinymce) {
@@ -620,6 +770,7 @@
 
 			if (window.tinymce) tinymce.triggerSave();
 
+			placeEditorInActivePane();
 			var previousLanguage = activeLanguage;
 			activeLanguage = languageId;
 			root.setAttribute('data-active-language', String(languageId));
@@ -635,7 +786,7 @@
 		buildTemplates();
 		buildSectionChoices();
 		setAddSectionOpen(false);
-		setMode(modeInput.value);
+		setMode(modeInput ? modeInput.value : '0');
 
 		if (window.lucide) lucide.createIcons();
 	}

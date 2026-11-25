@@ -49,13 +49,13 @@
           </div>
         </div>
         <div class="dcx-panel-body">
+          {% include 'common/description_mode.twig' %}
           <div class="dc-lang-frame">
           <ul class="nav nav-tabs" id="language">
             {% for language in languages %}
             <li><a href="#language{{ language.language_id }}" data-toggle="tab"><span class="lang-code">{{ language.code|split('-')|first|upper }}</span> {{ language.name }}</a></li>
             {% endfor %}
           </ul>
-          {% include 'common/description_editor.twig' %}
           <div class="tab-content">
             {% for language in languages %}
             <div class="tab-pane" id="language{{ language.language_id }}">
@@ -67,10 +67,18 @@
                 <div class="text-danger">{{ error_name[language.language_id] }}</div>
                 {% endif %}
               </div>
-              <div class="dcx-field">
+              <div class="dc-ad-slot" data-description-slot="{{ language.language_id }}">
+                {% if loop.first %}{% include 'common/description_editor.twig' %}{% endif %}
+              </div>
+              <div class="dcx-field dc-ad-classic-field"{% if not use_advanced_description %} hidden{% endif %}>
+                <button type="button" class="btn btn-default btn-sm dc-ad-classic-toggle" data-description-classic-toggle aria-controls="classic-description-{{ language.language_id }}" aria-expanded="{{ use_advanced_description ? 'false' : 'true' }}"{% if not use_advanced_description %} hidden{% endif %}>
+                  <i data-lucide="{{ use_advanced_description ? 'toggle-left' : 'toggle-right' }}" width="14" height="14"></i>
+                  <span data-description-classic-toggle-text>{{ use_advanced_description ? description_editor_config.labels.button_show_classic_description : description_editor_config.labels.button_hide_classic_description }}</span>
+                </button>
+              </div>
+              <div class="dcx-field dc-ad-classic-body" id="classic-description-{{ language.language_id }}" data-description-classic-body{% if use_advanced_description %} style="display:none"{% endif %}>
                 <label class="dcx-label" for="input-description{{ language.language_id }}">{{ entry_description }}</label>
                 <textarea name="category_description[{{ language.language_id }}][description]" placeholder="{{ entry_description }}" id="input-description{{ language.language_id }}" data-toggle="tinymce" class="form-control">{{ category_description[language.language_id] ? category_description[language.language_id].description }}</textarea>
-                <p class="text-xs text-gray-400 mt-1">{{ text_classic_description_hint }}</p>
               </div>
               <div class="dcx-field required">
                 <label class="dcx-label" for="input-meta-title{{ language.language_id }}">{{ entry_meta_title }}</label>

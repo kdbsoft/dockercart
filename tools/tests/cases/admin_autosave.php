@@ -110,6 +110,13 @@ return [
 		Assert::contains('data-autosave-saved=', $template);
 		Assert::contains('data-autosave-failed=', $template);
 		Assert::contains('data-autosave-pending=', $template);
+		Assert::contains("include 'common/description_mode.twig'", $template, 'the mode flag is serialized with the autosaved form');
+		Assert::contains("include 'common/description_editor.twig'", $template, 'the section JSON is serialized with the autosaved form');
+
+		$mode = repo_file('upload/admin/view/template/common/description_mode.twig');
+		$editor = repo_file('upload/admin/view/template/common/description_editor.twig');
+		Assert::contains('name="use_advanced_description"', $mode);
+		Assert::contains('name="advanced_description"', $editor);
 	},
 
 	'controller: the post form wires the switch, the cadence and the labels' => static function (): void {

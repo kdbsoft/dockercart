@@ -81,9 +81,9 @@ $_['button_select_category'] = 'Select Categories';
 
 // Error
 $_['error_permission']     = 'Warning: You do not have permission to modify blog posts!';
-$_['error_description']    = 'Warning: Post content is required!';
+$_['error_description']    = 'Warning: Post description is required!';
 $_['error_title']          = 'Warning: Post title must be between 1 and 255 characters!';
-$_['error_content']        = 'Warning: Post content is required!';
+$_['error_content']        = 'Warning: Add article content or an Advanced Description section!';
 $_['error_category']           = 'Warning: Please select a category!';
 $_['error_author']             = 'Warning: Please select an author!';
 $_['error_invalid_sort_order'] = 'Warning: Sort order must be a non-negative number!';
@@ -117,15 +117,22 @@ $_['text_autosave_saving']      = 'Saving...';
 $_['text_autosave_saved']       = 'Autosaved at %s';
 $_['text_autosave_failed']      = 'Not saved:';
 
-// Page builder (blog article as a landing page)
-$_['text_mode_builder']        = 'Page Builder';
-$_['text_mode_classic']        = 'Classic Editor';
-$_['text_switch_to_builder']   = 'Switch to Page Builder';
-$_['text_switch_to_classic']   = 'Switch to Classic Editor';
-$_['text_success_builder_mode'] = 'Content mode updated.';
-$_['button_open_builder']      = 'Open in Builder';
-$_['text_builder_cta_hint']    = 'The article is composed from sections in the builder.';
-$_['text_builder_pending']     = 'Save the article to enable the builder — the current text will be carried over automatically.';
-$_['text_builder_badge']       = 'Builder';
-$_['text_builder_badge_hint']  = 'The article is composed from sections in the Builder.';
+// Advanced Description (lightweight article sections)
+$_['text_advanced_description'] = 'Advanced Description';
+$_['text_mode_classic'] = 'Classic description';
+$_['text_mode_advanced'] = 'Advanced Description';
+$_['text_classic_description_hint'] = 'Used for search and article snippets. It is also the fallback when Advanced Description is off.';
+$_['text_advanced_description_hint'] = 'Compose the article description from ready-made sections. The article page itself stays unchanged.';
+$_['text_add_section'] = 'Add section';
+$_['text_empty_sections'] = 'No sections yet. Choose a template or add a section.';
+$_['text_move_up'] = 'Move up';
+$_['text_move_down'] = 'Move down';
+$_['text_remove_section'] = 'Remove section';
+$_['text_add_row'] = 'Add row';
+$_['text_remove_row'] = 'Remove row';
+$_['text_select_image'] = 'Select image';
+$_['text_remove_image'] = 'Remove';
+$_['text_confirm_template'] = 'Replace the current sections with this template?';
+$_['text_section_limit'] = 'The maximum number of sections has been reached.';
+$_['text_row_limit'] = 'The maximum number of rows has been reached.';
 

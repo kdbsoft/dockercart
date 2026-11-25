@@ -88,9 +88,21 @@ final class Sections {
 		'center' => 'option_align_center',
 	];
 
+	/** Lucide names of the banner-style segmented control for text alignment. */
+	private const ALIGN_ICONS = [
+		'left'   => 'align-start-vertical',
+		'center' => 'align-center-vertical',
+	];
+
 	private const POSITION_OPTIONS = [
 		'left'  => 'option_position_left',
 		'right' => 'option_position_right',
+	];
+
+	/** Lucide names of the banner-style segmented control for image_position. */
+	private const POSITION_ICONS = [
+		'left'  => 'align-start-vertical',
+		'right' => 'align-end-vertical',
 	];
 
 	private const COLUMNS_OPTIONS = [
@@ -120,7 +132,7 @@ final class Sections {
 			'fields' => [
 				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
 				['key' => 'body', 'type' => 'richtext', 'localized' => true, 'label' => 'field_body', 'default' => ''],
-				['key' => 'align', 'type' => 'select', 'localized' => false, 'label' => 'field_align', 'default' => 'left', 'options' => self::ALIGN_OPTIONS],
+				['key' => 'align', 'type' => 'select', 'localized' => false, 'label' => 'field_align', 'default' => 'left', 'options' => self::ALIGN_OPTIONS, 'ui' => 'icons', 'icons' => self::ALIGN_ICONS],
 			],
 		],
 		'text_image' => [
@@ -130,7 +142,7 @@ final class Sections {
 				['key' => 'heading', 'type' => 'text', 'localized' => true, 'label' => 'field_heading', 'default' => '', 'max' => 200],
 				['key' => 'body', 'type' => 'richtext', 'localized' => true, 'label' => 'field_body', 'default' => ''],
 				['key' => 'image', 'type' => 'image', 'localized' => false, 'label' => 'field_image', 'default' => ''],
-				['key' => 'position', 'type' => 'select', 'localized' => false, 'label' => 'field_position', 'default' => 'right', 'options' => self::POSITION_OPTIONS],
+				['key' => 'position', 'type' => 'select', 'localized' => false, 'label' => 'field_position', 'default' => 'right', 'options' => self::POSITION_OPTIONS, 'ui' => 'icons', 'icons' => self::POSITION_ICONS],
 			],
 		],
 		'features' => [
@@ -675,9 +687,11 @@ final class Sections {
 	 * @param string $stored_structure_json the stored advanced_description column
 	 * @param array<int, array<string, mixed>> $stored_descriptions language_id => stored description row
 	 * @param int $stored_use the stored use_advanced_description flag
+	 * @param string $classic_key per-language field carrying the classic body
+	 *        (`description` for catalog entities, `content` for blog posts)
 	 * @return array{0: int, 1: string, 2: array<int, string>} flag, structure JSON, per-language content JSON
 	 */
-	public static function resolveSave(array $data, string $descriptions_key, string $stored_structure_json = '', array $stored_descriptions = [], int $stored_use = 0): array {
+	public static function resolveSave(array $data, string $descriptions_key, string $stored_structure_json = '', array $stored_descriptions = [], int $stored_use = 0, string $classic_key = 'description'): array {
 		$use = array_key_exists('use_advanced_description', $data)
 			? !empty($data['use_advanced_description'])
 			: $stored_use === 1;
@@ -752,7 +766,11 @@ final class Sections {
 			$language_ids = [];
 
 			foreach ((array)($data[$descriptions_key] ?? []) as $language_id => $value) {
-				$bodies[(int)$language_id] = (string)(is_array($value) ? ($value['description'] ?? '') : '');
+				$bodies[(int)$language_id] = html_entity_decode(
+					(string)(is_array($value) ? ($value[$classic_key] ?? '') : ''),
+					ENT_QUOTES | ENT_HTML5,
+					'UTF-8'
+				);
 				$language_ids[] = (int)$language_id;
 			}
 
@@ -782,6 +800,41 @@ final class Sections {
 		}
 
 		return [$use ? 1 : 0, $structure_json, $content_json];
+	}
+
+	/**
+	 * Plain-text rendition of view-ready sections for full-text indexing.
+	 * Only copy fields are collected; image paths and editor metadata are not.
+	 *
+	 * @param array<int, array<string, mixed>> $sections Sections::forView() rows
+	 */
+	public static function plainText(array $sections): string {
+		$parts = [];
+
+		foreach ($sections as $section) {
+			$content = (array)($section['content'] ?? []);
+
+			foreach (['heading', 'body', 'text', 'footnote'] as $key) {
+				if ((string)($content[$key] ?? '') !== '') {
+					$parts[] = (string)$content[$key];
+				}
+			}
+
+			foreach ((array)($section['rows'] ?? []) as $row) {
+				foreach (['title', 'text', 'value', 'label', 'caption'] as $key) {
+					if ((string)($row[$key] ?? '') !== '') {
+						$parts[] = (string)$row[$key];
+					}
+				}
+			}
+		}
+
+		$text = trim((string)preg_replace('/\s+/u', ' ', implode(' ', array_map(
+			static fn (string $part): string => trim(strip_tags(html_entity_decode($part, ENT_QUOTES | ENT_HTML5, 'UTF-8'))),
+			$parts
+		))));
+
+		return $text;
 	}
 
 	/**

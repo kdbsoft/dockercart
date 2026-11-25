@@ -366,15 +366,21 @@ final class Product {
 	 */
 	public function descriptionsToResponse(array $descriptions): array {
 		$output = [];
+		$fields = ['name', 'description', 'meta_title', 'meta_description', 'meta_keyword', 'tag'];
 
 		foreach ($descriptions as $language_id => $description) {
-			foreach (['name', 'description', 'meta_title', 'meta_description', 'meta_keyword', 'tag'] as $field) {
+			$entry = [];
+
+			// The admin model also hydrates internal fields (advanced_content)
+			// for form/PATCH state; the API exposes only documented description
+			// fields.
+			foreach ($fields as $field) {
 				if (isset($description[$field])) {
-					$description[$field] = \Dockercart\Api\Serializer::decodeText($description[$field]);
+					$entry[$field] = \Dockercart\Api\Serializer::decodeText($description[$field]);
 				}
 			}
 
-			$output[$this->languages->code((int)$language_id)] = $description;
+			$output[$this->languages->code((int)$language_id)] = $entry;
 		}
 
 		return $output;

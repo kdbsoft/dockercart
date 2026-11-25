@@ -425,9 +425,9 @@
 	/* ==================== page title (owned landings) ==================== */
 
 	/**
-	 * An owned landing's name is its owner's title of the selected language
-	 * (oc_information_description.title / oc_blog_post_description.name). It
-	 * is edited in Page Settings — the top bar has no name field.
+	 * An information-owned landing's name is its page title of the
+	 * selected language (oc_information_description.title). It is edited in
+	 * Page Settings — the top bar has no name field.
 	 */
 	function ownerTitle() {
 		return CFG.ownerTitles ? String(CFG.ownerTitles[ui.lang] || '') : '';

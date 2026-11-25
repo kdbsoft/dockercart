@@ -76,3 +76,10 @@ $_['preset_visual_story']      = 'Visual Story';
 $_['preset_lookbook']          = 'Lookbook';
 $_['preset_gift_guide']         = 'Gift Guide';
 $_['preset_campaign']          = 'Campaign';
+
+// Editor toolbar buttons
+$_['button_templates']                 = 'Templates';
+
+// Classic copy toggle in advanced mode
+$_['button_show_classic_description'] = 'Show classic description';
+$_['button_hide_classic_description'] = 'Hide classic description';

@@ -1,53 +1,41 @@
 {#
 	Advanced Description: lightweight section editor embedded in the classic
-	product/category/manufacturer form. The mode switcher mirrors the
-	information pages' Page Builder toolbar (dc-opts-toolbar): a status chip,
-	a toggle button and a hidden 0/1 input. Structure is shared by all
-	languages; the active Bootstrap language tab selects which translated
-	fields are shown. The whole editor document is posted as one hidden JSON
-	field and normalised by Dockercart\Description\Admin / Sections before
-	anything is stored.
+	product/category/manufacturer form. The mode switcher is a separate
+	partial above the language tabs (dc-opts-toolbar); this block is moved by
+	the browser module into the active language tab pane, so the composition
+	and the translated classic copy are edited in one place. Structure is
+	shared by all languages; the active Bootstrap language tab selects which
+	translated fields are shown. The whole editor document is posted as one
+	hidden JSON field and normalised by Dockercart\Description\Admin /
+	Sections before anything is stored.
 #}
-<div class="dc-advanced-description-editor"
-	data-description-editor
+<div class="dc-ad-editor" data-description-editor
 	data-config="{{ description_editor_config|json_encode|e('html_attr') }}"
 	data-document="{{ advanced_description_json|e('html_attr') }}"
-	data-active-language="{{ languages|first.language_id }}">
+	data-active-language="{{ languages|first.language_id }}"{% if not use_advanced_description %} style="display:none"{% endif %}>
 	<input type="hidden" name="advanced_description" value="{{ advanced_description_json|e('html_attr') }}" />
 
-	<div class="dc-opts-toolbar dc-ad-mode-selector">
-		<span data-description-mode-label class="label {% if use_advanced_description %}label-primary{% else %}label-default{% endif %}">
-			<i data-lucide="circle" width="10" height="10"></i>
-			{% if use_advanced_description %}{{ text_mode_advanced }}{% else %}{{ text_mode_classic }}{% endif %}
-		</span>
-		<button type="button" data-description-mode-toggle class="btn btn-xs btn-default">
-			{% if use_advanced_description %}
-				<i data-lucide="arrow-left" width="13" height="13"></i> {{ text_switch_to_classic }}
-			{% else %}
-				{{ text_switch_to_advanced }} <i data-lucide="arrow-right" width="13" height="13"></i>
-			{% endif %}
-		</button>
-		<span class="dc-opts-toolbar__label">{{ text_advanced_description_hint }}</span>
-		<span class="dc-opts-toolbar__spacer"></span>
+	<div class="dc-ad-sections" data-description-sections>
+		<div class="dc-ad-empty" data-description-empty>{{ text_empty_sections }}</div>
 	</div>
-	<input type="hidden" name="use_advanced_description" value="{{ use_advanced_description ? 1 : 0 }}" />
 
-	<div data-description-workspace{% if not use_advanced_description %} style="display:none"{% endif %}>
-		<div class="dc-ad-templates">
-			<div class="dc-ad-templates__grid" data-description-template-cards></div>
-		</div>
-
-		<div class="dc-ad-sections" data-description-sections>
-			<div class="dc-ad-empty" data-description-empty>{{ text_empty_sections }}</div>
-		</div>
-
-		<div class="dc-ad-add-section">
+	<div class="dc-ad-add-section">
+		<div class="dc-ad-add-section__row">
 			<button type="button" class="btn btn-default btn-sm dc-ad-add-section__toggle" data-description-add-toggle aria-expanded="false" aria-controls="dc-description-add-panel">
 				<i data-lucide="plus" width="14" height="14"></i> {{ text_add_section }}
 			</button>
-			<div class="dc-ad-add-section__panel" id="dc-description-add-panel" data-description-add-panel hidden>
-				<div class="dc-ad-add-section__grid" data-description-add-cards></div>
-			</div>
+			<button type="button" class="dc-ad-templates__toggle" data-description-templates-toggle aria-expanded="true" aria-controls="dc-description-template-grid">
+				<i data-lucide="layout-grid" width="14" height="14" aria-hidden="true"></i>
+				<span>{{ description_editor_config.labels.button_templates }}</span>
+				<i data-lucide="chevron-down" width="13" height="13" aria-hidden="true"></i>
+			</button>
+			<span class="dc-ad-add-section__count" data-description-count></span>
+		</div>
+		<div class="dc-ad-add-section__panel" id="dc-description-add-panel" data-description-add-panel hidden>
+			<div class="dc-ad-add-section__grid" data-description-add-cards></div>
+		</div>
+		<div class="dc-ad-add-section__panel dc-ad-templates__panel" id="dc-description-template-grid" data-description-templates hidden>
+			<div class="dc-ad-templates__grid" data-description-template-cards></div>
 		</div>
 	</div>
 </div>

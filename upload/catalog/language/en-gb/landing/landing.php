@@ -4,7 +4,6 @@ $_['heading_title'] = 'Landing page';
 
 // Text
 $_['text_home']           = 'Home';
-$_['text_blog_section']     = 'Blog';
 $_['text_error']          = 'Landing page not found!';
 $_['text_empty_page']     = 'This page has no content yet.';
 $_['text_builder_empty']  = 'Drag a section from the left palette to start building this page.';

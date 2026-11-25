@@ -261,7 +261,6 @@ $_['error_template_blocks']  = 'Select at least one section to save as a templat
 
 // Information-page owned landings
 $_['text_owner_information'] = 'This page is managed from Catalog > Information: URL, meta tags, status and the SEO keyword belong to the information page.';
-$_['text_owner_post'] = 'This page is managed from the blog module: URL, meta tags, status and the SEO keyword belong to the article.';
 $_['error_owner']             = 'This landing is the content of an information page — manage it from Catalog > Information!';
 
 // Section container

@@ -76,3 +76,10 @@ $_['preset_visual_story']      = 'Визуальная история';
 $_['preset_lookbook']          = 'Лукбук';
 $_['preset_gift_guide']         = 'Подарочный гид';
 $_['preset_campaign']          = 'Кампания';
+
+// Кнопки редактора
+$_['button_templates']                 = 'Шаблоны';
+
+// Кнопка показа классического описания
+$_['button_show_classic_description'] = 'Показать классическое описание';
+$_['button_hide_classic_description'] = 'Скрыть классическое описание';

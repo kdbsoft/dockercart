@@ -25,7 +25,7 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 
 		if (!$post_data) {
 			$query = $this->db->query("SELECT DISTINCT bp.*, bpd.name, bpd.description, bpd.content,
-					bpd.meta_title, bpd.meta_description, bpd.meta_keyword, ba.name as author_name
+					bpd.advanced_content, bpd.meta_title, bpd.meta_description, bpd.meta_keyword, ba.name as author_name
 					FROM `" . DB_PREFIX . "blog_post` bp
 					LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
 					LEFT JOIN `" . DB_PREFIX . "blog_post_to_store` bps ON (bp.post_id = bps.post_id)
@@ -61,7 +61,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 	 * @return array
 	 */
 	public function getPosts($data = array()) {
-		$sql = "SELECT bp.*, bpd.name, bpd.description, ba.name as author_name
+		$sql = "SELECT DISTINCT bp.post_id, bp.author_id, bp.image, bp.background_image, bp.status,
+				bp.featured, bp.allow_comments, bp.sort_order, bp.views, bp.date_published,
+				bp.date_added, bp.date_modified, bpd.name, bpd.description, ba.name as author_name
 				FROM `" . DB_PREFIX . "blog_post` bp
 				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
 				LEFT JOIN `" . DB_PREFIX . "blog_post_to_store` bps ON (bp.post_id = bps.post_id)
@@ -246,7 +248,9 @@ class ModelExtensionModuleDockercartBlogPost extends Model {
 	public function getRelatedPosts($post_id, $limit = 5) {
 		$post_data = array();
 
-		$query = $this->db->query("SELECT DISTINCT bp.*, bpd.name, bpd.description, ba.name as author_name
+		$query = $this->db->query("SELECT DISTINCT bp.post_id, bp.author_id, bp.image, bp.background_image, bp.status,
+				bp.featured, bp.allow_comments, bp.sort_order, bp.views, bp.date_published,
+				bp.date_added, bp.date_modified, bpd.name, bpd.description, ba.name as author_name
 				FROM `" . DB_PREFIX . "blog_post` bp
 				LEFT JOIN `" . DB_PREFIX . "blog_post_description` bpd ON (bp.post_id = bpd.post_id)
 				LEFT JOIN `" . DB_PREFIX . "blog_post_to_store` bps ON (bp.post_id = bps.post_id)
