@@ -201,6 +201,48 @@ All runtime data lives outside the webroot:
 | Logs / Cache / Sessions | `/var/www/storage/*` | `./storage/*` |
 | Images | `/var/www/html/image` | `./upload/image` |
 
+### Sessions
+
+Session storage is picked per application config (`upload/system/config/{default,admin,api,store_api,catalog}.php`,
+adaptors in `upload/system/library/session/{file,db,redis}.php`). All four running
+apps read the same `SESSION_ENGINE` from `.env`:
+
+| Application | Adaptor | Lives in |
+|---|---|---|
+| storefront (catalog) | `SESSION_ENGINE` (default `file`) | `storage/session/sess_*` |
+| admin panel | `SESSION_ENGINE` (default `file`) | `storage/session/sess_*` |
+| admin/store API | `SESSION_ENGINE`, but never started (bearer token) | — |
+| `SESSION_ENGINE=db` (any app) | `db` | `oc_session` |
+
+`file` is the default because the payload then survives `make restart`/`make update`
+and does not depend on Redis — which is cache-only here (`--appendonly no --save ""`,
+`allkeys-lru`), so sessions stored there would be lost on restart and evicted under
+cache pressure. The storefront used to pin `db` in `system/config/catalog.php`
+(stock OpenCart), which cost ~4 database round trips per page view
+(read + `GET_LOCK` + `REPLACE` + `RELEASE_LOCK`) and one `oc_session` row per visitor;
+it now follows `SESSION_ENGINE` like every other app.
+
+- Every adaptor holds a per-session lock for the request (`flock`, MySQL
+  `GET_LOCK`, Redis `SET NX`), waits `LOCK_TIMEOUT` (10 s) and then proceeds
+  unlocked rather than hanging; a read-only request never writes back.
+- Session files are created `0640` (owner + group, never world) because the
+  payload is auth state; `www-data` reaches them through the `staff` group, see
+  the permission invariant in `docker/entrypoint.sh`.
+- `read()` refreshes the file mtime, so `session.gc_maxlifetime`
+  (`docker/php.prod.ini`, 86400 s) is an **idle** timeout, not an absolute one.
+- Expiry is enforced by the `session_gc` scheduler task
+  (`bin/dockercart_session_gc.php`, hourly, `is_system = 1` → hidden from the
+  scheduler UI, registered by `docker/mysql/migrations/20261127_session_gc_task.sql`),
+  not probabilistically inside a request: globbing the whole session directory
+  in a random page view is an O(number of sessions) latency spike, and the
+  `oc_session` purge used to scan a table with no index on `expire`. The task
+  cleans **both** stores (the `oc_session` part is a no-op unless
+  `SESSION_ENGINE=db`), so `session.gc_probability = 0` in the production ini;
+  set it back to `1` only if you run without the scheduler container. Locked
+  session files are never collected, and `oc_session.expire` is indexed
+  (`idx_session_expire`, migration `20261128_session_expire_index.sql`) so the
+  DB part stays cheap.
+
 ---
 
 ## 3. Configuration
@@ -245,7 +287,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | Variable | Default | Description |
 |---|---|---|
 | `CACHE_ENGINE` | `redis` | `redis` or `file` |
-| `SESSION_ENGINE` | `file` | `file` (default, persistent in `storage/session`) or `redis` (cache-only Redis loses sessions on restart) |
+| `SESSION_ENGINE` | `file` | Session adaptor for every app (storefront, admin, APIs): `file` (persistent in `storage/session`, pruned hourly by the hidden `session_gc` scheduler task), `redis` (cache-only Redis loses sessions on restart) or `db` (`oc_session`). See [Sessions](#sessions) |
 | `REDIS_HOSTNAME` | `redis` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_PASSWORD` | — | Redis password |
@@ -505,6 +547,11 @@ make scheduler-reload     # SIGHUP — reload code without restart
 make scheduler-status     # Check if running
 ```
 
+System tasks (`is_system = 1` rows) are not listed in Tools → Scheduler — they
+are infrastructure, registered by migrations and meant to stay on the schedule
+the migration sets: `webhook_deliver` (every minute), `webhook_cleanup` (daily),
+`session_gc` (hourly, see [Sessions](#sessions)), `backup_s3` (host cron only).
+
 ---
 
 ## 7. Backup
@@ -646,7 +693,9 @@ See [`SECURITY.md`](../SECURITY.md) for the full policy.
 - Remove MariaDB port mapping in production (or bind to `127.0.0.1`)
 - Always use HTTPS in production
 - Keep base images updated: `docker compose pull && docker compose up -d`
-- Ensure `./storage/` is not publicly accessible
+- Ensure `./storage/` is not publicly accessible — it also holds
+  `storage/session/sess_*` (authentication state; files are created `0640`,
+  the entrypoint strips world access from older ones)
 - Image execution is disabled in Apache — do not remove this restriction
 
 ### Admin Roles & Permissions

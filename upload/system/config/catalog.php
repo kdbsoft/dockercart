@@ -17,7 +17,12 @@ $_['db_port']            = DB_PORT;
 
 // Session
 $_['session_autostart']  = false;
-$_['session_engine']     = 'db';
+// Same adaptor as the panel and the APIs (SESSION_ENGINE in .env). The stock
+// OpenCart value was 'db', which put one row per visitor session into
+// oc_session and cost ~4 database round trips per page view (read + GET_LOCK +
+// REPLACE + RELEASE_LOCK). Expiry of the file store is handled by the hourly
+// `session_gc` scheduler task, never inside the request.
+$_['session_engine']     = defined('SESSION_ENGINE') ? SESSION_ENGINE : 'db';
 $_['session_name']       = 'OCSESSID';
 
 // Template

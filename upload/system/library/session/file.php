@@ -10,6 +10,15 @@ class File {
 	 */
 	const LOCK_TIMEOUT = 10;
 
+	/**
+	 * Mode of a session file: owner + group, never world. The payload is the
+	 * authentication state (customer_id, admin user_id, cart), so it must not
+	 * be readable by every local user of a shared host; group write is still
+	 * required because www-data may reach the file through the `staff` group
+	 * (see the permission invariant in docker/entrypoint.sh).
+	 */
+	const FILE_MODE = 0640;
+
 	private $directory;
 
 	/**
@@ -39,11 +48,24 @@ class File {
 		// existing one. The exclusive lock is held until write() so the
 		// request never races another one on the same session file, like
 		// PHP's built-in files session handler does.
+		$exists = is_file($file);
+
 		$handle = @fopen($file, 'c+');
 
 		if (!$handle) {
 			return array();
 		}
+
+		if (!$exists) {
+			@chmod($file, self::FILE_MODE);
+		}
+
+		// Refresh mtime on every read. PHP's own files handler rewrites the
+		// session each request, so `session.gc_maxlifetime` behaves as an idle
+		// timeout; this adapter deliberately skips unchanged write-backs (see
+		// write()), which would turn it into an absolute lifetime and log an
+		// active operator out after a day.
+		@touch($file);
 
 		$this->lock($handle);
 
@@ -68,11 +90,11 @@ class File {
 
 		$this->raw = $data;
 
-		$unserialized = unserialize($data, array('allowed_classes' => false));
-
-		// Corrupt or truncated session files (disk full, legacy damage)
-		// previously surfaced as "unserialize(): Extra data" warnings and a
-		// non-array return that broke consumers. Treat them as empty sessions.
+		// Corrupt or truncated session files (disk full, legacy damage) used to
+		// surface as "unserialize(): Extra data" warnings and a non-array return
+		// that broke consumers. Treat them as empty sessions, quietly — a
+		// damaged file is a logout, not an error worth a log line per request.
+		$unserialized = @unserialize($data, array('allowed_classes' => false));
 		if (!is_array($unserialized)) {
 			return array();
 		}
@@ -119,10 +141,16 @@ class File {
 		// or a fresh adaptor). Open, lock, rewrite, release.
 		$file = DIR_SESSION . 'sess_' . basename($session_id);
 
+		$exists = is_file($file);
+
 		$handle = @fopen($file, 'c+');
 
 		if (!$handle) {
 			return false;
+		}
+
+		if (!$exists) {
+			@chmod($file, self::FILE_MODE);
 		}
 
 		$this->lock($handle);
@@ -192,48 +220,82 @@ class File {
 		}
 	}
 
+	/**
+	 * Removes session files older than $maxlifetime (mtime based, like PHP's
+	 * files handler) and returns how many were deleted.
+	 *
+	 * This is the single GC implementation: production runs it from the
+	 * `session_gc` scheduler task (bin/dockercart_session_gc.php), because
+	 * globbing the whole session directory inside an arbitrary request is an
+	 * O(number of sessions) latency spike on a busy shop. The probabilistic
+	 * in-request run below stays as a dev-only fallback (session.gc_probability
+	 * is 0 in docker/php.prod.ini).
+	 *
+	 * @param	string	$directory		with a trailing slash (DIR_SESSION)
+	 * @param	int		$maxlifetime	seconds; 0 or less disables the run
+	 * @return	int
+	 */
+	public static function collectGarbage($directory, $maxlifetime) {
+		$maxlifetime = (int)$maxlifetime;
+
+		if ($maxlifetime <= 0 || !is_dir($directory)) {
+			return 0;
+		}
+
+		$expire = time() - $maxlifetime;
+		$removed = 0;
+
+		$files = glob($directory . 'sess_*');
+
+		if (!$files) {
+			return 0;
+		}
+
+		foreach ($files as $file) {
+			if (!is_file($file)) {
+				continue;
+			}
+
+			clearstatcache(true, $file);
+
+			if (filemtime($file) >= $expire) {
+				continue;
+			}
+
+			// Never remove a session file that is currently locked by a
+			// live request: an in-flight session must not disappear.
+			$handle = @fopen($file, 'r');
+
+			if ($handle) {
+				$in_use = !flock($handle, LOCK_EX | LOCK_NB);
+
+				flock($handle, LOCK_UN);
+				fclose($handle);
+
+				if ($in_use) {
+					continue;
+				}
+			}
+
+			if (@unlink($file)) {
+				$removed++;
+			}
+		}
+
+		return $removed;
+	}
+
 	public function __destruct() {
 		$this->closeHandle();
 
-		if (ini_get('session.gc_divisor')) {
-			$gc_divisor = ini_get('session.gc_divisor');
-		} else {
-			$gc_divisor = 1;
-		}
+		$gc_divisor = ini_get('session.gc_divisor');
+		$gc_divisor = ($gc_divisor === false || $gc_divisor === '') ? 1 : (int)$gc_divisor;
 
-		if (ini_get('session.gc_probability')) {
-			$gc_probability = ini_get('session.gc_probability');
-		} else {
-			$gc_probability = 1;
-		}
+		$gc_probability = ini_get('session.gc_probability');
+		$gc_probability = ($gc_probability === false || $gc_probability === '') ? 1 : (int)$gc_probability;
 
-		if ((rand() % $gc_divisor) < $gc_probability) {
-			$expire = time() - ini_get('session.gc_maxlifetime');
-
-			$files = glob(DIR_SESSION . 'sess_*');
-
-			foreach ($files as $file) {
-				if (filemtime($file) >= $expire) {
-					continue;
-				}
-
-				// Never remove a session file that is currently locked by a
-				// live request: an in-flight session must not disappear.
-				$handle = @fopen($file, 'r');
-
-				if ($handle) {
-					$in_use = !flock($handle, LOCK_EX | LOCK_NB);
-
-					flock($handle, LOCK_UN);
-					fclose($handle);
-
-					if ($in_use) {
-						continue;
-					}
-				}
-
-				unlink($file);
-			}
+		if ($gc_probability > 0 && $gc_divisor > 0 && (rand() % $gc_divisor) < $gc_probability) {
+			self::collectGarbage(defined('DIR_SESSION') ? DIR_SESSION : '', (int)ini_get('session.gc_maxlifetime'));
 		}
 	}
 }
