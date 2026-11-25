@@ -134,6 +134,15 @@ class ControllerCommonFooter extends Controller {
 			$data['logo'] = '';
 		}
 
+		// Light-background logo (for light footers/sections).
+		$logo_light_path = (string)$this->config->get('dockercart_theme_logo_light');
+
+		if ($logo_light_path !== '' && is_file(DIR_IMAGE . $logo_light_path)) {
+			$data['logo_light'] = $server . 'image/' . $logo_light_path;
+		} else {
+			$data['logo_light'] = $data['logo'];
+		}
+
 		// Dark logo (for footer / dark backgrounds) — set via DockerCart Theme Settings module
 		$logo_dark_path = $this->config->get('dockercart_theme_logo_dark');
 		if ($logo_dark_path && is_file(DIR_IMAGE . $logo_dark_path)) {

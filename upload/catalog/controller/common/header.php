@@ -136,6 +136,14 @@ class ControllerCommonHeader extends Controller {
 			$data['logo'] = '';
 		}
 
+		// Named variants for themes with light/dark headers.
+		$data['logo_light'] = $data['logo'];
+
+		$logo_dark = (string)$this->config->get('dockercart_theme_logo_dark');
+		$data['logo_dark'] = ($logo_dark !== '' && is_file(DIR_IMAGE . $logo_dark))
+			? $server . 'image/' . $logo_dark
+			: '';
+
 		$this->load->language('common/header');
 
 		// Localized home text for client-side breadcrumb insertion
