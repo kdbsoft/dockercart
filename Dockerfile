@@ -45,7 +45,13 @@ RUN a2enmod rewrite headers ssl deflate expires
 
 WORKDIR /var/www/html
 
-COPY upload/ /var/www/html/
+# --chown at copy time instead of a separate `RUN chown -R / chmod -R`:
+# in overlayfs that pass copies up every file into a second full-size layer
+# (the webroot is ~6 GB with product images). Modes come from the build
+# context as-is (644/664 files, 755/775 dirs); docker/entrypoint.sh then
+# normalises them idempotently at container start, and every compose variant
+# bind-mounts ./upload + ./storage over these paths anyway.
+COPY --chown=www-data:www-data upload/ /var/www/html/
 
 RUN mkdir -p /var/www/storage/cache \
     /var/www/storage/logs \
@@ -54,13 +60,9 @@ RUN mkdir -p /var/www/storage/cache \
     /var/www/storage/modification \
     /var/www/storage/session \
     /var/www/html/image/cache \
-    /var/www/html/image/catalog
-
-RUN chown -R www-data:www-data /var/www/html /var/www/storage \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 755 /var/www/storage \
-    && find /var/www/html -type d -exec chmod 755 {} \; \
-    && find /var/www/html -type f -exec chmod 644 {} \;
+    /var/www/html/image/catalog \
+    && chown -R www-data:www-data /var/www/storage \
+    && chown www-data:www-data /var/www/html/image/cache /var/www/html/image/catalog
 
 COPY docker/php.prod.ini /usr/local/etc/php/conf.d/dockercart.ini
 
