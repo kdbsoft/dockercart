@@ -400,7 +400,10 @@ elif [ "$LOCAL" = "$BASE" ]; then
 	# relevant paths between the previous and new commit (or HEAD when no fetch
 	# happened) — if any differ, rebuild.
 	BUILD_REQUIRED=0
-	BUILD_PATHSPEC="Dockerfile docker/ docker-compose*.yml composer.lock"
+	# `.dockerignore` belongs here too: it decides what lands in the build
+	# context (product images, generated configs), so changing only it still
+	# changes the resulting image.
+	BUILD_PATHSPEC="Dockerfile .dockerignore docker/ docker-compose*.yml composer.lock"
 	# shellcheck disable=SC2086
 	if git diff --quiet "$BASE" "$REMOTE" -- $BUILD_PATHSPEC 2>/dev/null; then
 		log "No Dockerfile/docker/compose changes detected — skipping image rebuild."
@@ -437,6 +440,19 @@ else
     log "Error: local and remote branches have diverged. Manual intervention required."
     exit 1
 fi
+
+# --- Image rotation -------------------------------------------------------
+# The rebuild above moved the `<project>_apache:latest` tag to the new image,
+# so the previous one is left untagged (dangling) and would pile up on every
+# update. Keep it as a rollback target for a week, drop only what is older.
+# Only *dangling* images are affected (no -a): tagged base images (php,
+# mariadb, nginx, ...) and anything a container uses — including stopped
+# containers — are never touched. `builder prune` is Docker/BuildKit-only
+# (a no-op shim under podman, where build cache is kept as images and covered
+# by the line above). `container prune` is deliberately absent: it would also
+# delete containers that were stopped by hand.
+docker image prune -f --filter "until=168h" >/dev/null 2>&1 || true
+docker builder prune -f --filter "until=168h" >/dev/null 2>&1 || true
 
 if [ "${SKIP_MIGRATIONS:-0}" = "1" ]; then
     log "SKIP_MIGRATIONS=1 set. Database migrations are skipped."

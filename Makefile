@@ -106,8 +106,19 @@ ftp: ## Attach optional FTP server (chrooted to ./upload/image) to the running s
 stop: ## Stop containers without removing volumes
 	@$(ACTIVE_COMPOSE) down || true
 
-restart: ## Restart containers (rebuild + recreate) in the active mode
+restart: ## Restart containers (rebuild + recreate) in the active mode, prune old images
 	@$(ACTIVE_COMPOSE) up -d --build --force-recreate --remove-orphans
+	@$(MAKE) --no-print-directory image-prune
+
+# A rebuild under the same tag (`<project>_apache:latest`) leaves the previous
+# image behind as an untagged `<none>` that nothing references any more —
+# compose never removes it. `image prune` (dangling only) reclaims exactly those
+# and never touches tagged images or images a container still uses, which is why
+# it is safe to run unattended after every restart. Do NOT use
+# `system prune -a` for this: it also deletes images that are merely not in use
+# (e.g. the ftp/certbot profiles' images) and the whole build cache.
+image-prune: ## Remove dangling images left behind by previous builds
+	@docker image prune -f 2>/dev/null || podman image prune -f 2>/dev/null || true
 
 logs: ## Show last 100 log lines
 	@$(ACTIVE_COMPOSE) logs --tail=100
