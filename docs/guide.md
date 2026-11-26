@@ -426,7 +426,7 @@ edits survive. The same default template lives in
 | `make shell` | Bash into app container |
 | `make mariadb` | MariaDB CLI |
 | `make migrate` | Apply SQL migrations |
-| `make backup` | Dump database |
+| `make backup` | Dump database to `./backups/` (keeps the newest `BACKUP_KEEP`, default 5) |
 | `make restore` | Restore database dump |
 | `make clean` | Remove all volumes (destructive) |
 
@@ -607,7 +607,8 @@ the migration sets: `webhook_deliver` (every minute), `webhook_cleanup` (daily),
 ### Local Backups
 
 ```bash
-make backup   # Dumps database to a timestamped .sql file
+make backup   # Dumps database to a timestamped .sql file; keeps the newest
+              # BACKUP_KEEP dumps (default 5), older ones are deleted
 make restore  # Restores from a dump file
 ```
 

@@ -22,6 +22,12 @@ ACTIVE_COMPOSE_FILES := $(foreach f,$(DOCKERCART_COMPOSE_FILES),-f $(f))
 ACTIVE_COMPOSE := docker compose $(ACTIVE_COMPOSE_FILES)
 endif
 
+# Local DB dumps kept by `make backup`. Counted, not date-based, so the newest
+# dump always survives: `make restore` picks `ls -t backups/*.sql | head -1`,
+# which rotation never touches. Local dumps are a rollback convenience, not the
+# backup strategy — that is `backup-s3` with BACKUP_S3_RETENTION_DAYS.
+BACKUP_KEEP ?= 5
+
 help: ## Show this help
 	@echo ""
 	@echo "DockerCart - Docker Compose Stack"
@@ -40,7 +46,7 @@ help: ## Show this help
 	@echo "  make logs         Show logs"
 	@echo "  make shell        Bash into app container"
 	@echo "  make mariadb      Open MariaDB CLI"
-	@echo "  make backup       Dump DB to ./backups/"
+	@echo "  make backup       Dump DB to ./backups/ (keeps the newest BACKUP_KEEP, default 5)"
 	@echo "  make test         Run the webhook/test suite (no DB needed)"
 	@echo ""
 	@echo "See README.md for full documentation."
@@ -134,10 +140,14 @@ scheduler-status: ## Check scheduler health
 mariadb: ## Open MariaDB CLI
 	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart}
 
-backup: ## Dump database to ./backups/
+backup: ## Dump database to ./backups/ (keeps the newest 5, see BACKUP_KEEP)
 	@mkdir -p backups
 	@$(COMPOSE) exec -e MYSQL_PWD=$${MARIADB_PASSWORD:-dockercart_password} mariadb mariadb-dump -u$${MARIADB_USER:-dockercart} $${MARIADB_DATABASE:-dockercart} > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "Backup created"
+	@# Rotation: only files this target creates (`backup_*.sql`), newest kept.
+	@# Values coming from .env may carry quotes, so the count is sanitised.
+	@KEEP=$$(printf '%s' '$(BACKUP_KEEP)' | tr -dc '0-9'); [ -n "$$KEEP" ] || KEEP=5; \
+	ls -t backups/backup_*.sql 2>/dev/null | tail -n +$$((KEEP + 1)) | xargs -r rm -f; \
+	echo "Backup created (kept: $$(ls -t backups/backup_*.sql 2>/dev/null | wc -l))"
 
 restore: ## Restore from the latest dump in ./backups/
 	@if [ -z "$$(ls -A backups/*.sql 2>/dev/null)" ]; then \
