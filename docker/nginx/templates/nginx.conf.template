@@ -14,12 +14,28 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
-    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+    # ==========================================================
+    # Access log
+    # ==========================================================
+    # Volume control. The catalog filter state travels as a base64 payload
+    # (?dcf=<...>), so logging the full "$request" produced kilobyte-long
+    # lines for bot-generated combinatorial URLs (millions of lines per week
+    # before the antibot rule learned to drop them). The access log therefore
+    # records the method + path verbatim and only the first 200 characters of
+    # the query string — enough to debug real traffic, bounded for floods.
+    map $args $log_args {
+        default "";
+        "~^(?<log_args_head>.{0,200})" $log_args_head;
+    }
+
+    log_format main '$remote_addr - $remote_user [$time_local] "$request_method $uri" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for" '
-                    '"$ab_cf_clearance" "$ab_block"';
+                    '"$ab_cf_clearance" "$ab_block" "$log_args"';
 
-    access_log /var/log/nginx/access.log main;
+    # Fallback sink for server blocks without their own access_log. Written
+    # buffered: one write per 64k or per minute instead of per request.
+    access_log /var/log/nginx/access.log main buffer=64k flush=1m;
 
     # Performance optimization
     sendfile on;

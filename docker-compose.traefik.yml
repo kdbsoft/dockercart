@@ -26,6 +26,9 @@ services:
       - ./docker/nginx/templates:/etc/nginx/templates:ro,z
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro,z
       - ./docker/nginx/cache:/var/cache/nginx:Z
+      # Host-side log directory: survives recreates and is rotated by the
+      # host's logrotate (docker/logrotate/nginx, `make logrotate-install`).
+      - ./docker/nginx/logs:/var/log/nginx:z
     ulimits:
       nofile:
         soft: 4096

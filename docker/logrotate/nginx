@@ -1,0 +1,26 @@
+# DockerCart — host-side logrotate rule for the nginx container logs.
+#
+# This is a TEMPLATE. It is rendered by scripts/install-nginx-logrotate.sh
+# (`make logrotate-install`) into /etc/logrotate.d/dockercart-nginx, with the
+# log directory, the nginx container name and the container CLI of the
+# current checkout substituted in.
+#
+# The nginx master process keeps the log files open, so rotation renames them
+# and then asks nginx to reopen (`nginx -s reopen` == SIGUSR1). That needs no
+# restart and loses no lines — unlike copytruncate, which can drop writes.
+# Do NOT add `create`: nginx opens the new file itself with the right owner
+# (root inside the container, which maps to the unprivileged host user under
+# rootless Podman — a fixed owner here would break logging).
+__LOG_DIR__/*.log {
+    daily
+    rotate 7
+    maxsize 100M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    su root root
+    postrotate
+        __RUNTIME__ exec __NGINX_CONTAINER__ nginx -s reopen 2>/dev/null || true
+    endscript
+}

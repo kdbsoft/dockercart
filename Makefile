@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate update start stop ftp logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status
+.PHONY: help migrate update start stop ftp logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart image-prune scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status logrotate-install
 
 ### Convenience variables
 # Base compose file used by commands that don't need to match the running mode
@@ -108,6 +108,9 @@ logs: ## Show last 100 log lines
 
 logs-follow: ## Follow logs in real time
 	@$(ACTIVE_COMPOSE) logs -f
+
+logrotate-install: ## Install host logrotate rule for nginx logs (docker/nginx/logs)
+	@./scripts/install-nginx-logrotate.sh
 
 shell: ## Open bash shell in the app container
 	@$(ACTIVE_COMPOSE) exec apache bash

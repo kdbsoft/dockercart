@@ -159,9 +159,13 @@ dockercart/
 │   │   ├── init.sql            Schema + seed data
 │   │   └── migrations/         Incremental SQL migrations
 │   ├── manticore/              Manticore Search configs
+│   ├── logrotate/
+│   │   ├── dockercart          Inside the apache image: storage/logs rotation
+│   │   └── nginx               Host template: nginx log rotation
 │   └── nginx/                  Nginx configs
 │       ├── templates/          nginx.conf.template (rendered at container start)
 │       ├── conf.d/             Server blocks + snippets
+│       ├── logs/               Access/error logs (bind-mounted, rotated on host)
 │       └── ssl/                Self-signed / LE server blocks
 ├── storage/                    Runtime files (outside webroot)
 │   ├── logs/                   Application error logs
@@ -199,7 +203,50 @@ All runtime data lives outside the webroot:
 |---|---|---|
 | Webroot | `/var/www/html` | `./upload` |
 | Logs / Cache / Sessions | `/var/www/storage/*` | `./storage/*` |
+| nginx access/error logs | `/var/log/nginx/*` | `./docker/nginx/logs/*` |
 | Images | `/var/www/html/image` | `./upload/image` |
+
+### Log Files & Rotation
+
+Two independent log streams, rotated by two different mechanisms:
+
+| Stream | Location | Rotation |
+|---|---|---|
+| App/PHP logs | `storage/logs/*.log` (bind mount) | `logrotate` + `cron` **inside** the apache container (`docker/logrotate/dockercart`, 7 days / 50M, `copytruncate`) |
+| nginx access/error | `docker/nginx/logs/*.log` (bind mount) | host `logrotate.timer` (`docker/logrotate/nginx`, 7 days / 100M) |
+| nginx http fallback | `/var/log/nginx/access.log` (host: `docker/nginx/logs/access.log`) | same host rule (usually empty — every server block sets its own `access_log`) |
+| Apache (image output) | `/dev/stdout` / `/dev/stderr` → Docker json-file | Docker `max-size: 10m` / `max-file: 3` |
+
+nginx logs used to stay inside the container's writable layer: they were lost on
+`make restart` and grew without bound (a busy store produced millions of lines,
+because the full `$request` was logged including the base64 `?dcf=` catalog-filter
+payload). Now:
+
+* `docker-compose.yml` / `docker-compose.traefik.yml` bind-mount
+  `./docker/nginx/logs` → `/var/log/nginx`. The directory is gitignored (only
+  `.gitkeep` is tracked) and the nginx master — running as root — creates the
+  files, so no `chown` is required, on Docker or rootless Podman.
+* One-time host setup: `make logrotate-install` (= `sudo
+  scripts/install-nginx-logrotate.sh`). It renders `docker/logrotate/nginx` with
+  the absolute log path and the real container name
+  (`NGINX_CONTAINER_NAME` → `COMPOSE_PROJECT_NAME` → `dockercart_nginx`) and
+  writes `/etc/logrotate.d/dockercart-nginx`. Rotation uses `nginx -s reopen`
+  (`SIGUSR1`) in `postrotate`, so open file descriptors are re-bound and no
+  lines are lost — no `copytruncate` and no `create` (nginx creates the new file
+  itself with the right owner).
+* The log format (`nginx.conf.template`) logs `"$request_method $uri"` plus the
+  first 200 characters of the query string (`$log_args`, a `map $args`), so path
+  debugging stays possible while a combinatorial flood cannot bloat the file.
+  All `access_log` directives are buffered (`buffer=64k flush=1m`): one write per
+  64 KB or per minute instead of one per request.
+* To empty a log without restarting nginx (one-off cleanup, e.g. right after
+  deploying this): `docker exec dockercart_nginx sh -c ': >
+  /var/log/nginx/dockercart_access.log'`. nginx opens its logs with `O_APPEND`,
+  so subsequent lines start again at offset 0 and no lines are lost. Prefer
+  rotation + `nginx -s reopen` for recurring cleanup.
+* The log directory belongs to the host: read it on the host (`tail`,
+  `zgrep`, log shipping), never via `docker exec` on the `/dev/stdout` symlinks
+  (see AGENTS.md).
 
 ### Sessions
 
@@ -375,6 +422,7 @@ edits survive. The same default template lives in
 | `make restart` | Restart all containers |
 | `make logs` | View logs |
 | `make logs-follow` | Tail logs |
+| `make logrotate-install` | Install the host logrotate rule for `docker/nginx/logs` (uses sudo) |
 | `make shell` | Bash into app container |
 | `make mariadb` | MariaDB CLI |
 | `make migrate` | Apply SQL migrations |

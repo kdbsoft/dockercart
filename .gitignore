@@ -100,6 +100,12 @@ build-extension.sh
 /docker/nginx/cache/
 /docker/nginx/cache/**
 
+# nginx access/error logs are bind-mounted here from the host (see
+# docker-compose.yml) and rotated by the host's logrotate. Keep the directory
+# itself (and .gitkeep) so the bind mount never gets auto-created as root.
+/docker/nginx/logs/*
+!/docker/nginx/logs/.gitkeep
+
 *.backup
 /docker/mysql/*.bak*
 /docker/mysql/*.tmp

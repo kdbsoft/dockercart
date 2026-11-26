@@ -350,6 +350,7 @@ Preview with `npm run release:dry-run`.
 - `make ftp` — attach optional FTP server (chrooted to `./upload/image`)
 - `make shell` — bash into the `apache` container (where the app runs)
 - `make scheduler-reload` — SIGHUP the scheduler for code reload without container restart
+- `make logrotate-install` — (re)install the host logrotate rule for `docker/nginx/logs`
 - `make logs-follow`, `make restart`, `make stop`, `make clean` (destructive: removes volumes)
 - Container names are prefixed `dockercart_` (e.g. `dockercart_apache`, `dockercart_mariadb`).
 
@@ -364,6 +365,14 @@ Preview with `npm run release:dry-run`.
   `docker compose logs --tail=100 <service>`, `docker logs --tail=50 <container>`.
 - Safe real files you MAY `tail` via exec: `/var/log/nginx/dockercart_*.log`
   (see `docker/nginx/conf.d/*.conf`) and app logs in `storage/logs/`.
+- nginx logs are **bind-mounted to the host** (`./docker/nginx/logs`, see
+  `docker-compose*.yml`): read them from the host, they are no longer symlinks and they
+  survive container recreates. Rotation is host-side — `docker/logrotate/nginx` installed
+  as `/etc/logrotate.d/dockercart-nginx` via `make logrotate-install`; the apache side
+  rotates `storage/logs` from inside the container (`docker/logrotate/dockercart`).
+  Don't add `copytruncate` there: the rule uses `nginx -s reopen` in `postrotate`.
+  Never mount logging straight to `/dev/stdout` to "fix" growth — that is what the
+  rotation rule is for.
 - Before `tail`/`cat` of any unfamiliar path inside a container, check
   `readlink <path>` / `ls -la` first — if it resolves to `/dev/stdout` or `/dev/stderr`,
   stop and use `docker logs`.

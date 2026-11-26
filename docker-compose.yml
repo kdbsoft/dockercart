@@ -56,6 +56,11 @@ services:
       - ./docker/nginx/templates:/etc/nginx/templates:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./docker/nginx/cache:/var/cache/nginx:z
+      # Access/error logs live on the host so they survive container
+      # recreates and are rotated by the host's logrotate (see
+      # docker/logrotate/nginx + `make logrotate-install`). The nginx master
+      # runs as root and opens these files itself, so no chown is needed.
+      - ./docker/nginx/logs:/var/log/nginx:z
     ulimits:
       nofile:
         soft: 4096
