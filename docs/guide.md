@@ -256,8 +256,8 @@ apps read the same `SESSION_ENGINE` from `.env`:
 
 | Application | Adaptor | Lives in |
 |---|---|---|
-| storefront (catalog) | `SESSION_ENGINE` (default `file`) | `storage/session/sess_*` |
-| admin panel | `SESSION_ENGINE` (default `file`) | `storage/session/sess_*` |
+| storefront (catalog) | `SESSION_ENGINE` (default `file`) | `storage/session/<a>/<b>/sess_*` |
+| admin panel | `SESSION_ENGINE` (default `file`) | `storage/session/<a>/<b>/sess_*` |
 | admin/store API | `SESSION_ENGINE`, but never started (bearer token) | — |
 | `SESSION_ENGINE=db` (any app) | `db` | `oc_session` |
 
@@ -269,6 +269,29 @@ cache pressure. The storefront used to pin `db` in `system/config/catalog.php`
 (read + `GET_LOCK` + `REPLACE` + `RELEASE_LOCK`) and one `oc_session` row per visitor;
 it now follows `SESSION_ENGINE` like every other app.
 
+- **Sessions are sharded**, not stored flat: `Session\File::pathFor()` puts a
+  session in `storage/session/<a>/<b>/sess_<id>`, where `a`/`b` are the first two
+  hex digits of `md5(id)` → 16 × 16 = **256 leaf directories** (the same shape as
+  PHP's `session.save_path = "2;/path"`). A busy storefront creates one session
+  per client without a cookie, and a flat directory holds as many entries as
+  sessions touched within `session.gc_maxlifetime` (86400 s ≈ one day of
+  traffic) — fine at 10k, painful at 200k, fatal near a million (the GC's
+  `glob()` alone allocates ~20 MB per 200k names). Shard directories are created
+  on demand with the umask cleared so every level is group-writable, and they
+  inherit setgid from `storage/session` (2775) — `chmod()` is deliberately not
+  used, a process outside the directory's group would have it drop the inherited
+  setgid bit again.
+- Sessions written before the sharded layout (flat `storage/session/sess_*`) stay
+  readable: `read()` prefers the shard and falls back to the flat file, and the
+  first write that actually changes something moves the session into its shard
+  and unlinks the flat copy. Nothing has to be migrated by hand.
+- **A missing session is never created by `read()`.** A crawler, probe or
+  prefetch arrives without the session cookie, so a file per request is garbage;
+  the file appears on the first `write()` that stores something (and a
+  `Session::close()` with an empty payload writes nothing at all). Note that a
+  rendered storefront page still stores `language`/`currency`/`csrf_token`
+  (`common/header.php`), so a cookie-less *browser-like* crawler still ends up
+  with one small session file per request — that is what the sharding bounds.
 - Every adaptor holds a per-session lock for the request (`flock`, MySQL
   `GET_LOCK`, Redis `SET NX`), waits `LOCK_TIMEOUT` (10 s) and then proceeds
   unlocked rather than hanging; a read-only request never writes back.
@@ -284,7 +307,10 @@ it now follows `SESSION_ENGINE` like every other app.
   in a random page view is an O(number of sessions) latency spike, and the
   `oc_session` purge used to scan a table with no index on `expire`. The task
   cleans **both** stores (the `oc_session` part is a no-op unless
-  `SESSION_ENGINE=db`), so `session.gc_probability = 0` in the production ini;
+  `SESSION_ENGINE=db`) and **both file layouts** — the legacy flat files at the
+  top of `storage/session` plus `<a>/<b>/sess_*` — one glob level at a time so
+  the peak memory stays at a single level's worth of names. Because of that,
+  `session.gc_probability = 0` in the production ini;
   set it back to `1` only if you run without the scheduler container. Locked
   session files are never collected, and `oc_session.expire` is indexed
   (`idx_session_expire`, migration `20261128_session_expire_index.sql`) so the
@@ -742,9 +768,10 @@ See [`SECURITY.md`](../SECURITY.md) for the full policy.
 - Remove MariaDB port mapping in production (or bind to `127.0.0.1`)
 - Always use HTTPS in production
 - Keep base images updated: `docker compose pull && docker compose up -d`
-- Ensure `./storage/` is not publicly accessible — it also holds
-  `storage/session/sess_*` (authentication state; files are created `0640`,
-  the entrypoint strips world access from older ones)
+- Ensure `./storage/` is not publicly accessible — it also holds the session
+  store (`storage/session/<a>/<b>/sess_*`, authentication state; files are created
+  `0640`, the entrypoint strips world access from older ones — flat *and*
+  sharded, hence no `-maxdepth` in that `find`)
 - Image execution is disabled in Apache — do not remove this restriction
 
 ### Admin Roles & Permissions

@@ -102,8 +102,10 @@ fix_permissions() {
 		# cart). Older releases created them 0644, i.e. readable by every local
 		# user of the host; strip world access only (group rw stays — www-data
 		# reaches storage through the staff group). Gated by -perm so nothing is
-		# touched once the mode is settled.
-		find /var/www/storage/session -maxdepth 1 -type f -name 'sess_*' -perm -004 -exec chmod o-rwx {} + 2>/dev/null || true
+		# touched once the mode is settled. No -maxdepth: this must cover both the
+		# legacy flat files at the top and the sharded <a>/<b>/sess_* ones
+		# (Session\File::pathFor).
+		find /var/www/storage/session -type f -name 'sess_*' -perm -004 -exec chmod o-rwx {} + 2>/dev/null || true
 
         # Git exclude file for extension installer (mounted from host .git/info/exclude)
         if [ -f "/var/www/git-exclude" ]; then

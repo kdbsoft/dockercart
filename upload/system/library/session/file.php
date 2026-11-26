@@ -19,7 +19,41 @@ class File {
 	 */
 	const FILE_MODE = 0640;
 
+	/**
+	 * Mode of a shard directory. mkdir() masks the mode with the process umask
+	 * (022 -> 0750: no group write), so the umask is cleared around the call
+	 * and every level ends up group-writable. The setgid bit cannot be requested
+	 * through the mode either — Linux only inherits it from a setgid parent, and
+	 * that is exactly what happens here: `storage/session` is 2775 (see the
+	 * permission invariant in docker/entrypoint.sh), and chmod() is deliberately
+	 * avoided because a process outside the directory's group (root in a user
+	 * namespace, a CLI worker) has its chmod drop the inherited bit again.
+	 */
+	const DIRECTORY_MODE = 02770;
+
+	/**
+	 * Shard levels of 16 buckets each: `md5(id)` gives two hex digits, so the
+	 * logic is 16 × 16 = 256 leaf directories — the same shape as PHP's own
+	 * `session.save_path = "2;/path"`.
+	 *
+	 * Why: a busy storefront creates one session per client, and a flat
+	 * directory then holds as many entries as sessions touched within
+	 * `session.gc_maxlifetime` (86400 s → one day of sessions). That is
+	 * harmless at 10k, unpleasant at 200k (glob() alone allocates ~20 MB and
+	 * every `unlink()` competes with the whole directory index) and fatal
+	 * around a million. 256 buckets divide the count by 256 and keep every
+	 * directory-level operation local to one shard.
+	 */
+	const SHARD_LEVELS = 2;
+
 	private $directory;
+
+	/**
+	 * Path of the file the locked handle below belongs to (the sharded target
+	 * or, for a session not rewritten since the sharded layout was introduced,
+	 * its legacy flat predecessor).
+	 */
+	private $file = '';
 
 	/**
 	 * Handle locked (LOCK_EX) for the current session id, held for the whole
@@ -39,24 +73,97 @@ class File {
 	 */
 	private $raw = null;
 
+	/**
+	 * @param	mixed	$directory	storage directory with a trailing slash; only a
+	 *								non-empty string is used (system/framework.php
+	 *								passes the registry to every adaptor), the
+	 *								DIR_SESSION constant is the default
+	 */
+	public function __construct($directory = null) {
+		if (is_string($directory) && $directory !== '') {
+			$this->directory = rtrim($directory, '/') . '/';
+		} else {
+			$this->directory = defined('DIR_SESSION') ? rtrim(DIR_SESSION, '/') . '/' : '';
+		}
+	}
+
+	/**
+	 * Canonical path of a session: `<a>/<b>/sess_<id>` where `a`/`b` are the
+	 * first two hex digits of md5(id). Hashing (instead of cutting the id) keeps
+	 * the layout defined for every id the Session class accepts
+	 * (`[a-zA-Z0-9,\-]{22,52}`) and cannot produce a path separator.
+	 *
+	 * @param	string	$directory		with or without a trailing slash
+	 * @param	string	$session_id
+	 * @return	string
+	 */
+	public static function pathFor($directory, $session_id) {
+		$id = basename($session_id);
+		$hash = md5($id);
+		$path = rtrim($directory, '/') . '/';
+
+		for ($i = 0; $i < self::SHARD_LEVELS; $i++) {
+			$path .= $hash[$i] . '/';
+		}
+
+		return $path . 'sess_' . $id;
+	}
+
+	/**
+	 * Flat `sess_<id>` at the top of the directory — where releases before the
+	 * sharded layout put every session. Still readable, never written.
+	 */
+	private function legacyPath($session_id) {
+		return $this->directory . 'sess_' . basename($session_id);
+	}
+
 	public function read($session_id) {
 		$this->closeHandle();
 
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
+		$target = self::pathFor($this->directory, $session_id);
+		$legacy = $this->legacyPath($session_id);
 
-		// 'c+' creates the file for a new session without truncating an
-		// existing one. The exclusive lock is held until write() so the
-		// request never races another one on the same session file, like
-		// PHP's built-in files session handler does.
-		$exists = is_file($file);
+		$file = $target;
 
+		// A session that has not been rewritten since the upgrade still lives
+		// flat. Read it from there; write() moves it into its shard the first
+		// time the request actually changes something.
+		if (!is_file($target) && is_file($legacy)) {
+			$file = $legacy;
+		}
+
+		// A missing session is deliberately NOT created here. Crawlers, probes
+		// and prefetches arrive without the session cookie, so a file per
+		// request is pure garbage; a session that never holds anything is
+		// indistinguishable from a missing one. The file (and the lock) appear
+		// in write(), on the first request that stores something.
+		if (!is_file($file)) {
+			$this->raw = '';
+
+			return array();
+		}
+
+		// 'c+' creates the file when a concurrent session_gc run removed it
+		// between the check above and here, without truncating a live one.
 		$handle = @fopen($file, 'c+');
 
 		if (!$handle) {
 			return array();
 		}
 
-		if (!$exists) {
+		$stat = fstat($handle);
+
+		if (!$stat) {
+			fclose($handle);
+
+			return array();
+		}
+
+		// A file this method had to create (a concurrent session_gc run removed
+		// it in between) comes from fopen(), so it needs the session mode.
+		// Sessions created by older releases are covered by the entrypoint's
+		// world-bit strip at boot.
+		if ($stat['size'] === 0) {
 			@chmod($file, self::FILE_MODE);
 		}
 
@@ -70,11 +177,8 @@ class File {
 		$this->lock($handle);
 
 		$this->handle = $handle;
+		$this->file = $file;
 		$this->session_id = $session_id;
-
-		clearstatcache(true, $file);
-
-		$stat = fstat($handle);
 
 		if (empty($stat['size'])) {
 			$this->raw = '';
@@ -110,22 +214,34 @@ class File {
 		}
 
 		$serialized = serialize($data);
+		$target = self::pathFor($this->directory, $session_id);
+		$held = ($this->handle && $session_id === $this->session_id) ? $this->file : '';
 
-		// Skip the write-back when the session was read but not modified.
-		// Under parallel requests (e.g. the admin dashboard fires a dozen
-		// widgets at once) most requests never touch the session, and a
-		// read-only request must never overwrite newer data with the stale
-		// copy it read before it had to proceed unlocked.
-		if ($this->handle && $session_id === $this->session_id && $serialized === $this->raw) {
+		// Nothing to remember: a read-only request whose session did not exist
+		// (a crawler, a probe, a prefetch) must not leave a file behind. This
+		// is where a bot flood used to turn into one session file per request.
+		if ($serialized === 'a:0:{}' && !is_file($target) && ($held === '' || !is_file($held))) {
 			$this->closeHandle();
 
 			return true;
 		}
 
-		// Normal path: the request holds the locked handle for this session
-		// id, so rewriting through it is atomic with respect to any other
-		// request of the same session.
-		if ($this->handle && $session_id === $this->session_id) {
+		// Skip the write-back when the session was read but not modified.
+		// Under parallel requests (e.g. the admin dashboard fires a dozen
+		// widgets at once) most requests never touch the session, and a
+		// read-only request must never overwrite newer data with the stale
+		// copy it read before it had to proceed unlocked. It also leaves a
+		// legacy flat file where it is: no change, nothing to migrate.
+		if ($held !== '' && $serialized === $this->raw) {
+			$this->closeHandle();
+
+			return true;
+		}
+
+		// Normal path: the request holds the locked handle for this session id,
+		// so rewriting through it is atomic with respect to any other request of
+		// the same session.
+		if ($held !== '' && $held === $target) {
 			ftruncate($this->handle, 0);
 			fseek($this->handle, 0);
 
@@ -137,9 +253,53 @@ class File {
 			return true;
 		}
 
-		// Fallback: writing a session id whose handle is not held (rotate()
-		// or a fresh adaptor). Open, lock, rewrite, release.
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
+		// Fallback: writing a session id whose handle is not held (rotate() or a
+		// fresh adaptor), or moving a legacy flat session into its shard. Open,
+		// lock, rewrite, release.
+		$written = $this->writeFile($target, $serialized);
+
+		if ($held !== '' && $held !== $target) {
+			$this->closeHandle();
+		}
+
+		// The shard now holds this session id, so a flat predecessor is dead
+		// weight: the sharded copy is read first and the flat one would only
+		// come back after the shard was collected. Dropped on every write, not
+		// just on the migrating one, because a previous write may have released
+		// the handle on the legacy file already.
+		$legacy = $this->legacyPath($session_id);
+
+		if ($written && $legacy !== $target && is_file($legacy)) {
+			@unlink($legacy);
+		}
+
+		return $written;
+	}
+
+	public function destroy($session_id) {
+		$this->closeHandle($session_id);
+
+		foreach (array_unique(array(self::pathFor($this->directory, $session_id), $this->legacyPath($session_id))) as $file) {
+			if (is_file($file)) {
+				@unlink($file);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Creates the shard directory when needed and rewrites the session file
+	 * under an exclusive lock.
+	 *
+	 * @param	string	$file		full path of the session file
+	 * @param	string	$serialized
+	 * @return	bool
+	 */
+	private function writeFile($file, $serialized) {
+		if (!$this->makeDirectory(dirname($file))) {
+			return false;
+		}
 
 		$exists = is_file($file);
 
@@ -167,16 +327,25 @@ class File {
 		return true;
 	}
 
-	public function destroy($session_id) {
-		$this->closeHandle($session_id);
-
-		$file = DIR_SESSION . 'sess_' . basename($session_id);
-
-		if (is_file($file)) {
-			unlink($file);
+	/**
+	 * Creates a shard directory (with its two levels) group-writable, whatever
+	 * umask the request runs with.
+	 *
+	 * @param	string	$directory
+	 * @return	bool
+	 */
+	private function makeDirectory($directory) {
+		if (is_dir($directory)) {
+			return true;
 		}
 
-		return true;
+		$umask = umask(0);
+
+		$created = @mkdir($directory, self::DIRECTORY_MODE, true);
+
+		umask($umask);
+
+		return $created || is_dir($directory);
 	}
 
 	/**
@@ -197,6 +366,7 @@ class File {
 		fclose($this->handle);
 
 		$this->handle = null;
+		$this->file = '';
 		$this->session_id = '';
 		$this->raw = null;
 	}
@@ -245,13 +415,7 @@ class File {
 		$expire = time() - $maxlifetime;
 		$removed = 0;
 
-		$files = glob($directory . 'sess_*');
-
-		if (!$files) {
-			return 0;
-		}
-
-		foreach ($files as $file) {
+		foreach (self::sessionFiles(rtrim($directory, '/') . '/') as $file) {
 			if (!is_file($file)) {
 				continue;
 			}
@@ -283,6 +447,33 @@ class File {
 		}
 
 		return $removed;
+	}
+
+	/**
+	 * Yields every session file of the directory: the legacy flat ones at the
+	 * top level, then the sharded `<a>/<b>/sess_*`. One level of globbing at a
+	 * time, so the peak memory stays at a single level's worth of names instead
+	 * of doubling when both layouts are merged into one array.
+	 *
+	 * @param	string	$directory		with a trailing slash
+	 * @return	\Generator
+	 */
+	private static function sessionFiles($directory) {
+		$files = glob($directory . 'sess_*');
+
+		if ($files) {
+			foreach ($files as $file) {
+				yield $file;
+			}
+		}
+
+		$files = glob($directory . str_repeat('*/', self::SHARD_LEVELS) . 'sess_*', GLOB_NOSORT);
+
+		if ($files) {
+			foreach ($files as $file) {
+				yield $file;
+			}
+		}
 	}
 
 	public function __destruct() {

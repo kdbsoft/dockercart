@@ -11,9 +11,10 @@
  * `session.gc_probability = 0` (docker/php.prod.ini) and this hourly worker
  * owns both stores:
  *
- *   - storage/session/sess_* older than `session.gc_maxlifetime`
- *     (Session\File::collectGarbage — never deletes a file a live request
- *     holds locked);
+ *   - storage/session/<a>/<b>/sess_* (canonical, sharded over 256 directories by
+ *     Session\File::pathFor) and the legacy flat storage/session/sess_* older
+ *     than `session.gc_maxlifetime` (Session\File::collectGarbage — never
+ *     deletes a file a live request holds locked);
  *   - `oc_session` rows whose `expire` passed. Every app follows
  *     SESSION_ENGINE now, so this is empty unless the store is configured with
  *     `SESSION_ENGINE=db` (or still has rows from the old stock OpenCart
