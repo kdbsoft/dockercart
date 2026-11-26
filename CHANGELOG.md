@@ -1,3 +1,14 @@
+## [3.52.0](https://github.com/kdbsoft/dockercart/compare/v3.51.1...v3.52.0) (2026-11-26)
+
+### Features
+
+* **make:** rotate local database backups ([1fb28dc](https://github.com/kdbsoft/dockercart/commit/1fb28dcf052e4f1d6de5d4b160f883228e1f76b5))
+* **nginx:** persist and rotate access logs on the host ([4e71f62](https://github.com/kdbsoft/dockercart/commit/4e71f620a85d8121e2f94a282c3c041079a4ce43))
+
+### Bug Fixes
+
+* **session:** shard session files into 256 directories ([0938ff5](https://github.com/kdbsoft/dockercart/commit/0938ff55d252f8d6d02e52b816aa75e4895913e7))
+
 ## [3.51.1](https://github.com/kdbsoft/dockercart/compare/v3.51.0...v3.51.1) (2026-11-25)
 
 ### Bug Fixes
