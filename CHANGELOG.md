@@ -1,3 +1,13 @@
+## [3.55.0](https://github.com/kdbsoft/dockercart/compare/v3.54.1...v3.55.0) (2026-11-28)
+
+### Features
+
+* **deploy:** add a read-only domain-move audit ([58d3b0c](https://github.com/kdbsoft/dockercart/commit/58d3b0c12a21d9e11ed88707b24f41e2f9d8c3e0))
+
+### Bug Fixes
+
+* **seo:** use the effective store URL in sitemap directives ([5518273](https://github.com/kdbsoft/dockercart/commit/5518273e721c0af854d380a9cbe59987d314b933))
+
 ## [3.54.1](https://github.com/kdbsoft/dockercart/compare/v3.54.0...v3.54.1) (2026-11-28)
 
 ### Bug Fixes
