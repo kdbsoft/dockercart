@@ -5,9 +5,11 @@
 # when DOCKERCART_ENV_FORCE_WIZARD=1 forces a redo).
 #
 # Design goals:
-#   - Minimal interaction. Ask only for the store domain and the admin email.
-#     Everything else (timezone, project name, ports, admin username, seed mode)
-#     gets a sane default, and every password is generated randomly.
+#   - Minimal interaction. Ask for the store domain, the admin email and — only
+#     when the store is actually being installed (no MariaDB data volume yet) —
+#     the seed mode (demo/clean). Everything else (timezone, project name,
+#     ports, admin username) gets a sane default, and every password is
+#     generated randomly.
 #   - Safe for automation. With no TTY or DOCKERCART_NONINTERACTIVE=1 the script
 #     copies .env.example and generates random passwords without any prompts.
 #   - No separate mode wizard: the launch/SSL mode is chosen via start.sh flags
@@ -201,7 +203,21 @@ configure_env() {
         return 0
     fi
 
-    # First run: copy the template, then ask the two questions.
+    # Installation or existing store? A MariaDB data volume is created by the
+    # first `up` and survives start/stop, so its absence is the honest signal
+    # that the schema is about to be initialised — which is exactly when the
+    # seed choice is consumed (docker/entrypoint.sh) and when the admin account
+    # (and its password) is created. start.sh decides the same way and exports
+    # DB_VOLUME_NAME so both look at the same volume.
+    local project
+    project="$(sanitize_project_name "${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}")"
+    local db_volume="${DB_VOLUME_NAME:-${project}_mariadb-data}"
+    local installing=0
+    if ! docker volume inspect "$db_volume" >/dev/null 2>&1; then
+        installing=1
+    fi
+
+    # First run: copy the template, then ask the questions.
     if [ ! -f "$ENV_FILE" ]; then
         if [ ! -f .env.example ]; then
             echo -e "${RED}❌ .env.example not found — cannot create .env${NC}"
@@ -214,9 +230,7 @@ configure_env() {
         # Existing database volume predates this .env: MariaDB bakes
         # user/password at first volume init and ignores new MARIADB_* values,
         # so fresh wizard passwords would not match it ('Access denied').
-        local project="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}"
-        local db_volume="${project}_mariadb-data"
-        if command -v docker >/dev/null 2>&1 && docker volume inspect "$db_volume" >/dev/null 2>&1; then
+        if [ "$installing" = "0" ]; then
             echo ""
             echo -e "${YELLOW}⚠ Existing database volume '${db_volume}' found.${NC}"
             echo -e "   Its passwords were set when the volume was first created; the"
@@ -230,6 +244,9 @@ configure_env() {
             if [ "$reset_db" = "y" ] || [ "$reset_db" = "Y" ]; then
                 if docker volume rm "$db_volume"; then
                     echo -e "${GREEN}✓ Database volume removed — it will be recreated fresh.${NC}"
+                    # From here on this IS an installation: ask for the seed mode
+                    # and let the summary/start.sh report the admin credentials.
+                    installing=1
                 else
                     echo -e "${RED}✗ Could not remove the volume (is a container using it?).${NC}"
                     echo -e "   Stop the stack (make stop) and run 'make start' again."
@@ -242,7 +259,11 @@ configure_env() {
     fi
 
     echo -e "${BLUE}DockerCart first-run setup${NC}"
-    echo -e "${YELLOW}Only two values are required; everything else uses sane defaults.${NC}"
+    if [ "$installing" = "1" ]; then
+        echo -e "${YELLOW}No database volume yet — this run installs the store.${NC}"
+    else
+        echo -e "${YELLOW}Existing database volume found — configuration only, no reinstall.${NC}"
+    fi
     echo -e "${YELLOW}Press Enter to accept the suggested value.${NC}"
     echo ""
 
@@ -276,14 +297,13 @@ configure_env() {
     fi
 
     # --- 3. Seed mode (demo / clean) -----------------------------------------
-    # Only prompt on a forced re-run (make clean -> make start, which sets
-    # DOCKERCART_ENV_FORCE_WIZARD=1) or when the key is missing/empty. The normal
-    # first-run wizard keeps the template default (demo) to stay minimal; the
-    # operator can edit DOCKERCART_SEED_MODE in .env later.
-    local force_wizard="${DOCKERCART_ENV_FORCE_WIZARD:-0}"
+    # Asked whenever the store is INSTALLED (no database volume yet — a fresh
+    # clone, make clean, or a manually removed volume) and whenever the key is
+    # missing. An existing store keeps whatever .env says: the value only ever
+    # reaches the first schema init, so re-asking would be a lie.
     local seed_mode
     seed_mode="$(get_env_key "$ENV_FILE" DOCKERCART_SEED_MODE)"
-    if [ "$force_wizard" = "1" ] || [ -z "$seed_mode" ]; then
+    if [ -z "$seed_mode" ] || [ "$installing" = "1" ]; then
         echo ""
         echo -e "${BLUE}Seed mode${NC}"
         echo -e "  ${GREEN}demo${NC}  — pre-populated sample store (products, categories)"
@@ -350,13 +370,6 @@ configure_env() {
         set_env_key "$ENV_FILE" DOCKERCART_HTTPS_PORT "443"
     fi
 
-    # Seed mode default (demo; edit .env for a clean store).
-    local seed_mode
-    seed_mode="$(get_env_key "$ENV_FILE" DOCKERCART_SEED_MODE)"
-    if [ -z "$seed_mode" ]; then
-        set_env_key "$ENV_FILE" DOCKERCART_SEED_MODE "demo"
-    fi
-
     # --- Random secrets ------------------------------------------------------
     generate_secrets "$ENV_FILE"
 
@@ -364,6 +377,9 @@ configure_env() {
     validate_flat_env "$ENV_FILE" || return 1
 
     # --- Summary -------------------------------------------------------------
+    local seed_note=""
+    [ "$installing" = "1" ] || seed_note=" ${YELLOW}(already installed — applies to a fresh database only)${NC}"
+
     echo -e "${GREEN}✓ Setup complete.${NC}"
     echo ""
     echo -e "${BLUE}Summary${NC}"
@@ -371,7 +387,7 @@ configure_env() {
     echo -e "  Admin URL:     ${GREEN}http://${domain:-$(get_env_key "$ENV_FILE" DOCKERCART_DOMAIN)}/admin${NC}"
     echo -e "  Admin user:    ${GREEN}$(get_env_key "$ENV_FILE" ADMIN_USERNAME)${NC}"
     echo -e "  Admin email:   ${GREEN}$(get_env_key "$ENV_FILE" ADMIN_EMAIL)${NC}"
-    echo -e "  Seed mode:     ${GREEN}$(get_env_key "$ENV_FILE" DOCKERCART_SEED_MODE)${NC}"
+    echo -e "  Seed mode:     ${GREEN}$(get_env_key "$ENV_FILE" DOCKERCART_SEED_MODE)${NC}${seed_note}"
     echo -e "  Timezone:      ${GREEN}$(get_env_key "$ENV_FILE" TZ)${NC}"
     echo ""
     echo -e "${YELLOW}All passwords were generated randomly and saved to .env.${NC}"

@@ -34,20 +34,20 @@ cd dockercart
 make start
 ```
 
-On first run, `make start` generates `.env` from `.env.example`. The interactive setup asks only for the store domain and admin email — everything else (timezone, ports, admin username, seed mode) gets a default, and all passwords are generated randomly. Set `DOCKERCART_NONINTERACTIVE=1` to skip the prompts entirely. Subsequent runs just start the stack (mode is remembered in `.env`). `make start` with no choice starts standalone HTTP; pass `start.sh` flags for non-interactive runs, e.g. `make start ARGS="--traefik --le"`.
+On first run, `make start` generates `.env` from `.env.example`. The interactive setup asks for the store domain, the admin email and — when the store is being installed (no database volume yet) — the seed mode (`demo` sample catalogue or `clean` empty store); every other value (timezone, ports, admin username) gets a default, and all passwords are generated randomly. Set `DOCKERCART_NONINTERACTIVE=1` to skip the prompts entirely (seed mode stays `demo`). Subsequent runs just start the stack (mode is remembered in `.env`). `make start` with no choice starts standalone HTTP; pass `start.sh` flags for non-interactive runs, e.g. `make start ARGS="--traefik --le"`.
 
 > **Note for podman-compose users:** the stack is tested with docker compose, but works under podman-compose (podman's `docker` shim) too, **provided `.env` stays flat** — no nested `${VAR}` references. docker compose expands `MARIADB_USER=${DB_USERNAME}` recursively; podman-compose does not, which leaves the literal string in the container env, breaks the mariadb healthcheck, and the startup hangs waiting on `condition: service_healthy`. If `make start` seems stuck, check the mariadb container env: `docker inspect ${MARIADB_CONTAINER_NAME:-dockercart_mariadb} --format '{{range .Config.Env}}{{println .}}{{end}}'` — a literal `${DB_USERNAME}` in `MARIADB_USER`/`MARIADB_DATABASE` means `.env` needs the flat values from `.env.example`.
 
 First boot performs the following automatically:
 
 - Generates `config.php` from environment variables
-- Seeds the database and applies migrations
+- Seeds the database (demo catalogue or empty, per `DOCKERCART_SEED_MODE`) and applies migrations
 - Builds the full-text search index
 - Sets correct file permissions
 - Requires no manual intervention
 
 **Admin panel:** `http://dockercart.local/admin`  
-**Admin credentials:** the values set during setup (or generated — see `.env` `ADMIN_USERNAME` / `ADMIN_PASSWORD`)
+**Admin credentials:** `ADMIN_USERNAME` / `ADMIN_PASSWORD` — both live in `.env`; the password is generated randomly on a fresh install and printed **once** in the `make start` summary (later starts stay silent, use `grep ADMIN_PASSWORD .env`)
 
 ---
 

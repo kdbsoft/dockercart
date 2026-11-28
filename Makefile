@@ -201,7 +201,8 @@ dump-init: ## Regenerate docker/mysql/init.sql from running MariaDB
 
 clean: ## DESTRUCTIVE: Stop containers, drop DB/search volumes, force re-setup
 	@echo "WARNING: All database and search data will be lost, and the next"
-	@echo "WARNING: 'make start' will re-run the setup wizard (incl. seed mode)."
+	@echo "WARNING: 'make start' will re-run the setup wizard and ask for the"
+	@echo "WARNING: seed mode (demo/clean) again."
 	@read -p "Continue? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	# Tear down using the exact compose file set that is currently active
 	# (Traefik/SSL overrides recorded in .env), so every service is stopped.
@@ -216,8 +217,10 @@ clean: ## DESTRUCTIVE: Stop containers, drop DB/search volumes, force re-setup
 		echo "Removing volume $$v..."; \
 		docker volume rm "$$v" >/dev/null 2>&1 || true; \
 	done
-	# Force the setup wizard (which now asks for seed mode) on the next start,
-	# without wiping the rest of the user's .env.
+	# Removing the volume alone already makes start.sh re-run the wizard (no
+	# database volume = installation). The explicit flag keeps that behaviour
+	# independent of the volume name and also re-runs the flat-env validation
+	# and the .env summary, without wiping the rest of the user's .env.
 	@if [ -f .env ]; then \
 		if grep -qE '^DOCKERCART_ENV_FORCE_WIZARD=' .env; then \
 			sed -i 's|^DOCKERCART_ENV_FORCE_WIZARD=.*|DOCKERCART_ENV_FORCE_WIZARD=1|' .env; \
@@ -225,4 +228,4 @@ clean: ## DESTRUCTIVE: Stop containers, drop DB/search volumes, force re-setup
 			printf '\n# Set by make clean so the next make start re-runs the wizard\nDOCKERCART_ENV_FORCE_WIZARD=1\n' >> .env; \
 		fi; \
 	fi
-	@echo "Cleaned. Run 'make start' to re-install (wizard will prompt for seed mode)."
+	@echo "Cleaned. Run 'make start' to re-install (the wizard asks for demo/clean again)."

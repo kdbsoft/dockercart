@@ -474,8 +474,11 @@ Preview with `npm run release:dry-run`.
   `.opencode/plans/YYYYMMDD-HHMMSS-<short-slug>.md` (the date-time prefix keeps plans
   sorted chronologically). Treat it as a working scratchpad, then leave it on disk
   (gitignored) — do not commit it.
-- `make start` first boot is fully unattended: generates configs, seeds DB, applies migrations,
-  builds Manticore index, fixes permissions. There is **no `/install` directory** — don't add one.
-  In practice, `make start ARGS="--traefik --le"` (or the interactive menu option 6) is the usual
-  entry point (Traefik mode).
+- `make start` on a machine without a database volume is an **installation**: `start.sh`
+  points the wizard at that (no volume = first schema init) and it asks for the seed mode
+  (`DOCKERCART_SEED_MODE=demo|clean`), then the summary prints the generated admin password
+  exactly once. Every later start is unattended: generates configs, applies migrations,
+  builds the Manticore index, fixes permissions — and stays silent about secrets. There is
+  **no `/install` directory** — don't add one. In practice, `make start ARGS="--traefik --le"`
+  (or the interactive menu option 6) is the usual entry point (Traefik mode).
 - Use `mariadb` command instead of `mysql`

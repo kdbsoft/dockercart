@@ -78,18 +78,57 @@ echo ""
 # ============================================================================
 
 # First-run configuration: creates .env from .env.example. The interactive
-# wizard (scripts/configure-env.sh) asks only for the store domain and the
-# admin email; everything else (timezone, project name, ports, admin username,
-# seed mode) gets a sane default, and all passwords are generated randomly.
-# Non-interactive runs (CI, no TTY) silently copy the template and generate
-# random passwords. Re-run with DOCKERCART_ENV_FORCE_WIZARD=1 to redo it.
-if [ ! -f .env ] || [ "${DOCKERCART_ENV_FORCE_WIZARD:-0}" = "1" ]; then
+# wizard (scripts/configure-env.sh) asks for the store domain, the admin email
+# and — because this is an installation — the seed mode (demo/clean); every
+# other value (timezone, project name, ports, admin username) gets a sane
+# default, and all passwords are generated randomly. Non-interactive runs (CI,
+# no TTY) silently copy the template and generate random passwords. Re-run with
+# DOCKERCART_ENV_FORCE_WIZARD=1 to redo it.
+
+# Load the shared project-name sanitizer (also used by the wizard below).
+# shellcheck disable=SC1091
+. ./scripts/project-name.sh
+
+# Read a KEY=value straight out of .env. load_env runs further below, but the
+# wizard trigger has to know the stored project name and force flag already.
+env_file_value() {
+    sed -n "s/^$2=//p" "$1" 2>/dev/null | tail -1
+}
+
+# INSTALLATION or existing store? The MariaDB data volume is created by the
+# first `up` and never removed by a normal start/stop, so its absence means
+# "the schema is about to be initialised for the first time": that is when the
+# seed choice (demo/clean) is consumed (docker/entrypoint.sh) and when the
+# admin account is created. Both the wizard and the summary below depend on it,
+# so it is decided here, before .env is loaded — the volume name comes from
+# COMPOSE_PROJECT_NAME, read from the environment, then from .env directly.
+project_hint="${COMPOSE_PROJECT_NAME:-$(env_file_value .env COMPOSE_PROJECT_NAME)}"
+project_hint="${project_hint:-$(basename "$PWD")}"
+DB_VOLUME_NAME="${DB_VOLUME_NAME:-$(sanitize_project_name "$project_hint")_mariadb-data}"
+# Shared with the wizard so both look at exactly the same volume.
+export DB_VOLUME_NAME
+
+FIRST_INSTALL=0
+if ! docker volume inspect "$DB_VOLUME_NAME" >/dev/null 2>&1; then
+    FIRST_INSTALL=1
+fi
+
+# The wizard runs when .env is missing, when it is explicitly forced (make
+# clean) and whenever the store is being installed — that is the only run on
+# which the seed mode / admin password prompts make sense.
+wizard_forced="${DOCKERCART_ENV_FORCE_WIZARD:-$(env_file_value .env DOCKERCART_ENV_FORCE_WIZARD)}"
+if [ ! -f .env ] || [ "$wizard_forced" = "1" ] || [ "$FIRST_INSTALL" = "1" ]; then
+    # shellcheck disable=SC1091
     . ./scripts/configure-env.sh
 fi
 
-# Load the shared project-name sanitizer (also used by the wizard above).
-# shellcheck disable=SC1091
-. ./scripts/project-name.sh
+# The wizard may have dropped an orphaned database volume (it asks before
+# generating fresh passwords, and `make clean` removes it beforehand) — so
+# re-check: the seed message and the admin credentials below must describe the
+# run that actually happens.
+if ! docker volume inspect "$DB_VOLUME_NAME" >/dev/null 2>&1; then
+    FIRST_INSTALL=1
+fi
 
 # Traefik ACME resolver discovery/verification (shared with health-check.sh).
 # A resolver name that the external Traefik does not know is a silent failure:
@@ -166,26 +205,49 @@ fi
 echo ""
 
 # ============================================================================
-# SEED MODE (only on fresh install: no existing DB volume)
+# SEED MODE (installation only: no DB volume yet)
 # ============================================================================
-# The seed choice lives in .env as DOCKERCART_SEED_MODE (see .env.example;
-# default "demo", use "clean" for an empty store). Here we only read it back;
-# no interactive prompt. On a fresh database volume with no seed key recorded,
-# default to demo data. Edit .env and run `make restart` to change the choice.
+# The choice lives in .env as DOCKERCART_SEED_MODE (default "demo", "clean" for
+# an empty store) and is asked for by the wizard above, on the run that installs
+# the schema. With an existing database volume the value is not used at all —
+# the demo cleanup only ever runs on a freshly seeded database — so nothing is
+# prompted here, and nothing pretends to be.
 
 SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
-DB_VOLUME_NAME="${DB_VOLUME_NAME:-$(sanitize_project_name "${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}")_mariadb-data}"
 
-# Detect whether a database volume already exists (i.e. this is NOT a first run)
-if docker volume inspect "${DB_VOLUME_NAME}" >/dev/null 2>&1; then
-    echo -e "${GREEN}✓ Database volume exists — skipping install prompt${NC}"
-elif [ -n "${DOCKERCART_SEED_MODE:-}" ]; then
-    echo -e "${YELLOW}Using DOCKERCART_SEED_MODE=${SEED_MODE} from environment${NC}"
+if [ "$FIRST_INSTALL" = "1" ]; then
+    echo -e "${YELLOW}Fresh install — schema will be seeded with DOCKERCART_SEED_MODE=${SEED_MODE}${NC}"
 else
-    echo -e "${YELLOW}No seed mode recorded — defaulting to demo data${NC}"
+    echo -e "${GREEN}✓ Existing database volume (${DB_VOLUME_NAME}) — store already installed, seed mode not used${NC}"
 fi
 
 echo ""
+
+# ============================================================================
+# ADMIN LOGIN (shown once, on the installation run)
+# ============================================================================
+# The admin password is generated by the wizard straight into .env and appears
+# nowhere else, so the install run is the one moment it has to be visible.
+# Later starts stay silent on purpose: echoing secrets on every boot leaks them
+# into CI output and `make logs`. To see it again: grep ADMIN_PASSWORD .env
+print_admin_credentials() {
+    [ "${FIRST_INSTALL:-0}" = "1" ] || return 0
+
+    local admin_user admin_pass
+    admin_user="${ADMIN_USERNAME:-$(env_file_value .env ADMIN_USERNAME)}"
+    admin_pass="${ADMIN_PASSWORD:-$(env_file_value .env ADMIN_PASSWORD)}"
+    [ -n "$admin_user" ] || admin_user="admin"
+
+    echo -e "${BLUE}Admin login (created by this installation):${NC}"
+    echo -e "  User:     ${GREEN}${admin_user}${NC}"
+    if [ -n "$admin_pass" ] && [ "$admin_pass" != "type_password_here" ]; then
+        echo -e "  Password: ${GREEN}${admin_pass}${NC}"
+    else
+        echo -e "  Password: ${YELLOW}(unchanged) see ADMIN_PASSWORD in .env${NC}"
+    fi
+    echo -e "  ${YELLOW}Printed only on install; it stays in .env (ADMIN_USERNAME / ADMIN_PASSWORD).${NC}"
+    echo ""
+}
 
 # ============================================================================
 # SSL SETUP
@@ -559,6 +621,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
     echo "HTTP challenge endpoint: http://${SSL_DOMAIN}/.well-known/acme-challenge/"
     echo "Auto-renewal: certbot service checks every $RENEW_INTERVAL (renews only near expiry)"
     echo ""
+    print_admin_credentials
     # Skip the generic start below
     exit 0
 fi
@@ -755,6 +818,7 @@ else
 fi
 
 echo ""
+print_admin_credentials
 echo -e "${BLUE}Database:${NC}"
 echo -e "  Host:     ${GREEN}${DB_HOSTNAME:-mariadb}${NC}"
 echo -e "  User:     ${GREEN}${DB_USERNAME:-dockercart}${NC}"

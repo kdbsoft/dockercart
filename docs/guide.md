@@ -47,7 +47,7 @@ cd dockercart
 make start
 ```
 
-On the first run `make start` generates `.env` from `.env.example`. The interactive setup asks for only the store domain and the admin email; every other value (timezone, project name, ports, admin username, seed mode) gets a sane default, and all passwords (DB, MariaDB root, Redis, admin, FTP) are generated randomly and written to `.env`. `.env.example` remains the full reference template for manual tuning — edit it (or the generated `.env`) to change anything. For fully automated installs, set `DOCKERCART_NONINTERACTIVE=1` to skip the two prompts and just generate `.env` with random secrets.
+On the first run `make start` generates `.env` from `.env.example`. The interactive setup asks for the store domain, the admin email and — because this is an installation (no database volume yet) — the seed mode (`demo` sample catalogue or `clean` empty store); every other value (timezone, project name, ports, admin username) gets a sane default, and all passwords (DB, MariaDB root, Redis, admin, FTP) are generated randomly and written to `.env`. `.env.example` remains the full reference template for manual tuning — edit it (or the generated `.env`) to change anything. For fully automated installs, set `DOCKERCART_NONINTERACTIVE=1` to skip the prompts and just generate `.env` with random secrets (seed mode then stays `demo`).
 
 **Keep `.env` flat (no nested `${VAR}` references).** docker compose expands `MARIADB_USER=${DB_USERNAME}` recursively, but podman-compose (the `docker` shim on podman hosts) does not: the literal string lands in the container env, the mariadb healthcheck runs with an empty user, mariadb never becomes `healthy`, and `up` blocks indefinitely on `depends_on: condition: service_healthy` — the startup appears hung right after the mariadb/redis containers are listed. If that happens, fix the `MARIADB_USER`/`MARIADB_DATABASE` lines in `.env` to the plain values from `.env.example` (they must mirror `DB_USERNAME`/`DB_DATABASE`) and re-run `make start`. The mariadb healthcheck resolves its credentials from the container environment at runtime, so it does not depend on compose-side interpolation.
 
@@ -69,11 +69,13 @@ The entrypoint script (`docker/entrypoint.sh`) runs the following on first start
 
 No web installer is involved — there is no `/install` directory.
 
+The installation run is the only one that asks for the seed mode (it is consumed by the first schema init) and the only one that **prints the admin password**: it is generated into `.env` and echoed once in the start summary. Later starts stay silent — read it with `grep ADMIN_PASSWORD .env`. To install again with a different seed mode run `make clean` and then `make start`.
+
 ### Access
 
 - **Storefront:** `http://dockercart.local`
 - **Admin panel:** `http://dockercart.local/admin`
-- **Default credentials:** `admin` / `admin123` (set in `.env`)
+- **Credentials:** `ADMIN_USERNAME` / `ADMIN_PASSWORD` from `.env` (random on a fresh install, printed once by `make start`)
 
 ### Add-ons
 
@@ -358,6 +360,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | `DOCKERCART_HTTPS_URL` | derived (`https://DOCKERCART_DOMAIN[:DOCKERCART_HTTPS_PORT]`) | HTTPS counterpart; derived the same way |
 | `DOCKERCART_SSL_ENABLED` | derived from the start mode (`--ssl`/`--le` → `true`) | Makes the app emit `https://` URLs (`HTTPS_SERVER`, `config_ssl`) |
 | `DOCKERCART_DOMAIN` | `dockercart.local` | Public store host — the single place the store URL is configured |
+| `DOCKERCART_SEED_MODE` | `demo` | What a **fresh install** seeds: `demo` (sample catalogue) or `clean` (empty store). Asked by the setup wizard on install; ignored once a database volume exists |
 | `ADMIN_USERNAME` | `admin` | Default admin username |
 | `ADMIN_PASSWORD` | `admin123` | Default admin password |
 | `ADMIN_EMAIL` | `admin@example.com` | Default admin email |
