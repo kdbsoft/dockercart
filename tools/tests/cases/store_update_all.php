@@ -191,6 +191,13 @@ XML;
 
 		Assert::contains('{% if can_modify and update_queue %}', $template, 'the button must be hidden for read-only groups');
 		Assert::contains('id="store-update-all-btn"', $template);
+
+		// The batch button belongs to the installed/purchased panel at the bottom,
+		// not to the catalog panel head at the top of the page.
+		$licenses_head = strpos($template, '{{ text_license_management }}');
+		$update_all_button = strpos($template, 'id="store-update-all-btn"');
+
+		Assert::true($licenses_head !== false && $update_all_button !== false && $update_all_button > $licenses_head, 'the batch button must sit in the licenses panel head');
 		Assert::contains('var updateQueue = {{ update_queue|json_encode|raw }};', $template);
 		Assert::contains('id="store-update-all-modal"', $template);
 		Assert::contains('id="store-update-all-bar"', $template);
