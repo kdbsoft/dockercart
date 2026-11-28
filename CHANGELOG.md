@@ -1,3 +1,14 @@
+## [3.53.0](https://github.com/kdbsoft/dockercart/compare/v3.52.2...v3.53.0) (2026-11-28)
+
+### Features
+
+* **deploy:** fail fast on a missing Traefik resolver and verify the edge cert ([926691c](https://github.com/kdbsoft/dockercart/commit/926691c8df135bc1d1bc1112ecbd3aba8f6ab10d))
+
+### Bug Fixes
+
+* **compose:** repair the nginx log dir ownership on start ([cbe07ec](https://github.com/kdbsoft/dockercart/commit/cbe07ec56bf8f409289ad053c995c23b5acad1a1))
+* **deploy:** default the Traefik ACME resolver to letsencrypt ([91b7654](https://github.com/kdbsoft/dockercart/commit/91b7654d763bacf3e571a4c565377b63b230dbc5))
+
 ## [3.52.2](https://github.com/kdbsoft/dockercart/compare/v3.52.1...v3.52.2) (2026-11-28)
 
 ### Bug Fixes
