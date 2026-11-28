@@ -377,7 +377,7 @@ omitted) + the TLS flag, and every consumer uses that one function:
 
 | Consumer | Uses it for |
 |---|---|
-| `docker/entrypoint.sh` | `HTTP_SERVER`/`HTTPS_SERVER` in the generated `config.php`, `oc_setting.config_url`/`config_ssl`, the seeded `robots.txt` sitemap |
+| `docker/entrypoint.sh` | `HTTP_SERVER`/`HTTPS_SERVER` in the generated `config.php`, `oc_setting.config_url`/`config_ssl`, the seeded `robots.txt` sitemap (repaired on boot when it still carries the placeholder host) |
 | `start.sh` | the start summary (`Site:`/`Admin:`) and the pre-flight hints |
 | `health-check.sh` | which URL `/health` is probed on (`make doctor`) |
 
@@ -388,7 +388,14 @@ propagated to a real domain. That rule is what healed installs whose `.env`
 still carried `DOCKERCART_URL=http://dockercart.local` after the wizard had
 already written the real domain: the storefront emitted `http://dockercart.local`
 images on an HTTPS page (mixed content → "Not secure") and links to an
-unresolvable host.
+unresolvable host. `start.sh` also comments such a line out of `.env`
+(`heal_placeholder_env_urls`) instead of only warning about it, so the stale
+value stops being passed by every later `make restart`. A real explicit URL is
+operator-owned and stays untouched.
+
+The derived URL is also what the `Sitemap:` line in `robots.txt` must carry — see
+[robots.txt](#robotstxt): a file seeded with the placeholder host is repaired at
+boot and on the Indexing page, never left pointing at `dockercart.local`.
 
 `DOCKERCART_SSL_ENABLED` is derived from the start mode: the TLS compose
 overrides (`docker-compose.ssl.yml`, `docker-compose.le.yml`,
@@ -488,6 +495,25 @@ The file is only *seeded* with a default template by `ensure_robots_txt()` in
 the https one when TLS is enabled, see [Store URL derivation](#store-url-derivation)); once it exists it is never overwritten on restart, so admin
 edits survive. The same default template lives in
 `ControllerSettingIndexing::defaultRobotsTxt()` — keep the two in sync.
+
+**The `Sitemap:` host follows the store URL, it is never configured twice.** A
+file seeded before the operator's domain was in place used to keep
+`Sitemap: http://dockercart.local:8080/sitemap.xml` forever — the storefront was
+fine on the real domain while every crawler was sent to a host nobody can
+resolve. Now a Sitemap line that still points at the placeholder host is
+rewritten to the current store URL:
+
+- on container boot, `store_robots_fix_sitemap()` (`docker/store-url.sh`) repairs
+  that one line of the existing file (everything else, including hand edits, is
+  left untouched) — unless the store itself lives on the placeholder host, i.e.
+  a local install;
+- on the admin page, `Dockercart\Seo\Robots::normalise()` rewrites it in the
+  editor (so the page shows what saving writes) and on save, which also keeps
+  `oc_setting.config_indexing_robots` in step with the file.
+
+A Sitemap pointing at a *real* host chosen by the operator (a CDN, an alternate
+domain) is never touched. `tools/tests/cases/robots_sitemap.php` keeps the bash
+and PHP implementations byte-identical.
 
 ---
 

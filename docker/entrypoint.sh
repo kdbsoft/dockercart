@@ -220,13 +220,27 @@ wait_for_mysql() {
 # Первичная раскладка robots.txt. После этого файл управляется из админки
 # (Система -> Индексация), поэтому здесь он только создаётся, если его ещё
 # нет — при каждом рестарте существующий файл не перезаписывается, иначе
-# правки из админки терялись бы.
+# правки из админки терялись бы. Единственное исключение — строка Sitemap с
+# хостом-плейсхолдером: такой файл мог быть засеян до того, как оператор задал
+# реальный домен, и до сих пор указывал поисковикам на dockercart.local
+# (store_robots_fix_sitemap, docker/store-url.sh).
 ensure_robots_txt() {
     resolve_owner
     local robots_file="/var/www/html/robots.txt"
 
     if [ -f "$robots_file" ]; then
-        echo "$robots_file already exists - leaving it as is (managed from admin)."
+        local url
+        url="$(store_effective_url)"
+        url="${url%/}"
+
+        # The file is the admin's, but a placeholder host in it is not: repair
+        # that single line, everything else stays exactly as saved.
+        if store_robots_fix_sitemap "$robots_file" "$url"; then
+            echo "$robots_file: placeholder sitemap replaced with ${url}/sitemap.xml"
+        else
+            echo "$robots_file already exists - leaving it as is (managed from admin)."
+        fi
+
         return 0
     fi
 

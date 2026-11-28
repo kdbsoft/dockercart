@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use Dockercart\Seo\Robots;
+
 class ControllerSettingIndexing extends Controller {
 	private $error = array();
 
@@ -65,6 +67,11 @@ class ControllerSettingIndexing extends Controller {
 			$data['config_indexing_robots'] = $default;
 		}
 
+		// A stored body may still carry the .env.example placeholder in its
+		// Sitemap line (a first install seeded it before the domain was known).
+		// Show what saving would write, so the page never disagrees with the file.
+		$data['config_indexing_robots'] = Robots::normalise((string)$data['config_indexing_robots'], $this->storeUrl());
+
 		$data['default_robots'] = $default;
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -79,6 +86,11 @@ class ControllerSettingIndexing extends Controller {
 	protected function save() {
 		$status = isset($this->request->post['config_indexing_status']) ? (int)$this->request->post['config_indexing_status'] : 0;
 		$robots = isset($this->request->post['config_indexing_robots']) ? (string)$this->request->post['config_indexing_robots'] : '';
+
+		// The Sitemap line is derived from the store URL, never configured
+		// twice (docker/store-url.sh): a placeholder host in the submitted body
+		// is rewritten before it reaches the file and the setting.
+		$robots = Robots::normalise($robots, $this->storeUrl());
 
 		$content = $this->renderRobotsTxt($status, $robots);
 
@@ -120,17 +132,29 @@ class ControllerSettingIndexing extends Controller {
 	}
 
 	/**
+	 * Store URL of this installation: config_url, falling back to the catalog
+	 * constant (which the entrypoint writes from the same resolver).
+	 *
+	 * @return	string
+	 */
+	protected function storeUrl() {
+		$url = (string)$this->config->get('config_url');
+
+		if ($url === '' && defined('HTTP_CATALOG')) {
+			$url = (string)HTTP_CATALOG;
+		}
+
+		return $url;
+	}
+
+	/**
 	 * Default robots.txt template. Keep in sync with ensure_robots_txt() in
 	 * docker/entrypoint.sh (which only seeds this on first boot).
 	 *
 	 * @return	string
 	 */
 	protected function defaultRobotsTxt() {
-		$url = rtrim((string)$this->config->get('config_url'), '/');
-
-		if ($url === '' && defined('HTTP_CATALOG')) {
-			$url = rtrim((string)HTTP_CATALOG, '/');
-		}
+		$url = rtrim($this->storeUrl(), '/');
 
 		$lines = array(
 			'User-agent: *',

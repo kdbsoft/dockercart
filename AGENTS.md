@@ -67,7 +67,9 @@ These are written at container start by `docker/entrypoint.sh` from `.env` and o
 every boot:
 
 - `upload/config.php`, `upload/admin/config.php`, `upload/api/config.php` — app configs
-- `robots.txt`, `sitemap.xml`
+- `robots.txt`, `sitemap.xml` — `robots.txt` is seeded once (the admin owns it afterwards);
+  the only thing the entrypoint still repairs is a `Sitemap:` line pointing at the
+  `dockercart.local` placeholder (`store_robots_fix_sitemap`, see the store-URL invariant below)
 - `storage/vendor/` — Composer deps
 Change behavior by editing `.env` (then `make restart`) or the entrypoint heredoc / Tailwind
 input (`tools/tailwind/tailwind-input.css`), not the generated files. For code changes
@@ -426,6 +428,15 @@ Preview with `npm run release:dry-run`.
   leftover is what made a live HTTPS store emit `http://dockercart.local` images and
   links. Never hand-write the URL into a new consumer; call the resolver, and keep
   `tools/tests/cases/store_url.php` green.
+- **The `Sitemap:` line in `robots.txt` follows the store URL too.** A file seeded while
+  the placeholder was in effect is repaired, never left advertising an unresolvable host:
+  `store_robots_fix_sitemap()` (`docker/store-url.sh`, container boot) rewrites that one
+  line of an existing file, and `Dockercart\Seo\Robots::normalise()` does the same on the
+  admin page (display + save, so the editor and the file can't disagree). Only a
+  placeholder host is rewritten — a real host chosen by the operator is untouched.
+  `start.sh` also comments a placeholder `DOCKERCART_URL`/`DOCKERCART_HTTPS_URL` out of
+  `.env` instead of only warning. Guarded by `tools/tests/cases/robots_sitemap.php`
+  (bash and PHP implementations are compared byte for byte).
 
 ## Notes
 

@@ -114,9 +114,40 @@ fi
 # one exception: the .env.example placeholder (dockercart.local) is ignored as
 # soon as DOCKERCART_DOMAIN names a different host — otherwise the app keeps
 # emitting http://dockercart.local assets/links on a real domain (mixed content,
-# broken links). start.sh still never writes to .env.
+# broken links).
+#
+# resolve_store_urls() drops such a placeholder for the current run; the line
+# itself is commented out of .env below. Leaving it behind is what made a first
+# install confusing: the wizard answered "✓ Domain: store.example.com" and every
+# `make restart` / operator inspection still saw
+# `DOCKERCART_URL=http://dockercart.local:8080`, which no longer matched any
+# generated link. Unlike the URL, .env *is* start.sh's to write (the wizard
+# already writes the domain there).
 # shellcheck source=./docker/store-url.sh
 . ./docker/store-url.sh
+
+# Comment out an explicit URL that still points at the template placeholder.
+# Only the placeholder host qualifies — a real explicit URL is operator-owned
+# and stays untouched (and still wins, see resolve_store_urls).
+heal_placeholder_env_urls() {
+    local file=".env" domain key value
+
+    [ -f "$file" ] || return 0
+
+    domain="$(sed -n 's/^DOCKERCART_DOMAIN=//p' "$file" | tail -1 | tr -d '[:space:]')"
+
+    for key in DOCKERCART_URL DOCKERCART_HTTPS_URL; do
+        value="$(sed -n "s/^${key}=//p" "$file" | tail -1 | tr -d '[:space:]')"
+        [ -n "$value" ] || continue
+        store_url_is_placeholder "$value" "$domain" || continue
+
+        sed -i "s|^${key}=.*|#${key}=  # template placeholder dropped by start.sh; the URL follows DOCKERCART_DOMAIN|" "$file"
+        unset "$key"
+        echo -e "${YELLOW}✓ ${key} dropped from .env: it pointed at ${STORE_URL_PLACEHOLDER_DOMAIN}, the URL is derived from DOCKERCART_DOMAIN${NC}"
+    done
+}
+
+heal_placeholder_env_urls
 
 # With --ssl / --le (standalone or behind Traefik) the browser is on https, so
 # the app must emit https URLs: an http config_ssl turns every image on the
@@ -215,9 +246,10 @@ ask_public_domain() {
     [ "$proposed" = "$current" ] && return 0
 
     # Persist so `make restart` / the next start use the same host, then apply
-    # it to this run. An explicit DOCKERCART_URL in .env stays operator-owned
-    # (never rewritten) — only a derived pair follows the domain (the template
-    # placeholder dockercart.local counts as derived, see docker/store-url.sh).
+    # it to this run. An explicit DOCKERCART_URL pointing at a real host in .env
+    # stays operator-owned (never rewritten) — only a derived pair follows the
+    # domain (the template placeholder dockercart.local counts as derived, see
+    # docker/store-url.sh, and is dropped from .env as well).
     DOCKERCART_DOMAIN="$proposed"
     SSL_DOMAIN="$proposed"
     export DOCKERCART_DOMAIN SSL_DOMAIN
@@ -228,9 +260,13 @@ ask_public_domain() {
     fi
     echo -e "${GREEN}✓ Domain: ${DOCKERCART_DOMAIN} (saved to .env)${NC}"
 
+    # A URL line left over from the template is now demonstrably stale: drop it
+    # from .env (this run already ignored it) and resolve again for the new host.
+    heal_placeholder_env_urls
+    resolve_store_urls
+
     if [ "$STORE_URLS_DERIVED" = "1" ]; then
-        # The URL follows the domain — recompute for the domain given just now.
-        resolve_store_urls
+        echo -e "${GREEN}✓ Store URL follows the domain: ${STORE_HTTP_URL}${NC}"
     elif [ -n "${DOCKERCART_URL:-}" ] && ! printf '%s' "$DOCKERCART_URL" | grep -Fq "$DOCKERCART_DOMAIN"; then
         # An explicit URL wins (operator-owned), so it is NOT rewritten — say so
         # instead of leaving a silently stale app URL behind.

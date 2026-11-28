@@ -116,3 +116,64 @@ store_effective_url() {
 		printf '%s' "$STORE_HTTP_URL"
 	fi
 }
+
+# Rewrite a robots.txt whose Sitemap line points at the placeholder host.
+#
+# ensure_robots_txt() seeds robots.txt exactly once (the admin owns the file
+# afterwards, so operator edits survive restarts). A first boot that still ran
+# with the .env.example placeholder therefore baked
+# "Sitemap: http://dockercart.local:8080/sitemap.xml" into the file, and no
+# later fix could reach it: search engines were pointed at a host no visitor can
+# resolve while the storefront itself was fine. This repairs that one line —
+# only that line, and only for a placeholder host (a real host chosen by the
+# operator, e.g. a CDN, is left untouched).
+#
+# The same rule lives in Dockercart\Seo\Robots (admin save/display);
+# tools/tests/cases/robots_sitemap.php keeps both implementations in parity.
+#
+# $1 robots.txt path, $2 store URL (no trailing slash needed).
+# Returns 0 when the file was rewritten, 1 when there was nothing to do.
+store_robots_fix_sitemap() {
+	local file="${1:-}" url="${2:-}" host host_re tmp
+
+	[ -f "$file" ] || return 1
+	[ -n "$url" ] || return 1
+
+	url="${url%/}"
+	host="$(store_url_host "$url")"
+
+	# A local install *is* the placeholder host: nothing to correct.
+	[ -n "$host" ] || return 1
+	[ "$host" != "$STORE_URL_PLACEHOLDER_DOMAIN" ] || return 1
+
+	# Only Sitemap lines are considered (one directive per line).
+	if ! sed -nE 's/^[[:space:]]*Sitemap:[[:space:]]*//Ip' "$file" \
+		| cut -d/ -f3 | cut -d: -f1 | tr '[:upper:]' '[:lower:]' \
+		| grep -qx "$STORE_URL_PLACEHOLDER_DOMAIN"; then
+		return 1
+	fi
+
+	host_re="${STORE_URL_PLACEHOLDER_DOMAIN//./\\.}"
+	# Outside the webroot on purpose: the webroot is a bind mount shared with
+	# nginx, a half-written robots.txt must never be servable.
+	tmp="$(mktemp)" || return 1
+
+	if ! sed -E "s|^([[:space:]]*Sitemap:[[:space:]]*)https?://${host_re}([:/][^[:space:]]*)?[[:space:]]*\$|\1${url}/sitemap.xml|I" "$file" > "$tmp"; then
+		rm -f "$tmp"
+
+		return 1
+	fi
+
+	# Write through the existing inode: the host-side owner/group and the 0664
+	# mode set by the entrypoint survive (sed -i would replace the file).
+	if ! cat "$tmp" > "$file" 2>/dev/null; then
+		rm -f "$tmp"
+		echo "WARNING: could not rewrite the placeholder sitemap in $file" >&2
+
+		return 1
+	fi
+
+	rm -f "$tmp"
+
+	return 0
+}

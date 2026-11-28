@@ -13,7 +13,7 @@ $_['entry_robots']           = 'robots.txt content';
 
 // Help
 $_['help_indexing_status']   = 'When disabled, robots.txt will disallow the entire store to all search engine crawlers (Disallow: /).';
-$_['help_robots']            = 'The contents of the robots.txt file served at /robots.txt. Use one directive per line (User-agent, Allow, Disallow, Sitemap). Changes are saved to the file immediately.';
+$_['help_robots']            = 'The contents of the robots.txt file served at /robots.txt. Use one directive per line (User-agent, Allow, Disallow, Sitemap). Changes are saved to the file immediately. The host in the Sitemap line follows the store URL — a leftover dockercart.local placeholder is replaced on save.';
 
 // Button
 $_['button_save']            = 'Save';
