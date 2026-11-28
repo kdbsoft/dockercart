@@ -1,3 +1,13 @@
+## [3.54.0](https://github.com/kdbsoft/dockercart/compare/v3.53.1...v3.54.0) (2026-11-28)
+
+### Features
+
+* **install:** ask the seed mode on install and print admin credentials once ([d3f151d](https://github.com/kdbsoft/dockercart/commit/d3f151d5637fb384773bac8edaca0c6be9bea0c2))
+
+### Bug Fixes
+
+* **seo:** repair robots.txt sitemap pointing at the placeholder host ([9a8f2e3](https://github.com/kdbsoft/dockercart/commit/9a8f2e3d0e54efa1abad490aac3c07e77ef96e59))
+
 ## [3.53.1](https://github.com/kdbsoft/dockercart/compare/v3.53.0...v3.53.1) (2026-11-28)
 
 ### Bug Fixes
