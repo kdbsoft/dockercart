@@ -120,16 +120,16 @@
                                 {% endif %}
                               </span>
                               {% if offer.state == 'buy' %}
-                              <a href="{{ offer.buy_url }}" class="btn btn-sm btn-primary store-card-btn" target="_blank" rel="noopener">
-                                <i data-lucide="shopping-cart" width="14" height="14"></i> {{ text_buy }}
+                              <a href="{{ offer.buy_url }}" class="btn btn-primary store-card-btn" target="_blank" rel="noopener">
+                                <i data-lucide="shopping-cart" width="12" height="12"></i> {{ text_buy }}
                               </a>
                               {% elseif offer.state == 'install' %}
-                              <button class="btn btn-sm btn-success store-card-btn store-install-btn" data-sku="{{ offer.sku }}">
-                                <i data-lucide="download" width="14" height="14"></i> {{ text_install }}
+                              <button class="btn btn-success store-card-btn store-install-btn" data-sku="{{ offer.sku }}">
+                                <i data-lucide="download" width="12" height="12"></i> {{ text_install }}
                               </button>
                               {% elseif offer.state == 'update' %}
-                              <button class="btn btn-sm btn-warning store-card-btn store-update-btn" data-sku="{{ offer.sku }}">
-                                <i data-lucide="arrow-up" width="14" height="14"></i> {{ text_update }}
+                              <button class="btn btn-warning store-card-btn store-update-btn" data-sku="{{ offer.sku }}">
+                                <i data-lucide="arrow-up" width="12" height="12"></i> {{ text_update }}
                               </button>
                               {% elseif offer.state == 'up_to_date' %}
                               <span class="label label-success store-card-btn-label">{{ text_up_to_date }}</span>

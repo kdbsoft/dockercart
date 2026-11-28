@@ -229,6 +229,32 @@
 	white-space: nowrap;
 }
 
+/* Compact Buy / Install / Update buttons inside the offer cards. */
+.store-card-btn {
+	font-size: 11px;
+	line-height: 1.5;
+	padding: 3px 8px;
+	border-radius: var(--dc-radius-md);
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.store-card-btn svg {
+	width: 12px;
+	height: 12px;
+}
+
+.store-card-btn-label {
+	display: inline-block;
+	font-size: 10px;
+	line-height: 1.5;
+	padding: 3px 6px;
+	border-radius: var(--dc-radius-md);
+	font-weight: 600;
+}
+
 .store-card-price {
 	font-size: 15px;
 	font-weight: 700;
