@@ -1,3 +1,9 @@
+## [3.53.1](https://github.com/kdbsoft/dockercart/compare/v3.53.0...v3.53.1) (2026-11-28)
+
+### Bug Fixes
+
+* **deploy:** derive the store URL and SSL flag from the domain ([d6813a5](https://github.com/kdbsoft/dockercart/commit/d6813a598fb0b94fe9f708b2ecee213a8c9bf831))
+
 ## [3.53.0](https://github.com/kdbsoft/dockercart/compare/v3.52.2...v3.53.0) (2026-11-28)
 
 ### Features
