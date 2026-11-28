@@ -132,19 +132,34 @@ class ControllerSettingIndexing extends Controller {
 	}
 
 	/**
-	 * Store URL of this installation: config_url, falling back to the catalog
-	 * constant (which the entrypoint writes from the same resolver).
+	 * URL the store is publicly served on, for everything a crawler reads.
+	 *
+	 * `config_url` is the http base and `config_ssl` the https one (the entrypoint
+	 * syncs both from the same resolver, docker/store-url.sh). On a TLS deployment
+	 * every page a crawler sees is https, so advertising the sitemap over http
+	 * sends it through a redirect at best — prefer the https base whenever the
+	 * store has one.
 	 *
 	 * @return	string
 	 */
 	protected function storeUrl() {
-		$url = (string)$this->config->get('config_url');
+		$ssl = (string)$this->config->get('config_ssl');
 
-		if ($url === '' && defined('HTTP_CATALOG')) {
-			$url = (string)HTTP_CATALOG;
+		if ($ssl === '' && defined('HTTPS_CATALOG')) {
+			$ssl = (string)HTTPS_CATALOG;
 		}
 
-		return $url;
+		$http = (string)$this->config->get('config_url');
+
+		if ($http === '' && defined('HTTP_CATALOG')) {
+			$http = (string)HTTP_CATALOG;
+		}
+
+		if (stripos($ssl, 'https://') === 0) {
+			return $ssl;
+		}
+
+		return $http !== '' ? $http : $ssl;
 	}
 
 	/**

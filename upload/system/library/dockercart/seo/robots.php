@@ -63,27 +63,40 @@ final class Robots {
 	}
 
 	/**
-	 * Rewrite placeholder Sitemap lines to the current store URL.
+	 * Rewrite our own Sitemap lines to the current store URL.
 	 *
-	 * Returns the body unchanged when there is nothing to do: no store URL, the
-	 * store itself lives on the placeholder host (local development), or no
-	 * Sitemap line points at the placeholder.
+	 * A line is "ours" when its host is the placeholder host (the domain was not
+	 * known yet when the file was written) or the store's own host (the line was
+	 * written over http, before TLS was switched on, or with a stale port). Such
+	 * a line is rewritten to `<store URL>/sitemap.xml`, so an HTTPS store never
+	 * advertises its sitemap over http. A line pointing at any *other* host (a
+	 * CDN, an alternate domain) is chosen by the operator and left alone.
+	 *
+	 * The body is returned unchanged when there is nothing to do: no usable store
+	 * URL, or every Sitemap line is either canonical or foreign.
 	 *
 	 * @param	string	$body		robots.txt contents
-	 * @param	string	$store_url	current store URL (config_url)
+	 * @param	string	$store_url	effective store URL (https when the store has one)
 	 * @return	string
 	 */
 	public static function normalise(string $body, string $store_url): string {
 		$target = self::sitemapUrl($store_url);
+		$store_host = self::host($store_url);
 
-		if ($target === '' || self::isPlaceholder($store_url)) {
+		if ($target === '' || $store_host === '') {
 			return $body;
 		}
 
 		$result = preg_replace_callback(
 			'/^([ \t]*Sitemap:[ \t]*)(\S+)[ \t]*$/mi',
-			static function (array $match) use ($target): string {
-				return self::isPlaceholder($match[2]) ? $match[1] . $target : $match[0];
+			static function (array $match) use ($target, $store_host): string {
+				$host = self::host($match[2]);
+
+				if ($host === self::PLACEHOLDER_HOST || $host === $store_host) {
+					return $match[1] . $target;
+				}
+
+				return $match[0];
 			},
 			$body
 		);

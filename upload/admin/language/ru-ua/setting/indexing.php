@@ -13,7 +13,7 @@ $_['entry_robots']           = 'Содержимое robots.txt';
 
 // Help
 $_['help_indexing_status']   = 'Если выключено, robots.txt запретит индексацию всего магазина всем поисковым роботам (Disallow: /).';
-$_['help_robots']            = 'Содержимое файла robots.txt, отдаваемого по адресу /robots.txt. Одна директива на строку (User-agent, Allow, Disallow, Sitemap). Изменения сразу записываются в файл. Хост в строке Sitemap берётся из URL магазина — забытый плейсхолдер dockercart.local заменяется при сохранении.';
+$_['help_robots']            = 'Содержимое файла robots.txt, отдаваемого по адресу /robots.txt. Одна директива на строку (User-agent, Allow, Disallow, Sitemap). Изменения сразу записываются в файл. Строка Sitemap берётся из URL магазина (https, если он есть): забытый плейсхолдер dockercart.local или http-адрес исправляются при сохранении.';
 
 // Button
 $_['button_save']            = 'Сохранить';

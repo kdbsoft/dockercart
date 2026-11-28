@@ -117,48 +117,59 @@ store_effective_url() {
 	fi
 }
 
-# Rewrite a robots.txt whose Sitemap line points at the placeholder host.
+# Rewrite robots.txt Sitemap lines that no longer match the store URL.
 #
 # ensure_robots_txt() seeds robots.txt exactly once (the admin owns the file
-# afterwards, so operator edits survive restarts). A first boot that still ran
-# with the .env.example placeholder therefore baked
-# "Sitemap: http://dockercart.local:8080/sitemap.xml" into the file, and no
-# later fix could reach it: search engines were pointed at a host no visitor can
-# resolve while the storefront itself was fine. This repairs that one line —
-# only that line, and only for a placeholder host (a real host chosen by the
-# operator, e.g. a CDN, is left untouched).
+# afterwards, so operator edits survive restarts). Two kinds of stale line could
+# therefore stick forever: a first boot that still ran with the .env.example
+# placeholder baked
+# "Sitemap: http://dockercart.local:8080/sitemap.xml" into the file, and a line
+# written over http (or with a stale port) before TLS was switched on — the store
+# then served https pages while its sitemap was advertised as http, i.e. every
+# crawler was sent through a redirect or to a host nobody can resolve.
+#
+# A line is "ours" when its host is the placeholder host or the store's own host;
+# it is rewritten to "<store URL>/sitemap.xml". A line pointing at any other host
+# (a CDN, an alternate domain) is operator-chosen and left untouched. Nothing
+# else in the file is touched.
 #
 # The same rule lives in Dockercart\Seo\Robots (admin save/display);
 # tools/tests/cases/robots_sitemap.php keeps both implementations in parity.
 #
-# $1 robots.txt path, $2 store URL (no trailing slash needed).
+# $1 robots.txt path, $2 effective store URL (no trailing slash needed).
 # Returns 0 when the file was rewritten, 1 when there was nothing to do.
 store_robots_fix_sitemap() {
-	local file="${1:-}" url="${2:-}" host host_re tmp
+	local file="${1:-}" url="${2:-}" host p_re s_re target stale tmp
 
 	[ -f "$file" ] || return 1
 	[ -n "$url" ] || return 1
 
 	url="${url%/}"
 	host="$(store_url_host "$url")"
-
-	# A local install *is* the placeholder host: nothing to correct.
 	[ -n "$host" ] || return 1
-	[ "$host" != "$STORE_URL_PLACEHOLDER_DOMAIN" ] || return 1
 
-	# Only Sitemap lines are considered (one directive per line).
-	if ! sed -nE 's/^[[:space:]]*Sitemap:[[:space:]]*//Ip' "$file" \
-		| cut -d/ -f3 | cut -d: -f1 | tr '[:upper:]' '[:lower:]' \
-		| grep -qx "$STORE_URL_PLACEHOLDER_DOMAIN"; then
-		return 1
-	fi
+	target="${url}/sitemap.xml"
 
-	host_re="${STORE_URL_PLACEHOLDER_DOMAIN//./\\.}"
+	# grep -E patterns: only the dots of the hosts need escaping.
+	p_re="${STORE_URL_PLACEHOLDER_DOMAIN//./\\.}"
+	s_re="${host//./\\.}"
+
+	# How many Sitemap lines are ours but do not already carry the store URL?
+	stale="$(sed -nE 's/^[[:space:]]*[Ss]itemap:[[:space:]]*//p' "$file" \
+		| grep -vxF "$target" \
+		| sed -E 's|^[A-Za-z][A-Za-z0-9+.-]*://||' | cut -d/ -f1 | cut -d: -f1 \
+		| tr '[:upper:]' '[:lower:]' \
+		| grep -cxE "${p_re}|${s_re}" || true)"
+
+	# Already canonical, or nothing of ours in the file: leave it alone (this also
+	# keeps the file's mtime stable across restarts).
+	[ "${stale:-0}" -gt 0 ] 2>/dev/null || return 1
+
 	# Outside the webroot on purpose: the webroot is a bind mount shared with
 	# nginx, a half-written robots.txt must never be servable.
 	tmp="$(mktemp)" || return 1
 
-	if ! sed -E "s|^([[:space:]]*Sitemap:[[:space:]]*)https?://${host_re}([:/][^[:space:]]*)?[[:space:]]*\$|\1${url}/sitemap.xml|I" "$file" > "$tmp"; then
+	if ! sed -E "s#^([[:space:]]*[Ss]itemap:[[:space:]]*)https?://(${p_re}|${s_re})([:/][^[:space:]]*)?[[:space:]]*\$#\1${target}#" "$file" > "$tmp"; then
 		rm -f "$tmp"
 
 		return 1
@@ -168,7 +179,7 @@ store_robots_fix_sitemap() {
 	# mode set by the entrypoint survive (sed -i would replace the file).
 	if ! cat "$tmp" > "$file" 2>/dev/null; then
 		rm -f "$tmp"
-		echo "WARNING: could not rewrite the placeholder sitemap in $file" >&2
+		echo "WARNING: could not rewrite the sitemap line in $file" >&2
 
 		return 1
 	fi

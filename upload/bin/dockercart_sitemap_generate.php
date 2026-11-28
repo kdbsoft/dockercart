@@ -94,7 +94,26 @@ try {
 	}
 
 	// URL Router — required by buildAlternateUrls()
-	$url = new Url($config->get('config_url') ?: HTTP_SERVER, $config->get('config_ssl') ?: HTTPS_SERVER);
+	//
+	// The sitemap advertises the URL the store is actually served on: https when
+	// it has one. `config_url` is always the http base (the admin labels the two
+	// "Store URL" / "SSL URL" and the entrypoint syncs them from the same
+	// resolver, docker/store-url.sh), so building <loc>/hreflang from it put
+	// http:// entries — i.e. a redirect hop at best — in the sitemap of an HTTPS
+	// store. The fallbacks keep a store without url/ssl settings working.
+	$store_url = static function () use ($config): string {
+		$ssl = (string)$config->get('config_ssl');
+
+		if (stripos($ssl, 'https://') === 0) {
+			return rtrim($ssl, '/');
+		}
+
+		$http = (string)($config->get('config_url') ?: (defined('HTTP_SERVER') ? HTTP_SERVER : ''));
+
+		return rtrim($http !== '' ? $http : $ssl, '/');
+	};
+
+	$url = new Url($store_url(), $config->get('config_ssl') ?: HTTPS_SERVER);
 	$registry->set('url', $url);
 
 	// Register SEO URL rewriter so $url->link() returns clean SEO URLs
@@ -371,7 +390,7 @@ try {
 	}
 
 	// Build sitemap index
-	$sitemap_url = rtrim($config->get('config_url') ?: HTTP_SERVER, '/');
+	$sitemap_url = $store_url();
 
 	if (count($sitemap_files) === 1) {
 		$single = $sitemap_files[0];

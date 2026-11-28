@@ -227,17 +227,17 @@ wait_for_mysql() {
 # (store_robots_fix_sitemap, docker/store-url.sh).
 ensure_robots_txt() {
     resolve_owner
-    local robots_file="/var/www/html/robots.txt"
+    local robots_file="${ROBOTS_FILE:-/var/www/html/robots.txt}"
+    local url status note
+
+    url="$(store_effective_url)"
+    url="${url%/}"
 
     if [ -f "$robots_file" ]; then
-        local url
-        url="$(store_effective_url)"
-        url="${url%/}"
-
         # The file is the admin's, but a placeholder host in it is not: repair
         # that single line, everything else stays exactly as saved.
         if store_robots_fix_sitemap "$robots_file" "$url"; then
-            echo "$robots_file: placeholder sitemap replaced with ${url}/sitemap.xml"
+            echo "$robots_file: sitemap line updated to ${url}/sitemap.xml"
         else
             echo "$robots_file already exists - leaving it as is (managed from admin)."
         fi
@@ -247,13 +247,22 @@ ensure_robots_txt() {
 
     echo "Seeding $robots_file ..."
 
-    # Seed only, and always for the URL the store really answers on (https when
-    # TLS is enabled) — see docker/store-url.sh.
-    local url
-    url="$(store_effective_url)"
-    url="${url%/}"
+    # Indexing switched off in the admin (System -> Indexing) must survive the
+    # file going missing: seeding the allow template would silently switch
+    # indexing back on. config_indexing_status is authoritative; an absent row
+    # means "never saved", which the admin treats as enabled.
+    status=$(MYSQL_PWD="${DB_PASSWORD:-dockercart_password}" mysql -h"${DB_HOSTNAME:-mariadb}" \
+        -u"${DB_USERNAME:-dockercart}" --skip-ssl -N -B \
+        -e "SELECT COALESCE(\`value\`,'1') FROM \`${DB_PREFIX:-oc_}setting\` WHERE \`key\` = 'config_indexing_status' AND store_id = 0 LIMIT 1" \
+        "${DB_DATABASE:-dockercart}" 2>/dev/null || true)
 
-    cat > "$robots_file" <<-EOF
+    if [ "${status:-1}" = "0" ]; then
+        printf 'User-agent: *\nDisallow: /\n' > "$robots_file"
+        note="indexing disabled, see System -> Indexing"
+    else
+        # Seed only, and always for the URL the store really answers on (https when
+        # TLS is enabled) — see docker/store-url.sh.
+        cat > "$robots_file" <<-EOF
 	User-agent: *
 	Allow: /catalog/view/javascript/
 	Allow: /catalog/view/theme/
@@ -283,13 +292,15 @@ ensure_robots_txt() {
 
 	Sitemap: ${url}/sitemap.xml
 	EOF
+        note="sitemap: ${url}/sitemap.xml"
+    fi
 
     if [ "$(id -u)" -eq 0 ]; then
         chown "$OWNER" "$robots_file" 2>/dev/null || true
         chmod 664 "$robots_file" 2>/dev/null || true
     fi
 
-    echo "$robots_file seeded (sitemap: ${url}/sitemap.xml)"
+    echo "$robots_file seeded (${note})"
 }
 
 # Inject the resolved store URL into generated config files (see
@@ -710,6 +721,57 @@ SQL
     echo "Store URL updated."
 }
 
+# Регенерация sitemap.xml при смене URL магазина.
+#
+# В карте сайта зашиты абсолютные <loc>/hreflang. Файл в .gitignore, задачи в
+# планировщике по умолчанию нет — после переезда (локальный стенд -> сервер)
+# карта указывала бы на старый хост месяцами. Последний применённый URL храним в
+# storage/ (bind mount), а НЕ в oc_setting: сохранение настроек магазина идёт
+# через editSetting('config', …), который удаляет все строки code='config'.
+ensure_sitemap_matches_url() {
+    # Paths are overridable so the case in tools/tests can exercise the state
+    # machine without a container (same defaults in production).
+    local marker="${SITEMAP_URL_MARKER:-/var/www/storage/.applied_store_url}"
+    local generator="${SITEMAP_GENERATOR:-/var/www/html/bin/dockercart_sitemap_generate.php}"
+    local effective applied status
+
+    effective="$(store_effective_url)"
+    effective="${effective%/}"
+
+    applied=""
+    [ -f "$marker" ] && applied="$(tr -d '[:space:]' < "$marker" 2>/dev/null || true)"
+
+    # Ничего не менялось — не трогаем карту (и её mtime).
+    if [ "$applied" = "$effective" ]; then
+        return 0
+    fi
+
+    if [ ! -f "$generator" ]; then
+        return 0
+    fi
+
+    status=$(MYSQL_PWD="${DB_PASSWORD:-dockercart_password}" mysql -h"${DB_HOSTNAME:-mariadb}" \
+        -u"${DB_USERNAME:-dockercart}" --skip-ssl -N -B \
+        -e "SELECT COALESCE(\`value\`,'0') FROM \`${DB_PREFIX:-oc_}setting\` WHERE \`key\` = 'module_dockercart_sitemap_status' AND store_id = 0 LIMIT 1" \
+        "${DB_DATABASE:-dockercart}" 2>/dev/null || true)
+
+    # Запоминаем ДО генерации: сломанный прогон не должен повторяться на каждом боте.
+    if ! printf '%s\n' "$effective" > "$marker" 2>/dev/null; then
+        echo "WARNING: cannot write $marker - sitemap regeneration state is lost"
+    fi
+
+    if [ "${status:-0}" != "1" ]; then
+        echo "Store URL changed ('${applied:-<none>}' -> '${effective}') - sitemap feed disabled, skip regeneration."
+
+        return 0
+    fi
+
+    echo "Store URL changed ('${applied:-<none>}' -> '${effective}') - regenerating sitemap.xml in the background..."
+    (
+        php "$generator" 2>&1
+    ) &
+}
+
 wait_for_manticore() {
     echo "Waiting for Manticore to be ready..."
     local max_attempts=30
@@ -904,9 +966,6 @@ setup_logrotate
 # Создаем конфиги приложения, если отсутствуют
 ensure_app_configs
 
-# Создаём robots.txt, только если его ещё нет (дальше управляется из админки)
-ensure_robots_txt
-
 # Ждем MariaDB
 wait_for_mysql
 
@@ -929,6 +988,16 @@ apply_php_settings
 ensure_encryption_key
 
 ensure_store_url
+
+# robots.txt: создаётся только если его ещё нет (дальше управляется из админки).
+# Стоит после wait_for_mysql/ensure_store_url: пересев смотрит в настройки
+# (config_indexing_status) и в итоговый URL магазина; в существующем файле
+# правится только устаревшая строка Sitemap.
+ensure_robots_txt
+
+# Смена домена/схемы делает sitemap.xml недействительным — перегенерируем
+# (фоном, не блокируя Apache): в карте зашиты абсолютные ссылки.
+ensure_sitemap_matches_url
 
 # Бутстрап админ-пароля из ADMIN_PASSWORD (плейсхолдер из init.sql)
 ensure_admin_password
