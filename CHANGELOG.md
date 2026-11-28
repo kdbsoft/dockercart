@@ -1,3 +1,10 @@
+## [3.52.2](https://github.com/kdbsoft/dockercart/compare/v3.52.1...v3.52.2) (2026-11-28)
+
+### Bug Fixes
+
+* **compose:** never pull the locally built apache image ([c361a61](https://github.com/kdbsoft/dockercart/commit/c361a6116f8cca6a64a415228b52d25e7ae5381e))
+* **traefik:** make the ACME certresolver name configurable ([cb1b8ea](https://github.com/kdbsoft/dockercart/commit/cb1b8ea48dd60501bde6fc3dca8f2acf826c8ec6))
+
 ## [3.52.1](https://github.com/kdbsoft/dockercart/compare/v3.52.0...v3.52.1) (2026-11-28)
 
 ### Bug Fixes
