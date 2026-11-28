@@ -154,6 +154,14 @@ services:
       start_period: 60s
 
   scheduler:
+    # Reuses the image built by the `apache` service (same tag, no build block).
+    # `pull_policy: never` is required on such a "consumer" service: compose pulls
+    # every image that has no build block with its default `missing` policy BEFORE
+    # building (podman-compose >= 1.6 does it explicitly, docker compose v2 in its
+    # pre-build pull step). The name `<project>_apache` exists only locally, so the
+    # pull fails with "pull access denied" and aborts `up` on a first boot / fresh
+    # project name; services with a build block only get a tolerated warning.
+    pull_policy: never
     image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
     container_name: ${SCHEDULER_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_scheduler}
     restart: ${RESTART_POLICY:-unless-stopped}
@@ -379,6 +387,8 @@ services:
   backup-worker:
     profiles:
       - backup
+    # Consumer of the image built by `apache` — never pull it (see `scheduler`).
+    pull_policy: never
     image: ${COMPOSE_PROJECT_NAME:-dockercart}_apache:latest
     container_name: ${COMPOSE_PROJECT_NAME:-dockercart}_backup_worker
     environment:

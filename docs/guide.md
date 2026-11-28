@@ -51,6 +51,8 @@ On the first run `make start` generates `.env` from `.env.example`. The interact
 
 **Keep `.env` flat (no nested `${VAR}` references).** docker compose expands `MARIADB_USER=${DB_USERNAME}` recursively, but podman-compose (the `docker` shim on podman hosts) does not: the literal string lands in the container env, the mariadb healthcheck runs with an empty user, mariadb never becomes `healthy`, and `up` blocks indefinitely on `depends_on: condition: service_healthy` — the startup appears hung right after the mariadb/redis containers are listed. If that happens, fix the `MARIADB_USER`/`MARIADB_DATABASE` lines in `.env` to the plain values from `.env.example` (they must mirror `DB_USERNAME`/`DB_DATABASE`) and re-run `make start`. The mariadb healthcheck resolves its credentials from the container environment at runtime, so it does not depend on compose-side interpolation.
 
+**`scheduler` / `backup-worker` must not pull their image.** Both reuse the image built by the `apache` service (`<project>_apache:latest`) and therefore carry `pull_policy: never`. compose pulls every service that has `image:` but no `build:` before building (podman-compose ≥ 1.6 explicitly, docker compose v2 in its pre-build pull step), and treats the resulting `pull access denied for <project>_apache` as fatal — on a first boot (no local image yet) `make start` aborted with that error. Services with a `build:` block only get a tolerated warning, which is why `apache` is unaffected. Don't drop `pull_policy: never` from those two services.
+
 ### First Boot
 
 ```bash
