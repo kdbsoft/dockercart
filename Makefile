@@ -3,7 +3,7 @@ include .env
 export
 endif
 
-.PHONY: help migrate update start stop ftp logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart image-prune scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status logrotate-install
+.PHONY: help migrate update start stop ftp logs logs-follow shell mariadb backup restore backup-s3 dump-init clean restart image-prune scheduler-logs scheduler-restart scheduler-reload scheduler-shell scheduler-status logrotate-install doctor
 
 ### Convenience variables
 # Base compose file used by commands that don't need to match the running mode
@@ -48,6 +48,7 @@ help: ## Show this help
 	@echo "  make mariadb      Open MariaDB CLI"
 	@echo "  make backup       Dump DB to ./backups/ (keeps the newest BACKUP_KEEP, default 5)"
 	@echo "  make test         Run the webhook/test suite (no DB needed)"
+	@echo "  make doctor       Read-only diagnostics: health checks + Traefik ACME resolver preflight"
 	@echo ""
 	@echo "See README.md for full documentation."
 
@@ -128,6 +129,14 @@ logs-follow: ## Follow logs in real time
 
 logrotate-install: ## Install host logrotate rule for nginx logs (docker/nginx/logs)
 	@./scripts/install-nginx-logrotate.sh
+
+doctor: ## Read-only diagnostics: health checks + Traefik ACME resolver preflight
+	@rc=0; ./health-check.sh || rc=1; \
+	case " $(DOCKERCART_COMPOSE_FILES) " in \
+		*traefik*) \
+			( . ./scripts/traefik-resolver.sh; check_traefik_resolver "$${TRAEFIK_CERTRESOLVER:-letsencrypt}" ) || rc=1 ;; \
+	esac; \
+	exit $$rc
 
 shell: ## Open bash shell in the app container
 	@$(ACTIVE_COMPOSE) exec apache bash

@@ -125,8 +125,8 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck >/dev/null
           shellcheck -x docker/entrypoint.sh docker/manticore/entrypoint.sh \
-            docker/mysql/init.sh scripts/run-migrations.sh start.sh update.sh \
-            health-check.sh install-backup-cron.sh
+            docker/mysql/init.sh scripts/run-migrations.sh scripts/traefik-resolver.sh start.sh \
+            update.sh health-check.sh install-backup-cron.sh
 
       - name: Compose validation (base mode)
         run: docker compose -f docker-compose.yml config --quiet
