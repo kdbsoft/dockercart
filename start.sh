@@ -91,6 +91,12 @@ fi
 # shellcheck disable=SC1091
 . ./scripts/project-name.sh
 
+# Traefik ACME resolver discovery/verification (shared with health-check.sh).
+# A resolver name that the external Traefik does not know is a silent failure:
+# no certificate is ever issued and the proxy serves its default self-signed one.
+# shellcheck disable=SC1091
+. ./scripts/traefik-resolver.sh
+
 if [ -f .env ]; then
     echo -e "${YELLOW}Loading .env variables...${NC}"
     # shellcheck disable=SC1091
@@ -255,6 +261,23 @@ if [ "$SSL_MODE" = "letsencrypt" ]; then
             LE_HOST="${DOCKERCART_DOMAIN:-$LE_HOST}"
         fi
         echo -e "${GREEN}✓ Domain: ${LE_HOST}${NC}"
+
+        # Verify BEFORE touching the stack: a router pointing at a resolver that
+        # the external Traefik does not define never receives a certificate, and
+        # the failure only shows up later as a browser warning / Cloudflare 526.
+        # Escape hatch for unusual setups (Traefik behind a socket proxy that
+        # hides its args): SKIP_TRAEFIK_RESOLVER_CHECK=1.
+        if [ "${SKIP_TRAEFIK_RESOLVER_CHECK:-0}" != "1" ]; then
+            if ! check_traefik_resolver "${TRAEFIK_CERTRESOLVER:-letsencrypt}"; then
+                echo -e "${RED}❌ Not starting: the router would ask for a certificate from a${NC}"
+                echo -e "${RED}   resolver that does not exist. Set TRAEFIK_CERTRESOLVER in .env${NC}"
+                echo -e "${RED}   to a name listed above (or fix Traefik's static config), then${NC}"
+                echo -e "${RED}   re-run. Skip this preflight with SKIP_TRAEFIK_RESOLVER_CHECK=1.${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${YELLOW}⚠ Traefik resolver check skipped (SKIP_TRAEFIK_RESOLVER_CHECK=1)${NC}"
+        fi
         echo ""
     else
         echo -e "${YELLOW}Let's Encrypt setup${NC}"
@@ -535,7 +558,13 @@ DOCKERCART_SEED_MODE="${SEED_MODE}" docker compose "${COMPOSE_FILES[@]}" up -d -
 PROJECT_NAME="$(sanitize_project_name "${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}")"
 MARIADB_CT="${MARIADB_CONTAINER_NAME:-${PROJECT_NAME}_mariadb}"
 APACHE_CT="${APACHE_CONTAINER_NAME:-${PROJECT_NAME}_apache}"
+NGINX_CT="${NGINX_CONTAINER_NAME:-${PROJECT_NAME}_nginx}"
 START_TIMEOUT="${START_TIMEOUT:-240}"
+# How long the edge may take to serve a real certificate (ACME is not instant).
+CERT_TIMEOUT="${CERT_TIMEOUT:-60}"
+# Host port probed for the served certificate. In Traefik mode this is the
+# external Traefik's https entrypoint; 443 is omitted from the URL by design.
+CERT_PROBE_PORT="${CERT_PROBE_PORT:-443}"
 
 wait_for_healthy() {
     local name="$1" desc="$2"
@@ -565,6 +594,83 @@ if ! wait_for_healthy "$APACHE_CT" "Apache"; then
     docker inspect --format '  {{.Name}}: status={{.State.Status}} health={{.State.Health.Status}}' "$APACHE_CT" 2>/dev/null || true
     exit 1
 fi
+# nginx is where users land: without it the store answers 502/521 even though
+# apache and mariadb are fine (e.g. its log bind mount is not writable).
+if ! wait_for_healthy "$NGINX_CT" "nginx"; then
+    echo -e "${RED}❌ nginx (${NGINX_CT}) did not become healthy within ${START_TIMEOUT}s${NC}"
+    echo -e "${RED}   Run 'docker logs ${NGINX_CT} --tail 30' — a restart loop usually means${NC}"
+    echo -e "${RED}   the config or the log/cache bind mounts are not usable by root.${NC}"
+    docker inspect --format '  {{.Name}}: status={{.State.Status}} health={{.State.Health.Status}} restarts={{.RestartCount}}' "$NGINX_CT" 2>/dev/null || true
+    docker logs "$NGINX_CT" --tail 30 2>&1 | sed 's/^/    /' || true
+    exit 1
+fi
+
+# ============================================================================
+# TRAEFIK + LET'S ENCRYPT — CERTIFICATE POST-CHECK
+# ============================================================================
+# Traefik requests the certificate on the first TLS handshake for the router
+# host, so right after `up` the default certificate may still be served. A
+# resolver-name mismatch and a failed HTTP-01 challenge look identical from
+# here (Traefik's default self-signed cert), so read the certificate the edge
+# actually presents and fail loudly instead of letting the operator discover it
+# through a browser/Cloudflare 526.
+
+# Raw TLS probe of the local edge for $1, empty when nothing listens.
+probe_edge_cert() {
+    local domain="$1"
+    command -v openssl >/dev/null 2>&1 || return 0
+    if command -v timeout >/dev/null 2>&1; then
+        timeout 10 openssl s_client -connect "127.0.0.1:${CERT_PROBE_PORT}" \
+            -servername "$domain" </dev/null 2>/dev/null
+    else
+        openssl s_client -connect "127.0.0.1:${CERT_PROBE_PORT}" \
+            -servername "$domain" </dev/null 2>/dev/null
+    fi
+}
+
+# `subject=CN = shop.example` of the served certificate, empty if unreachable.
+edge_cert_subject() {
+    probe_edge_cert "$1" | openssl x509 -noout -subject 2>/dev/null || true
+}
+
+# `notAfter=Jan  1 00:00:00 2027 GMT` of the served certificate.
+edge_cert_enddate() {
+    probe_edge_cert "$1" | openssl x509 -noout -enddate 2>/dev/null || true
+}
+
+# Wait up to CERT_TIMEOUT for a real certificate for $1.
+#   returns 0 — issued, or the edge does not answer locally (nothing to judge
+#               from this host: a warning is printed instead of a 60 s stall)
+#   returns 1 — the edge keeps presenting Traefik's default self-signed cert
+assert_edge_cert() {
+    local domain="$1" deadline=$((SECONDS + CERT_TIMEOUT)) subject
+    while [ "$SECONDS" -lt "$deadline" ]; do
+        subject="$(edge_cert_subject "$domain")"
+        if [ -z "$subject" ]; then
+            echo -e "${YELLOW}⚠ Could not verify the certificate for ${domain}: nothing answered on 127.0.0.1:${CERT_PROBE_PORT}${NC}"
+            echo -e "${YELLOW}  (Traefik on another host, or 443 not published here?) — check it in a browser.${NC}"
+            return 0
+        fi
+        case "$subject" in
+            *'TRAEFIK DEFAULT CERT'*) sleep 3 ;;
+            *) echo -e "${GREEN}✓ Certificate for ${domain} is being served${NC}" ; return 0 ;;
+        esac
+    done
+    echo -e "${RED}❌ Traefik still serves its DEFAULT self-signed certificate for ${domain}${NC}"
+    echo -e "${RED}   Usual causes: TRAEFIK_CERTRESOLVER='${TRAEFIK_CERTRESOLVER:-letsencrypt}' is not a${NC}"
+    echo -e "${RED}   resolver of the external Traefik, or the HTTP-01 challenge cannot reach it.${NC}"
+    echo -e "${RED}   Inspect: docker logs <traefik> --tail 50 | grep -i 'certificate resolver\\|acme'${NC}"
+    echo -e "${RED}   Behind Cloudflare this shows up as error 526 (SSL mode must be Full (strict)).${NC}"
+    return 1
+}
+
+if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = true ]; then
+    if ! command -v openssl >/dev/null 2>&1; then
+        echo -e "${YELLOW}⚠ openssl not installed — cannot verify the certificate Traefik serves${NC}"
+    elif ! assert_edge_cert "${DOCKERCART_DOMAIN:-dockercart.local}"; then
+        exit 1
+    fi
+fi
 
 echo -e "${GREEN}✓ Containers started${NC}"
 echo ""
@@ -589,6 +695,16 @@ if [ "$TRAEFIK_MODE" = true ]; then
     echo -e "  Frontend: ${GREEN}Nginx (ports managed externally)${NC}"
     echo -e "  Backend:  ${GREEN}Apache (internal, port 80)${NC}"
     echo -e "  Database: ${GREEN}MariaDB (internal)${NC}"
+    if [ "$SSL_MODE" = "letsencrypt" ]; then
+        # Make the certificate state part of the start summary: "not issued" is
+        # visible here instead of only in a browser / Cloudflare error page.
+        CERT_END="$(edge_cert_enddate "${DOCKERCART_DOMAIN:-dockercart.local}" | sed 's/^notAfter=//')"
+        if [ -n "$CERT_END" ]; then
+            echo -e "  Cert:      ${GREEN}issued, valid until ${CERT_END}${NC}"
+        else
+            echo -e "  Cert:      ${YELLOW}not verified from this host (check your browser / Cloudflare)${NC}"
+        fi
+    fi
     echo ""
 else
     echo -e "${GREEN}✅ DockerCart is running!${NC}"
@@ -616,6 +732,7 @@ echo -e "${BLUE}Commands:${NC}"
 echo -e "  Stop:     ${GREEN}docker compose down${NC}"
 echo -e "  Logs:     ${GREEN}docker compose logs -f${NC}"
 echo -e "  Shell:    ${GREEN}docker compose exec apache bash${NC}"
+echo -e "  Doctor:   ${GREEN}make doctor${NC}  (containers, HTTP, DB, restart loops, edge cert)"
 echo ""
 
 if [ "$SSL_MODE" = "letsencrypt" ]; then

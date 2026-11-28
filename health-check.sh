@@ -21,6 +21,25 @@ MARIADB_USER=${MARIADB_USER:-${DB_USERNAME:-dockercart}}
 MARIADB_PASSWORD=${MARIADB_PASSWORD:-${DB_PASSWORD:-dockercart_password}}
 MARIADB_DATABASE=${MARIADB_DATABASE:-${DB_DATABASE:-dockercart}}
 
+# Container names follow the same defaulting chain as start.sh/Makefile.
+PROJECT_NAME=${COMPOSE_PROJECT_NAME:-dockercart}
+NGINX_CT=${NGINX_CONTAINER_NAME:-${PROJECT_NAME}_nginx}
+APACHE_CT=${APACHE_CONTAINER_NAME:-${PROJECT_NAME}_apache}
+TRAEFIK_CT=${TRAEFIK_CONTAINER_NAME:-traefik}
+CERT_PROBE_PORT=${CERT_PROBE_PORT:-443}
+
+# Shared ACME resolver discovery (scripts/traefik-resolver.sh).
+# shellcheck source=./scripts/traefik-resolver.sh
+. ./scripts/traefik-resolver.sh
+
+# Traefik terminates TLS in the `--traefik --le` mode only; the mode is recorded
+# in .env by start.sh (DOCKERCART_COMPOSE_FILES), so the certificate and
+# resolver checks stay silent for standalone/HTTP stacks.
+TRAEFIK_LE=false
+case " ${DOCKERCART_COMPOSE_FILES:-} " in
+    *'traefik.le'*) TRAEFIK_LE=true ;;
+esac
+
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -52,6 +71,12 @@ check() {
     fi
 }
 
+# Edge certificate probe command (eval'd by check(), hence no function): the
+# subject must exist and must not be Traefik's default self-signed certificate.
+# Traefik serves that one until ACME succeeds, whether the resolver name is
+# wrong or the HTTP-01 challenge fails, and Cloudflare reports it as 526.
+EDGE_CERT_CMD="openssl s_client -connect 127.0.0.1:${CERT_PROBE_PORT} -servername ${DOCKERCART_DOMAIN} </dev/null 2>/dev/null | openssl x509 -noout -subject 2>/dev/null | grep -qv 'TRAEFIK DEFAULT CERT'"
+
 # Check Docker
 echo -e "${YELLOW}🐳 Docker Check${NC}"
 check "Docker installed" "command -v docker"
@@ -71,6 +96,15 @@ check "manticore" "docker ps --filter name=^/${MANTICORE_CONTAINER_NAME:-${COMPO
 check "scheduler" "docker ps --filter name=^/${SCHEDULER_CONTAINER_NAME:-${COMPOSE_PROJECT_NAME:-dockercart}_scheduler}\$ --format '{{.Status}}' | grep -q 'Up'"
 echo ""
 
+# Restart loops: a crash-looping container still reports "Up ... (health:
+# starting)" between restarts, so the status checks above cannot see it. nginx
+# is the one that loops when its log bind mount is not writable by root or a
+# rendered config is invalid; RestartCount is the honest signal.
+echo -e "${YELLOW}🔁 Restart Loop Check${NC}"
+check "nginx not restarting (RestartCount=0)" "[ \"\$(docker inspect -f '{{.RestartCount}}' ${NGINX_CT} 2>/dev/null)\" = '0' ]"
+check "apache not restarting (RestartCount=0)" "[ \"\$(docker inspect -f '{{.RestartCount}}' ${APACHE_CT} 2>/dev/null)\" = '0' ]"
+echo ""
+
 # Check HTTP health endpoint (proxies to apache's healthcheck.php)
 # In Traefik mode the store port is whatever the router publishes — pick it
 # up from DOCKERCART_URL (e.g. http://shop.example:8080) when present.
@@ -86,6 +120,31 @@ if [ -n "${HEALTHCHECK_TOKEN}" ]; then
 fi
 check "HTTP /health (${DOCKERCART_URL})" "${HEALTH_CMD}"
 echo ""
+
+# Edge certificate + ACME resolver (Traefik --le mode only). Traefik serves its
+# own default self-signed certificate until ACME succeeds — a mismatch between
+# the router's tls.certresolver label and the proxy's certificatesResolvers, or a
+# failing HTTP-01 challenge, both surface as Cloudflare error 526.
+if [ "$TRAEFIK_LE" = "true" ]; then
+    echo -e "${YELLOW}🔐 Edge Certificate Check (Traefik + Let's Encrypt)${NC}"
+
+    RESOLVER_WANT="${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+    RESOLVERS_FOUND="$(detect_traefik_resolvers)"
+    if [ -n "$RESOLVERS_FOUND" ]; then
+        # shellcheck disable=SC2086 # newline-separated list, word splitting intended
+        echo -e "  ACME resolvers on the running Traefik: $(printf '%s ' $RESOLVERS_FOUND)"
+    fi
+    check "TRAEFIK_CERTRESOLVER '${RESOLVER_WANT}' exists on Traefik" "check_traefik_resolver '${RESOLVER_WANT}'"
+    check "no 'nonexistent certificate resolver' in Traefik logs" "! docker logs ${TRAEFIK_CT} 2>&1 | grep -qi 'nonexistent certificate resolver'"
+
+    if command -v openssl >/dev/null 2>&1; then
+        echo -e "  Probing https://127.0.0.1:${CERT_PROBE_PORT} (SNI ${DOCKERCART_DOMAIN})"
+        check "certificate for ${DOCKERCART_DOMAIN} is served (not Traefik default)" "${EDGE_CERT_CMD}"
+    else
+        echo -e "${YELLOW}  openssl not installed — certificate probe skipped${NC}"
+    fi
+    echo ""
+fi
 
 # Check MariaDB
 echo -e "${YELLOW}💾 MariaDB Check${NC}"
