@@ -2,6 +2,11 @@
 # Usage: docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.le.yml up -d
 # Traefik terminates TLS and runs its own ACME client: only DOCKERCART_DOMAIN
 # (the router Host rule) is needed — set its DNS A/AAAA record to this host.
+#
+# The resolver name must match a `certificatesResolvers.<name>` entry in the
+# EXTERNAL Traefik's static config. Default is `le`; set TRAEFIK_CERTRESOLVER
+# when your Traefik calls it something else (e.g. `letsencrypt`) — otherwise the
+# router never gets a certificate and Traefik serves its default self-signed one.
 
 services:
   nginx:
@@ -10,5 +15,5 @@ services:
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=websecure"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls=true"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=le"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}"
       - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"

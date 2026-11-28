@@ -378,6 +378,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | `LETSENCRYPT_DATA_DIR` | `./docker/letsencrypt` | ACME state persistence |
 | `CERTBOT_RENEW_INTERVAL` | `24h` | How often the certbot container checks for renewal |
 | `RENEW_NGINX_RELOAD_INTERVAL` | `6h` | How often nginx reloads to pick up renewed certificates |
+| `TRAEFIK_CERTRESOLVER` | `le` | Traefik mode only: name of the ACME `certificatesResolvers` entry in the **external** Traefik that issues the store's certificate (must match, or no cert is issued) |
 
 `SSL_DOMAIN` / `SSL_EMAIL` are optional overrides: unset (or left at the
 `.env.example` placeholder) `start.sh` derives them from `DOCKERCART_DOMAIN` /
@@ -491,6 +492,14 @@ make start ARGS="--traefik"        # HTTP
 make start ARGS="--traefik --ssl"  # HTTPS (self-signed)
 make start ARGS="--traefik --le"   # HTTPS (Let's Encrypt)
 ```
+
+In `--le` mode Traefik runs the ACME client itself: the nginx router is tagged
+`tls.certresolver=<TRAEFIK_CERTRESOLVER>` (default `le`, see `docker-compose.traefik.le.yml`).
+That name must exist as a `certificatesResolvers` entry in the **external** Traefik's
+static config, and `DOCKERCART_DOMAIN` must resolve to this host on ports 80/443.
+A name mismatch is silent from DockerCart's side — Traefik simply keeps serving its
+default certificate — so set `TRAEFIK_CERTRESOLVER` in `.env` when your Traefik calls
+its resolver `letsencrypt` (Traefik's own docs default) or anything else.
 
 ### FTP Add-on
 
