@@ -4,9 +4,11 @@
 # (the router Host rule) is needed — set its DNS A/AAAA record to this host.
 #
 # The resolver name must match a `certificatesResolvers.<name>` entry in the
-# EXTERNAL Traefik's static config. Default is `le`; set TRAEFIK_CERTRESOLVER
-# when your Traefik calls it something else (e.g. `letsencrypt`) — otherwise the
-# router never gets a certificate and Traefik serves its default self-signed one.
+# EXTERNAL Traefik's static config. Default is `letsencrypt` (Traefik's own docs
+# default); set TRAEFIK_CERTRESOLVER in .env when your Traefik names its ACME
+# resolver differently — otherwise the router never gets a certificate and
+# Traefik serves its default self-signed one (Cloudflare then reports 526).
+# start.sh checks the name against the running Traefik before starting.
 
 services:
   nginx:
@@ -15,5 +17,5 @@ services:
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.rule=Host(`${DOCKERCART_DOMAIN:-dockercart.local}`)"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.entrypoints=websecure"
       - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls=true"
-      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}"
+      - "traefik.http.routers.${DOCKERCART_ROUTER_NAME:-dockercart}.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
       - "traefik.http.services.${DOCKERCART_ROUTER_NAME:-dockercart}.loadbalancer.server.port=80"
