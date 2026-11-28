@@ -1,3 +1,10 @@
+## [3.52.1](https://github.com/kdbsoft/dockercart/compare/v3.52.0...v3.52.1) (2026-11-28)
+
+### Bug Fixes
+
+* **admin:** move batch update button into the licenses panel ([f80adf5](https://github.com/kdbsoft/dockercart/commit/f80adf5a11baaa277071ec39b05805dff3806e05))
+* **start:** derive the Let's Encrypt domain from the store domain ([3945b15](https://github.com/kdbsoft/dockercart/commit/3945b152dbfb6b6642d8ff888a9b03015ba90a66))
+
 ## [3.52.0](https://github.com/kdbsoft/dockercart/compare/v3.51.1...v3.52.0) (2026-11-26)
 
 ### Features
