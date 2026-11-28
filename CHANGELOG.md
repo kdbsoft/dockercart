@@ -1,3 +1,9 @@
+## [3.54.1](https://github.com/kdbsoft/dockercart/compare/v3.54.0...v3.54.1) (2026-11-28)
+
+### Bug Fixes
+
+* **ci:** resolve shellcheck source path for entrypoint ([845c2b2](https://github.com/kdbsoft/dockercart/commit/845c2b2d3c62853bf2739fbdd5ed9ef893f63925))
+
 ## [3.54.0](https://github.com/kdbsoft/dockercart/compare/v3.53.1...v3.54.0) (2026-11-28)
 
 ### Features
