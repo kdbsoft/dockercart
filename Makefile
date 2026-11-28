@@ -130,13 +130,17 @@ logs-follow: ## Follow logs in real time
 logrotate-install: ## Install host logrotate rule for nginx logs (docker/nginx/logs)
 	@./scripts/install-nginx-logrotate.sh
 
-doctor: ## Read-only diagnostics: health checks + Traefik ACME resolver preflight
+doctor: ## Read-only diagnostics: health checks, Traefik ACME resolver, domain check
 	@rc=0; ./health-check.sh || rc=1; \
 	case " $(DOCKERCART_COMPOSE_FILES) " in \
 		*traefik*) \
 			( . ./scripts/traefik-resolver.sh; check_traefik_resolver "$${TRAEFIK_CERTRESOLVER:-letsencrypt}" ) || rc=1 ;; \
 	esac; \
+	./scripts/domain-check.sh || rc=1; \
 	exit $$rc
+
+retarget-check: ## Read-only: what still points at another host (after a domain move)
+	@./scripts/domain-check.sh
 
 shell: ## Open bash shell in the app container
 	@$(ACTIVE_COMPOSE) exec apache bash

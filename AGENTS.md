@@ -68,8 +68,13 @@ every boot:
 
 - `upload/config.php`, `upload/admin/config.php`, `upload/api/config.php` — app configs
 - `robots.txt`, `sitemap.xml` — `robots.txt` is seeded once (the admin owns it afterwards);
-  the only thing the entrypoint still repairs is a `Sitemap:` line pointing at the
-  `dockercart.local` placeholder (`store_robots_fix_sitemap`, see the store-URL invariant below)
+  the only thing the entrypoint still repairs is a `Sitemap:` line whose host is the
+  `dockercart.local` placeholder or the store's own host with a stale scheme/port
+  (`store_robots_fix_sitemap`, see the store-URL invariant below). A *missing* file is
+  reseeded honouring `config_indexing_status` (0 → `Disallow: /`), which is why
+  `ensure_robots_txt()` runs after `ensure_store_url` — it reads settings and the URL. A *missing* file is
+  reseeded respecting `config_indexing_status` (0 → `Disallow: /`), which is why
+  `ensure_robots_txt()` runs after `ensure_store_url`, not before `wait_for_mysql`
 - `storage/vendor/` — Composer deps
 Change behavior by editing `.env` (then `make restart`) or the entrypoint heredoc / Tailwind
 input (`tools/tailwind/tailwind-input.css`), not the generated files. For code changes
@@ -353,6 +358,11 @@ Preview with `npm run release:dry-run`.
 - `make shell` — bash into the `apache` container (where the app runs)
 - `make scheduler-reload` — SIGHUP the scheduler for code reload without container restart
 - `make logrotate-install` — (re)install the host logrotate rule for `docker/nginx/logs`
+- `make retarget-check` — read-only domain audit (`scripts/domain-check.sh`, also part of
+  `make doctor`): what still points at another host after a domain change — `.env` ports and
+  explicit URLs, `robots.txt`/`sitemap.xml`, `oc_setting.config_url`/`config_ssl`/`config_indexing_robots`,
+  `oc_store`, webhook endpoints, and content columns. Non-zero exit when something must be fixed
+  (runbook: `docs/guide.md` §4 "Moving the store to another domain")
 - `make logs-follow`, `make restart`, `make stop`, `make clean` (destructive: removes volumes)
 - Container names are prefixed `dockercart_` (e.g. `dockercart_apache`, `dockercart_mariadb`).
 
@@ -428,15 +438,25 @@ Preview with `npm run release:dry-run`.
   leftover is what made a live HTTPS store emit `http://dockercart.local` images and
   links. Never hand-write the URL into a new consumer; call the resolver, and keep
   `tools/tests/cases/store_url.php` green.
-- **The `Sitemap:` line in `robots.txt` follows the store URL too.** A file seeded while
-  the placeholder was in effect is repaired, never left advertising an unresolvable host:
-  `store_robots_fix_sitemap()` (`docker/store-url.sh`, container boot) rewrites that one
-  line of an existing file, and `Dockercart\Seo\Robots::normalise()` does the same on the
-  admin page (display + save, so the editor and the file can't disagree). Only a
-  placeholder host is rewritten — a real host chosen by the operator is untouched.
-  `start.sh` also comments a placeholder `DOCKERCART_URL`/`DOCKERCART_HTTPS_URL` out of
-  `.env` instead of only warning. Guarded by `tools/tests/cases/robots_sitemap.php`
-  (bash and PHP implementations are compared byte for byte).
+- **The `Sitemap:` line in `robots.txt` follows the store URL too.** A line whose host is
+  the placeholder or the store's own host is rewritten to `<store URL>/sitemap.xml`
+  (scheme and port included, so an HTTPS store never advertises http):
+  `store_robots_fix_sitemap()` (`docker/store-url.sh`, container boot) and
+  `Dockercart\Seo\Robots::normalise()` (admin page display + save, so the editor and the
+  file can't disagree; the page prefers the **https** base, `config_url` is the http
+  one). Any other host is operator-chosen and untouched. `start.sh` also comments a
+  placeholder `DOCKERCART_URL`/`DOCKERCART_HTTPS_URL` out of `.env` instead of only
+  warning. Guarded by `tools/tests/cases/robots_sitemap.php` (bash and PHP
+  implementations are compared byte for byte).
+- **`sitemap.xml` advertises the same effective URL.**
+  `upload/bin/dockercart_sitemap_generate.php` builds `<loc>`, hreflang alternates and
+  the sitemap index from `config_ssl` when the store has https and from `config_url`
+  otherwise — never from the http base on an HTTPS store. The value comes from a
+  `$store_url()` closure in that script; keep it in step with the robots rule above.
+  The entrypoint also **regenerates** it when the effective store URL changes
+  (`ensure_sitemap_matches_url`, state in `storage/.applied_store_url` — not in
+  `oc_setting`, because the store-settings form saves via `editSetting('config', …)`,
+  which deletes every `code='config'` row). Guarded by `tools/tests/cases/domain_move.php`.
 
 ## Notes
 
