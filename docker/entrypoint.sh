@@ -6,7 +6,8 @@ set -e
 # an .env left with the template placeholder must never leak into config.php,
 # robots.txt or oc_setting (http://dockercart.local assets on an HTTPS page are
 # mixed content, and the host is unresolvable for visitors).
-# shellcheck source=./store-url.sh
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=store-url.sh
 . /usr/local/bin/store-url.sh
 
 # ─────────────────────────────────────────────────────────────────────────────
