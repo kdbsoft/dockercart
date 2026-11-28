@@ -13,8 +13,15 @@ if [ -f .env ]; then
 fi
 
 DOCKERCART_HTTP_PORT=${DOCKERCART_HTTP_PORT:-80}
+DOCKERCART_HTTPS_PORT=${DOCKERCART_HTTPS_PORT:-443}
 DOCKERCART_DOMAIN=${DOCKERCART_DOMAIN:-dockercart.local}
-DOCKERCART_URL=${DOCKERCART_URL:-http://${DOCKERCART_DOMAIN}}
+
+# Same derivation as the container (docker/store-url.sh) — the probe must hit the
+# URL the store is really configured with, not a placeholder from the template.
+# shellcheck source=./docker/store-url.sh
+. ./docker/store-url.sh
+resolve_store_urls
+DOCKERCART_URL="$(store_effective_url)"
 HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-127.0.0.1}
 HEALTHCHECK_TOKEN=${HEALTHCHECK_TOKEN:-}
 MARIADB_USER=${MARIADB_USER:-${DB_USERNAME:-dockercart}}

@@ -75,6 +75,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Shared store-URL resolution (sourced by the entrypoint, also sourced by
+# start.sh / health-check.sh on the host from the repo copy of the same file).
+COPY docker/store-url.sh /usr/local/bin/store-url.sh
+
 EXPOSE 80 443
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

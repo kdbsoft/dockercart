@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Store URL resolution (docker/store-url.sh, shipped beside this script in the
+# image). The store URL is DERIVED from DOCKERCART_DOMAIN + the public ports —
+# an .env left with the template placeholder must never leak into config.php,
+# robots.txt or oc_setting (http://dockercart.local assets on an HTTPS page are
+# mixed content, and the host is unresolvable for visitors).
+# shellcheck source=./store-url.sh
+. /usr/local/bin/store-url.sh
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Права в bind-mount'ах (upload/, storage/)
 #
@@ -224,12 +232,11 @@ ensure_robots_txt() {
 
     echo "Seeding $robots_file ..."
 
-    local url="${DOCKERCART_URL:-http://dockercart.local}"
+    # Seed only, and always for the URL the store really answers on (https when
+    # TLS is enabled) — see docker/store-url.sh.
+    local url
+    url="$(store_effective_url)"
     url="${url%/}"
-
-    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] && [ -n "${DOCKERCART_HTTPS_URL:-}" ]; then
-        url="${DOCKERCART_HTTPS_URL%/}"
-    fi
 
     cat > "$robots_file" <<-EOF
 	User-agent: *
@@ -270,6 +277,31 @@ ensure_robots_txt() {
     echo "$robots_file seeded (sitemap: ${url}/sitemap.xml)"
 }
 
+# Inject the resolved store URL into generated config files (see
+# docker/store-url.sh). config.php therefore carries literals: the CLI workers
+# that load it need no URL environment, and no process can disagree with the
+# web app about which host the store lives on.
+apply_store_url() {
+    resolve_store_urls
+
+    local url="${STORE_HTTP_URL}"
+    local ssl_url="${STORE_HTTP_URL}"
+    if [ "${STORE_SSL_ENABLED}" = "true" ]; then
+        ssl_url="${STORE_HTTPS_URL}"
+    fi
+
+    local file
+    for file in "$@"; do
+        sed -i -e "s|__DC_STORE_URL__|${url}|g" -e "s|__DC_STORE_SSL_URL__|${ssl_url}|g" "$file"
+        if grep -q '__DC_STORE' "$file"; then
+            echo "ERROR: unresolved store URL marker left in ${file}" >&2
+            return 1
+        fi
+    done
+
+    echo "Store URL: ${url} (https: ${ssl_url})"
+}
+
 # Гарантированно создаем config.php файлы (если их нет на хосте/в bind mount)
 ensure_app_configs() {
     resolve_owner
@@ -287,17 +319,16 @@ $env = static function (string $key, string $default): string {
 	return ($value === false || $value === '') ? $default : $value;
 };
 
-$httpServer = rtrim($env('DOCKERCART_URL', 'http://dockercart.local'), '/') . '/';
-$sslEnabled = filter_var($env('DOCKERCART_SSL_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN);
-$httpsServer = $sslEnabled
-	? rtrim($env('DOCKERCART_HTTPS_URL', $httpServer), '/') . '/'
-	: $httpServer;
+// Store URL — resolved by this entrypoint (docker/store-url.sh) from
+// DOCKERCART_DOMAIN + the public ports + the SSL flag, then injected as a
+// literal below. CLI workers (bin/, cron/) load this same file and must not
+// depend on URL environment variables existing in their container.
 
 // HTTP
-define('HTTP_SERVER', $httpServer);
+define('HTTP_SERVER', '__DC_STORE_URL__');
 
-// HTTPS
-define('HTTPS_SERVER', $httpsServer);
+// HTTPS (equals HTTP_SERVER when TLS is disabled)
+define('HTTPS_SERVER', '__DC_STORE_SSL_URL__');
 
 
 // DIR
@@ -354,19 +385,15 @@ $env = static function (string $key, string $default): string {
 	return ($value === false || $value === '') ? $default : $value;
 };
 
-$catalogHttpServer = rtrim($env('DOCKERCART_URL', 'http://dockercart.local'), '/') . '/';
-$sslEnabled = filter_var($env('DOCKERCART_SSL_ENABLED', 'false'), FILTER_VALIDATE_BOOLEAN);
-$catalogHttpsServer = $sslEnabled
-	? rtrim($env('DOCKERCART_HTTPS_URL', $catalogHttpServer), '/') . '/'
-	: $catalogHttpServer;
+// Store URL — injected by the entrypoint (see the catalog config above).
 
 // HTTP
-define('HTTP_SERVER', $catalogHttpServer . 'admin/');
-define('HTTP_CATALOG', $catalogHttpServer);
+define('HTTP_SERVER', '__DC_STORE_URL__admin/');
+define('HTTP_CATALOG', '__DC_STORE_URL__');
 
-// HTTPS
-define('HTTPS_SERVER', $catalogHttpsServer . 'admin/');
-define('HTTPS_CATALOG', $catalogHttpsServer);
+// HTTPS (equals HTTP when TLS is disabled)
+define('HTTPS_SERVER', '__DC_STORE_SSL_URL__admin/');
+define('HTTPS_CATALOG', '__DC_STORE_SSL_URL__');
 
 // DIR
 define('DIR_APPLICATION', '/var/www/html/admin/');
@@ -411,6 +438,9 @@ define('IMAGE_MAX_DIMENSION', getenv('IMAGE_MAX_DIMENSION') ?: '2560');
 // default — Redis is cache-only and loses all data on restart (no AOF).
 define('SESSION_ENGINE', $env('SESSION_ENGINE', 'file'));
 PHP
+
+    # Resolve the store URL once and inject it into both generated configs.
+    apply_store_url "$root_config" "$admin_config"
 
     # API front controller reuses the admin application config (same constants,
     # same DB/cache/session credentials) and only adds its own DIR.
@@ -510,8 +540,12 @@ initialize_database() {
     echo "Seed SQL imported successfully (${table_count} tables)."
 
     # Bootstrap: admin user, API key, store settings
-    local url="${DOCKERCART_URL:-http://dockercart.local}"
-    url="${url%/}/"
+    resolve_store_urls
+    local url="${STORE_HTTP_URL}"
+    local ssl_url="${STORE_HTTP_URL}"
+    if [ "${STORE_SSL_ENABLED}" = "true" ]; then
+        ssl_url="${STORE_HTTPS_URL}"
+    fi
 
     echo "Applying DockerCart bootstrap settings..."
     local admin_hash
@@ -532,7 +566,7 @@ DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_email', 'config_ur
 INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
   (0, 'config', 'config_email', '${admin_email}', 0),
   (0, 'config', 'config_url', '${url}', 0),
-  (0, 'config', 'config_ssl', '${url}', 0),
+  (0, 'config', 'config_ssl', '${ssl_url}', 0),
   (0, 'config', 'config_encryption', REPLACE(UUID(), '-', ''), 0),
   (0, 'config', 'config_onboarding_email_default', '${admin_email}', 0);
 SQL
@@ -617,33 +651,46 @@ SQL
     fi
 }
 
-# Всегда синхронизирует config_url/config_ssl из DOCKERCART_URL с БД
+# Синхронизирует config_url / config_ssl в oc_setting с разрешёнными URL
+# (docker/store-url.sh).
+#
+# ОБА ключа обязательны: страницы отдают ссылки на картинки/логотип из
+# config_ssl (ModelToolImage, common/header), поэтому http-адрес в config_ssl
+# при работающем TLS — это mixed content на каждой странице магазина, а не
+# «косметика». Раньше сравнивался только config_url, поэтому такая рассинхронизация
+# жила вечно: строка ниже печатала «up to date» и не трогала config_ssl.
 ensure_store_url() {
     local db_host="${DB_HOSTNAME:-mariadb}"
     local db_user="${DB_USERNAME:-dockercart}"
     local db_pass="${DB_PASSWORD:-dockercart_password}"
     local db_name="${DB_DATABASE:-dockercart}"
     local db_prefix="${DB_PREFIX:-oc_}"
-    local url="${DOCKERCART_URL:-http://dockercart.local}"
-    url="${url%/}/"
 
-    # Проверяем, совпадает ли текущее значение в БД
+    resolve_store_urls
+
+    local url="${STORE_HTTP_URL}"
+    local ssl_url="${STORE_HTTP_URL}"
+    if [ "${STORE_SSL_ENABLED}" = "true" ]; then
+        ssl_url="${STORE_HTTPS_URL}"
+    fi
+
+    # Одно чтение на оба ключа: '|' — безопасный разделитель (URL его не содержит).
     local current
     current=$(MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl \
-        -N -B -e "SELECT \`value\` FROM \`${db_prefix}setting\` WHERE \`key\` = 'config_url' AND store_id = 0" \
-        "${db_name}" 2>/dev/null || true)
+        -N -B -e "SELECT COALESCE(MAX(CASE WHEN \`key\` = 'config_url' THEN \`value\` END), '') AS u, COALESCE(MAX(CASE WHEN \`key\` = 'config_ssl' THEN \`value\` END), '') AS s FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_url', 'config_ssl') AND store_id = 0" \
+        "${db_name}" 2>/dev/null | tr '\t' '|' || true)
 
-    if [ "${current}" = "${url}" ]; then
+    if [ "${current}" = "${url}|${ssl_url}" ]; then
         return 0
     fi
 
-    echo "Updating store URL to: ${url}"
+    echo "Updating store URL: ${url} (https: ${ssl_url})"
     MYSQL_PWD="${db_pass}" mysql -h"${db_host}" -u"${db_user}" --skip-ssl "${db_name}" <<SQL
 SET NAMES utf8mb4;
 DELETE FROM \`${db_prefix}setting\` WHERE \`key\` IN ('config_url', 'config_ssl') AND store_id = 0;
 INSERT INTO \`${db_prefix}setting\` (store_id, \`code\`, \`key\`, \`value\`, serialized) VALUES
   (0, 'config', 'config_url', '${url}', 0),
-  (0, 'config', 'config_ssl', '${url}', 0);
+  (0, 'config', 'config_ssl', '${ssl_url}', 0);
 SQL
     echo "Store URL updated."
 }
@@ -701,7 +748,7 @@ post_max_size = ${PHP_POST_MAX_SIZE:-100M}
 date.timezone = ${TZ:-UTC}
 PHP
 
-    if [ "${DOCKERCART_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then
+    if [ "${STORE_SSL_ENABLED:-false}" = "true" ] || [ "${DOCKERCART_FORCE_SSL:-0}" -eq 1 ]; then
         echo "session.cookie_secure = On" >> "$ini_file"
     fi
 
@@ -792,6 +839,14 @@ echo "Entrypoint: $0 (modified: ${script_mtime})"
 echo "Entrypoint started at UTC: $(date -u '+%Y-%m-%d %H:%M:%S')"
 
 echo "Starting DockerCart container..."
+
+# Store URL: derived ONCE here from DOCKERCART_DOMAIN + the public ports + the
+# SSL flag (docker/store-url.sh). Everything below — config.php, robots.txt,
+# oc_setting.config_url/config_ssl — uses the resolved values, so a leftover
+# .env.example placeholder (http://dockercart.local on a real domain) can no
+# longer reach the storefront.
+resolve_store_urls
+echo "Store URL: ${STORE_HTTP_URL} (https: ${STORE_HTTPS_URL}, SSL: ${STORE_SSL_ENABLED}, derived: ${STORE_URLS_DERIVED})"
 
 # Warn about publicly known default secrets before anything else
 warn_default_secrets

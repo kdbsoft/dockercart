@@ -10,3 +10,16 @@ services:
     volumes:
       - ./docker/ssl:/etc/ssl/dockercart:ro
       - ./docker/nginx/ssl/dockercart.selfsigned.conf:/etc/nginx/conf.d/dockercart.ssl.conf:ro
+
+  # TLS is terminated in front of the app in this mode, so the app MUST emit
+  # https:// URLs: when it keeps an http base URL, config_ssl (which builds
+  # every image/logo/asset URL on an https page) stays http and the browser
+  # reports mixed content + "Not secure". Literal on purpose — the mode is
+  # authoritative, so a stale DOCKERCART_SSL_ENABLED=false in an existing .env
+  # cannot switch TLS URL generation off again.
+  apache:
+    environment:
+      - DOCKERCART_SSL_ENABLED=true
+  scheduler:
+    environment:
+      - DOCKERCART_SSL_ENABLED=true

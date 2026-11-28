@@ -8,14 +8,9 @@ DB_PREFIX="${DB_PREFIX:-oc_}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin123}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
-DOCKERCART_URL="${DOCKERCART_URL:-http://dockercart.local}"
 DOCKERCART_SEED_MODE="${DOCKERCART_SEED_MODE:-demo}"
 SEED_SQL="/opt/dockercart-seed/init.sql"
 CLEAN_SQL="/opt/dockercart-seed/clean_demo.sql"
-
-if [ "${DOCKERCART_URL%/}" = "${DOCKERCART_URL}" ]; then
-  DOCKERCART_URL="${DOCKERCART_URL}/"
-fi
 
 sql_escape() {
   printf "%s" "$1" | sed "s/'/''/g"

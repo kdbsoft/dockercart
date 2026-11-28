@@ -105,36 +105,31 @@ if [ -f .env ]; then
 fi
 
 # ============================================================================
-# DERIVE STORE URL(S) FROM DOMAIN + LISTEN PORT (fallback only)
+# STORE URL(S) + SSL FLAG (derived — docker/store-url.sh)
 # ============================================================================
-# DOCKERCART_URL / DOCKERCART_HTTPS_URL are the source of truth for the app
-# URL (config.php, config_url/config_ssl in the DB, robots.txt seed sitemap, Traefik
-# labels). They are usually derived from DOCKERCART_DOMAIN + the listen ports,
-# but an explicitly set URL (e.g. http://shop.local:8080) must win — .env is
-# operator-owned and start.sh never writes to it. Derivation runs only when the
-# URL keys are absent (fresh .env from the template, or a config lacking them).
-# Port 80/443 are the defaults and are omitted from the URL.
-# The flag records whether these two values came from the derivation (they are
-# recomputed if the operator sets a different domain later for Let's Encrypt).
-DOCKERCART_URL_DERIVED=false
-if [ -n "${DOCKERCART_DOMAIN:-}" ] && [ -z "${DOCKERCART_URL:-}" ]; then
-    DOCKERCART_URL_DERIVED=true
-    if [ -z "${DOCKERCART_HTTP_PORT:-}" ]; then
-        DOCKERCART_HTTP_PORT=80
-    fi
-    if [ -z "${DOCKERCART_HTTPS_PORT:-}" ]; then
-        DOCKERCART_HTTPS_PORT=443
-    fi
-    DOCKERCART_URL_PORT_SUFFIX=""
-    if [ "${DOCKERCART_HTTP_PORT}" != "80" ]; then
-        DOCKERCART_URL_PORT_SUFFIX=":${DOCKERCART_HTTP_PORT}"
-    fi
-    DOCKERCART_HTTPS_URL_PORT_SUFFIX=""
-    if [ "${DOCKERCART_HTTPS_PORT}" != "443" ]; then
-        DOCKERCART_HTTPS_URL_PORT_SUFFIX=":${DOCKERCART_HTTPS_PORT}"
-    fi
-    export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX}"
-    export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX}"
+# The URL is DERIVED from DOCKERCART_DOMAIN + the public listen ports, and the
+# SSL flag from the selected mode. The same resolver runs inside the container,
+# so `make restart` (which interpolates .env without ever calling this script)
+# produces exactly the same URLs. An explicit DOCKERCART_URL in .env wins, with
+# one exception: the .env.example placeholder (dockercart.local) is ignored as
+# soon as DOCKERCART_DOMAIN names a different host — otherwise the app keeps
+# emitting http://dockercart.local assets/links on a real domain (mixed content,
+# broken links). start.sh still never writes to .env.
+# shellcheck source=./docker/store-url.sh
+. ./docker/store-url.sh
+
+# With --ssl / --le (standalone or behind Traefik) the browser is on https, so
+# the app must emit https URLs: an http config_ssl turns every image on the
+# page into mixed content and the browser shows "Not secure". Exported for this
+# run; later `make restart` runs get it from the TLS compose override files.
+if [ "$SSL_MODE" != "none" ]; then
+    export DOCKERCART_SSL_ENABLED=true
+fi
+
+resolve_store_urls
+
+if [ "$STORE_URLS_DERIVED" = "1" ]; then
+    echo -e "${GREEN}✓ Store URL derived from domain: ${STORE_HTTP_URL}${NC}"
 fi
 
 echo ""
@@ -220,8 +215,9 @@ ask_public_domain() {
     [ "$proposed" = "$current" ] && return 0
 
     # Persist so `make restart` / the next start use the same host, then apply
-    # it to this run. DOCKERCART_URL / DOCKERCART_HTTPS_URL are operator-owned
-    # (start.sh never rewrites an explicit URL) — only a derived pair follows.
+    # it to this run. An explicit DOCKERCART_URL in .env stays operator-owned
+    # (never rewritten) — only a derived pair follows the domain (the template
+    # placeholder dockercart.local counts as derived, see docker/store-url.sh).
     DOCKERCART_DOMAIN="$proposed"
     SSL_DOMAIN="$proposed"
     export DOCKERCART_DOMAIN SSL_DOMAIN
@@ -232,9 +228,9 @@ ask_public_domain() {
     fi
     echo -e "${GREEN}✓ Domain: ${DOCKERCART_DOMAIN} (saved to .env)${NC}"
 
-    if [ "$DOCKERCART_URL_DERIVED" = "true" ]; then
-        export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX:-}"
-        export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX:-}"
+    if [ "$STORE_URLS_DERIVED" = "1" ]; then
+        # The URL follows the domain — recompute for the domain given just now.
+        resolve_store_urls
     elif [ -n "${DOCKERCART_URL:-}" ] && ! printf '%s' "$DOCKERCART_URL" | grep -Fq "$DOCKERCART_DOMAIN"; then
         # An explicit URL wins (operator-owned), so it is NOT rewritten — say so
         # instead of leaving a silently stale app URL behind.
@@ -709,7 +705,7 @@ if [ "$TRAEFIK_MODE" = true ]; then
 else
     echo -e "${GREEN}✅ DockerCart is running!${NC}"
     echo ""
-    SITE_URL="${DOCKERCART_URL:-http://dockercart.local}"
+    SITE_URL="$(store_effective_url)"
     SITE_HOST="${DOCKERCART_DOMAIN:-dockercart.local}"
     DB_HOST_PRINT="${DB_HOSTNAME:-mariadb}"
     DB_PORT_PRINT="${DB_PORT:-3306}"
