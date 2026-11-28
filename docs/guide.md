@@ -226,8 +226,18 @@ payload). Now:
 
 * `docker-compose.yml` / `docker-compose.traefik.yml` bind-mount
   `./docker/nginx/logs` → `/var/log/nginx`. The directory is gitignored (only
-  `.gitkeep` is tracked) and the nginx master — running as root — creates the
-  files, so no `chown` is required, on Docker or rootless Podman.
+  `.gitkeep` is tracked), so **its owner is not versioned**: after a fresh clone it
+  belongs to the deploy user, and the root nginx master cannot create `error.log`
+  there (`cap_drop: ALL` leaves it without `DAC_OVERRIDE` in
+  `docker-compose.traefik.yml`). The nginx service therefore overrides its
+  `entrypoint` to `chown 0:0 /var/log/nginx` (and the existing `*.log` files)
+  before `exec /docker-entrypoint.sh nginx -g 'daemon off;'` — `CAP_CHOWN` is
+  granted, and no host-side root is needed. Without that, nginx dies with
+  `open() "/var/log/nginx/error.log" failed (13: Permission denied)` and
+  restart-loops. `docker/nginx/cache` needs no equivalent: it has no tracked file
+  at all (`.gitignore` excludes the whole directory), so Docker creates it as
+  root — while `logs/.gitkeep` makes git create that directory as the deploy
+  user.
 * One-time host setup: `make logrotate-install` (= `sudo
   scripts/install-nginx-logrotate.sh`). It renders `docker/logrotate/nginx` with
   the absolute log path and the real container name
@@ -378,7 +388,7 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | `LETSENCRYPT_DATA_DIR` | `./docker/letsencrypt` | ACME state persistence |
 | `CERTBOT_RENEW_INTERVAL` | `24h` | How often the certbot container checks for renewal |
 | `RENEW_NGINX_RELOAD_INTERVAL` | `6h` | How often nginx reloads to pick up renewed certificates |
-| `TRAEFIK_CERTRESOLVER` | `le` | Traefik mode only: name of the ACME `certificatesResolvers` entry in the **external** Traefik that issues the store's certificate (must match, or no cert is issued) |
+| `TRAEFIK_CERTRESOLVER` | `letsencrypt` | Traefik mode only: name of the ACME `certificatesResolvers` entry in the **external** Traefik that issues the store's certificate (must match, or no cert is issued). `start.sh` verifies it against the running Traefik's `--certificatesresolvers.<name>.*` flags and aborts on a mismatch |
 
 `SSL_DOMAIN` / `SSL_EMAIL` are optional overrides: unset (or left at the
 `.env.example` placeholder) `start.sh` derives them from `DOCKERCART_DOMAIN` /
@@ -459,6 +469,7 @@ edits survive. The same default template lives in
 | `make logs` | View logs |
 | `make logs-follow` | Tail logs |
 | `make logrotate-install` | Install the host logrotate rule for `docker/nginx/logs` (uses sudo) |
+| `make doctor` | Read-only diagnostics: containers, restart loops, HTTP `/health`, DB, PHP, storage, Traefik ACME resolver and the served edge certificate. Safe to run any time (it changes nothing) |
 | `make shell` | Bash into app container |
 | `make mariadb` | MariaDB CLI |
 | `make migrate` | Apply SQL migrations |
@@ -494,12 +505,39 @@ make start ARGS="--traefik --le"   # HTTPS (Let's Encrypt)
 ```
 
 In `--le` mode Traefik runs the ACME client itself: the nginx router is tagged
-`tls.certresolver=<TRAEFIK_CERTRESOLVER>` (default `le`, see `docker-compose.traefik.le.yml`).
+`tls.certresolver=<TRAEFIK_CERTRESOLVER>` (default `letsencrypt`, see
+`docker-compose.traefik.le.yml`).
 That name must exist as a `certificatesResolvers` entry in the **external** Traefik's
 static config, and `DOCKERCART_DOMAIN` must resolve to this host on ports 80/443.
-A name mismatch is silent from DockerCart's side — Traefik simply keeps serving its
-default certificate — so set `TRAEFIK_CERTRESOLVER` in `.env` when your Traefik calls
-its resolver `letsencrypt` (Traefik's own docs default) or anything else.
+A name mismatch is silent from Traefik's side — it logs `Router uses a nonexistent
+certificate resolver` and keeps serving its default self-signed certificate — so
+`start.sh` reads the running Traefik's `--certificatesresolvers.<name>.*` arguments
+before starting and **aborts** when `${TRAEFIK_CERTRESOLVER}` is not among them.
+When the Traefik container is not visible from this host (different host, socket
+proxy, file-based config) the check only warns, and the certificate is verified
+after start-up instead (see [TLS / 526 troubleshooting](#tls--526-troubleshooting)).
+Set `TRAEFIK_CERTRESOLVER` in `.env` whenever your Traefik calls the resolver
+something else.
+
+### TLS / 526 troubleshooting
+
+Cloudflare in front of the stack turns an origin-certificate problem into an
+opaque `Error code 526` ("invalid SSL certificate"). `make doctor` runs every
+check below in one pass; the table maps a symptom to the check that names the
+cause.
+
+| Symptom | Cause | Check | Fix |
+|---|---|---|---|
+| `Error code 526`, site reachable over HTTP | Traefik serves its **default self-signed** certificate because the router's resolver does not exist or ACME never succeeded | `openssl s_client -connect <origin>:443 -servername <domain> </dev/null \| openssl x509 -noout -subject` → `CN=TRAEFIK DEFAULT CERT`; `docker logs <traefik> 2>&1 \| grep -i 'certificate resolver\|acme'` | `make doctor` (prints the resolvers the proxy defines), then set `TRAEFIK_CERTRESOLVER` to one of them and `make restart` |
+| Cloudflare edge certificate valid, origin still 526 | `TRAEFIK_CERTRESOLVER` ≠ the proxy's `certificatesResolvers.<name>` | `docker inspect <traefik> --format '{{json .Args}}' \| grep -o 'certificatesresolvers\.[A-Za-z0-9_-]*'` | same as above; `start.sh` refuses to start on a mismatch (`SKIP_TRAEFIK_RESOLVER_CHECK=1` overrides) |
+| nginx restart-loops / 502 / 521 even with a valid certificate | `docker/nginx/logs` is not writable by the container's root (host bind mount owned by the deploy user, `cap_drop: ALL` without `DAC_OVERRIDE`) | `docker logs <nginx> --tail 5` → `open() "/var/log/nginx/error.log" failed (13: Permission denied)` | nothing to do on the host: `make restart` recreates nginx and its entrypoint takes ownership of the directory |
+| ACME challenge never completes although the domain resolves | port 80 blocked, or Cloudflare "Always Use HTTPS" redirects the challenge away | `curl -sI http://<domain>/.well-known/acme-challenge/probe` answers from the origin (404), not with a redirect | allow HTTP to the origin (Traefik solves HTTP-01 on its own `web` entrypoint); the path is exempt from the antibot map and served by `location ^~ /.well-known/acme-challenge/` (`docker/nginx/conf.d/dockercart.conf`, `docker/nginx/templates/nginx.conf.template`) |
+
+Verified on a Cloudflare-proxied instance: **HTTP-01 works through the CF proxy**
+(the challenge path is not redirected and reaches Traefik), so DNS-01 and
+Cloudflare Origin Certificates are *not* required. The zone's SSL/TLS mode must
+be **Full (strict)** — "Flexible" produces a redirect loop or error 521 even
+with a perfectly valid Let's Encrypt certificate on the origin.
 
 ### FTP Add-on
 

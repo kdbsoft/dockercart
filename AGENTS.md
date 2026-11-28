@@ -381,6 +381,36 @@ Preview with `npm run release:dry-run`.
   `docker exec <container> sh -c '... | head -n 30'`. For non-interactive commands prefer
   `docker compose exec -T <service>` (as in `Makefile`) — plain `docker exec -T <container>`
   fails on podman hosts.
+- **`docker/nginx/logs` ownership is repaired inside the container, never from git.** The
+  directory is a bind mount and its host owner is not versioned, so a fresh clone has it
+  owned by the deploy user — while the root nginx master opens its logs by path. nginx runs
+  with `cap_drop: ALL` (no `DAC_OVERRIDE` in `docker-compose.traefik.yml`), so it cannot
+  create `error.log` there and restart-loops (`open() ".../error.log" failed (13)` →
+  502/521). The nginx service therefore overrides `entrypoint` to `chown 0:0` the directory
+  (plus `*.log`) before `exec /docker-entrypoint.sh` — `CAP_CHOWN` is granted. A host-side
+  `chown -R 0:0` needs root, which the deploy user usually does not have. Do not "simplify"
+  that entrypoint away, and do not rely on permissions surviving `git clone`.
+
+## Deploy-config invariants (Traefik resolver, readiness)
+
+- `TRAEFIK_CERTRESOLVER` (default `letsencrypt`) must name a resolver the **external**
+  Traefik actually defines (`--certificatesresolvers.<name>.*`). A mismatch is silent on our
+  side: Traefik logs `Router uses a nonexistent certificate resolver` and keeps serving
+  `TRAEFIK DEFAULT CERT`, which the browser rejects and Cloudflare reports as **526**.
+  - Change the default only together with `docs/guide.md` (env table + Traefik section) and
+    `tools/tests/cases/deploy_config.php`, which fails the build when the compose default,
+    the documented default and `.env.example` disagree.
+  - `start.sh` preflights the name against the running Traefik
+    (`scripts/traefik-resolver.sh`, shared with `health-check.sh` / `make doctor`) and
+    aborts on a mismatch. It cannot decide when the proxy is not visible (another host,
+    file-based config): it warns, and the served certificate is verified **after** `up`
+    instead (`assert_edge_cert`, bounded by `CERT_TIMEOUT`). A default self-signed cert is a
+    hard failure, "nothing on 443" only a warning.
+  - Readiness waits for `mariadb`, `apache` **and** `nginx`; reporting success while nginx
+    restart-loops was the reason a broken deploy looked green.
+- HTTP-01 through a Cloudflare proxy works (the challenge path is not redirected), so
+  DNS-01 / Cloudflare Origin Certificates are not required — but the zone's SSL mode must be
+  **Full (strict)**, otherwise 526/521 appear even with a valid Let's Encrypt certificate.
 
 ## Notes
 
