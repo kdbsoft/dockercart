@@ -1,3 +1,9 @@
+## [3.55.1](https://github.com/kdbsoft/dockercart/compare/v3.55.0...v3.55.1) (2026-11-28)
+
+### Bug Fixes
+
+* **seo:** normalize the shared store base url ([f5300bd](https://github.com/kdbsoft/dockercart/commit/f5300bdd79a688833b105bcf3edee7471cea70e5))
+
 ## [3.55.0](https://github.com/kdbsoft/dockercart/compare/v3.54.1...v3.55.0) (2026-11-28)
 
 ### Features
