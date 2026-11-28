@@ -354,9 +354,10 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 | Variable | Default | Description |
 |---|---|---|
-| `DOCKERCART_URL` | `http://dockercart.local` | Store base URL |
-| `DOCKERCART_HTTPS_URL` | — | HTTPS URL (when SSL enabled) |
-| `DOCKERCART_SSL_ENABLED` | `false` | Enable SSL mode |
+| `DOCKERCART_URL` | derived (`http://DOCKERCART_DOMAIN[:DOCKERCART_HTTP_PORT]`) | Store base URL. **Derived** — set it only when the store answers under a different host than the domain |
+| `DOCKERCART_HTTPS_URL` | derived (`https://DOCKERCART_DOMAIN[:DOCKERCART_HTTPS_PORT]`) | HTTPS counterpart; derived the same way |
+| `DOCKERCART_SSL_ENABLED` | derived from the start mode (`--ssl`/`--le` → `true`) | Makes the app emit `https://` URLs (`HTTPS_SERVER`, `config_ssl`) |
+| `DOCKERCART_DOMAIN` | `dockercart.local` | Public store host — the single place the store URL is configured |
 | `ADMIN_USERNAME` | `admin` | Default admin username |
 | `ADMIN_PASSWORD` | `admin123` | Default admin password |
 | `ADMIN_EMAIL` | `admin@example.com` | Default admin email |
@@ -366,6 +367,41 @@ All settings are defined in `.env` — generated interactively on the first `mak
 | `PHP_MAX_EXECUTION_TIME` | `300` | Max execution time (s) |
 | `IMAGE_MAX_DIMENSION` | `2560` | Max image dimension (px); `0` disables |
 | `TZ` | `UTC` | Timezone |
+
+### Store URL derivation
+
+The store URL is **derived**, not configured: `docker/store-url.sh` resolves
+`STORE_HTTP_URL` / `STORE_HTTPS_URL` / `STORE_SSL_ENABLED` from
+`DOCKERCART_DOMAIN` + `DOCKERCART_HTTP_PORT` / `DOCKERCART_HTTPS_PORT` (80/443
+omitted) + the TLS flag, and every consumer uses that one function:
+
+| Consumer | Uses it for |
+|---|---|
+| `docker/entrypoint.sh` | `HTTP_SERVER`/`HTTPS_SERVER` in the generated `config.php`, `oc_setting.config_url`/`config_ssl`, the seeded `robots.txt` sitemap |
+| `start.sh` | the start summary (`Site:`/`Admin:`) and the pre-flight hints |
+| `health-check.sh` | which URL `/health` is probed on (`make doctor`) |
+
+An explicit `DOCKERCART_URL`/`DOCKERCART_HTTPS_URL` in `.env` wins, **except**
+when it points at the `.env.example` placeholder (`dockercart.local`) while
+`DOCKERCART_DOMAIN` names another host — a leftover placeholder must never be
+propagated to a real domain. That rule is what healed installs whose `.env`
+still carried `DOCKERCART_URL=http://dockercart.local` after the wizard had
+already written the real domain: the storefront emitted `http://dockercart.local`
+images on an HTTPS page (mixed content → "Not secure") and links to an
+unresolvable host.
+
+`DOCKERCART_SSL_ENABLED` is derived from the start mode: the TLS compose
+overrides (`docker-compose.ssl.yml`, `docker-compose.le.yml`,
+`docker-compose.traefik.ssl.yml`, `docker-compose.traefik.le.yml`) set it to
+`true` literally, so a stale `false` in an old `.env` cannot switch https URL
+generation off. With TLS on, `config.php` gets `HTTPS_SERVER=https://…` and
+`oc_setting.config_ssl` is synced to the same https base — `config_ssl` is what
+builds **every** image/logo/asset URL on an https page (`ModelToolImage`,
+`common/header`), so an http value there is a page full of blocked images.
+
+`config.php` carries the resolved URLs as literals (the entrypoint injects them
+into marker slots), so CLI workers in other roles (`scheduler`, `backup-worker`)
+load the same file without needing URL environment variables.
 
 #### Cache & Redis
 
@@ -448,8 +484,8 @@ The page has a master "Enable indexing" switch (on by default) and an editor for
 indexing off makes the file disallow the whole store (`Disallow: /`).
 
 The file is only *seeded* with a default template by `ensure_robots_txt()` in
-`docker/entrypoint.sh` on first boot (sitemap URL from `DOCKERCART_URL` /
-`DOCKERCART_HTTPS_URL`); once it exists it is never overwritten on restart, so admin
+`docker/entrypoint.sh` on first boot (sitemap URL from the derived store URL —
+the https one when TLS is enabled, see [Store URL derivation](#store-url-derivation)); once it exists it is never overwritten on restart, so admin
 edits survive. The same default template lives in
 `ControllerSettingIndexing::defaultRobotsTxt()` — keep the two in sync.
 

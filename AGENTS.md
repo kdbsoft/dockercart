@@ -411,6 +411,21 @@ Preview with `npm run release:dry-run`.
 - HTTP-01 through a Cloudflare proxy works (the challenge path is not redirected), so
   DNS-01 / Cloudflare Origin Certificates are not required — but the zone's SSL mode must be
   **Full (strict)**, otherwise 526/521 appear even with a valid Let's Encrypt certificate.
+- **Store URL is derived, never configured twice.** `docker/store-url.sh`
+  (`resolve_store_urls`) turns `DOCKERCART_DOMAIN` + `DOCKERCART_HTTP_PORT` /
+  `DOCKERCART_HTTPS_PORT` + `DOCKERCART_SSL_ENABLED` into `STORE_HTTP_URL` /
+  `STORE_HTTPS_URL`; it is sourced by `docker/entrypoint.sh` (inside the image),
+  `start.sh` and `health-check.sh`. `config.php` gets the resolved URLs as literals
+  (marker injection, so CLI roles need no URL env), and `ensure_store_url()` keeps
+  `oc_setting.config_url` **and** `config_ssl` in step — `config_ssl` builds every
+  asset URL on an https page (`ModelToolImage`, `common/header`), so an http value
+  there is a storefront full of blocked images. `DOCKERCART_SSL_ENABLED` is set to
+  `true` literally by the TLS compose overrides (the mode is authoritative). The one
+  exception to "explicit URL wins": a URL pointing at the template placeholder
+  `dockercart.local` is ignored when `DOCKERCART_DOMAIN` names another host — that
+  leftover is what made a live HTTPS store emit `http://dockercart.local` images and
+  links. Never hand-write the URL into a new consumer; call the resolver, and keep
+  `tools/tests/cases/store_url.php` green.
 
 ## Notes
 
