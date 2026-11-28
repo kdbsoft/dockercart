@@ -25,6 +25,7 @@
 declare(strict_types=1);
 
 use Dockercart\Seo\Robots;
+use Dockercart\Seo\StoreUrl;
 
 /**
  * Run the bash helper on a temp robots.txt and return [status, contents].
@@ -175,6 +176,46 @@ return [
 		}
 	},
 
+	'store base: https wins and the trailing slash is always there' => static function (): void {
+		require_once DIR_SYSTEM . 'library/url.php';
+
+		// `Url` concatenates its base with `index.php?route=…`, so a base without
+		// the trailing slash produced `https://store.dockercart.netindex.php/…` in
+		// every <loc> and hreflang of the generated sitemap.
+		$base = StoreUrl::base('http://store.dockercart.net/', 'https://store.dockercart.net');
+
+		Assert::same('https://store.dockercart.net/', $base, 'the https base wins and keeps its trailing slash');
+
+		$url = new Url($base, $base);
+
+		Assert::same(
+			'https://store.dockercart.net/index.php?route=product/product&product_id=1',
+			$url->link('product/product', 'product_id=1'),
+			'Url must produce a well-formed absolute URL'
+		);
+
+		// http-only store: no https upgrade, still one trailing slash.
+		Assert::same('http://dockercart.local:8080/', StoreUrl::base('http://dockercart.local:8080//', 'http://dockercart.local:8080/'), 'duplicate slashes collapse, http is kept');
+
+		// Missing settings: fall back to whichever value exists.
+		Assert::same('https://store.dockercart.net/', StoreUrl::base('', 'https://store.dockercart.net/'), 'an empty config_url must fall back to the ssl base');
+		Assert::same('', StoreUrl::base('', ''), 'nothing configured, nothing returned');
+	},
+
+	'store base: sitemap generator and the Indexing page share it' => static function (): void {
+		$sitemap = repo_file('upload/bin/dockercart_sitemap_generate.php');
+
+		Assert::contains('use Dockercart\\Seo\\StoreUrl;', $sitemap, 'the generator must use the shared base helper');
+		Assert::contains('new Url($store_base(), $store_base())', $sitemap, 'the Url base must carry the trailing slash');
+		Assert::notContains('new Url($store_url()', $sitemap, 'the slash-less base is the bug that mangled every <loc>');
+		Assert::contains('$sitemap_url = rtrim($store_base(), \'/\')', $sitemap, 'the sitemap index appends its own path');
+
+		$controller = repo_file('upload/admin/controller/setting/indexing.php');
+
+		Assert::contains('use Dockercart\\Seo\\StoreUrl;', $controller, 'the Indexing page must use the same base rule');
+		Assert::contains('return StoreUrl::base(', $controller, 'the Sitemap line must be built from the shared base');
+	},
+
 	'robots: the boot repair runs on an existing file, the admin follows the library' => static function (): void {
 		$entrypoint = repo_file('docker/entrypoint.sh');
 
@@ -191,7 +232,7 @@ return [
 
 		// config_url is the http base; advertising the sitemap over http on a TLS
 		// store is the bug this guards (entry_url/entry_ssl in setting/store.php).
-		Assert::contains("stripos(\$ssl, 'https://')", $controller, 'the Sitemap URL must prefer the https base when the store has one');
+		Assert::contains('StoreUrl::base(', $controller, 'the Sitemap URL must be built from the shared, slash-terminated base');
 
 		// start.sh drops a stale placeholder URL from .env instead of only warning.
 		$start = repo_file('start.sh');
@@ -203,8 +244,7 @@ return [
 		// the http base, so using it put http:// <loc> entries in an HTTPS store.
 		$sitemap = repo_file('upload/bin/dockercart_sitemap_generate.php');
 
-		Assert::contains("stripos(\$ssl, 'https://')", $sitemap, 'the sitemap must prefer the https base when the store has one');
-		Assert::contains('$sitemap_url = $store_url();', $sitemap, 'the sitemap index must use the effective URL');
+		Assert::contains('StoreUrl::base(', $sitemap, 'the sitemap must prefer the https base when the store has one');
 		Assert::notContains("new Url(\$config->get('config_url')", $sitemap, 'the sitemap must not be built from the http base');
 
 		// The seed branch reads settings (config_indexing_status) and the resolved

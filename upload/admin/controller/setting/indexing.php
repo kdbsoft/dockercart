@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use Dockercart\Seo\Robots;
+use Dockercart\Seo\StoreUrl;
 
 class ControllerSettingIndexing extends Controller {
 	private $error = array();
@@ -132,34 +133,21 @@ class ControllerSettingIndexing extends Controller {
 	}
 
 	/**
-	 * URL the store is publicly served on, for everything a crawler reads.
+	 * Base URL the store is publicly served on, for everything a crawler reads
+	 * (robots Sitemap line, default template).
 	 *
 	 * `config_url` is the http base and `config_ssl` the https one (the entrypoint
-	 * syncs both from the same resolver, docker/store-url.sh). On a TLS deployment
-	 * every page a crawler sees is https, so advertising the sitemap over http
-	 * sends it through a redirect at best — prefer the https base whenever the
-	 * store has one.
+	 * syncs both from the same resolver, docker/store-url.sh). A crawler only ever
+	 * reaches the https URL when the store has one, so https wins whenever it is
+	 * configured — and the base keeps its trailing slash (see StoreUrl).
 	 *
 	 * @return	string
 	 */
 	protected function storeUrl() {
-		$ssl = (string)$this->config->get('config_ssl');
-
-		if ($ssl === '' && defined('HTTPS_CATALOG')) {
-			$ssl = (string)HTTPS_CATALOG;
-		}
-
-		$http = (string)$this->config->get('config_url');
-
-		if ($http === '' && defined('HTTP_CATALOG')) {
-			$http = (string)HTTP_CATALOG;
-		}
-
-		if (stripos($ssl, 'https://') === 0) {
-			return $ssl;
-		}
-
-		return $http !== '' ? $http : $ssl;
+		return StoreUrl::base(
+			(string)$this->config->get('config_url') ?: (defined('HTTP_CATALOG') ? HTTP_CATALOG : ''),
+			(string)$this->config->get('config_ssl') ?: (defined('HTTPS_CATALOG') ? HTTPS_CATALOG : '')
+		);
 	}
 
 	/**

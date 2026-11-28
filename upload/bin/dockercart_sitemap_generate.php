@@ -17,6 +17,8 @@
 
 declare(strict_types=1);
 
+use Dockercart\Seo\StoreUrl;
+
 if (php_sapi_name() !== 'cli') {
 	fwrite(STDERR, "This script must be run from CLI.\n");
 	exit(1);
@@ -99,21 +101,19 @@ try {
 	// it has one. `config_url` is always the http base (the admin labels the two
 	// "Store URL" / "SSL URL" and the entrypoint syncs them from the same
 	// resolver, docker/store-url.sh), so building <loc>/hreflang from it put
-	// http:// entries — i.e. a redirect hop at best — in the sitemap of an HTTPS
-	// store. The fallbacks keep a store without url/ssl settings working.
-	$store_url = static function () use ($config): string {
-		$ssl = (string)$config->get('config_ssl');
-
-		if (stripos($ssl, 'https://') === 0) {
-			return rtrim($ssl, '/');
-		}
-
-		$http = (string)($config->get('config_url') ?: (defined('HTTP_SERVER') ? HTTP_SERVER : ''));
-
-		return rtrim($http !== '' ? $http : $ssl, '/');
+	// http:// entries in the sitemap of an HTTPS store.
+	//
+	// `Url` concatenates its base with `index.php?route=…`, so the base carries a
+	// trailing slash (Dockercart\Seo\StoreUrl) — without it every <loc> came out
+	// as `https://store.dockercart.netindex.php/…`.
+	$store_base = static function () use ($config): string {
+		return StoreUrl::base(
+			(string)($config->get('config_url') ?: (defined('HTTP_SERVER') ? HTTP_SERVER : '')),
+			(string)($config->get('config_ssl') ?: (defined('HTTPS_SERVER') ? HTTPS_SERVER : ''))
+		);
 	};
 
-	$url = new Url($store_url(), $config->get('config_ssl') ?: HTTPS_SERVER);
+	$url = new Url($store_base(), $store_base());
 	$registry->set('url', $url);
 
 	// Register SEO URL rewriter so $url->link() returns clean SEO URLs
@@ -390,7 +390,7 @@ try {
 	}
 
 	// Build sitemap index
-	$sitemap_url = $store_url();
+	$sitemap_url = rtrim($store_base(), '/');
 
 	if (count($sitemap_files) === 1) {
 		$single = $sitemap_files[0];
