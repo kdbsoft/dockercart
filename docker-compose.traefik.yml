@@ -15,6 +15,24 @@ services:
       - NET_BIND_SERVICE
       - SETGID
       - SETUID
+    # The log directory is a host bind mount (./docker/nginx/logs). Git does not
+    # record ownership, so a fresh clone leaves it owned by the deploy user while
+    # the nginx master opens its logs as root: with cap_drop: ALL it needs
+    # CAP_DAC_OVERRIDE (not granted here) to write into a directory it does not
+    # own and otherwise dies with `open() ".../error.log" failed (13: Permission
+    # denied)` and restart-loops (502/521 behind a proxy). Taking ownership from
+    # inside the container needs no host-side root (a host `chown -R 0:0` would)
+    # and also repairs log files created by an earlier run. See docs/guide.md →
+    # Log Files & Rotation.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        mkdir -p /var/log/nginx
+        chown 0:0 /var/log/nginx
+        chown 0:0 /var/log/nginx/*.log 2>/dev/null || true
+        exec /docker-entrypoint.sh nginx -g 'daemon off;'
     logging:
       driver: "json-file"
       options:
@@ -27,7 +45,9 @@ services:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro,z
       - ./docker/nginx/cache:/var/cache/nginx:Z
       # Host-side log directory: survives recreates and is rotated by the
-      # host's logrotate (docker/logrotate/nginx, `make logrotate-install`).
+      # host's logrotate (docker/logrotate/nginx, `make logrotate-install`). The
+      # entrypoint above takes ownership so the root master can create files in
+      # it without CAP_DAC_OVERRIDE.
       - ./docker/nginx/logs:/var/log/nginx:z
     ulimits:
       nofile:
