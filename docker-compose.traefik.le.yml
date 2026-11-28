@@ -1,6 +1,7 @@
 # Docker Compose override for Traefik LE (Let's Encrypt) SSL mode
 # Usage: docker compose -f docker-compose.traefik.yml -f docker-compose.traefik.le.yml up -d
-# Requires SSL_DOMAIN and SSL_EMAIL environment variables to be set in .env
+# Traefik terminates TLS and runs its own ACME client: only DOCKERCART_DOMAIN
+# (the router Host rule) is needed — set its DNS A/AAAA record to this host.
 
 services:
   nginx:

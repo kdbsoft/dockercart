@@ -2,7 +2,7 @@
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.le.yml up -d
 # Requirements:
-#   - SSL_DOMAIN and SSL_EMAIL in .env
+#   - a public DOCKERCART_DOMAIN (start.sh derives SSL_DOMAIN/SSL_EMAIL from it)
 #   - Public inbound ports 80 and 443
 
 services:

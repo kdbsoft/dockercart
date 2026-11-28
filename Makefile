@@ -74,7 +74,7 @@ start: ## Start the stack. Interactively pick a mode, or pass start.sh flags via
 		printf '\n%s\n' "Select start mode:"; \
 		printf '  1) Standalone HTTP (default)          nginx -> apache, plain HTTP\n'; \
 		printf '  2) Standalone HTTPS (self-signed)     dev/staging, self-signed cert\n'; \
-		printf "  3) Standalone HTTPS (Let's Encrypt)   production, auto-renew (needs SSL_DOMAIN)\n"; \
+		printf "  3) Standalone HTTPS (Let's Encrypt)   production, auto-renew (needs a public DOCKERCART_DOMAIN)\n"; \
 		printf '  4) Traefik HTTP                       external Traefik reverse proxy\n'; \
 		printf '  5) Traefik HTTPS (self-signed)\n'; \
 		printf '  6) Traefik HTTPS (Let'"'"'s Encrypt)\n'; \

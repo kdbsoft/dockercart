@@ -108,7 +108,11 @@ fi
 # operator-owned and start.sh never writes to it. Derivation runs only when the
 # URL keys are absent (fresh .env from the template, or a config lacking them).
 # Port 80/443 are the defaults and are omitted from the URL.
+# The flag records whether these two values came from the derivation (they are
+# recomputed if the operator sets a different domain later for Let's Encrypt).
+DOCKERCART_URL_DERIVED=false
 if [ -n "${DOCKERCART_DOMAIN:-}" ] && [ -z "${DOCKERCART_URL:-}" ]; then
+    DOCKERCART_URL_DERIVED=true
     if [ -z "${DOCKERCART_HTTP_PORT:-}" ]; then
         DOCKERCART_HTTP_PORT=80
     fi
@@ -155,20 +159,125 @@ echo ""
 # SSL SETUP
 # ============================================================================
 
-if [ "$SSL_MODE" = "letsencrypt" ]; then
-    echo -e "${YELLOW}Let's Encrypt setup${NC}"
-
+# --- Let's Encrypt identity -------------------------------------------------
+# The setup wizard asks for exactly two things: DOCKERCART_DOMAIN and
+# ADMIN_EMAIL. Let's Encrypt therefore never asks for them a second time:
+# SSL_DOMAIN / SSL_EMAIL are OPTIONAL overrides that fall back to those two
+# values when unset or left at their .env.example placeholders.
+resolve_ssl_identity() {
     if [ -z "${SSL_DOMAIN:-}" ] || [ "${SSL_DOMAIN}" = "example.com" ]; then
-        echo -e "${RED}❌ SSL_DOMAIN not configured in .env${NC}"
-        echo ""
-        echo "Edit .env and set:"
-        echo "  SSL_DOMAIN=your-domain.com"
-        echo "  SSL_EMAIL=admin@your-domain.com"
-        exit 1
+        SSL_DOMAIN="${DOCKERCART_DOMAIN:-}"
     fi
+    if [ -z "${SSL_EMAIL:-}" ] || [ "${SSL_EMAIL}" = "admin@example.com" ]; then
+        SSL_EMAIL="${ADMIN_EMAIL:-}"
+    fi
+    export SSL_DOMAIN SSL_EMAIL
+}
 
-    echo -e "${GREEN}✓ Domain: ${SSL_DOMAIN}${NC}"
+# ACME validation needs a publicly resolvable FQDN. Local-only names (the
+# wizard default dockercart.local, RFC 2606 TLDs) can never pass HTTP-01 —
+# detecting that here turns a cryptic certbot DNS timeout into a clear message.
+is_acme_domain() {
+    case "$1" in
+        '' | localhost | *[!A-Za-z0-9.-]* | *.local | *.localhost | *.internal | \
+            *.test | *.invalid | *.example) return 1 ;;
+    esac
+    printf '%s' "$1" | grep -q '\.' || return 1
+    return 0
+}
+
+# Ask for a publicly resolvable domain while the operator is still looking at
+# the terminal, instead of aborting with "edit .env and re-run". Returns 0 when
+# a usable domain is in place (either given now or already configured), 1 when
+# the operator aborted (Ctrl-D) or the run is non-interactive.
+ask_public_domain() {
+    local current="$1" proposed
+    [ "${DOCKERCART_NONINTERACTIVE:-0}" = "1" ] && return 1
+    [ -t 0 ] || return 1
+
     echo ""
+    echo -e "${YELLOW}The certificate needs a public domain (DNS pointing at this host).${NC}"
+    echo -e "${YELLOW}Current: ${current:-<empty>}${NC}"
+    while true; do
+        printf 'Public domain for the certificate [%s]: ' "${current:-none}"
+        if ! IFS= read -r proposed; then
+            return 1
+        fi
+        proposed="${proposed%%[[:space:]]}"
+        [ -z "$proposed" ] && proposed="$current"
+        if is_acme_domain "$proposed"; then
+            break
+        fi
+        echo -e "${RED}That is not a public domain (local-only names cannot pass ACME).${NC}"
+        echo -e "${RED}Enter a real domain, or Ctrl-D to abort.${NC}"
+    done
+    [ "$proposed" = "$current" ] && return 0
+
+    # Persist so `make restart` / the next start use the same host, then apply
+    # it to this run. DOCKERCART_URL / DOCKERCART_HTTPS_URL are operator-owned
+    # (start.sh never rewrites an explicit URL) — only a derived pair follows.
+    DOCKERCART_DOMAIN="$proposed"
+    SSL_DOMAIN="$proposed"
+    export DOCKERCART_DOMAIN SSL_DOMAIN
+    if grep -qE '^DOCKERCART_DOMAIN=' .env 2>/dev/null; then
+        sed -i "s|^DOCKERCART_DOMAIN=.*|DOCKERCART_DOMAIN=${DOCKERCART_DOMAIN}|" .env
+    else
+        printf '\n# Public store domain (written by start.sh for Let'\''s Encrypt)\nDOCKERCART_DOMAIN=%s\n' "$DOCKERCART_DOMAIN" >> .env
+    fi
+    echo -e "${GREEN}✓ Domain: ${DOCKERCART_DOMAIN} (saved to .env)${NC}"
+
+    if [ "$DOCKERCART_URL_DERIVED" = "true" ]; then
+        export DOCKERCART_URL="http://${DOCKERCART_DOMAIN}${DOCKERCART_URL_PORT_SUFFIX:-}"
+        export DOCKERCART_HTTPS_URL="https://${DOCKERCART_DOMAIN}${DOCKERCART_HTTPS_URL_PORT_SUFFIX:-}"
+    elif [ -n "${DOCKERCART_URL:-}" ] && ! printf '%s' "$DOCKERCART_URL" | grep -Fq "$DOCKERCART_DOMAIN"; then
+        # An explicit URL wins (operator-owned), so it is NOT rewritten — say so
+        # instead of leaving a silently stale app URL behind.
+        echo -e "${YELLOW}ℹ DOCKERCART_URL in .env is '${DOCKERCART_URL}' and was left untouched.${NC}"
+        echo -e "${YELLOW}  Update it if the store itself must be served on ${DOCKERCART_DOMAIN}.${NC}"
+    fi
+    return 0
+}
+
+if [ "$SSL_MODE" = "letsencrypt" ]; then
+    resolve_ssl_identity
+
+    if [ "$TRAEFIK_MODE" = true ]; then
+        # Traefik runs its own ACME client and takes the router host from
+        # DOCKERCART_DOMAIN (docker-compose.traefik.le.yml); certbot is never
+        # used and SSL_DOMAIN/SSL_EMAIL are irrelevant here.
+        LE_HOST="${DOCKERCART_DOMAIN:-dockercart.local}"
+        echo -e "${YELLOW}Let's Encrypt setup (Traefik certresolver)${NC}"
+        if ! is_acme_domain "$LE_HOST"; then
+            if ! ask_public_domain "$LE_HOST"; then
+                echo -e "${YELLOW}⚠ DOCKERCART_DOMAIN='${LE_HOST}' is not publicly resolvable —"
+                echo -e "${YELLOW}  Traefik cannot validate it. Set a real domain in .env before going live.${NC}"
+            fi
+            LE_HOST="${DOCKERCART_DOMAIN:-$LE_HOST}"
+        fi
+        echo -e "${GREEN}✓ Domain: ${LE_HOST}${NC}"
+        echo ""
+    else
+        echo -e "${YELLOW}Let's Encrypt setup${NC}"
+        if ! is_acme_domain "${SSL_DOMAIN}" && ! ask_public_domain "${SSL_DOMAIN}"; then
+            echo -e "${RED}❌ Standalone Let's Encrypt needs a public domain, got '${SSL_DOMAIN:-<empty>}'${NC}"
+            echo ""
+            echo "Set the store domain in .env (it is used for the app URL and the"
+            echo "certificate alike) and point its DNS A/AAAA record at this host:"
+            echo "  DOCKERCART_DOMAIN=your-domain.com"
+            echo "  ADMIN_EMAIL=admin@your-domain.com"
+            echo ""
+            echo "SSL_DOMAIN / SSL_EMAIL are optional overrides when the certificate"
+            echo "must use a different name than the store domain."
+            exit 1
+        fi
+        if [ -z "${SSL_EMAIL}" ]; then
+            echo -e "${RED}❌ No ACME account email — set ADMIN_EMAIL (or SSL_EMAIL) in .env${NC}"
+            exit 1
+        fi
+        echo -e "${GREEN}✓ Domain: ${SSL_DOMAIN}${NC}"
+        echo -e "${GREEN}✓ ACME email: ${SSL_EMAIL}${NC}"
+        echo ""
+    fi
 fi
 
 if [ "$SSL_MODE" = "self-signed" ] && [ "$TRAEFIK_MODE" = false ]; then
@@ -351,7 +460,7 @@ if [ "$SSL_MODE" = "letsencrypt" ] && [ "$TRAEFIK_MODE" = false ]; then
         echo "Using certbot cert-name: $CERTBOT_CERT_NAME"
         if ! docker compose -f docker-compose.yml -f docker-compose.le.yml run --rm --no-deps --entrypoint certbot certbot certonly \
             --webroot -w /var/www/certbot \
-            --email "${SSL_EMAIL:?SSL_EMAIL is not set}" \
+            --email "${SSL_EMAIL}" \
             --agree-tos \
             --no-eff-email \
             --non-interactive \

@@ -17,18 +17,27 @@ if [ ! -f .env ]; then
     echo "  cp .env.example .env"
     echo ""
     echo "Required variables:"
-    echo "  SSL_DOMAIN=your-domain.com"
-    echo "  SSL_EMAIL=admin@your-domain.com"
+    echo "  DOCKERCART_DOMAIN=your-domain.com"
+    echo "  ADMIN_EMAIL=admin@your-domain.com"
     exit 1
 fi
 
 # Load environment variables
 set +e; set -a; . ./.env; set +a; set -e
 
+# The certificate identity is DERIVED from the store domain / admin email
+# (start.sh does the same), so the operator configures them only once.
+if [ -z "$SSL_DOMAIN" ] || [ "$SSL_DOMAIN" = "example.com" ]; then
+    SSL_DOMAIN="${DOCKERCART_DOMAIN:-}"
+fi
+if [ -z "$SSL_EMAIL" ] || [ "$SSL_EMAIL" = "admin@example.com" ]; then
+    SSL_EMAIL="${ADMIN_EMAIL:-}"
+fi
+
 if [ -z "$SSL_DOMAIN" ] || [ -z "$SSL_EMAIL" ]; then
-    echo "❌ Error: SSL_DOMAIN or SSL_EMAIL not set in .env"
+    echo "❌ Error: no certificate domain — set DOCKERCART_DOMAIN and ADMIN_EMAIL in .env"
     echo ""
-    echo "Add to .env:"
+    echo "Optional overrides (when the certificate must use a different name):"
     echo "  SSL_DOMAIN=your-domain.com"
     echo "  SSL_EMAIL=admin@your-domain.com"
     exit 1

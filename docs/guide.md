@@ -370,12 +370,19 @@ All settings are defined in `.env` — generated interactively on the first `mak
 
 | Variable | Default | Description |
 |---|---|---|
-| `SSL_DOMAIN` | — | Domain for LE certificate |
-| `SSL_EMAIL` | — | Email for LE registration |
+| `SSL_DOMAIN` | `DOCKERCART_DOMAIN` | Override for the LE certificate host (only needed when it differs from the store domain) |
+| `SSL_EMAIL` | `ADMIN_EMAIL` | Override for the ACME account email |
 | `LETSENCRYPT_ENABLED` | `false` | Enable LE mode |
 | `LETSENCRYPT_DATA_DIR` | `./docker/letsencrypt` | ACME state persistence |
 | `CERTBOT_RENEW_INTERVAL` | `24h` | How often the certbot container checks for renewal |
 | `RENEW_NGINX_RELOAD_INTERVAL` | `6h` | How often nginx reloads to pick up renewed certificates |
+
+`SSL_DOMAIN` / `SSL_EMAIL` are optional overrides: unset (or left at the
+`.env.example` placeholder) `start.sh` derives them from `DOCKERCART_DOMAIN` /
+`ADMIN_EMAIL`, so the certificate name is configured in exactly one place. Only
+standalone LE validates the domain (a public FQDN is required, local-only names
+like `dockercart.local` are rejected up front); Traefik LE just warns, because
+Traefik's own ACME client does the validation.
 
 Renewal flow: the certbot container runs `certbot renew --webroot` every
 `CERTBOT_RENEW_INTERVAL`; nginx has no deploy-hook (the certbot image has no
@@ -465,6 +472,13 @@ make start               # interactive: pick Standalone HTTP / self-signed / Let
 make start ARGS="--ssl"  # HTTPS with self-signed certificate
 make start ARGS="--le"   # HTTPS with Let's Encrypt (requires public DNS + port 80/443 access)
 ```
+
+The certificate host is `DOCKERCART_DOMAIN` (with `SSL_DOMAIN` acting as an optional
+override, see the env table above). When Let's Encrypt is selected and the configured
+domain cannot pass ACME validation (e.g. the `dockercart.local` default), an
+interactive `make start` asks for the public domain right there and saves it to `.env`;
+a non-interactive run fails with an explanation instead of starting a stack whose
+certificate can never be issued.
 
 ### Traefik Mode
 
